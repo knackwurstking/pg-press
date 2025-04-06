@@ -8,7 +8,7 @@
 > - Build for web and android (capacitor)
 
 - JSON GET/POST/PUT/DELETE
-- Auth via github oauth (?) or email (?) (registration for api tokens)
+- Auth via ~github oauth (?) or~ email (?) (registration for api tokens)
 - Accept api tokens, get from registration
 - Live mode:
     - Use websockets for this mode [Scenario](#scenario)
