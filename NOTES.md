@@ -8,8 +8,8 @@
 > - Build for web and android (capacitor)
 
 - JSON GET/POST/PUT/DELETE
-- Auth via github oauth (?)
-- Accept api tokens
+- Auth via github oauth (?) or email (?) (registration for api tokens)
+- Accept api tokens, get from registration
 - Live mode:
     - Use websockets for this mode [Scenario](#scenario)
     - Need to tell the server if someone is editing
@@ -47,3 +47,8 @@
 - client 1 is adding 13mm data but with data "?" for the second entry (time: 22:30:15)
 - client 2 is adding 13mm data but with "47" instead of "?" (time: 22:30:14)
 - each request takes 2 seconds
+
+## Questions
+
+- How to send valid emails via golang
+- How to package a multipage PWA golang web app with capacitor for a good android app with proper routing
