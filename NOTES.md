@@ -1,5 +1,12 @@
 # Notes
 
+> Sever url: "knackwurstking.duckdns.org/pg-vis"
+>
+> - Golang backend
+> - Vite frontend with vanilla typescript using my own ui lib
+> - Multi page application
+> - Build for web and android (capacitor)
+
 - JSON GET/POST/PUT/DELETE
 - Auth via github oauth (?)
 - Accept api tokens
