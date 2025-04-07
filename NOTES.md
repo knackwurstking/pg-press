@@ -14,6 +14,7 @@
 
 ## Questions
 
+- Should this be a MPA or a SPA (the main app /pg-vis)
 - How to send valid emails via golang
 - How to package a multipage PWA golang web app with capacitor for a good android app with proper routing
 - Do i want an capacitor android app here?
