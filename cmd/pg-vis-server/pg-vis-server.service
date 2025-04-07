@@ -1,0 +1,9 @@
+[Unit]
+Description=PG: Vis Server
+After=network.target
+
+[Service]
+ExecStart=pg-vis-server
+
+[Install]
+WantedBy=default.target
