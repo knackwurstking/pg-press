@@ -10,12 +10,14 @@
 - Add a app download button for easy install, so noob users can handle this
 - Everything will be synced with the server for each user using the api key for identification
 - Need some kind of an admin page bound to as api key (the master key)
+- Replace the gist id page with the api key page, also preview permissions the client gets with his api key
 
 ## Questions
 
 - How to send valid emails via golang
 - How to package a multipage PWA golang web app with capacitor for a good android app with proper routing
 - Do i want an capacitor android app here?
+- Find out how to do pwa auto updates faster
 
 ## What i need
 
