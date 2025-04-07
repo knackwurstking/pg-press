@@ -1,0 +1,23 @@
+[
+    {
+        "db_key": {
+            // key: <id>:<user>:<user_id>
+            "time": 1743993407473, // JS: new Date().getTime()
+            "user": "<telegram-user-name>",
+            "user_id": "<telegram-id>"
+        },
+
+        "format": "100x100",
+        "toolID": "G03",
+        "data": [
+            {
+                "press": -1,
+                "filter": [4],
+                "data": [
+                    ["6", "45", "4", "29", "-", "12.1 (max: 15.6)"],
+                    ["20", "45", "-", "-", "-", "42.0 (max: 44.0)"]
+                ]
+            }
+        ]
+    }
+]
