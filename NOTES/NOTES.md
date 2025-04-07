@@ -7,7 +7,8 @@
 - ~Websockets for realtime editing, need to support multiple users here~
 - Websockets for server events, or just use these sse events
 - PWA, for offline support
-- Vite Frontend makes the pwa stuff more easy
+- Vite Frontend makes the pwa stuff more easy, maybe think about using svelte-kit
+  for this project
 - Add a app download button for easy install, so noob users can handle this
 - Everything will be synced with the server for each user using the api key
   for identification
