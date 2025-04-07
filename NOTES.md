@@ -52,3 +52,11 @@
 
 - How to send valid emails via golang
 - How to package a multipage PWA golang web app with capacitor for a good android app with proper routing
+
+## What i need
+
+- Golang
+    - Server framework or just use the stdlib
+        - ???
+    - A local database, maybe somethings like sqlite(?)
+        - [**bbolt**](https://github.com/etcd-io/bbolt) (_key/value store_)
