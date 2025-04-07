@@ -14,8 +14,28 @@
                 "press": -1,
                 "filter": [4],
                 "data": [
-                    ["6", "45", "4", "29", "-", "12.1 (max: 15.6)"],
-                    ["20", "45", "-", "-", "-", "42.0 (max: 44.0)"]
+                    {
+                        "thickness": 6,
+                        "lower_stamp_height": 45,
+                        "lower_stamp_sheets": 29,
+                        "upper_stamp_sheets": 4,
+                        "thickness_settings": -1,
+                        "thickness_settings_sacmi": {
+                            "max": 15.6,
+                            "current": 12.1
+                        }
+                    },
+                    {
+                        "thickness": 20,
+                        "lower_stamp_height": 45,
+                        "lower_stamp_sheets": 0,
+                        "upper_stamp_sheets": 0,
+                        "thickness_settings": -1,
+                        "thickness_settings_sacmi": {
+                            "max": 44.0,
+                            "current": 42.0
+                        }
+                    }
                 ]
             }
         ]
