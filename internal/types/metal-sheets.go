@@ -3,20 +3,20 @@ package types
 type MetalSheets []MetalSheet
 
 type MetalSheet struct {
-	DBKey  DBKey                 `json:"db_key"`
-	Format string                `json:"format"`
-	ToolID string                `json:"tool_id"`
-	Press  MetalSheetPress       `json:"press"`
-	Data   []MetalSheetDataEntry `json:"data"`
+	ModifiedBy []ModifiedBy          `json:"modified_by"`
+	Format     string                `json:"format"`
+	ToolID     string                `json:"tool_id"`
+	Press      MetalSheetPress       `json:"press"`
+	Data       []MetalSheetDataEntry `json:"data"`
 }
 
 type MetalSheetPress struct {
-	DBKey DBKey `json:"db_key"`
-	Nr    Press `json:"nr"`
+	ModifiedBy []ModifiedBy `json:"modified_by"`
+	Nr         Press        `json:"nr"`
 }
 
 type MetalSheetDataEntry struct {
-	DBKey                  DBKey                  `json:"db_key"`
+	ModifiedBy             []ModifiedBy           `json:"modified_by"`
 	Thickness              float32                `json:"thickness"`
 	LowerStampHeight       int8                   `json:"lower_stamp_height"`
 	LowerStampSheets       float32                `json:"lower_stamp_sheets"`

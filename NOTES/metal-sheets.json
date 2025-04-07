@@ -1,8 +1,7 @@
 [
     {
-        "db_key": {
-            // key: <id>:<user>:<user_id>
-            "time": 1743993407473, // JS: new Date().getTime()
+        "odified_by": {
+            "time": 1743993407473,
             "user": "<telegram-user-name>",
             "user_id": "<telegram-id>"
         },
@@ -11,8 +10,8 @@
         "tool_id": "G03",
 
         "press": {
-            "db_key": {
-                "time": 1743993407473, // JS: new Date().getTime()
+            "modified_by": {
+                "time": 1743993407473,
                 "user": "<telegram-user-name>",
                 "user_id": "<telegram-id>"
             },
@@ -22,8 +21,8 @@
 
         "data": [
             {
-                "db_key": {
-                    "time": 1743993407473, // JS: new Date().getTime()
+                "modified_by": {
+                    "time": 1743993407473,
                     "user": "<telegram-user-name>",
                     "user_id": "<telegram-id>"
                 },
@@ -38,9 +37,10 @@
                     "current": 12.1
                 }
             },
+
             {
-                "db_key": {
-                    "time": 1743993407473, // JS: new Date().getTime()
+                "modified_by": {
+                    "time": 1743993407473,
                     "user": "<telegram-user-name>",
                     "user_id": "<telegram-id>"
                 },
