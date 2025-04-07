@@ -3,9 +3,10 @@ package main
 import (
 	"net/http"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/knackwurstking/pg-vis/internal/constants"
 	"github.com/knackwurstking/pg-vis/internal/httperrors"
-	"github.com/labstack/echo/v4"
 )
 
 func setHandlers(e *echo.Echo) {

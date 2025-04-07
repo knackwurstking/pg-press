@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/knackwurstking/pg-vis/internal/constants"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
+
+	"github.com/knackwurstking/pg-vis/internal/constants"
 )
 
 func main() {
