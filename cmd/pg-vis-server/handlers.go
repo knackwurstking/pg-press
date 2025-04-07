@@ -21,6 +21,9 @@ func setHandlers(e *echo.Echo) {
 	})
 
 	e.GET(constants.BaseServerPath+"/", func(c echo.Context) error {
+		// TODO: Serve the app here, but only with a valid api key, so i need to add
+		//       a auth middleware here
+
 		return httperrors.NewUnderConstruction()
 	})
 }
