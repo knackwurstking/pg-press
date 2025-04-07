@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/knackwurstking/pg-vis/internal/constants"
 	"github.com/knackwurstking/pg-vis/internal/httperrors"
 	"github.com/labstack/echo/v4"
@@ -14,9 +16,11 @@ func setHandlers(e *echo.Echo) {
 	//     - "/metal-sheets" => List all existing sheets here, also allow to add a new one
 	//     - "/metal-sheets/:format/:toolID" => Show entries, allow add, modify and deletion
 
+	e.GET(constants.BaseServerPath+"", func(c echo.Context) error {
+		return c.Redirect(http.StatusSeeOther, constants.BaseServerPath+"/")
+	})
+
 	e.GET(constants.BaseServerPath+"/", func(c echo.Context) error {
-		// TODO: Test this first
-		// TODO: Deliver the home page here
 		return httperrors.NewUnderConstruction()
 	})
 }
