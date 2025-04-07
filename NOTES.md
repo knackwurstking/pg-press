@@ -30,7 +30,7 @@
 
 ## Routes
 
-| Path                 | Description                                                                  |
-| -------------------- | ---------------------------------------------------------------------------- |
-| /pg-vis              | Returns the main page (auth required, else redirect to "/registration" page) |
-| /pg-vis/registration | Here just show an info page how to get an api key                            |
+| Path                 | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| /pg-vis              | Start page: Api key setup, Api key permissions, Web app news, ... |
+| /pg-vis/registration | Register API key and info about how to get one                    |
