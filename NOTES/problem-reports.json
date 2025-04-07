@@ -1,20 +1,22 @@
 [
     {
+        // key: <id>:<user>:<user_id>
         "id": 1743992937495, // JS: new Date().getTime()
+        "user": "<telegram-user-name>",
+        "user_id": "<telegram-id>",
         "area": "Presse 4/5",
         "title": "Max Zeit Druckerreichen",
         "description": "Relais defekt => getauscht\nRechnerneustart",
-        "pictures": ["<path-to-picture>"],
-        "user": "<telegram-user-name>",
-        "user_id": "<telegram-id>"
+        "pictures": ["<path-to-picture>"]
     },
     {
+        // key: <id>:<user>:<user_id>
+        "user": "<telegram-user-name>",
+        "user_id": "<telegram-id>",
         "id": 1743993407473, // JS: new Date().getTime()
         "area": "Pressen Absaugung",
         "title": "Inverter Allarm",
         "description": "Linke Schaltschrank Tür, am Inverter \"fn\" drücken",
-        "pictures": ["<path-to-picture>"],
-        "user": "<telegram-user-name>",
-        "user_id": "<telegram-id>"
+        "pictures": ["<path-to-picture>"]
     }
 ]
