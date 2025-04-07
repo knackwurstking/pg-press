@@ -8,7 +8,7 @@
         },
 
         "format": "100x100",
-        "toolID": "G03",
+        "tool_id": "G03",
         "data": [
             {
                 "press": -1,
