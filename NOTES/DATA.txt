@@ -1,0 +1,63 @@
+Users
+    - ID 1
+      Time 1743993407473
+      User <telegram-user-name>
+      User ID <telegram-user-id>
+      State normal
+
+    - ID 2
+      Time 1743993407473
+      User <telegram-user-name>
+      User ID <telegram-user-id>
+      State normal
+
+    - ID 3
+      Time 1743993407473
+      User <telegram-user-name>
+      User ID <telegram-user-id>
+      State banned
+
+Metal Sheets
+    - ID 100x100 G01
+      Modified By
+        - ID 1
+          Date number
+          Data ... (A copy of the data added/editet by the user)
+    
+      Note <multiline string>
+
+      Thickness 6
+      Lower Stamp Height 45
+      Lower Stamp Sheets 29.0
+      Upper Stamp Sheets 4.0
+      Thickness Settings -1.0
+      Thickness Settings SACMI
+        Max 15.6
+        Current 12.1
+    
+    - ID 100x100 G01
+      Modified By
+        - ID 2
+          Date number
+          Data ... (A copy of the data added/editet by the user)
+    
+      Note <multiline string>
+
+      Thickness 20
+      Lower Stamp Height 45
+      Lower Stamp Sheets 0.0
+      Upper Stamp Sheets 0.0
+      Thickness Settings -1.0
+      Thickness Settings SACMI
+        Max 44.0
+        Current 42.0
+
+Press
+    - Press 0
+      Modified By
+        - ID 1
+          Date number
+          Data ... (A copy of the data added/editet by the user)
+
+      Lower Tool ID G01
+
