@@ -35,10 +35,6 @@ export default defineConfig({
         },
     },
 
-    //esbuild: {
-    //    legalComments: "inline",
-    //},
-
     define: {
         "process.env.SERVER_PATH_PREFIX": JSON.stringify(
             process.env.SERVER_PATH_PREFIX,

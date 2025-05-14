@@ -33,9 +33,7 @@ export default defineConfig({
                 "layout-base": "./script/pages/layout-base.js",
 
                 // Pages
-                "devices-address": "./script/pages/devices/address/main.js",
-                devices: "./script/pages/devices/main.js",
-                settings: "./script/pages/settings/main.js",
+                // ...
             },
             output: {
                 dir: "./public/js/",
@@ -43,10 +41,6 @@ export default defineConfig({
             },
         },
     },
-
-    //esbuild: {
-    //    legalComments: "inline",
-    //},
 
     define: {
         "process.env.SERVER_PATH_PREFIX": JSON.stringify(
