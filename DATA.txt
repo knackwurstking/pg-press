@@ -1,18 +1,16 @@
 Users
-    - ID 1
-      Time 1743993407473
+    - Time 1743993407473
+      User <telegram-user-name>
+      User ID <telegram-user-id>    (not null, primary key, unique)
+      State normal
+      Key <api-key>                 (not null, primary key, unique)
+
+    - Time 1743993407473
       User <telegram-user-name>
       User ID <telegram-user-id>
       State normal
 
-    - ID 2
-      Time 1743993407473
-      User <telegram-user-name>
-      User ID <telegram-user-id>
-      State normal
-
-    - ID 3
-      Time 1743993407473
+    - Time 1743993407473
       User <telegram-user-name>
       User ID <telegram-user-id>
       State banned
@@ -20,10 +18,10 @@ Users
 Metal Sheets
     - ID 100x100 G01
       Modified By
-        - ID 1
+        - User ID <telegram-user-id>
           Date number
           Data ... (A copy of the data added/editet by the user)
-    
+
       Note <multiline string>
 
       Thickness 6
@@ -34,13 +32,13 @@ Metal Sheets
       Thickness Settings SACMI
         Max 15.6
         Current 12.1
-    
+
     - ID 100x100 G01
       Modified By
         - ID 2
           Date number
           Data ... (A copy of the data added/editet by the user)
-    
+
       Note <multiline string>
 
       Thickness 20
@@ -60,4 +58,3 @@ Press
           Data ... (A copy of the data added/editet by the user)
 
       Lower Tool ID G01
-
