@@ -1,1 +1,10 @@
-/bin
+*_templ.go
+*templ.txt
+package-lock.json
+node_modules
+.DS_Store
+bin
+dist
+public/css/ui*.css
+public/js
+public/service-worker.js

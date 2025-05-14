@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
+
+        <link
+            rel="icon"
+            href="{{ .ServerPathPrefix }}/icons/favicon.ico"
+            sizes="any"
+        />
+        <link
+            rel="apple-touch-icon"
+            href="{{ .ServerPathPrefix }}/icons/apple-touch-icon-180x180.png"
+        />
+
+        <link
+            rel="stylesheet"
+            href="{{ .ServerPathPrefix }}/css/ui-v4.2.0.css"
+        />
+        <link rel="stylesheet" href="{{ .ServerPathPrefix }}/css/style.css" />
+
+        <link rel="manifest" href="{{ .ServerPathPrefix }}/manifest.json" />
+
+        <title>{{ .Title }}</title>
+
+        <script src="{{ .ServerPathPrefix }}/js/ui-v4.2.0.min.umd.cjs"></script>
+
+        <script src="{{ .ServerPathPrefix }}/js/main.js"></script>
+
+        <script>
+            window.utils.registerServiceWorker();
+        </script>
+    </head>
+
+    <body data-ui-theme="dark">
+        {{ block "layout" . }} {{ end }}
+    </body>
+</html>

@@ -1,0 +1,118 @@
+html,
+body,
+main {
+    width: 100%;
+    height: 100%;
+    /*overscroll-behavior-y: none !important;*/
+}
+
+.color-storage-item {
+    outline: var(--ui-border-width) solid transparent;
+    outline-offset: var(--ui-border-width);
+    border-radius: var(--ui-radius);
+    cursor: pointer;
+}
+
+.color-storage-item.active {
+    outline: var(--ui-border-width) solid var(--ui-primary);
+}
+
+.color-storage-item input[type="color"] {
+    display: none;
+    opacity: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.color-storage-item.active input[type="color"] {
+    display: block;
+    position: absolute;
+}
+
+.device-list-item {
+    z-index: 0;
+    border-radius: var(--ui-radius);
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+
+    overflow: visible;
+}
+
+.device-list-item .background {
+    position: absolute;
+    z-index: -1;
+    top: 0.25rem;
+    right: 0.25rem;
+    bottom: 0.25rem;
+    left: 0.25rem;
+    border-radius: var(--ui-radius);
+
+    filter: blur(0.5rem);
+    -webkit-backdrop-filter: blur(0.5rem);
+}
+
+.online-indicator[data-state] {
+    display: none;
+}
+
+.online-indicator[data-state="online"],
+.online-indicator[data-state="offline"] {
+    display: inline-flex;
+}
+
+.online-indicator[data-state="online"] {
+    color: green;
+}
+
+.online-indicator[data-state="online"]::after {
+    --mono: 1;
+    content: "Online";
+    color: green;
+}
+
+.online-indicator[data-state="offline"] {
+    color: red;
+}
+
+.online-indicator[data-state="offline"]::after {
+    --mono: 1;
+    content: "Offline";
+    color: red;
+}
+
+.power-button {
+    color: rgb(0, 0, 0) !important;
+}
+
+.power-button[data-state="on"] {
+    color: rgb(0, 225, 0) !important;
+}
+
+.power-button[data-state="processing"] {
+    color: yellow !important;
+}
+
+.power-button[data-state="off"] {
+    color: rgb(0, 0, 0) !important;
+}
+
+.color-range-slider input[type="range"]::-webkit-slider-runnable-track {
+    background: -webkit-linear-gradient(
+        right,
+        hsl(0, 0%, 100%) 0%,
+        hsl(0, 0%, 50%) 50%,
+        hsl(0, 0%, 0%) 100%
+    );
+}
+
+.color-range-slider input[type="range"]::-moz-range-track {
+    background: -moz-linear-gradient(
+        right,
+        hsl(0, 0%, 100%) 0%,
+        hsl(0, 0%, 50%) 50%,
+        hsl(0, 0%, 0%) 100%
+    );
+}

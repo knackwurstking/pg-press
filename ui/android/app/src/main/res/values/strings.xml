@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">PG: VIS</string>
-    <string name="title_activity_main">PG: VIS</string>
-    <string name="package_name">knackwurstking.pgvis</string>
-    <string name="custom_url_scheme">knackwurstking.pgvis</string>
-</resources>

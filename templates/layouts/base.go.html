@@ -1,0 +1,34 @@
+{{ define "layout" }}
+<main class="_base-layout">
+    {{ block "content" . }} {{ end }}
+
+    <div class="ui-app-bar" data-ui-position="top">
+        <span class="ui-app-bar-left">
+            {{ block "component-online-indicator" . }} {{ end }}
+        </span>
+
+        <span class="ui-app-bar-center">
+            <span>
+                <h3
+                    data-name="title"
+                    class="app-bar-title"
+                    style="display: none"
+                ></h3>
+            </span>
+        </span>
+
+        <span class="ui-app-bar-right">
+            <!--button
+                data-name="settings-button"
+                style="display: none"
+                data-ui-variant="ghost"
+                onclick="location.pathname = '{{ .ServerPathPrefix }}/settings'"
+            >
+                Settings
+            </button-->
+        </span>
+    </div>
+
+    <script src="{{ .ServerPathPrefix }}/js/layout-base.js"></script>
+</main>
+{{ end }}

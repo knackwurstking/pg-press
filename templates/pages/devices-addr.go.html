@@ -1,0 +1,113 @@
+{{ define "content" }}
+<div
+    class="_content devices-addr ui-container ui-auto-scroll ui-hide-scrollbar"
+    style="
+        height: 100%;
+        padding-top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
+    "
+>
+    <div class="ui-flex column gap">
+        <span class="power ui-flex gap justify-between align-center">
+            <span>Power</span>
+            <span>
+                <button class="off" data-ui-color="destructive">OFF</button>
+                <button class="on">ON</button>
+            </span>
+        </span>
+
+        <h2>Color Storage</h2>
+
+        <div
+            class="range-sliders ui-flex column gap nowrap"
+            style="display: none"
+        ></div>
+
+        <br />
+
+        <div class="color-storage-container ui-flex row gap wrap"></div>
+        <button class="new-color ui-flex-item">
+            New Color
+            <input
+                style="
+                    position: absolute;
+                    opacity: 0;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                "
+                type="color"
+            />
+        </button>
+    </div>
+</div>
+
+<template name="color-storage-item">
+    <div
+        class="color-storage-item ui-border ui-padding"
+        style="width: 7rem; height: 3.5rem"
+        data-color
+    >
+        <div
+            style="
+                background-color: currentColor;
+                color: inherit;
+                width: 100%;
+                height: 100%;
+                border-radius: inherit;
+            "
+        ></div>
+        <input type="color" />
+        <button
+            class="delete"
+            style="
+                --wght: 850;
+                position: absolute;
+                top: 0;
+                right: 0;
+                transform: translate(50%, -50%);
+                border-radius: 50%;
+                padding: 0 !important;
+            "
+            data-ui-variant="ghost"
+            data-ui-icon
+        >
+            x
+        </button>
+    </div>
+</template>
+
+<template name="color-range-slider">
+    <!--
+        .color-range-slider
+            .title
+            .container
+                input[type="range"]
+                input[type="number"]
+    -->
+
+    <span
+        class="color-range-slider ui-flex column justify-start"
+        style="height: fit-content; width: 100%"
+    >
+        <span
+            class="title"
+            style="--slnt: -15; width: fit-content; font-size: 0.9rem"
+        ></span>
+
+        <span style="width: 100%" class="container ui-flex row gap nowrap">
+            <input type="range" min="0" max="255" step="1" />
+
+            <input
+                style="height: 100%; width: 6ch; text-align: center"
+                type="number"
+                min="0"
+                max="255"
+                step="1"
+            />
+        </span>
+    </span>
+</template>
+
+<script src="{{ .ServerPathPrefix }}/js/devices-address.js"></script>
+{{ end }}
