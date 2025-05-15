@@ -5,9 +5,6 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
-	"path/filepath"
-	"picow-led/internal/api"
-	"picow-led/internal/routes"
 	"time"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -17,17 +14,9 @@ import (
 )
 
 var (
-	serverPathPrefix      = os.Getenv("SERVER_PATH_PREFIX")
-	version               = "v0.11.0"
-	apiConfigPath         = "api.yaml"
-	apiConfigFallbackPath = ""
+	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
+	version          = "v0.1.0"
 )
-
-func init() {
-	if d, err := os.UserConfigDir(); err == nil {
-		apiConfigFallbackPath = filepath.Join(d, "picow-led", "api.yaml")
-	}
-}
 
 //go:embed templates
 var templates embed.FS
@@ -55,8 +44,8 @@ func publicFS() fs.FS {
 
 func main() {
 	app := cli.App{
-		Name:  "picow-led",
-		Usage: cli.Usage("PicoW LED server and client."),
+		Name:  "pg-vis",
+		Usage: cli.Usage("A place to collect lots of data"),
 		Commands: []cli.Command{
 			{
 				Name:  "server",
@@ -87,6 +76,7 @@ func cliServerAction(addr *string) cli.ActionRunner {
 	return func(cmd *cli.Command) error {
 		e := echo.New()
 
+		// Initialize the logger
 		logger := slog.New(tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.DateTime,
@@ -103,22 +93,7 @@ func cliServerAction(addr *string) cli.ActionRunner {
 		// Echo: Static File Server
 		e.GET(serverPathPrefix+"/*", echo.StaticDirectoryHandler(publicFS(), false))
 
-		// Api Configuration
-		slog.Info("Load API configuration", "path", apiConfigPath, "fallbackPath", apiConfigFallbackPath)
-		apiConfig, err := api.GetConfig(
-			apiConfigPath, apiConfigFallbackPath,
-		)
-		if err != nil {
-			slog.Warn("Read API configuration failed!")
-			slog.Warn(err.Error())
-		}
-
-		routes.Create(e, routes.Options{
-			ServerPathPrefix: serverPathPrefix,
-			Version:          version,
-			Templates:        templatesFS(),
-			Config:           apiConfig,
-		})
+		// TODO: Echo: Routes
 
 		return e.Start(*addr)
 	}
