@@ -103,7 +103,7 @@ func cliServerAction(addr *string) cli.ActionRunner {
 			},
 		}
 		routes.RegisterPWA(e, o)
-		routes.RegisterFrontend(e, o)
+		routes.RegisterPages(e, o)
 		routes.RegisterAPI(e, o)
 
 		return e.Start(*addr)
