@@ -1,3 +1,0 @@
-window.addEventListener("pageshow", () => {
-    // TODO: Websocket handler here...
-});

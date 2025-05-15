@@ -27,13 +27,13 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 // Main, window
-                main: "./script/pages/main.js",
+                main: "./script/main.ts",
 
-                // Layouts
-                "layout-base": "./script/pages/layout-base.js",
+                // Layout
+                "layout/base": "./script/layout/base.ts",
 
-                // Pages
-                // ...
+                // Content
+                "content/home": "./script/content/home.ts",
             },
             output: {
                 dir: "./public/js/",
