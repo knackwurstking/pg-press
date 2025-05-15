@@ -1,4 +1,4 @@
-module picow-led
+module pg-vis
 
 go 1.24
 
