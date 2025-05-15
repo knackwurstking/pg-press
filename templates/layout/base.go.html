@@ -1,6 +1,15 @@
 {{ define "layout" }}
-<main class="_layout base">
-    {{ block "content" . }} {{ end }}
+<main class="_layout base ui-debug">
+    <div
+        style="
+            width: 100%;
+            height: 100%;
+            padding-top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
+        "
+        class="ui-container ui-auto-scroll ui-hide-scrollbar"
+    >
+        {{ block "content" . }} {{ end }}
+    </div>
 
     <div class="ui-app-bar" data-ui-position="top">
         <span class="ui-app-bar-left"></span>
