@@ -1,8 +1,9 @@
 all: init build
 
+# NOTE: This include satement here needs to be removed for the rpi-server-project
 include .env
 
-BINARY_NAME := "picow-led"
+BINARY_NAME := "pg-vis"
 SERVER_APP_NAME := ${BINARY_NAME}
 
 clean:
@@ -46,7 +47,7 @@ generate-pwa-assets:
 
 define SYSTEMD_SERVICE_FILE
 [Unit]
-Description=Control my fucking lights
+Description=PG: Vis Server
 After=network.target
 
 [Service]
