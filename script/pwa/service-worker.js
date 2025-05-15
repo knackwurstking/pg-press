@@ -103,6 +103,7 @@ const isBlackListed = (/** @type {string} */ url) => {
     return blackList.find((path) => new RegExp(".*" + path + "$").test(url));
 };
 
+// @ts-expect-error
 self.addEventListener(
     "fetch",
     (/** @type {Event & { request: Request }} */ evt) => {
