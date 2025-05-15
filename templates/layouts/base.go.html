@@ -1,11 +1,9 @@
 {{ define "layout" }}
-<main class="_base-layout">
+<main class="_layout base">
     {{ block "content" . }} {{ end }}
 
     <div class="ui-app-bar" data-ui-position="top">
-        <span class="ui-app-bar-left">
-            {{ block "component-online-indicator" . }} {{ end }}
-        </span>
+        <span class="ui-app-bar-left"></span>
 
         <span class="ui-app-bar-center">
             <span>
@@ -17,16 +15,7 @@
             </span>
         </span>
 
-        <span class="ui-app-bar-right">
-            <!--button
-                data-name="settings-button"
-                style="display: none"
-                data-ui-variant="ghost"
-                onclick="location.pathname = '{{ .ServerPathPrefix }}/settings'"
-            >
-                Settings
-            </button-->
-        </span>
+        <span class="ui-app-bar-right"></span>
     </div>
 
     <script src="{{ .ServerPathPrefix }}/js/layout-base.js"></script>
