@@ -1,8 +1,5 @@
 all: init build
 
-# NOTE: This include satement here needs to be removed for the rpi-server-project
-include .env
-
 BINARY_NAME := "pg-vis"
 SERVER_APP_NAME := ${BINARY_NAME}
 
