@@ -7,7 +7,8 @@ const cacheFiles = [
     process.env.SERVER_PATH_PREFIX + "/css/style.css",
     process.env.SERVER_PATH_PREFIX + "/css/ui-v4.2.0.css",
 
-    process.env.SERVER_PATH_PREFIX + "/js/layout-base.js",
+    process.env.SERVER_PATH_PREFIX + "/js/content/home.js",
+    process.env.SERVER_PATH_PREFIX + "/js/layout/base.js",
     process.env.SERVER_PATH_PREFIX + "/js/main.js",
     process.env.SERVER_PATH_PREFIX + "/js/ui-v4.2.0.min.umd.cjs",
 
