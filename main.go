@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"os"
+	"pg-vis/internal/routes"
 	"time"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -93,7 +94,12 @@ func cliServerAction(addr *string) cli.ActionRunner {
 		// Echo: Static File Server
 		e.GET(serverPathPrefix+"/*", echo.StaticDirectoryHandler(publicFS(), false))
 
-		// TODO: Echo: Routes
+		// Echo: Routes
+		o := &routes.Options{
+			ServerPathPrefix: serverPathPrefix,
+			Version:          version,
+		}
+		routes.RegisterPWA(e, o)
 
 		return e.Start(*addr)
 	}
