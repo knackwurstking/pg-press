@@ -23,11 +23,11 @@ generate:
 dev:
 	make generate
 	which gow || (echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && exit 1)
-	gow -e=go,html,js,json -v -r run . server -a :8887
+	gow -e=go,html,js,json -v -r run . server -a ${SERVER_ADDR}
 
 run:
 	make generate
-	go run . server -a :8887
+	go run . server -a ${SERVER_ADDR}
 
 test:
 	go test -v ./...
