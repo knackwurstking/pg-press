@@ -1,8 +1,8 @@
 {
     "version": "{{ .Version }}",
     "manifest_version": 3,
-    "name": "PicoW LED",
-    "short_name": "picow-led",
+    "name": "PG: Vis",
+    "short_name": "pg-vis",
     "id": "",
     "icons": [
         {
@@ -27,15 +27,7 @@
             "purpose": "maskable"
         }
     ],
-    "screenshots": [
-        {
-            "src": "{{ .ServerPathPrefix }}/screenshots/1.png",
-            "sizes": "1488x1748",
-            "type": "image/png",
-            "form_factor": "wide",
-            "label": "App Preview"
-        }
-    ],
+    "screenshots": [],
     "theme_color": "#09090b",
     "background_color": "#09090b",
     "display": "standalone",
