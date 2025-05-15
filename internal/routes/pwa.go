@@ -11,16 +11,8 @@ import (
 )
 
 func RegisterPWA(e *echo.Echo, o *Options) {
-	e.GET(o.Data.ServerPathPrefix+"/service-worker.js", func(c echo.Context) error {
-		err := serveTemplate(c, o.Templates, o.Data, "service-worker.js")
-		if err != nil {
-			slog.Error(err.Error())
-		}
-		return err
-	})
-
 	e.GET(o.Data.ServerPathPrefix+"/manifest.json", func(c echo.Context) error {
-		err := serveTemplate(c, o.Templates, o.Data, "manifest.json")
+		err := serveTemplate(c, o.Templates, o.Data, "pwa/manifest.json")
 		if err != nil {
 			slog.Error(err.Error())
 		}
