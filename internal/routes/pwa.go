@@ -1,6 +1,6 @@
 // Routes:
 //
-//	TODO: - GET: "/service-worker"
+//	TODO: - GET: "/service-worker.js"
 //	TODO: - GET: "/manifest.json"
 package routes
 
