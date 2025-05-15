@@ -96,8 +96,11 @@ func cliServerAction(addr *string) cli.ActionRunner {
 
 		// Echo: Routes
 		o := &routes.Options{
-			ServerPathPrefix: serverPathPrefix,
-			Version:          version,
+			Templates: templates,
+			Data: routes.Data{
+				ServerPathPrefix: serverPathPrefix,
+				Version:          version,
+			},
 		}
 		routes.RegisterPWA(e, o)
 

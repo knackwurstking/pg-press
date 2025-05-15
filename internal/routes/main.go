@@ -1,6 +1,13 @@
 package routes
 
+import "io/fs"
+
 type Options struct {
-	ServerPathPrefix string `json:"server-path-prefix" yaml:"server-path-prefix"`
-	Version          string `json:"version" yaml:"string"`
+	Templates fs.FS
+	Data      Data
+}
+
+type Data struct {
+	Version          string
+	ServerPathPrefix string
 }
