@@ -21,15 +21,35 @@
     <input style="width: 100%; height: 100%" type="search" list="searchInput" />
     <datalist id="searchInput">
         {{ range $option := .SearchDataList }}
-        <option value="{{$option}}">{{$option}}</option>
+        <option value="{{ $option }}">{{ $option }}</option>
         {{ end }}
     </datalist>
 </search>
 
 <div id="tables" style="margin-top: 3rem">
-    <!-- TODO: Render table here (server side) `{{ range $table := .Tables }}` -->
-    <!-- TODO: ... `{{ range $value := $table.Head }}` -->
-    <!-- TODO: ... `{{ range $value := $table.Body }}` -->
+    {{ range $table := .Tables }}
+
+    <table>
+        <thead>
+            <row>
+                {{ range $value := $table.Head }}
+                <th></th>
+                <!-- TODO: ... -->
+                {{ end }}
+            </row>
+        </thead>
+
+        <tbody>
+            <row>
+                {{ range $value := $table.Body }}
+                <td></td>
+                <!-- TODO: ... -->
+                {{ end }}
+            </row>
+        </tbody>
+    </table>
+
+    {{ end }}
 </div>
 
 <script src="{{ .ServerPathPrefix }}/js/content/metal-sheets.js"></script>

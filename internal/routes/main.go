@@ -15,30 +15,3 @@ func (o *Options) MetalSheetsPage() MetalSheetsPage {
 		Global: g,
 	}
 }
-
-type Global struct {
-	Title            string
-	SubTitle         string
-	Version          string
-	ServerPathPrefix string
-}
-
-func (g Global) HasSubTitle() bool {
-	return g.SubTitle != ""
-}
-
-type MetalSheetsPage struct {
-	Global
-}
-
-func (msp MetalSheetsPage) SearchDataList() []Option {
-	// TODO: Generate list from database
-
-	return []Option{
-		"120x60 G01",
-		"120x60 G01",
-		"120x60 G01",
-	} // NOTE: Data for testing
-}
-
-type Option string
