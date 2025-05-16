@@ -16,7 +16,7 @@ func (msp MetalSheetsPage) Tables() []Table {
 	// TODO: Get data from database
 
 	return []Table{
-		{ // TODO: Add some data for testing here
+		{
 			Head: []string{
 				"Stärke",
 				"Marke (Höhe)",
