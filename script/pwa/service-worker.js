@@ -3,6 +3,7 @@ const CURRENT_CACHE = "pg-vis-" + CACHE_VERSION;
 
 const cacheFiles = [
     process.env.SERVER_PATH_PREFIX + "/",
+    process.env.SERVER_PATH_PREFIX + "/metal-sheets",
 
     process.env.SERVER_PATH_PREFIX + "/css/style.css",
     process.env.SERVER_PATH_PREFIX + "/css/ui-v4.2.0.css",
