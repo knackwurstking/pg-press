@@ -19,7 +19,7 @@
                 <h3
                     data-name="title"
                     class="app-bar-title"
-                    style="display: none"
+                    style="{{ if not .HasSubTitle }}display: none;{{ end }}"
                 >
                     {{ .SubTitle }}
                 </h3>
