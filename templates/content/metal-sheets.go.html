@@ -41,9 +41,20 @@
 
         <tbody>
             <row>
-                {{ range $value := $table.Body }}
-                <td></td>
-                <!-- TODO: ... -->
+                {{ range $row := $table.Body }}
+                <td>
+                    {{ range $cell := $value }}
+                    <tr>
+                        {{ if $cell.IsString }}
+                        <td>{{ $cell.Value }}</td>
+                        {{ else if $cell.IsSacmiThickness }}
+                        <td>
+                            {{ $cell.Value.Current }} ({{ $cell.Value.Max }})
+                        </td>
+                        {{ end }}
+                    </tr>
+                    {{ end }}
+                </td>
                 {{ end }}
             </row>
         </tbody>
