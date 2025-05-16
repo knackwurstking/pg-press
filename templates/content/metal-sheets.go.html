@@ -26,7 +26,11 @@
     </datalist>
 </search>
 
-<div id="tables" style="margin-top: 3rem"></div>
+<div id="tables" style="margin-top: 3rem">
+    <!-- TODO: Render table here (server side) `{{ range $table := .Tables }}` -->
+    <!-- TODO: ... `{{ range $value := $table.Head }}` -->
+    <!-- TODO: ... `{{ range $value := $table.Body }}` -->
+</div>
 
 <script src="{{ .ServerPathPrefix }}/js/content/metal-sheets.js"></script>
 {{ end }}
