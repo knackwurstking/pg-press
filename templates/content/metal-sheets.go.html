@@ -9,8 +9,16 @@
 
 <style></style>
 
-<search>
-    <input type="search" list="searchInput" />
+<search
+    style="
+        position: absolute;
+        top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
+        left: 0;
+        right: 0;
+        height: 2.5rem;
+    "
+>
+    <input style="height: 100%" type="search" list="searchInput" />
     <datalist id="searchInput">
         {{ range $option := .SearchDataList }}
         <option value="{{ $option }}">{{ $option }}</option>
@@ -18,7 +26,7 @@
     </datalist>
 </search>
 
-<div id="tables"></div>
+<div id="tables" style="margin-top: 3rem"></div>
 
 <script src="{{ .ServerPathPrefix }}/js/content/metal-sheets.js"></script>
 {{ end }}
