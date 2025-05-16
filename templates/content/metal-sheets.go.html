@@ -13,15 +13,15 @@
     style="
         position: absolute;
         top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
-        left: 0;
-        right: 0;
+        left: var(--ui-spacing);
+        right: var(--ui-spacing);
         height: 2.5rem;
     "
 >
-    <input style="height: 100%" type="search" list="searchInput" />
+    <input style="width: 100%; height: 100%" type="search" list="searchInput" />
     <datalist id="searchInput">
         {{ range $option := .SearchDataList }}
-        <option value="{{ $option }}">{{ $option }}</option>
+        <option value="{{$option}}">{{$option}}</option>
         {{ end }}
     </datalist>
 </search>

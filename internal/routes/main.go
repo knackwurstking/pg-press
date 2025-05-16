@@ -35,13 +35,10 @@ func (msp MetalSheetsPage) SearchDataList() []Option {
 	// TODO: Generate list from database
 
 	return []Option{
-		{Value: "120x60 G01", Title: "120x60 G01"},
-		{Value: "120x60 G02", Title: "120x60 G01"},
-		{Value: "120x60 G03", Title: "120x60 G01"},
+		"120x60 G01",
+		"120x60 G01",
+		"120x60 G01",
 	} // NOTE: Data for testing
 }
 
-type Option struct {
-	Value string
-	Title string
-}
+type Option string
