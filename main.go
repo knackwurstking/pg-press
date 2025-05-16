@@ -97,7 +97,8 @@ func cliServerAction(addr *string) cli.ActionRunner {
 		// Echo: Routes
 		o := &routes.Options{
 			Templates: templatesFS(),
-			Data: routes.Data{
+			Global: routes.Global{
+				Title:            "PG: Vis",
 				ServerPathPrefix: serverPathPrefix,
 				Version:          version,
 			},

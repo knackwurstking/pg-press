@@ -34,6 +34,7 @@ export default defineConfig({
 
                 // Content
                 "content/home": "./script/content/home.ts",
+                "content/metal-sheets": "./script/content/metal-sheets.ts",
             },
             output: {
                 dir: "./public/js/",

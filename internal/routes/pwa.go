@@ -11,8 +11,8 @@ import (
 )
 
 func RegisterPWA(e *echo.Echo, o *Options) {
-	e.GET(o.Data.ServerPathPrefix+"/manifest.json", func(c echo.Context) error {
-		err := serveTemplate(c, o.Templates, o.Data, "pwa/manifest.json")
+	e.GET(o.Global.ServerPathPrefix+"/manifest.json", func(c echo.Context) error {
+		err := serveTemplate(c, o.Templates, o.Global, "pwa/manifest.json")
 		if err != nil {
 			slog.Error(err.Error())
 		}

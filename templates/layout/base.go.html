@@ -20,13 +20,15 @@
                     data-name="title"
                     class="app-bar-title"
                     style="display: none"
-                ></h3>
+                >
+                    {{ .SubTitle }}
+                </h3>
             </span>
         </span>
 
         <span class="ui-app-bar-right"></span>
     </div>
 
-    <script src="{{ .ServerPathPrefix }}/js/layout-base.js"></script>
+    <script src="{{ .ServerPathPrefix }}/js/layout/base.js"></script>
 </main>
 {{ end }}

@@ -1,18 +1,24 @@
 {{ define "content" }}
 <!-- NOTE: ...
-    - search bar on top (no regex?)
+    - SearchBar on top (no regex?)
 
-    - Home/Dashboard
-        - Preview all pages with some info
-        - Allow pinning things on top, browser bookmarks like
-    - Howtos
-        - Support pictures and html or markdown input (optional)
-    - Documents, Find a better name for this
-        - Contains handbooks and more, all pdf or html
     - Metal Sheets
         - Tables from top to bottom
         - Could use detail tags for this, or find something else
 -->
+
+<style></style>
+
+<search>
+    <input type="search" list="searchInput" />
+    <datalist id="searchInput">
+        {{ range $option := .SearchDataList }}
+        <option value="{{ $option }}">{{ $option }}</option>
+        {{ end }}
+    </datalist>
+</search>
+
+<div id="tables"></div>
 
 <script src="{{ .ServerPathPrefix }}/js/content/metal-sheets.js"></script>
 {{ end }}

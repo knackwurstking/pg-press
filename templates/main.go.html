@@ -25,7 +25,11 @@
 
         <link rel="manifest" href="{{ .ServerPathPrefix }}/manifest.json" />
 
+        {{ if .HasSubTitle }}
+        <title>{{ .Title }} | {{ .SubTitle }}</title>
+        {{ else }}
         <title>{{ .Title }}</title>
+        {{ end }}
 
         <script src="{{ .ServerPathPrefix }}/js/ui-v4.2.0.min.umd.cjs"></script>
         <script src="{{ .ServerPathPrefix }}/js/main.js"></script>
