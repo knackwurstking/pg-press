@@ -31,32 +31,24 @@
 
     <table>
         <thead>
-            <row>
+            <tr>
                 {{ range $value := $table.Head }}
                 <th></th>
                 <!-- TODO: ... -->
                 {{ end }}
-            </row>
+            </tr>
         </thead>
 
         <tbody>
-            <row>
-                {{ range $row := $table.Body }}
-                <td>
-                    {{ range $cell := $value }}
-                    <tr>
-                        {{ if $cell.IsString }}
-                        <td>{{ $cell.Value }}</td>
-                        {{ else if $cell.IsSacmiThickness }}
-                        <td>
-                            {{ $cell.Value.Current }} ({{ $cell.Value.Max }})
-                        </td>
-                        {{ end }}
-                    </tr>
-                    {{ end }}
-                </td>
-                {{ end }}
-            </row>
+            {{ range $row := $table.Body }}
+            <tr>
+                {{ range $cell := $row }} {{ if $cell.IsSacmiThickness }}
+                <td>{{ $cell.Value.Current }} ({{ $cell.Value.Max }})</td>
+                {{ else }}
+                <td>{{ $cell.Value }}</td>
+                {{ end }} {{ end }}
+            </tr>
+            {{ end }}
         </tbody>
     </table>
 
