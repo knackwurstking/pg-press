@@ -33,8 +33,7 @@
         <thead>
             <tr>
                 {{ range $value := $table.Head }}
-                <th></th>
-                <!-- TODO: ... -->
+                <th>{{ $value }}</th>
                 {{ end }}
             </tr>
         </thead>
