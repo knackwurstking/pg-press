@@ -22,9 +22,8 @@ func (msp MetalSheetsPage) Tables() []Table {
 				"Marke (Höhe)",
 				"Blech Stempel",
 				"Bleck Marke",
-				"Stf. P5",
-				"Stf. P2-4",
 				"Stf. P0",
+				"Stf. P2-4",
 			},
 			Body: [][]any{
 				{
@@ -36,8 +35,6 @@ func (msp MetalSheetsPage) Tables() []Table {
 
 					NewTableCell_SacmiThickness(SacmiThickness{Current: -1, Max: -1}),
 					NewTableCell_Float64(5.0),
-
-					NewTableCell_SacmiThickness(SacmiThickness{Current: -1, Max: -1}),
 				},
 			},
 			HiddenCells: []int{4, 7},
