@@ -1,0 +1,3 @@
+window.addEventListener("pageshow", async () => {
+    // ...
+});
