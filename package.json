@@ -7,7 +7,7 @@
         "@vite-pwa/assets-generator": "^0.2.6",
         "eslint": "^9.25.1",
         "globals": "^16.0.0",
-        "ui": "knackwurstking/ui#v4.2.0",
+        "ui": "knackwurstking/ui#v4.2.1",
         "vite": "^6.3.3",
         "vite-require": "^0.2.3"
     }
