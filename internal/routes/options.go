@@ -2,6 +2,7 @@ package routes
 
 import (
 	"io/fs"
+	"strings"
 )
 
 type Options struct {
@@ -9,11 +10,12 @@ type Options struct {
 	Global    Global
 }
 
-func (o *Options) MetalSheets() MetalSheets {
+func (o *Options) MetalSheets(tableSearch string) MetalSheets {
 	g := o.Global
 	g.SubTitle = "Metal Sheets"
 
 	return MetalSheets{
-		Global: g,
+		Global:      g,
+		TableSearch: strings.Trim(tableSearch, " "),
 	}
 }

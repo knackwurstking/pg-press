@@ -1,7 +1,10 @@
 package routes
 
+import "regexp"
+
 type MetalSheets struct {
 	Global
+	TableSearch string
 }
 
 func (msp MetalSheets) SearchDataList() []string {
@@ -15,7 +18,7 @@ func (msp MetalSheets) SearchDataList() []string {
 func (msp MetalSheets) Tables() []MetalSheetTable {
 	// TODO: Get data from database
 
-	return []MetalSheetTable{
+	tables := []MetalSheetTable{
 		{
 			DataSearch: "120x60 G06",
 			Head: []string{
@@ -40,5 +43,20 @@ func (msp MetalSheets) Tables() []MetalSheetTable {
 			},
 			HiddenCells: []int{4},
 		},
-	} // NOTE: Data for testing
+	}
+
+	if msp.TableSearch == "" {
+		return tables
+	}
+
+	filtered := []MetalSheetTable{}
+
+	r := regexp.MustCompile(msp.TableSearch)
+	for _, t := range tables {
+		if r.MatchString(t.DataSearch) {
+			filtered = append(filtered, t)
+		}
+	}
+
+	return filtered
 }

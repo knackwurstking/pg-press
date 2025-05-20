@@ -25,13 +25,8 @@ func RegisterPages(e *echo.Echo, o *Options) {
 	})
 
 	e.GET(o.Global.ServerPathPrefix+"/metal-sheets", func(c echo.Context) error {
-		// TODO: Handle query "tableSearch", pass to `o.MetalSheets()`
-		//
-		// tableSearch := c.QueryParam("tableSearch")
-		slog.Debug("query", "QueryParams", c.QueryParams())
-
 		err := serveTemplate(
-			c, o.Templates, o.MetalSheets(),
+			c, o.Templates, o.MetalSheets(c.QueryParam("tableSearch")),
 			"main.go.html",
 			"layout/base.go.html",
 			"content/metal-sheets.tmpl",
