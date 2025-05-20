@@ -9,11 +9,11 @@ type Options struct {
 	Global    Global
 }
 
-func (o *Options) MetalSheetsPage() MetalSheetsPage {
+func (o *Options) MetalSheets() MetalSheets {
 	g := o.Global
 	g.SubTitle = "Metal Sheets"
 
-	return MetalSheetsPage{
+	return MetalSheets{
 		Global: g,
 	}
 }

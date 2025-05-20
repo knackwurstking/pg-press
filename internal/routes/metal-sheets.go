@@ -1,10 +1,10 @@
 package routes
 
-type MetalSheetsPage struct {
+type MetalSheets struct {
 	Global
 }
 
-func (msp MetalSheetsPage) SearchDataList() []string {
+func (msp MetalSheets) SearchDataList() []string {
 	// TODO: Get data from database
 
 	return []string{
@@ -12,7 +12,7 @@ func (msp MetalSheetsPage) SearchDataList() []string {
 	} // NOTE: Data for testing
 }
 
-func (msp MetalSheetsPage) Tables() []MetalSheetTable {
+func (msp MetalSheets) Tables() []MetalSheetTable {
 	// TODO: Get data from database
 
 	return []MetalSheetTable{

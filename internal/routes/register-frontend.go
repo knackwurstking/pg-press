@@ -25,7 +25,7 @@ func RegisterPages(e *echo.Echo, o *Options) {
 		slog.Debug("query", "QueryParams", c.QueryParams())
 
 		err := serveTemplate(
-			c, o.Templates, o.MetalSheetsPage(),
+			c, o.Templates, o.MetalSheets(),
 			"main.go.html",
 			"layout/base.go.html",
 			"content/metal-sheets.tmpl",
