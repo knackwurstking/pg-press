@@ -29,7 +29,7 @@ func RegisterPages(e *echo.Echo, o *Options) {
 			c, o.Templates, o.MetalSheets(c.QueryParam("tableSearch")),
 			"main.go.html",
 			"layout/base.go.html",
-			"content/metal-sheets.tmpl",
+			"content/metal-sheets.go.html",
 		)
 		if err != nil {
 			slog.Error(err.Error())
