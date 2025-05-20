@@ -1,3 +1,4 @@
+// TODO: create tables
 document.addEventListener("DOMContentLoaded", () => {
     const tableSearchInput =
         document.querySelector<HTMLInputElement>(`#tableSearch`)!;
