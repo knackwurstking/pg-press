@@ -51,8 +51,8 @@ Description=PG: Vis Server
 After=network.target
 
 [Service]
-EnvironmentFile=%h/.config/picow-led/.env
-ExecStart=${SERVER_APP_NAME} server
+# TODO: Add Env: "SERVER_PATH_PREFIX"
+ExecStart=${SERVER_APP_NAME} server --addr ${SERVER_ADDR}
 
 [Install]
 WantedBy=default.target
