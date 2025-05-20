@@ -1,4 +1,5 @@
-all: init build
+all: init generate build
+server: init generate build stop install start log
 
 include .env
 
