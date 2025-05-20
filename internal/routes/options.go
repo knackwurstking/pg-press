@@ -1,6 +1,8 @@
 package routes
 
-import "io/fs"
+import (
+	"io/fs"
+)
 
 type Options struct {
 	Templates fs.FS
