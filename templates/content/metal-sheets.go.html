@@ -15,7 +15,7 @@
         list="tableSearchInput"
         autocomplete="off"
     />
-    <datalist id="tableSearchInput">
+        <datalist id="tableSearchInput">
         {{ range $option := .SearchDataList }}
             <option value="{{ $option }}">{{ $option }}</option>
         {{ end }}
@@ -27,10 +27,10 @@
         <table data-search="{{ $table.DataSearch }}">
             <thead>
                 <tr>
-                    {{ range $i, $value := $table.Head }} 
+                    {{ range $i, $value := $table.Head }}
                         {{ if $table.IsHidden $i }}
                             {{ continue }}
-                        {{ end }} 
+                        {{ end }}
 
                         <th>{{ $value }}</th>
                     {{ end }}
@@ -40,16 +40,16 @@
             <tbody>
                 {{ range $row := $table.Body }}
                     <tr>
-                        {{ range $i, $cell := $row }} 
+                        {{ range $i, $cell := $row }}
                             {{ if $table.IsHidden $i }}
                                 {{ continue }}
-                            {{ end }} 
+                            {{ end }}
 
                             {{ if $cell.IsSacmiThickness }}
                                 <td>{{ $cell.Value.Current }} ({{ $cell.Value.Max }})</td>
                             {{ else }}
                                 <td>{{ $cell.Value }}</td>
-                            {{ end }} 
+                            {{ end }}
                         {{ end }}
                     </tr>
                 {{ end }}
