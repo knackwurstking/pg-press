@@ -1,5 +1,7 @@
 all: init build
 
+include .env
+
 BINARY_NAME := "pg-vis"
 SERVER_APP_NAME := ${BINARY_NAME}
 
