@@ -1,3 +1,7 @@
+// Routes:
+//
+//   - GET: "/"
+//   - GET: "/metal-sheets?tableSearch=..."
 package routes
 
 import (
@@ -20,7 +24,9 @@ func RegisterPages(e *echo.Echo, o *Options) {
 		return err
 	})
 
-	e.GET(o.Global.ServerPathPrefix+"/metal-sheets/", func(c echo.Context) error {
+	e.GET(o.Global.ServerPathPrefix+"/metal-sheets", func(c echo.Context) error {
+		// TODO: Handle query "tableSearch", pass to `o.MetalSheets()`
+		//
 		// tableSearch := c.QueryParam("tableSearch")
 		slog.Debug("query", "QueryParams", c.QueryParams())
 

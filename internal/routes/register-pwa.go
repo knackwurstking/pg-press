@@ -1,6 +1,5 @@
 // Routes:
 //
-//   - GET: "/service-worker.js"
 //   - GET: "/manifest.json"
 package routes
 
