@@ -21,11 +21,14 @@ func RegisterPages(e *echo.Echo, o *Options) {
 	})
 
 	e.GET(o.Global.ServerPathPrefix+"/metal-sheets/", func(c echo.Context) error {
+		// tableSearch := c.QueryParam("tableSearch")
+		slog.Debug("query", "QueryParams", c.QueryParams())
+
 		err := serveTemplate(
 			c, o.Templates, o.MetalSheetsPage(),
 			"main.go.html",
 			"layout/base.go.html",
-			"content/metal-sheets.go.html",
+			"content/metal-sheets.tmpl",
 		)
 		if err != nil {
 			slog.Error(err.Error())

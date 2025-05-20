@@ -1,5 +1,7 @@
 package routes
 
+import "slices"
+
 type MetalSheetsPage struct {
 	Global
 }
@@ -38,7 +40,7 @@ func (msp MetalSheetsPage) Tables() []Table {
 					NewTableCell_Float64(5.0),
 				},
 			},
-			HiddenCells: []int{4, 7},
+			HiddenCells: []int{4},
 		},
 	} // NOTE: Data for testing
 }
@@ -48,6 +50,10 @@ type Table struct {
 	Head        []string
 	Body        [][]any
 	HiddenCells []int
+}
+
+func (t Table) IsHidden(index int) bool {
+	return slices.Contains(t.HiddenCells, index)
 }
 
 type TableCell[T string | int | float64 | SacmiThickness] struct {
