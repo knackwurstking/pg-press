@@ -17,6 +17,7 @@ func (msp MetalSheetsPage) Tables() []Table {
 
 	return []Table{
 		{
+			DataSearch: "120x60 G06",
 			Head: []string{
 				"Stärke",
 				"Marke (Höhe)",
@@ -43,6 +44,7 @@ func (msp MetalSheetsPage) Tables() []Table {
 }
 
 type Table struct {
+	DataSearch  string
 	Head        []string
 	Body        [][]any
 	HiddenCells []int
