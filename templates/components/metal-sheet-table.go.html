@@ -1,0 +1,38 @@
+{{ define "component-metal-sheet-table" }}
+
+{{ $global := index . 0 }}
+{{ $table := index . 1 }}
+
+<table data-search="{{ $table.DataSearch }}">
+    <thead>
+        <tr>
+            {{ range $i, $value := $table.Head }}
+                {{ if $table.IsHidden $i }}
+                    {{ continue }}
+                {{ end }}
+
+                <th>{{ $value }}</th>
+            {{ end }}
+        </tr>
+    </thead>
+
+    <tbody>
+        {{ range $row := $table.Body }}
+            <tr>
+                {{ range $i, $cell := $row }}
+                    {{ if $table.IsHidden $i }}
+                        {{ continue }}
+                    {{ end }}
+
+                    {{ if $cell.IsSacmiThickness }}
+                        <td>{{ $cell.Value.Current }} ({{ $cell.Value.Max }})</td>
+                    {{ else }}
+                        <td>{{ $cell.Value }}</td>
+                    {{ end }}
+                {{ end }}
+            </tr>
+        {{ end }}
+    </tbody>
+</table>
+
+{{ end }}

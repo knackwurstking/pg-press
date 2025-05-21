@@ -7,8 +7,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func serveTemplate(c echo.Context, f fs.FS, data any, pattern ...string) error {
-	t, err := template.ParseFS(f, pattern...)
+var (
+	componentTemplates = []string{
+		"components/metal-sheet-table.go.html",
+	}
+)
+
+func serveTemplate(c echo.Context, f fs.FS, data any, patterns ...string) error {
+	t, err := template.ParseFS(f, append(patterns, componentTemplates...)...)
 	if err != nil {
 		return err
 	}

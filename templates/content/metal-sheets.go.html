@@ -1,5 +1,8 @@
 {{ define "content" }}
-<!-- TODO: kick server side rendering stuff here -->
+
+{{ $data := . }}
+{{ $global := $data.Global }}
+
 <search
     style="
         position: absolute;
@@ -15,49 +18,19 @@
         type="search"
         list="tableSearchInput"
         autocomplete="off"
-        value="{{ .TableSearch }}"
+        value="{{ $data.TableSearch }}"
         onchange='location.search = "tableSearch=" + this.value'
     />
     <datalist id="tableSearchInput">
-        {{ range $option := .SearchDataList }}
+        {{ range $option := $data.SearchDataList }}
             <option value="{{ $option }}">{{ $option }}</option>
         {{ end }}
     </datalist>
 </search>
 
 <div id="tables" style="margin-top: 3rem">
-    {{ range $table := .Tables }}
-        <table data-search="{{ $table.DataSearch }}">
-            <thead>
-                <tr>
-                    {{ range $i, $value := $table.Head }}
-                        {{ if $table.IsHidden $i }}
-                            {{ continue }}
-                        {{ end }}
-
-                        <th>{{ $value }}</th>
-                    {{ end }}
-                </tr>
-            </thead>
-
-            <tbody>
-                {{ range $row := $table.Body }}
-                    <tr>
-                        {{ range $i, $cell := $row }}
-                            {{ if $table.IsHidden $i }}
-                                {{ continue }}
-                            {{ end }}
-
-                            {{ if $cell.IsSacmiThickness }}
-                                <td>{{ $cell.Value.Current }} ({{ $cell.Value.Max }})</td>
-                            {{ else }}
-                                <td>{{ $cell.Value }}</td>
-                            {{ end }}
-                        {{ end }}
-                    </tr>
-                {{ end }}
-            </tbody>
-        </table>
+    {{ range $table := $data.Tables }}
+        {{ template "component-metal-sheet-table" ($global.Array $global $table) }}
     {{ end }}
 </div>
 

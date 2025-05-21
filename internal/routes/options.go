@@ -11,6 +11,10 @@ type Global struct {
 	ServerPathPrefix string
 }
 
+func (g Global) Array(v ...any) []any {
+	return v
+}
+
 func (g Global) HasSubTitle() bool {
 	return g.SubTitle != ""
 }
