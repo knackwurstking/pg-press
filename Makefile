@@ -76,7 +76,7 @@ start: check-linux
 	systemctl --user restart ${SERVER_APP_NAME}
 
 stop: check-linux
-	systemctl --user stop ${SERVER_APP_NAME}
+	systemctl --user stop ${SERVER_APP_NAME} || exit 0
 
 log: check-linux
 	journalctl --user -u ${SERVER_APP_NAME} --follow --output cat
