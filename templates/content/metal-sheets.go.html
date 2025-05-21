@@ -16,6 +16,7 @@
         list="tableSearchInput"
         autocomplete="off"
         value="{{ .TableSearch }}"
+        onchange='location.search = "tableSearch=" + this.value'
     />
     <datalist id="tableSearchInput">
         {{ range $option := .SearchDataList }}
