@@ -51,7 +51,7 @@ Description=PG: Vis Server
 After=network.target
 
 [Service]
-Environment="${SERVER_PATH_PREFIX}"
+Environment="SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX}"
 ExecStart=${SERVER_APP_NAME} server --addr ${SERVER_ADDR}
 
 [Install]
