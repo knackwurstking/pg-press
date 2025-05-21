@@ -96,12 +96,12 @@ func cliServerAction(addr *string) cli.ActionRunner {
 
 		// Echo: Routes
 		o := &routes.Options{
-			Templates: templatesFS(),
 			Global: routes.Global{
 				Title:            "PG: Vis",
 				ServerPathPrefix: serverPathPrefix,
 				Version:          version,
 			},
+			Templates: templatesFS(),
 		}
 		routes.RegisterPWA(e, o)
 		routes.RegisterPages(e, o)

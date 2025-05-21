@@ -1,4 +1,4 @@
-package routes
+package types
 
 // SacmiThickness is used as value for a TableCell
 //

@@ -1,4 +1,4 @@
-package routes
+package types
 
 import "slices"
 

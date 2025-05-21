@@ -2,12 +2,11 @@ package routes
 
 import (
 	"io/fs"
-	"strings"
 )
 
 type Options struct {
+	Global
 	Templates fs.FS
-	Global    Global
 }
 
 func (o *Options) MetalSheets(tableSearch string) MetalSheets {
@@ -16,6 +15,6 @@ func (o *Options) MetalSheets(tableSearch string) MetalSheets {
 
 	return MetalSheets{
 		Global:      g,
-		TableSearch: strings.Trim(tableSearch, " "),
+		TableSearch: tableSearch,
 	}
 }

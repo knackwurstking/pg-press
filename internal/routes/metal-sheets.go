@@ -1,6 +1,9 @@
 package routes
 
-import "regexp"
+import (
+	"pg-vis/internal/types"
+	"regexp"
+)
 
 type MetalSheets struct {
 	Global
@@ -15,10 +18,10 @@ func (msp MetalSheets) SearchDataList() []string {
 	} // NOTE: Data for testing
 }
 
-func (msp MetalSheets) Tables() []MetalSheetTable {
+func (msp MetalSheets) Tables() []types.MetalSheetTable {
 	// TODO: Get data from database
 
-	tables := []MetalSheetTable{
+	tables := []types.MetalSheetTable{
 		{
 			DataSearch: "120x60 G06",
 			Head: []string{
@@ -31,14 +34,16 @@ func (msp MetalSheets) Tables() []MetalSheetTable {
 			},
 			Body: [][]any{
 				{
-					NewMetalSheetTableCell_Float64(6),
-					NewMetalSheetTableCell_Int(50),
+					types.NewMetalSheetTableCell_Float64(6),
+					types.NewMetalSheetTableCell_Int(50),
 
-					NewMetalSheetTableCell_Float64(4),
-					NewMetalSheetTableCell_Float64(13),
+					types.NewMetalSheetTableCell_Float64(4),
+					types.NewMetalSheetTableCell_Float64(13),
 
-					NewMetalSheetTableCell_SacmiThickness(SacmiThickness{Current: -1, Max: -1}),
-					NewMetalSheetTableCell_Float64(5.0),
+					types.NewMetalSheetTableCell_SacmiThickness(
+						types.SacmiThickness{Current: -1, Max: -1},
+					),
+					types.NewMetalSheetTableCell_Float64(5.0),
 				},
 			},
 			HiddenCells: []int{4},
@@ -49,7 +54,7 @@ func (msp MetalSheets) Tables() []MetalSheetTable {
 		return tables
 	}
 
-	filtered := []MetalSheetTable{}
+	filtered := []types.MetalSheetTable{}
 
 	r := regexp.MustCompile(msp.TableSearch)
 	for _, t := range tables {

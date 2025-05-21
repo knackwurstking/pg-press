@@ -1,4 +1,4 @@
-package routes
+package types
 
 type MetalSheetTableCell[T string | int | float64 | SacmiThickness] struct {
 	Value T

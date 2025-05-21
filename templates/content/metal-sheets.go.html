@@ -15,6 +15,7 @@
         type="search"
         list="tableSearchInput"
         autocomplete="off"
+        value="{{ .TableSearch }}"
     />
     <datalist id="tableSearchInput">
         {{ range $option := .SearchDataList }}
