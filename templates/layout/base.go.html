@@ -1,5 +1,13 @@
 {{ define "layout" }}
-<main class="_layout base">
+
+<!-- NOTE: Important IDs
+    - wsStateIndicator
+-->
+
+<main
+    class="_layout base"
+    hx-ext="ws" ws-connect="/ws/htmx"
+>
     <div
         style="
             width: 100%;
@@ -12,7 +20,11 @@
     </div>
 
     <div class="ui-app-bar" data-ui-position="top">
-        <span class="ui-app-bar-left"></span>
+        <span class="ui-app-bar-left">
+            <h6 id="wsStateIndicator">
+                <span>OFFLINE</span>
+            </h6>
+        </span>
 
         <span class="ui-app-bar-center">
             <span>
