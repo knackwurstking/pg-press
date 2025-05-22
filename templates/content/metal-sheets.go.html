@@ -1,5 +1,12 @@
 {{ define "content" }}
 
+<!-- NOTE: Important IDs
+    - metalSheetsSearchForm
+    - metalSheetsTableSearch
+    - metalSheetsTableSearchDataList
+    - metalSheetTables
+-->
+
 {{ $data := . }}
 {{ $global := $data.Global }}
 
@@ -12,23 +19,28 @@
         height: 2.5rem;
     "
 >
-    <input
-        id="tableSearch" name="tableSearch"
-        style="width: 100%; height: 100%"
-        type="search"
-        list="tableSearchInput"
-        autocomplete="off"
-        value="{{ $data.TableSearch }}"
-        onchange='location.search = "tableSearch=" + this.value'
-    />
-    <datalist id="tableSearchInput">
-        {{ range $option := $data.SearchDataList }}
-            <option value="{{ $option }}">{{ $option }}</option>
-        {{ end }}
-    </datalist>
+    <form id="metalSheetsSearchForm" wx-send>
+        <input
+            id="metalSheetsTableSearch" name="tableSearch"
+            style="width: 100%; height: 100%"
+            type="search"
+            list="tableSearchInput"
+            autocomplete="off"
+            value="{{ $data.TableSearch }}"
+            onchange='location.search = "tableSearch=" + this.value'
+        />
+        <datalist id="metalSheetsTableSearchDataList">
+            {{ range $option := $data.SearchDataList }}
+                <option value="{{ $option }}">{{ $option }}</option>
+            {{ end }}
+        </datalist>
+    </form>
 </search>
 
-<div id="tables" style="margin-top: 3rem">
+<div
+    id="metalSheetTables"
+    style="margin-top: 3rem"
+>
     {{ range $table := $data.Tables }}
         {{ template "component-metal-sheet-table" ($global.Array $global $table) }}
     {{ end }}
