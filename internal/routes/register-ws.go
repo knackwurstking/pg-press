@@ -17,7 +17,7 @@ func RegisterWS(e *echo.Echo, o *Options) {
 		websocket.Handler(func(conn *websocket.Conn) {
 			defer conn.Close()
 
-			client := NewWSClient(conn)
+			client := NewWSClient("htmx/metal-sheets", conn)
 			ws.Register(client)
 			defer ws.Unregister(client)
 
@@ -88,11 +88,13 @@ func (ws *WS) Stop() {
 }
 
 type WSClient struct {
+	Type string
 	Conn *websocket.Conn
 }
 
-func NewWSClient(client *websocket.Conn) *WSClient {
+func NewWSClient(t string, client *websocket.Conn) *WSClient {
 	return &WSClient{
+		Type: t,
 		Conn: client,
 	}
 }
