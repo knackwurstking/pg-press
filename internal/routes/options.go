@@ -28,7 +28,7 @@ type Options struct {
 func (o *Options) MetalSheets(tableSearch string) MetalSheets {
 	g := o.Global
 	g.SubTitle = "Metal Sheets"
-	g.WSConnect = "/htmx/metal-sheets"
+	g.WSConnect = g.ServerPathPrefix + "/htmx/metal-sheets"
 
 	return MetalSheets{
 		Global:      g,
