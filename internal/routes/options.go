@@ -9,6 +9,7 @@ type Global struct {
 	SubTitle         string
 	Version          string
 	ServerPathPrefix string
+	WSConnect        string
 }
 
 func (g Global) Array(v ...any) []any {
@@ -27,6 +28,7 @@ type Options struct {
 func (o *Options) MetalSheets(tableSearch string) MetalSheets {
 	g := o.Global
 	g.SubTitle = "Metal Sheets"
+	g.WSConnect = "/htmx/metal-sheets"
 
 	return MetalSheets{
 		Global:      g,
