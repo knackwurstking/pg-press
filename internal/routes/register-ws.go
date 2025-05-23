@@ -64,6 +64,9 @@ func (ws *WSHandler) Register(client *WSClient) {
 	if !slices.Contains(ws.Clients, client) {
 		ws.Clients = append(ws.Clients, client)
 	}
+
+	slog.Debug("WS: Register client",
+		"len(ws.Clients)", len(ws.Clients), "*client", *client)
 }
 
 func (ws *WSHandler) Unregister(client *WSClient) {
@@ -77,6 +80,9 @@ func (ws *WSHandler) Unregister(client *WSClient) {
 		}
 	}
 	ws.Clients = newClients
+
+	slog.Debug("WS: Unregister client",
+		"len(ws.Clients)", len(ws.Clients), "*client", *client)
 }
 
 func (ws *WSHandler) Start() {
