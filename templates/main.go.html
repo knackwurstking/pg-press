@@ -31,17 +31,8 @@
         <title>{{ .Title }}</title>
         {{ end }}
 
-        <script
-            src="https://unpkg.com/htmx.org@2.0.4"
-            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
-            crossorigin="anonymous"
-        ></script>
-
-        <script
-            src="https://unpkg.com/htmx-ext-ws@2.0.2"
-            integrity="sha384-vuKxTKv5TX/b3lLzDKP2U363sOAoRo5wSvzzc3LJsbaQRSBSS+3rKKHcOx5J8doU"
-            crossorigin="anonymous"
-        ></script>
+        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        <script src="https://unpkg.com/htmx-ext-ws@2.0.2"></script>
 
         <script src="{{ .ServerPathPrefix }}/js/ui-v4.2.0.min.umd.cjs"></script>
         <script src="{{ .ServerPathPrefix }}/js/main.js"></script>
