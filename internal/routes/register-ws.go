@@ -11,15 +11,15 @@ import (
 )
 
 func RegisterWS(e *echo.Echo, o *Options) {
-	ws := NewWS()
+	wsHandler := NewWSHandler()
 
 	e.GET(o.ServerPathPrefix+"/htmx/metal-sheets", func(c echo.Context) error {
 		websocket.Handler(func(conn *websocket.Conn) {
 			defer conn.Close()
 
 			client := NewWSClient("htmx/metal-sheets", conn)
-			ws.Register(client)
-			defer ws.Unregister(client)
+			wsHandler.Register(client)
+			defer wsHandler.Unregister(client)
 
 			for {
 				// TODO: Send initial data, and remove this data from register-frontend
@@ -44,20 +44,20 @@ func RegisterWS(e *echo.Echo, o *Options) {
 	})
 }
 
-type WS struct {
+type WSHandler struct {
 	Clients []*WSClient
 
 	mutex *sync.Mutex
 }
 
-func NewWS() *WS {
-	return &WS{
+func NewWSHandler() *WSHandler {
+	return &WSHandler{
 		Clients: make([]*WSClient, 0),
 		mutex:   &sync.Mutex{},
 	}
 }
 
-func (ws *WS) Register(client *WSClient) {
+func (ws *WSHandler) Register(client *WSClient) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -66,7 +66,7 @@ func (ws *WS) Register(client *WSClient) {
 	}
 }
 
-func (ws *WS) Unregister(client *WSClient) {
+func (ws *WSHandler) Unregister(client *WSClient) {
 	ws.mutex.Lock()
 	defer ws.mutex.Unlock()
 
@@ -79,11 +79,11 @@ func (ws *WS) Unregister(client *WSClient) {
 	ws.Clients = newClients
 }
 
-func (ws *WS) Start() {
+func (ws *WSHandler) Start() {
 	// TODO: ...
 }
 
-func (ws *WS) Stop() {
+func (ws *WSHandler) Stop() {
 	// TODO: ...
 }
 
