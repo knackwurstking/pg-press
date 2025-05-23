@@ -11,6 +11,8 @@ import (
 func RegisterWS(e *echo.Echo, o *Options) {
 	e.GET(o.ServerPathPrefix+"/htmx/metal-sheets", func(c echo.Context) error {
 		websocket.Handler(func(conn *websocket.Conn) {
+			defer conn.Close()
+
 			// TODO: Register client, need a websocket handler first
 
 			for {
