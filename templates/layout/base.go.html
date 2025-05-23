@@ -6,7 +6,10 @@
 
 <main
     class="_layout base"
-    hx-ext="ws" ws-connect="{{ .WSConnect }}"
+
+    {{ if ne .WSConnect "" }}
+        hx-ext="ws" ws-connect="{{ .WSConnect }}"
+    {{ end }}
 >
     <div
         style="
