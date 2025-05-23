@@ -16,6 +16,8 @@ func RegisterWS(e *echo.Echo, o *Options) {
 			// TODO: Register client, need a websocket handler first
 
 			for {
+				// TODO: Send initial data, and remove this data from register-frontend
+
 				// TODO: Read, parse and handle client data
 				message := ""
 				if err := websocket.Message.Receive(conn, &message); err != nil {
