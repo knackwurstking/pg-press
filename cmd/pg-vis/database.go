@@ -10,7 +10,7 @@ import (
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
 
-func getDB(customPath *string) (*pgvis.DB, error) {
+func openDB(customPath *string) (*pgvis.DB, error) {
 	path := filepath.Join(configPath, databaseFile)
 
 	if customPath != nil {

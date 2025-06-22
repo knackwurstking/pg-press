@@ -45,7 +45,7 @@ func main() {
 							)
 
 							return func(cmd *cli.Command) error {
-								db, err := getDB(customDBPath)
+								db, err := openDB(customDBPath)
 								if err != nil {
 									return err
 								}
