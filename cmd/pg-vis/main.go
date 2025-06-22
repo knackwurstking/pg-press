@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/goforj/godump"
+	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 const (
@@ -55,12 +55,24 @@ func main() {
 									return err
 								}
 
-								// TODO: Print out all users
+								t := table.NewWriter()
+								t.SetOutputMirror(os.Stdout)
+								t.AppendHeader(table.Row{"#", "User Name"})
+
+								rows := []table.Row{}
 								for _, u := range users {
-									godump.Dump(u)
+									rows = append(rows, 
+										table.Row{
+											u.ID, u.UserName, u.TelegramID,
+										}
+									)
 								}
 
-								return errUnderConstruction
+								t.AppendRows(rows)
+								t.SetStyle(table.StyleLight)
+								t.Render()
+
+								return nil 
 							}
 						}),
 					},
