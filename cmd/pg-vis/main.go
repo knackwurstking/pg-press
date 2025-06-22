@@ -45,17 +45,7 @@ func main() {
 							)
 
 							return func(cmd *cli.Command) error {
-								dbPath := filepath.Join(configPath, databaseFile)
-
-								if customDBPath != nil {
-									var err error
-									dbPath, err = filepath.Abs(*customDBPath)
-									if err != nil {
-										return err
-									}
-								}
-
-								db, err := openDB(dbPath)
+								db, err := getDB(customDBPath)
 								if err != nil {
 									return err
 								}
