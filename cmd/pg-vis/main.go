@@ -39,7 +39,7 @@ func main() {
 						Name: "list",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: ...
+								// TODO: List users
 
 								return errUnderConstruction
 							}
@@ -50,7 +50,7 @@ func main() {
 						Name: "show",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: ...
+								// TODO: Show user information
 
 								return errUnderConstruction
 							}
@@ -61,7 +61,7 @@ func main() {
 						Name: "add",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: ...
+								// TODO: Add a new user
 
 								return errUnderConstruction
 							}
@@ -72,7 +72,7 @@ func main() {
 						Name: "remove",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: ...
+								// TODO: Remove user
 
 								return errUnderConstruction
 							}
@@ -83,7 +83,7 @@ func main() {
 						Name: "mod",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: ...
+								// TODO: Modify user
 
 								return errUnderConstruction
 							}
@@ -97,7 +97,7 @@ func main() {
 				Usage: cli.Usage("Start the server."),
 				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 					return func(cmd *cli.Command) error {
-						// TODO: ...
+						// TODO: Server backend
 
 						return errUnderConstruction
 					}
