@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -19,10 +18,6 @@ func openDB(customPath *string) (*pgvis.DB, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	if _, err := os.Stat(path); err != nil {
-		return nil, err
 	}
 
 	db, err := sql.Open("sqlite3", path)
