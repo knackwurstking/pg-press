@@ -1,13 +1,24 @@
 package types
 
 type User struct {
-	TelegramID int64  `json:"telegram_id"`
-	UserName   string `json:"user_name"`
-	ApiKey     string `json:"api_key"`
+	TelegramID int64   `json:"telegram_id"`
+	UserName   string  `json:"user_name"`
+	ApiKey     *string `json:"api_key"` // ApiKey is optional and can be nil
 }
 
-func NewUser() *User {
-	return &User{}
+func NewUser(telegramID int64, userName string, apiKey *string) *User {
+	return &User{
+		TelegramID: telegramID,
+		UserName:   userName,
+		ApiKey:     apiKey,
+	}
 }
 
 type Users []*User
+
+func NewUsers(users ...*User) Users {
+	u := make([]*User, 0)
+	u = append(u, users...)
+
+	return u
+}
