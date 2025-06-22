@@ -40,6 +40,7 @@ func main() {
 						Name: "list",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							customDBPath := cli.String(cmd, "db",
+								cli.WithShort("d"),
 								cli.Optional,
 							)
 
