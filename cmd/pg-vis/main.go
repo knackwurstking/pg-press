@@ -39,7 +39,20 @@ func main() {
 						Name: "list",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 							return func(cmd *cli.Command) error {
-								// TODO: List users
+								db, err := openDB(filepath.Join(configPath, databaseFile))
+								if err != nil {
+									return err
+								}
+
+								// TODO: List all available users...
+								users, err := db.Users.List()
+								if err != nil {
+									return err
+								}
+
+								for _, u := range users {
+									// ...
+								}
 
 								return errUnderConstruction
 							}
