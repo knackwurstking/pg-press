@@ -14,7 +14,8 @@ init:
 	cd frontend && npm ci 
 
 run:
-	go run ./cmd/pg-vis
+	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
+		go run ./cmd/pg-vis server -a ${SERVER_ADDR}
 
 build:
-	go build ./cmd/pg-vis
+		go build ./cmd/pg-vis
