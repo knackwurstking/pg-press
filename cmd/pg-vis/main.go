@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/goforj/godump"
 )
 
 const (
@@ -38,20 +39,34 @@ func main() {
 					{
 						Name: "list",
 						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							customDBPath := cli.String(cmd, "db",
+								cli.Optional,
+							)
+
 							return func(cmd *cli.Command) error {
-								db, err := openDB(filepath.Join(configPath, databaseFile))
+								dbPath := filepath.Join(configPath, databaseFile)
+
+								if customDBPath != nil {
+									var err error
+									dbPath, err = filepath.Abs(*customDBPath)
+									if err != nil {
+										return err
+									}
+								}
+
+								db, err := openDB(dbPath)
 								if err != nil {
 									return err
 								}
 
-								// TODO: List all available users...
 								users, err := db.Users.List()
 								if err != nil {
 									return err
 								}
 
+								// TODO: Print out all users
 								for _, u := range users {
-									// ...
+									godump.Dump(u)
 								}
 
 								return errUnderConstruction
