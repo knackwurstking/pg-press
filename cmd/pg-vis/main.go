@@ -34,13 +34,62 @@ func main() {
 			{
 				Name:  "user",
 				Usage: cli.Usage("Handle users, add, delete or modify user data in the database"),
-				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-					return func(cmd *cli.Command) error {
-						// TODO: ...
+				Commands: []cli.Command{
+					{
+						Name: "list",
+						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							return func(cmd *cli.Command) error {
+								// TODO: ...
 
-						return errUnderConstruction
-					}
-				}),
+								return errUnderConstruction
+							}
+						}),
+					},
+
+					{
+						Name: "show",
+						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							return func(cmd *cli.Command) error {
+								// TODO: ...
+
+								return errUnderConstruction
+							}
+						}),
+					},
+
+					{
+						Name: "add",
+						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							return func(cmd *cli.Command) error {
+								// TODO: ...
+
+								return errUnderConstruction
+							}
+						}),
+					},
+
+					{
+						Name: "remove",
+						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							return func(cmd *cli.Command) error {
+								// TODO: ...
+
+								return errUnderConstruction
+							}
+						}),
+					},
+
+					{
+						Name: "mod",
+						Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+							return func(cmd *cli.Command) error {
+								// TODO: ...
+
+								return errUnderConstruction
+							}
+						}),
+					},
+				},
 			},
 
 			{
@@ -54,6 +103,8 @@ func main() {
 					}
 				}),
 			},
+
+			cli.CompletionCommand(),
 		},
 		CommandFlags: []cli.CommandFlag{
 			cli.HelpCommandFlag(),
