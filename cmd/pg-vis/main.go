@@ -43,17 +43,7 @@ func main() {
 				},
 			},
 
-			{
-				Name:  "server",
-				Usage: cli.Usage("Start the server."),
-				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-					return func(cmd *cli.Command) error {
-						// TODO: Server backend
-
-						return errUnderConstruction
-					}
-				}),
-			},
+			serverCommand(),
 
 			cli.CompletionCommand(),
 		},
