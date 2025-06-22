@@ -2,26 +2,39 @@ package main
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
 )
 
 const (
-	version = "v0.0.1"
+	appName      = "pg-vis"
+	version      = "v0.0.1"
+	databaseFile = "pgvis.db"
 )
 
-var errUnderConstruction = errors.New("under construction")
+var (
+	errUnderConstruction = errors.New("under construction")
+	configPath           string
+)
+
+func init() {
+	if p, err := os.UserConfigDir(); err != nil {
+		panic(err)
+	} else {
+		configPath = filepath.Join(p, appName)
+	}
+}
 
 func main() {
 	a := cli.App{
-		Name: "pg-vis",
+		Name: appName,
 		Commands: []cli.Command{
 			{
 				Name:  "user",
 				Usage: cli.Usage("Handle users, add, delete or modify user data in the database"),
 				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-					// TODO: Flags here...
-
 					return func(cmd *cli.Command) error {
 						// TODO: ...
 
@@ -34,8 +47,6 @@ func main() {
 				Name:  "server",
 				Usage: cli.Usage("Start the server."),
 				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-					// TODO: Flags here...
-
 					return func(cmd *cli.Command) error {
 						// TODO: ...
 
