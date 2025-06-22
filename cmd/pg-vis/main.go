@@ -33,7 +33,7 @@ func main() {
 		Name: appName,
 		Commands: []cli.Command{
 			{
-				Name:  "user",
+				Name:  "users",
 				Usage: cli.Usage("Handle users, add, delete or modify user data in the database"),
 				Commands: []cli.Command{
 					{
