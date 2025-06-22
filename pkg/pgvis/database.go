@@ -1,4 +1,4 @@
-package types
+package pgvis
 
 import "database/sql"
 
@@ -21,4 +21,12 @@ type DBUsers struct {
 
 func NewDBUsers(db *sql.DB) *DBUsers {
 	return &DBUsers{}
+}
+
+func (db *DBUsers) List() ([]*User, error) {
+	users := NewUsers()
+
+	// TODO: ...
+
+	return users, nil
 }

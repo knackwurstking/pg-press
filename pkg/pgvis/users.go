@@ -1,4 +1,4 @@
-package types
+package pgvis
 
 type User struct {
 	TelegramID int64   `json:"telegram_id"`
