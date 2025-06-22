@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/goforj/godump v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
 )
