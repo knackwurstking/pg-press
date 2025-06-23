@@ -29,15 +29,11 @@ func listUserCommand() cli.Command {
 
 				t := table.NewWriter()
 				t.SetOutputMirror(os.Stdout)
-				t.AppendHeader(table.Row{"#", "User Name"})
+				t.AppendHeader(table.Row{"Telegram ID", "User Name"})
 
 				rows := []table.Row{}
 				for _, u := range users {
-					rows = append(rows,
-						table.Row{
-							u.ID, u.UserName, u.TelegramID,
-						},
-					)
+					rows = append(rows, table.Row{u.TelegramID, u.UserName})
 				}
 
 				t.AppendRows(rows)

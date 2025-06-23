@@ -1,7 +1,6 @@
 package pgvis
 
 type User struct {
-	ID         int     `json:"id"`
 	TelegramID int64   `json:"telegram_id"`
 	UserName   string  `json:"user_name"`
 	ApiKey     *string `json:"api_key"` // ApiKey is optional and can be nil
