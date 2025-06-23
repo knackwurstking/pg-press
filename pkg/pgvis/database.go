@@ -27,6 +27,8 @@ func NewDBUsers(db *sql.DB) *DBUsers {
 		CREATE TABLE IF NOT EXISTS users (
 			"id" INTEGER NOT NULL,
 			"telegram_id" INTEGER NOT NULL,
+			"user_name" TEXT NOT NULL,
+			"api_key" TEXT NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT, "telegram_id")
 		);
 	`
@@ -42,7 +44,26 @@ func NewDBUsers(db *sql.DB) *DBUsers {
 func (db *DBUsers) List() ([]*User, error) {
 	users := NewUsers()
 
-	// TODO: List users
+	query := `SELECT * FROM users`
+	if r, err := db.db.Query(query); err != nil {
+		return users, err
+	} else {
+		defer r.Close()
+
+		user := &User{}
+		for r.Next() {
+			err := r.Scan(
+				&user.ID,
+				&user.TelegramID, &user.UserName,
+				&user.ApiKey,
+			)
+			if err != nil {
+				return users, err
+			}
+
+			users = append(users, user)
+		}
+	}
 
 	return users, nil
 }
