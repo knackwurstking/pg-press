@@ -20,13 +20,15 @@ type DBUsers struct {
 }
 
 func NewDBUsers(db *sql.DB) *DBUsers {
+	// TODO: Create users table
+
 	return &DBUsers{}
 }
 
 func (db *DBUsers) List() ([]*User, error) {
 	users := NewUsers()
 
-	// TODO: ...
+	// TODO: List users
 
 	return users, nil
 }
