@@ -50,7 +50,17 @@ func showUserCommand() cli.Command {
 	return cli.Command{
 		Name: "show",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
+
 			return func(cmd *cli.Command) error {
+				db, err := openDB(customDBPath)
+				if err != nil {
+					return err
+				}
+
 				// TODO: Show user information
 
 				return errUnderConstruction
