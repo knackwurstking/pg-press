@@ -90,8 +90,21 @@ func (db *DBUsers) Get(telegramID int64) (*User, error) {
 }
 
 func (db *DBUsers) Add(user *User) error {
-	// TODO: Add user to the database, but check for telegramID first,
-	// 		 0 is not allowed
+	if user.TelegramID == 0 {
+		return errors.New("Telegram ID cannot be 0")
+	}
 
-	return errors.New("under construction")
+	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id = %d`, user.TelegramID)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return err
+	}
+	if !r.Next() {
+		return ErrNotFound
+	}
+	r.Close()
+
+	query = `INSERT INTO users (telegram_id, user_name, api_key) VALUES (?, ?, ?)`
+	_, err = db.db.Exec(query, user.TelegramID, user.UserName, user.ApiKey)
+	return err
 }
