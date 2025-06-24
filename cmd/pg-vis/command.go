@@ -88,8 +88,22 @@ func addUserCommand() cli.Command {
 	return cli.Command{
 		Name: "add",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
+
+			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+			userName := cli.StringArg(cmd, "user-name", cli.Optional)
+
 			return func(cmd *cli.Command) error {
-				// TODO: Add a new user
+				_, err := openDB(customDBPath)
+				if err != nil {
+					return err
+				}
+
+				// TODO: Add a new users to the users database
+				godump.Dump(telegramID, userName)
 
 				return errUnderConstruction
 			}
