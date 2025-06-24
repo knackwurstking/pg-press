@@ -2,6 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
+	"errors"
 )
 
 // DB contains all database tables
@@ -61,4 +62,10 @@ func (db *DBUsers) List() ([]*User, error) {
 	}
 
 	return users, nil
+}
+
+func (db *DBUsers) Get(telegramID int64) (*User, error) {
+	// TODO: ...
+
+	return nil, errors.New("under construction")
 }
