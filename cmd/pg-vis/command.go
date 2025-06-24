@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/goforj/godump"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
@@ -55,15 +56,22 @@ func showUserCommand() cli.Command {
 				cli.Optional,
 			)
 
+			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+
 			return func(cmd *cli.Command) error {
 				db, err := openDB(customDBPath)
 				if err != nil {
 					return err
 				}
 
-				// TODO: Show user information
+				user, err := db.Users.Get(*telegramID)
+				if err != nil {
+					return err
+				}
 
-				return errUnderConstruction
+				godump.Dump(user)
+
+				return nil
 			}
 		}),
 	}
