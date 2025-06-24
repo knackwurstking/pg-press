@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/goforj/godump"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
 
 func listUserCommand() cli.Command {
@@ -66,6 +69,10 @@ func showUserCommand() cli.Command {
 
 				user, err := db.Users.Get(*telegramID)
 				if err != nil {
+					if errors.Is(err, pgvis.ErrNotFound) {
+						return fmt.Errorf("User not found: %d", *telegramID)
+					}
+
 					return err
 				}
 

@@ -2,7 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
-	"errors"
+	"fmt"
 )
 
 // DB contains all database tables
@@ -45,27 +45,45 @@ func (db *DBUsers) List() ([]*User, error) {
 	users := NewUsers()
 
 	query := `SELECT * FROM users`
-	if r, err := db.db.Query(query); err != nil {
+	r, err := db.db.Query(query)
+	if err != nil {
 		return users, err
-	} else {
-		defer r.Close()
+	}
 
-		user := &User{}
-		for r.Next() {
-			err := r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
-			if err != nil {
-				return users, err
-			}
+	defer r.Close()
 
-			users = append(users, user)
+	user := &User{}
+	for r.Next() {
+		err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+		if err != nil {
+			return users, err
 		}
+
+		users = append(users, user)
 	}
 
 	return users, nil
 }
 
 func (db *DBUsers) Get(telegramID int64) (*User, error) {
-	// TODO: ...
+	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, errors.New("under construction")
+	defer r.Close()
+
+	user := &User{}
+
+	if !r.Next() {
+		return nil, ErrNotFound
+	}
+
+	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
