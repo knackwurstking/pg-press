@@ -102,7 +102,7 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				// TODO: Add a new users to the users database
+				// TODO: Add a new users to the users database, check for error not found
 				godump.Dump(telegramID, userName)
 
 				return errUnderConstruction
