@@ -2,6 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -86,4 +87,11 @@ func (db *DBUsers) Get(telegramID int64) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func (db *DBUsers) Add(user *User) error {
+	// TODO: Add user to the database, but check for telegramID first,
+	// 		 0 is not allowed
+
+	return errors.New("under construction")
 }
