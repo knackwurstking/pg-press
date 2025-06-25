@@ -113,3 +113,7 @@ func (db *DBUsers) Add(user *User) error {
 	_, err = db.db.Exec(query, user.TelegramID, user.UserName, user.ApiKey)
 	return err
 }
+
+func (db *DBUsers) Remove(telegramID int64) {
+	// TODO: Remove table entries with `telegramID`
+}
