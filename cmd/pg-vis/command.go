@@ -132,10 +132,22 @@ func removeUserCommand() cli.Command {
 	return cli.Command{
 		Name: "remove",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			return func(cmd *cli.Command) error {
-				// TODO: Remove user
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
 
-				return errUnderConstruction
+			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				db, err := openDB(customDBPath)
+				if err != nil {
+					return err
+				}
+
+				db.Users.Remove(*telegramID)
+
+				return nil
 			}
 		}),
 	}
