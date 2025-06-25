@@ -115,5 +115,10 @@ func (db *DBUsers) Add(user *User) error {
 }
 
 func (db *DBUsers) Remove(telegramID int64) {
-	// TODO: Remove table entries with `telegramID`
+	query := fmt.Sprintf(
+		`delete from users where telegram_id = "%d"`,
+		telegramID,
+	)
+
+	_, _ = db.db.Exec(query)
 }
