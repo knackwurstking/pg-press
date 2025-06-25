@@ -45,7 +45,7 @@ func NewDBUsers(db *sql.DB) *DBUsers {
 func (db *DBUsers) List() ([]*User, error) {
 	users := NewUsers()
 
-	query := `SELECT * FROM users`
+	query := `SELECT * FROM users ORDER BY telegram_id ASC`
 	r, err := db.db.Query(query)
 	if err != nil {
 		return users, err
@@ -53,8 +53,9 @@ func (db *DBUsers) List() ([]*User, error) {
 
 	defer r.Close()
 
-	user := &User{}
 	for r.Next() {
+		user := &User{}
+
 		err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
 		if err != nil {
 			return users, err
@@ -94,7 +95,11 @@ func (db *DBUsers) Add(user *User) error {
 		return errors.New("Telegram ID cannot be 0")
 	}
 
-	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id = %d`, user.TelegramID)
+	query := fmt.Sprintf(
+		`SELECT * FROM users WHERE telegram_id = %d OR user_name = "%s"`,
+		user.TelegramID, user.UserName,
+	)
+
 	r, err := db.db.Query(query)
 	if err != nil {
 		return err
@@ -104,7 +109,7 @@ func (db *DBUsers) Add(user *User) error {
 	}
 	r.Close()
 
-	query = `INSERT INTO users (telegram_id, user_name, api_key) VALUES (?, ?, ?)`
+	query = `INSERT INTO users (telegram_id, user_name, api_key) VALUES (?, "?", "?")`
 	_, err = db.db.Exec(query, user.TelegramID, user.UserName, user.ApiKey)
 	return err
 }
