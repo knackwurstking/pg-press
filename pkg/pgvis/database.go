@@ -99,8 +99,8 @@ func (db *DBUsers) Add(user *User) error {
 	if err != nil {
 		return err
 	}
-	if !r.Next() {
-		return ErrNotFound
+	if r.Next() {
+		return ErrAlreadyExists
 	}
 	r.Close()
 
