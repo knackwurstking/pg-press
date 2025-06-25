@@ -97,15 +97,17 @@ func addUserCommand() cli.Command {
 			userName := cli.StringArg(cmd, "user-name", cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				_, err := openDB(customDBPath)
+				db, err := openDB(customDBPath)
 				if err != nil {
 					return err
 				}
 
-				// TODO: Add a new users to the users database, check for error not found
-				godump.Dump(telegramID, userName)
+				err = db.Users.Add(pgvis.NewUser(*telegramID, *userName, ""))
+				if errors.Is(err, pgvis.ErrAlreadyExists) {
+					return fmt.Errorf("A user for %d already exists!", *telegramID)
+				}
 
-				return errUnderConstruction
+				return err
 			}
 		}),
 	}
