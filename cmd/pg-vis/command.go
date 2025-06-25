@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/goforj/godump"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
@@ -32,7 +31,9 @@ func listUserCommand() cli.Command {
 				}
 
 				t := table.NewWriter()
+
 				t.SetOutputMirror(os.Stdout)
+
 				t.AppendHeader(table.Row{"Telegram ID", "User Name"})
 
 				rows := []table.Row{}
@@ -76,7 +77,20 @@ func showUserCommand() cli.Command {
 					return err
 				}
 
-				godump.Dump(user)
+				t := table.NewWriter()
+
+				t.SetOutputMirror(os.Stdout)
+
+				t.AppendHeader(table.Row{"Telegram ID", "User Name", "Api Key"})
+
+				row := table.Row{user.TelegramID, user.UserName, user.ApiKey}
+
+				t.AppendRows([]table.Row{row})
+				t.SetStyle(table.StyleLight)
+				t.Render()
+
+				// NOTE: Here i could print out some more user related stuff
+				// 		 like last activity, or whatever
 
 				return nil
 			}
@@ -104,7 +118,8 @@ func addUserCommand() cli.Command {
 
 				err = db.Users.Add(pgvis.NewUser(*telegramID, *userName, ""))
 				if errors.Is(err, pgvis.ErrAlreadyExists) {
-					return fmt.Errorf("A user for %d already exists!", *telegramID)
+					return fmt.Errorf("user already exists: %d (%s)",
+						*telegramID, *userName)
 				}
 
 				return err
