@@ -111,8 +111,12 @@ func (db *DBUsers) Add(user *User) error {
 		return ErrAlreadyExists
 	}
 
-	query = `INSERT INTO users (telegram_id, user_name, api_key) VALUES (?, "?", "?")`
-	_, err = db.db.Exec(query, user.TelegramID, user.UserName, user.ApiKey)
+	query = fmt.Sprintf(
+		`INSERT INTO users (telegram_id, user_name, api_key) VALUES (%d, "%s", "%s")`,
+		user.TelegramID, user.UserName, user.ApiKey,
+	)
+
+	_, err = db.db.Exec(query)
 	return err
 }
 
@@ -140,10 +144,10 @@ func (db *DBUsers) Update(telegramID int64, user *User) error {
 	}
 
 	query = fmt.Sprintf(
-		`UPDATE users SET user_name = "?" WHERE telegram_id = %d`,
-		telegramID,
+		`UPDATE users SET user_name = "%s" WHERE telegram_id = %d`,
+		user.UserName, telegramID,
 	)
 
-	_, err = db.db.Exec(query, user.UserName)
+	_, err = db.db.Exec(query)
 	return err
 }
