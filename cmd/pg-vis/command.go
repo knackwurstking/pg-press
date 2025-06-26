@@ -163,7 +163,7 @@ func modUserCommand() cli.Command {
 			)
 
 			userName := cli.String(cmd, "name",
-				cli.WithShort("name"),
+				cli.WithShort("n"),
 				cli.Optional)
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
