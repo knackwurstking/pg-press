@@ -130,7 +130,7 @@ func (db *DBUsers) Remove(telegramID int64) {
 }
 
 func (db *DBUsers) Update(telegramID int64, user *User) error {
-	query := fmt.Sprintf(`SELECT FROM users WHERE telegram_id = %d`, telegramID)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id = %d`, telegramID)
 
 	r, err := db.db.Query(query)
 	if err != nil {
