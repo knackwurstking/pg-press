@@ -104,10 +104,12 @@ func (db *DBUsers) Add(user *User) error {
 	if err != nil {
 		return err
 	}
-	if r.Next() {
+
+	ok := r.Next()
+	r.Close()
+	if ok {
 		return ErrAlreadyExists
 	}
-	r.Close()
 
 	query = `INSERT INTO users (telegram_id, user_name, api_key) VALUES (?, "?", "?")`
 	_, err = db.db.Exec(query, user.TelegramID, user.UserName, user.ApiKey)
@@ -121,4 +123,27 @@ func (db *DBUsers) Remove(telegramID int64) {
 	)
 
 	_, _ = db.db.Exec(query)
+}
+
+func (db *DBUsers) Update(telegramID int64, user *User) error {
+	query := fmt.Sprintf(`SELECT FROM users WHERE telegram_id = %d`, telegramID)
+
+	r, err := db.db.Query(query)
+	if err != nil {
+		return err
+	}
+
+	ok := r.Next()
+	r.Close()
+	if !ok {
+		return ErrNotFound
+	}
+
+	query = fmt.Sprintf(
+		`UPDATE users SET user_name = "?" WHERE telegram_id = %d`,
+		telegramID,
+	)
+
+	_, err = db.db.Exec(query, user.UserName)
+	return err
 }

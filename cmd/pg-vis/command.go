@@ -157,10 +157,34 @@ func modUserCommand() cli.Command {
 	return cli.Command{
 		Name: "mod",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			return func(cmd *cli.Command) error {
-				// TODO: Modify user
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
 
-				return errUnderConstruction
+			userName := cli.String(cmd, "user",
+				cli.WithShort("u"),
+				cli.Optional)
+
+			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				db, err := openDB(customDBPath)
+				if err != nil {
+					return err
+				}
+
+				user, err := db.Users.Get(*telegramID)
+				if err != nil {
+					return err
+				}
+
+				if userName != nil {
+					user.UserName = *userName
+				}
+
+				err = db.Users.Update(*telegramID, user)
+				return err
 			}
 		}),
 	}
