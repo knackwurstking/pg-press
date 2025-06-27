@@ -16,6 +16,7 @@ const (
 
 var (
 	errUnderConstruction = errors.New("under construction")
+	exitCodeNotFound     = 10
 	configPath           string
 )
 

@@ -73,8 +73,7 @@ func showUserCommand() cli.Command {
 				user, err := db.Users.Get(*telegramID)
 				if err != nil {
 					if errors.Is(err, pgvis.ErrNotFound) {
-						// TODO: Return a special exit code used for the not found error
-						return fmt.Errorf("User not found: %d", *telegramID)
+						os.Exit(exitCodeNotFound)
 					}
 
 					return err
