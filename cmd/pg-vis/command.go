@@ -57,13 +57,15 @@ func showUserCommand() cli.Command {
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := cli.String(cmd, "db",
 				cli.WithShort("d"),
-				cli.Optional,
-			)
+				cli.Optional)
+
+			flagApiKey := cli.Bool(cmd, "api-key",
+				cli.Optional)
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(customDBPath)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					return err
 				}
@@ -75,6 +77,13 @@ func showUserCommand() cli.Command {
 					}
 
 					return err
+				}
+
+				if *flagApiKey {
+					// TODO: Only output the api key for this user and exit,
+					// 		 no newlines
+
+					return nil
 				}
 
 				t := table.NewWriter()
