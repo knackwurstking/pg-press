@@ -20,7 +20,7 @@ func listUserCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(customDBPath)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					return err
 				}
@@ -120,7 +120,7 @@ func addUserCommand() cli.Command {
 			userName := cli.StringArg(cmd, "user-name", cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(customDBPath)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					return err
 				}
@@ -149,7 +149,7 @@ func removeUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(customDBPath)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					return err
 				}
@@ -178,7 +178,7 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(customDBPath)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					return err
 				}
