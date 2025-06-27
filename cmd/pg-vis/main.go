@@ -12,11 +12,12 @@ const (
 	appName      = "pg-vis"
 	version      = "v0.0.1"
 	databaseFile = "pgvis.db"
+
+	exitCodeNotFound = 10
 )
 
 var (
 	errUnderConstruction = errors.New("under construction")
-	exitCodeNotFound     = 10
 	configPath           string
 )
 
