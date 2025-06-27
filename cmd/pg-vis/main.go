@@ -24,6 +24,9 @@ func init() {
 		panic(err)
 	} else {
 		configPath = filepath.Join(p, appName)
+		if err := os.MkdirAll(configPath, 0700); err != nil {
+			panic(err)
+		}
 	}
 }
 
