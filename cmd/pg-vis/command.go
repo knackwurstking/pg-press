@@ -80,9 +80,7 @@ func showUserCommand() cli.Command {
 				}
 
 				if *flagApiKey {
-					// TODO: Only output the api key for this user and exit,
-					// 		 no newlines
-
+					fmt.Fprint(os.Stdout, user.ApiKey)
 					return nil
 				}
 
