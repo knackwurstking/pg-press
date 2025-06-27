@@ -32,6 +32,17 @@ func main() {
 		Name: appName,
 		Commands: []cli.Command{
 			{
+				Name: "api-key",
+				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+					return func(cmd *cli.Command) error {
+						// TODO: Generate a new unique api key
+
+						return errUnderConstruction
+					}
+				}),
+			},
+
+			{
 				Name:  "user",
 				Usage: cli.Usage("Handle users, add, delete or modify user data in the database"),
 				Commands: []cli.Command{
