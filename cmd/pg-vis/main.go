@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -45,8 +46,9 @@ func main() {
 				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 					return func(cmd *cli.Command) error {
 						// TODO: Generate a new unique api key
+						fmt.Fprintf(os.Stdout, "<api-key>")
 
-						return errUnderConstruction
+						return nil
 					}
 				}),
 			},
