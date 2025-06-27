@@ -9,12 +9,12 @@ import (
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
 
-func openDB(customPath *string) (*pgvis.DB, error) {
+func openDB(customPath string) (*pgvis.DB, error) {
 	path := filepath.Join(configPath, databaseFile)
 
-	if customPath != nil {
+	if customPath != "" {
 		var err error
-		path, err = filepath.Abs(*customPath)
+		path, err = filepath.Abs(customPath)
 		if err != nil {
 			return nil, err
 		}
