@@ -34,6 +34,10 @@ func init() {
 func main() {
 	a := cli.App{
 		Name: appName,
+		Usage: cli.Usage(`Exit Codes:
+  1   Generic
+  10  Not Found
+`),
 		Commands: []cli.Command{
 			{
 				Name: "api-key",
