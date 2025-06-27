@@ -2,8 +2,6 @@ github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17 h1:9EjaewjKeb8f
 github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17/go.mod h1:uc5MKp25kkPkWcI4gcCtGZWUSKjdZlKjrHAVZ7OXb6k=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/goforj/godump v1.2.0 h1:MQZJ41ZBTJGh+tlZqtQWLU1P9MX48LxSYpeJHYnrzXY=
-github.com/goforj/godump v1.2.0/go.mod h1:lCaXaxNTozTNAMJTPY91/ntMqw3JF8FOL93jCNKpNW0=
 github.com/jedib0t/go-pretty/v6 v6.6.7 h1:m+LbHpm0aIAPLzLbMfn8dc3Ht8MW7lsSO4MPItz/Uuo=
 github.com/jedib0t/go-pretty/v6 v6.6.7/go.mod h1:YwC5CE4fJ1HFUDeivSV1r//AmANFHyqczZk+U6BDALU=
 github.com/mattn/go-isatty v0.0.13 h1:qdl+GuBjcsKKDco5BsxPJlId98mSWNKqYA+Co0SC1yA=

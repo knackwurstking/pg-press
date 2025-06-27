@@ -4,7 +4,6 @@ go 1.24
 
 require (
 	github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
-	github.com/goforj/godump v1.2.0
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/mattn/go-sqlite3 v1.14.28
 )
