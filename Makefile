@@ -18,4 +18,4 @@ run:
 		go run ./cmd/pg-vis server -a ${SERVER_ADDR}
 
 build:
-		go build ./cmd/pg-vis
+	go build ./cmd/pg-vis -o ./bin/pg-vis
