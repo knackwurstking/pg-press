@@ -17,5 +17,7 @@ run:
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
 		go run ./cmd/pg-vis server -a ${SERVER_ADDR}
 
+# TODO: Add dev script, see picow-led project
+
 build:
 	go build -v -o ./bin/pg-vis ./cmd/pg-vis
