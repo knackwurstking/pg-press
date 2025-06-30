@@ -10,6 +10,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 // TODO: Create a lock file while writing to database file,
@@ -215,11 +216,34 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
-				// TODO: Server backend, start with login stuff using the api key
 				e := echo.New()
 
 				// Init logger
 				log.SetLevel(log.DebugLevel)
+
+				e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+					Format: "[${time_rfc3339}] ${status} ${method} ${path} (${remote_ip}) ${latency_human}\n",
+					Output: os.Stderr,
+				}))
+
+				e.Use(middleware.BasicAuthWithConfig(
+					middleware.BasicAuthConfig{
+						Skipper: func(c echo.Context) bool {
+							return false
+						},
+						Validator: func(username, password string, ctx echo.Context) (bool, error) {
+							log.Debugf(
+								"Middleware: validator: username: \"%s\"; password: \"%s\";",
+								username, password,
+							)
+
+							return false, errors.New("under construction")
+						},
+						Realm: "Restricted",
+					},
+				))
+
+				initRouter(e)
 
 				if err := e.Start(*addr); err != nil {
 					log.Errorf("Starting the server failed: %s", err.Error())
