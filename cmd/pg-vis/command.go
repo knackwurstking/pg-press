@@ -244,7 +244,7 @@ func serverCommand() cli.Command {
 					Skipper: func(c echo.Context) bool {
 						url := c.Request().URL.String()
 						log.Debugf("Auth: Skipper: %s", url)
-						return strings.HasSuffix(url, "/singup")
+						return strings.HasSuffix(url, "/signup")
 					},
 					KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token",
 					AuthScheme: "Bearer",
@@ -259,7 +259,7 @@ func serverCommand() cli.Command {
 						log.Debugf("Auth ErrorHandler: %s", err.Error())
 
 						if err != nil {
-							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/singup")
+							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/signup")
 						}
 
 						return nil
