@@ -231,7 +231,7 @@ func serverCommand() cli.Command {
 					Skipper: func(c echo.Context) bool {
 						return false
 					},
-					KeyLookup:  "header:" + echo.HeaderAuthorization,
+					KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token",
 					AuthScheme: "Bearer",
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Validator: auth middleware: %s", auth)
