@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
@@ -224,8 +226,18 @@ func serverCommand() cli.Command {
 				log.SetLevel(log.DebugLevel)
 
 				e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-					Format: "[${time_rfc3339}] ${status} ${method} ${path} (${remote_ip}) ${latency_human}\n",
+					Format: "${custom} ${status} ${method} ${path} (${remote_ip}) ${latency_human}\n",
 					Output: os.Stderr,
+					CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
+						t := time.Now()
+						buf.Write(fmt.Appendf(nil,
+							"%d/%02d/%02d %02d:%02d:%02d",
+							t.Year(), int(t.Month()), t.Day(),
+							t.Hour(), t.Minute(), t.Second(),
+						))
+
+						return 0, nil
+					},
 				}))
 
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
