@@ -251,6 +251,26 @@ func serverCommand() cli.Command {
 					},
 				}))
 
+				e.HTTPErrorHandler = func(err error, c echo.Context) {
+					log.Warnf("HTTPErrorHandler: %s", err.Error())
+
+					// TODO: Maybe serve an error page here instead
+					if herr, ok := err.(*echo.HTTPError); ok {
+						message := http.StatusText(herr.Code)
+
+						if m, ok := herr.Message.(string); ok {
+							message = m
+						} else if e, ok := herr.Message.(error); ok {
+							message = e.Error()
+						}
+
+						c.JSON(herr.Code, message)
+						return
+					}
+
+					c.JSON(500, err.Error())
+				}
+
 				initRouter(e)
 
 				if err := e.Start(*addr); err != nil {
