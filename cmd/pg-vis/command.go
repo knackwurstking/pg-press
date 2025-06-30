@@ -202,6 +202,13 @@ func serverCommand() cli.Command {
 		Name:  "server",
 		Usage: cli.Usage("Start the server."),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			addr := cli.String(
+				cmd, "addr",
+				cli.WithShort("a"),
+				cli.Usage("Set server address (<host>:<port>)"),
+			)
+			*addr = serverAddress
+
 			return func(cmd *cli.Command) error {
 				// TODO: Server backend
 
