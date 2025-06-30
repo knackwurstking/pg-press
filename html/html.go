@@ -8,8 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-//go:embed pages
-var pages embed.FS
+//go:embed routes
+var routes embed.FS
 
 //go:embed static
 var static embed.FS
@@ -22,9 +22,9 @@ func Serve(e *echo.Echo, options Options) {
 	e.StaticFS(options.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
 
 	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
-		t, err := template.ParseFS(pages,
-			"pages/layout.html",
-			"pages/page.html",
+		t, err := template.ParseFS(routes,
+			"routes/layout.html",
+			"routes/page.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -39,9 +39,9 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/signup", func(c echo.Context) error {
-		t, err := template.ParseFS(pages,
-			"pages/layout.html",
-			"pages/signup/page.html",
+		t, err := template.ParseFS(routes,
+			"routes/layout.html",
+			"routes/signup/page.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -56,9 +56,9 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
-		t, err := template.ParseFS(pages,
-			"pages/layout.html",
-			"pages/feed/page.html",
+		t, err := template.ParseFS(routes,
+			"routes/layout.html",
+			"routes/feed/page.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
