@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
@@ -229,19 +230,21 @@ func serverCommand() cli.Command {
 
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 					Skipper: func(c echo.Context) bool {
-						return false
+						url := c.Request().URL.String()
+						log.Debugf("Auth: Skipper: %s", url)
+						return strings.HasSuffix(url, "/singup")
 					},
 					KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token",
 					AuthScheme: "Bearer",
 					Validator: func(auth string, c echo.Context) (bool, error) {
-						log.Debugf("Validator: auth middleware: %s", auth)
+						log.Debugf("Auth: Validator: %s", auth)
 
-						// TODO: ...
+						// TODO: Need a debug key, or whatever else
 
 						return false, nil
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
-						log.Debugf("ErrorHandler: auth middleware: %s", err.Error())
+						log.Debugf("Auth ErrorHandler: %s", err.Error())
 
 						if err != nil {
 							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/singup")
