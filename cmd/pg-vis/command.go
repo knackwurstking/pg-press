@@ -254,7 +254,7 @@ func serverCommand() cli.Command {
 				e.HTTPErrorHandler = func(err error, c echo.Context) {
 					log.Warnf("HTTPErrorHandler: %s", err.Error())
 
-					// TODO: Maybe serve an error page here instead
+					// NOTE: Maybe serve an error page here instead
 					if herr, ok := err.(*echo.HTTPError); ok {
 						message := http.StatusText(herr.Code)
 
