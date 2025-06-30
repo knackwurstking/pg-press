@@ -1,7 +1,10 @@
 all: init build
 
+BINARY_NAME := pg-vis
+
 SERVER_ADDR := :9020
-SERVER_PATH_PREFIX := /pg-vis
+#SERVER_PATH_PREFIX := /${BINARY_NAME}
+SERVER_PATH_PREFIX := 
 
 clean:
 	git clean -xfd
@@ -15,13 +18,12 @@ init:
 
 run:
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
-		go run ./cmd/pg-vis server -a ${SERVER_ADDR}
+		go run ./cmd/${BINARY_NAME} server -a ${SERVER_ADDR}
 
-# TODO: Add dev script, see picow-led project
 dev:
 	which gow || (echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && exit 1)
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
 		gow -e=go,json -v -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
 
 build:
-	go build -v -o ./bin/pg-vis ./cmd/pg-vis
+	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
