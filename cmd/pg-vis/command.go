@@ -12,6 +12,7 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/knackwurstking/pg-vis/html"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -286,7 +287,9 @@ func serverCommand() cli.Command {
 					c.JSON(500, err.Error())
 				}
 
-				initRouter(e)
+				html.Serve(e, html.Options{
+					ServerPathPrefix: serverPathPrefix,
+				})
 
 				if err := e.Start(*addr); err != nil {
 					log.Errorf("Starting the server failed: %s", err.Error())
