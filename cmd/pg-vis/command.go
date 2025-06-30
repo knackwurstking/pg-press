@@ -237,7 +237,7 @@ func serverCommand() cli.Command {
 								username, password,
 							)
 
-							return false, errors.New("under construction")
+							return false, nil
 						},
 						Realm: "Restricted",
 					},
