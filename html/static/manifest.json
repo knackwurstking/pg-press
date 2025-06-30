@@ -1,0 +1,37 @@
+{
+	"version": "0.0.1",
+	"manifest_version": 3,
+	"name": "PG: Presse",
+	"short_name": "PG: Presse",
+	"id": "",
+	"icons": [
+		{
+			"src": "./pwa-64x64.png",
+			"sizes": "64x64",
+			"type": "image/png"
+		},
+		{
+			"src": "./pwa-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "./pwa-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		},
+		{
+			"src": "./maskable-icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"screenshots": [],
+	"theme_color": "#000000",
+	"background_color": "#000000",
+	"display": "standalone",
+	"scope": ".",
+	"start_url": "./",
+	"public_path": ""
+}
