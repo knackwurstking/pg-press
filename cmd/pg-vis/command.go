@@ -238,7 +238,7 @@ func serverCommand() cli.Command {
 
 						// TODO: ...
 
-						return true, nil
+						return false, nil
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
 						log.Debugf("ErrorHandler: auth middleware: %s", err.Error())
