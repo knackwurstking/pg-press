@@ -13,7 +13,8 @@ const (
 	version      = "v0.0.1"
 	databaseFile = "pgvis.db"
 
-	exitCodeNotFound = 10
+	exitCodeNotFound    = 10
+	exitCodeServerStart = 20
 )
 
 var (
