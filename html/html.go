@@ -23,7 +23,7 @@ func Serve(e *echo.Echo, options Options) {
 
 	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
 		t, err := template.ParseFS(pages,
-			"layout.html",
+			"pages/layout.html",
 			"pages/page.html",
 		)
 		if err != nil {
@@ -40,7 +40,7 @@ func Serve(e *echo.Echo, options Options) {
 
 	e.GET(options.ServerPathPrefix+"/signup", func(c echo.Context) error {
 		t, err := template.ParseFS(pages,
-			"layout.html",
+			"pages/layout.html",
 			"pages/signup/page.html",
 		)
 		if err != nil {
@@ -57,7 +57,7 @@ func Serve(e *echo.Echo, options Options) {
 
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
 		t, err := template.ParseFS(pages,
-			"layout.html",
+			"pages/layout.html",
 			"pages/feed/page.html",
 		)
 		if err != nil {
