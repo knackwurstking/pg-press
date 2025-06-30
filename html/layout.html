@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{ .Lang }}">
+    <head>
+        <meta charset="utf-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <link rel="icon" href="./favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+
+        <link rel="manifest" href="./manifest.json" />
+
+        <link rel="stylesheet" href="./pico.lime.min.css" />
+
+        {{block "additional-scripts"}}{{end}}
+
+        <title>{{block "title"}}{{end}}</title>
+    </head>
+
+    <body>
+        {{block "content" .}}
+        <!-- Fallback, if "content" is not defined elsewhere -->
+        {{end}}
+    </body>
+</html>
