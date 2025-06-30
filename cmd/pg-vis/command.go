@@ -213,9 +213,9 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
-				// TODO: Server backend
+				// TODO: Server backend, start with login stuff using the api key
 
-				return errUnderConstruction
+				return nil
 			}
 		}),
 	}
