@@ -231,7 +231,7 @@ func serverCommand() cli.Command {
 						Skipper: func(c echo.Context) bool {
 							return false
 						},
-						Validator: func(username, password string, ctx echo.Context) (bool, error) {
+						Validator: func(username, password string, c echo.Context) (bool, error) {
 							log.Debugf(
 								"Middleware: validator: username: \"%s\"; password: \"%s\";",
 								username, password,
