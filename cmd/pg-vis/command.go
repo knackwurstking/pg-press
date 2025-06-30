@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
+	"regexp"
 	"time"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -241,11 +241,15 @@ func serverCommand() cli.Command {
 					},
 				}))
 
+				// TODO: Find a better way to to this, maybe a hardcoded allow list?
+				skipperRegExp := regexp.MustCompile("(.*/signup.*|.*pico.lime.min.css|manifest.json)")
+
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 					Skipper: func(c echo.Context) bool {
 						url := c.Request().URL.String()
 						log.Debugf("Auth: Skipper: %s", url)
-						return strings.HasSuffix(url, "/signup")
+
+						return skipperRegExp.MatchString(url)
 					},
 					KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token",
 					AuthScheme: "Bearer",
