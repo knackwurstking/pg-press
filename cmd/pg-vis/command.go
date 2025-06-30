@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -226,22 +227,29 @@ func serverCommand() cli.Command {
 					Output: os.Stderr,
 				}))
 
-				e.Use(middleware.BasicAuthWithConfig(
-					middleware.BasicAuthConfig{
-						Skipper: func(c echo.Context) bool {
-							return false
-						},
-						Validator: func(username, password string, c echo.Context) (bool, error) {
-							log.Debugf(
-								"Middleware: validator: username: \"%s\"; password: \"%s\";",
-								username, password,
-							)
-
-							return false, nil
-						},
-						Realm: "Restricted",
+				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
+					Skipper: func(c echo.Context) bool {
+						return false
 					},
-				))
+					KeyLookup:  "header:" + echo.HeaderAuthorization,
+					AuthScheme: "Bearer",
+					Validator: func(auth string, c echo.Context) (bool, error) {
+						log.Debugf("Validator: auth middleware: %s", auth)
+
+						// TODO: ...
+
+						return true, nil
+					},
+					ErrorHandler: func(err error, c echo.Context) error {
+						log.Debugf("ErrorHandler: auth middleware: %s", err.Error())
+
+						if err != nil {
+							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/singup")
+						}
+
+						return nil
+					},
+				}))
 
 				initRouter(e)
 
