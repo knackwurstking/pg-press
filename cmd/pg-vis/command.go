@@ -150,7 +150,7 @@ func addUserCommand() cli.Command {
 
 				user := pgvis.NewUser(*telegramID, *userName, *apiKey)
 
-				if apiKey != nil {
+				if *apiKey != "" {
 					user.ApiKey = *apiKey
 				}
 
@@ -207,6 +207,9 @@ func modUserCommand() cli.Command {
 			apiKey := cli.String(cmd, "api-key",
 				cli.Optional)
 
+			deleteApiKey := cli.Bool(cmd, "delete-api-key",
+				cli.Optional)
+
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
@@ -220,12 +223,16 @@ func modUserCommand() cli.Command {
 					return err
 				}
 
-				if userName != nil {
+				if *userName != "" {
 					user.UserName = *userName
 				}
 
-				if apiKey != nil {
+				if *apiKey != "" {
 					user.ApiKey = *apiKey
+				}
+
+				if *deleteApiKey {
+					user.ApiKey = ""
 				}
 
 				err = db.Users.Update(*telegramID, user)
