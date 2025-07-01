@@ -136,7 +136,8 @@ func addUserCommand() cli.Command {
 				cli.Optional,
 			)
 
-			// TODO: Add api key flag
+			apiKey := cli.String(cmd, "api-key",
+				cli.Optional)
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 			userName := cli.StringArg(cmd, "user-name", cli.Optional)
@@ -147,7 +148,13 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				err = db.Users.Add(pgvis.NewUser(*telegramID, *userName, ""))
+				user := pgvis.NewUser(*telegramID, *userName, *apiKey)
+
+				if apiKey != nil {
+					user.ApiKey = *apiKey
+				}
+
+				err = db.Users.Add(user)
 				if errors.Is(err, pgvis.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
@@ -197,7 +204,8 @@ func modUserCommand() cli.Command {
 				cli.WithShort("n"),
 				cli.Optional)
 
-			// TODO: Add api key flag
+			apiKey := cli.String(cmd, "api-key",
+				cli.Optional)
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
@@ -214,6 +222,10 @@ func modUserCommand() cli.Command {
 
 				if userName != nil {
 					user.UserName = *userName
+				}
+
+				if apiKey != nil {
+					user.ApiKey = *apiKey
 				}
 
 				err = db.Users.Update(*telegramID, user)
