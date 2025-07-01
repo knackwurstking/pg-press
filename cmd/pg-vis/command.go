@@ -213,6 +213,11 @@ func serverCommand() cli.Command {
 		Name:  "server",
 		Usage: cli.Usage("Start the server."),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
+
 			addr := cli.String(
 				cmd, "addr",
 				cli.WithShort("a"),
@@ -256,8 +261,6 @@ func serverCommand() cli.Command {
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Auth: Validator: %s", auth)
 
-						// TODO: ...
-
 						return false, nil
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
@@ -291,8 +294,14 @@ func serverCommand() cli.Command {
 					c.JSON(500, err.Error())
 				}
 
+				db, err := openDB(*customDBPath)
+				if err != nil {
+					return err
+				}
+
 				html.Serve(e, html.Options{
 					ServerPathPrefix: serverPathPrefix,
+					DB:               db,
 				})
 
 				if err := e.Start(*addr); err != nil {
