@@ -288,8 +288,11 @@ func serverCommand() cli.Command {
 
 						return skipperRegExp.MatchString(url)
 					},
-					KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token",
+
+					KeyLookup: "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + html.CookieName,
+
 					AuthScheme: "Bearer",
+
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Auth: Validator: %s", auth)
 
@@ -300,6 +303,7 @@ func serverCommand() cli.Command {
 
 						return user.ApiKey == auth, nil
 					},
+
 					ErrorHandler: func(err error, c echo.Context) error {
 						log.Debugf("Auth ErrorHandler: %s", err.Error())
 
