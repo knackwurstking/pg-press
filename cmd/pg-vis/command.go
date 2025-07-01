@@ -261,7 +261,7 @@ func serverCommand() cli.Command {
 					},
 				}))
 
-				// TODO: Find a better way to to this, maybe a hardcoded allow list?
+				// NOTE: Find a better way to to this, maybe a hardcoded allow list?
 				skipperRegExp := regexp.MustCompile("(.*/signup.*|.*pico.lime.min.css|manifest.json)")
 
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
