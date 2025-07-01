@@ -1,0 +1,11 @@
+[Unit]
+Description=PG Vis Server
+After=network.target
+
+[Service]
+Environment="SERVER_ADDR=:9020"
+Environment="SERVER_PATH_PREFIX=/pg-vis"
+ExecStart=pg-vis server
+
+[Install]
+WantedBy=default.target
