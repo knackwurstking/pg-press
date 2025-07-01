@@ -295,10 +295,10 @@ func serverCommand() cli.Command {
 
 						user, err := db.Users.GetUserFromApiKey(auth)
 						if err != nil {
-							return false, nil
+							return false, err
 						}
 
-						return user.ApiKey == auth
+						return user.ApiKey == auth, nil
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
 						log.Debugf("Auth ErrorHandler: %s", err.Error())
