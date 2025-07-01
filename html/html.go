@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
+	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,6 +18,7 @@ var static embed.FS
 
 type Options struct {
 	ServerPathPrefix string
+	DB               *pgvis.DB
 }
 
 func Serve(e *echo.Echo, options Options) {
