@@ -42,7 +42,14 @@ func Serve(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/signup", func(c echo.Context) error {
 		v, err := c.FormParams()
 		apiKey := v.Get("api-key")
-		log.Debugf("Form: Api Key: %#v", apiKey)
+
+		if apiKey != "" {
+			log.Debugf("Form: Api Key: %#v", apiKey)
+
+			// TODO: Check api key and get user
+
+			// TODO: If user exists for this api key, redirect to start page "/"
+		}
 
 		t, err := template.ParseFS(routes,
 			"routes/layout.html",
