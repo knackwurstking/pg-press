@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 )
 
@@ -39,6 +40,10 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/signup", func(c echo.Context) error {
+		v, err := c.FormParams()
+		apiKey := v.Get("api-key")
+		log.Debugf("Form: Api Key: %#v", apiKey)
+
 		t, err := template.ParseFS(routes,
 			"routes/layout.html",
 			"routes/signup/page.html",
@@ -47,7 +52,9 @@ func Serve(e *echo.Echo, options Options) {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 
-		err = t.Execute(c.Response(), nil)
+		err = t.Execute(c.Response(), SignUpData{
+			ApiKey: apiKey,
+		})
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -71,4 +78,8 @@ func Serve(e *echo.Echo, options Options) {
 
 		return nil
 	})
+}
+
+type SignUpData struct {
+	ApiKey string
 }
