@@ -253,6 +253,11 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
+				db, err := openDB(*customDBPath)
+				if err != nil {
+					return err
+				}
+
 				e := echo.New()
 
 				// Init logger
@@ -288,9 +293,12 @@ func serverCommand() cli.Command {
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Auth: Validator: %s", auth)
 
-						// TODO: Authorize...
+						user, err := db.Users.GetUserFromApiKey(auth)
+						if err != nil {
+							return false, nil
+						}
 
-						return false, nil
+						return user.ApiKey == auth
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
 						log.Debugf("Auth ErrorHandler: %s", err.Error())
@@ -321,11 +329,6 @@ func serverCommand() cli.Command {
 					}
 
 					c.JSON(500, err.Error())
-				}
-
-				db, err := openDB(*customDBPath)
-				if err != nil {
-					return err
 				}
 
 				html.Serve(e, html.Options{
