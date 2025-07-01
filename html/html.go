@@ -58,12 +58,20 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 	v, err := c.FormParams()
 	apiKey := v.Get("api-key")
 
+	invalidApiKey := false
+
 	if apiKey != "" {
 		log.Debugf("Form: Api Key: %#v", apiKey)
 
-		// TODO: Get user for this api key
+		u, err := db.Users.GetUserFromApiKey(apiKey)
+		if err == nil {
+			if u.ApiKey == apiKey {
+				// TODO: Creaste cookie?
+				c.Redirect(http.StatusSeeOther, "/")
+			}
 
-		// TODO: If user exists for this api key, redirect to start page "/"
+			invalidApiKey = true
+		}
 	}
 
 	t, err := template.ParseFS(routes,
@@ -75,7 +83,8 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 	}
 
 	err = t.Execute(c.Response(), SignUpData{
-		ApiKey: apiKey,
+		ApiKey:        apiKey,
+		InvalidApiKey: invalidApiKey,
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -102,5 +111,6 @@ func handleFeed(c echo.Context) error {
 }
 
 type SignUpData struct {
-	ApiKey string
+	ApiKey        string
+	InvalidApiKey bool
 }
