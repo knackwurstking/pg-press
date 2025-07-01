@@ -10,6 +10,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	CookieName = "pgvis-api-key"
+)
+
 //go:embed routes
 var routes embed.FS
 
@@ -66,7 +70,12 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 		u, err := db.Users.GetUserFromApiKey(apiKey)
 		if err == nil {
 			if u.ApiKey == apiKey {
-				// TODO: Creaste cookie?
+				cookie := new(http.Cookie)
+
+				cookie.Name = CookieName
+				cookie.Value = u.ApiKey
+				c.SetCookie(cookie)
+
 				c.Redirect(http.StatusSeeOther, "/")
 			}
 
