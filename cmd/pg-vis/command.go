@@ -287,7 +287,7 @@ func serverCommand() cli.Command {
 
 				// FIXME: Find a better way to to this
 				skipperRegExp := regexp.MustCompile(
-					"(.*/signup.*|.*pico.lime.min.css|manifest.json|*.png|*.ico)",
+					`(.*/signup.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
 				)
 
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
