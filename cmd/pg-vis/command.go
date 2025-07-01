@@ -125,6 +125,8 @@ func addUserCommand() cli.Command {
 				cli.Optional,
 			)
 
+			// TODO: Add api key flag
+
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 			userName := cli.StringArg(cmd, "user-name", cli.Optional)
 
@@ -183,6 +185,8 @@ func modUserCommand() cli.Command {
 			userName := cli.String(cmd, "name",
 				cli.WithShort("n"),
 				cli.Optional)
+
+			// TODO: Add api key flag
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
