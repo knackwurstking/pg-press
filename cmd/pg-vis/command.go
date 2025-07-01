@@ -32,9 +32,6 @@ func apiKeyCommand() cli.Command {
 	}
 }
 
-// TODO: Create a lock file while writing to database file,
-// 		 need to find out if concurrent reading is allowed
-
 func listUserCommand() cli.Command {
 	return cli.Command{
 		Name: "list",
