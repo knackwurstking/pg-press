@@ -261,6 +261,8 @@ func serverCommand() cli.Command {
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Auth: Validator: %s", auth)
 
+						// TODO: Authorize...
+
 						return false, nil
 					},
 					ErrorHandler: func(err error, c echo.Context) error {
