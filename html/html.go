@@ -48,7 +48,7 @@ func Serve(e *echo.Echo, options Options) {
 		if apiKey != "" {
 			log.Debugf("Form: Api Key: %#v", apiKey)
 
-			// TODO: Check api key and get user
+			// TODO: Get user for this api key
 
 			// TODO: If user exists for this api key, redirect to start page "/"
 		}
