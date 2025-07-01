@@ -18,6 +18,20 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+func apiKeyCommand() cli.Command {
+	return cli.Command{
+		Name: "api-key",
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			return func(cmd *cli.Command) error {
+				// TODO: Generate a new unique api key
+				fmt.Fprintf(os.Stdout, "<api-key>")
+
+				return nil
+			}
+		}),
+	}
+}
+
 // TODO: Create a lock file while writing to database file,
 // 		 need to find out if concurrent reading is allowed
 

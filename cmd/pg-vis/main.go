@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -42,17 +41,7 @@ func main() {
   10  Not Found
 `),
 		Commands: []cli.Command{
-			{
-				Name: "api-key",
-				Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-					return func(cmd *cli.Command) error {
-						// TODO: Generate a new unique api key
-						fmt.Fprintf(os.Stdout, "<api-key>")
-
-						return nil
-					}
-				}),
-			},
+			apiKeyCommand(),
 
 			{
 				Name:  "user",
