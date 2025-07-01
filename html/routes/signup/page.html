@@ -23,7 +23,7 @@
                     placeholder="Api Key"
                     required
                     value="{{.ApiKey}}"
-                    {{if not .InvalidApiKey}}aria-invalid="{{.InvalidApiKey}}"{{end}}
+                    {{if .InvalidApiKey}}aria-invalid="{{.InvalidApiKey}}"{{end}}
                 />
             </label>
         </fieldset>
