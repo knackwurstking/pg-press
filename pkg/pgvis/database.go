@@ -167,8 +167,8 @@ func (db *DBUsers) Update(telegramID int64, user *User) error {
 	}
 
 	query = fmt.Sprintf(
-		`UPDATE users SET user_name = "%s" WHERE telegram_id = %d`,
-		user.UserName, telegramID,
+		`UPDATE users SET user_name = "%s", api_key = "%s" WHERE telegram_id = %d`,
+		user.UserName, user.ApiKey, telegramID,
 	)
 
 	_, err = db.db.Exec(query)
