@@ -90,6 +90,29 @@ func (db *DBUsers) Get(telegramID int64) (*User, error) {
 	return user, nil
 }
 
+func (db *DBUsers) GetUserFromApiKey(apiKey string) (*User, error) {
+	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key=%s`, apiKey)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Close()
+
+	user := &User{}
+
+	if !r.Next() {
+		return nil, ErrNotFound
+	}
+
+	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (db *DBUsers) Add(user *User) error {
 	if user.TelegramID == 0 {
 		return errors.New("Telegram ID cannot be 0")
