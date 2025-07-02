@@ -69,19 +69,21 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 
 		if u, err := db.Users.GetUserFromApiKey(apiKey); err == nil {
 			if u.ApiKey == apiKey {
+				log.Debugf("Form: set cookie and redirect")
 				cookie := new(http.Cookie)
 
 				cookie.Name = CookieName
-				cookie.Value = u.ApiKey
+				cookie.Value = u.ApiKey // TODO: Do not set this key unencrypted
 				c.SetCookie(cookie)
 
-				c.Redirect(http.StatusSeeOther, "/")
+				return c.Redirect(http.StatusSeeOther, "/")
 			}
 
 			if u.ApiKey != "" {
 				invalidApiKey = true
 			}
 		} else {
+			log.Warnf("Get user for api key failed: %s", err.Error())
 			invalidApiKey = true
 		}
 	}
