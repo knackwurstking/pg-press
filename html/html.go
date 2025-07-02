@@ -70,7 +70,10 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 		if u, err := db.Users.GetUserFromApiKey(apiKey); err == nil {
 			if u.ApiKey == apiKey {
 				log.Debugf("Form: set cookie and redirect")
+
 				cookie := new(http.Cookie)
+
+				// TODO: Get device information before setting the cookie value
 
 				cookie.Name = CookieName
 				cookie.Value = u.ApiKey // TODO: Store a generated key here for this device and update users database
