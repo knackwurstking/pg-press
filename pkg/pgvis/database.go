@@ -91,7 +91,7 @@ func (db *DBUsers) Get(telegramID int64) (*User, error) {
 }
 
 func (db *DBUsers) GetUserFromApiKey(apiKey string) (*User, error) {
-	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key=%s`, apiKey)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key="%s"`, apiKey)
 	r, err := db.db.Query(query)
 	if err != nil {
 		return nil, err
