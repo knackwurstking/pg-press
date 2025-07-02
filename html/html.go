@@ -73,7 +73,7 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 				cookie := new(http.Cookie)
 
 				cookie.Name = CookieName
-				cookie.Value = u.ApiKey // TODO: Do not set this key unencrypted
+				cookie.Value = u.ApiKey // TODO: Store a generated key here for this device and update users database
 				c.SetCookie(cookie)
 
 				return c.Redirect(http.StatusSeeOther, "/")
