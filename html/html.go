@@ -85,7 +85,11 @@ func handleLogin(c echo.Context, db *pgvis.DB) error {
 				cookie.Value = uuid.New().String()
 				c.SetCookie(cookie)
 
-				Cookies.Add(c.Request().UserAgent(), cookie.Value)
+				Cookies.Add(&cookies.Cookie{
+					UserAgent: apiKey,
+					Value:     cookie.Value,
+					ApiKey:    apiKey,
+				})
 
 				return c.Redirect(http.StatusSeeOther, "/")
 			}

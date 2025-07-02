@@ -305,21 +305,17 @@ func serverCommand() cli.Command {
 					Validator: func(auth string, c echo.Context) (bool, error) {
 						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
 
-						cookie, err := c.Cookie(html.CookieName)
-						if err == nil {
-							if html.Cookies.Contains(c.Request().UserAgent(), cookie.Value) {
-								c, err := html.Cookies.Get(c.Request().UserAgent(), cookie.Value)
-								if err != nil {
-									return false, err
-								}
-								user := c.User(db)
+						if cookie, err := c.Cookie(html.CookieName); err == nil {
+							c := html.Cookies.Get(c.Request().UserAgent(), cookie.Value)
+							if c == nil {
+								return false, nil
 							}
+							auth = c.ApiKey
 						}
 
 						user, err := db.Users.GetUserFromApiKey(auth)
-						log.Debugf("Auth: Validator: %#v, %#v", user, err)
 						if err != nil {
-							return false, err
+							return false, nil
 						}
 
 						return user.ApiKey == auth, nil

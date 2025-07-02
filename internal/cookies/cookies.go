@@ -14,11 +14,18 @@ func New() *Cookies {
 	return NewCookies()
 }
 
-func (c *Cookies) Add(userAgent, value string) {
-	c.list = append(c.list, &Cookie{
-		UserAgent: userAgent,
-		Value:     value,
-	})
+func (c *Cookies) Get(userAgent, value string) *Cookie {
+	for _, cookie := range c.list {
+		if cookie.UserAgent == userAgent && cookie.Value == value {
+			return cookie
+		}
+	}
+
+	return nil
+}
+
+func (c *Cookies) Add(cookie *Cookie) {
+	c.list = append(c.list, cookie)
 }
 
 func (c *Cookies) Contains(userAgent, value string) bool {
