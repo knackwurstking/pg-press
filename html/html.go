@@ -6,12 +6,20 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
+	"github.com/google/uuid"
+	"github.com/knackwurstking/pg-vis/internal/cookies"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 )
 
 const (
 	CookieName = "pgvis-api-key"
+)
+
+var (
+	// TODO: Create a special cookie handler, holding the value and the device information,
+	//       also store this this in the database table "cookies"
+	Cookies = cookies.New()
 )
 
 //go:embed routes
@@ -73,11 +81,11 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 
 				cookie := new(http.Cookie)
 
-				// TODO: Get device information before setting the cookie value
-
 				cookie.Name = CookieName
-				cookie.Value = u.ApiKey // TODO: Store a generated key here for this device and update users database
+				cookie.Value = uuid.New().String()
 				c.SetCookie(cookie)
+
+				Cookies.Add(c.Request().Header.Get("User-Agent"), cookie.Value)
 
 				return c.Redirect(http.StatusSeeOther, "/")
 			}
