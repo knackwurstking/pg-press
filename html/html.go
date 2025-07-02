@@ -40,8 +40,8 @@ func Serve(e *echo.Echo, options Options) {
 		return handleHomePage(c)
 	})
 
-	e.GET(options.ServerPathPrefix+"/signup", func(c echo.Context) error {
-		return handleSignUp(c, options.DB)
+	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
+		return handleLogin(c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
@@ -66,7 +66,7 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
-func handleSignUp(c echo.Context, db *pgvis.DB) error {
+func handleLogin(c echo.Context, db *pgvis.DB) error {
 	v, err := c.FormParams()
 	apiKey := v.Get("api-key")
 
@@ -85,7 +85,7 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 				cookie.Value = uuid.New().String()
 				c.SetCookie(cookie)
 
-				Cookies.Add(c.Request().Header.Get("User-Agent"), cookie.Value)
+				Cookies.Add(c.Request().UserAgent(), cookie.Value)
 
 				return c.Redirect(http.StatusSeeOther, "/")
 			}
@@ -101,13 +101,13 @@ func handleSignUp(c echo.Context, db *pgvis.DB) error {
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
-		"routes/signup/page.html",
+		"routes/login/page.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), SignUpData{
+	err = t.Execute(c.Response(), LoginData{
 		ApiKey:        apiKey,
 		InvalidApiKey: invalidApiKey,
 	})
@@ -135,7 +135,7 @@ func handleFeed(c echo.Context) error {
 	return nil
 }
 
-type SignUpData struct {
+type LoginData struct {
 	ApiKey        string
 	InvalidApiKey bool
 }

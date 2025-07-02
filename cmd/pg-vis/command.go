@@ -287,7 +287,7 @@ func serverCommand() cli.Command {
 
 				// FIXME: Find a better way to to this
 				skipperRegExp := regexp.MustCompile(
-					`(.*/signup.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
+					`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
 				)
 
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
@@ -303,14 +303,21 @@ func serverCommand() cli.Command {
 					AuthScheme: "Bearer",
 
 					Validator: func(auth string, c echo.Context) (bool, error) {
-						log.Debugf("Auth: Validator: %s", auth)
+						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
 
 						cookie, err := c.Cookie(html.CookieName)
 						if err == nil {
-							html.Cookies.Contains(c.Request().UserAgent(), cookie.Value)
+							if html.Cookies.Contains(c.Request().UserAgent(), cookie.Value) {
+								c, err := html.Cookies.Get(c.Request().UserAgent(), cookie.Value)
+								if err != nil {
+									return false, err
+								}
+								user := c.User(db)
+							}
 						}
 
 						user, err := db.Users.GetUserFromApiKey(auth)
+						log.Debugf("Auth: Validator: %#v, %#v", user, err)
 						if err != nil {
 							return false, err
 						}
@@ -322,7 +329,7 @@ func serverCommand() cli.Command {
 						log.Debugf("Auth ErrorHandler: %s", err.Error())
 
 						if err != nil {
-							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/signup")
+							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 						}
 
 						return nil

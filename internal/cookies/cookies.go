@@ -2,25 +2,27 @@ package cookies
 
 import "slices"
 
-type Cookies []*Cookie
-
-func NewCookies() Cookies {
-	return make(Cookies, 0)
+type Cookies struct {
+	list []*Cookie
 }
 
-func New() Cookies {
+func NewCookies() *Cookies {
+	return &Cookies{}
+}
+
+func New() *Cookies {
 	return NewCookies()
 }
 
-func (c Cookies) Add(userAgent, value string) {
-	c = append(c, &Cookie{
+func (c *Cookies) Add(userAgent, value string) {
+	c.list = append(c.list, &Cookie{
 		UserAgent: userAgent,
 		Value:     value,
 	})
 }
 
-func (c Cookies) Contains(userAgent, value string) bool {
-	for _, cookie := range c {
+func (c *Cookies) Contains(userAgent, value string) bool {
+	for _, cookie := range c.list {
 		if cookie.UserAgent == userAgent && cookie.Value == value {
 			return true
 		}
@@ -29,10 +31,10 @@ func (c Cookies) Contains(userAgent, value string) bool {
 	return false
 }
 
-func (c Cookies) Remove(userAgent, value string) {
-	for i, cookie := range c {
+func (c *Cookies) Remove(userAgent, value string) {
+	for i, cookie := range c.list {
 		if cookie.UserAgent == userAgent && cookie.Value == value {
-			c = slices.Delete(c, i, i+1)
+			c.list = slices.Delete(c.list, i, i+1)
 		}
 	}
 }
