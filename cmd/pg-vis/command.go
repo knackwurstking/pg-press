@@ -306,16 +306,16 @@ func serverCommand() cli.Command {
 						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
 
 						if cookie, err := c.Cookie(html.CookieName); err == nil {
-							c := html.Cookies.Get(c.Request().UserAgent(), cookie.Value)
-							if c == nil {
-								return false, nil
+							c := html.Cookies.Get(cookie.Value)
+							if c != nil {
+								log.Debugf("Auth: Validator: cookie found")
+								auth = c.ApiKey
 							}
-							auth = c.ApiKey
 						}
 
 						user, err := db.Users.GetUserFromApiKey(auth)
 						if err != nil {
-							return false, nil
+							return false, fmt.Errorf("get user from db: %s (%#v)", err.Error(), auth)
 						}
 
 						return user.ApiKey == auth, nil

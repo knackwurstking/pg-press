@@ -17,8 +17,6 @@ const (
 )
 
 var (
-	// TODO: Create a special cookie handler, holding the value and the device information,
-	//       also store this this in the database table "cookies"
 	Cookies = cookies.New()
 )
 
@@ -86,7 +84,7 @@ func handleLogin(c echo.Context, db *pgvis.DB) error {
 				c.SetCookie(cookie)
 
 				Cookies.Add(&cookies.Cookie{
-					UserAgent: apiKey,
+					UserAgent: c.Request().UserAgent(),
 					Value:     cookie.Value,
 					ApiKey:    apiKey,
 				})
