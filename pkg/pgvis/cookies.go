@@ -1,17 +1,28 @@
-package cookies
+package pgvis
 
-import "slices"
+import (
+	"slices"
+)
+
+type Cookie struct {
+	UserAgent string
+	Value     string
+	ApiKey    string
+}
 
 type Cookies struct {
 	list []*Cookie
+	db   *DB
 }
 
-func NewCookies() *Cookies {
-	return &Cookies{}
+func NewCookies(db *DB) *Cookies {
+	return &Cookies{
+		db: db,
+	}
 }
 
-func New() *Cookies {
-	return NewCookies()
+func New(db *DB) *Cookies {
+	return NewCookies(db)
 }
 
 func (c *Cookies) Get(value string) *Cookie {

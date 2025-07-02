@@ -7,17 +7,12 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
-	"github.com/knackwurstking/pg-vis/internal/cookies"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 )
 
 const (
 	CookieName = "pgvis-api-key"
-)
-
-var (
-	Cookies = cookies.New()
 )
 
 //go:embed routes
@@ -29,6 +24,7 @@ var static embed.FS
 type Options struct {
 	ServerPathPrefix string
 	DB               *pgvis.DB
+	Cookies          *pgvis.Cookies
 }
 
 func Serve(e *echo.Echo, options Options) {
@@ -39,7 +35,7 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.DB)
+		return handleLogin(c, options.DB, options.Cookies)
 	})
 
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
@@ -64,8 +60,8 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
-func handleLogin(c echo.Context, db *pgvis.DB) error {
-	v, err := c.FormParams()
+func handleLogin(ctx echo.Context, db *pgvis.DB, c *pgvis.Cookies) error {
+	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
 	invalidApiKey := false
@@ -81,15 +77,15 @@ func handleLogin(c echo.Context, db *pgvis.DB) error {
 
 				cookie.Name = CookieName
 				cookie.Value = uuid.New().String()
-				c.SetCookie(cookie)
+				ctx.SetCookie(cookie)
 
-				Cookies.Add(&cookies.Cookie{
-					UserAgent: c.Request().UserAgent(),
+				c.Add(&pgvis.Cookie{
+					UserAgent: ctx.Request().UserAgent(),
 					Value:     cookie.Value,
 					ApiKey:    apiKey,
 				})
 
-				return c.Redirect(http.StatusSeeOther, "/")
+				return ctx.Redirect(http.StatusSeeOther, "/")
 			}
 
 			if u.ApiKey != "" {
@@ -109,7 +105,7 @@ func handleLogin(c echo.Context, db *pgvis.DB) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), LoginData{
+	err = t.Execute(ctx.Response(), LoginData{
 		ApiKey:        apiKey,
 		InvalidApiKey: invalidApiKey,
 	})

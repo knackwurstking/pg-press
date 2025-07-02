@@ -265,6 +265,13 @@ func serverCommand() cli.Command {
 					return err
 				}
 
+				// FIXME: Find a better way to to this
+				skipperRegExp := regexp.MustCompile(
+					`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
+				)
+
+				cookies := pgvis.New(db)
+
 				e := echo.New()
 
 				// Init logger
@@ -285,11 +292,6 @@ func serverCommand() cli.Command {
 					},
 				}))
 
-				// FIXME: Find a better way to to this
-				skipperRegExp := regexp.MustCompile(
-					`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
-				)
-
 				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 					Skipper: func(c echo.Context) bool {
 						url := c.Request().URL.String()
@@ -306,7 +308,7 @@ func serverCommand() cli.Command {
 						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
 
 						if cookie, err := c.Cookie(html.CookieName); err == nil {
-							c := html.Cookies.Get(cookie.Value)
+							c := cookies.Get(cookie.Value)
 							if c != nil {
 								log.Debugf("Auth: Validator: cookie found")
 								auth = c.ApiKey
@@ -355,6 +357,7 @@ func serverCommand() cli.Command {
 				html.Serve(e, html.Options{
 					ServerPathPrefix: serverPathPrefix,
 					DB:               db,
+					Cookies:          cookies,
 				})
 
 				if err := e.Start(*addr); err != nil {
