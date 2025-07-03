@@ -115,7 +115,6 @@ func showUserCommand() cli.Command {
 
 				cookies, err := db.Cookies.GetForApiKey(user.ApiKey)
 				if err != nil {
-					// TODO: Print out cookies ( | ApiKey | User Agent | )
 					t := table.NewWriter()
 					t.SetOutputMirror(os.Stdout)
 					t.AppendHeader(table.Row{"Api Key", "User Agent"})
