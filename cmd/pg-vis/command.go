@@ -103,7 +103,6 @@ func showUserCommand() cli.Command {
 				}
 
 				t := table.NewWriter()
-
 				t.SetOutputMirror(os.Stdout)
 
 				t.AppendHeader(table.Row{"Telegram ID", "User Name", "Api Key"})
@@ -114,8 +113,22 @@ func showUserCommand() cli.Command {
 				t.SetStyle(table.StyleLight)
 				t.Render()
 
-				// NOTE: Here i could print out some more user related stuff
-				// 		 like last activity, or whatever
+				cookies, err := db.Cookies.GetForApiKey(user.ApiKey)
+				if err != nil {
+					// TODO: Print out cookies ( | ApiKey | User Agent | )
+					t := table.NewWriter()
+					t.SetOutputMirror(os.Stdout)
+					t.AppendHeader(table.Row{"Api Key", "User Agent"})
+
+					rows := []table.Row{}
+					for _, c := range cookies {
+						rows = append(rows, table.Row{c.ApiKey, c.UserAgent})
+					}
+
+					t.AppendRows([]table.Row{row})
+					t.SetStyle(table.StyleLight)
+					t.Render()
+				}
 
 				return nil
 			}
