@@ -2,6 +2,7 @@ package html
 
 import (
 	"embed"
+	"errors"
 	"html/template"
 	"net/http"
 
@@ -33,12 +34,16 @@ func Serve(e *echo.Echo, options Options) {
 		return handleHomePage(c)
 	})
 
+	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
+		return handleFeed(c)
+	})
+
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
 		return handleLogin(c, options.DB)
 	})
 
-	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
-		return handleFeed(c)
+	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
+		return handleProfile(c)
 	})
 }
 
@@ -131,6 +136,12 @@ func handleFeed(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func handleProfile(c echo.Context) error {
+	// TODO: ...
+
+	return errors.New("under construction")
 }
 
 type LoginData struct {
