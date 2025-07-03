@@ -12,4 +12,30 @@
 <!-- Content -->
 
 {{define "content"}}
+<header class="container-fluid">
+    <hgroup>
+        <h1>{{.User.UserName}}</h1>
+        <p>{{.User.Telegram}}</p>
+    </hgroup>
+</header>
+
+<main class="container-fluid">
+    {{if ne .User.UserName ""}}
+    <dialog>
+        <form method="dialog">
+            <label>
+                User Name
+                <input
+                    type="text"
+                    value="{{.User.UserName}}"
+                    placeholder="User Name"
+                    aria-invalid="{{if eq .User.UserName ""}}{{end}}"
+                />
+            </label>
+
+            <button type="submit">Submit</button>
+        </form>
+    </dialog>
+    {{end}}
+</main>
 {{end}}
