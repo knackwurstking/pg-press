@@ -67,7 +67,12 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 				return false, fmt.Errorf("get user from db: %s (%#v)", err.Error(), auth)
 			}
 
-			return user.ApiKey == auth, nil
+			if user.ApiKey == auth {
+				c.Set("user", user)
+				return true, nil
+			}
+
+			return false, nil
 		},
 
 		ErrorHandler: func(err error, c echo.Context) error {
