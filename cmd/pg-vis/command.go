@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
-	"regexp"
-	"time"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
@@ -15,7 +12,6 @@ import (
 	"github.com/knackwurstking/pg-vis/html"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func apiKeyCommand() cli.Command {
@@ -265,72 +261,13 @@ func serverCommand() cli.Command {
 					return err
 				}
 
-				// FIXME: Find a better way to to this
-				skipperRegExp := regexp.MustCompile(
-					`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
-				)
-
 				e := echo.New()
 
 				// Init logger
 				log.SetLevel(log.DebugLevel)
 
-				e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-					Format: "${custom} ---> ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
-					Output: os.Stderr,
-					CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-						t := time.Now()
-						buf.Write(fmt.Appendf(nil,
-							"%d/%02d/%02d %02d:%02d:%02d",
-							t.Year(), int(t.Month()), t.Day(),
-							t.Hour(), t.Minute(), t.Second(),
-						))
-
-						return 0, nil
-					},
-				}))
-
-				e.Use(middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-					Skipper: func(c echo.Context) bool {
-						url := c.Request().URL.String()
-						log.Debugf("Auth: Skipper: %s", url)
-
-						return skipperRegExp.MatchString(url)
-					},
-
-					KeyLookup: "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + html.CookieName,
-
-					AuthScheme: "Bearer",
-
-					Validator: func(auth string, c echo.Context) (bool, error) {
-						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
-
-						if cookie, err := c.Cookie(html.CookieName); err == nil {
-							c, err := db.Cookies.Get(cookie.Value)
-							if err == nil {
-								log.Debugf("Auth: Validator: cookie found")
-								auth = c.ApiKey
-							}
-						}
-
-						user, err := db.Users.GetUserFromApiKey(auth)
-						if err != nil {
-							return false, fmt.Errorf("get user from db: %s (%#v)", err.Error(), auth)
-						}
-
-						return user.ApiKey == auth, nil
-					},
-
-					ErrorHandler: func(err error, c echo.Context) error {
-						log.Debugf("Auth ErrorHandler: %s", err.Error())
-
-						if err != nil {
-							return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
-						}
-
-						return nil
-					},
-				}))
+				e.Use(middlewareLogger())
+				e.Use(middlewareKeyAuth(db))
 
 				e.HTTPErrorHandler = func(err error, c echo.Context) {
 					log.Warnf("HTTPErrorHandler: %s", err.Error())
