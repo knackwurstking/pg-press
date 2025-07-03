@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pg-vis/html"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/color"
 )
 
 func apiKeyCommand() cli.Command {
@@ -113,20 +114,15 @@ func showUserCommand() cli.Command {
 				t.SetStyle(table.StyleLight)
 				t.Render()
 
-				cookies, err := db.Cookies.GetForApiKey(user.ApiKey)
-				if err != nil {
-					t := table.NewWriter()
-					t.SetOutputMirror(os.Stdout)
-					t.AppendHeader(table.Row{"Api Key", "User Agent"})
-
-					rows := []table.Row{}
-					for _, c := range cookies {
-						rows = append(rows, table.Row{c.ApiKey, c.UserAgent})
+				if cookies, err := db.Cookies.GetForApiKey(user.ApiKey); err != nil {
+					fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
+				} else {
+					if len(cookies) > 0 {
+						fmt.Printf("\n%s\n\n", color.Underline(color.Bold("Cookies:")))
+						for _, c := range cookies {
+							fmt.Printf("%s \"%s\"\n", color.Bold(c.ApiKey), color.Italic(c.UserAgent))
+						}
 					}
-
-					t.AppendRows([]table.Row{row})
-					t.SetStyle(table.StyleLight)
-					t.Render()
 				}
 
 				return nil
