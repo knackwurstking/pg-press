@@ -110,7 +110,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(ctx.Response(), LoginData{
+	err = t.Execute(ctx.Response(), LoginPageData{
 		ApiKey:        apiKey,
 		InvalidApiKey: invalidApiKey,
 	})
@@ -139,12 +139,35 @@ func handleFeed(c echo.Context) error {
 }
 
 func handleProfile(c echo.Context) error {
-	// TODO: ...
+	user, ok := c.Get("user").(*pgvis.User)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			errors.New("this should never happen, user is missing in context"))
+	}
 
-	return errors.New("under construction")
+	t, err := template.ParseFS(routes,
+		"routes/layout.html",
+		"routes/profile/page.html",
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = t.Execute(c.Response(), ProfilePageData{
+		User: user,
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return nil
 }
 
-type LoginData struct {
+type LoginPageData struct {
 	ApiKey        string
 	InvalidApiKey bool
+}
+
+type ProfilePageData struct {
+	User *pgvis.User
 }
