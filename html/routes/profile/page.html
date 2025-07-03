@@ -18,9 +18,9 @@
             <h1>{{.User.UserName}}</h1>
 
             <button
-                class="secondary outline icon"
+                class="contrast outline icon"
                 onclick='
-                    console.debug("@todo: Open dialog here")
+                    document.querySelector("#dialogEditUserName").showModal();
                 '
             >
                 {{template "svg-pencil"}}
@@ -32,12 +32,33 @@
 </header>
 
 <main class="container-fluid">
-    {{if ne .User.UserName ""}}
-    <dialog>
+    {{if ne .ErrorMessages nil}}
+    <dialog id="dialogErrorMessages" open>
         <form method="dialog">
+            <header>
+                <h2>{{template "svg-triangle-alert"}}</h2>
+            </header>
+
+            <span class="messages">
+                {{range $message := .ErrorMessages}}
+                    <p>{{$message}}</p>
+                {{end}}
+            </span>
+
+            <footer>
+                <button>Schließen</button>
+            </footer>
+        </form>
+    </dialog>
+    {{end}}
+
+    {{if ne .User.UserName ""}}
+    <dialog id="dialogEditUserName">
+        <form>
             <label>
                 User Name
                 <input
+                    name="user-name"
                     type="text"
                     value="{{.User.UserName}}"
                     placeholder="User Name"

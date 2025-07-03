@@ -44,7 +44,7 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
-		return handleProfile(c)
+		return handleProfile(c, options.DB)
 	})
 }
 
@@ -139,25 +139,40 @@ func handleFeed(c echo.Context) error {
 	return nil
 }
 
-func handleProfile(c echo.Context) error {
-	user, ok := c.Get("user").(*pgvis.User)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			errors.New("this should never happen, user is missing in context"))
+func handleProfile(ctx echo.Context, db *pgvis.DB) error {
+	var data ProfilePageData
+
+	{ // Get user from the echos context
+		user, ok := ctx.Get("user").(*pgvis.User)
+		if !ok {
+			return echo.NewHTTPError(http.StatusInternalServerError,
+				errors.New("this should never happen, user is missing in context"))
+		}
+		data.User = user
+	}
+
+	{ // Get "user-name" from form data (optional), and update database user
+		v, err := ctx.FormParams()
+		if userName := v.Get("user-name"); userName != "" && userName != data.User.UserName {
+			if err = db.Users.Update(data.User.TelegramID, data.User); err != nil {
+				data.ErrorMessages = []string{err.Error()}
+			} else {
+				data.User.UserName = userName
+			}
+		}
 	}
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
 		"routes/profile/page.html",
 		"svg/pencil.html",
+		"svg/triangle-alert.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), ProfilePageData{
-		User: user,
-	})
+	err = t.Execute(ctx.Response(), data)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -171,5 +186,6 @@ type LoginPageData struct {
 }
 
 type ProfilePageData struct {
-	User *pgvis.User
+	User          *pgvis.User
+	ErrorMessages []string
 }
