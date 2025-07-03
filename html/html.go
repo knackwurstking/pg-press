@@ -91,7 +91,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 					ApiKey:    apiKey,
 				})
 
-				return ctx.Redirect(http.StatusSeeOther, "/")
+				return ctx.Redirect(http.StatusSeeOther, "/profile")
 			}
 
 			if u.ApiKey != "" {
