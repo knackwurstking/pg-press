@@ -270,8 +270,6 @@ func serverCommand() cli.Command {
 					`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
 				)
 
-				cookies := pgvis.New(db)
-
 				e := echo.New()
 
 				// Init logger
@@ -308,8 +306,8 @@ func serverCommand() cli.Command {
 						log.Debugf("Auth: Validator: %s", c.Request().UserAgent())
 
 						if cookie, err := c.Cookie(html.CookieName); err == nil {
-							c := cookies.Get(cookie.Value)
-							if c != nil {
+							c, err := db.Cookies.Get(cookie.Value)
+							if err == nil {
 								log.Debugf("Auth: Validator: cookie found")
 								auth = c.ApiKey
 							}
@@ -357,7 +355,6 @@ func serverCommand() cli.Command {
 				html.Serve(e, html.Options{
 					ServerPathPrefix: serverPathPrefix,
 					DB:               db,
-					Cookies:          cookies,
 				})
 
 				if err := e.Start(*addr); err != nil {

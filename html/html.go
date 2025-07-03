@@ -24,7 +24,6 @@ var static embed.FS
 type Options struct {
 	ServerPathPrefix string
 	DB               *pgvis.DB
-	Cookies          *pgvis.Cookies
 }
 
 func Serve(e *echo.Echo, options Options) {
@@ -35,7 +34,7 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.DB, options.Cookies)
+		return handleLogin(c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
@@ -60,7 +59,7 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
-func handleLogin(ctx echo.Context, db *pgvis.DB, c *pgvis.Cookies) error {
+func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
@@ -79,7 +78,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB, c *pgvis.Cookies) error {
 				cookie.Value = uuid.New().String()
 				ctx.SetCookie(cookie)
 
-				c.Add(&pgvis.Cookie{
+				db.Cookies.Add(&pgvis.Cookie{
 					UserAgent: ctx.Request().UserAgent(),
 					Value:     cookie.Value,
 					ApiKey:    apiKey,
