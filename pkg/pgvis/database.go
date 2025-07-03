@@ -222,6 +222,28 @@ func (db *DBCookies) Get(value string) (*Cookie, error) {
 	return cookie, nil
 }
 
+func (db *DBCookies) GetForApiKey(apiKey string) ([]*Cookie, error) {
+	cookies := []*Cookie{}
+
+	query := fmt.Sprintf(`SELECT * FROM cookies WHERE api_key="%s"`, apiKey)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	cookie := &Cookie{}
+	for r.Next() {
+		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey)
+		if err != nil {
+			return nil, err
+		}
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
+
 func (db *DBCookies) Add(cookie *Cookie) error {
 	if cookie.Value == "" {
 		return errors.New("cookie \"Value\" cannot be empty")
