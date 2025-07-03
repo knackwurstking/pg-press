@@ -16,8 +16,9 @@ type DB struct {
 
 func NewDB(db *sql.DB) *DB {
 	return &DB{
-		Users: NewDBUsers(db),
-		db:    db,
+		Users:   NewDBUsers(db),
+		Cookies: NewDBCookies(db),
+		db:      db,
 	}
 }
 
