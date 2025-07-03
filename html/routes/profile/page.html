@@ -14,8 +14,20 @@
 {{define "content"}}
 <header class="container-fluid">
     <hgroup>
-        <h1>{{.User.UserName}}</h1>
-        <p>{{.User.Telegram}}</p>
+        <span class="user-name">
+            <h1>{{.User.UserName}}</h1>
+
+            <button
+                class="secondary outline icon"
+                onclick='
+                    console.debug("@todo: Open dialog here")
+                '
+            >
+                {{template "svg-pencil"}}
+            </button>
+        </span>
+
+        <p>Telegram ID: {{.User.TelegramID}}</p>
     </hgroup>
 </header>
 

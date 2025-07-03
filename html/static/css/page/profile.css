@@ -1,0 +1,10 @@
+hgroup > .user-name > * {
+    margin: 0;
+}
+
+hgroup > .user-name {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}

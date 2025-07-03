@@ -17,6 +17,7 @@ const (
 )
 
 //go:embed routes
+//go:embed svg
 var routes embed.FS
 
 //go:embed static
@@ -148,6 +149,7 @@ func handleProfile(c echo.Context) error {
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
 		"routes/profile/page.html",
+		"svg/pencil.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
