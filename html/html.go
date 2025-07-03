@@ -69,6 +69,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 		log.Debugf("Form: Api Key: %#v", apiKey)
 
 		if u, err := db.Users.GetUserFromApiKey(apiKey); err == nil {
+			// Set cookie and redirect to "/"
 			if u.ApiKey == apiKey {
 				log.Debugf("Form: set cookie and redirect")
 
