@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/color"
+	"github.com/williepotgieter/keymaker"
 )
 
 func apiKeyCommand() cli.Command {
@@ -20,8 +21,12 @@ func apiKeyCommand() cli.Command {
 		Name: "api-key",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			return func(cmd *cli.Command) error {
-				// TODO: Generate a new unique api key
-				fmt.Fprintf(os.Stdout, "<api-key>")
+				apiKey, err := keymaker.NewApiKey("pgp", 32)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Generating a new api key failed: %s\n", err.Error())
+				}
+
+				fmt.Println(apiKey)
 
 				return nil
 			}
