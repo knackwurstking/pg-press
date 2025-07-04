@@ -99,6 +99,12 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 			}
 		} else {
 			log.Warnf("Get user for api key failed: %s", err.Error())
+			users, _ := db.Users.List()
+
+			for _, user := range users {
+				log.Debugf("handleLogin: user=%#v", user)
+			}
+
 			invalidApiKey = true
 		}
 	}
