@@ -30,7 +30,7 @@ func NewDBUsers(db *sql.DB) *DBUsers {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			"telegram_id" INTEGER NOT NULL,
-			"user_name" TEXT NOT NULL UNIQUE,
+			"user_name" TEXT NOT NULL,
 			"api_key" TEXT NOT NULL UNIQUE,
 			PRIMARY KEY("telegram_id")
 		);
