@@ -76,7 +76,7 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 			// Set cookie and redirect to "/"
 			if u.ApiKey == apiKey {
 				log.Debugf(
-					"Form: Api Key: set cookie and redirect (id: %#v; user: %#v)",
+					"/login -> Set cookie and redirect to /profile (id: %#v; user: %#v)",
 					u.TelegramID, u.UserName,
 				)
 
@@ -99,13 +99,7 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 				invalidApiKey = true
 			}
 		} else {
-			log.Warnf("Get user for api key failed: %s", err.Error())
-			users, _ := db.Users.List()
-
-			for _, user := range users {
-				log.Debugf("handleLogin: user=%#v", user)
-			}
-
+			log.Warnf("/login -> User not found, invalid api key: %s", err.Error())
 			invalidApiKey = true
 		}
 	}

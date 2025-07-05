@@ -42,7 +42,7 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
 			url := c.Request().URL.String()
-			log.Debugf("Skipper: %s", url)
+			log.Debugf("KeyAuth -> Skipper -> %s", url)
 
 			return skipperRegExp.MatchString(url)
 		},
@@ -52,12 +52,12 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 		AuthScheme: "Bearer",
 
 		Validator: func(auth string, c echo.Context) (bool, error) {
-			log.Debugf("Validator: User Agent: %s", c.Request().UserAgent())
+			log.Debugf("KeyAuth -> Validator -> User-Agent=%#v", c.Request().UserAgent())
 
 			if cookie, err := c.Cookie(html.CookieName); err == nil {
 				c, err := db.Cookies.Get(cookie.Value)
 				if err == nil {
-					log.Debugf("Validator: cookie found")
+					log.Debugf("KeyAuth -> Validator -> cookie found")
 					auth = c.ApiKey
 				}
 			}
@@ -66,6 +66,11 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 			if err != nil {
 				return false, fmt.Errorf("get user from db with auth %#v failed: %s", auth, err.Error())
 			}
+
+			log.Debugf(
+				"KeyAuth -> Validator -> telegram_id=%#v; user_name=%#v",
+				user.TelegramID, user.UserName,
+			)
 
 			if user.ApiKey == auth {
 				c.Set("user", user)
@@ -76,14 +81,9 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 		},
 
 		ErrorHandler: func(err error, c echo.Context) error {
-			log.Debugf("ErrorHandler: %s", err.Error())
-			log.Debugf("ErrorHandler: User Agent: %#v", c.Request().UserAgent())
-
-			if err != nil {
-				return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
-			}
-
-			return nil
+			log.Errorf("KeyAuth -> ErrorHandler -> %s", err.Error())
+			log.Debugf("KeyAuth -> ErrorHandler -> User-Agent=%#v", c.Request().UserAgent())
+			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
 	})
 }
