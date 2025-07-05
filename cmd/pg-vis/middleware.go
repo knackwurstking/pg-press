@@ -34,9 +34,9 @@ func middlewareLogger() echo.MiddlewareFunc {
 }
 
 func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
-	// FIXME: Find a better way to to this
+	// FIXME: Find a better way to to this !!!
 	skipperRegExp := regexp.MustCompile(
-		`(.*/login.*|.*pico.lime.min.css|manifest.json|.*\.png|.*\.ico)`,
+		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico)`,
 	)
 
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
