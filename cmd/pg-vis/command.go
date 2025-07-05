@@ -278,6 +278,7 @@ func serverCommand() cli.Command {
 
 				// Init logger
 				log.SetLevel(log.DebugLevel)
+				log.SetReportCaller(true)
 
 				e.Use(middlewareLogger())
 				e.Use(middlewareKeyAuth(db))
