@@ -40,7 +40,7 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.DB)
+		return handleLogin(c, options.ServerPathPrefix, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
@@ -65,7 +65,7 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
-func handleLogin(ctx echo.Context, db *pgvis.DB) error {
+func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
@@ -92,7 +92,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 					ApiKey:    apiKey,
 				})
 
-				return ctx.Redirect(http.StatusSeeOther, "/profile")
+				return ctx.Redirect(http.StatusSeeOther, serverPathPrefix+"/profile")
 			}
 
 			if u.ApiKey != "" {
