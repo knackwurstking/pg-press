@@ -18,7 +18,7 @@ import (
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${custom} ---> ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
+		Format: "${custom} ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
 		Output: os.Stderr,
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
 			t := time.Now()
