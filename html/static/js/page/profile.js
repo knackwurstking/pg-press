@@ -1,1 +1,1 @@
-console.debug("Hello, this is the login page here.");
+console.debug("Hello, this is the profile page here.");
