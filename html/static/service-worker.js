@@ -1,5 +1,15 @@
-const version = "v1";
-const files = ["./pico.lime.min.css"];
+const version = "v0";
+
+const files = [
+    "./apple-touch-icon-180x180.png",
+    "./favicon.ico",
+    "./icon.png",
+    "./maskable-icon-512x512.png",
+    "./pico.lime.min.css",
+    "./pwa-192x192.png",
+    "./pwa-512x512.png",
+    "./pwa-64x64.png",
+];
 
 this.addEventListener("install", (event) => {
     console.debug("Install...", { files });
@@ -50,8 +60,7 @@ this.addEventListener("fetch", (event) => {
                     resp ||
                     // @ts-expect-error - request not exists
                     fetch(event.request).then((resp) => {
-                        // @ts-expect-error - request not exists
-                        cache.put(event.request, resp.clone());
+                        //cache.put(event.request, resp.clone());
                         return resp;
                     })
                 );
