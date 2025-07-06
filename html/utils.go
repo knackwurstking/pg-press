@@ -24,7 +24,7 @@ func getUserFromContext(ctx echo.Context) (*pgvis.User, error) {
 func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, err error) {
 	u, err := db.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
-		return false, fmt.Errorf("user not found: %s", err.Error())
+		return false, fmt.Errorf("database error: %s", err.Error())
 	}
 
 	// Set cookie and redirect to "/"

@@ -71,7 +71,7 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 		return ctx.Redirect(http.StatusSeeOther, serverPathPrefix+"/profile")
 	} else {
 		if err != nil {
-			log.Error("/login -> Invalid Api Key: %s", err.Error())
+			log.Errorf("/login -> Invalid Api Key: %s", err.Error())
 		}
 	}
 
