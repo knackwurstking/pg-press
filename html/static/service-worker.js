@@ -1,4 +1,4 @@
-const version = "v0.0.1";
+const version = "v0";
 const files = ["./pico.lime.min.css"];
 
 this.addEventListener("install", (event) => {
