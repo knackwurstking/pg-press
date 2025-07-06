@@ -2,7 +2,6 @@ package html
 
 import (
 	"embed"
-	"errors"
 	"html/template"
 	"net/http"
 
@@ -141,29 +140,28 @@ func handleFeed(c echo.Context) error {
 }
 
 func handleProfile(ctx echo.Context, db *pgvis.DB) error {
-	var data ProfilePageData
+	var pageData ProfilePageData
 
-	{ // Get user from the echos context
-		user, ok := ctx.Get("user").(*pgvis.User)
-		if !ok {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				errors.New("this should never happen, user is missing in context"))
-		}
-		data.User = user
+	user, err := getUserFromContext(ctx)
+	if err != nil {
+		return err
 	}
+	pageData.User = user
 
-	{ // Get "user-name" from form data (optional), and update database user
-		v, err := ctx.FormParams()
-		if userName := v.Get("user-name"); userName != "" && userName != data.User.UserName {
-			log.Debugf(
-				"/profile -> Change user name in database: %s => %s",
-				data.User.UserName, userName,
-			)
+	// Get "user-name" from form data (optional), and update database user
+	v, err := ctx.FormParams()
+	userName := v.Get("user-name")
 
-			data.User.UserName = userName
-			if err = db.Users.Update(data.User.TelegramID, data.User); err != nil {
-				data.ErrorMessages = []string{err.Error()}
-			}
+	// Database update
+	if userName != "" && userName != pageData.User.UserName {
+		log.Debugf(
+			"/profile -> Change user name in database: %s => %s",
+			pageData.User.UserName, userName,
+		)
+
+		pageData.User.UserName = userName
+		if err = db.Users.Update(pageData.User.TelegramID, pageData.User); err != nil {
+			pageData.ErrorMessages = []string{err.Error()}
 		}
 	}
 
@@ -177,7 +175,7 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(ctx.Response(), data)
+	err = t.Execute(ctx.Response(), pageData)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
