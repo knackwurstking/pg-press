@@ -42,9 +42,13 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: func(c echo.Context) bool {
 			url := c.Request().URL.String()
-			log.Debugf("KeyAuth -> Skipper -> %s", url)
 
-			return skipperRegExp.MatchString(url)
+			if ok := skipperRegExp.MatchString(url); ok {
+				log.Debugf("KeyAuth -> Skipper -> Skip: %s", url)
+				return true
+			}
+
+			return false
 		},
 
 		KeyLookup: "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + html.CookieName,
