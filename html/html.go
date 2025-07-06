@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/google/uuid"
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
 )
@@ -68,38 +67,11 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
-	invalidApiKey := false
-
-	if apiKey != "" {
-		if u, err := db.Users.GetUserFromApiKey(apiKey); err == nil {
-			// Set cookie and redirect to "/"
-			if u.ApiKey == apiKey {
-				log.Debugf(
-					"/login -> Set cookie and redirect to /profile (id: %#v; user: %#v)",
-					u.TelegramID, u.UserName,
-				)
-
-				cookie := new(http.Cookie)
-
-				cookie.Name = CookieName
-				cookie.Value = uuid.New().String()
-				ctx.SetCookie(cookie)
-
-				db.Cookies.Add(&pgvis.Cookie{
-					UserAgent: ctx.Request().UserAgent(),
-					Value:     cookie.Value,
-					ApiKey:    apiKey,
-				})
-
-				return ctx.Redirect(http.StatusSeeOther, serverPathPrefix+"/profile")
-			}
-
-			if u.ApiKey != "" {
-				invalidApiKey = true
-			}
-		} else {
-			log.Warnf("/login -> User not found, invalid api key: %s", err.Error())
-			invalidApiKey = true
+	if ok, err := handleLoginApiKey(apiKey, db, ctx); ok {
+		return ctx.Redirect(http.StatusSeeOther, serverPathPrefix+"/profile")
+	} else {
+		if err != nil {
+			log.Error("/login -> Invalid Api Key: %s", err.Error())
 		}
 	}
 
@@ -113,7 +85,7 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 
 	err = t.Execute(ctx.Response(), LoginPageData{
 		ApiKey:        apiKey,
-		InvalidApiKey: invalidApiKey,
+		InvalidApiKey: apiKey != "",
 	})
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
