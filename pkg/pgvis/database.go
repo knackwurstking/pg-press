@@ -155,7 +155,7 @@ func (db *DBUsers) Remove(telegramID int64) {
 }
 
 func (db *DBUsers) Update(telegramID int64, user *User) error {
-	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id = %d`, telegramID)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
 
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -169,7 +169,7 @@ func (db *DBUsers) Update(telegramID int64, user *User) error {
 	}
 
 	query = fmt.Sprintf(
-		`UPDATE users SET user_name = "%s", api_key = "%s" WHERE telegram_id = %d`,
+		`UPDATE users SET user_name="%s", api_key="%s" WHERE telegram_id=%d`,
 		user.UserName, user.ApiKey, telegramID,
 	)
 

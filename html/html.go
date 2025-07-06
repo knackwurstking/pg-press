@@ -155,6 +155,12 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	{ // Get "user-name" from form data (optional), and update database user
 		v, err := ctx.FormParams()
 		if userName := v.Get("user-name"); userName != "" && userName != data.User.UserName {
+			log.Debugf(
+				"/profile -> Change user name in database: %s => %s",
+				data.User.UserName, userName,
+			)
+
+			data.User.UserName = userName
 			if err = db.Users.Update(data.User.TelegramID, data.User); err != nil {
 				data.ErrorMessages = []string{err.Error()}
 			} else {

@@ -52,8 +52,13 @@
     </dialog>
     {{end}}
 
-    <dialog id="dialogEditUserName">
-        <form>
+    <dialog 
+        id="dialogEditUserName" 
+        onsubmit='
+            const value = this.querySelector(`input[name="user-name"]`).value;
+        '
+    >
+        <form action="./profile">
             <label>
                 User Name
                 <input
