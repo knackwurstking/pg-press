@@ -28,7 +28,17 @@
         <title>{{block "title" .}}{{end}}</title>
 
         <script>
-            // TODO: Register the service worker here
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker.register("./service-worker.js")
+                        .then((registration) => {
+                            console.debug("Service Worker registered with scope:", registration.scope);
+                        })
+                        .catch((err), () => {
+                            console.debug("Service Worker registration failed:", err);
+                        });
+                });
+            }
         </script>
     </head>
 
