@@ -25,7 +25,7 @@
 
         {{block "additional-scripts" .}}{{end}}
 
-        <title>{{block "title" .}}{{end}}</title>
+        <title>PG: Presse | {{template "title" .}}</title>
 
         <script>
             if ("serviceWorker" in navigator) {
@@ -49,7 +49,19 @@
         </script>
     </head>
 
-    <body class="debug">
+    <body>
+        <header class="container-fluid">
+            <nav>
+                <ul>
+                    <li>
+                        <strong>{{template "title" .}}</strong>
+                    </li>
+                </ul>
+
+                {{template "nav" .}}
+            </nav>
+        </header>
+
         {{block "content" .}}{{end}}
     </body>
 </html>

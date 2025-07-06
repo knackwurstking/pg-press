@@ -1,6 +1,6 @@
 <!-- Title -->
 
-{{define "title"}}PG: Presse | Profil{{end}}
+{{define "title"}}Profil{{end}}
 
 <!-- Additional Scripts -->
 
@@ -9,10 +9,16 @@
 <script src="./js/page/profile.js" defer></script>
 {{end}}
 
+<!-- Nav -->
+
+{{define "nav"}}
+<li><a href="./">Home</a></li>
+{{end}}
+
 <!-- Content -->
 
 {{define "content"}}
-<header class="container-fluid">
+<main class="container-fluid">
     <hgroup>
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
@@ -29,9 +35,7 @@
 
         <p>Telegram ID: {{.User.TelegramID}}</p>
     </hgroup>
-</header>
 
-<main class="container-fluid">
     {{if ne .ErrorMessages nil}}
     <dialog id="dialogErrorMessages" open>
         <form method="dialog">

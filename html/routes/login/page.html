@@ -1,12 +1,18 @@
 <!-- Title -->
 
-{{define "title"}}PG: Presse | Registrieren{{end}}
+{{define "title"}}Registrieren{{end}}
 
 <!-- Additional Scripts -->
 
 {{define "additional-scripts"}}
 <link rel="stylesheet" href="./css/page/login.css" />
 <script src="./js/page/login.js" defer></script>
+{{end}}
+
+<!-- Nav -->
+
+{{define "nav"}}
+<li><a href="./">Home</a></li>
 {{end}}
 
 <!-- Content -->
@@ -23,7 +29,9 @@
                     placeholder="Api Key"
                     required
                     value="{{.ApiKey}}"
-                    {{if .InvalidApiKey}}aria-invalid="{{.InvalidApiKey}}"{{end}}
+                    {{if
+                    .InvalidApiKey}}aria-invalid="{{.InvalidApiKey}}"
+                    {{end}}
                 />
             </label>
         </fieldset>
