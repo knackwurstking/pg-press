@@ -163,8 +163,6 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 			data.User.UserName = userName
 			if err = db.Users.Update(data.User.TelegramID, data.User); err != nil {
 				data.ErrorMessages = []string{err.Error()}
-			} else {
-				data.User.UserName = userName
 			}
 		}
 	}
