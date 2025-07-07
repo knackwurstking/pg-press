@@ -123,9 +123,18 @@ func showUserCommand() cli.Command {
 					fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
 				} else {
 					if len(cookies) > 0 {
-						fmt.Printf("\n%s\n\n", color.Underline(color.Bold("Cookies:")))
+						fmt.Printf(
+							"\n%s <api-key> - <value> - <user-agent>\n\n",
+							color.Underline(color.Bold("Cookies:")),
+						)
+
 						for _, c := range cookies {
-							fmt.Printf("%s \"%s\"\n", color.Bold(c.ApiKey), color.Italic(c.UserAgent))
+							fmt.Printf(
+								"%s - %s - \"%s\"\n",
+								color.Bold(c.ApiKey),
+								c.Value,
+								color.Italic(c.UserAgent),
+							)
 						}
 					}
 				}
