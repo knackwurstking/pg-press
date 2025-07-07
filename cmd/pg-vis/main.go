@@ -45,7 +45,7 @@ func main() {
 
 			{
 				Name:  "user",
-				Usage: cli.Usage("Handle users, add, delete or modify user data in the database"),
+				Usage: cli.Usage("Handle users database table, add, remove or modify user data"),
 				Commands: []cli.Command{
 					listUserCommand(),
 					showUserCommand(),
@@ -55,8 +55,13 @@ func main() {
 				},
 			},
 
-			// TODO: Cookies command(s): "cookies" remove --api-key <api-key>
-			// TODO: Cookies command(s): "cookies" remove --value <value>
+			{
+				Name:  "cookies",
+				Usage: cli.Usage("Handle cookies database table, remove cookies data"),
+				Commands: []cli.Command{
+					removeCookiesCommand(),
+				},
+			},
 
 			serverCommand(),
 
