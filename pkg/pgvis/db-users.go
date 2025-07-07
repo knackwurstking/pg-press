@@ -129,13 +129,14 @@ func (db *DBUsers) Add(user *User) error {
 	return err
 }
 
-func (db *DBUsers) Remove(telegramID int64) {
+func (db *DBUsers) Remove(telegramID int64) error {
 	query := fmt.Sprintf(
 		`DELETE FROM users WHERE telegram_id = "%d"`,
 		telegramID,
 	)
 
-	_, _ = db.db.Exec(query)
+	_, err := db.db.Exec(query)
+	return err
 }
 
 func (db *DBUsers) Update(telegramID int64, user *User) error {
