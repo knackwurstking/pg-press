@@ -13,7 +13,13 @@ func removeCookiesCommand() cli.Command {
 				cli.Optional,
 			)
 
-			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+			useApiKey := cli.Bool(cmd, "api-key",
+				cli.Usage("Remove all entries containing the api-key"),
+				cli.Optional)
+
+			value := cli.StringArg(cmd, "value",
+				cli.Usage("Remove entry containing the cookie value, only if `--api-key` is not set"),
+				cli.Required)
 
 			return func(cmd *cli.Command) error {
 				db, err := openDB(*customDBPath)
@@ -21,7 +27,7 @@ func removeCookiesCommand() cli.Command {
 					return err
 				}
 
-				db.Users.Remove(*telegramID)
+				// TODO: ...
 
 				return nil
 			}
