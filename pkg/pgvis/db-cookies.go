@@ -28,6 +28,7 @@ func NewDBCookies(db *sql.DB) *DBCookies {
 			PRIMARY KEY("value")
 		);
 	`
+
 	if _, err := db.Exec(query); err != nil {
 		panic(err)
 	}
