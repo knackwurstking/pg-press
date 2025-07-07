@@ -55,6 +55,9 @@ func main() {
 				},
 			},
 
+			// TODO: Cookies command(s): "cookies" remove --api-key <api-key>
+			// TODO: Cookies command(s): "cookies" remove --value <value>
+
 			serverCommand(),
 
 			cli.CompletionCommand(),
