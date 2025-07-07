@@ -10,7 +10,8 @@ import (
 
 func apiKeyCommand() cli.Command {
 	return cli.Command{
-		Name: "api-key",
+		Name:  "api-key",
+		Usage: cli.Usage("Generating a new Api Key"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			return func(cmd *cli.Command) error {
 				apiKey, err := keymaker.NewApiKey("pgp", 32)
