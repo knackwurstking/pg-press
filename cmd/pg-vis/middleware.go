@@ -58,28 +58,39 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
 			log.Debugf("KeyAuth -> Validator -> User-Agent=%#v", ctx.Request().UserAgent())
 
-			if cookie, err := ctx.Cookie(html.CookieName); err == nil {
-				c, err := db.Cookies.Get(cookie.Value)
-				if err == nil {
-					log.Debugf("KeyAuth -> Validator -> cookie found")
-					auth = c.ApiKey
+			user, err := db.Users.GetUserFromApiKey(auth)
+			if err != nil {
+				if cookie, err := ctx.Cookie(html.CookieName); err == nil {
+					c, err := db.Cookies.Get(cookie.Value)
+					if err == nil {
+						log.Debugf("KeyAuth -> Validator -> cookie found")
+						auth = c.ApiKey
+					}
+				} else {
+					return false, fmt.Errorf("get user from db with auth %#v failed: %s", auth, err.Error())
+				}
+			} else {
+				// Api Key found in users table (database), remove old existing cookie
+				if cookie, err := ctx.Cookie(html.CookieName); err == nil {
+					db.Cookies.Remove(cookie.Value)
 				}
 			}
 
-			user, err := db.Users.GetUserFromApiKey(auth)
-			if err != nil {
-				return false, fmt.Errorf("get user from db with auth %#v failed: %s", auth, err.Error())
-			}
-
-			log.Debugf(
-				"KeyAuth -> Validator -> telegram_id=%#v; user_name=%#v",
-				user.TelegramID, user.UserName,
-			)
-
 			if user.ApiKey == auth {
+				log.Debugf(
+					"KeyAuth -> Validator -> Authorized: telegram_id=%#v; user_name=%#v",
+					user.TelegramID, user.UserName,
+				)
+
 				ctx.Set("user", user)
+
 				return true, nil
 			}
+
+			log.Warn(
+				"KeyAuth -> Validator -> Rejected: telegram_id=%#v; user_name=%#v, api_key=%#v",
+				user.TelegramID, user.UserName, user.ApiKey,
+			)
 
 			return false, nil
 		},
