@@ -18,15 +18,22 @@ type DBCookies struct {
 }
 
 func NewDBCookies(db *sql.DB) *DBCookies {
-	// TODO: Alter existing table (new "vendor")
 	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
-			vendor TEST NOT NULL,
+			vendor TEXT NOT NULL,
 			value TEXT NOT NULL,
 			api_key TEXT NOT NULL,
 			PRIMARY KEY("value")
 		);
+	`
+
+	if _, err := db.Exec(query); err != nil {
+		panic(err)
+	}
+
+	query = `
+		ALTER TABLE cookies ADD COLUMN vendor TEXT
 	`
 
 	if _, err := db.Exec(query); err != nil {
