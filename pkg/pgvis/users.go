@@ -13,12 +13,3 @@ func NewUser(telegramID int64, userName string, apiKey string) *User {
 		ApiKey:     apiKey,
 	}
 }
-
-type Users []*User
-
-func NewUsers(users ...*User) Users {
-	u := make([]*User, 0)
-	u = append(u, users...)
-
-	return u
-}
