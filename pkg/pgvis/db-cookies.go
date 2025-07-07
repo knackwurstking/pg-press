@@ -110,11 +110,12 @@ func (db *DBCookies) Add(cookie *Cookie) error {
 	return err
 }
 
-func (db *DBCookies) Remove(value string) {
+func (db *DBCookies) Remove(value string) error {
 	query := fmt.Sprintf(
 		`DELETE FROM cookies WHERE value = "%s"`,
 		value,
 	)
 
-	_, _ = db.db.Exec(query)
+	_, err := db.db.Exec(query)
+	return err
 }

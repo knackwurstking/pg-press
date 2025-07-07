@@ -78,7 +78,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 			if c, err := db.Cookies.Get(cookie.Value); err != nil {
 				return false, nil
 			} else {
-				log.Debugf("KeyAuth -> Validator -> Cookie found, try to search for the user again")
+				log.Debugf("KeyAuth -> Validator -> Cookie found, try to search for the user...")
 
 				if user, err = db.Users.GetUserFromApiKey(c.ApiKey); err != nil {
 					return false, nil
@@ -86,11 +86,6 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 			}
 		} else {
 			return false, nil
-		}
-	} else {
-		// Api Key found in users table (database), remove old existing cookie
-		if cookie, err := ctx.Cookie(html.CookieName); err == nil {
-			db.Cookies.Remove(cookie.Value)
 		}
 	}
 

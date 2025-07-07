@@ -29,6 +29,13 @@ func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 
 	// Set cookie and redirect to "/"
 	if u.ApiKey == apiKey {
+		if cookie, err := ctx.Cookie(CookieName); err == nil {
+			log.Debug("Removing the old cookie...")
+			if err = db.Cookies.Remove(cookie.Value); err != nil {
+				log.Warnf("KeyAuth -> Validator -> Removing the old cookie failed: %s", err.Error())
+			}
+		}
+
 		log.Debugf(
 			"Set cookie and redirect to /profile (id: %#v; user: %#v)",
 			u.TelegramID, u.UserName,
