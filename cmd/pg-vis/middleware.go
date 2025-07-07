@@ -55,10 +55,10 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 
 		AuthScheme: "Bearer",
 
-		Validator: func(auth string, c echo.Context) (bool, error) {
-			log.Debugf("KeyAuth -> Validator -> User-Agent=%#v", c.Request().UserAgent())
+		Validator: func(auth string, ctx echo.Context) (bool, error) {
+			log.Debugf("KeyAuth -> Validator -> User-Agent=%#v", ctx.Request().UserAgent())
 
-			if cookie, err := c.Cookie(html.CookieName); err == nil {
+			if cookie, err := ctx.Cookie(html.CookieName); err == nil {
 				c, err := db.Cookies.Get(cookie.Value)
 				if err == nil {
 					log.Debugf("KeyAuth -> Validator -> cookie found")
@@ -77,7 +77,7 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 			)
 
 			if user.ApiKey == auth {
-				c.Set("user", user)
+				ctx.Set("user", user)
 				return true, nil
 			}
 

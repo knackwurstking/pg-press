@@ -8,7 +8,6 @@ import (
 
 type Cookie struct {
 	UserAgent string
-	Vendor    string
 	Value     string
 	ApiKey    string
 }
@@ -21,19 +20,10 @@ func NewDBCookies(db *sql.DB) *DBCookies {
 	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
-			vendor TEXT NOT NULL,
 			value TEXT NOT NULL,
 			api_key TEXT NOT NULL,
 			PRIMARY KEY("value")
 		);
-	`
-
-	if _, err := db.Exec(query); err != nil {
-		panic(err)
-	}
-
-	query = `
-		ALTER TABLE cookies ADD COLUMN vendor TEXT
 	`
 
 	if _, err := db.Exec(query); err != nil {
@@ -60,7 +50,7 @@ func (db *DBCookies) Get(value string) (*Cookie, error) {
 		return nil, ErrNotFound
 	}
 
-	err = r.Scan(&cookie.UserAgent, &cookie.Vendor, &cookie.Value, &cookie.ApiKey)
+	err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +70,7 @@ func (db *DBCookies) GetForApiKey(apiKey string) ([]*Cookie, error) {
 
 	cookie := &Cookie{}
 	for r.Next() {
-		err = r.Scan(&cookie.UserAgent, &cookie.Vendor, &cookie.Value, &cookie.ApiKey)
+		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey)
 		if err != nil {
 			return nil, err
 		}
@@ -112,8 +102,8 @@ func (db *DBCookies) Add(cookie *Cookie) error {
 	}
 
 	query = fmt.Sprintf(
-		`INSERT INTO cookies (user_agent, vendor, value, api_key) VALUES ("%s", "%s", "%s", "%s")`,
-		cookie.UserAgent, cookie.Vendor, cookie.Value, cookie.ApiKey,
+		`INSERT INTO cookies (user_agent, value, api_key) VALUES ("%s", "%s", "%s")`,
+		cookie.UserAgent, cookie.Value, cookie.ApiKey,
 	)
 
 	_, err = db.db.Exec(query)
