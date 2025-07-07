@@ -11,7 +11,8 @@
 
 <!-- Nav -->
 
-{{define "nav"}}{{end}}
+{{define "nav"}}
+{{end}}
 
 <!-- Content -->
 
@@ -21,15 +22,12 @@
         <fieldset>
             <label>
                 Api Key
-                <input
-                    name="api-key"
-                    type="text"
-                    placeholder="Api Key"
-                    required
-                    value="{{.ApiKey}}"
-                    {{if
-                    .InvalidApiKey}}aria-invalid="{{.InvalidApiKey}}"
-                    {{end}}
+                <input name="api-key" 
+                    type="text" 
+                    placeholder="Api Key" 
+                    value="{{.ApiKey}}" 
+                    {{if .InvalidApiKey}} aria-invalid="{{.InvalidApiKey}}" {{end}} 
+                    required 
                 />
             </label>
         </fieldset>

@@ -26,12 +26,9 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button
-                class="contrast outline icon"
-                onclick='
+            <button class="contrast outline icon" onclick='
                     document.querySelector("#dialogEditUserName").showModal();
-                '
-            >
+                '>
                 {{template "svg-pencil"}}
             </button>
         </span>
@@ -50,7 +47,7 @@
 
             <span class="messages">
                 {{range $message := .ErrorMessages}}
-                    <p>{{$message}}</p>
+                <p>{{$message}}</p>
                 {{end}}
             </span>
 
@@ -65,13 +62,8 @@
         <form action="./profile">
             <label>
                 User Name
-                <input
-                    name="user-name"
-                    type="text"
-                    value="{{.User.UserName}}"
-                    placeholder="User Name"
-                    aria-invalid="{{if eq .User.UserName ""}}{{end}}"
-                />
+                <input name="user-name" type="text" value="{{.User.UserName}}" placeholder="User Name"
+                    aria-invalid="{{if eq .User.UserName ""}}{{end}}" />
             </label>
 
             <button type="submit">Submit</button>

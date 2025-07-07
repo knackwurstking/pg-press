@@ -1,67 +1,66 @@
 <!doctype html>
 <html lang="de">
-    <head>
-        <meta charset="utf-8" />
 
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1"
-        />
+<head>
+    <meta charset="utf-8" />
 
-        <link rel="icon" href="./favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
-        <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
 
-        <style>
-            .debug,
-            .debug * {
-                border: 0.5px solid red;
-            }
-        </style>
+    <link rel="manifest" href="./manifest.json" />
 
-        <link rel="stylesheet" href="./pico.lime.min.css" />
-        <link rel="stylesheet" href="./css/style.css" />
+    <style>
+        .debug,
+        .debug * {
+            border: 0.5px solid red;
+        }
+    </style>
 
-        {{block "additional-scripts" .}}{{end}}
+    <link rel="stylesheet" href="./pico.lime.min.css" />
+    <link rel="stylesheet" href="./css/style.css" />
 
-        <title>PG: Presse | {{template "title" .}}</title>
+    {{block "additional-scripts" .}}{{end}}
 
-        <script>
-            if ("serviceWorker" in navigator) {
-                window.addEventListener("load", () => {
-                    navigator.serviceWorker
-                        .register("./service-worker.js")
-                        .then((registration) => {
-                            console.info(
-                                "Service Worker registered with scope:",
-                                registration.scope,
-                            );
-                        })
-                        .catch((err) => {
-                            console.error(
-                                "Service Worker registration failed:",
-                                err,
-                            );
-                        });
-                });
-            }
-        </script>
-    </head>
+    <title>PG: Presse | {{template "title" .}}</title>
 
-    <body>
-        <header class="container-fluid">
-            <nav>
-                <ul>
-                    <li>
-                        <strong>{{template "title" .}}</strong>
-                    </li>
-                </ul>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("./service-worker.js")
+                    .then((registration) => {
+                        console.info(
+                            "Service Worker registered with scope:",
+                            registration.scope,
+                        );
+                    })
+                    .catch((err) => {
+                        console.error(
+                            "Service Worker registration failed:",
+                            err,
+                        );
+                    });
+            });
+        }
+    </script>
+</head>
 
-                {{template "nav" .}}
-            </nav>
-        </header>
+<body>
+    <header class="container-fluid">
+        <nav>
+            <ul>
+                <li>
+                    <strong>{{template "title" .}}</strong>
+                </li>
+            </ul>
 
-        {{block "content" .}}{{end}}
-    </body>
+            {{template "nav" .}}
+        </nav>
+    </header>
+
+    {{block "content" .}}{{end}}
+</body>
+
 </html>
