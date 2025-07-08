@@ -9,6 +9,8 @@ const files = [
     "./pwa-192x192.png",
     "./pwa-512x512.png",
     "./pwa-64x64.png",
+
+    "./css/style.css",
 ];
 
 this.addEventListener("install", (event) => {
