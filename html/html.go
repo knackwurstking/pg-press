@@ -185,7 +185,7 @@ func (PageData) TemplatePatterns(patterns ...string) []string {
 type HomePageData struct {
 	PageData
 
-	// TODO: Categories, Sub categories, Info...
+	GlobalSearch GlobalSearch
 }
 
 type LoginPageData struct {
