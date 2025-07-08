@@ -47,15 +47,19 @@ func Serve(e *echo.Echo, options Options) {
 }
 
 func handleHomePage(c echo.Context) error {
+	pageData := PageData{}
+
 	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/page.html",
+		pageData.TemplatePatterns(
+			"routes/layout.html",
+			"routes/page.html",
+		)...,
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), nil)
+	err = t.Execute(c.Response(), pageData)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -75,9 +79,16 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 		}
 	}
 
+	pageData := LoginPageData{
+		ApiKey:        apiKey,
+		InvalidApiKey: apiKey != "",
+	}
+
 	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/login/page.html",
+		pageData.TemplatePatterns(
+			"routes/layout.html",
+			"routes/login/page.html",
+		)...,
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -95,15 +106,19 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 }
 
 func handleFeed(c echo.Context) error {
+	pageData := PageData{}
+
 	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/feed/page.html",
+		pageData.TemplatePatterns(
+			"routes/layout.html",
+			"routes/feed/page.html",
+		)...,
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), nil)
+	err = t.Execute(c.Response(), pageData)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
