@@ -28,9 +28,12 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button class="contrast outline icon" onclick='
+            <button
+                class="outline contrast icon"
+                onclick='
                     document.querySelector("#dialogEditUserName").showModal();
-                '>
+                '
+            >
                 {{template "svg-pencil"}}
             </button>
         </span>
@@ -38,37 +41,35 @@
         <p>Telegram ID: {{.User.TelegramID}}</p>
     </hgroup>
 
+    <br />
+
     <!-- TODO: Add a cookies section here, for disconnect remote devices  -->
+    <details>
+        <summary>Cookies</summary>
 
-    {{if ne .ErrorMessages nil}}
-    <dialog id="dialogErrorMessages" open>
-        <form method="dialog">
-            <header>
-                <h2>{{template "svg-triangle-alert"}}</h2>
-            </header>
+        <i>Under Construction</i>
 
-            <span class="messages">
-                {{range $message := .ErrorMessages}}
-                <p>{{$message}}</p>
-                {{end}}
-            </span>
-
-            <footer>
-                <button>Schließen</button>
-            </footer>
-        </form>
-    </dialog>
-    {{end}}
+        <ul>
+            <!-- TODO: Render cookies here, add delete (icon) button -->
+        </ul>
+    </details>
 
     <dialog id="dialogEditUserName">
         <form action="./profile">
             <label>
                 User Name
-                <input name="user-name" type="text" value="{{.User.UserName}}" placeholder="User Name"
-                    aria-invalid="{{if eq .User.UserName ""}}{{end}}" />
+                <input
+                    name="user-name"
+                    type="text"
+                    value="{{.User.UserName}}"
+                    placeholder="User Name"
+                />
             </label>
 
-            <button type="submit">Submit</button>
+            <footer>
+                <button class="secondary">Schließen</button>
+                <button type="submit">Ändern</button>
+            </footer>
         </form>
     </dialog>
 </main>

@@ -15,10 +15,3 @@ hgroup > .user-name {
     flex-direction: column;
     gap: var(--pico-spacing);
 }
-
-#dialogErrorMessages footer {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: var(--pico-spacing);
-}

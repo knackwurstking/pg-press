@@ -155,12 +155,19 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	return nil
 }
 
+type PageData struct {
+	ErrorMessages []string
+}
+
 type LoginPageData struct {
+	PageData
+
 	ApiKey        string
 	InvalidApiKey bool
 }
 
 type ProfilePageData struct {
-	User          *pgvis.User
-	ErrorMessages []string
+	PageData
+
+	User *pgvis.User
 }

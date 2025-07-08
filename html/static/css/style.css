@@ -1,3 +1,18 @@
-button.icon {
+button.outline.icon {
     border: none;
+}
+
+svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+}
+
+dialog footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--pico-spacing);
+}
+
+dialog footer [type="submit"] {
+    margin-bottom: 0;
 }

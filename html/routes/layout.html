@@ -49,7 +49,7 @@
 
 <body>
     <header class="container-fluid">
-        <nav>
+        <nav class="ui-flex row justify-between gap">
             <ul>
                 <li>
                     <strong>{{template "title" .}}</strong>
@@ -61,6 +61,26 @@
     </header>
 
     {{block "content" .}}{{end}}
+
+    {{if ne .ErrorMessages nil}}
+    <dialog id="dialogErrorMessages" open>
+        <form method="dialog">
+            <header>
+                <h2>{{template "svg-triangle-alert"}}</h2>
+            </header>
+
+            <span class="messages">
+                {{range $message := .ErrorMessages}}
+                <p>{{$message}}</p>
+                {{end}}
+            </span>
+
+            <footer>
+                <button class="secondary">Schließen</button>
+            </footer>
+        </form>
+    </dialog>
+    {{end}}
 </body>
 
 </html>

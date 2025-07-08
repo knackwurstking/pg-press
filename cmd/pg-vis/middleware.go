@@ -19,7 +19,7 @@ import (
 var (
 	// FIXME: Find a better way to to this !!!
 	keyAuthSkipperRegExp = regexp.MustCompile(
-		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico)`,
+		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico|.*service-worker\.js)`,
 	)
 )
 
