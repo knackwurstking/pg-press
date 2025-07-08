@@ -138,10 +138,10 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	}
 
 	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/profile/page.html",
-		"svg/pencil.html",
-		"svg/triangle-alert.html",
+		pageData.TemplatePatterns(
+			"routes/layout.html",
+			"routes/profile/page.html",
+		)...,
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -157,6 +157,14 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 
 type PageData struct {
 	ErrorMessages []string
+}
+
+func (PageData) TemplatePatterns(patterns ...string) []string {
+	return append(
+		patterns,
+		"svg/triangle-alert.html",
+		"svg/pencil.html",
+	)
 }
 
 type LoginPageData struct {
