@@ -7,9 +7,9 @@ import (
 )
 
 type Cookie struct {
-	UserAgent string
-	Value     string
-	ApiKey    string
+	UserAgent string `json:"user_agent"`
+	Value     string `json:"value"`
+	ApiKey    string `json:"api_key"`
 }
 
 type DBCookies struct {
