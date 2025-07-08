@@ -1,9 +1,12 @@
 package main
 
-import "github.com/SuperPaintman/nice/cli"
+import (
+	"os"
+	"fmt"
 
-// TODO: Cookies command(s): "cookies" remove --api-key <api-key>
-// TODO: Cookies command(s): "cookies" remove --value <value>
+	"github.com/SuperPaintman/nice/cli"
+)
+
 func removeCookiesCommand() cli.Command {
 	return cli.Command{
 		Name: "remove",
@@ -27,7 +30,16 @@ func removeCookiesCommand() cli.Command {
 					return err
 				}
 
-				// TODO: ...
+				if *useApiKey {
+					err = db.Cookies.RemoveApiKey(*value)
+				} else {
+					err = db.Cookies.Remove(*value)
+				}
+
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Removing cookies from database failed: %s", err.Error())
+					os.Exit(exitCodeGeneric)
+				}
 
 				return nil
 			}
