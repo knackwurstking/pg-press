@@ -28,12 +28,9 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button
-                class="outline contrast icon"
-                onclick='
+            <button class="outline contrast icon" onclick='
                     document.querySelector("#dialogEditUserName").showModal();
-                '
-            >
+                '>
                 {{template "svg-pencil"}}
             </button>
         </span>
@@ -58,12 +55,7 @@
         <form action="./profile">
             <label>
                 User Name
-                <input
-                    name="user-name"
-                    type="text"
-                    value="{{.User.UserName}}"
-                    placeholder="User Name"
-                />
+                <input name="user-name" type="text" value="{{.User.UserName}}" placeholder="User Name" />
             </label>
 
             <footer>
