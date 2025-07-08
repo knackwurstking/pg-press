@@ -101,13 +101,14 @@ func showUserCommand() cli.Command {
 				} else {
 					if len(cookies) > 0 {
 						fmt.Printf(
-							"\n%s <api-key> - <value> - <user-agent>\n\n",
+							"\n%s <last-login> - <api-key> - <value> - <user-agent>\n\n",
 							color.Underline(color.Bold("Cookies:")),
 						)
 
 						for _, c := range cookies {
 							fmt.Printf(
-								"%s - %s - \"%s\"\n",
+								"%d - %s - %s - \"%s\"\n",
+								c.LastLogin,
 								color.Bold(c.ApiKey),
 								c.Value,
 								color.Italic(c.UserAgent),

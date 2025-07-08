@@ -83,6 +83,9 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 				if user, err = db.Users.GetUserFromApiKey(c.ApiKey); err != nil {
 					return false, nil
 				}
+
+				c.LastLogin = time.Now().UnixMilli()
+				go db.Cookies.Update(c.Value, c)
 			}
 		} else {
 			return false, nil

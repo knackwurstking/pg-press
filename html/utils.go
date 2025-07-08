@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
@@ -51,6 +52,7 @@ func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 			UserAgent: ctx.Request().UserAgent(),
 			Value:     cookie.Value,
 			ApiKey:    apiKey,
+			LastLogin: time.Now().UnixMilli(),
 		})
 
 		return true, nil
