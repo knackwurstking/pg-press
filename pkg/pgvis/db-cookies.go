@@ -119,3 +119,13 @@ func (db *DBCookies) Remove(value string) error {
 	_, err := db.db.Exec(query)
 	return err
 }
+
+func (db *DBCookies) RemoveApiKey(apiKey string) error {
+	query := fmt.Sprintf(
+		`DELETE FROM cookies WHERE api_key = "%s"`,
+		apiKey,
+	)
+
+	_, err := db.db.Exec(query)
+	return err
+}
