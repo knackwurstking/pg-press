@@ -22,3 +22,9 @@ dialog footer {
 dialog footer [type="submit"] {
     margin-bottom: 0;
 }
+
+#dialogErrorMessages .messages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pico-spacing);
+}
