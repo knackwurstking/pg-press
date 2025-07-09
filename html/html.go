@@ -169,6 +169,8 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
+	// TODO: Add cookies to `pageData`, check for errors and append to `pageData.ErrorMessages`
+
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
 		"routes/profile.html",
