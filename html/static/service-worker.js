@@ -4,8 +4,9 @@
 //  - v0.1: Updated files
 //  - v0.2: Updated files, Add bootstrap-icons (woff, woff2, css)
 //  - v0.3: Updated files, ./css/style.css removed
+//  - v0.4: Updated files, Add ui-dev.min.css, manifest.json
 
-const version = "v0.3";
+const version = "v0.4";
 
 const files = [
     "./apple-touch-icon-180x180.png",
@@ -13,11 +14,12 @@ const files = [
     "./bootstrap-icons.woff2",
     "./favicon.ico",
     "./icon.png",
+    "./manifest.json",
     "./maskable-icon-512x512.png",
     "./pwa-192x192.png",
     "./pwa-512x512.png",
     "./pwa-64x64.png",
-    //"./ui-dev.min.css",
+    "./ui-dev.min.css",
 
     "./css/bootstrap-icons.min.css",
 ];
