@@ -13,10 +13,10 @@ const files = [
     "./favicon.ico",
     "./icon.png",
     "./maskable-icon-512x512.png",
-    //"./ui-dev.min.css",
     "./pwa-192x192.png",
     "./pwa-512x512.png",
     "./pwa-64x64.png",
+    //"./ui-dev.min.css",
 
     "./css/style.css",
     "./css/bootstrap-icons.min.css",
