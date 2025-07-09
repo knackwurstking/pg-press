@@ -6,8 +6,9 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
 
 const (
@@ -194,29 +195,4 @@ func handleTroubleReports(ctx echo.Context) error {
 	}
 
 	return nil
-}
-
-type PageData struct {
-	ErrorMessages []string
-}
-
-func (PageData) TemplatePatterns(patterns ...string) []string {
-	return append(
-		patterns,
-		"svg/triangle-alert.html",
-		"svg/pencil.html",
-	)
-}
-
-type LoginPageData struct {
-	PageData
-
-	ApiKey        string
-	InvalidApiKey bool
-}
-
-type ProfilePageData struct {
-	PageData
-
-	User *pgvis.User
 }
