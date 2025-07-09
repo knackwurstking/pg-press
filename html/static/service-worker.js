@@ -6,7 +6,8 @@
 //  - v0.3: Updated files, ./css/style.css removed
 //  - v0.4: Updated files, Add ui-dev.min.css, manifest.json
 
-const version = "v0.4";
+// FIXME: Service Worker Changes seems not to work as expected
+const version = "pgvis-v0.4";
 
 const files = [
     "./apple-touch-icon-180x180.png",
