@@ -41,6 +41,8 @@ func Serve(e *echo.Echo, options Options) {
 		return handleLogin(c, options.ServerPathPrefix, options.DB)
 	})
 
+	// TODO: /logout route, just remove the cookie and redirect to the /login page
+
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
 		return handleProfile(c, options.DB)
 	})
