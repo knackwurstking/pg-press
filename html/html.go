@@ -59,7 +59,7 @@ func handleHomePage(c echo.Context) error {
 	t, err := template.ParseFS(routes,
 		pageData.TemplatePatterns(
 			"routes/layout.html",
-			"routes/page.html",
+			"routes/home.html",
 		)...,
 	)
 	if err != nil {
@@ -94,7 +94,7 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 	t, err := template.ParseFS(routes,
 		pageData.TemplatePatterns(
 			"routes/layout.html",
-			"routes/login/page.html",
+			"routes/login.html",
 		)...,
 	)
 	if err != nil {
@@ -118,7 +118,7 @@ func handleFeed(c echo.Context) error {
 	t, err := template.ParseFS(routes,
 		pageData.TemplatePatterns(
 			"routes/layout.html",
-			"routes/feed/page.html",
+			"routes/feed.html",
 		)...,
 	)
 	if err != nil {
@@ -162,7 +162,7 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	t, err := template.ParseFS(routes,
 		pageData.TemplatePatterns(
 			"routes/layout.html",
-			"routes/profile/page.html",
+			"routes/profile.html",
 		)...,
 	)
 	if err != nil {
@@ -183,7 +183,7 @@ func handleTroubleReports(ctx echo.Context) error {
 	t, err := template.ParseFS(routes,
 		pageData.TemplatePatterns(
 			"routes/layout.html",
-			"routes/trouble-reports/page.html",
+			"routes/trouble-reports.html",
 		)...,
 	)
 	if err != nil {
