@@ -5,7 +5,6 @@ details[disabled] {
     cursor: default;
 }
 
-button.outline.ghost,
 button.outline.icon {
     border: none;
 }
