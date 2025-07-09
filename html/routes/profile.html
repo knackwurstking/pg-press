@@ -5,7 +5,19 @@
 <!-- Additional Scripts -->
 
 {{define "additional-scripts"}}
-<link rel="stylesheet" href="./css/page/profile.css" />
+<style>
+    hgroup>.user-name>* {
+        margin: 0;
+    }
+
+    hgroup>.user-name {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--pico-spacing);
+    }
+</style>
 {{end}}
 
 <!-- Nav -->
