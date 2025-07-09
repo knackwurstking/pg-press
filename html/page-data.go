@@ -13,7 +13,6 @@ func (PageData) TemplatePatterns(patterns ...string) []string {
 		patterns,
 		"svg/triangle-alert.html",
 		"svg/pencil.html",
-		"svg/plus.html",
 	)
 }
 
