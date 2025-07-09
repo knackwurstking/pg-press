@@ -4,11 +4,12 @@
 //  - v0.1: Updated files
 //  - v0.2: Updated files, Add bootstrap-icons (woff, woff2, css)
 //  - v0.3: Updated files, ./css/style.css removed
-//  - v0.4: Updated files, Add ui-dev.min.css, manifest.json
+//  - pgvis-v0.4: Updated files, Add ui-dev.min.css, manifest.json
+//  - pgvis-v0.5: Added skipWaiting to "install" event handler
 
 // FIXME: Service Worker Changes seems not to work as expected
 //        - It is installing, but not activating (chrome browser)
-const version = "pgvis-v0.4";
+const version = "pgvis-v0.5";
 
 const files = [
     "./apple-touch-icon-180x180.png",
@@ -28,6 +29,8 @@ const files = [
 
 this.addEventListener("install", (event) => {
     console.debug("Install...", { files });
+
+    self.skipWaiting();
 
     // @ts-expect-error - waitUntil not exists
     event.waitUntil(
