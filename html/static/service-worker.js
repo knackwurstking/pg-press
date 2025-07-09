@@ -1,4 +1,9 @@
-const version = "v0";
+// Version History:
+//
+//  - v0: Initial version
+//  - v0.1: Updated files
+
+const version = "v0.1";
 
 const files = [
     "./apple-touch-icon-180x180.png",
