@@ -60,6 +60,7 @@ func (db *DBCookies) Get(value string) (*Cookie, error) {
 	return cookie, nil
 }
 
+// TODO: Rename method to `ListApiKey(...
 func (db *DBCookies) GetForApiKey(apiKey string) ([]*Cookie, error) {
 	cookies := []*Cookie{}
 
