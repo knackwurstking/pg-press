@@ -20,22 +20,52 @@
 
 {{define "content"}}
 <main class="container-fluid">
-    <input id="globalSearch" name="search" type="search" placeholder="Suche" aria-label="Suche" />
-
     <!-- TODO: Categories, Sub categories, And more -->
 
-    <aside>
-        <nav>
-            <ul>
-                <li><a href="#howtos" class="secondary">Howtos</a></li>
-                <li><a href="#documentation" class="secondary">Documentation</a></li>
-                <li><a href="#alert-lists" class="secondary">Alarm Listen</a></li>
-                <li><a href="#trouble-reports" class="secondary">Problem Berichte</a></li>
-                <li><a href="#product-data" class="secondary">Product Daten</a></li>
-                <li><a href="#metal-sheets" class="secondary">Blech Listen</a></li>
-                <li><a href="#flakes" class="secondary">Flakes</a></li>
-            </ul>
-        </nav>
-    </aside>
+    <details name="categories" disabled>
+        <summary>Howtos</summary>
+
+        <i>Work in Progress</i>
+    </details>
+
+    <hr />
+
+    <details name="categories" disabled>
+        <summary>Alarm Listen</summary>
+
+        <i>Work in Progress</i>
+    </details>
+
+    <hr />
+
+    <details name="categories">
+        <summary>Trouble Reports</summary>
+
+        <i>Work in Progress</i>
+    </details>
+
+    <hr />
+
+    <details name="categories" disabled>
+        <summary>Produkt Daten</summary>
+
+        <i>Work in Progress</i>
+    </details>
+
+    <hr />
+
+    <details name="categories" disabled>
+        <summary>Blech Listen</summary>
+
+        <i>Work in Progress</i>
+    </details>
+
+    <hr />
+
+    <details name="categories" disabled>
+        <summary>Flakes</summary>
+
+        <i>Work in Progress</i>
+    </details>
 </main>
 {{end}}

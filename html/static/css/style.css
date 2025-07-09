@@ -1,4 +1,5 @@
-a[disabled] {
+a[disabled],
+details[disabled] {
     opacity: 0.5;
     pointer-events: none;
     cursor: default;
