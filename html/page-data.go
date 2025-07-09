@@ -19,4 +19,5 @@ type ProfilePageData struct {
 	PageData
 
 	User *pgvis.User
+	Cookies []*pgvis.Cookie
 }
