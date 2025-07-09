@@ -57,10 +57,8 @@ func handleHomePage(c echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
-		pageData.TemplatePatterns(
-			"routes/layout.html",
-			"routes/home.html",
-		)...,
+		"routes/layout.html",
+		"routes/home.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -92,19 +90,14 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 	}
 
 	t, err := template.ParseFS(routes,
-		pageData.TemplatePatterns(
-			"routes/layout.html",
-			"routes/login.html",
-		)...,
+		"routes/layout.html",
+		"routes/login.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(ctx.Response(), LoginPageData{
-		ApiKey:        apiKey,
-		InvalidApiKey: apiKey != "",
-	})
+	err = t.Execute(ctx.Response(), pageData)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -116,10 +109,8 @@ func handleFeed(c echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
-		pageData.TemplatePatterns(
-			"routes/layout.html",
-			"routes/feed.html",
-		)...,
+		"routes/layout.html",
+		"routes/feed.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -160,10 +151,8 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	}
 
 	t, err := template.ParseFS(routes,
-		pageData.TemplatePatterns(
-			"routes/layout.html",
-			"routes/profile.html",
-		)...,
+		"routes/layout.html",
+		"routes/profile.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -181,10 +170,8 @@ func handleTroubleReports(ctx echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
-		pageData.TemplatePatterns(
-			"routes/layout.html",
-			"routes/trouble-reports.html",
-		)...,
+		"routes/layout.html",
+		"routes/trouble-reports.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

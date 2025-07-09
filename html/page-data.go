@@ -8,14 +8,6 @@ type PageData struct {
 	ErrorMessages []string
 }
 
-func (PageData) TemplatePatterns(patterns ...string) []string {
-	return append(
-		patterns,
-		"svg/triangle-alert.html",
-		"svg/pencil.html",
-	)
-}
-
 type LoginPageData struct {
 	PageData
 
