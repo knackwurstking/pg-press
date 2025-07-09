@@ -143,7 +143,9 @@ func handleFeed(c echo.Context) *echo.HTTPError {
 }
 
 func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	var pageData ProfilePageData
+	pageData := ProfilePageData{
+		Cookies: make([]*pgvis.Cookie, 0),
+	}
 
 	if user, err := getUserFromContext(ctx); err != nil {
 		return err
