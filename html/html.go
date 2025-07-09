@@ -46,6 +46,10 @@ func Serve(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
 		return handleProfile(c, options.DB)
 	})
+
+	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
+		return handleTroubleReports(c)
+	})
 }
 
 func handleHomePage(c echo.Context) error {
@@ -166,6 +170,26 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 
 	err = t.Execute(ctx.Response(), pageData)
 	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return nil
+}
+
+func handleTroubleReports(ctx echo.Context) error {
+	pageData := PageData{}
+
+	t, err := template.ParseFS(routes,
+		pageData.TemplatePatterns(
+			"routes/layout.html",
+			"routes/trouble-reports/page.html",
+		)...,
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err = t.Execute(ctx.Response(), pageData); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
