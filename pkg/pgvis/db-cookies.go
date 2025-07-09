@@ -37,6 +37,28 @@ func NewDBCookies(db *sql.DB) *DBCookies {
 	}
 }
 
+func (db *DBCookies) ListApiKey(apiKey string) ([]*Cookie, error) {
+	cookies := []*Cookie{}
+
+	query := fmt.Sprintf(`SELECT * FROM cookies WHERE api_key="%s"`, apiKey)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
+
+	cookie := &Cookie{}
+	for r.Next() {
+		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
+		if err != nil {
+			return nil, err
+		}
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
+
 func (db *DBCookies) Get(value string) (*Cookie, error) {
 	query := fmt.Sprintf(`SELECT * FROM cookies WHERE value="%s"`, value)
 	r, err := db.db.Query(query)
@@ -58,29 +80,6 @@ func (db *DBCookies) Get(value string) (*Cookie, error) {
 	}
 
 	return cookie, nil
-}
-
-// TODO: Rename method to `ListApiKey(...
-func (db *DBCookies) GetForApiKey(apiKey string) ([]*Cookie, error) {
-	cookies := []*Cookie{}
-
-	query := fmt.Sprintf(`SELECT * FROM cookies WHERE api_key="%s"`, apiKey)
-	r, err := db.db.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-
-	cookie := &Cookie{}
-	for r.Next() {
-		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
-		if err != nil {
-			return nil, err
-		}
-		cookies = append(cookies, cookie)
-	}
-
-	return cookies, nil
 }
 
 func (db *DBCookies) Add(cookie *Cookie) error {

@@ -16,7 +16,6 @@ const (
 )
 
 //go:embed routes
-//go:embed svg
 var routes embed.FS
 
 //go:embed static

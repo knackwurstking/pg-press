@@ -96,7 +96,7 @@ func showUserCommand() cli.Command {
 				t.SetStyle(table.StyleLight)
 				t.Render()
 
-				if cookies, err := db.Cookies.GetForApiKey(user.ApiKey); err != nil {
+				if cookies, err := db.Cookies.ListApiKey(user.ApiKey); err != nil {
 					fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
 				} else {
 					if len(cookies) > 0 {
