@@ -39,10 +39,12 @@ func Serve(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.ServerPathPrefix, options.DB)
+		return handleLogin(c, options.DB)
 	})
 
-	// TODO: /logout route, just remove the cookie and redirect to the /login page
+	e.GET(options.ServerPathPrefix+"/logout", func(c echo.Context) error {
+		return handleLogout(c, options.DB)
+	})
 
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
 		return handleProfile(c, options.DB)
@@ -53,7 +55,7 @@ func Serve(e *echo.Echo, options Options) {
 	})
 }
 
-func handleHomePage(c echo.Context) error {
+func handleHomePage(c echo.Context) *echo.HTTPError {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
@@ -72,12 +74,16 @@ func handleHomePage(c echo.Context) error {
 	return nil
 }
 
-func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error {
+func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
 	if ok, err := handleLoginApiKey(apiKey, db, ctx); ok {
-		return ctx.Redirect(http.StatusSeeOther, serverPathPrefix+"/profile")
+		if err = ctx.Redirect(http.StatusSeeOther, "./profile"); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		} else {
+			return nil
+		}
 	} else {
 		if err != nil {
 			log.Errorf("/login -> Invalid Api Key: %s", err.Error())
@@ -105,7 +111,20 @@ func handleLogin(ctx echo.Context, serverPathPrefix string, db *pgvis.DB) error 
 	return nil
 }
 
-func handleFeed(c echo.Context) error {
+func handleLogout(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	if cookie, err := ctx.Cookie(CookieName); err == nil {
+		db.Cookies.Remove(cookie.Value)
+
+		err = ctx.Redirect(http.StatusSeeOther, "./login")
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+	}
+
+	return nil
+}
+
+func handleFeed(c echo.Context) *echo.HTTPError {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
@@ -124,14 +143,14 @@ func handleFeed(c echo.Context) error {
 	return nil
 }
 
-func handleProfile(ctx echo.Context, db *pgvis.DB) error {
+func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	var pageData ProfilePageData
 
-	user, err := getUserFromContext(ctx)
-	if err != nil {
+	if user, err := getUserFromContext(ctx); err != nil {
 		return err
+	} else {
+		pageData.User = user
 	}
-	pageData.User = user
 
 	// Get "user-name" from form data (optional), and update database user
 	v, err := ctx.FormParams()
@@ -166,7 +185,7 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 	return nil
 }
 
-func handleTroubleReports(ctx echo.Context) error {
+func handleTroubleReports(ctx echo.Context) *echo.HTTPError {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,
