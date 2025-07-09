@@ -14,7 +14,7 @@
 
 {{define "content"}}
 <main class="container">
-    <dialog open>
+    <dialog id="dialogLogin" class="clean">
         <form>
             <label>
                 Api Key
@@ -34,5 +34,9 @@
             </footer>
         </form>
     </dialog>
+
+    <script>
+        document.querySelector("#dialogLogin").showModal();
+    </script>
 </main>
 {{end}}
