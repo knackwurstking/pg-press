@@ -1,6 +1,24 @@
 <!-- Additional Scripts -->
 
-{{define "additional-scripts"}}{{end}}
+{{define "additional-scripts"}}
+<style>
+    details>summary {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+    }
+
+    details>summary>*:first-child {
+        width: 100%;
+    }
+
+    details>summary>*:last-child {
+        flex: 1;
+        width: fit-content;
+    }
+</style>
+{{end}}
 
 <!-- Nav -->
 
@@ -17,64 +35,86 @@
 <main class="container-fluid">
     <!-- TODO: Categories, Sub categories, And more -->
 
-    <details name="categories" disabled>
-        <summary>Howtos</summary>
-
-        <i>Work in Progress</i>
-    </details>
-
-    <hr />
-
-    <details name="categories" disabled>
-        <summary>Alarm Listen</summary>
-
-        <i>Work in Progress</i>
-    </details>
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./documetation" disabled>Documentation</a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <hr />
 
-    <details name="categories">
-        <summary>Trouble Reports</summary>
-
-        <!-- NOTE: Find a better way for this crap here -->
-        <aside>
-            <nav>
-                <ul>
-                    <li><a style="float: right;" role="button" class="contrast" href="./trouble-reports">Open</a></li>
-                </ul>
-
-                <ul>
-                    <li><a href="#" class="secondary">Topic: Presse 0</a></li>
-                    <li><a href="#" class="secondary">Topic: Presse 2-5</a></li>
-                    <li><a href="#" class="secondary">Topic: Presse 5</a></li>
-                    <li><a href="#" class="secondary">Topic: Allgemein</a></li>
-                </ul>
-            </nav>
-        </aside>
-    </details>
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./howtos" disabled>Howtos</a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <hr />
 
-    <details name="categories" disabled>
-        <summary>Produkt Daten</summary>
-
-        <i>Work in Progress</i>
-    </details>
-
-    <hr />
-
-    <details name="categories" disabled>
-        <summary>Blech Listen</summary>
-
-        <i>Work in Progress</i>
-    </details>
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./alert-lists" disabled>Alarm Listen</a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <hr />
 
-    <details name="categories" disabled>
-        <summary>Flakes</summary>
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./trouble-reports">Trouble Reports</a></li>
+            </ul>
 
-        <i>Work in Progress</i>
-    </details>
+            <ul>
+                <li><a href="#" class="secondary">Topic: Presse 0</a></li>
+                <li><a href="#" class="secondary">Topic: Presse 2-5</a></li>
+                <li><a href="#" class="secondary">Topic: Presse 5</a></li>
+                <li><a href="#" class="secondary">Topic: Allgemein</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <hr />
+
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./product-data" disabled>Produkt Daten</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <hr />
+
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./metal-sheets" disabled>Blech Listen</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <hr />
+
+    <aside>
+        <nav>
+            <ul>
+                <li><a href="./flakes" disabled>Flakes</a></li>
+            </ul>
+
+            <ul>
+                <li><a href="#" class="secondary" disabled>Topic: P0</a></li>
+                <li><a href="#" class="secondary" disabled>Topic: P0 Rechner</a></li>
+                <li><a href="#" class="secondary" disabled>Topic: P4</a></li>
+                <li><a href="#" class="secondary" disabled>Topic: P5</a></li>
+            </ul>
+        </nav>
+    </aside>
 </main>
 {{end}}
