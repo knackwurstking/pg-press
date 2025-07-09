@@ -16,21 +16,14 @@
 <main class="container">
     <dialog id="dialogLogin" class="clean">
         <form>
-            <label>
+            <label class="flex column">
                 Api Key
-
-                <input
-                    name="api-key"
-                    type="text"
-                    placeholder="Api Key"
-                    value="{{.ApiKey}}"
-                    {{if .InvalidApiKey}} aria-invalid="{{.InvalidApiKey}}" {{end}}
-                    required
-                />
+                <input name="api-key" type="text" placeholder="Api Key" value="{{.ApiKey}}" {{if .InvalidApiKey}}
+                    aria-invalid="{{.InvalidApiKey}}" {{end}} required />
             </label>
 
-            <footer>
-                <button type="submit">Anmelden</button>
+            <footer class="flex">
+                <button class="flex-item" type="submit">Anmelden</button>
             </footer>
         </form>
     </dialog>

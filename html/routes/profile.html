@@ -50,16 +50,16 @@
         </ul>
     </details>
 
-    <dialog id="dialogEditUserName">
+    <dialog id="dialogEditUserName" class="clean">
         <form action="./profile">
-            <label>
+            <label class="flex column">
                 User Name
                 <input name="user-name" type="text" value="{{.User.UserName}}" placeholder="User Name" />
             </label>
 
-            <footer>
-                <button class="secondary">Schließen</button>
-                <button type="submit">Ändern</button>
+            <footer class="flex row gap justify-end">
+                <button class="flex-item secondary">Schließen</button>
+                <button type="flex-item submit">Ändern</button>
             </footer>
         </form>
     </dialog>
