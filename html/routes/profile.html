@@ -53,7 +53,7 @@
 
     <br />
 
-    <!-- TODO: Add a cookies section here, for disconnect remote devices  -->
+    {{if ne (len .Cookies) 0}}
     <details>
         <summary>Cookies</summary>
 
@@ -61,8 +61,11 @@
 
         <ul>
             <!-- TODO: Render cookies here, add delete (icon) button -->
+            {{range $cookie := .Cookies}}
+            {{end}}
         </ul>
     </details>
+    {{end}}
 
     <dialog id="dialogEditUserName" class="clean">
         <form action="./profile">
