@@ -7,8 +7,6 @@
 //  - pgvis-v0.4: Updated files, Add ui-dev.min.css, manifest.json
 //  - pgvis-v0.5: Added skipWaiting to "install" event handler
 
-// FIXME: Service Worker Changes seems not to work as expected
-//        - It is installing, but not activating (chrome browser)
 const version = "pgvis-v0.5";
 
 const files = [
