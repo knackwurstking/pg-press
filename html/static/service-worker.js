@@ -7,6 +7,7 @@
 //  - v0.4: Updated files, Add ui-dev.min.css, manifest.json
 
 // FIXME: Service Worker Changes seems not to work as expected
+//        - It is installing, but not activating (chrome browser)
 const version = "pgvis-v0.4";
 
 const files = [
