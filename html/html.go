@@ -80,7 +80,7 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	if ok, err := handleLoginApiKey(apiKey, db, ctx); ok {
 		if err = ctx.Redirect(http.StatusSeeOther, "./profile"); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		} else {
 			return nil
 		}
@@ -117,7 +117,7 @@ func handleLogout(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 		err = ctx.Redirect(http.StatusSeeOther, "./login")
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
 	}
 

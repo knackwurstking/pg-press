@@ -43,23 +43,35 @@ func serverCommand() cli.Command {
 				e.Use(middlewareKeyAuth(db))
 
 				e.HTTPErrorHandler = func(err error, c echo.Context) {
-					log.Warnf("HTTPErrorHandler: %s", err.Error())
+					log.Debugf("HTTPErrorHandler -> err=%#v", err)
 
-					// NOTE: Maybe serve an error page here instead
-					if herr, ok := err.(*echo.HTTPError); ok {
-						message := http.StatusText(herr.Code)
-
-						if m, ok := herr.Message.(string); ok {
-							message = m
-						} else if e, ok := herr.Message.(error); ok {
-							message = e.Error()
-						}
-
-						c.JSON(herr.Code, message)
-						return
+					if err == nil {
+						return 
 					}
 
-					c.JSON(500, err.Error())
+					code := 500
+					message := ""
+
+					// NOTE: Maybe serve an error page here instead
+					if err, ok := err.(*echo.HTTPError); ok {
+						if err == nil {
+							return
+						}
+
+						code = err.Code
+						message = http.StatusText(err.Code)
+
+						if m, ok := err.Message.(string); ok {
+							message = m
+						} else if e, ok := err.Message.(error); ok {
+							message = e.Error()
+						}
+					} else {
+						message = err.Error()
+					}
+
+					log.Warnf("HTTPErrorHandler -> %s", err.Error())
+					c.JSON(code, message)
 				}
 
 				html.Serve(e, html.Options{
