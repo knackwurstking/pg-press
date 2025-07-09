@@ -21,6 +21,16 @@
 
 {{define "content"}}
 <main class="container-fluid">
-    <!-- TODO: Design some layout with a "New Report" button -->
+    <div style="display: flex; justify-content: space-between; gap: var(--pico-spacing);">
+        <input style="margin: auto 0;" type="search" name="search" placeholder="Suche" aria-label="Suche" />
+        <button class="contrast" disabled>{{template "svg-plus"}}</button>
+    </div>
+
+    <br />
+
+    <!-- TOOD: Search input, using a datalist(?), Frontend search handler -->
+    <i>Under Construction</i>
+
+    <!-- TOOD: details list containing data -->
 </main>
 {{end}}
