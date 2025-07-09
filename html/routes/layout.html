@@ -11,14 +11,8 @@
 
     <link rel="manifest" href="./manifest.json" />
 
-    <style>
-        .debug,
-        .debug * {
-            border: 0.5px solid red;
-        }
-    </style>
-
-    <link rel="stylesheet" href="./pico.lime.min.css" />
+    <!--link rel="stylesheet" href="./pico.lime.min.css" /-->
+    <link rel="stylesheet" href="./ui-dev.min.css" />
     <link rel="stylesheet" href="./css/style.css" />
 
     {{block "additional-scripts" .}}{{end}}
@@ -26,30 +20,30 @@
     <title>PG: Presse | {{template "title" .}}</title>
 
     <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker
-                    .register("./service-worker.js")
-                    .then((registration) => {
-                        console.info(
-                            "Service Worker registered with scope:",
-                            registration.scope,
-                        );
-                    })
-                    .catch((err) => {
-                        console.error(
-                            "Service Worker registration failed:",
-                            err,
-                        );
-                    });
-            });
-        }
+        //if ("serviceWorker" in navigator) {
+        //    window.addEventListener("load", () => {
+        //        navigator.serviceWorker
+        //            .register("./service-worker.js")
+        //            .then((registration) => {
+        //                console.info(
+        //                    "Service Worker registered with scope:",
+        //                    registration.scope,
+        //                );
+        //            })
+        //            .catch((err) => {
+        //                console.error(
+        //                    "Service Worker registration failed:",
+        //                    err,
+        //                );
+        //            });
+        //    });
+        //}
     </script>
 </head>
 
 <body>
-    <header class="container-fluid">
-        <nav class="ui-flex row justify-between gap">
+    <header class="container fluid">
+        <nav class="flex row justify-between gap">
             <ul>
                 <li>
                     <strong>{{block "title" .}}PG: Presse{{end}}</strong>
