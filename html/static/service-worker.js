@@ -2,20 +2,24 @@
 //
 //  - v0: Initial version
 //  - v0.1: Updated files
+//  - v0.2: Updated files, Add bootstrap-icons (woff, woff2, css)
 
-const version = "v0.1";
+const version = "v0.2";
 
 const files = [
     "./apple-touch-icon-180x180.png",
+    "./bootstrap-icons.woff",
+    "./bootstrap-icons.woff2",
     "./favicon.ico",
     "./icon.png",
     "./maskable-icon-512x512.png",
-    "./pico.lime.min.css",
+    //"./ui-dev.min.css",
     "./pwa-192x192.png",
     "./pwa-512x512.png",
     "./pwa-64x64.png",
 
     "./css/style.css",
+    "./css/bootstrap-icons.min.css",
 ];
 
 this.addEventListener("install", (event) => {
