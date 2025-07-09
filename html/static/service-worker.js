@@ -3,8 +3,9 @@
 //  - v0: Initial version
 //  - v0.1: Updated files
 //  - v0.2: Updated files, Add bootstrap-icons (woff, woff2, css)
+//  - v0.3: Updated files, ./css/style.css removed
 
-const version = "v0.2";
+const version = "v0.3";
 
 const files = [
     "./apple-touch-icon-180x180.png",
@@ -18,7 +19,6 @@ const files = [
     "./pwa-64x64.png",
     //"./ui-dev.min.css",
 
-    "./css/style.css",
     "./css/bootstrap-icons.min.css",
 ];
 
