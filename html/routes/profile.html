@@ -27,10 +27,10 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button class="outline contrast icon" onclick='
-                    document.querySelector("#dialogEditUserName").showModal();
-                '>
-                {{template "svg-pencil"}}
+            <button class="ghost icon" onclick='
+                document.querySelector("#dialogEditUserName").showModal();
+            '>
+                <i class="bi bi-pen"></i>
             </button>
         </span>
 
