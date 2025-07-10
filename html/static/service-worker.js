@@ -7,8 +7,9 @@
 //  - pgvis-v0.4: Updated files, Add ui-dev.min.css, manifest.json
 //  - pgvis-v0.5: Added skipWaiting to "install" event handler
 //  - pgvis-v0.6: Updated ui - no user select
+//  - pgvis-v0.7: Updated ui - Changed table styles
 
-const version = "pgvis-v0.6";
+const version = "pgvis-v0.7";
 
 const files = [
     "./apple-touch-icon-180x180.png",
