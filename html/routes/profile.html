@@ -69,7 +69,7 @@
             </thead>
 
             <tbody>
-                {{range $cookie := .Cookies}}
+                {{range $cookie := .CookiesSorted}}
                 <tr>
                     <td>{{$cookie.TimeString}}</td>
                     <td class="left">{{$cookie.UserAgent}}</td>
