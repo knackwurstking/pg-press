@@ -84,7 +84,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 					return false, nil
 				}
 
-				// TODO: Try to minimize this update process, maybe only update after a /login?
+				// TODO: Try to minimize this update process
 				c.LastLogin = time.Now().UnixMilli()
 				if err := db.Cookies.Update(c.Value, c); err != nil {
 					log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
