@@ -55,6 +55,11 @@ func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
 	return nil
 }
 
+type TroubleReportsDialogEditTemplateData struct {
+	Submitted   bool     // Submitted set to true will close the dialog
+	AriaInvalid []string // AriaInvalid containing input names for all invalid input elements
+}
+
 func handleTroubleReportsDialogEditGET(ctx echo.Context, options Options) *echo.HTTPError {
 	// TODO: Send the dialog, taking query vars: "id" (optional), if not set, a new entry will be added to the database on submit
 

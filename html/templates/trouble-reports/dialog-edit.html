@@ -1,3 +1,4 @@
+{{if not .Submitted}}
 <dialog id="dialogEdit">
     <!-- TODO: Will this work? -->
     <form
@@ -19,3 +20,6 @@
         </script>
     </dialog>
 </dialog>
+{{else}}
+<span id="dialogEdit"></span>
+{{end}}
