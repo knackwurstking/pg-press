@@ -6,11 +6,11 @@
 
 {{define "additional-scripts"}}
 <style>
-    hgroup>.user-name>* {
+    hgroup > .user-name > * {
         margin: 0;
     }
 
-    hgroup>.user-name {
+    hgroup > .user-name {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -24,7 +24,9 @@
 
 {{define "nav"}}
 <ul class="flex row gap justify-end align-center">
-    <li><a href="./"><i class="bi bi-house"></i></a></li>
+    <li>
+        <a href="./"><i class="bi bi-house"></i></a>
+    </li>
     <li><a href="./feed">Feed</a></li>
     <li><a href="./profile" disabled>Profil</a></li>
 </ul>
@@ -38,16 +40,26 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button class="ghost icon" onclick='
-                document.querySelector("#dialogEditUserName").showModal();
-            '>
+            <button
+                class="ghost icon"
+                onclick='
+                    document.querySelector("#dialogEditUserName").showModal();
+                '
+            >
                 <i class="bi bi-pen"></i>
             </button>
         </span>
 
         <div class="flex gap justify-between">
             <p>Telegram ID: {{.User.TelegramID}}</p>
-            <a style="float: right;" role="button" href="./logout" class="ghost destructive">Logout</a>
+            <a
+                style="float: right"
+                role="button"
+                href="./logout"
+                class="ghost destructive"
+            >
+                Logout
+            </a>
         </div>
     </hgroup>
 
@@ -73,9 +85,12 @@
                     <td class="left">{{$cookie.UserAgent}}</td>
 
                     <td class="right no-user-select">
-                        <button class="ghost destructive icon" onclick='
-                            console.debug("@TODO: Delete this cookie...");
-                        '>
+                        <button
+                            class="ghost destructive icon"
+                            onclick='
+                                console.debug("@TODO: Delete this cookie...");
+                            '
+                        >
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>
@@ -90,7 +105,12 @@
         <form action="./profile">
             <label class="flex column">
                 User Name
-                <input name="user-name" type="text" value="{{.User.UserName}}" placeholder="User Name" />
+                <input
+                    name="user-name"
+                    type="text"
+                    value="{{.User.UserName}}"
+                    placeholder="User Name"
+                />
             </label>
 
             <footer class="flex row gap justify-end">
