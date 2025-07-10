@@ -15,64 +15,18 @@
 {{define "content"}}
 <main class="container fluid">
     <section style="margin-top: 0" class="flex gap justify-between">
-        <input style="margin: auto 0; width: 100%" type="search" name="search" placeholder="Suche" aria-label="Suche" />
+        <input
+            style="margin: auto 0; width: 100%"
+            type="search"
+            name="search"
+            placeholder="Suche"
+            aria-label="Suche"
+        />
     </section>
 
     <section style="margin-top: 0" class="flex gap justify-end">
-        <button class="ghost icon" onclick='
-            // NOTE: This is just for testing, Normally this should open some kind of an edit dialog, or whatever
-            // TODO: Need a api for this, ex: "POST ./api/trouble-reports"
-            const url = "./api/trouble-reports";
-
-            let resp = resp
-            fetch(url, {
-                method: "POST",
-                header: {
-                    "Content-Type": "application/json"
-                },
-                data: JSON.stringify([
-                    {
-                        modified: {
-                            user: {
-                                telegram_id: ,
-                                user_name: ,
-                                api_key: ,
-                            },
-                            title: "Test Trouble Report, Entry nr. 1",
-                            content: `Need to think about this content stuff...
-
-How to do indentation...
-    ...This is a 4 space indentation
-
-And what about markdown or html for text formatting?`,
-                        },
-                    },
-                    {
-                        modified: {
-                            user: {
-                                telegram_id: ,
-                                user_name: ,
-                                api_key: ,
-                            },
-                            title: "Test Trouble Report, Entry nr. 2",
-                            content: `This is a very short one line test entry.`,
-                        },
-                    },
-                ]),
-            }).then((r) => {
-                resp = r
-                if (!resp.ok) {
-                    resp.json().then((data) => {
-                        // TODO: Notification
-                        console.error(`Failed to create trouble report: ${resp.status}: ${data.message}`)
-                    });
-                }
-            }).catch((err) => {
-                console.error(`Failed to create trouble report: ${err}`)
-            });
-        '>
-            <i class="bi bi-plus"></i>
-        </button>
+        <!-- NOTE: This is just for testing, Normally this should open some kind of an edit dialog, or whatever -->
+        <button class="ghost icon"><i class="bi bi-plus"></i></button>
     </section>
 
     <section>
