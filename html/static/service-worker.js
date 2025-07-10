@@ -65,7 +65,7 @@ this.addEventListener("activate", (event) => {
     );
 });
 
-// NOTE: Cache first
+// Cache first, Network second
 this.addEventListener("fetch", (event) => {
     // @ts-expect-error - respondWith not exists
     event.respondWith(
