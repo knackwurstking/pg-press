@@ -9,11 +9,11 @@ import (
 
 func ServeFeed(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
-		return handleFeed(c)
+		return handleFeedPage(c)
 	})
 }
 
-func handleFeed(c echo.Context) error {
+func handleFeedPage(c echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(templates,

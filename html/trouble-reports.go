@@ -10,7 +10,7 @@ import (
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		return handleTroubleReports(c)
+		return handleTroubleReportsPage(c)
 	})
 }
 
@@ -27,7 +27,7 @@ func NewTroubleReportsPageData() TroubleReportsPageData {
 	}
 }
 
-func handleTroubleReports(ctx echo.Context) error {
+func handleTroubleReportsPage(ctx echo.Context) error {
 	pageData := NewTroubleReportsPageData()
 
 	// TODO: Get data from the database here

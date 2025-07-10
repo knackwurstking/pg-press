@@ -13,7 +13,7 @@ import (
 
 func ServeProfile(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
-		return handleProfile(c, options.DB)
+		return handleProfilePage(c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
@@ -43,7 +43,7 @@ func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
 	return pgvis.SortCookies(p.Cookies)
 }
 
-func handleProfile(ctx echo.Context, db *pgvis.DB) error {
+func handleProfilePage(ctx echo.Context, db *pgvis.DB) error {
 	pageData := NewProfilePageData()
 
 	if user, err := getUserFromContext(ctx); err != nil {

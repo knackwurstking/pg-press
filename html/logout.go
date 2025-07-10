@@ -9,11 +9,11 @@ import (
 
 func ServeLogout(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/logout", func(c echo.Context) error {
-		return handleLogout(c, options.DB)
+		return handleLogoutPage(c, options.DB)
 	})
 }
 
-func handleLogout(ctx echo.Context, db *pgvis.DB) error {
+func handleLogoutPage(ctx echo.Context, db *pgvis.DB) error {
 	if cookie, err := ctx.Cookie(CookieName); err == nil {
 		db.Cookies.Remove(cookie.Value)
 

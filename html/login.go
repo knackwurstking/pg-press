@@ -14,7 +14,7 @@ import (
 
 func ServeLogin(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.DB)
+		return handleLoginPage(c, options.DB)
 	})
 }
 
@@ -31,7 +31,7 @@ func NewLoginPageData() LoginPageData {
 	}
 }
 
-func handleLogin(ctx echo.Context, db *pgvis.DB) error {
+func handleLoginPage(ctx echo.Context, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 
