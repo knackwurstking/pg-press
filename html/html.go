@@ -45,6 +45,8 @@ func Serve(e *echo.Echo, options Options) {
 		return handleLogout(c, options.DB)
 	})
 
+	// TODO: Need to handle the cookies deletion, Maybe using query
+	//       `?delete_cookie=<value>`
 	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
 		return handleProfile(c, options.DB)
 	})
