@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -156,4 +157,22 @@ func (db *DBCookies) RemoveApiKey(apiKey string) error {
 
 	_, err := db.db.Exec(query)
 	return err
+}
+
+func SortCookies(cookies []*Cookie) []*Cookie {
+	cookiesSorted := []*Cookie{}
+
+outer:
+	for _, c := range cookies {
+		for i, sc := range cookiesSorted {
+			if c.LastLogin > sc.LastLogin {
+				cookiesSorted = slices.Insert(cookiesSorted, i, c)
+				continue outer
+			}
+		}
+
+		cookiesSorted = append(cookiesSorted, c)
+	}
+
+	return cookiesSorted
 }

@@ -105,10 +105,10 @@ func showUserCommand() cli.Command {
 							color.Underline(color.Bold("Cookies:")),
 						)
 
-						for _, c := range cookies {
+						for _, c := range pgvis.SortCookies(cookies) {
 							fmt.Printf(
-								"%d - %s - %s - \"%s\"\n",
-								c.LastLogin,
+								"%s - %s - %s - \"%s\"\n",
+								c.TimeString(),
 								color.Bold(c.ApiKey),
 								c.Value,
 								color.Italic(c.UserAgent),

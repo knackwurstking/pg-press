@@ -25,19 +25,5 @@ type ProfilePageData struct {
 }
 
 func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
-	cookiesSorted := []*pgvis.Cookie{}
-
-outer:
-	for _, c := range p.Cookies {
-		for i, sc := range cookiesSorted {
-			if c.LastLogin > sc.LastLogin {
-				cookiesSorted = slices.Insert(cookiesSorted, i, c)
-				continue outer
-			}
-		}
-
-		cookiesSorted = append(cookiesSorted, c)
-	}
-
-	return cookiesSorted
+	return pgvis.SortCookies(p.Cookies)
 }
