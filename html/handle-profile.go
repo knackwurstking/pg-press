@@ -49,6 +49,9 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
+	// TODO: Need to handle the cookies deletion, Maybe using query
+	//       `?delete_cookie=<value>`
+
 	if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
 		log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
 	} else {
