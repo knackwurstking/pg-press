@@ -14,6 +14,8 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	})
 
 	// TODO: Add "GET /trouble-reports/dialog-edit" (dialog id == "dialogEdit")
+
+	// TODO: Add "POST /trouble-reports/dialog-edit", Form data containing a new trouble report
 }
 
 type TroubleReportsPageData struct {
