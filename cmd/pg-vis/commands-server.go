@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/api"
 	"github.com/knackwurstking/pg-vis/html"
 )
 
@@ -48,7 +47,7 @@ func serverCommand() cli.Command {
 					log.Debugf("HTTPErrorHandler -> err=%#v", err)
 
 					if err == nil {
-						return 
+						return
 					}
 
 					code := 500
@@ -75,10 +74,6 @@ func serverCommand() cli.Command {
 					log.Warnf("HTTPErrorHandler -> %s", err.Error())
 					c.JSON(code, message)
 				}
-
-				api.Serve(e, api.Options{
-					ServerPathPrefix: serverPathPrefix,
-				})
 
 				html.Serve(e, html.Options{
 					ServerPathPrefix: serverPathPrefix,

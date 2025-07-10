@@ -33,6 +33,7 @@ type Options struct {
 	DB               *pgvis.DB
 }
 
+// TODO: Clean up this mess
 func Serve(e *echo.Echo, options Options) {
 	e.StaticFS(options.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
 

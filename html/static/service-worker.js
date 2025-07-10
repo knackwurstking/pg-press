@@ -32,6 +32,7 @@ const files = [
 this.addEventListener("install", (event) => {
     console.debug("Install...", { files });
 
+    // @ts-ignore
     self.skipWaiting();
 
     // @ts-expect-error - waitUntil not exists
