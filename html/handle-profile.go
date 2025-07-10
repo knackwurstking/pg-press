@@ -22,6 +22,9 @@ func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
 
 func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	pageData := ProfilePageData{
+		PageData: PageData{
+			ErrorMessages: []string{},
+		},
 		Cookies: make([]*pgvis.Cookie, 0),
 	}
 
@@ -31,28 +34,8 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		pageData.User = user
 	}
 
-	{ // Get (optinal) "user-name" form params, and update database
-		v, err := ctx.FormParams()
-		userName := v.Get("user-name")
-
-		// Database update
-		if userName != "" && userName != pageData.User.UserName {
-			log.Debugf(
-				"/profile -> Change user name in database: %s => %s",
-				pageData.User.UserName, userName,
-			)
-
-			user := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
-			if err = db.Users.Update(pageData.User.TelegramID, user); err != nil {
-				pageData.ErrorMessages = []string{err.Error()}
-			} else {
-				pageData.User.UserName = userName
-			}
-		}
-	}
-
-	// TODO: Need to handle the cookies deletion, Maybe using query
-	//       `?delete_cookie=<value>`
+	handleProfileUserName(ctx, &pageData, db)
+	handleProfileCookieDeletion(ctx, &pageData, db)
 
 	if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
 		log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
@@ -74,4 +57,35 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	}
 
 	return nil
+}
+
+func handleProfileUserName(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) {
+	v, err := ctx.FormParams()
+	userName := v.Get("user-name")
+
+	// Database update
+	if userName != "" && userName != pageData.User.UserName {
+		log.Debugf(
+			"/profile -> Change user name in database: %s => %s",
+			pageData.User.UserName, userName,
+		)
+
+		user := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
+		if err = db.Users.Update(pageData.User.TelegramID, user); err != nil {
+			pageData.ErrorMessages = append(pageData.ErrorMessages, err.Error())
+		} else {
+			pageData.User.UserName = userName
+		}
+	}
+}
+
+func handleProfileCookieDeletion(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) {
+	deleteCookie := ctx.QueryParam("delete_cookie")
+	if deleteCookie == "" {
+		return
+	}
+
+	if err := db.Cookies.Remove(deleteCookie); err != nil {
+		pageData.ErrorMessages = append(pageData.ErrorMessages, err.Error())
+	}
 }

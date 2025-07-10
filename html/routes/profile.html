@@ -85,10 +85,9 @@
                     <td class="left">{{$cookie.UserAgent}}</td>
 
                     <td class="right no-user-select">
-                        <!-- TODO: Convert this to a link button, (`./profile?delete_cookie=<value>`) -->
-                        <button class="ghost destructive icon">
+                        <a role="button" class="ghost destructive icon" href="./profile?delete_cookie={{$cookie.Value}}">
                             <i class="bi bi-trash"></i>
-                        </button>
+                        </a>
                     </td>
                 </tr>
                 {{end}}
