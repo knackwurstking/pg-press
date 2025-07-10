@@ -13,9 +13,13 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		return handleTroubleReportsPage(c)
 	})
 
-	// TODO: Add "GET /trouble-reports/dialog-edit" (dialog id == "dialogEdit")
+	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+		return handleTroubleReportsDialogEditGET(c, options)
+	})
 
-	// TODO: Add "POST /trouble-reports/dialog-edit", Form data containing a new trouble report
+	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+		return handleTroubleReportsDialogEditPOST(c, options)
+	})
 }
 
 type TroubleReportsPageData struct {
@@ -47,6 +51,18 @@ func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
 	if err = t.Execute(ctx.Response(), pageData); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	return nil
+}
+
+func handleTroubleReportsDialogEditGET(ctx echo.Context, options Options) *echo.HTTPError {
+	// TODO: Send the dialog, taking query vars: "id" (optional), if not set, a new entry will be added to the database on submit
+
+	return nil
+}
+
+func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo.HTTPError {
+	// TODO: Add new database entry and close dialog on success (just replace with span again) Reading form variables: "title", "content"
 
 	return nil
 }
