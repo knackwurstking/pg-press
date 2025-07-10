@@ -63,19 +63,19 @@
             <thead>
                 <tr>
                     <th>Letzte Anmeldung</th>
-                    <th>Benutzeragent</th>
-                    <th>Aktionen</th>
+                    <th class="left">Benutzeragent</th>
+                    <th></th>
                 </tr>
             </thead>
 
             <tbody>
                 {{range $cookie := .Cookies}}
                 <tr>
-                    <td>{{$cookie.LastLogin}}</td>
-                    <td>{{$cookie.UserAgent}}</td>
+                    <td>{{$cookie.TimeString}}</td>
+                    <td class="left">{{$cookie.UserAgent}}</td>
 
-                    <td class="right">
-                        <button class="ghost primary icon" onclick='
+                    <td class="right no-user-select">
+                        <button class="ghost destructive icon" onclick='
                             console.debug("@TODO: Delete this cookie...");
                         '>
                             <i class="bi bi-trash"></i>
