@@ -42,9 +42,11 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 				pageData.User.UserName, userName,
 			)
 
-			pageData.User.UserName = userName
-			if err = db.Users.Update(pageData.User.TelegramID, pageData.User); err != nil {
+			user := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
+			if err = db.Users.Update(pageData.User.TelegramID, user); err != nil {
 				pageData.ErrorMessages = []string{err.Error()}
+			} else {
+				pageData.User.UserName = userName
 			}
 		}
 	}
