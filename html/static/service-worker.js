@@ -8,14 +8,16 @@
 //  - pgvis-v0.5: Added skipWaiting to "install" event handler
 //  - pgvis-v0.6: Updated ui - no user select
 //  - pgvis-v0.7: Updated ui - Changed table styles
+//  - pgvis-v0.8: Add htmx.min.js
 
-const version = "pgvis-v0.7";
+const version = "pgvis-v0.8";
 
 const files = [
     "./apple-touch-icon-180x180.png",
     "./bootstrap-icons.woff",
     "./bootstrap-icons.woff2",
     "./favicon.ico",
+    "./htmx.min.js",
     "./icon.png",
     "./manifest.json",
     "./maskable-icon-512x512.png",
