@@ -26,7 +26,16 @@
 
     <section style="margin-top: 0" class="flex gap justify-end">
         <!-- TODO: This should open some kind of an edit (form) dialog, or whatever -->
-        <button class="ghost icon"><i class="bi bi-plus"></i></button>
+        <button
+            hx-get="/trouble-reports/dialog-edit"
+            hx-trigger="click"
+            hx-target="#dialogEdit"
+            hx-swap="outerHTML"
+            class="ghost icon"
+            title="Erstelle einen neuen Eintrag"
+        >
+            <i class="bi bi-plus"></i>
+        </button>
     </section>
 
     <section>
@@ -34,5 +43,7 @@
     </section>
 
     <!-- TODO: Rendering data here -->
+
+    <span id="dialogEdit"></span>
 </main>
 {{end}}
