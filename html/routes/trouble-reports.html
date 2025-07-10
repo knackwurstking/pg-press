@@ -29,6 +29,28 @@
             class="ghost icon"
             onclick='
                 // TODO: Need a api for this, ex: "POST ./api/trouble-reports"
+                const url = "./api/trouble-reports";
+
+                let resp = resp
+                fetch(url, {
+                    method: "POST",
+                    header: {
+                        "Content-Type": "application/json"
+                    },
+                    data: JSON.stringify({
+                        // TODO: Add data to POST
+                    }),
+                }).then((r) => {
+                    resp = r
+                    if (!resp.ok) {
+                        resp.json().then((data) => {
+                            // TODO: Notification
+                            console.error(`Failed to create trouble report: ${resp.status}: ${data.message}`)
+                        });
+                    }
+                }).catch((err) => {
+                    console.error(`Failed to create trouble report: ${err}`)
+                });
             '
         >
             <i class="bi bi-plus"></i>
