@@ -43,7 +43,7 @@ func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
 	return pgvis.SortCookies(p.Cookies)
 }
 
-func handleProfilePage(ctx echo.Context, db *pgvis.DB) error {
+func handleProfilePage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	pageData := NewProfilePageData()
 
 	if user, err := getUserFromContext(ctx); err != nil {

@@ -13,7 +13,7 @@ func ServeHome(e *echo.Echo, options Options) {
 	})
 }
 
-func handleHomePage(c echo.Context) error {
+func handleHomePage(c echo.Context) *echo.HTTPError {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(templates,

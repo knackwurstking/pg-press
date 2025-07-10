@@ -13,7 +13,7 @@ func ServeLogout(e *echo.Echo, options Options) {
 	})
 }
 
-func handleLogoutPage(ctx echo.Context, db *pgvis.DB) error {
+func handleLogoutPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if cookie, err := ctx.Cookie(CookieName); err == nil {
 		db.Cookies.Remove(cookie.Value)
 

@@ -27,7 +27,7 @@ func NewTroubleReportsPageData() TroubleReportsPageData {
 	}
 }
 
-func handleTroubleReportsPage(ctx echo.Context) error {
+func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
 	pageData := NewTroubleReportsPageData()
 
 	// TODO: Get data from the database here
