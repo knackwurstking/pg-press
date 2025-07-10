@@ -71,16 +71,17 @@ func handleProfileCookiesGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	cookies, err := db.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("list cookies for api key failed: %#v", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("list cookies for api key failed: %s", err))
 	}
+	cookies = pgvis.SortCookies(cookies)
 
 	t, err := template.ParseFS(routes, "routes/profile/cookies.html")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %#v", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err))
 	}
 
 	if err := t.Execute(ctx.Response(), cookies); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %#v", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %s", err))
 	}
 
 	return nil
@@ -93,7 +94,7 @@ func handleProfileCookiesDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError 
 	}
 
 	if err := db.Cookies.Remove(value); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("removing cookie failed: %#v", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("removing cookie failed: %s", err))
 	}
 
 	return handleProfileCookiesGET(ctx, db)

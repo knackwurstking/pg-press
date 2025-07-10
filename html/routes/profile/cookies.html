@@ -1,4 +1,5 @@
-{{if ne (len .Cookies) 0}}
+{{$cookies := .}}
+{{if ne (len $cookies) 0}}
 <details id="cookies" open>
     <summary>Cookies</summary>
 
@@ -12,7 +13,7 @@
         </thead>
 
         <tbody>
-            {{range $cookie := .CookiesSorted}}
+            {{range $cookie := $cookies}}
             <tr>
                 <td>{{$cookie.TimeString}}</td>
                 <td class="left">{{$cookie.UserAgent}}</td>
@@ -20,6 +21,7 @@
                 <td class="right no-user-select">
                     <a
                         hx-delete="./profile/cookies?value={{$cookie.Value}}"
+                        hx-trigger="click"
                         hx-target="cookies"
                         hx-swap="outerHTML"
                         role="button"
