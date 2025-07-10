@@ -59,11 +59,32 @@
 
         <i>Under Construction</i>
 
-        <ul>
-            <!-- TODO: Render cookies here, add delete (icon) button -->
-            {{range $cookie := .Cookies}}
-            {{end}}
-        </ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>Letzte Anmeldung</th>
+                    <th>Benutzeragent</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{range $cookie := .Cookies}}
+                <tr>
+                    <td>{{$cookie.LastLogin}}</td>
+                    <td>{{$cookie.UserAgent}}</td>
+
+                    <td class="right">
+                        <button class="ghost primary icon" onclick='
+                            console.debug("@TODO: Delete this cookie...")
+                        '>
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
     </details>
     {{end}}
 
