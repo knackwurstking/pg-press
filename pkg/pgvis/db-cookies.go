@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 )
 
 type Cookie struct {
@@ -11,6 +12,15 @@ type Cookie struct {
 	Value     string `json:"value"`
 	ApiKey    string `json:"api_key"`
 	LastLogin int64  `json:"last_login"`
+}
+
+func (c *Cookie) TimeString() string {
+	t := time.UnixMilli(c.LastLogin)
+	return fmt.Sprintf(
+		"%04d/%02d/%02d %02d:%02d:%02d", 
+		t.Year(), t.Month(), t.Day(), 
+		t.Hour(), t.Minute(), t.Second(),
+	)
 }
 
 type DBCookies struct {
