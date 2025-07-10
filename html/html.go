@@ -170,7 +170,11 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
-	// TODO: Add cookies to `pageData`, check for errors and append to `pageData.ErrorMessages`
+	if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
+		log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
+	} else {
+		pageData.Cookies = cookies
+	}
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
