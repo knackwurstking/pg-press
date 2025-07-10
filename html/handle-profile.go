@@ -31,20 +31,21 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		pageData.User = user
 	}
 
-	// Get "user-name" from form data (optional), and update database user
-	v, err := ctx.FormParams()
-	userName := v.Get("user-name")
+	{ // Get (optinal) "user-name" form params, and update database
+		v, err := ctx.FormParams()
+		userName := v.Get("user-name")
 
-	// Database update
-	if userName != "" && userName != pageData.User.UserName {
-		log.Debugf(
-			"/profile -> Change user name in database: %s => %s",
-			pageData.User.UserName, userName,
-		)
+		// Database update
+		if userName != "" && userName != pageData.User.UserName {
+			log.Debugf(
+				"/profile -> Change user name in database: %s => %s",
+				pageData.User.UserName, userName,
+			)
 
-		pageData.User.UserName = userName
-		if err = db.Users.Update(pageData.User.TelegramID, pageData.User); err != nil {
-			pageData.ErrorMessages = []string{err.Error()}
+			pageData.User.UserName = userName
+			if err = db.Users.Update(pageData.User.TelegramID, pageData.User); err != nil {
+				pageData.ErrorMessages = []string{err.Error()}
+			}
 		}
 	}
 
