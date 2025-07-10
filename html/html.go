@@ -33,39 +33,13 @@ type Options struct {
 	DB               *pgvis.DB
 }
 
-// TODO: Clean up this mess
 func Serve(e *echo.Echo, options Options) {
 	e.StaticFS(options.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
 
-	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
-		return handleHomePage(c)
-	})
-
-	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
-		return handleFeed(c)
-	})
-
-	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
-		return handleLogin(c, options.DB)
-	})
-
-	e.GET(options.ServerPathPrefix+"/logout", func(c echo.Context) error {
-		return handleLogout(c, options.DB)
-	})
-
-	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
-		return handleProfile(c, options.DB)
-	})
-
-	e.GET(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
-		return handleProfileCookiesGET(c, options.DB)
-	})
-
-	e.DELETE(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
-		return handleProfileCookiesDELETE(c, options.DB)
-	})
-
-	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		return handleTroubleReports(c)
-	})
+	ServeHome(e, options)
+	ServeFeed(e, options)
+	ServeLogin(e, options)
+	ServeLogout(e, options)
+	ServeProfile(e, options)
+	ServeTroubleReports(e, options)
 }

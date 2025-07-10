@@ -7,10 +7,23 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/labstack/echo/v4"
-
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/labstack/echo/v4"
 )
+
+func ServeProfile(e *echo.Echo, options Options) {
+	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
+		return handleProfile(c, options.DB)
+	})
+
+	e.GET(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
+		return handleProfileCookiesGET(c, options.DB)
+	})
+
+	e.DELETE(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
+		return handleProfileCookiesDELETE(c, options.DB)
+	})
+}
 
 type ProfilePageData struct {
 	PageData
@@ -39,7 +52,7 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 		pageData.User = user
 	}
 
-	handleProfileUserName(ctx, &pageData, db)
+	handleProfileFormParamUserName(ctx, &pageData, db)
 
 	if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
 		log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
@@ -100,7 +113,7 @@ func handleProfileCookiesDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError 
 	return handleProfileCookiesGET(ctx, db)
 }
 
-func handleProfileUserName(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) {
+func handleProfileFormParamUserName(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) {
 	v, err := ctx.FormParams()
 	userName := v.Get("user-name")
 

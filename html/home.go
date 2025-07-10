@@ -7,12 +7,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func handleFeed(c echo.Context) error {
+func ServeHome(e *echo.Echo, options Options) {
+	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
+		return handleHomePage(c)
+	})
+}
+
+func handleHomePage(c echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
-		"templates/feed.html",
+		"templates/home.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

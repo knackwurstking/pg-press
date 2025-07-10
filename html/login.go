@@ -8,10 +8,15 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/labstack/echo/v4"
 )
+
+func ServeLogin(e *echo.Echo, options Options) {
+	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
+		return handleLogin(c, options.DB)
+	})
+}
 
 type LoginPageData struct {
 	PageData

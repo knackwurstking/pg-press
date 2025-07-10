@@ -8,6 +8,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func ServeTroubleReports(e *echo.Echo, options Options) {
+	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
+		return handleTroubleReports(c)
+	})
+}
+
 type TroubleReportsPageData struct {
 	PageData
 
