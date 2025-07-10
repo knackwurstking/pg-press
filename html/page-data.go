@@ -1,8 +1,6 @@
 package html
 
 import (
-	"slices"
-
 	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 )
 
