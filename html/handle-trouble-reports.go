@@ -8,7 +8,7 @@ import (
 )
 
 func handleTroubleReports(ctx echo.Context) *echo.HTTPError {
-	pageData := PageData{}
+	pageData := NewPageData()
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
