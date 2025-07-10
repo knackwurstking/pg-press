@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
 type LoginPageData struct {

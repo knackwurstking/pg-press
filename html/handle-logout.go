@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
 func handleLogout(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {

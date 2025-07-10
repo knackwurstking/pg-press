@@ -9,7 +9,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/labstack/gommon/color"
 
-	"github.com/knackwurstking/pg-vis/internal/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
 func listUserCommand() cli.Command {

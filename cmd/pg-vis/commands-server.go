@@ -6,8 +6,9 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/html"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/html"
 )
 
 func serverCommand() cli.Command {

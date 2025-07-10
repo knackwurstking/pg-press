@@ -15,45 +15,36 @@
 {{define "content"}}
 <main class="container fluid">
     <section style="margin-top: 0" class="flex gap justify-between">
-        <input
-            style="margin: auto 0; width: 100%"
-            type="search"
-            name="search"
-            placeholder="Suche"
-            aria-label="Suche"
-        />
+        <input style="margin: auto 0; width: 100%" type="search" name="search" placeholder="Suche" aria-label="Suche" />
     </section>
 
     <section style="margin-top: 0" class="flex gap justify-end">
-        <button
-            class="ghost icon"
-            onclick='
-                // NOTE: This is just for testing, Normally this should open some kind of an edit dialog, or whatever
-                // TODO: Need a api for this, ex: "POST ./api/trouble-reports"
-                const url = "./api/trouble-reports";
+        <button class="ghost icon" onclick='
+            // NOTE: This is just for testing, Normally this should open some kind of an edit dialog, or whatever
+            // TODO: Need a api for this, ex: "POST ./api/trouble-reports"
+            const url = "./api/trouble-reports";
 
-                let resp = resp
-                fetch(url, {
-                    method: "POST",
-                    header: {
-                        "Content-Type": "application/json"
-                    },
-                    data: JSON.stringify({
-                        // TODO: Add data to POST
-                    }),
-                }).then((r) => {
-                    resp = r
-                    if (!resp.ok) {
-                        resp.json().then((data) => {
-                            // TODO: Notification
-                            console.error(`Failed to create trouble report: ${resp.status}: ${data.message}`)
-                        });
-                    }
-                }).catch((err) => {
-                    console.error(`Failed to create trouble report: ${err}`)
-                });
-            '
-        >
+            let resp = resp
+            fetch(url, {
+                method: "POST",
+                header: {
+                    "Content-Type": "application/json"
+                },
+                data: JSON.stringify({
+                    // TODO: Add data to POST
+                }),
+            }).then((r) => {
+                resp = r
+                if (!resp.ok) {
+                    resp.json().then((data) => {
+                        // TODO: Notification
+                        console.error(`Failed to create trouble report: ${resp.status}: ${data.message}`)
+                    });
+                }
+            }).catch((err) => {
+                console.error(`Failed to create trouble report: ${err}`)
+            });
+        '>
             <i class="bi bi-plus"></i>
         </button>
     </section>
