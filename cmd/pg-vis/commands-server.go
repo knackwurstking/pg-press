@@ -53,7 +53,6 @@ func serverCommand() cli.Command {
 					code := 500
 					message := ""
 
-					// NOTE: Maybe serve an error page here instead
 					if err, ok := err.(*echo.HTTPError); ok {
 						if err == nil {
 							return
