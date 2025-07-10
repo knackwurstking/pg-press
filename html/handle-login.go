@@ -46,9 +46,9 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 	pageData.ApiKey = apiKey
 	pageData.InvalidApiKey = apiKey != ""
 
-	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/login.html",
+	t, err := template.ParseFS(templates,
+		"templates/layout.html",
+		"templates/login.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

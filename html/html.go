@@ -12,8 +12,8 @@ const (
 	CookieName = "pgvis-api-key"
 )
 
-//go:embed routes
-var routes embed.FS
+//go:embed templates
+var templates embed.FS
 
 //go:embed static
 var static embed.FS

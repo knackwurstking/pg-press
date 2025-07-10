@@ -47,9 +47,9 @@ func handleProfile(ctx echo.Context, db *pgvis.DB) error {
 		pageData.Cookies = cookies
 	}
 
-	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/profile.html",
+	t, err := template.ParseFS(templates,
+		"templates/layout.html",
+		"templates/profile.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -75,7 +75,7 @@ func handleProfileCookiesGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	}
 	cookies = pgvis.SortCookies(cookies)
 
-	t, err := template.ParseFS(routes, "routes/profile/cookies.html")
+	t, err := template.ParseFS(templates, "templates/profile/cookies.html")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err))
 	}

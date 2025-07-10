@@ -10,9 +10,9 @@ import (
 func handleFeed(c echo.Context) error {
 	pageData := PageData{}
 
-	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/feed.html",
+	t, err := template.ParseFS(templates,
+		"templates/layout.html",
+		"templates/feed.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

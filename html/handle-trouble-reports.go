@@ -17,7 +17,7 @@ type TroubleReportsPageData struct {
 func NewTroubleReportsPageData() TroubleReportsPageData {
 	return TroubleReportsPageData{
 		PageData: NewPageData(),
-		Reports: make([]*pgvis.TroubleReport, 0),
+		Reports:  make([]*pgvis.TroubleReport, 0),
 	}
 }
 
@@ -26,9 +26,9 @@ func handleTroubleReports(ctx echo.Context) error {
 
 	// TODO: Get data from the database here
 
-	t, err := template.ParseFS(routes,
-		"routes/layout.html",
-		"routes/trouble-reports.html",
+	t, err := template.ParseFS(templates,
+		"templates/layout.html",
+		"templates/trouble-reports.html",
 	)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
