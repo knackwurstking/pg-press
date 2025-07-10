@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 func openDB(customPath string) (*pgvis.DB, error) {

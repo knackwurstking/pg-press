@@ -3,8 +3,9 @@ package html
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 func handleLogout(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {

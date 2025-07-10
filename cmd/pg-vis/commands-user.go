@@ -7,8 +7,9 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/gommon/color"
+
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 func listUserCommand() cli.Command {

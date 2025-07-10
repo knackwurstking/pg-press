@@ -13,7 +13,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/knackwurstking/pg-vis/html"
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 var (

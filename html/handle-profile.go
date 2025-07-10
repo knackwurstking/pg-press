@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 type ProfilePageData struct {

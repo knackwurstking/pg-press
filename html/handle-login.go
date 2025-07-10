@@ -8,8 +8,9 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
-	"github.com/knackwurstking/pg-vis/pkg/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/internal/pgvis"
 )
 
 type LoginPageData struct {
