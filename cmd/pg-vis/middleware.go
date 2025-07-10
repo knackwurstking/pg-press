@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -21,7 +22,18 @@ var (
 	keyAuthSkipperRegExp = regexp.MustCompile(
 		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico|.*service-worker\.js|.*\.woff|.*\.woff2|.*htmx.min.js)`,
 	)
+
+	pages []string
 )
+
+func init() {
+	pages = []string{
+		serverPathPrefix + "/",
+		serverPathPrefix + "/feed",
+		serverPathPrefix + "/profile",
+		serverPathPrefix + "/trouble-reports",
+	}
+}
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -84,10 +96,13 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 					return false, nil
 				}
 
-				// TODO: Try to minimize this update process
-				c.LastLogin = time.Now().UnixMilli()
-				if err := db.Cookies.Update(c.Value, c); err != nil {
-					log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
+				log.Debugf("KeyAuth -> Validator -> ctx.Request().URL.Path=%#v", ctx.Request().URL.Path)
+				if slices.Contains(pages, ctx.Request().URL.Path) {
+					log.Debugf("KeyAuth -> Validator -> Update cookies last login timestamp")
+					c.LastLogin = time.Now().UnixMilli()
+					if err := db.Cookies.Update(c.Value, c); err != nil {
+						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
+					}
 				}
 			}
 		} else {
