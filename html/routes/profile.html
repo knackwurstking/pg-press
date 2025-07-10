@@ -27,8 +27,8 @@
     <li>
         <a href="./"><i class="bi bi-house"></i></a>
     </li>
+
     <li><a href="./feed">Feed</a></li>
-    <li><a href="./profile" disabled>Profil</a></li>
 </ul>
 {{end}}
 
@@ -85,7 +85,11 @@
                     <td class="left">{{$cookie.UserAgent}}</td>
 
                     <td class="right no-user-select">
-                        <a role="button" class="ghost destructive icon" href="./profile?delete_cookie={{$cookie.Value}}">
+                        <a
+                            role="button"
+                            class="ghost destructive icon"
+                            href="./profile?delete_cookie={{$cookie.Value}}"
+                        >
                             <i class="bi bi-trash"></i>
                         </a>
                     </td>
