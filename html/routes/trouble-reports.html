@@ -30,9 +30,35 @@
                 header: {
                     "Content-Type": "application/json"
                 },
-                data: JSON.stringify({
-                    // TODO: Add data to POST
-                }),
+                data: JSON.stringify([
+                    {
+                        modified: {
+                            user: {
+                                telegram_id: ,
+                                user_name: ,
+                                api_key: ,
+                            },
+                            title: "Test Trouble Report, Entry nr. 1",
+                            content: `Need to think about this content stuff...
+
+How to do indentation...
+    ...This is a 4 space indentation
+
+And what about markdown or html for text formatting?`,
+                        },
+                    },
+                    {
+                        modified: {
+                            user: {
+                                telegram_id: ,
+                                user_name: ,
+                                api_key: ,
+                            },
+                            title: "Test Trouble Report, Entry nr. 2",
+                            content: `This is a very short one line test entry.`,
+                        },
+                    },
+                ]),
             }).then((r) => {
                 resp = r
                 if (!resp.ok) {

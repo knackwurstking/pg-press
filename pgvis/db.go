@@ -19,3 +19,4 @@ func NewDB(db *sql.DB) *DB {
 		db:      db,
 	}
 }
+
