@@ -85,11 +85,9 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 				}
 
 				c.LastLogin = time.Now().UnixMilli()
-				go func() {
-					if err := db.Cookies.Update(c.Value, c); err != nil {
-						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
-					}
-				}()
+				if err := db.Cookies.Update(c.Value, c); err != nil {
+					log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
+				}
 			}
 		} else {
 			return false, nil
