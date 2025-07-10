@@ -17,8 +17,8 @@ type Cookie struct {
 func (c *Cookie) TimeString() string {
 	t := time.UnixMilli(c.LastLogin)
 	return fmt.Sprintf(
-		"%04d/%02d/%02d %02d:%02d:%02d", 
-		t.Year(), t.Month(), t.Day(), 
+		"%04d/%02d/%02d %02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
 		t.Hour(), t.Minute(), t.Second(),
 	)
 }
@@ -57,13 +57,15 @@ func (db *DBCookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 	}
 	defer r.Close()
 
-	cookie := &Cookie{}
 	for r.Next() {
+		cookie := Cookie{}
+
 		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 		if err != nil {
 			return nil, err
 		}
-		cookies = append(cookies, cookie)
+
+		cookies = append(cookies, &cookie)
 	}
 
 	return cookies, nil
@@ -128,7 +130,7 @@ func (db *DBCookies) Update(value string, cookie *Cookie) error {
 	}
 
 	query := fmt.Sprintf(
-		`UPDATE cookies SET user_agent="%s", value="%s", api_key="%s", last_login=%d WHERE value=%s`,
+		`UPDATE cookies SET user_agent="%s", value="%s", api_key="%s", last_login=%d WHERE value="%s"`,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value,
 	)
 
