@@ -4,11 +4,27 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
 )
 
+type TroubleReportsPageData struct {
+	PageData
+
+	Reports []*pgvis.TroubleReport
+}
+
+func NewTroubleReportsPageData() TroubleReportsPageData {
+	return TroubleReportsPageData{
+		PageData: NewPageData(),
+		Reports: make([]*pgvis.TroubleReport, 0),
+	}
+}
+
 func handleTroubleReports(ctx echo.Context) *echo.HTTPError {
-	pageData := NewPageData()
+	pageData := NewTroubleReportsPageData()
+
+	// TODO: Get data from the database here
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
