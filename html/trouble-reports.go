@@ -12,6 +12,8 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
 		return handleTroubleReportsPage(c)
 	})
+
+	// TODO: Add "GET /trouble-reports/dialog-edit" (dialog id == "dialogEdit")
 }
 
 type TroubleReportsPageData struct {
