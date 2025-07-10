@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func handleHomePage(c echo.Context) *echo.HTTPError {
+func handleHomePage(c echo.Context) error {
 	pageData := PageData{}
 
 	t, err := template.ParseFS(routes,

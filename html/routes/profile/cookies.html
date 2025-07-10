@@ -1,0 +1,34 @@
+<details id="cookies" open>
+    <summary>Cookies</summary>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Letzte Anmeldung</th>
+                <th class="left">Benutzeragent</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range $cookie := .CookiesSorted}}
+            <tr>
+                <td>{{$cookie.TimeString}}</td>
+                <td class="left">{{$cookie.UserAgent}}</td>
+
+                <td class="right no-user-select">
+                    <a
+                        hx-delete="./profile/cookies?value={{$cookie.Value}}"
+                        hx-target="cookies"
+                        hx-swap="outerHTML"
+                        role="button"
+                        class="ghost destructive icon"
+                    >
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</details>

@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
-func handleLogout(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func handleLogout(ctx echo.Context, db *pgvis.DB) error {
 	if cookie, err := ctx.Cookie(CookieName); err == nil {
 		db.Cookies.Remove(cookie.Value)
 

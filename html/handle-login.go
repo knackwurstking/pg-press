@@ -26,7 +26,7 @@ func NewLoginPageData() LoginPageData {
 	}
 }
 
-func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func handleLogin(ctx echo.Context, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
 

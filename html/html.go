@@ -2,8 +2,6 @@ package html
 
 import (
 	"embed"
-	"errors"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -58,17 +56,15 @@ func Serve(e *echo.Echo, options Options) {
 		return handleProfile(c, options.DB)
 	})
 
+	e.GET(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
+		return handleProfileCookiesGET(c, options.DB)
+	})
+
+	e.DELETE(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
+		return handleProfileCookiesDELETE(c, options.DB)
+	})
+
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
 		return handleTroubleReports(c)
 	})
-}
-
-func getUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
-	user, ok := ctx.Get("user").(*pgvis.User)
-	if !ok {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError,
-			errors.New("user is missing in context"))
-	}
-
-	return user, nil
 }
