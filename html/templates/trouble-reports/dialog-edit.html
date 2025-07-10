@@ -1,0 +1,21 @@
+<dialog id="dialogEdit">
+    <!-- TODO: Will this work? -->
+    <form
+        hx-post="./trouble-reports/dialog-edit"
+        hx-trigger="submit"
+        hx-target="#dialogEdit"
+        hx-swap="outerHTML"
+    >
+        <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
+
+        <footer class="flex row gap justify-end">
+            <button class="flex-item secondary">Schließen</button>
+            <button type="flex-item submit">Ändern</button>
+        </footer>
+    </form>
+    <dialog>
+        <script>
+            document.querySelector("#dialogEdit").showModal();
+        </script>
+    </dialog>
+</dialog>
