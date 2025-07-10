@@ -1,8 +1,8 @@
 package html
 
 import (
-	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -12,14 +12,48 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func getUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
-	user, ok := ctx.Get("user").(*pgvis.User)
-	if !ok {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError,
-			errors.New("user is missing in context"))
+type LoginPageData struct {
+	PageData
+
+	ApiKey        string
+	InvalidApiKey bool
+}
+
+func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	v, err := ctx.FormParams()
+	apiKey := v.Get("api-key")
+
+	if ok, err := handleLoginApiKey(apiKey, db, ctx); ok {
+		if err = ctx.Redirect(http.StatusSeeOther, "./profile"); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		} else {
+			return nil
+		}
+	} else {
+		if err != nil {
+			log.Errorf("/login -> Invalid Api Key: %s", err.Error())
+		}
 	}
 
-	return user, nil
+	pageData := LoginPageData{
+		ApiKey:        apiKey,
+		InvalidApiKey: apiKey != "",
+	}
+
+	t, err := template.ParseFS(routes,
+		"routes/layout.html",
+		"routes/login.html",
+	)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	err = t.Execute(ctx.Response(), pageData)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return nil
 }
 
 func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, err error) {
