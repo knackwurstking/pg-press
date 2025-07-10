@@ -23,13 +23,17 @@
 <!-- Nav -->
 
 {{define "nav"}}
-<ul class="flex row gap justify-end align-center">
-    <li>
-        <a href="./"><i class="bi bi-house"></i></a>
-    </li>
+<div class="flex row gap justify-end align-center">
+    <a role="button" class="ghost primary" href="./feed">Feed</a>
 
-    <li><a href="./feed">Feed</a></li>
-</ul>
+    <a role="button" class="ghost primary icon" href="./profile" disabled>
+        <i class="bi bi-person-circle"></i>
+    </a>
+
+    <a role="button" class="ghost primary icon" href="./">
+        <i class="bi bi-house"></i>
+    </a>
+</div>
 {{end}}
 
 <!-- Content -->

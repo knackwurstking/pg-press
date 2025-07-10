@@ -9,22 +9,35 @@
 <!-- Nav -->
 
 {{define "nav"}}
-<ul  class="flex row gap justify-end align-center">
-    <li><a href="./"><i class="bi bi-house"></i></a></li>
-    <li><a href="./feed">Feed</a></li>
-    <li><a href="./profile">Profil</a></li>
-</ul>
+<!-- TODO: Create template for this nav stuff -->
+<div class="flex row gap justify-end align-center">
+    <a role="button" class="ghost primary" href="./feed">Feed</a>
+
+    <a role="button" class="ghost primary icon" href="./profile">
+        <i class="bi bi-person-circle"></i>
+    </a>
+
+    <a role="button" class="ghost primary icon" href="./">
+        <i class="bi bi-house"></i>
+    </a>
+</div>
 {{end}}
 
 <!-- Content -->
 
 {{define "content"}}
 <main class="container fluid">
-    <section style="margin-top: 0;" class="flex gap justify-between">
-        <input style="margin: auto 0; width: 100%;" type="search" name="search" placeholder="Suche" aria-label="Suche" />
+    <section style="margin-top: 0" class="flex gap justify-between">
+        <input
+            style="margin: auto 0; width: 100%"
+            type="search"
+            name="search"
+            placeholder="Suche"
+            aria-label="Suche"
+        />
     </section>
 
-    <section style="margin-top: 0;" class="flex gap justify-end">
+    <section style="margin-top: 0" class="flex gap justify-end">
         <button class="ghost icon"><i class="bi bi-plus"></i></button>
     </section>
 

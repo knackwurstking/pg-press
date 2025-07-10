@@ -2,18 +2,18 @@
 
 {{define "additional-scripts"}}
 <style>
-    details>summary {
+    details > summary {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         flex-wrap: nowrap;
     }
 
-    details>summary>*:first-child {
+    details > summary > *:first-child {
         width: 100%;
     }
 
-    details>summary>*:last-child {
+    details > summary > *:last-child {
         flex: 1;
         width: fit-content;
     }
@@ -23,10 +23,17 @@
 <!-- Nav -->
 
 {{define "nav"}}
-<ul class="flex row gap justify-end align-center">
-    <li><a href="./feed">Feed</a></li>
-    <li><a href="./profile">Profil</a></li>
-</ul>
+<div class="flex row gap justify-end align-center">
+    <a role="button" class="ghost primary" href="./feed">Feed</a>
+
+    <a role="button" class="ghost primary icon" href="./profile">
+        <i class="bi bi-person-circle"></i>
+    </a>
+
+    <a role="button" class="ghost primary icon" href="./" disabled>
+        <i class="bi bi-house"></i>
+    </a>
+</div>
 {{end}}
 
 <!-- Content -->
@@ -71,11 +78,27 @@
                 <li><a href="./trouble-reports">Trouble Reports</a></li>
             </ul>
 
-            <ul style="padding-left: 1rem;">
-                <li><a href="#" class="secondary ghost" disabled>Topic: Presse 0</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: Presse 2-5</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: Presse 5</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: Allgemein</a></li>
+            <ul style="padding-left: 1rem">
+                <li>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 0</a
+                    >
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 2-5</a
+                    >
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 5</a
+                    >
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Allgemein</a
+                    >
+                </li>
             </ul>
         </nav>
     </aside>
@@ -108,11 +131,21 @@
                 <li><a href="./flakes" disabled>Flakes</a></li>
             </ul>
 
-            <ul style="padding-left: 1rem;">
-                <li><a href="#" class="secondary ghost" disabled>Topic: P0</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: P0 Rechner</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: P4</a></li>
-                <li><a href="#" class="secondary ghost" disabled>Topic: P5</a></li>
+            <ul style="padding-left: 1rem">
+                <li>
+                    <a href="#" class="secondary ghost" disabled>Topic: P0</a>
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: P0 Rechner</a
+                    >
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled>Topic: P4</a>
+                </li>
+                <li>
+                    <a href="#" class="secondary ghost" disabled>Topic: P5</a>
+                </li>
             </ul>
         </nav>
     </aside>
