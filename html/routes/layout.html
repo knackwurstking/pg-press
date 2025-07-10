@@ -55,7 +55,7 @@
 
     {{block "content" .}}{{end}}
 
-    {{if ne .ErrorMessages nil}}
+    {{if ne (len .ErrorMessages) 0}}
     <dialog id="dialogErrorMessages" class="clean">
         <form method="dialog">
             <i style="font-size: 2.5rem;" class="bi bi-exclamation-triangle"></i>

@@ -16,17 +16,19 @@ type ProfilePageData struct {
 	Cookies []*pgvis.Cookie
 }
 
+func NewProfilePageData() ProfilePageData {
+	return ProfilePageData{
+		PageData: NewPageData(),
+		Cookies:  make([]*pgvis.Cookie, 0),
+	}
+}
+
 func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
 	return pgvis.SortCookies(p.Cookies)
 }
 
 func handleProfile(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	pageData := ProfilePageData{
-		PageData: PageData{
-			ErrorMessages: []string{},
-		},
-		Cookies: make([]*pgvis.Cookie, 0),
-	}
+	pageData := NewProfilePageData()
 
 	if user, err := getUserFromContext(ctx); err != nil {
 		return err

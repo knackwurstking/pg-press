@@ -19,6 +19,12 @@ type LoginPageData struct {
 	InvalidApiKey bool
 }
 
+func NewLoginPageData() LoginPageData {
+	return LoginPageData{
+		PageData: NewPageData(),
+	}
+}
+
 func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	v, err := ctx.FormParams()
 	apiKey := v.Get("api-key")
@@ -35,10 +41,9 @@ func handleLogin(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
-	pageData := LoginPageData{
-		ApiKey:        apiKey,
-		InvalidApiKey: apiKey != "",
-	}
+	pageData := NewLoginPageData()
+	pageData.ApiKey = apiKey
+	pageData.InvalidApiKey = apiKey != ""
 
 	t, err := template.ParseFS(routes,
 		"routes/layout.html",
