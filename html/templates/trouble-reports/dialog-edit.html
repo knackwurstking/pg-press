@@ -1,24 +1,38 @@
 {{if not .Submitted}}
-<dialog id="dialogEdit">
+<dialog id="dialogEdit" class="clean fullscreen debug">
+    <style>
+        form {
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            height: 100%;
+            margin: 0;
+        }
+    </style>
+
     <!-- TODO: Will this work? -->
     <form
         hx-post="./trouble-reports/dialog-edit"
         hx-trigger="submit"
         hx-target="#dialogEdit"
         hx-swap="outerHTML"
+        class="flex column"
     >
-        <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
+        <div class="content flex-item">
+            <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
+        </div>
 
         <footer class="flex row gap justify-end">
-            <button class="flex-item secondary">Schließen</button>
-            <button type="flex-item submit">Ändern</button>
+            <button class="secondary">Schließen</button>
+            <button type="submit">Ändern</button>
         </footer>
     </form>
-    <dialog>
-        <script>
-            document.querySelector("#dialogEdit").showModal();
-        </script>
-    </dialog>
+
+    <script>
+        document.querySelector("#dialogEdit").showModal();
+    </script>
 </dialog>
 {{else}}
 <!-- TODO: Handle "GET ./trouble-reports/data" (target `#data`) -->
