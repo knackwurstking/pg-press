@@ -27,11 +27,11 @@ type DBTroubleReports struct {
 func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
-			id INTEGER NOT NULL AUTOINCREMENT,
+			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
 			modified BLOB NOT NULL,
-			PRIMARY KEY("id")
+			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
