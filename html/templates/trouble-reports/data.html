@@ -1,3 +1,4 @@
+{{if ne (len .) 0}}
 <ul id="data">
     {{range $troubleReport := .}}
     <details>
@@ -6,3 +7,6 @@
     </details>
     {{end}}
 </ul>
+{{else}}
+<span id="data"></span>
+{{end}}
