@@ -71,10 +71,12 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context) *echo.H
 		Inputs:    map[string]string{},
 	}
 
-	if id, err := strconv.Atoi(ctx.QueryParam("id")); err == nil && !data.Submitted {
-		if id > 0 {
-			// TODO: Get data from the database if ID is bigger 0
-			data.ID = id
+	if !data.Submitted {
+		if id, err := strconv.Atoi(ctx.QueryParam("id")); err == nil {
+			if id > 0 {
+				// TODO: Get data from the database if ID is bigger 0
+				data.ID = id
+			}
 		}
 	}
 
