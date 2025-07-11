@@ -1,6 +1,9 @@
 package pgvis
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
 
 type TroubleReport struct {
 	ID       int                       `json:"id"`
@@ -39,4 +42,32 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 	}
 }
 
-// TODO: Add methods: List, Add, Update, Remove
+func (db *DBTroubleReports) List(tr *TroubleReport) ([]*TroubleReport, error) {
+	// TODO: ...
+
+	return nil, errors.New("under construction")
+}
+
+func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
+	// TODO: ...
+
+	return nil, errors.New("under construction")
+}
+
+func (db *DBTroubleReports) Add(tr *TroubleReport) error {
+	// TODO: ...
+
+	return errors.New("under construction")
+}
+
+func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
+	// TODO: ...
+
+	return errors.New("under construction")
+}
+
+func (db *DBTroubleReports) Remove(id int64) error {
+	// TODO: ...
+
+	return errors.New("under construction")
+}
