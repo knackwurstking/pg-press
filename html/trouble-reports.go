@@ -15,7 +15,7 @@ import (
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		return handleTroubleReportsPage(c)
+		return handleTroubleReportsPage(c, options)
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
@@ -40,10 +40,17 @@ func NewTroubleReportsPageData() TroubleReportsPageData {
 	}
 }
 
-func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
+func handleTroubleReportsPage(ctx echo.Context, options *Options) *echo.HTTPError {
 	pageData := NewTroubleReportsPageData()
 
-	// TODO: Get data from the database here
+	trs, err := options.DB.TroubleReports.List()
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("list trouble-reports: %s", err.Error()),
+		)
+	}
+	pageData.Reports = trs
 
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
