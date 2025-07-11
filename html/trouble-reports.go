@@ -20,7 +20,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditGET(false, c) // TODO: Pass options
+		return handleTroubleReportsDialogEditGET(false, c, options)
 	})
 
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
@@ -74,7 +74,7 @@ type TroubleReportsDialogEditTemplateData struct {
 	Inputs    map[string]string // Inputs containing all data to render
 }
 
-func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context) *echo.HTTPError {
+func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, options Options) *echo.HTTPError {
 	data := TroubleReportsDialogEditTemplateData{
 		Submitted: submitted,
 		Inputs:    map[string]string{},
@@ -153,5 +153,5 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 		title, content,
 	)
 
-	return handleTroubleReportsDialogEditGET(true, ctx)
+	return handleTroubleReportsDialogEditGET(true, ctx, options)
 }
