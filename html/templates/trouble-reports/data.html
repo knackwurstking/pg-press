@@ -1,0 +1,8 @@
+<ul id="data">
+    {{range $troubleReport := .}}
+    <details>
+        <summary>{{$troubleReport.Title}}</summary>
+        <p>{{$troubleReport.Content}}</p>
+    </details>
+    {{end}}
+</ul>

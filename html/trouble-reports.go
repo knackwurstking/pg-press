@@ -16,42 +16,24 @@ import (
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		return handleTroubleReportsPage(c, options)
+		return handleTroubleReportsPage(c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditGET(false, c, options)
+		return handleTroubleReportsDialogEditGET(false, c, options.DB)
 	})
 
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditPOST(c, options)
+		return handleTroubleReportsDialogEditPOST(c, options.DB)
+	})
+
+	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
+		return handleTroubleReportsDataGET(c, options.DB)
 	})
 }
 
-type TroubleReportsPageData struct {
-	PageData
-
-	Reports []*pgvis.TroubleReport
-}
-
-func NewTroubleReportsPageData() TroubleReportsPageData {
-	return TroubleReportsPageData{
-		PageData: NewPageData(),
-		Reports:  make([]*pgvis.TroubleReport, 0),
-	}
-}
-
-func handleTroubleReportsPage(ctx echo.Context, options Options) *echo.HTTPError {
-	pageData := NewTroubleReportsPageData()
-
-	trs, err := options.DB.TroubleReports.List()
-	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("list trouble-reports: %s", err.Error()),
-		)
-	}
-	pageData.Reports = trs
+func handleTroubleReportsPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	pageData := NewPageData()
 
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
@@ -74,7 +56,7 @@ type TroubleReportsDialogEditTemplateData struct {
 	Inputs    map[string]string // Inputs containing all data to render
 }
 
-func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, options Options) *echo.HTTPError {
+func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	data := TroubleReportsDialogEditTemplateData{
 		Submitted: submitted,
 		Inputs:    map[string]string{},
@@ -107,7 +89,8 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, options
 	return nil
 }
 
-func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo.HTTPError {
+func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	// TODO: Prepare user input, so i can use it as html
 	title, err := url.QueryUnescape(ctx.QueryParam("title"))
 	if err != nil {
 		return echo.NewHTTPError(
@@ -116,6 +99,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 		)
 	}
 
+	// TODO: Prepare user input, so i can use it as html
 	content, err := url.QueryUnescape(ctx.QueryParam("content"))
 	if err != nil {
 		return echo.NewHTTPError(
@@ -153,5 +137,26 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 		title, content,
 	)
 
-	return handleTroubleReportsDialogEditGET(true, ctx, options)
+	return handleTroubleReportsDialogEditGET(true, ctx, db)
+}
+
+func handleTroubleReportsDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	trs, err := db.TroubleReports.List()
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("list trouble-reports: %s", err.Error()),
+		)
+	}
+
+	t, err := template.ParseFS(templates, "templates/trouble-reports/data.html")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err = t.Execute(ctx.Response(), trs); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return nil
 }
