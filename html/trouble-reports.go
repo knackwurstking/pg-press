@@ -91,7 +91,11 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 }
 
 func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	title, err := url.QueryUnescape(ctx.QueryParam("title"))
+	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
+		return handleTroubleReportsDialogEditGET(true, ctx, db)
+	}
+
+	title, err := url.QueryUnescape(ctx.FormValue("title"))
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
@@ -99,7 +103,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		)
 	}
 
-	content, err := url.QueryUnescape(ctx.QueryParam("content"))
+	content, err := url.QueryUnescape(ctx.FormValue("content"))
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
@@ -124,7 +128,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 
 	// TODO: Need to find out if the submit button was pressed
 	if title == "" || content == "" {
-		log.Debug("Invalid input: title=%#v; content=%#v", title, content)
+		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
 		// TODO: Invalid Input
 	} else {
 		if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {

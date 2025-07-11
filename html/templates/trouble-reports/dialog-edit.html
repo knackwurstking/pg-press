@@ -19,8 +19,13 @@
             <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
         </div>
 
+        <input name="title" />
+        <textarea name="content"></textarea>
+
         <footer class="flex row gap justify-end">
-            <button class="secondary">Schließen</button>
+            <button hx-post="./trouble-reports/dialog-edit?id={{.ID}}&cancel=true" hx-trigger="click"
+                hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
+                class="secondary">Schließen</button>
             <button type="submit">Ändern</button>
         </footer>
     </form>
