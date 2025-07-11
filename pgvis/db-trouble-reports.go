@@ -1,12 +1,12 @@
 package pgvis
 
 type TroubleReport struct {
-	Modified *Modified `json:"modified"`
-	Title    string    `json:"title"`
-	Content  string    `json:"content"`
+	Modified *Modified[*TroubleReport] `json:"modified"`
+	Title    string                    `json:"title"`
+	Content  string                    `json:"content"`
 }
 
-func NewTroubleReport(m *Modified, title, content string) *TroubleReport {
+func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *TroubleReport {
 	return &TroubleReport{
 		Modified: m,
 	}

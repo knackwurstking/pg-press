@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -115,9 +116,27 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 		)
 	}
 
+	user, ok := ctx.Get("user").(*pgvis.User)
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
+	}
+
+	_ = pgvis.NewTroubleReport(
+		&pgvis.Modified[*pgvis.TroubleReport]{
+			User:       user,
+			Time:       time.Now().UnixMilli(),
+			DataBefore: nil,
+		},
+		title,
+		content,
+	)
+
 	if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
-		// TODO: Add data to database (new entry)
+		// TODO: Add data `data` to database (new entry)
 	} else {
+		// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
+		//tr.Modified.DataBefore
+
 		// TODO: Update data with ID in the database (existing data)
 	}
 
