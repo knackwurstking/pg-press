@@ -91,7 +91,6 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 }
 
 func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	// TODO: Prepare user input, so i can use it as html
 	title, err := url.QueryUnescape(ctx.QueryParam("title"))
 	if err != nil {
 		return echo.NewHTTPError(
@@ -100,7 +99,6 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		)
 	}
 
-	// TODO: Prepare user input, so i can use it as html
 	content, err := url.QueryUnescape(ctx.QueryParam("content"))
 	if err != nil {
 		return echo.NewHTTPError(
@@ -125,20 +123,15 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 	)
 
 	if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
-		log.Debug("Add new database entry")
+		log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
 		// TODO: Add data `data` to database (new entry)
 	} else {
-		log.Debugf("Update database entry with id %d", id)
+		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
 		// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
 		//tr.Modified.DataBefore
 
 		// TODO: Update data with ID in the database (existing data)
 	}
-
-	log.Warn(
-		"@TODO: Storing title and content in trouble-reports database: title=%#v; content=%#v",
-		title, content,
-	)
 
 	return handleTroubleReportsDialogEditGET(true, ctx, db)
 }
