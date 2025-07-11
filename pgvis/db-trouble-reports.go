@@ -44,7 +44,6 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 	}
 }
 
-// TODO: Continue here
 func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 	query := `SELECT * FROM trouble-reports ORDER BY id ASC`
 	r, err := db.db.Query(query)
