@@ -13,13 +13,8 @@
     </style>
 
     <!-- TODO: Will this work? -->
-    <form
-        hx-post="./trouble-reports/dialog-edit?id={{.ID}}"
-        hx-trigger="submit"
-        hx-target="#dialogEdit"
-        hx-swap="outerHTML"
-        class="flex column"
-    >
+    <form hx-post="./trouble-reports/dialog-edit?id={{.ID}}" hx-trigger="submit"
+        hx-target="#dialogEdit" hx-swap="outerHTML" class="flex column">
         <div class="content flex-item">
             <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
         </div>
@@ -36,11 +31,6 @@
 </dialog>
 {{else}}
 <!-- TODO: Handle "GET ./trouble-reports/data" (target `#data`) -->
-<span
-    hx-get="./trouble-reports/data"
-    hx-trigger="load"
-    hx-target="#data"
-    hx-swap="outerHTML"
-    id="dialogEdit"
-></span>
+<span hx-get="./trouble-reports/data" hx-trigger="load" hx-target="#data" hx-swap="outerHTML"
+    id="dialogEdit"></span>
 {{end}}

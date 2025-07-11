@@ -1,54 +1,24 @@
-<!-- Title -->
+{{define "title"}}PG: Presse | Trouble Reports{{end}}
 
-{{define "title"}}Trouble Reports{{end}}
-
-<!-- Additional Scripts -->
-
-{{define "additional-scripts"}}{{end}}
-
-<!-- Nav -->
+{{define "app-bar-title"}}Trouble Reports{{end}}
 
 {{define "nav"}} {{template "basic-nav-elements"}} {{end}}
 
-<!-- Content -->
-
 {{define "content"}}
 <main class="container fluid">
-    <section
-        style="margin-top: 0"
-        class="flex gap justify-between"
-    >
-        <input
-            style="margin: auto 0; width: 100%"
-            type="search"
-            name="search"
-            placeholder="Suche"
-            aria-label="Suche"
-        />
+    <section style="margin-top: 0" class="flex gap justify-between">
+        <input style="margin: auto 0; width: 100%" type="search" name="search" placeholder="Suche"
+            aria-label="Suche" />
     </section>
 
-    <section
-        style="margin-top: 0"
-        class="flex gap justify-end"
-    >
-        <button
-            hx-get="./trouble-reports/dialog-edit"
-            hx-trigger="click"
-            hx-target="#dialogEdit"
-            hx-swap="outerHTML"
-            class="ghost icon"
-            title="Erstelle einen neuen Eintrag"
-        >
+    <section style="margin-top: 0" class="flex gap justify-end">
+        <button hx-get="./trouble-reports/dialog-edit" hx-trigger="click" hx-target="#dialogEdit"
+            hx-swap="outerHTML" class="ghost icon" title="Erstelle einen neuen Eintrag">
             <i class="bi bi-plus-lg"></i>
         </button>
     </section>
 
-    <span
-        hx-get="./trouble-reports/data"
-        hx-trigger="load"
-        hx-swap="outerHTML"
-        id="data"
-    ></span>
+    <span hx-get="./trouble-reports/data" hx-trigger="load" hx-swap="outerHTML" id="data"></span>
 
     <span id="dialogEdit"></span>
 </main>

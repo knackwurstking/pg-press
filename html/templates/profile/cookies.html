@@ -19,14 +19,9 @@
                 <td class="left">{{$cookie.UserAgent}}</td>
 
                 <td class="right no-user-select">
-                    <a
-                        hx-delete="./profile/cookies?value={{$cookie.Value}}"
-                        hx-trigger="click"
-                        hx-target="#cookies"
-                        hx-swap="outerHTML"
-                        role="button"
-                        class="ghost destructive icon"
-                    >
+                    <a hx-delete="./profile/cookies?value={{$cookie.Value}}" hx-trigger="click"
+                        hx-target="#cookies" hx-swap="outerHTML" role="button"
+                        class="ghost destructive icon">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>
