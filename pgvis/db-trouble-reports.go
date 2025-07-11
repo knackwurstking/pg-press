@@ -81,17 +81,14 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
-	query := fmt.Sprintf(
-		`INSERT INTO trouble_reports (title, content, modified) VALUES ("%s", "%s", ?)`,
-		tr.Title, tr.Content,
-	)
+	query := `INSERT INTO trouble_reports (title, content, modified) VALUES (?, ?, ?)`
 
 	modifiedBytes, err := json.Marshal(tr.Modified)
 	if err != nil {
 		return fmt.Errorf("marshal modified failed: %s", err.Error())
 	}
 
-	_, err = db.db.Exec(query, modifiedBytes)
+	_, err = db.db.Exec(query, tr.Title, tr.Content, modifiedBytes)
 	return err
 }
 
