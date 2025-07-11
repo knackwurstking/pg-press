@@ -3,6 +3,7 @@ package pgvis
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type TroubleReport struct {
@@ -55,9 +56,13 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
-	// TODO: ...
+	query := fmt.Sprintf(
+		`INSERT INTO trouble-reports (title, content, modified) VALUES ("%s", "%s", ?)`,
+		tr.Title, tr.Content,
+	)
 
-	return errors.New("under construction")
+	_, err := db.db.Exec(query, tr.Modified.JSON())
+	return err
 }
 
 func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
