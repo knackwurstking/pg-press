@@ -56,7 +56,13 @@
                 class="secondary">Schließen</button>
 
             <!-- Set button text based on ID value -->
-            <button type="submit">Ändern</button>
+            <button type="submit">
+                {{if gt .ID 0}}
+                    Aktualisieren 
+                {{else}}
+                    Erstellen
+                {{end}}
+            </button>
         </footer>
 
     </form>
