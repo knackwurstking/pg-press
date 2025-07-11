@@ -9,8 +9,9 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
