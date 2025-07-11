@@ -65,6 +65,7 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 	if !data.Submitted {
 		if id, err := strconv.Atoi(ctx.QueryParam("id")); err == nil {
 			if id > 0 {
+				log.Debugf("Get database entry with id %d", id)
 				// TODO: Get data from the database if ID is bigger 0
 				data.ID = id
 			}
@@ -124,8 +125,10 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 	)
 
 	if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
+		log.Debug("Add new database entry")
 		// TODO: Add data `data` to database (new entry)
 	} else {
+		log.Debugf("Update database entry with id %d", id)
 		// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
 		//tr.Modified.DataBefore
 
