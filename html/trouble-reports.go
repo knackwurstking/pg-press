@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -57,9 +58,10 @@ type TroubleReportsDialogEditTemplateData struct {
 }
 
 // handleTroubleReportsDialogEditGET
-// 
+//
 // QueryParam:
-// 	id: int
+//
+//	id: int
 func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	data := TroubleReportsDialogEditTemplateData{
 		Submitted: submitted,
@@ -97,12 +99,12 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 // handleTroubleReportsDialogEditPOST will add or update data
 //
 // QueryParam:
-// 	- cancel: "true"
-// 	- id: int
+//   - cancel: "true"
+//   - id: int
 //
 // FormValue:
-// 	- title: string
-// 	- content: multiline-string
+//   - title: string
+//   - content: multiline-string
 func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
 		return handleTroubleReportsDialogEditGET(true, ctx, db)
@@ -115,6 +117,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 			fmt.Errorf("query unescape \"title\" failed: %s", err.Error()),
 		)
 	}
+	title = strings.Trim(title, " \n\r\t")
 
 	content, err := url.QueryUnescape(ctx.FormValue("content"))
 	if err != nil {
@@ -123,6 +126,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 			fmt.Errorf("query unescape \"content\" failed: %s", err.Error()),
 		)
 	}
+	content = strings.Trim(content, " \n\r\t")
 
 	user, ok := ctx.Get("user").(*pgvis.User)
 	if !ok {
@@ -141,7 +145,11 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 
 	if title == "" || content == "" {
 		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
-		// TODO: Invalid Input
+		// TODO: Invalid Input, set inputs to invalid
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("invalid input"),
+		) // NOTE: Just a placeholder
 	} else {
 		if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
 			log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
