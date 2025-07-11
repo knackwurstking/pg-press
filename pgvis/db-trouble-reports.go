@@ -86,7 +86,12 @@ func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 		tr.Title, tr.Content,
 	)
 
-	_, err := db.db.Exec(query, tr.Modified.JSON())
+	modifiedBytes, err := json.Marshal(tr.Modified)
+	if err != nil {
+		return fmt.Errorf("marshal modified failed: %s", err.Error())
+	}
+
+	_, err = db.db.Exec(query, modifiedBytes)
 	return err
 }
 
