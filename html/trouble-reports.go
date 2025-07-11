@@ -123,9 +123,9 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 
 	_ = pgvis.NewTroubleReport(
 		&pgvis.Modified[*pgvis.TroubleReport]{
-			User:       user,
-			Time:       time.Now().UnixMilli(),
-			DataBefore: nil,
+			User:     user,
+			Time:     time.Now().UnixMilli(),
+			Original: nil,
 		},
 		title,
 		content,
