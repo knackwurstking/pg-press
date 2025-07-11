@@ -126,7 +126,6 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		content,
 	)
 
-	// TODO: Need to find out if the submit button was pressed
 	if title == "" || content == "" {
 		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
 		// TODO: Invalid Input
