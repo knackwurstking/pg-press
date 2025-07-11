@@ -1,5 +1,6 @@
 {{if not .Submitted}}
 <dialog id="dialogEdit" class="clean fullscreen">
+
     <style>
         form {
             width: 100%;
@@ -12,22 +13,22 @@
         }
     </style>
 
-    <!-- TODO: Will this work? -->
     <form hx-post="./trouble-reports/dialog-edit?id={{.ID}}" hx-trigger="submit"
         hx-target="#dialogEdit" hx-swap="outerHTML" class="flex column">
+
         <div class="content flex-item">
-            <!-- TODO: Inputs: "title" (text input), "content" (textarea input) -->
+            <input name="title" />
+            <textarea name="content"></textarea>
         </div>
 
-        <input name="title" />
-        <textarea name="content"></textarea>
-
         <footer class="flex row gap justify-end">
-            <button hx-post="./trouble-reports/dialog-edit?id={{.ID}}&cancel=true" hx-trigger="click"
-                hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
+            <button hx-post="./trouble-reports/dialog-edit?id={{.ID}}&cancel=true"
+                hx-trigger="click" hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
                 class="secondary">Schließen</button>
+
             <button type="submit">Ändern</button>
         </footer>
+
     </form>
 
     <script>
