@@ -26,7 +26,7 @@ type DBTroubleReports struct {
 
 func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 	query := `
-		CREATE TABLE IF NOT EXISTS cookies (
+		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
@@ -45,7 +45,7 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 }
 
 func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
-	query := `SELECT * FROM trouble-reports ORDER BY id ASC`
+	query := `SELECT * FROM trouble_reports ORDER BY id ASC`
 	r, err := db.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 	query := fmt.Sprintf(
-		`INSERT INTO trouble-reports (title, content, modified) VALUES ("%s", "%s", ?)`,
+		`INSERT INTO trouble_reports (title, content, modified) VALUES ("%s", "%s", ?)`,
 		tr.Title, tr.Content,
 	)
 
