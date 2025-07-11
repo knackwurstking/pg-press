@@ -109,7 +109,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo
 		)
 	}
 
-	if _, err := strconv.Atoi(ctx.QueryParam("id")); err != nil {
+	if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
 		// TODO: Add data to database (new entry)
 	} else {
 		// TODO: Update data with ID in the database (existing data)
