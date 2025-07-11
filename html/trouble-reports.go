@@ -56,6 +56,10 @@ type TroubleReportsDialogEditTemplateData struct {
 	Inputs    map[string]string // Inputs containing all data to render
 }
 
+// handleTroubleReportsDialogEditGET
+// 
+// QueryParam:
+// 	id: int
 func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	data := TroubleReportsDialogEditTemplateData{
 		Submitted: submitted,
@@ -90,6 +94,15 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 	return nil
 }
 
+// handleTroubleReportsDialogEditPOST will add or update data
+//
+// QueryParam:
+// 	- cancel: "true"
+// 	- id: int
+//
+// FormValue:
+// 	- title: string
+// 	- content: multiline-string
 func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
 		return handleTroubleReportsDialogEditGET(true, ctx, db)
