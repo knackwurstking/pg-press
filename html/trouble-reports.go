@@ -41,7 +41,7 @@ func NewTroubleReportsPageData() TroubleReportsPageData {
 	}
 }
 
-func handleTroubleReportsPage(ctx echo.Context, options *Options) *echo.HTTPError {
+func handleTroubleReportsPage(ctx echo.Context, options Options) *echo.HTTPError {
 	pageData := NewTroubleReportsPageData()
 
 	trs, err := options.DB.TroubleReports.List()
