@@ -122,15 +122,20 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		content,
 	)
 
-	if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
-		log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
-		// TODO: Add data `data` to database (new entry)
+	if title == "" || content == "" {
+		log.Debug("Invalid input: title=%#v; content=%#v", title, content)
+		// TODO: Invalid Input
 	} else {
-		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
-		// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
-		//tr.Modified.DataBefore
+		if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
+			log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
+			// TODO: Add data `data` to database (new entry)
+		} else {
+			log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
+			// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
+			//tr.Modified.DataBefore
 
-		// TODO: Update data with ID in the database (existing data)
+			// TODO: Update data with ID in the database (existing data)
+		}
 	}
 
 	return handleTroubleReportsDialogEditGET(true, ctx, db)
