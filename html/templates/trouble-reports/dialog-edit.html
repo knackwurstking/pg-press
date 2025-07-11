@@ -14,7 +14,7 @@
 
     <!-- TODO: Will this work? -->
     <form
-        hx-post="./trouble-reports/dialog-edit"
+        hx-post="./trouble-reports/dialog-edit?id={{.ID}}"
         hx-trigger="submit"
         hx-target="#dialogEdit"
         hx-swap="outerHTML"

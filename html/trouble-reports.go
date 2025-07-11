@@ -60,6 +60,7 @@ func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
 }
 
 type TroubleReportsDialogEditTemplateData struct {
+	ID        int
 	Submitted bool              // Submitted set to true will close the dialog
 	Inputs    map[string]string // Inputs containing all data to render
 }
@@ -70,8 +71,11 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context) *echo.H
 		Inputs:    map[string]string{},
 	}
 
-	if _, err := strconv.Atoi(ctx.QueryParam("id")); err == nil && !data.Submitted {
-		// TODO: Get data if ID from the database and open database for edit
+	if id, err := strconv.Atoi(ctx.QueryParam("id")); err == nil && !data.Submitted {
+		if id > 0 {
+			// TODO: Get data from the database if ID is bigger 0
+			data.ID = id
+		}
 	}
 
 	t, err := template.ParseFS(templates, "templates/trouble-reports/dialog-edit.html")
