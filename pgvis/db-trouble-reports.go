@@ -2,6 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -43,10 +44,35 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 	}
 }
 
-func (db *DBTroubleReports) List(tr *TroubleReport) ([]*TroubleReport, error) {
-	// TODO: ...
+// TODO: Continue here
+func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
+	query := `SELECT * FROM trouble-reports ORDER BY id ASC`
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer r.Close()
 
-	return nil, errors.New("under construction")
+	trs := []*TroubleReport{}
+
+	for r.Next() {
+		tr := TroubleReport{}
+
+		m := []byte{}
+
+		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &m)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := json.Unmarshal(m, &tr.Modified); err != nil {
+			return nil, fmt.Errorf("unmarshal modified failed: %s", err.Error())
+		}
+
+		trs = append(trs, &tr)
+	}
+
+	return trs, nil
 }
 
 func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
