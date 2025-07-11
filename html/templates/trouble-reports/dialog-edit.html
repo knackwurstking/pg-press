@@ -21,5 +21,12 @@
     </dialog>
 </dialog>
 {{else}}
-<span id="dialogEdit"></span>
+<!-- TODO: Handle "GET ./trouble-reports/data" (target `#data`) -->
+<span
+    hx-get="./trouble-reports/data"
+    hx-trigger="load"
+    hx-target="#data"
+    hx-swap="outerHTML"
+    id="dialogEdit"
+></span>
 {{end}}

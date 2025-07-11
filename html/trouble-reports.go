@@ -1,9 +1,13 @@
 package html
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
+	"strconv"
 
+	"github.com/charmbracelet/log"
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +18,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditGET(c, options)
+		return handleTroubleReportsDialogEditGET(false, c) // TODO: Pass options
 	})
 
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
@@ -56,18 +60,65 @@ func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
 }
 
 type TroubleReportsDialogEditTemplateData struct {
-	Submitted   bool     // Submitted set to true will close the dialog
-	AriaInvalid []string // AriaInvalid containing input names for all invalid input elements
+	Submitted bool              // Submitted set to true will close the dialog
+	Inputs    map[string]string // Inputs containing all data to render
 }
 
-func handleTroubleReportsDialogEditGET(ctx echo.Context, options Options) *echo.HTTPError {
-	// TODO: Send the dialog, taking query vars: "id" (optional), if not set, a new entry will be added to the database on submit
+func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context) *echo.HTTPError {
+	data := TroubleReportsDialogEditTemplateData{
+		Submitted: submitted,
+		Inputs:    map[string]string{},
+	}
+
+	if _, err := strconv.Atoi(ctx.QueryParam("id")); err == nil && !data.Submitted {
+		// TODO: Get data if ID from the database and open database for edit
+	}
+
+	t, err := template.ParseFS(templates, "templates/trouble-reports/dialog-edit.html")
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("template parsing failed: %s", err.Error()),
+		)
+	}
+
+	if err = t.Execute(ctx.Response(), data); err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("template executing failed: %s", err.Error()),
+		)
+	}
 
 	return nil
 }
 
 func handleTroubleReportsDialogEditPOST(ctx echo.Context, options Options) *echo.HTTPError {
-	// TODO: Add new database entry and close dialog on success (just replace with span again) Reading form variables: "title", "content"
+	title, err := url.QueryUnescape(ctx.QueryParam("title"))
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("query unescape \"title\" failed: %s", err.Error()),
+		)
+	}
 
-	return nil
+	content, err := url.QueryUnescape(ctx.QueryParam("content"))
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("query unescape \"content\" failed: %s", err.Error()),
+		)
+	}
+
+	if _, err := strconv.Atoi(ctx.QueryParam("id")); err != nil {
+		// TODO: Add data to database (new entry)
+	} else {
+		// TODO: Update data with ID in the database (existing data)
+	}
+
+	log.Warn(
+		"@TODO: Storing title and content in trouble-reports database: title=%#v; content=%#v",
+		title, content,
+	)
+
+	return handleTroubleReportsDialogEditGET(true, ctx)
 }
