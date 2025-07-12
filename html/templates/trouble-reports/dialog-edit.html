@@ -31,35 +31,36 @@
         }
     </style>
 
-    <form hx-post="./trouble-reports/dialog-edit?id={{.ID}}" hx-trigger="submit"
-        hx-target="#dialogEdit" hx-swap="outerHTML" class="flex column gap">
+    <form {{if gt .ID 0}} hx-put="./trouble-reports/dialog-edit?id={{.ID}}" {{else}}
+        hx-post="./trouble-reports/dialog-edit" {{end}} hx-trigger="submit" hx-target="#dialogEdit"
+        hx-swap="outerHTML" class="flex column gap">
 
         <div class="content flex-item flex column gap">
 
             <label for="title" class="flex column">
-                Titel 
+                Titel
                 <input name="title" id="title" placeholder="Titel" />
             </label>
 
             <!-- TODO: Allow embedding attachments -->
             <label for="content" class="flex-item flex column">
-                Report 
+                Report
                 <textarea name="content" id="content" placeholder="Report"></textarea>
             </label>
 
         </div>
 
         <footer class="flex row gap justify-end">
-            <button hx-post="./trouble-reports/dialog-edit?id={{.ID}}&cancel=true"
+            <button hx-post="./trouble-reports/dialog-edit&cancel=true"
                 hx-trigger="click" hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
                 class="secondary">Schließen</button>
 
             <!-- Set button text based on ID value -->
             <button type="submit">
                 {{if gt .ID 0}}
-                    Aktualisieren 
+                Aktualisieren
                 {{else}}
-                    Erstellen
+                Erstellen
                 {{end}}
             </button>
         </footer>
