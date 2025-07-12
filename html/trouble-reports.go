@@ -34,7 +34,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	// HTMX: Dialog Edit
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return trDialogEditGET(false, c, options.DB)
+		return trDialogEditGET(c, options.DB, nil)
 	})
 
 	// FormValues:
@@ -68,7 +68,9 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 type TRDialogEdit struct {
 	ID        int
 	Submitted bool              // Submitted set to true will close the dialog
-	Inputs    map[string]string // Inputs containing all data to render
+	Title string 
+	Content string 
+	LinkedAttachments []*pgvis.Attachment
 }
 
 // trDialogEditGET
@@ -77,22 +79,32 @@ type TRDialogEdit struct {
 //
 //	cancel: "true"
 //	id: int
-func trDialogEditGET(submitted bool, c echo.Context, db *pgvis.DB) *echo.HTTPError {
+func trDialogEditGET(c echo.Context, db *pgvis.DB, pageData *TRDialogEdit) *echo.HTTPError {
 	if cancel := c.QueryParam("cancel"); cancel == "true" {
-		submitted = true
+		pageData.Submitted = true
 	}
 
-	data := TRDialogEdit{
-		Submitted: submitted,
-		Inputs:    map[string]string{},
+	if pageData == nil {
+		pageData = &TRDialogEdit{Submitted: false}
 	}
 
-	if !data.Submitted {
+	if !pageData.Submitted {
 		if id, err := strconv.Atoi(c.QueryParam("id")); err == nil {
 			if id > 0 {
 				log.Debugf("Get database entry with id %d", id)
-				// TODO: Get data from the database if ID is bigger 0
-				data.ID = id
+
+				pageData.ID = id
+
+				tr, err := db.TroubleReports.Get(int64(id))
+				if err != nil {
+					return echo.NewHTTPError(
+						http.StatusBadRequest,
+						fmt.Errorf("no data: %s", err.Error()),
+					)
+				}
+				pageData.Title = tr.Title
+				pageData.Content = tr.Content
+				pageData.LinkedAttachments = tr.LinkedAttachments
 			}
 		}
 	}
@@ -105,7 +117,7 @@ func trDialogEditGET(submitted bool, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 		)
 	}
 
-	if err = t.Execute(c.Response(), data); err != nil {
+	if err = t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
 			fmt.Errorf("template executing failed: %s", err.Error()),
@@ -148,7 +160,7 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		)
 	}
 
-	return trDialogEditGET(true, c, db)
+	return trDialogEditGET(c, db, &TRDialogEdit{Submitted: true})
 }
 
 func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
@@ -177,16 +189,23 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		) // NOTE: Just a placeholder
 	}
 
-	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-	_ = pgvis.NewTroubleReport(modified, title, content)
-
 	log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
-	// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
-	//tr.Modified.DataBefore
 
-	// TODO: Update data with ID in the database (existing data)
+	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+	trNew := pgvis.NewTroubleReport(modified, title, content)
 
-	return trDialogEditGET(true, c, db)
+	// Need to pass to old data to the modifieds origianal field
+	if trOld, err := db.TroubleReports.Get(int64(id)); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	} else {
+		trNew.Modified.Original = trOld
+	}
+
+	if err = db.TroubleReports.Update(int64(id), trNew); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return trDialogEditGET(c, db, &TRDialogEdit{Submitted: true})
 }
 
 func trDataGET(c echo.Context, db *pgvis.DB) *echo.HTTPError {

@@ -39,13 +39,13 @@
 
             <label for="title" class="flex column">
                 Titel
-                <input name="title" id="title" placeholder="Titel" />
+                <input name="title" id="title" placeholder="Titel" value="{{.Title}}" />
             </label>
 
             <!-- TODO: Allow embedding attachments -->
             <label for="content" class="flex-item flex column">
                 Report
-                <textarea name="content" id="content" placeholder="Report"></textarea>
+                <textarea name="content" id="content" placeholder="Report" value="{{.Content}}"></textarea>
             </label>
 
         </div>
