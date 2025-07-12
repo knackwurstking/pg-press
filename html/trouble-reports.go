@@ -60,6 +60,8 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		return trDataGET(c, options.DB)
 	})
 
+	// QueryParam:
+	//   - id: int
 	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
 		return trDataDELETE(c, options.DB)
 	})
