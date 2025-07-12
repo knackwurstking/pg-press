@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
@@ -133,19 +132,13 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
 	}
 
-	_ = pgvis.NewTroubleReport(
-		&pgvis.Modified[*pgvis.TroubleReport]{
-			User:     user,
-			Time:     time.Now().UnixMilli(),
-			Original: nil,
-		},
-		title,
-		content,
-	)
+	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+	tr := pgvis.NewTroubleReport(modified, title, content)
 
 	if title == "" || content == "" {
 		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
-		// TODO: Invalid Input, set inputs to invalid
+
+		// TODO: Invalid Input, set inputs to invalid and continue
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
 			fmt.Errorf("invalid input"),
@@ -153,7 +146,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 	} else {
 		if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
 			log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
-			// TODO: Add data `data` to database (new entry)
+			// TODO: Continue here... Add data `data` to database (new entry)
 		} else {
 			log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
 			// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore

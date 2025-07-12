@@ -7,15 +7,18 @@ import (
 	"fmt"
 )
 
+// TODO: Need to add some attachments, can be linked in content
 type TroubleReport struct {
-	ID       int                       `json:"id"`
-	Title    string                    `json:"title"`
-	Content  string                    `json:"content"`
-	Modified *Modified[*TroubleReport] `json:"modified"`
+	ID                int                       `json:"id"`
+	Title             string                    `json:"title"`
+	Content           string                    `json:"content"`
+	LinkedAttachments []*Attachment             `json:"linked_attachments"`
+	Modified          *Modified[*TroubleReport] `json:"modified"`
 }
 
 func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *TroubleReport {
 	return &TroubleReport{
+		LinkedAttachments: make([]*Attachment, 0),
 		Modified: m,
 	}
 }
@@ -30,6 +33,7 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
+			linked_attachments BLOB NOT NULL,
 			modified BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -57,15 +61,20 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 	for r.Next() {
 		tr := TroubleReport{}
 
+		la := []byte{}
 		m := []byte{}
 
-		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &m)
+		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &m)
 		if err != nil {
 			return nil, err
 		}
 
+		if err := json.Unmarshal(m, &tr.LinkedAttachments); err != nil {
+			return nil, fmt.Errorf("unmarshal \"linked_attachments\" failed: %s", err.Error())
+		}
+
 		if err := json.Unmarshal(m, &tr.Modified); err != nil {
-			return nil, fmt.Errorf("unmarshal modified failed: %s", err.Error())
+			return nil, fmt.Errorf("unmarshal \"modified\" failed: %s", err.Error())
 		}
 
 		trs = append(trs, &tr)
@@ -81,14 +90,19 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
-	query := `INSERT INTO trouble_reports (title, content, modified) VALUES (?, ?, ?)`
+	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
 
 	modifiedBytes, err := json.Marshal(tr.Modified)
 	if err != nil {
-		return fmt.Errorf("marshal modified failed: %s", err.Error())
+		return fmt.Errorf("marshal \"modified\" failed: %s", err.Error())
 	}
 
-	_, err = db.db.Exec(query, tr.Title, tr.Content, modifiedBytes)
+	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+	if err != nil {
+		return fmt.Errorf("marshal \"linked_attachments\" failed: %s", err.Error())
+	}
+
+	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modifiedBytes)
 	return err
 }
 
