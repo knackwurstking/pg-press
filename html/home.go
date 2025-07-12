@@ -14,8 +14,6 @@ func ServeHome(e *echo.Echo, options Options) {
 }
 
 func handleHomePage(c echo.Context) *echo.HTTPError {
-	pageData := PageData{}
-
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
 		"templates/home.html",
@@ -24,7 +22,7 @@ func handleHomePage(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), pageData)
+	err = t.Execute(c.Response(), nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

@@ -54,28 +54,6 @@
     </header>
 
     {{block "content" .}}{{end}}
-
-    {{if ne (len .ErrorMessages) 0}}
-    <dialog id="dialogErrorMessages" class="clean">
-        <form method="dialog">
-            <i style="font-size: 2.5rem" class="bi bi-exclamation-triangle"></i>
-
-            <span class="messages flex column gap">
-                {{range $message := .ErrorMessages}}
-                <p>{{$message}}</p>
-                {{end}}
-            </span>
-
-            <footer>
-                <button class="secondary">Schließen</button>
-            </footer>
-        </form>
-    </dialog>
-
-    <script>
-        document.querySelector("#dialogErrorMessages").showModal();
-    </script>
-    {{end}}
 </body>
 
 </html>

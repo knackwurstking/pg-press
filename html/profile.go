@@ -26,15 +26,12 @@ func ServeProfile(e *echo.Echo, options Options) {
 }
 
 type ProfilePageData struct {
-	PageData
-
 	User    *pgvis.User
 	Cookies []*pgvis.Cookie
 }
 
 func NewProfilePageData() ProfilePageData {
 	return ProfilePageData{
-		PageData: NewPageData(),
 		Cookies:  make([]*pgvis.Cookie, 0),
 	}
 }
@@ -52,7 +49,12 @@ func handleProfilePage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		pageData.User = user
 	}
 
-	handleProfileFormParamUserName(ctx, &pageData, db)
+	if err := handleProfileFormParamUserName(ctx, &pageData, db); err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("change username: %s", err.Error()),
+		)
+	}
 
 	if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
 		log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
@@ -113,7 +115,7 @@ func handleProfileCookiesDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError 
 	return handleProfileCookiesGET(ctx, db)
 }
 
-func handleProfileFormParamUserName(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) {
+func handleProfileFormParamUserName(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	userName := v.Get("user-name")
 
@@ -126,9 +128,11 @@ func handleProfileFormParamUserName(ctx echo.Context, pageData *ProfilePageData,
 
 		user := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
 		if err = db.Users.Update(pageData.User.TelegramID, user); err != nil {
-			pageData.ErrorMessages = append(pageData.ErrorMessages, err.Error())
+			return err
 		} else {
 			pageData.User.UserName = userName
 		}
 	}
+
+	return nil
 }

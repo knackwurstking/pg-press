@@ -18,16 +18,6 @@ var templates embed.FS
 //go:embed static
 var static embed.FS
 
-type PageData struct {
-	ErrorMessages []string
-}
-
-func NewPageData() PageData {
-	return PageData{
-		ErrorMessages: make([]string, 0),
-	}
-}
-
 type Options struct {
 	ServerPathPrefix string
 	DB               *pgvis.DB

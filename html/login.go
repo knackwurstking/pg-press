@@ -19,16 +19,12 @@ func ServeLogin(e *echo.Echo, options Options) {
 }
 
 type LoginPageData struct {
-	PageData
-
 	ApiKey        string
 	InvalidApiKey bool
 }
 
 func NewLoginPageData() LoginPageData {
-	return LoginPageData{
-		PageData: NewPageData(),
-	}
+	return LoginPageData{}
 }
 
 func handleLoginPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {

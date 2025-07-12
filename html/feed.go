@@ -14,8 +14,6 @@ func ServeFeed(e *echo.Echo, options Options) {
 }
 
 func handleFeedPage(c echo.Context) *echo.HTTPError {
-	pageData := PageData{}
-
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
 		"templates/feed.html",
@@ -24,7 +22,7 @@ func handleFeedPage(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	err = t.Execute(c.Response(), pageData)
+	err = t.Execute(c.Response(), nil)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

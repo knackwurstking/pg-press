@@ -33,8 +33,6 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 }
 
 func handleTroubleReportsPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	pageData := NewPageData()
-
 	t, err := template.ParseFS(templates,
 		"templates/layout.html",
 		"templates/trouble-reports.html",
@@ -43,7 +41,7 @@ func handleTroubleReportsPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err = t.Execute(ctx.Response(), pageData); err != nil {
+	if err = t.Execute(ctx.Response(), nil); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
