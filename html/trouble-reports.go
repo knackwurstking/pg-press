@@ -15,7 +15,7 @@ import (
 )
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
-	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
+	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error { // {{{
 		t, err := template.ParseFS(templates,
 			"templates/layout.html",
 			"templates/trouble-reports.html",
@@ -29,11 +29,11 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		}
 
 		return nil
-	})
+	}) // }}}
 
-	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
 		return trDialogEditGET(false, c, options.DB)
-	})
+	}) // }}}
 
 	// QueryParams:
 	//   - cancel: "true"
@@ -41,7 +41,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	// FormValues:
 	//   - title: string
 	//   - content: multiline-string
-	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
 		if cancel := c.QueryParam("cancel"); cancel == "true" {
 			return trDialogEditGET(true, c, options.DB)
 		}
@@ -79,7 +79,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		}
 
 		return trDialogEditGET(true, c, options.DB)
-	})
+	}) // }}}
 
 	// QueryParam:
 	//   - cancel: "true"
@@ -88,7 +88,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	// FormValue:
 	//   - title: string
 	//   - content: multiline-string
-	e.PUT(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+	e.PUT(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
 		if cancel := c.QueryParam("cancel"); cancel == "true" {
 			return trDialogEditGET(true, c, options.DB)
 		}
@@ -128,13 +128,13 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		// TODO: Update data with ID in the database (existing data)
 
 		return trDialogEditGET(true, c, options.DB)
-	})
+	}) // }}}
 
-	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
+	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error { // {{{
 		return trDataGET(c, options.DB)
-	})
+	}) // }}}
 
-	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
+	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error { // {{{
 		id, err := strconv.Atoi(c.QueryParam("id"))
 		if err != nil {
 			return echo.NewHTTPError(
@@ -157,7 +157,7 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		}
 
 		return trDataGET(c, options.DB)
-	})
+	}) // }}}
 }
 
 type TRDialogEdit struct {
