@@ -1,61 +1,62 @@
 <!doctype html>
 <html lang="de">
+    <head>
+        <meta charset="utf-8" />
 
-<head>
-    <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+        />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <link rel="icon" href="./favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
 
-    <link rel="icon" href="./favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+        <link rel="manifest" href="./manifest.json" />
 
-    <link rel="manifest" href="./manifest.json" />
+        <link rel="stylesheet" href="./css/bootstrap-icons.min.css" />
+        <link rel="stylesheet" href="./ui-dev.min.css" />
 
-    <link rel="stylesheet" href="./css/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="./ui-dev.min.css" />
+        <title>{{block "title" .}}{{end}}</title>
 
-    <title>{{block "title" .}}{{end}}</title>
+        <script src="./htmx.min.js"></script>
 
-    <script src="./htmx.min.js"></script>
+        <script>
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker
+                        .register("./service-worker.js")
+                        .then((registration) => {
+                            console.info(
+                                "Service Worker registered with scope:",
+                                registration.scope,
+                            );
+                        })
+                        .catch((err) => {
+                            console.error(
+                                "Service Worker registration failed:",
+                                err,
+                            );
+                        });
+                });
+            }
+        </script>
+    </head>
 
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker
-                    .register("./service-worker.js")
-                    .then((registration) => {
-                        console.info(
-                            "Service Worker registered with scope:",
-                            registration.scope,
-                        );
-                    })
-                    .catch((err) => {
-                        console.error(
-                            "Service Worker registration failed:",
-                            err,
-                        );
-                    });
-            });
-        }
-    </script>
-</head>
+    <body>
+        <header class="container fluid">
+            <nav class="flex row justify-between">
+                <ul class="flex-item">
+                    <li>
+                        <strong>{{block "app-bar-title" .}}{{end}}</strong>
+                    </li>
+                </ul>
 
-<body>
-    <header class="container fluid">
-        <nav class="flex row justify-between">
-            <ul class="flex-item">
-                <li>
-                    <strong>{{block "app-bar-title" .}}{{end}}</strong>
-                </li>
-            </ul>
+                {{block "nav" .}}{{end}}
+            </nav>
+        </header>
 
-            {{block "nav" .}}{{end}}
-        </nav>
-    </header>
-
-    {{block "content" .}}{{end}}
-</body>
-
+        {{block "content" .}}{{end}}
+    </body>
 </html>
 
 {{define "basic-nav-elements"}}

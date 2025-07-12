@@ -1,8 +1,12 @@
+<!-- Title -->
+
 {{define "title"}}PG: Presse | Registrieren{{end}}
+
+<!-- App Bar Title -->
 
 {{define "app-bar-title"}}Registrieren{{end}}
 
-{{define "nav"}}{{end}}
+<!-- Content -->
 
 {{define "content"}}
 <main class="container">
@@ -10,8 +14,17 @@
         <form>
             <label class="flex column">
                 Api Key
-                <input name="api-key" type="text" placeholder="Api Key" value="{{.ApiKey}}" {{if
-                    .InvalidApiKey}} aria-invalid="{{.InvalidApiKey}}" {{end}} required />
+                <input
+                    name="api-key"
+                    type="text"
+                    placeholder="Api Key"
+                    value="{{.ApiKey}}"
+                    {{if
+                    .InvalidApiKey}}
+                    aria-invalid="{{.InvalidApiKey}}"
+                    {{end}}
+                    required
+                />
             </label>
 
             <footer class="flex">

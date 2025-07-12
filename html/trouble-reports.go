@@ -165,6 +165,8 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 }
 
 func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
+	pageData := &TRDialogEdit{Submitted: true}
+
 	id, err := strconv.Atoi(c.QueryParam("id"))
 	if err != nil || id <= 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
@@ -180,33 +182,28 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	if title == "" || content == "" {
-		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
+	pageData.InvalidTitle = title == ""
+	pageData.InvalidContent = content == ""
 
-		// TODO: Invalid Input, set inputs to invalid and continue
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid input"),
-		) // NOTE: Just a placeholder
+	if pageData.InvalidTitle || pageData.InvalidContent {
+		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
+
+		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+		trNew := pgvis.NewTroubleReport(modified, title, content)
+
+		// Need to pass to old data to the modifieds original field
+		if trOld, err := db.TroubleReports.Get(int64(id)); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		} else {
+			trNew.Modified.Original = trOld
+		}
+
+		if err = db.TroubleReports.Update(int64(id), trNew); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
-	log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
-
-	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-	trNew := pgvis.NewTroubleReport(modified, title, content)
-
-	// Need to pass to old data to the modifieds original field
-	if trOld, err := db.TroubleReports.Get(int64(id)); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	} else {
-		trNew.Modified.Original = trOld
-	}
-
-	if err = db.TroubleReports.Update(int64(id), trNew); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return trDialogEditGET(c, db, &TRDialogEdit{Submitted: true})
+	return trDialogEditGET(c, db, pageData)
 }
 
 func trDataGET(c echo.Context, db *pgvis.DB) *echo.HTTPError {

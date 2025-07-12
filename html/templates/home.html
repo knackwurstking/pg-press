@@ -1,6 +1,12 @@
+<!-- Title -->
+
 {{define "title"}}PG: Presse | Home{{end}}
 
+<!-- App Bar Title -->
+
 {{define "app-bar-title"}}Home{{end}}
+
+<!-- Nav -->
 
 {{define "nav"}}
 <div class="flex row gap justify-end align-center">
@@ -16,20 +22,22 @@
 </div>
 {{end}}
 
+<!-- Content -->
+
 {{define "content"}}
 <style>
-    details>summary {
+    details > summary {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         flex-wrap: nowrap;
     }
 
-    details>summary>*:first-child {
+    details > summary > *:first-child {
         width: 100%;
     }
 
-    details>summary>*:last-child {
+    details > summary > *:last-child {
         flex: 1;
         width: fit-content;
     }
@@ -74,16 +82,24 @@
 
             <ul style="padding-left: 1rem">
                 <li>
-                    <a href="#" class="secondary ghost" disabled>Topic: Presse 0</a>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 0</a
+                    >
                 </li>
                 <li>
-                    <a href="#" class="secondary ghost" disabled>Topic: Presse 2-5</a>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 2-5</a
+                    >
                 </li>
                 <li>
-                    <a href="#" class="secondary ghost" disabled>Topic: Presse 5</a>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Presse 5</a
+                    >
                 </li>
                 <li>
-                    <a href="#" class="secondary ghost" disabled>Topic: Allgemein</a>
+                    <a href="#" class="secondary ghost" disabled
+                        >Topic: Allgemein</a
+                    >
                 </li>
             </ul>
         </nav>

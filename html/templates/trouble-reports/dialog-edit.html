@@ -1,6 +1,5 @@
 {{if not .Submitted}}
 <dialog id="dialogEdit" class="clean fullscreen">
-
     <style>
         form {
             width: 100%;
@@ -31,42 +30,66 @@
         }
     </style>
 
-    <form {{if gt .ID 0}} hx-put="./trouble-reports/dialog-edit?id={{.ID}}" {{else}}
-        hx-post="./trouble-reports/dialog-edit" {{end}} hx-trigger="submit" hx-target="#dialogEdit"
-        hx-swap="outerHTML" class="flex column gap">
-
+    <form
+        {{if
+        gt
+        .ID
+        0}}
+        hx-put="./trouble-reports/dialog-edit?id={{.ID}}"
+        {{else}}
+        hx-post="./trouble-reports/dialog-edit"
+        {{end}}
+        hx-trigger="submit"
+        hx-target="#dialogEdit"
+        hx-swap="outerHTML"
+        class="flex column gap"
+    >
         <div class="content flex-item flex column gap">
-
             <label for="title" class="flex column">
                 Titel
-                <input name="title" id="title" placeholder="Titel" value="{{.Title}}" {{if
-                    .InvalidTitle}}aria-invalid="true" {{end}} />
+                <input
+                    name="title"
+                    id="title"
+                    placeholder="Titel"
+                    value="{{.Title}}"
+                    {{if
+                    .InvalidTitle}}aria-invalid="true"
+                    {{end}}
+                />
             </label>
 
             <!-- TODO: Allow embedding attachments -->
             <label for="content" class="flex-item flex column">
                 Report
-                <textarea name="content" id="content" placeholder="Report" value="{{.Content}}" {{if
-                    .InvalidContent}}aria-invalid="true" {{end}}></textarea>
+                <textarea
+                    name="content"
+                    id="content"
+                    placeholder="Report"
+                    value="{{.Content}}"
+                    {{if
+                    .InvalidContent}}aria-invalid="true"
+                    {{end}}
+                ></textarea>
             </label>
-
         </div>
 
         <footer class="flex row gap justify-end">
-            <button hx-get="./trouble-reports/dialog-edit?cancel=true" hx-trigger="click"
-                hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
-                class="secondary">Schließen</button>
+            <button
+                hx-get="./trouble-reports/dialog-edit?cancel=true"
+                hx-trigger="click"
+                hx-target="#dialogEdit"
+                hx-swap="outerHTML"
+                type="button"
+                class="secondary"
+            >
+                Schließen
+            </button>
 
             <!-- Set button text based on ID value -->
             <button type="submit">
-                {{if gt .ID 0}}
-                Aktualisieren
-                {{else}}
-                Erstellen
-                {{end}}
+                {{if gt .ID 0}} Aktualisieren {{else}} Erstellen {{end}}
             </button>
         </footer>
-
     </form>
 
     <script>
@@ -74,6 +97,11 @@
     </script>
 </dialog>
 {{else}}
-<span hx-get="./trouble-reports/data" hx-trigger="load" hx-target="#data" hx-swap="outerHTML"
-    id="dialogEdit"></span>
+<span
+    hx-get="./trouble-reports/data"
+    hx-trigger="load"
+    hx-target="#data"
+    hx-swap="outerHTML"
+    id="dialogEdit"
+></span>
 {{end}}

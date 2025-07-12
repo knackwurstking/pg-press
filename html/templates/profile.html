@@ -1,6 +1,12 @@
+<!-- Title -->
+
 {{define "title"}}PG: Presse | Profil{{end}}
 
+<!-- App Bar Title -->
+
 {{define "app-bar-title"}}Profil{{end}}
+
+<!-- Nav -->
 
 {{define "nav"}}
 <div class="flex row gap justify-end align-center">
@@ -16,13 +22,15 @@
 </div>
 {{end}}
 
+<!-- Content -->
+
 {{define "content"}}
 <style>
-    hgroup>.user-name>* {
+    hgroup > .user-name > * {
         margin: 0;
     }
 
-    hgroup>.user-name {
+    hgroup > .user-name {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -36,16 +44,24 @@
         <span class="user-name">
             <h1>{{.User.UserName}}</h1>
 
-            <button class="ghost icon" onclick='
+            <button
+                class="ghost icon"
+                onclick='
                     document.querySelector("#dialogEditUserName").showModal();
-                '>
+                '
+            >
                 <i class="bi bi-pen"></i>
             </button>
         </span>
 
         <div class="flex gap justify-between">
             <p>Telegram ID: {{.User.TelegramID}}</p>
-            <a style="float: right" role="button" href="./logout" class="ghost destructive">
+            <a
+                style="float: right"
+                role="button"
+                href="./logout"
+                class="ghost destructive"
+            >
                 Logout
             </a>
         </div>
@@ -53,14 +69,23 @@
 
     <br />
 
-    <span id="cookies" hx-get="./profile/cookies" hx-trigger="load" hx-swap="outerHTML"></span>
+    <span
+        id="cookies"
+        hx-get="./profile/cookies"
+        hx-trigger="load"
+        hx-swap="outerHTML"
+    ></span>
 
     <dialog id="dialogEditUserName" class="clean">
         <form action="./profile">
             <label class="flex column">
                 User Name
-                <input name="user-name" type="text" value="{{.User.UserName}}"
-                    placeholder="User Name" />
+                <input
+                    name="user-name"
+                    type="text"
+                    value="{{.User.UserName}}"
+                    placeholder="User Name"
+                />
             </label>
 
             <footer class="flex row gap justify-end">
