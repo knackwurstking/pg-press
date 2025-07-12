@@ -7,7 +7,6 @@ import (
 	"fmt"
 )
 
-// TODO: Need to add some attachments, can be linked in content
 type TroubleReport struct {
 	ID                int                       `json:"id"`
 	Title             string                    `json:"title"`

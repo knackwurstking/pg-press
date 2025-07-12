@@ -42,6 +42,7 @@
                 <input name="title" id="title" placeholder="Titel" />
             </label>
 
+            <!-- TODO: Allow embedding attachments -->
             <!-- TODO: Find a better label for this -->
             <label for="content" class="flex-item flex column">
                 Inhalt 
@@ -72,7 +73,6 @@
     </script>
 </dialog>
 {{else}}
-<!-- TODO: Handle "GET ./trouble-reports/data" (target `#data`) -->
 <span hx-get="./trouble-reports/data" hx-trigger="load" hx-target="#data" hx-swap="outerHTML"
     id="dialogEdit"></span>
 {{end}}
