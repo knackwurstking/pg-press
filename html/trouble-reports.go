@@ -193,7 +193,7 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
 	trNew := pgvis.NewTroubleReport(modified, title, content)
 
-	// Need to pass to old data to the modifieds origianal field
+	// Need to pass to old data to the modifieds original field
 	if trOld, err := db.TroubleReports.Get(int64(id)); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	} else {
