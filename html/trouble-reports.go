@@ -71,6 +71,8 @@ type TRDialogEdit struct {
 	Title             string
 	Content           string
 	LinkedAttachments []*pgvis.Attachment
+	InvalidTitle      bool
+	InvalidContent    bool
 }
 
 // trDialogEditGET
@@ -128,6 +130,8 @@ func trDialogEditGET(c echo.Context, db *pgvis.DB, pageData *TRDialogEdit) *echo
 }
 
 func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
+	pageData := &TRDialogEdit{Submitted: true}
+
 	user, ok := c.Get("user").(*pgvis.User)
 	if !ok {
 		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
@@ -138,29 +142,24 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	if title == "" || content == "" {
-		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
+	pageData.InvalidTitle = title == ""
+	pageData.InvalidContent = content == ""
 
-		// TODO: Invalid Input, set inputs to invalid and continue
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid input"),
-		) // NOTE: Just a placeholder
+	if pageData.InvalidTitle || pageData.InvalidContent {
+		log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
+
+		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+		tr := pgvis.NewTroubleReport(modified, title, content)
+
+		if err = db.TroubleReports.Add(tr); err != nil {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				fmt.Errorf("add data: %s", err.Error()),
+			)
+		}
 	}
 
-	log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
-
-	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-	tr := pgvis.NewTroubleReport(modified, title, content)
-
-	if err = db.TroubleReports.Add(tr); err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("add data: %s", err.Error()),
-		)
-	}
-
-	return trDialogEditGET(c, db, &TRDialogEdit{Submitted: true})
+	return trDialogEditGET(c, db, pageData)
 }
 
 func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {

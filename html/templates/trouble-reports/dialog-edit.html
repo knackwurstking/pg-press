@@ -39,20 +39,22 @@
 
             <label for="title" class="flex column">
                 Titel
-                <input name="title" id="title" placeholder="Titel" value="{{.Title}}" />
+                <input name="title" id="title" placeholder="Titel" value="{{.Title}}" {{if
+                    .InvalidTitle}}aria-invalid="true" {{end}} />
             </label>
 
             <!-- TODO: Allow embedding attachments -->
             <label for="content" class="flex-item flex column">
                 Report
-                <textarea name="content" id="content" placeholder="Report" value="{{.Content}}"></textarea>
+                <textarea name="content" id="content" placeholder="Report" value="{{.Content}}" {{if
+                    .InvalidContent}}aria-invalid="true" {{end}}></textarea>
             </label>
 
         </div>
 
         <footer class="flex row gap justify-end">
-            <button hx-get="./trouble-reports/dialog-edit?cancel=true"
-                hx-trigger="click" hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
+            <button hx-get="./trouble-reports/dialog-edit?cancel=true" hx-trigger="click"
+                hx-target="#dialogEdit" hx-swap="outerHTML" type="button"
                 class="secondary">Schließen</button>
 
             <!-- Set button text based on ID value -->
