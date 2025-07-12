@@ -3,7 +3,6 @@ package pgvis
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
@@ -18,7 +17,7 @@ type TroubleReport struct {
 func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *TroubleReport {
 	return &TroubleReport{
 		LinkedAttachments: make([]*Attachment, 0),
-		Modified: m,
+		Modified:          m,
 	}
 }
 
@@ -83,9 +82,39 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 }
 
 func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
-	// TODO: Continue here
+	query := fmt.Sprintf(`SELECT * FROM trouble_reports WHERE id = %d`, id)
+	r, err := db.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, errors.New("under construction")
+	defer r.Close()
+
+	if !r.Next() {
+		return nil, ErrNotFound
+	}
+
+	tr := &TroubleReport{}
+
+	la := []byte{}
+	md := []byte{}
+
+	err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &md)
+	if err != nil {
+		return nil, fmt.Errorf("scan data from database: %s", err.Error())
+	}
+
+	err = json.Unmarshal(la, &tr.LinkedAttachments)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal \"linked_attachments\" from database: %s", err.Error())
+	}
+
+	err = json.Unmarshal(la, &tr.Modified)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshal \"modified\" from database: %s", err.Error())
+	}
+
+	return tr, nil
 }
 
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
@@ -113,12 +142,12 @@ func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
 
 	md, err := json.Marshal(tr.Modified)
 	if err != nil {
-		return fmt.Errorf("marshal \"modified\" to JSON failed")
+		return fmt.Errorf("marshal \"modified\" to JSON: %s", err.Error())
 	}
 
 	la, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return fmt.Errorf("marshal \"modified\" to JSON failed")
+		return fmt.Errorf("marshal \"linked_attachments\" to JSON: %s", err.Error())
 	}
 
 	_, err = db.db.Exec(query, tr.Title, tr.Content, la, md)
