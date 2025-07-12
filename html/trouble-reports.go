@@ -146,7 +146,13 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 	} else {
 		if id, err := strconv.Atoi(ctx.QueryParam("id")); err != nil || id <= 0 {
 			log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
-			// TODO: Continue here... Add data `data` to database (new entry)
+
+			if err = db.TroubleReports.Add(tr); err != nil {
+				return echo.NewHTTPError(
+					http.StatusInternalServerError,
+					fmt.Errorf("add data: %s", err.Error()),
+				)
+			}
 		} else {
 			log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
 			// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
