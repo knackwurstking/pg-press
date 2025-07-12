@@ -83,7 +83,7 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 }
 
 func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
-	// TODO: ...
+	// TODO: Continue here
 
 	return nil, errors.New("under construction")
 }
@@ -106,9 +106,23 @@ func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 }
 
 func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
-	// TODO: Continue here
+	query := fmt.Sprintf(
+		`UPDATE ... SET title = ?, content = ?, linked_attachments = ?, mondified = ? WHERE id=%d`,
+		tr.ID,
+	)
 
-	return errors.New("under construction")
+	md, err := json.Marshal(tr.Modified)
+	if err != nil {
+		return fmt.Errorf("marshal \"modified\" to JSON failed")
+	}
+
+	la, err := json.Marshal(tr.LinkedAttachments)
+	if err != nil {
+		return fmt.Errorf("marshal \"modified\" to JSON failed")
+	}
+
+	_, err = db.db.Exec(query, tr.Title, tr.Content, la, md)
+	return err
 }
 
 func (db *DBTroubleReports) Remove(id int64) error {
