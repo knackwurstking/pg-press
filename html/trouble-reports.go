@@ -14,6 +14,16 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
+type TRDialogEdit struct {
+	ID                int
+	Submitted         bool // Submitted set to true will close the dialog
+	Title             string
+	Content           string
+	LinkedAttachments []*pgvis.Attachment
+	InvalidTitle      bool
+	InvalidContent    bool
+}
+
 func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
 		t, err := template.ParseFS(templates,
@@ -65,16 +75,6 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
 		return trDataDELETE(c, options.DB)
 	})
-}
-
-type TRDialogEdit struct {
-	ID                int
-	Submitted         bool // Submitted set to true will close the dialog
-	Title             string
-	Content           string
-	LinkedAttachments []*pgvis.Attachment
-	InvalidTitle      bool
-	InvalidContent    bool
 }
 
 // trDialogEditGET
