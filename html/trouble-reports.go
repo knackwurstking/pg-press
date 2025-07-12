@@ -31,21 +31,14 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		return nil
 	}) // }}}
 
-	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
+	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
 		return trDialogEditGET(false, c, options.DB)
-	}) // }}}
+	})
 
-	// QueryParams:
-	//   - cancel: "true"
-	//
 	// FormValues:
 	//   - title: string
 	//   - content: multiline-string
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
-		if cancel := c.QueryParam("cancel"); cancel == "true" {
-			return trDialogEditGET(true, c, options.DB)
-		}
-
 		user, ok := c.Get("user").(*pgvis.User)
 		if !ok {
 			return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
@@ -82,17 +75,12 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	}) // }}}
 
 	// QueryParam:
-	//   - cancel: "true"
 	//   - id: int
 	//
 	// FormValue:
 	//   - title: string
 	//   - content: multiline-string
 	e.PUT(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error { // {{{
-		if cancel := c.QueryParam("cancel"); cancel == "true" {
-			return trDialogEditGET(true, c, options.DB)
-		}
-
 		id, err := strconv.Atoi(c.QueryParam("id"))
 		if err != nil || id <= 0 {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
@@ -130,9 +118,9 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		return trDialogEditGET(true, c, options.DB)
 	}) // }}}
 
-	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error { // {{{
+	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
 		return trDataGET(c, options.DB)
-	}) // }}}
+	})
 
 	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error { // {{{
 		id, err := strconv.Atoi(c.QueryParam("id"))
@@ -170,8 +158,13 @@ type TRDialogEdit struct {
 //
 // QueryParam:
 //
+//	cancel: "true"
 //	id: int
 func trDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
+		submitted = true
+	}
+
 	data := TRDialogEdit{
 		Submitted: submitted,
 		Inputs:    map[string]string{},
