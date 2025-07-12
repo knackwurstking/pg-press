@@ -30,6 +30,10 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
 		return handleTroubleReportsDataGET(c, options.DB)
 	})
+
+	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
+		return handleTroubleReportsDataDELETE(c, options.DB)
+	})
 }
 
 func handleTroubleReportsPage(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
@@ -182,4 +186,29 @@ func handleTroubleReportsDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError
 	}
 
 	return nil
+}
+
+func handleTroubleReportsDataDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	id, err := strconv.Atoi(ctx.QueryParam("id"))
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("query param \"id\": %s", err.Error()),
+		)
+	}
+	if id <= 0 {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("invalid \"id\": cannot be 0 or lower"),
+		)
+	}
+
+	if err := db.TroubleReports.Remove(int64(id)); err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Errorf("invalid \"id\" %d: not found", id),
+		)
+	}
+
+	return handleTroubleReportsDataGET(ctx, db)
 }

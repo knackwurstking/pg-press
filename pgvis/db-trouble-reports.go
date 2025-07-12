@@ -106,13 +106,17 @@ func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 }
 
 func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
-	// TODO: ...
+	// TODO: Continue here
 
 	return errors.New("under construction")
 }
 
 func (db *DBTroubleReports) Remove(id int64) error {
-	// TODO: ...
+	query := fmt.Sprintf(
+		`DELETE FROM trouble_reports WHERE id = %d`,
+		id,
+	)
 
-	return errors.New("under construction")
+	_, err := db.db.Exec(query)
+	return err
 }
