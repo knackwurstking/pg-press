@@ -35,12 +35,99 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 		return trDialogEditGET(false, c, options.DB)
 	})
 
+	// QueryParams:
+	//   - cancel: "true"
+	//
+	// FormValues:
+	//   - title: string
+	//   - content: multiline-string
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return trDialogEditPOST(c, options.DB)
+		if cancel := c.QueryParam("cancel"); cancel == "true" {
+			return trDialogEditGET(true, c, options.DB)
+		}
+
+		user, ok := c.Get("user").(*pgvis.User)
+		if !ok {
+			return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
+		}
+
+		title, content, err := trGetTitleAndContent(c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
+		}
+
+		if title == "" || content == "" {
+			log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
+
+			// TODO: Invalid Input, set inputs to invalid and continue
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("invalid input"),
+			) // NOTE: Just a placeholder
+		}
+
+		log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
+
+		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+		tr := pgvis.NewTroubleReport(modified, title, content)
+
+		if err = options.DB.TroubleReports.Add(tr); err != nil {
+			return echo.NewHTTPError(
+				http.StatusInternalServerError,
+				fmt.Errorf("add data: %s", err.Error()),
+			)
+		}
+
+		return trDialogEditGET(true, c, options.DB)
 	})
 
-	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return trDialogEditPUT(c, options.DB)
+	// QueryParam:
+	//   - cancel: "true"
+	//   - id: int
+	//
+	// FormValue:
+	//   - title: string
+	//   - content: multiline-string
+	e.PUT(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
+		if cancel := c.QueryParam("cancel"); cancel == "true" {
+			return trDialogEditGET(true, c, options.DB)
+		}
+
+		id, err := strconv.Atoi(c.QueryParam("id"))
+		if err != nil || id <= 0 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
+		}
+
+		user, ok := c.Get("user").(*pgvis.User)
+		if !ok {
+			return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
+		}
+
+		title, content, err := trGetTitleAndContent(c)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
+		}
+
+		if title == "" || content == "" {
+			log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
+
+			// TODO: Invalid Input, set inputs to invalid and continue
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("invalid input"),
+			) // NOTE: Just a placeholder
+		}
+
+		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+		_ = pgvis.NewTroubleReport(modified, title, content)
+
+		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
+		// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
+		//tr.Modified.DataBefore
+
+		// TODO: Update data with ID in the database (existing data)
+
+		return trDialogEditGET(true, c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
@@ -48,7 +135,28 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 	})
 
 	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
-		return trDataDELETE(c, options.DB)
+		id, err := strconv.Atoi(c.QueryParam("id"))
+		if err != nil {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("query param \"id\": %s", err.Error()),
+			)
+		}
+		if id <= 0 {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("invalid \"id\": cannot be 0 or lower"),
+			)
+		}
+
+		if err := options.DB.TroubleReports.Remove(int64(id)); err != nil {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("invalid \"id\" %d: not found", id),
+			)
+		}
+
+		return trDataGET(c, options.DB)
 	})
 }
 
@@ -97,105 +205,6 @@ func trDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPE
 	return nil
 }
 
-// trDialogEditPOST will add or update data
-//
-// QueryParam:
-//   - cancel: "true"
-//
-// FormValue:
-//   - title: string
-//   - content: multiline-string
-func trDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
-		return trDialogEditGET(true, ctx, db)
-	}
-
-	user, ok := ctx.Get("user").(*pgvis.User)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
-	}
-
-	title, content, err := trGetTitleAndContent(ctx)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
-	}
-
-	if title == "" || content == "" {
-		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
-
-		// TODO: Invalid Input, set inputs to invalid and continue
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid input"),
-		) // NOTE: Just a placeholder
-	}
-
-	log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
-
-	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-	tr := pgvis.NewTroubleReport(modified, title, content)
-
-	if err = db.TroubleReports.Add(tr); err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("add data: %s", err.Error()),
-		)
-	}
-
-	return trDialogEditGET(true, ctx, db)
-}
-
-// trDialogEditPUT will add or update data
-//
-// QueryParam:
-//   - cancel: "true"
-//   - id: int
-//
-// FormValue:
-//   - title: string
-//   - content: multiline-string
-func trDialogEditPUT(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
-		return trDialogEditGET(true, ctx, db)
-	}
-
-	id, err := strconv.Atoi(ctx.QueryParam("id"))
-	if err != nil || id <= 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
-	}
-
-	user, ok := ctx.Get("user").(*pgvis.User)
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
-	}
-
-	title, content, err := trGetTitleAndContent(ctx)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
-	}
-
-	if title == "" || content == "" {
-		log.Debugf("Invalid input: title=%#v; content=%#v", title, content)
-
-		// TODO: Invalid Input, set inputs to invalid and continue
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid input"),
-		) // NOTE: Just a placeholder
-	}
-
-	modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-	_ = pgvis.NewTroubleReport(modified, title, content)
-
-	log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
-	// TODO: Get old data from the database before write the new one, add this to the modified.DataBefore
-	//tr.Modified.DataBefore
-
-	// TODO: Update data with ID in the database (existing data)
-
-	return trDialogEditGET(true, ctx, db)
-}
-
 func trDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	trs, err := db.TroubleReports.List()
 	if err != nil {
@@ -215,31 +224,6 @@ func trDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	}
 
 	return nil
-}
-
-func trDataDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	id, err := strconv.Atoi(ctx.QueryParam("id"))
-	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("query param \"id\": %s", err.Error()),
-		)
-	}
-	if id <= 0 {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid \"id\": cannot be 0 or lower"),
-		)
-	}
-
-	if err := db.TroubleReports.Remove(int64(id)); err != nil {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid \"id\" %d: not found", id),
-		)
-	}
-
-	return trDataGET(ctx, db)
 }
 
 func trGetTitleAndContent(ctx echo.Context) (title, content string, err error) {
