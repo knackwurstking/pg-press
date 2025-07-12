@@ -16,59 +16,55 @@ import (
 
 func ServeTroubleReports(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		return handleTroubleReportsPage(c)
+		t, err := template.ParseFS(templates,
+			"templates/layout.html",
+			"templates/trouble-reports.html",
+		)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		if err = t.Execute(c.Response(), nil); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+
+		return nil
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditGET(false, c, options.DB)
+		return trDialogEditGET(false, c, options.DB)
 	})
 
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditPOST(c, options.DB)
+		return trDialogEditPOST(c, options.DB)
 	})
 
 	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return handleTroubleReportsDialogEditPUT(c, options.DB)
+		return trDialogEditPUT(c, options.DB)
 	})
 
 	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
-		return handleTroubleReportsDataGET(c, options.DB)
+		return trDataGET(c, options.DB)
 	})
 
 	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
-		return handleTroubleReportsDataDELETE(c, options.DB)
+		return trDataDELETE(c, options.DB)
 	})
 }
 
-func handleTroubleReportsPage(ctx echo.Context) *echo.HTTPError {
-	t, err := template.ParseFS(templates,
-		"templates/layout.html",
-		"templates/trouble-reports.html",
-	)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if err = t.Execute(ctx.Response(), nil); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return nil
-}
-
-type TroubleReportsDialogEditTemplateData struct {
+type TRDialogEdit struct {
 	ID        int
 	Submitted bool              // Submitted set to true will close the dialog
 	Inputs    map[string]string // Inputs containing all data to render
 }
 
-// handleTroubleReportsDialogEditGET
+// trDialogEditGET
 //
 // QueryParam:
 //
 //	id: int
-func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	data := TroubleReportsDialogEditTemplateData{
+func trDialogEditGET(submitted bool, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+	data := TRDialogEdit{
 		Submitted: submitted,
 		Inputs:    map[string]string{},
 	}
@@ -101,7 +97,7 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 	return nil
 }
 
-// handleTroubleReportsDialogEditPOST will add or update data
+// trDialogEditPOST will add or update data
 //
 // QueryParam:
 //   - cancel: "true"
@@ -109,9 +105,9 @@ func handleTroubleReportsDialogEditGET(submitted bool, ctx echo.Context, db *pgv
 // FormValue:
 //   - title: string
 //   - content: multiline-string
-func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func trDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
-		return handleTroubleReportsDialogEditGET(true, ctx, db)
+		return trDialogEditGET(true, ctx, db)
 	}
 
 	user, ok := ctx.Get("user").(*pgvis.User)
@@ -119,7 +115,7 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
 	}
 
-	title, content, err := getTitleAndContent(ctx)
+	title, content, err := trGetTitleAndContent(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
@@ -146,10 +142,10 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 		)
 	}
 
-	return handleTroubleReportsDialogEditGET(true, ctx, db)
+	return trDialogEditGET(true, ctx, db)
 }
 
-// handleTroubleReportsDialogEditPUT will add or update data
+// trDialogEditPUT will add or update data
 //
 // QueryParam:
 //   - cancel: "true"
@@ -158,9 +154,9 @@ func handleTroubleReportsDialogEditPOST(ctx echo.Context, db *pgvis.DB) *echo.HT
 // FormValue:
 //   - title: string
 //   - content: multiline-string
-func handleTroubleReportsDialogEditPUT(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func trDialogEditPUT(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if cancel := ctx.QueryParam("cancel"); cancel == "true" {
-		return handleTroubleReportsDialogEditGET(true, ctx, db)
+		return trDialogEditGET(true, ctx, db)
 	}
 
 	id, err := strconv.Atoi(ctx.QueryParam("id"))
@@ -173,7 +169,7 @@ func handleTroubleReportsDialogEditPUT(ctx echo.Context, db *pgvis.DB) *echo.HTT
 		return echo.NewHTTPError(http.StatusBadRequest, "cannot get the user from the echos context")
 	}
 
-	title, content, err := getTitleAndContent(ctx)
+	title, content, err := trGetTitleAndContent(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
@@ -197,10 +193,10 @@ func handleTroubleReportsDialogEditPUT(ctx echo.Context, db *pgvis.DB) *echo.HTT
 
 	// TODO: Update data with ID in the database (existing data)
 
-	return handleTroubleReportsDialogEditGET(true, ctx, db)
+	return trDialogEditGET(true, ctx, db)
 }
 
-func handleTroubleReportsDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func trDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	trs, err := db.TroubleReports.List()
 	if err != nil {
 		return echo.NewHTTPError(
@@ -221,7 +217,7 @@ func handleTroubleReportsDataGET(ctx echo.Context, db *pgvis.DB) *echo.HTTPError
 	return nil
 }
 
-func handleTroubleReportsDataDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
+func trDataDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
 	id, err := strconv.Atoi(ctx.QueryParam("id"))
 	if err != nil {
 		return echo.NewHTTPError(
@@ -243,10 +239,10 @@ func handleTroubleReportsDataDELETE(ctx echo.Context, db *pgvis.DB) *echo.HTTPEr
 		)
 	}
 
-	return handleTroubleReportsDataGET(ctx, db)
+	return trDataGET(ctx, db)
 }
 
-func getTitleAndContent(ctx echo.Context) (title, content string, err error) {
+func trGetTitleAndContent(ctx echo.Context) (title, content string, err error) {
 	title, err = url.QueryUnescape(ctx.FormValue("title"))
 	if err != nil {
 		return title, content, echo.NewHTTPError(
