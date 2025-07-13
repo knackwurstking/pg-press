@@ -11,8 +11,9 @@
 //  - pgvis-v0.8: Add htmx.min.js
 //  - pgvis-v0.9: Updated ui - Fixed missing aria-invalid styles for textarea element
 //  - pgvis-v0.10: Updated ui - Updated font settings (size and variant)
+//  - pgvis-v0.11: Updated ui - Updated font settings (size and variant)
 
-const version = "pgvis-v0.10";
+const version = "pgvis-v0.11";
 
 const files = [
     "./apple-touch-icon-180x180.png",
