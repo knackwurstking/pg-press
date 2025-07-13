@@ -26,11 +26,11 @@
 
 {{define "content"}}
 <style>
-    hgroup > .user-name > * {
+    hgroup>.user-name>* {
         margin: 0;
     }
 
-    hgroup > .user-name {
+    hgroup>.user-name {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -48,8 +48,7 @@
                 class="ghost icon"
                 onclick='
                     document.querySelector("#dialogEditUserName").showModal();
-                '
-            >
+                '>
                 <i class="bi bi-pen"></i>
             </button>
         </span>
@@ -60,8 +59,7 @@
                 style="float: right"
                 role="button"
                 href="./logout"
-                class="ghost destructive"
-            >
+                class="ghost destructive">
                 Logout
             </a>
         </div>
@@ -73,9 +71,9 @@
         id="cookies"
         hx-get="./profile/cookies"
         hx-trigger="load"
-        hx-swap="outerHTML"
-    ></span>
+        hx-swap="outerHTML"></span>
 
+    <!-- FIXME: Proper cancel button handling -->
     <dialog id="dialogEditUserName" class="clean">
         <form action="./profile">
             <label class="flex column">
@@ -84,12 +82,11 @@
                     name="user-name"
                     type="text"
                     value="{{.User.UserName}}"
-                    placeholder="User Name"
-                />
+                    placeholder="User Name" />
             </label>
 
             <footer class="flex row gap justify-end">
-                <button class="flex-item secondary">Schließen</button>
+                <a role="button" class="flex-item secondary" href="./profile">Schließen</a>
                 <button type="flex-item submit">Ändern</button>
             </footer>
         </form>

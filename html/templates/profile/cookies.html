@@ -1,4 +1,5 @@
-{{$cookies := .}} {{if ne (len $cookies) 0}}
+{{$cookies := .}}
+{{if ne (len $cookies) 0}}
 <details id="cookies" open>
     <summary>Cookies</summary>
 
@@ -24,8 +25,7 @@
                         hx-target="#cookies"
                         hx-swap="outerHTML"
                         role="button"
-                        class="ghost destructive icon"
-                    >
+                        class="ghost destructive icon">
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>
