@@ -3,10 +3,7 @@
     {{range $troubleReport := .}}
     <details style="margin: var(--ui-spacing) auto;">
         <summary>{{$troubleReport.Title}}</summary>
-
-        <!-- TODO: Convert `Content` to html, or whatever -->
-        <p>{{$troubleReport.Content}}</p>
-
+        <pre>{{$troubleReport.Content}}</pre>
     </details>
     {{end}}
 </ul>
