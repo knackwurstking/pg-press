@@ -74,7 +74,7 @@
         hx-swap="outerHTML"></span>
 
     <!-- FIXME: Proper cancel button handling -->
-    <dialog id="dialogEditUserName" class="clean">
+    <dialog id="dialogEditUserName" class="clean" oncancel="event.preventDefault()">
         <form action="./profile">
             <label class="flex column">
                 User Name
