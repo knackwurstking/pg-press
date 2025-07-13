@@ -9,8 +9,9 @@
 //  - pgvis-v0.6: Updated ui - no user select
 //  - pgvis-v0.7: Updated ui - Changed table styles
 //  - pgvis-v0.8: Add htmx.min.js
+//  - pgvis-v0.9: Updated ui - Fixed missing aria-invalid styles for textarea element
 
-const version = "pgvis-v0.8";
+const version = "pgvis-v0.9";
 
 const files = [
     "./apple-touch-icon-180x180.png",
