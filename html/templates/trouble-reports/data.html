@@ -1,7 +1,7 @@
 {{if ne (len .) 0}}
 <ul id="data">
     {{range $troubleReport := .}}
-    <details>
+    <details style="margin: var(--ui-spacing) auto;">
         <summary>{{$troubleReport.Title}}</summary>
         <p>{{$troubleReport.Content}}</p>
     </details>
