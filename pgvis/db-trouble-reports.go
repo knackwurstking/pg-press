@@ -16,6 +16,8 @@ type TroubleReport struct {
 
 func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *TroubleReport {
 	return &TroubleReport{
+		Title:             title,
+		Content:           content,
 		LinkedAttachments: make([]*Attachment, 0),
 		Modified:          m,
 	}
@@ -60,18 +62,18 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 		tr := TroubleReport{}
 
 		la := []byte{}
-		m := []byte{}
+		md := []byte{}
 
-		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &m)
+		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &md)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := json.Unmarshal(m, &tr.LinkedAttachments); err != nil {
+		if err := json.Unmarshal(la, &tr.LinkedAttachments); err != nil {
 			return nil, fmt.Errorf("unmarshal \"linked_attachments\" failed: %s", err.Error())
 		}
 
-		if err := json.Unmarshal(m, &tr.Modified); err != nil {
+		if err := json.Unmarshal(md, &tr.Modified); err != nil {
 			return nil, fmt.Errorf("unmarshal \"modified\" failed: %s", err.Error())
 		}
 
@@ -120,17 +122,17 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
 
-	modifiedBytes, err := json.Marshal(tr.Modified)
+	md, err := json.Marshal(tr.Modified)
 	if err != nil {
 		return fmt.Errorf("marshal \"modified\" failed: %s", err.Error())
 	}
 
-	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+	la, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
 		return fmt.Errorf("marshal \"linked_attachments\" failed: %s", err.Error())
 	}
 
-	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modifiedBytes)
+	_, err = db.db.Exec(query, tr.Title, tr.Content, la, md)
 	return err
 }
 

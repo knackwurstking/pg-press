@@ -132,7 +132,7 @@ func trDialogEditGET(c echo.Context, db *pgvis.DB, pageData *TRDialogEdit) *echo
 }
 
 func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	pageData := &TRDialogEdit{Submitted: true}
+	dialogEditData := &TRDialogEdit{Submitted: true}
 
 	user, ok := c.Get("user").(*pgvis.User)
 	if !ok {
@@ -144,10 +144,12 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	pageData.InvalidTitle = title == ""
-	pageData.InvalidContent = content == ""
+	dialogEditData.Title = title
+	dialogEditData.Content = content
+	dialogEditData.InvalidTitle = title == ""
+	dialogEditData.InvalidContent = content == ""
 
-	if pageData.InvalidTitle || pageData.InvalidContent {
+	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
 		log.Debugf("Add new database entry: title=%#v; content=%#v", title, content)
 
 		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
@@ -159,13 +161,15 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 				fmt.Errorf("add data: %s", err.Error()),
 			)
 		}
+	} else {
+		dialogEditData.Submitted = false
 	}
 
-	return trDialogEditGET(c, db, pageData)
+	return trDialogEditGET(c, db, dialogEditData)
 }
 
 func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	pageData := &TRDialogEdit{Submitted: true}
+	dialogEditData := &TRDialogEdit{Submitted: true}
 
 	id, err := strconv.Atoi(c.QueryParam("id"))
 	if err != nil || id <= 0 {
@@ -182,10 +186,12 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	pageData.InvalidTitle = title == ""
-	pageData.InvalidContent = content == ""
+	dialogEditData.Title = title
+	dialogEditData.Content = content
+	dialogEditData.InvalidTitle = title == ""
+	dialogEditData.InvalidContent = content == ""
 
-	if pageData.InvalidTitle || pageData.InvalidContent {
+	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
 		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
 
 		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
@@ -201,9 +207,11 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		if err = db.TroubleReports.Update(int64(id), trNew); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+	} else {
+		dialogEditData.Submitted = false
 	}
 
-	return trDialogEditGET(c, db, pageData)
+	return trDialogEditGET(c, db, dialogEditData)
 }
 
 func trDataGET(c echo.Context, db *pgvis.DB) *echo.HTTPError {
@@ -213,6 +221,10 @@ func trDataGET(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 			http.StatusInternalServerError,
 			fmt.Errorf("list trouble-reports: %s", err.Error()),
 		)
+	}
+
+	for _, tr := range trs {
+		log.Debugf("tr=%#v", tr)
 	}
 
 	t, err := template.ParseFS(templates, "templates/trouble-reports/data.html")
