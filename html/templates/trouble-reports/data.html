@@ -1,6 +1,8 @@
 {{if ne (len .) 0}}
 <ul id="data">
     {{range $troubleReport := .}}
+    <!-- TODO: Edit Button -->
+    <!-- TODO: Delete Button -->
     <details style="margin: var(--ui-spacing) auto;" class="data">
         <summary>{{$troubleReport.Title}}</summary>
         <pre>{{$troubleReport.Content}}</pre>
