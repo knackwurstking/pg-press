@@ -13,6 +13,22 @@
 <!-- Content -->
 
 {{define "content"}}
+<script>
+    function search(event) {
+        const rg = new RegExp(event.currentTarget.value, "si");
+        const elements = document.querySelectorAll("details.data");
+
+        elements.forEach((element) => {
+            if (rg.test(element.textContent)) {
+                console.debug("match: ", element.textContent);
+                element.style.display = "block"
+            } else {
+                element.style.display = "none"
+            }
+        });
+    }
+</script>
+
 <main class="container fluid">
     <section style="margin-top: 0" class="flex gap justify-between">
         <input
@@ -20,7 +36,9 @@
             type="search"
             name="search"
             placeholder="Suche"
-            aria-label="Suche" />
+            aria-label="Suche"
+            onchange="search(event)"
+        />
     </section>
 
     <section style="margin-top: 0" class="flex gap justify-end">
