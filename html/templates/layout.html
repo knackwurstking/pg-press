@@ -18,6 +18,13 @@
 
     <title>{{block "title" .}}{{end}}</title>
 
+    <style>
+        body.debug,
+        body.debug * {
+            border-color: var(--ui-border-color) !important;
+        }
+    </style>
+
     <script src="./htmx.min.js"></script>
 
     <script>
@@ -45,11 +52,23 @@
 <body>
     <header class="container fluid">
         <nav class="flex row justify-between">
-            <ul class="flex-item">
-                <li>
+            <div class="flex row gap justify-start align-center">
+                <div>
+                    <button
+                        class="ghost secondary icon flex column"
+                        onclick='
+                            document.querySelector("body").classList.toggle("debug");
+                        '
+                    >
+                        <i class="bi bi-border-all"></i>
+                        <small>DEBUG</small>
+                    </button>
+                </div>
+
+                <div>
                     <strong>{{block "app-bar-title" .}}{{end}}</strong>
-                </li>
-            </ul>
+                </div>
+            </div>
 
             {{block "nav" .}}{{end}}
         </nav>
