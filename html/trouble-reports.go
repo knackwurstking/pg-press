@@ -84,12 +84,12 @@ func ServeTroubleReports(e *echo.Echo, options Options) {
 //	cancel: "true"
 //	id: int
 func trDialogEditGET(c echo.Context, db *pgvis.DB, pageData *TRDialogEdit) *echo.HTTPError {
-	if cancel := c.QueryParam("cancel"); cancel == "true" {
-		pageData.Submitted = true
-	}
-
 	if pageData == nil {
 		pageData = &TRDialogEdit{Submitted: false}
+	}
+
+	if cancel := c.QueryParam("cancel"); cancel == "true" {
+		pageData.Submitted = true
 	}
 
 	if !pageData.Submitted {
