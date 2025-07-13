@@ -28,6 +28,15 @@
         body.debug * {
             border-color: var(--ui-border-color) !important;
         }
+
+        details summary::after {
+            font-family: "bootstrap-icons";
+            content: "\f285";
+        }
+
+        details[open] summary::after {
+            content: "\f282";
+        }
     </style>
 
     <script src="./htmx.min.js"></script>
