@@ -71,8 +71,11 @@ func autoCleanCookiesCommand() cli.Command {
 				}
 
 				now := time.Now().UnixMilli()
+				isExpired := func(cookie *pgvis.Cookie) bool {
+					return now >= cookie.LastLogin
+				}
 
-				if *telegramID != 0 {
+				if *telegramID != 0 { // {{{ Clean up cookies for a specific telegram user
 					u, err := db.Users.Get(*telegramID)
 					if err != nil {
 						if errors.Is(err, pgvis.ErrNotFound) {
@@ -90,7 +93,7 @@ func autoCleanCookiesCommand() cli.Command {
 					}
 
 					for _, cookie := range cookies {
-						if now >= cookie.LastLogin {
+						if isExpired(cookie) {
 							if err = db.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
 								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
@@ -99,8 +102,9 @@ func autoCleanCookiesCommand() cli.Command {
 					}
 
 					return nil
-				}
+				} // }}}
 
+				// {{{ Clean up all cookies
 				cookies, err := db.Cookies.List() 
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s", err.Error())
@@ -108,13 +112,14 @@ func autoCleanCookiesCommand() cli.Command {
 				}
 
 				for _, cookie := range cookies {
-					if now >= cookie.LastLogin {
+					if isExpired(cookie) {
 						if err = db.Cookies.Remove(cookie.Value); err != nil {
 							// Print out error and continue
 							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
 						}
 					}
 				}
+				// }}}
 
 				return nil
 			}
