@@ -104,8 +104,7 @@ func autoCleanCookiesCommand() cli.Command {
 					return nil
 				} // }}}
 
-				// {{{ Clean up all cookies
-				cookies, err := db.Cookies.List() 
+				cookies, err := db.Cookies.List() // {{{ Clean up all cookies
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s", err.Error())
 					os.Exit(exitCodeGeneric)
@@ -118,8 +117,7 @@ func autoCleanCookiesCommand() cli.Command {
 							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
 						}
 					}
-				}
-				// }}}
+				} // }}}
 
 				return nil
 			}
