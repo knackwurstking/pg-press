@@ -12,6 +12,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	CookieExpirationDuration = time.Hour * 24 * 31 * 6
+)
+
 func ServeLogin(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
 		return handleLoginPage(c, options.DB)
@@ -91,9 +95,11 @@ func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 
 		cookie.Name = CookieName
 		cookie.Value = uuid.New().String()
-		cookie.Expires = time.Now().Add(time.Hour * 24 * 31 * 6)
+		cookie.Expires = time.Now().Add(CookieExpirationDuration)
+
 		ctx.SetCookie(cookie)
 
+		// TODO: Store expiration date for this cookie
 		db.Cookies.Add(&pgvis.Cookie{
 			UserAgent: ctx.Request().UserAgent(),
 			Value:     cookie.Value,

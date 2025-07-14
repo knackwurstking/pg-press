@@ -99,7 +99,13 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 				log.Debugf("KeyAuth -> Validator -> ctx.Request().URL.Path=%#v", ctx.Request().URL.Path)
 				if slices.Contains(pages, ctx.Request().URL.Path) {
 					log.Debugf("KeyAuth -> Validator -> Update cookies last login timestamp")
+
 					c.LastLogin = time.Now().UnixMilli()
+
+					// Update expiration for the browser cookie
+					cookie.Expires = time.Now().Add(html.CookieExpirationDuration)
+					// TODO: Add this expiration thing to pgvis.Cookie
+
 					if err := db.Cookies.Update(c.Value, c); err != nil {
 						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
 					}
