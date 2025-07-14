@@ -70,6 +70,7 @@ func autoCleanCookiesCommand() cli.Command {
 					return err
 				}
 
+				now := time.Now().UnixMilli()
 
 				if *telegramID != 0 {
 					u, err := db.Users.Get(*telegramID)
@@ -88,7 +89,6 @@ func autoCleanCookiesCommand() cli.Command {
 						os.Exit(exitCodeGeneric)
 					}
 
-					now := time.Now().UnixMilli()
 					for _, cookie := range cookies {
 						if now >= cookie.LastLogin {
 							if err = db.Cookies.Remove(cookie.Value); err != nil {
@@ -101,10 +101,22 @@ func autoCleanCookiesCommand() cli.Command {
 					return nil
 				}
 
-				// TODO: Auto clean up expired cookies for all users
-				//db.Cookies.List()
+				cookies, err := db.Cookies.List() 
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s", err.Error())
+					os.Exit(exitCodeGeneric)
+				}
 
-				return errors.New("under construction")
+				for _, cookie := range cookies {
+					if now >= cookie.LastLogin {
+						if err = db.Cookies.Remove(cookie.Value); err != nil {
+							// Print out error and continue
+							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
+						}
+					}
+				}
+
+				return nil
 			}
 		}),
 	}
