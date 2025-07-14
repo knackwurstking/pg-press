@@ -71,13 +71,13 @@ func autoCleanCookiesCommand() cli.Command {
 					return err
 				}
 
-				
-				now := time.Now().Add(0 - html.CookieExpirationDuration).UnixMilli()
+				t := time.Now().Add(0 - html.CookieExpirationDuration).UnixMilli()
 				isExpired := func(cookie *pgvis.Cookie) bool {
-					return now >= cookie.LastLogin
+					return t >= cookie.LastLogin
 				}
 
-				if *telegramID != 0 { // {{{ Clean up cookies for a specific telegram user
+				// Clean up cookies for a specific telegram user
+				if *telegramID != 0 {
 					u, err := db.Users.Get(*telegramID)
 					if err != nil {
 						if errors.Is(err, pgvis.ErrNotFound) {
@@ -104,9 +104,10 @@ func autoCleanCookiesCommand() cli.Command {
 					}
 
 					return nil
-				} // }}}
+				}
 
-				cookies, err := db.Cookies.List() // {{{ Clean up all cookies
+				// Clean up all cookies
+				cookies, err := db.Cookies.List()
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s", err.Error())
 					os.Exit(exitCodeGeneric)
@@ -119,7 +120,7 @@ func autoCleanCookiesCommand() cli.Command {
 							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
 						}
 					}
-				} // }}}
+				}
 
 				return nil
 			}
