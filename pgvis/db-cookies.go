@@ -48,6 +48,31 @@ func NewDBCookies(db *sql.DB) *DBCookies {
 	}
 }
 
+func (db *DBCookies) List() ([]*Cookie, error) {
+	cookies := []*Cookie{}
+
+	query := `SELECT * FROM cookies ORDER BY last_login ASC`
+	r, err := db.db.Query(query)
+	if err != nil {
+		return cookies, err
+	}
+
+	defer r.Close()
+
+	for r.Next() {
+		cookie := &Cookie{}
+
+		err = r.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
+		if err != nil {
+			return cookies, err
+		}
+
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
+
 func (db *DBCookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 	cookies := []*Cookie{}
 
