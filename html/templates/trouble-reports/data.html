@@ -1,5 +1,11 @@
 {{if ne (len .) 0}}
 <ul id="data">
+    <style>
+        pre {
+            text-wrap: wrap;
+        }
+    </style>
+
     {{range $troubleReport := .}}
     <!-- TODO: Edit Button -->
     <!-- TODO: Delete Button -->
