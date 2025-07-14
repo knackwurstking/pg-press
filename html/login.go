@@ -91,6 +91,7 @@ func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 
 		cookie.Name = CookieName
 		cookie.Value = uuid.New().String()
+		cookie.Expires.Add(time.Hour * 24 * 31 * 6)
 		ctx.SetCookie(cookie)
 
 		db.Cookies.Add(&pgvis.Cookie{
