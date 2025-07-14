@@ -104,7 +104,6 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 
 					// Update expiration for the browser cookie
 					cookie.Expires = time.Now().Add(html.CookieExpirationDuration)
-					// TODO: Add this expiration thing to pgvis.Cookie
 
 					if err := db.Cookies.Update(c.Value, c); err != nil {
 						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)

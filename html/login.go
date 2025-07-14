@@ -99,7 +99,6 @@ func handleLoginApiKey(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 
 		ctx.SetCookie(cookie)
 
-		// TODO: Store expiration date for this cookie
 		db.Cookies.Add(&pgvis.Cookie{
 			UserAgent: ctx.Request().UserAgent(),
 			Value:     cookie.Value,
