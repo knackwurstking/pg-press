@@ -64,13 +64,11 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 
 		ErrorHandler: func(err error, c echo.Context) error {
 			// FIXME: Need to find out why cookie are not working from time to time
-			if (err.Error() == "missing key in cookies") {
-				for _, cookie := range c.Cookies() {
-					log.Debug("KeyAuth -> ErrorHandler -> cookie=%#v", cookie)
-				}
+			for _, cookie := range c.Cookies() {
+				log.Debug("KeyAuth -> ErrorHandler -> cookie=%#v", cookie)
 			}
 
-			log.Errorf("KeyAuth -> ErrorHandler -> %s", err.Error())
+			log.Errorf("KeyAuth -> ErrorHandler -> %#v", err.Error())
 			log.Debugf("KeyAuth -> ErrorHandler -> User-Agent=%#v", c.Request().UserAgent())
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
