@@ -14,7 +14,7 @@ const (
 
 	exitCodeGeneric   	= 1 
 	exitCodeNotFound    = 10
-	exitCodeServerStart = 20
+	exitCodeServerStart = 20 // exitCodeServerStart failed
 )
 
 var (
@@ -61,6 +61,7 @@ func main() {
 				Usage: cli.Usage("Handle cookies database table, remove cookies data"),
 				Commands: []cli.Command{
 					removeCookiesCommand(),
+					autoCleanCookiesCommand(),
 				},
 			},
 

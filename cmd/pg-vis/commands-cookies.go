@@ -1,8 +1,9 @@
 package main
 
 import (
-	"os"
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -42,6 +43,38 @@ func removeCookiesCommand() cli.Command {
 				}
 
 				return nil
+			}
+		}),
+	}
+}
+
+func autoCleanCookiesCommand() cli.Command {
+	return cli.Command{
+		Name: "auto-clean",
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Optional,
+			)
+
+			telegramID := cli.Int64(cmd, "user",
+				cli.WithShort("u"),
+				cli.Optional,
+			)
+
+			return func(cmd *cli.Command) error {
+				_, err := openDB(*customDBPath)
+				if err != nil {
+					return err
+				}
+
+				if *telegramID != 0 {
+					// TODO: Auto clean up expired cookies for a specific user
+				} else {
+					// TODO: Auto clean up expired cookies for all users
+				}
+
+				return errors.New("under construction")
 			}
 		}),
 	}
