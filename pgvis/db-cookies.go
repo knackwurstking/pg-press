@@ -12,7 +12,7 @@ type Cookie struct {
 	UserAgent string `json:"user_agent"`
 	Value     string `json:"value"`
 	ApiKey    string `json:"api_key"`
-	LastLogin int64  `json:"last_login"`
+	LastLogin int64  `json:"last_login"` // LastLogin, (Unix) Milliseconds
 }
 
 func (c *Cookie) TimeString() string {
