@@ -7,12 +7,24 @@
     </style>
 
     {{range $troubleReport := .}}
-    <!-- TODO: Edit Button -->
-    <!-- TODO: Delete Button -->
     <details style="margin: var(--ui-spacing) auto;" class="data">
         <summary>{{$troubleReport.Title}}</summary>
         <pre>{{$troubleReport.Content}}</pre>
     </details>
+
+    <!-- TODO: Attach some kind of an Action container to the bottom.
+               With buttons: Edit, Delete / Vote for Delete -->
+
+    <div class="actions flex row gap justify-end align-center">
+        <button class="ghost primary icon">
+            <i class="bi bi-pen"></i>
+        </button>
+        <button class="ghost destructive icon">
+            <i class="bi bi-trash"></i>
+        </button>
+    </div>
+
+    <hr />
     {{end}}
 </ul>
 {{else}}
