@@ -53,6 +53,7 @@ func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB)
 		t, err := template.ParseFS(templates,
 			"templates/layout.html",
 			"templates/profile.html",
+			"templates/nav/feed.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())

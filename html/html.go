@@ -52,6 +52,7 @@ func serveHome(e *echo.Echo, options Options) {
 		t, err := template.ParseFS(templates,
 			"templates/layout.html",
 			"templates/home.html",
+			"templates/nav/feed.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
