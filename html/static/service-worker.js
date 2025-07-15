@@ -13,8 +13,9 @@
 //  - pgvis-v0.10: Updated ui - Updated font settings (size and variant)
 //  - pgvis-v0.11: Updated ui - Updated font settings (size and variant)
 //  - pgvis-v0.12: Updated ui - Updated list styles (padding)
+//  - pgvis-v0.13: Updated ui - Updated input styles (padding)
 
-const version = "pgvis-v0.12";
+const version = "pgvis-v0.13";
 
 const files = [
     "./apple-touch-icon-180x180.png",
