@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pg-vis/html/handler/feed"
 	"github.com/knackwurstking/pg-vis/html/handler/profile"
 	"github.com/knackwurstking/pg-vis/html/handler/troublereports"
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -36,7 +37,9 @@ func Serve(e *echo.Echo, o Options) {
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
 
 	serveHome(e, o)
-	serveFeed(e, o)
+
+	feed.Serve(templates, o.ServerPathPrefix, e, o.DB)
+
 	serveLogin(e, o)
 	serveLogout(e, o)
 
@@ -49,25 +52,6 @@ func serveHome(e *echo.Echo, options Options) {
 		t, err := template.ParseFS(templates,
 			"templates/layout.html",
 			"templates/home.html",
-		)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		err = t.Execute(c.Response(), nil)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		return nil
-	})
-}
-
-func serveFeed(e *echo.Echo, options Options) {
-	e.GET(options.ServerPathPrefix+"/feed", func(c echo.Context) error {
-		t, err := template.ParseFS(templates,
-			"templates/layout.html",
-			"templates/feed.html",
 		)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
