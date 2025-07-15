@@ -17,3 +17,5 @@ func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
 
 	return user, nil
 }
+
+

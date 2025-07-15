@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/html/handler"
 	"github.com/knackwurstking/pg-vis/html/handler/profile"
 	"github.com/knackwurstking/pg-vis/html/handler/troublereports"
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -33,15 +32,16 @@ type Options struct {
 	DB               *pgvis.DB
 }
 
-func Serve(e *echo.Echo, options Options) {
-	e.StaticFS(options.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
+func Serve(e *echo.Echo, o Options) {
+	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(static, "static"))
 
-	serveHome(e, options)
-	serveFeed(e, options)
-	serveLogin(e, options)
-	serveLogout(e, options)
-	serveProfile(e, options)
-	serveTroubleReports(e, options)
+	serveHome(e, o)
+	serveFeed(e, o)
+	serveLogin(e, o)
+	serveLogout(e, o)
+
+	profile.Serve(templates, o.ServerPathPrefix, e, o.DB)
+	troublereports.Serve(templates, o.ServerPathPrefix, e, o.DB)
 }
 
 func serveHome(e *echo.Echo, options Options) {
@@ -141,122 +141,6 @@ func serveLogout(e *echo.Echo, options Options) {
 	})
 }
 
-type ProfilePageData struct {
-	User    *pgvis.User
-	Cookies []*pgvis.Cookie
-}
-
-func NewProfilePageData() ProfilePageData {
-	return ProfilePageData{
-		Cookies: make([]*pgvis.Cookie, 0),
-	}
-}
-
-func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
-	return pgvis.SortCookies(p.Cookies)
-}
-
-func serveProfile(e *echo.Echo, options Options) {
-	e.GET(options.ServerPathPrefix+"/profile", func(c echo.Context) error {
-		pageData := NewProfilePageData()
-
-		if user, err := handler.GetUserFromContext(c); err != nil {
-			return err
-		} else {
-			pageData.User = user
-		}
-
-		if err := handleUserNameChange(c, &pageData, options.DB); err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				fmt.Errorf("change username: %s", err.Error()),
-			)
-		}
-
-		if cookies, err := options.DB.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
-			log.Error("/profile -> List cookies for Api Key failed: %s", err.Error())
-		} else {
-			pageData.Cookies = cookies
-		}
-
-		t, err := template.ParseFS(templates,
-			"templates/layout.html",
-			"templates/profile.html",
-		)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		err = t.Execute(c.Response(), pageData)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		return nil
-	})
-
-	e.GET(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
-		return profile.GETCookies(templates, c, options.DB)
-	})
-
-	e.DELETE(options.ServerPathPrefix+"/profile/cookies", func(c echo.Context) error {
-		return profile.DELETECookies(templates, c, options.DB)
-	})
-}
-
-func serveTroubleReports(e *echo.Echo, options Options) {
-	e.GET(options.ServerPathPrefix+"/trouble-reports", func(c echo.Context) error {
-		t, err := template.ParseFS(templates,
-			"templates/layout.html",
-			"templates/trouble-reports.html",
-		)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		if err = t.Execute(c.Response(), nil); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-		}
-
-		return nil
-	})
-
-	// HTMX: Dialog Edit
-
-	e.GET(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return troublereports.GETDialogEdit(templates, c, options.DB, nil)
-	})
-
-	// FormValues:
-	//   - title: string
-	//   - content: multiline-string
-	e.POST(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return troublereports.POSTDialogEdit(templates, c, options.DB)
-	})
-
-	// QueryParam:
-	//   - id: int
-	//
-	// FormValue:
-	//   - title: string
-	//   - content: multiline-string
-	e.PUT(options.ServerPathPrefix+"/trouble-reports/dialog-edit", func(c echo.Context) error {
-		return troublereports.PUTDialogEdit(templates, c, options.DB)
-	})
-
-	// HTMX: Data
-
-	e.GET(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
-		return troublereports.GETData(templates, c, options.DB)
-	})
-
-	// QueryParam:
-	//   - id: int
-	e.DELETE(options.ServerPathPrefix+"/trouble-reports/data", func(c echo.Context) error {
-		return troublereports.DELETEData(templates, c, options.DB)
-	})
-}
-
 func handleApiKeyLogin(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, err error) {
 	if apiKey == "" {
 		return false, nil
@@ -300,26 +184,4 @@ func handleApiKeyLogin(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 	}
 
 	return false, nil
-}
-
-func handleUserNameChange(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) error {
-	v, err := ctx.FormParams()
-	userName := v.Get("user-name")
-
-	// Database update
-	if userName != "" && userName != pageData.User.UserName {
-		log.Debugf(
-			"Change user name in database: %s => %s",
-			pageData.User.UserName, userName,
-		)
-
-		user := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
-		if err = db.Users.Update(pageData.User.TelegramID, user); err != nil {
-			return err
-		} else {
-			pageData.User.UserName = userName
-		}
-	}
-
-	return nil
 }

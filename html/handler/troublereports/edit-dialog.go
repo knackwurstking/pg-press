@@ -16,15 +16,25 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
+type EditDialogPageData struct {
+	ID                int
+	Submitted         bool // Submitted set to true will close the dialog
+	Title             string
+	Content           string
+	LinkedAttachments []*pgvis.Attachment
+	InvalidTitle      bool
+	InvalidContent    bool
+}
+
 // trDialogEditGET
 //
 // QueryParam:
 //
 //	cancel: "true"
 //	id: int
-func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *PageData) *echo.HTTPError {
+func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *EditDialogPageData) *echo.HTTPError {
 	if pageData == nil {
-		pageData = &PageData{Submitted: false}
+		pageData = &EditDialogPageData{Submitted: false}
 	}
 
 	if cancel := c.QueryParam("cancel"); cancel == "true" {
@@ -71,7 +81,7 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Page
 }
 
 func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	dialogEditData := &PageData{Submitted: true}
+	dialogEditData := &EditDialogPageData{Submitted: true}
 
 	user, herr := handler.GetUserFromContext(c)
 	if herr != nil {
@@ -123,7 +133,7 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	dialogEditData := &PageData{
+	dialogEditData := &EditDialogPageData{
 		Submitted:      true,
 		ID:             id,
 		Title:          title,
