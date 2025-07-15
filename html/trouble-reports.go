@@ -185,11 +185,11 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	}
 
 	dialogEditData := &TRDialogEdit{
-		Submitted: true,
-		ID: id,
-		Title: title,
-		Content: content,
-		InvalidTitle: title == "",
+		Submitted:      true,
+		ID:             id,
+		Title:          title,
+		Content:        content,
+		InvalidTitle:   title == "",
 		InvalidContent: content == "",
 	}
 
