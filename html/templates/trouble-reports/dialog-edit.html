@@ -60,10 +60,10 @@
                     name="content"
                     id="content"
                     placeholder="Report"
-                    value="{{.Content}}"
                     {{if .InvalidContent}}
                     aria-invalid="true"
-                    {{end}}></textarea>
+                    {{end}}
+                >{{.Content}}</textarea>
             </label>
         </div>
 
