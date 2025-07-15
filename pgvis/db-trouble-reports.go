@@ -111,7 +111,7 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 		return nil, fmt.Errorf("unmarshal \"linked_attachments\" from database: %s", err.Error())
 	}
 
-	err = json.Unmarshal(la, &tr.Modified)
+	err = json.Unmarshal(md, &tr.Modified)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal \"modified\" from database: %s", err.Error())
 	}
