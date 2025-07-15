@@ -16,12 +16,24 @@
                With buttons: Edit, Delete / Vote for Delete -->
 
     <div class="actions flex row gap justify-end align-center">
-        <button class="ghost primary icon">
+
+        <button
+            hx-get="./trouble-reports/dialog-edit?id={{$troubleReport.ID}}"
+            hx-trigger="click"
+            hx-target="#dialogEdit"
+            hx-swap="outerHTML"
+            class="ghost primary icon"
+        >
             <i class="bi bi-pen"></i>
         </button>
-        <button class="ghost destructive icon">
+
+        <button 
+            hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
+            class="ghost destructive icon"
+        >
             <i class="bi bi-trash"></i>
         </button>
+
     </div>
 
     <hr />

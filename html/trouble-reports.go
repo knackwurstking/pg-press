@@ -254,10 +254,32 @@ func trDataDELETE(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		)
 	}
 
-	if err := db.TroubleReports.Remove(int64(id)); err != nil {
+	user, ok := c.Get("user").(pgvis.User)
+	if !ok {
 		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid \"id\" %d: not found", id),
+			http.StatusInternalServerError,
+			fmt.Errorf("no user in echos context"),
+		)
+	}
+
+	if user.IsAdmin(user.TelegramID) {
+		log.Debugf(
+			"User %d (%s) is deleting the trouble report %d",
+			user.TelegramID, user.UserName, id,
+		)
+
+		if err := db.TroubleReports.Remove(int64(id)); err != nil {
+			return echo.NewHTTPError(
+				http.StatusBadRequest,
+				fmt.Errorf("invalid \"id\" %d: not found", id),
+			)
+		}
+	} else {
+		// TODO: Voting system for deletion
+		log.Warnf(
+			"User %d (%s) not allowed for deletion. "+
+				"Voting system not implemented for now.",
+			user.TelegramID, user.UserName,
 		)
 	}
 
