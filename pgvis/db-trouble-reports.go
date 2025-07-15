@@ -61,19 +61,19 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 	for r.Next() {
 		tr := TroubleReport{}
 
-		la := []byte{}
-		md := []byte{}
+		linkedAttachments := []byte{}
+		modified := []byte{}
 
-		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &md)
+		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &linkedAttachments, &modified)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := json.Unmarshal(la, &tr.LinkedAttachments); err != nil {
+		if err := json.Unmarshal(linkedAttachments, &tr.LinkedAttachments); err != nil {
 			return nil, fmt.Errorf("unmarshal \"linked_attachments\" failed: %s", err.Error())
 		}
 
-		if err := json.Unmarshal(md, &tr.Modified); err != nil {
+		if err := json.Unmarshal(modified, &tr.Modified); err != nil {
 			return nil, fmt.Errorf("unmarshal \"modified\" failed: %s", err.Error())
 		}
 
@@ -98,20 +98,20 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 
 	tr := &TroubleReport{}
 
-	la := []byte{}
-	md := []byte{}
+	linkedAttachments := []byte{}
+	modified := []byte{}
 
-	err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &la, &md)
+	err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &linkedAttachments, &modified)
 	if err != nil {
 		return nil, fmt.Errorf("scan data from database: %s", err.Error())
 	}
 
-	err = json.Unmarshal(la, &tr.LinkedAttachments)
+	err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal \"linked_attachments\" from database: %s", err.Error())
 	}
 
-	err = json.Unmarshal(md, &tr.Modified)
+	err = json.Unmarshal(modified, &tr.Modified)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal \"modified\" from database: %s", err.Error())
 	}
@@ -122,17 +122,17 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
 
-	md, err := json.Marshal(tr.Modified)
+	modified, err := json.Marshal(tr.Modified)
 	if err != nil {
 		return fmt.Errorf("marshal \"modified\" failed: %s", err.Error())
 	}
 
-	la, err := json.Marshal(tr.LinkedAttachments)
+	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
 		return fmt.Errorf("marshal \"linked_attachments\" failed: %s", err.Error())
 	}
 
-	_, err = db.db.Exec(query, tr.Title, tr.Content, la, md)
+	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modified)
 	return err
 }
 
@@ -142,17 +142,17 @@ func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
 		tr.ID,
 	)
 
-	md, err := json.Marshal(tr.Modified)
+	modified, err := json.Marshal(tr.Modified)
 	if err != nil {
 		return fmt.Errorf("marshal \"modified\" to JSON: %s", err.Error())
 	}
 
-	la, err := json.Marshal(tr.LinkedAttachments)
+	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
 		return fmt.Errorf("marshal \"linked_attachments\" to JSON: %s", err.Error())
 	}
 
-	_, err = db.db.Exec(query, tr.Title, tr.Content, la, md)
+	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modified)
 	return err
 }
 
