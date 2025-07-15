@@ -138,8 +138,8 @@ func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 
 func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
 	query := fmt.Sprintf(
-		`UPDATE ... SET title = ?, content = ?, linked_attachments = ?, mondified = ? WHERE id=%d`,
-		tr.ID,
+		`UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id=%d`,
+		id,
 	)
 
 	modified, err := json.Marshal(tr.Modified)
