@@ -8,10 +8,12 @@ type DBFeeds struct {
 
 func NewDBFeeds(db *sql.DB) *DBFeeds {
 	query := `
-		CREATE TABLE IF NOT EXISTS trouble_reports (
+		DROP TABLE IF EXISTS feeds;
+		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
 			content TEXT NOT NULL,
+			data BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
