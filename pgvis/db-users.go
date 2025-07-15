@@ -24,14 +24,14 @@ func NewUser(telegramID int64, userName string, apiKey string) *User {
 	}
 }
 
-func (u *User) IsAdmin(telegramID int64) bool {
+func (u *User) IsAdmin() bool {
 	// TODO: Check if user is an admin somehow, not implemented yet. The
 	// 		 following is just a provisorium
 	return slices.Contains(
 		strings.Split(
 			os.Getenv("ADMINS"), ",",
 		),
-		strconv.Itoa(int(telegramID)),
+		strconv.Itoa(int(u.TelegramID)),
 	)
 }
 
