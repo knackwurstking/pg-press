@@ -223,10 +223,6 @@ func trDataGET(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		)
 	}
 
-	for _, tr := range trs {
-		log.Debugf("tr=%#v", tr)
-	}
-
 	t, err := template.ParseFS(templates, "templates/trouble-reports/data.html")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -254,7 +250,7 @@ func trDataDELETE(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		)
 	}
 
-	user, ok := c.Get("user").(pgvis.User)
+	user, ok := c.Get("user").(*pgvis.User)
 	if !ok {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
