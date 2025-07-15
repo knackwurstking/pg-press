@@ -13,7 +13,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type DataPageData struct {
+	TroubleReports []*pgvis.TroubleReport
+	IsAdmin        bool
+}
+
 func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
+	user, herr := handler.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
 	trs, err := db.TroubleReports.List()
 	if err != nil {
 		return echo.NewHTTPError(
@@ -27,7 +37,10 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if err = t.Execute(c.Response(), trs); err != nil {
+	if err = t.Execute(c.Response(), DataPageData{
+		TroubleReports: trs,
+		IsAdmin: user.IsAdmin(),
+	}); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -54,7 +67,7 @@ func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return herr
 	}
 
-	if user.IsAdmin(user.TelegramID) {
+	if user.IsAdmin() {
 		log.Debugf(
 			"User %d (%s) is deleting the trouble report %d",
 			user.TelegramID, user.UserName, id,

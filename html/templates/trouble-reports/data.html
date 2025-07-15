@@ -1,4 +1,6 @@
-{{if ne (len .) 0}}
+{{$data := .}}
+
+{{if ne (len $data.TroubleReports) 0}}
 <ul id="data">
     <style>
         pre {
@@ -6,10 +8,10 @@
         }
     </style>
 
-    {{range $troubleReport := .}}
+    {{range $tr := $data.TroubleReports}}
     <details style="margin: var(--ui-spacing) auto;" class="data">
-        <summary>{{$troubleReport.Title}}</summary>
-        <pre>{{$troubleReport.Content}}</pre>
+        <summary>{{$tr.Title}}</summary>
+        <pre>{{$tr.Content}}</pre>
     </details>
 
     <!-- TODO: Attach some kind of an Action container to the bottom.
@@ -18,7 +20,7 @@
     <div class="actions flex row gap justify-end align-center">
 
         <button
-            hx-get="./trouble-reports/dialog-edit?id={{$troubleReport.ID}}"
+            hx-get="./trouble-reports/dialog-edit?id={{$tr.ID}}"
             hx-trigger="click"
             hx-target="#dialogEdit"
             hx-swap="outerHTML"
@@ -28,11 +30,12 @@
         </button>
 
         <button
-            hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
+            hx-delete="./trouble-reports/data?id={{$tr.ID}}"
             hx-trigger="click"
             hx-target="#data"
             hx-swap="outerHTML"
             class="ghost destructive icon"
+            {{if not $data.IsAdmin}}disabled{{end}}
         >
             <i class="bi bi-trash"></i>
         </button>
