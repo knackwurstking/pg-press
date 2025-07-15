@@ -9,7 +9,7 @@ type Feed[T any] struct {
 	Data    T
 }
 
-func (f *Feed[T]) DataToSQLBlob() []byte {
+func (f *Feed[T]) DataToJSON() []byte {
 	b, err := json.Marshal(f)
 	if err != nil {
 		panic(err)
@@ -17,8 +17,8 @@ func (f *Feed[T]) DataToSQLBlob() []byte {
 	return b
 }
 
-func (f *Feed[T]) SQLBlobToData(b []byte) {
-	err := json.Unmarshal(b, f)
+func (f *Feed[T]) JSONToData(b []byte) {
+	err := json.Unmarshal(b, f.Data)
 	if err != nil {
 		panic(err)
 	}
