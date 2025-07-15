@@ -92,7 +92,7 @@ func trDialogEditGET(c echo.Context, db *pgvis.DB, pageData *TRDialogEdit) *echo
 		pageData.Submitted = true
 	}
 
-	if !pageData.Submitted {
+	if !pageData.Submitted && (!pageData.InvalidTitle && !pageData.InvalidContent) {
 		if id, err := strconv.Atoi(c.QueryParam("id")); err == nil {
 			if id > 0 {
 				log.Debugf("Get database entry with id %d", id)
@@ -169,8 +169,6 @@ func trDialogEditPOST(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 }
 
 func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	dialogEditData := &TRDialogEdit{Submitted: true}
-
 	id, err := strconv.Atoi(c.QueryParam("id"))
 	if err != nil || id <= 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
@@ -186,10 +184,14 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
 	}
 
-	dialogEditData.Title = title
-	dialogEditData.Content = content
-	dialogEditData.InvalidTitle = title == ""
-	dialogEditData.InvalidContent = content == ""
+	dialogEditData := &TRDialogEdit{
+		Submitted: true,
+		ID: id,
+		Title: title,
+		Content: content,
+		InvalidTitle: title == "",
+		InvalidContent: content == "",
+	}
 
 	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
 		log.Debugf("Update database entry with id %d: title=%#v; content=%#v", id, title, content)
@@ -197,11 +199,11 @@ func trDialogEditPUT(c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
 		trNew := pgvis.NewTroubleReport(modified, title, content)
 
-		// Need to pass to old data to the modifieds original field
+		// Need to pass to old data to the modified original field
 		if trOld, err := db.TroubleReports.Get(int64(id)); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		} else {
-			trNew.Modified.Original = trOld
+			modified.Original = trOld
 		}
 
 		if err = db.TroubleReports.Update(int64(id), trNew); err != nil {
