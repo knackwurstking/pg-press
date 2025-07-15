@@ -4,6 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"slices"
+	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -18,6 +22,17 @@ func NewUser(telegramID int64, userName string, apiKey string) *User {
 		UserName:   userName,
 		ApiKey:     apiKey,
 	}
+}
+
+func (u *User) IsAdmin(telegramID int64) bool {
+	// TODO: Check if user is an admin somehow, not implemented yet. The
+	// 		 following is just a provisorium
+	return slices.Contains(
+		strings.Split(
+			os.Getenv("ADMINS"), ",",
+		),
+		strconv.Itoa(int(telegramID)),
+	)
 }
 
 type DBUsers struct {
