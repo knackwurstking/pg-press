@@ -10,7 +10,7 @@ type Feed[T any] struct {
 }
 
 func (f *Feed[T]) DataToJSON() []byte {
-	b, err := json.Marshal(f)
+	b, err := json.Marshal(f.Data)
 	if err != nil {
 		panic(err)
 	}
@@ -18,7 +18,7 @@ func (f *Feed[T]) DataToJSON() []byte {
 }
 
 func (f *Feed[T]) JSONToData(b []byte) {
-	err := json.Unmarshal(b, f.Data)
+	err := json.Unmarshal(b, &f.Data)
 	if err != nil {
 		panic(err)
 	}

@@ -2,7 +2,6 @@ package pgvis
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 )
 
@@ -52,13 +51,8 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 			return nil, err
 		}
 
-		if err := json.Unmarshal(linkedAttachments, &tr.LinkedAttachments); err != nil {
-			return nil, fmt.Errorf("unmarshal \"linked_attachments\" failed: %s", err.Error())
-		}
-
-		if err := json.Unmarshal(modified, &tr.Modified); err != nil {
-			return nil, fmt.Errorf("unmarshal \"modified\" failed: %s", err.Error())
-		}
+		tr.JSONToLinkedAttachments(linkedAttachments)
+		tr.JSONToModified(modified)
 
 		trs = append(trs, &tr)
 	}
@@ -89,15 +83,8 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 		return nil, fmt.Errorf("scan data from database: %s", err.Error())
 	}
 
-	err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshal \"linked_attachments\" from database: %s", err.Error())
-	}
-
-	err = json.Unmarshal(modified, &tr.Modified)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshal \"modified\" from database: %s", err.Error())
-	}
+	tr.JSONToLinkedAttachments(linkedAttachments)
+	tr.JSONToModified(modified)
 
 	return tr, nil
 }
@@ -105,17 +92,7 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 func (db *DBTroubleReports) Add(tr *TroubleReport) error {
 	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
 
-	modified, err := json.Marshal(tr.Modified)
-	if err != nil {
-		return fmt.Errorf("marshal \"modified\" failed: %s", err.Error())
-	}
-
-	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
-	if err != nil {
-		return fmt.Errorf("marshal \"linked_attachments\" failed: %s", err.Error())
-	}
-
-	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modified)
+	_, err := db.db.Exec(query, tr.Title, tr.Content, tr.LinkedAttachmentsToJSON(), tr.ModifiedToJSON())
 	return err
 }
 
@@ -125,17 +102,7 @@ func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
 		id,
 	)
 
-	modified, err := json.Marshal(tr.Modified)
-	if err != nil {
-		return fmt.Errorf("marshal \"modified\" to JSON: %s", err.Error())
-	}
-
-	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
-	if err != nil {
-		return fmt.Errorf("marshal \"linked_attachments\" to JSON: %s", err.Error())
-	}
-
-	_, err = db.db.Exec(query, tr.Title, tr.Content, linkedAttachments, modified)
+	_, err := db.db.Exec(query, tr.Title, tr.Content, tr.LinkedAttachmentsToJSON(), tr.ModifiedToJSON())
 	return err
 }
 

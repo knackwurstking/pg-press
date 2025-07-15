@@ -20,7 +20,7 @@ func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *Troub
 }
 
 func (tr *TroubleReport) LinkedAttachmentsToJSON() []byte {
-	data, err := json.Marshal(tr)
+	data, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +28,22 @@ func (tr *TroubleReport) LinkedAttachmentsToJSON() []byte {
 }
 
 func (tr *TroubleReport) JSONToLinkedAttachments(b []byte) {
-	err := json.Unmarshal(b, tr.LinkedAttachments)
+	err := json.Unmarshal(b, &tr.LinkedAttachments)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (tr *TroubleReport) ModifiedToJSON() []byte {
+	data, err := json.Marshal(tr.Modified)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func (tr *TroubleReport) JSONToModified(b []byte) {
+	err := json.Unmarshal(b, &tr.Modified)
 	if err != nil {
 		panic(err)
 	}
