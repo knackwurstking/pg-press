@@ -10,8 +10,6 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
-// NOTE: Maybe using RSS here, but can i do this with authorization?
-
 func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
 	e.GET(serverPathPrefix+"/feed", func(c echo.Context) error {
 		t, err := template.ParseFS(templates,
