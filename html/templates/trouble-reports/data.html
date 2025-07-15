@@ -29,6 +29,9 @@
 
         <button
             hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
+            hx-trigger="click"
+            hx-target="#dialogEdit"
+            hx-swap="outerHTML"
             class="ghost destructive icon"
         >
             <i class="bi bi-trash"></i>
