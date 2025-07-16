@@ -1,0 +1,22 @@
+{{if gt .Count 0}}
+<span
+    style="
+        position: absolute;
+        color: var(--ui-destructive);
+        background-color: var(--ui-destructive-text);
+        top: 0;
+        right: 0;
+        font-size: 0.65rem;
+        border-radius: 50%;
+    "
+    id="feedCounter"
+>
+    {{if gt .Count 9}}
+    9+
+    {{else}}
+    {{.Count}}
+    {{end}}
+</span>
+{{else}}
+<span id="feedCounter"></span>
+{{end}}

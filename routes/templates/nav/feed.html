@@ -1,7 +1,27 @@
 {{define "nav-feed"}}
 <!-- TODO: Add count of unread feeds, just like YouTube. Use HTMX for this.
            Maybe using websockets for this, update the icon bell count, ... -->
-<a role="button" class="ghost primary icon" href="./feed">
+<a
+    hx-get="./nav/feed-counter"
+    hx-trigger="load"
+    hx-target="#feedCounter"
+    hx-swap="outerHTML"
+    role="button"
+    class="ghost primary icon"
+    href="./feed"
+>
     <i class="bi bi-bell"></i>
+    <span
+        style="
+            position: absolute;
+            color: var(--ui-destructive);
+            background-color: var(--ui-destructive-text);
+            top: 0;
+            right: 0;
+            font-size: 0.65rem;
+            border-radius: 50%;
+        "
+        id="feedCounter"
+    ></span>
 </a>
 {{end}}
