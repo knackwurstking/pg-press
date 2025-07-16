@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pg-vis/html"
+
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes"
 )
 
 func removeCookiesCommand() cli.Command {
@@ -71,7 +72,7 @@ func autoCleanCookiesCommand() cli.Command {
 					return err
 				}
 
-				t := time.Now().Add(0 - html.CookieExpirationDuration).UnixMilli()
+				t := time.Now().Add(0 - routes.CookieExpirationDuration).UnixMilli()
 				isExpired := func(cookie *pgvis.Cookie) bool {
 					return t >= cookie.LastLogin
 				}

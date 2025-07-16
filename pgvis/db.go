@@ -6,18 +6,18 @@ import (
 
 // DB contains all database tables
 type DB struct {
-	Users          *DBUsers
+	Users          *Users
 	Cookies        *Cookies
-	TroubleReports *DBTroubleReports
+	TroubleReports *TroubleReports
 
 	db *sql.DB
 }
 
 func New(db *sql.DB) *DB {
 	return &DB{
-		Users:          NewDBUsers(db),
+		Users:          NewUsers(db),
 		Cookies:        NewCookies(db),
-		TroubleReports: NewDBTroubleReports(db),
+		TroubleReports: NewTroubleReports(db),
 		db:             db,
 	}
 }

@@ -25,5 +25,5 @@ func openDB(customPath string) (*pgvis.DB, error) {
 		return nil, err
 	}
 
-	return pgvis.NewDB(db), nil
+	return pgvis.New(db), nil
 }

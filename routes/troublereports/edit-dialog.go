@@ -12,8 +12,8 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/html/handler"
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
 type EditDialogPageData struct {
@@ -83,7 +83,7 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	dialogEditData := &EditDialogPageData{Submitted: true}
 
-	user, herr := handler.GetUserFromContext(c)
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
@@ -123,7 +123,7 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
 	}
 
-	user, herr := handler.GetUserFromContext(c)
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}

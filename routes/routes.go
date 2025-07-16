@@ -1,4 +1,4 @@
-package html
+package routes
 
 import (
 	"embed"
@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/html/handler/feed"
-	"github.com/knackwurstking/pg-vis/html/handler/profile"
-	"github.com/knackwurstking/pg-vis/html/handler/troublereports"
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/feed"
+	"github.com/knackwurstking/pg-vis/routes/profile"
+	"github.com/knackwurstking/pg-vis/routes/troublereports"
 )
 
 const (

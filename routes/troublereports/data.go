@@ -8,9 +8,10 @@ import (
 	"strconv"
 
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/html/handler"
-	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
 type DataPageData struct {
@@ -19,7 +20,7 @@ type DataPageData struct {
 }
 
 func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	user, herr := handler.GetUserFromContext(c)
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
@@ -39,7 +40,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	if err = t.Execute(c.Response(), DataPageData{
 		TroubleReports: trs,
-		IsAdmin: user.IsAdmin(),
+		IsAdmin:        user.IsAdmin(),
 	}); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -62,7 +63,7 @@ func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		)
 	}
 
-	user, herr := handler.GetUserFromContext(c)
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}

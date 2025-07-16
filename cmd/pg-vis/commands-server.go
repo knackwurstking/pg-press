@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/html"
+	"github.com/knackwurstking/pg-vis/routes"
 )
 
 func serverCommand() cli.Command {
@@ -74,7 +74,7 @@ func serverCommand() cli.Command {
 					c.JSON(code, message)
 				}
 
-				html.Serve(e, html.Options{
+				routes.Serve(e, routes.Options{
 					ServerPathPrefix: serverPathPrefix,
 					DB:               db,
 				})

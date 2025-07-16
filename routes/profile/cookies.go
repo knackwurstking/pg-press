@@ -9,12 +9,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/html/handler"
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
 func GETCookies(templates fs.FS, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	user, herr := handler.GetUserFromContext(ctx)
+	user, herr := utils.GetUserFromContext(ctx)
 	if herr != nil {
 		return herr
 	}

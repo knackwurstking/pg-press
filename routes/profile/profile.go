@@ -7,37 +7,34 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/knackwurstking/pg-vis/html/handler"
-	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
-type ProfilePageData struct {
+type Profile struct {
 	User    *pgvis.User
 	Cookies []*pgvis.Cookie
 }
 
-func NewProfilePageData() ProfilePageData {
-	return ProfilePageData{
-		Cookies: make([]*pgvis.Cookie, 0),
-	}
-}
-
-func (p ProfilePageData) CookiesSorted() []*pgvis.Cookie {
+func (p *Profile) CookiesSorted() []*pgvis.Cookie {
 	return pgvis.SortCookies(p.Cookies)
 }
 
 func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
 	e.GET(serverPathPrefix+"/profile", func(c echo.Context) error {
-		pageData := NewProfilePageData()
+		pageData := &Profile{
+			Cookies: []*pgvis.Cookie{},
+		}
 
-		if user, err := handler.GetUserFromContext(c); err != nil {
+		if user, err := utils.GetUserFromContext(c); err != nil {
 			return err
 		} else {
 			pageData.User = user
 		}
 
-		if err := handleUserNameChange(c, &pageData, db); err != nil {
+		if err := handleUserNameChange(c, pageData, db); err != nil {
 			return echo.NewHTTPError(
 				http.StatusInternalServerError,
 				fmt.Errorf("change username: %s", err.Error()),
@@ -76,7 +73,7 @@ func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB)
 	})
 }
 
-func handleUserNameChange(ctx echo.Context, pageData *ProfilePageData, db *pgvis.DB) error {
+func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) error {
 	v, err := ctx.FormParams()
 	userName := v.Get("user-name")
 

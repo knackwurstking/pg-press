@@ -13,8 +13,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/knackwurstking/pg-vis/html"
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes"
 )
 
 var (
@@ -39,6 +39,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${custom} ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
 		Output: os.Stderr,
+
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
 			t := time.Now()
 			buf.Write(fmt.Appendf(nil,
@@ -54,8 +55,11 @@ func middlewareLogger() echo.MiddlewareFunc {
 
 func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper:    keyAuthSkipper,
-		KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + html.CookieName,
+		Skipper: keyAuthSkipper,
+
+		KeyLookup: "header:" + echo.HeaderAuthorization +
+			",query:access_token,cookie:" + routes.CookieName,
+
 		AuthScheme: "Bearer",
 
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
@@ -86,7 +90,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 
 	user, err := db.Users.GetUserFromApiKey(auth)
 	if err != nil {
-		if cookie, err := ctx.Cookie(html.CookieName); err == nil {
+		if cookie, err := ctx.Cookie(routes.CookieName); err == nil {
 			if c, err := db.Cookies.Get(cookie.Value); err != nil {
 				return false, nil
 			} else {
@@ -103,7 +107,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 					c.LastLogin = time.Now().UnixMilli()
 
 					// Update expiration for the browser cookie
-					cookie.Expires = time.Now().Add(html.CookieExpirationDuration)
+					cookie.Expires = time.Now().Add(routes.CookieExpirationDuration)
 
 					if err := db.Cookies.Update(c.Value, c); err != nil {
 						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
