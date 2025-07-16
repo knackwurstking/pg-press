@@ -31,7 +31,7 @@ func NewUsers(db *sql.DB) *Users {
 func (db *Users) List() ([]*User, error) {
 	users := []*User{}
 
-	query := `SELECT * FROM users ORDER BY telegram_id ASC`
+	query := `SELECT * FROM users`
 	r, err := db.db.Query(query)
 	if err != nil {
 		return users, err

@@ -34,7 +34,7 @@ func NewCookies(db *sql.DB) *Cookies {
 func (db *Cookies) List() ([]*Cookie, error) {
 	cookies := []*Cookie{}
 
-	query := `SELECT * FROM cookies ORDER BY last_login ASC`
+	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	r, err := db.db.Query(query)
 	if err != nil {
 		return cookies, err
