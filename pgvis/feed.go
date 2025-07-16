@@ -2,6 +2,7 @@ package pgvis
 
 import "encoding/json"
 
+// TODO: How to add user specific stuff to feeds?
 type Feed[T any] struct {
 	ID      int
 	Time    int64 // Time contains an UNIX millisecond timestamp
