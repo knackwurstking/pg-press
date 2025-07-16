@@ -3,7 +3,7 @@
 {{if ne (len $data.Feeds) 0}}
 <ul id="data">
     {{range $feed := $data.Feeds}}
-        {{$data.HTML $feed}}
+        {{$data.Render $feed}}
     {{end}}
 </ul>
 {{else}}

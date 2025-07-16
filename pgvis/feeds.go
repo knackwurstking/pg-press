@@ -55,16 +55,9 @@ func (f *Feeds) ListRange(from int, count int) ([]*Feed, error) {
 }
 
 func (f *Feeds) Add(feed *Feed) error {
-	if r, err := f.db.Query("select * from feeds where id = ?", feed.ID); err == nil {
-		r.Close()
-		if !r.Next() {
-			return ErrAlreadyExists
-		}
-	}
-
 	_, err := f.db.Exec(
-		"INSERT INTO feeds (id, time, main, cache) VALUES (?, ?, ?, ?)",
-		feed.ID, feed.Time, feed.Main, feed.Cache,
+		"INSERT INTO feeds (time, main, cache) VALUES (?, ?, ?)",
+		feed.Time, feed.Main, feed.CacheToJSON(),
 	)
 	return err
 }
