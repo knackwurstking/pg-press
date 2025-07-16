@@ -35,7 +35,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		Feeds: make([]*pgvis.Feed, 0),
 	}
 
-	feeds, err := db.Feeds.ListRange(0, 100)
+	feeds, err := db.Feeds.List()
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
