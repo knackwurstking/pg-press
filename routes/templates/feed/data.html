@@ -2,6 +2,16 @@
 
 {{if ne (len $data.Feeds) 0}}
 <ul id="data">
+    <style>
+        footer {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            gap: var(--ui-spacing);
+        }
+    </style>
+
     {{range $feed := $data.Feeds}}
         {{$data.Render $feed}}
     {{end}}

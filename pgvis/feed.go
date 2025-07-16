@@ -45,14 +45,14 @@ func NewUserAddFeed(userName string) *Feed {
 
 func NewUserRemoveFeed(userName string) *Feed {
 	return NewFeed(
-		fmt.Sprintf(`<p>User %s Removed</p>`, userName),
+		fmt.Sprintf(`<p>%s Kicked!</p>`, userName),
 		nil,
 	)
 }
 
 func NewUserNameChangeFeed(old, new string) *Feed {
 	return NewFeed(
-		fmt.Sprintf(`<p>User changed name from %s to %s</p>`, old, new),
+		fmt.Sprintf(`<p>User name changed from %s to %s</p>`, old, new),
 		nil,
 	)
 }

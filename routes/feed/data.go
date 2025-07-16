@@ -16,15 +16,17 @@ type Data struct {
 	Feeds []*pgvis.Feed
 }
 
-func (d *Data) Render(f *pgvis.Feed) (html string) {
-	return fmt.Sprintf(
-		`<article id="feed%d">
-			<main>%s</main>
-			<footer>%s</footer>
-		</article>`,
-		f.ID,
-		f.Main,
-		time.UnixMilli(f.Time).Local().String(),
+func (d *Data) Render(f *pgvis.Feed) template.HTML {
+	return template.HTML(
+		fmt.Sprintf(
+			`<article id="feed%d">
+         		<main>%s</main>
+         		<footer><small>%s<small></footer>
+          	</article>`,
+			f.ID,
+			f.Main,
+			time.UnixMilli(f.Time).Local().String(),
+		),
 	)
 }
 
