@@ -10,7 +10,6 @@ type Feeds struct {
 
 func NewFeeds(db *sql.DB) *Feeds {
 	query := `
-		DROP TABLE IF EXISTS feeds;
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,

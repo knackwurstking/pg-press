@@ -21,7 +21,7 @@ func (d *Data) Render(f *pgvis.Feed) template.HTML {
 		fmt.Sprintf(
 			`<article id="feed%d">
          		<main>%s</main>
-         		<footer><small>%s<small></footer>
+         		<footer><small>%s</small></footer>
           	</article>`,
 			f.ID,
 			f.Main,
@@ -35,7 +35,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		Feeds: make([]*pgvis.Feed, 0),
 	}
 
-	feeds, err := db.Feeds.List()
+	feeds, err := db.Feeds.ListRange(0, 100)
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
