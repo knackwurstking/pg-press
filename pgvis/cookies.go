@@ -7,11 +7,11 @@ import (
 	"slices"
 )
 
-type DBCookies struct {
+type Cookies struct {
 	db *sql.DB
 }
 
-func NewDBCookies(db *sql.DB) *DBCookies {
+func NewCookies(db *sql.DB) *Cookies {
 	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
@@ -26,12 +26,12 @@ func NewDBCookies(db *sql.DB) *DBCookies {
 		panic(err)
 	}
 
-	return &DBCookies{
+	return &Cookies{
 		db: db,
 	}
 }
 
-func (db *DBCookies) List() ([]*Cookie, error) {
+func (db *Cookies) List() ([]*Cookie, error) {
 	cookies := []*Cookie{}
 
 	query := `SELECT * FROM cookies ORDER BY last_login ASC`
@@ -56,7 +56,7 @@ func (db *DBCookies) List() ([]*Cookie, error) {
 	return cookies, nil
 }
 
-func (db *DBCookies) ListApiKey(apiKey string) ([]*Cookie, error) {
+func (db *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 	cookies := []*Cookie{}
 
 	query := fmt.Sprintf(`SELECT * FROM cookies WHERE api_key="%s"`, apiKey)
@@ -80,7 +80,7 @@ func (db *DBCookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 	return cookies, nil
 }
 
-func (db *DBCookies) Get(value string) (*Cookie, error) {
+func (db *Cookies) Get(value string) (*Cookie, error) {
 	query := fmt.Sprintf(`SELECT * FROM cookies WHERE value="%s"`, value)
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -103,7 +103,7 @@ func (db *DBCookies) Get(value string) (*Cookie, error) {
 	return cookie, nil
 }
 
-func (db *DBCookies) Add(cookie *Cookie) error {
+func (db *Cookies) Add(cookie *Cookie) error {
 	if cookie.Value == "" {
 		return errors.New("cookie \"Value\" cannot be empty")
 	}
@@ -133,7 +133,7 @@ func (db *DBCookies) Add(cookie *Cookie) error {
 	return err
 }
 
-func (db *DBCookies) Update(value string, cookie *Cookie) error {
+func (db *Cookies) Update(value string, cookie *Cookie) error {
 	if cookie.Value == "" {
 		return errors.New("cookie \"Value\" cannot be empty")
 	}
@@ -147,7 +147,7 @@ func (db *DBCookies) Update(value string, cookie *Cookie) error {
 	return err
 }
 
-func (db *DBCookies) Remove(value string) error {
+func (db *Cookies) Remove(value string) error {
 	query := fmt.Sprintf(
 		`DELETE FROM cookies WHERE value = "%s"`,
 		value,
@@ -157,7 +157,7 @@ func (db *DBCookies) Remove(value string) error {
 	return err
 }
 
-func (db *DBCookies) RemoveApiKey(apiKey string) error {
+func (db *Cookies) RemoveApiKey(apiKey string) error {
 	query := fmt.Sprintf(
 		`DELETE FROM cookies WHERE api_key = "%s"`,
 		apiKey,

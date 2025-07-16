@@ -6,11 +6,11 @@ import (
 	"fmt"
 )
 
-type DBUsers struct {
+type Users struct {
 	db *sql.DB
 }
 
-func NewDBUsers(db *sql.DB) *DBUsers {
+func NewUsers(db *sql.DB) *Users {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			"telegram_id" INTEGER NOT NULL,
@@ -23,12 +23,12 @@ func NewDBUsers(db *sql.DB) *DBUsers {
 		panic(err)
 	}
 
-	return &DBUsers{
+	return &Users{
 		db: db,
 	}
 }
 
-func (db *DBUsers) List() ([]*User, error) {
+func (db *Users) List() ([]*User, error) {
 	users := []*User{}
 
 	query := `SELECT * FROM users ORDER BY telegram_id ASC`
@@ -53,7 +53,7 @@ func (db *DBUsers) List() ([]*User, error) {
 	return users, nil
 }
 
-func (db *DBUsers) Get(telegramID int64) (*User, error) {
+func (db *Users) Get(telegramID int64) (*User, error) {
 	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -76,7 +76,7 @@ func (db *DBUsers) Get(telegramID int64) (*User, error) {
 	return user, nil
 }
 
-func (db *DBUsers) GetUserFromApiKey(apiKey string) (*User, error) {
+func (db *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key="%s"`, apiKey)
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -99,7 +99,7 @@ func (db *DBUsers) GetUserFromApiKey(apiKey string) (*User, error) {
 	return user, nil
 }
 
-func (db *DBUsers) Add(user *User) error {
+func (db *Users) Add(user *User) error {
 	if user.TelegramID == 0 {
 		return errors.New("Telegram ID cannot be 0")
 	}
@@ -134,7 +134,7 @@ func (db *DBUsers) Add(user *User) error {
 	return err
 }
 
-func (db *DBUsers) Remove(telegramID int64) error {
+func (db *Users) Remove(telegramID int64) error {
 	query := fmt.Sprintf(
 		`DELETE FROM users WHERE telegram_id = "%d"`,
 		telegramID,
@@ -144,7 +144,7 @@ func (db *DBUsers) Remove(telegramID int64) error {
 	return err
 }
 
-func (db *DBUsers) Update(telegramID int64, user *User) error {
+func (db *Users) Update(telegramID int64, user *User) error {
 	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
 
 	r, err := db.db.Query(query)

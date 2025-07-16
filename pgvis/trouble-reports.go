@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-type DBTroubleReports struct {
+type TroubleReports struct {
 	db *sql.DB
 }
 
-func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
+func NewTroubleReports(db *sql.DB) *TroubleReports {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -25,12 +25,12 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 		panic(err)
 	}
 
-	return &DBTroubleReports{
+	return &TroubleReports{
 		db: db,
 	}
 }
 
-func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
+func (db *TroubleReports) List() ([]*TroubleReport, error) {
 	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -60,7 +60,7 @@ func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
 	return trs, nil
 }
 
-func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
+func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	query := fmt.Sprintf(`SELECT * FROM trouble_reports WHERE id = %d`, id)
 	r, err := db.db.Query(query)
 	if err != nil {
@@ -89,14 +89,14 @@ func (db *DBTroubleReports) Get(id int64) (*TroubleReport, error) {
 	return tr, nil
 }
 
-func (db *DBTroubleReports) Add(tr *TroubleReport) error {
+func (db *TroubleReports) Add(tr *TroubleReport) error {
 	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
 
 	_, err := db.db.Exec(query, tr.Title, tr.Content, tr.LinkedAttachmentsToJSON(), tr.ModifiedToJSON())
 	return err
 }
 
-func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
+func (db *TroubleReports) Update(id int64, tr *TroubleReport) error {
 	query := fmt.Sprintf(
 		`UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id=%d`,
 		id,
@@ -106,7 +106,7 @@ func (db *DBTroubleReports) Update(id int64, tr *TroubleReport) error {
 	return err
 }
 
-func (db *DBTroubleReports) Remove(id int64) error {
+func (db *TroubleReports) Remove(id int64) error {
 	query := fmt.Sprintf(
 		`DELETE FROM trouble_reports WHERE id = %d`,
 		id,

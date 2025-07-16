@@ -2,11 +2,11 @@ package pgvis
 
 import "database/sql"
 
-type DBFeeds struct {
+type Feeds struct {
 	db *sql.DB
 }
 
-func NewDBFeeds(db *sql.DB) *DBFeeds {
+func NewFeeds(db *sql.DB) *Feeds {
 	query := `
 		DROP TABLE IF EXISTS feeds;
 		CREATE TABLE IF NOT EXISTS feeds (
@@ -21,7 +21,7 @@ func NewDBFeeds(db *sql.DB) *DBFeeds {
 		panic(err)
 	}
 
-	return &DBFeeds{
+	return &Feeds{
 		db: db,
 	}
 }
