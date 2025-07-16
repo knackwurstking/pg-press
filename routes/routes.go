@@ -13,6 +13,7 @@ import (
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/feed"
+	"github.com/knackwurstking/pg-vis/routes/nav"
 	"github.com/knackwurstking/pg-vis/routes/profile"
 	"github.com/knackwurstking/pg-vis/routes/troublereports"
 )
@@ -45,6 +46,8 @@ func Serve(e *echo.Echo, o Options) {
 
 	profile.Serve(templates, o.ServerPathPrefix, e, o.DB)
 	troublereports.Serve(templates, o.ServerPathPrefix, e, o.DB)
+
+	nav.Serve(templates, o.ServerPathPrefix, e, o.DB)
 }
 
 func serveHome(e *echo.Echo, options Options) {

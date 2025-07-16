@@ -26,7 +26,7 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 	// TODO: Get number of feeds the user has not viewed yet
 	data.Count = 1 // Just for testing
 
-	t, err := template.ParseFS(templates, "templates/feed/data.html")
+	t, err := template.ParseFS(templates, "templates/nav/feed-counter.html")
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
