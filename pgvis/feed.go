@@ -21,6 +21,21 @@ func NewFeed(main string, cache any) *Feed {
 	}
 }
 
+func (f *Feed) CacheToJSON() []byte {
+	b, err := json.Marshal(f.Cache)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (f *Feed) JSONToCache(b []byte) {
+	err := json.Unmarshal(b, &f.Cache)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func NewUserAddFeed(userName string) *Feed {
 	return NewFeed(
 		fmt.Sprintf(`<p>New user: %s</p>`, userName),
@@ -40,19 +55,4 @@ func NewUserNameChangeFeed(old, new string) *Feed {
 		fmt.Sprintf(`<p>User changed name from %s to %s</p>`, old, new),
 		nil,
 	)
-}
-
-func (f *Feed) CacheToJSON() []byte {
-	b, err := json.Marshal(f.Cache)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-func (f *Feed) JSONToCache(b []byte) {
-	err := json.Unmarshal(b, &f.Cache)
-	if err != nil {
-		panic(err)
-	}
 }
