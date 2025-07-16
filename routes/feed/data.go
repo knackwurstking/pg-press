@@ -40,15 +40,19 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		Feeds: make([]*pgvis.Feed, 0),
 	}
 
-	// TODO: List the last 100 feeds from the database
+	feeds, err := db.Feeds.ListRange(0, 100)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("list feeds from range 0..100: %s", err.Error()))
+	}
+	data.Feeds = feeds
 
 	t, err := template.ParseFS(templates, "templates/feed/cookies.html")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err.Error()))
 	}
 
 	if err := t.Execute(c.Response(), data); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %s", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %s", err.Error()))
 	}
 
 	return nil
