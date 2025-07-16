@@ -9,6 +9,7 @@ type DB struct {
 	Users          *Users
 	Cookies        *Cookies
 	TroubleReports *TroubleReports
+	Feeds          *Feeds
 
 	db *sql.DB
 }
@@ -18,6 +19,7 @@ func New(db *sql.DB) *DB {
 		Users:          NewUsers(db),
 		Cookies:        NewCookies(db),
 		TroubleReports: NewTroubleReports(db),
+		Feeds:          NewFeeds(db),
 		db:             db,
 	}
 }
