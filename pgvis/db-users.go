@@ -126,6 +126,11 @@ func (db *DBUsers) Add(user *User) error {
 	)
 
 	_, err = db.db.Exec(query)
+
+	if err == nil {
+		// TODO: Create a new user feed
+	}
+
 	return err
 }
 

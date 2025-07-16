@@ -1,0 +1,11 @@
+{{$data := .}}
+
+{{if ne (len $data.Feeds) 0}}
+<ul id="data">
+    {{range $feed := $data.Feeds}}
+        {{$data.HTML $feed}}
+    {{end}}
+</ul>
+{{else}}
+<span id="data"></span>
+{{end}}

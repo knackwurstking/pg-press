@@ -12,7 +12,6 @@ func NewDBFeeds(db *sql.DB) *DBFeeds {
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
-			content TEXT NOT NULL,
 			data BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -26,3 +25,5 @@ func NewDBFeeds(db *sql.DB) *DBFeeds {
 		db: db,
 	}
 }
+
+// TODO: List method, allow count (from .. to)

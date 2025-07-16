@@ -1,16 +1,24 @@
 package pgvis
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
-// TODO: How to add user specific stuff to feeds?
-type Feed[T any] struct {
-	ID      int
-	Time    int64 // Time contains an UNIX millisecond timestamp
-	Content string
-	Data    T
+type Feed struct {
+	ID   int
+	Time int64 // Time contains an UNIX millisecond timestamp
+	Data any
 }
 
-func (f *Feed[T]) DataToJSON() []byte {
+func NewFeed(data any) *Feed {
+	return &Feed{
+		Time: time.Now().UnixMilli(),
+		Data: data,
+	}
+}
+
+func (f *Feed) DataToJSON() []byte {
 	b, err := json.Marshal(f.Data)
 	if err != nil {
 		panic(err)
@@ -18,7 +26,7 @@ func (f *Feed[T]) DataToJSON() []byte {
 	return b
 }
 
-func (f *Feed[T]) JSONToData(b []byte) {
+func (f *Feed) JSONToData(b []byte) {
 	err := json.Unmarshal(b, &f.Data)
 	if err != nil {
 		panic(err)

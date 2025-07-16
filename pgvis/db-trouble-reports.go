@@ -31,7 +31,7 @@ func NewDBTroubleReports(db *sql.DB) *DBTroubleReports {
 }
 
 func (db *DBTroubleReports) List() ([]*TroubleReport, error) {
-	query := `SELECT * FROM trouble_reports ORDER BY id ASC`
+	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
 	r, err := db.db.Query(query)
 	if err != nil {
 		return nil, err

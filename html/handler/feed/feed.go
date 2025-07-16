@@ -10,11 +10,11 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
+// TODO: Server side rendering feeds for user (Maybe just render the last 100 feeds from new to old), using HTMX
 // TODO: Websocket handler for the nav icon button count per user
 // TODO: Websocket handler for live feeds
 
 func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
-	// TODO: Server side rendering feeds for user
 	e.GET(serverPathPrefix+"/feed", func(c echo.Context) error {
 		t, err := template.ParseFS(templates,
 			"templates/layout.html",
@@ -30,5 +30,9 @@ func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB)
 		}
 
 		return nil
+	})
+
+	e.GET(serverPathPrefix+"/feed/data", func(c echo.Context) error {
+		return GETData(templates, c, db)
 	})
 }
