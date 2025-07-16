@@ -7,10 +7,11 @@ import (
 )
 
 type Users struct {
-	db *sql.DB
+	db    *sql.DB
+	feeds *Feeds
 }
 
-func NewUsers(db *sql.DB) *Users {
+func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			"telegram_id" INTEGER NOT NULL,
@@ -24,7 +25,8 @@ func NewUsers(db *sql.DB) *Users {
 	}
 
 	return &Users{
-		db: db,
+		db:    db,
+		feeds: feeds,
 	}
 }
 
@@ -127,24 +129,41 @@ func (db *Users) Add(user *User) error {
 
 	_, err = db.db.Exec(query)
 
+	// Feed...
 	if err == nil {
-		// TODO: Create a new user feed
+		feed := NewUserAddFeed(user.UserName)
+		if err := db.feeds.Add(feed); err != nil {
+			return fmt.Errorf("add new feed: %s", err.Error())
+		}
 	}
 
 	return err
 }
 
 func (db *Users) Remove(telegramID int64) error {
+	user, _ := db.Get(telegramID)
+
 	query := fmt.Sprintf(
 		`DELETE FROM users WHERE telegram_id = "%d"`,
 		telegramID,
 	)
 
 	_, err := db.db.Exec(query)
+
+	// Feed...
+	if err == nil && user != nil {
+		feed := NewUserRemoveFeed(user.UserName)
+		if err := db.feeds.Add(feed); err != nil {
+			return fmt.Errorf("add new feed: %s", err.Error())
+		}
+	}
+
 	return err
 }
 
 func (db *Users) Update(telegramID int64, user *User) error {
+	prevUser, _ := db.Get(telegramID)
+
 	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
 
 	r, err := db.db.Query(query)
@@ -164,5 +183,16 @@ func (db *Users) Update(telegramID int64, user *User) error {
 	)
 
 	_, err = db.db.Exec(query)
+
+	// Feed...
+	if err == nil && prevUser != nil {
+		if prevUser.UserName != user.UserName {
+			feed := NewUserNameChangeFeed(prevUser.UserName, user.UserName)
+			if err = db.feeds.Add(feed); err != nil {
+				return fmt.Errorf("add new feed: %s", err.Error())
+			}
+		}
+	}
+
 	return err
 }

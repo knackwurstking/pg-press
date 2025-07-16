@@ -16,23 +16,16 @@ type Data struct {
 	Feeds []*pgvis.Feed
 }
 
-func (d *Data) HTML(f *pgvis.Feed) (html string) {
-	switch v := f.Data.(type) {
-	case *pgvis.User:
-		return fmt.Sprintf(
-			`
-				<article id="feed%d">
-					<main><p>New user: %s</p></main>
-					<footer>%s</footer>
-				</article>
-			`,
-			f.ID,
-			v.UserName,
-			time.UnixMilli(f.Time).Local().String(),
-		)
-	default:
-		return ""
-	}
+func (d *Data) Render(f *pgvis.Feed) (html string) {
+	return fmt.Sprintf(
+		`<article id="feed%d">
+			<main>%s</main>
+			<footer>%s</footer>
+		</article>`,
+		f.ID,
+		f.Main,
+		time.UnixMilli(f.Time).Local().String(),
+	)
 }
 
 func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
@@ -42,17 +35,26 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	feeds, err := db.Feeds.ListRange(0, 100)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("list feeds from range 0..100: %s", err.Error()))
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("list feeds from range 0..100: %s", err.Error()),
+		)
 	}
 	data.Feeds = feeds
 
-	t, err := template.ParseFS(templates, "templates/feed/cookies.html")
+	t, err := template.ParseFS(templates, "templates/feed/data.html")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err.Error()))
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("template parsing failed: %s", err.Error()),
+		)
 	}
 
 	if err := t.Execute(c.Response(), data); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %s", err.Error()))
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("template executing failed: %s", err.Error()),
+		)
 	}
 
 	return nil

@@ -14,7 +14,8 @@ func NewFeeds(db *sql.DB) *Feeds {
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
-			data BLOB NOT NULL,
+			main TEXT NOT NULL,
+			cache BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -30,7 +31,7 @@ func NewFeeds(db *sql.DB) *Feeds {
 
 func (f *Feeds) List() ([]*Feed, error) {
 	r, err := f.db.Query(
-		"SELECT id, time, data FROM feeds ORDER BY id DESC",
+		"SELECT id, time, main, cache FROM feeds ORDER BY id DESC",
 	)
 	if err != nil {
 		return nil, err
@@ -42,28 +43,43 @@ func (f *Feeds) List() ([]*Feed, error) {
 
 func (f *Feeds) ListRange(from int, count int) ([]*Feed, error) {
 	r, err := f.db.Query(
-		"SELECT id, time, data FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?",
+		"SELECT id, time, main, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?",
 		count, from,
 	)
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
 
+	defer r.Close()
 	return f.scanAllRows(r)
+}
+
+func (f *Feeds) Add(feed *Feed) error {
+	if r, err := f.db.Query("select * from feeds where id = ?", feed.ID); err == nil {
+		r.Close()
+		if !r.Next() {
+			return ErrAlreadyExists
+		}
+	}
+
+	_, err := f.db.Exec(
+		"INSERT INTO feeds (id, time, main, cache) VALUES (?, ?, ?, ?)",
+		feed.ID, feed.Time, feed.Main, feed.Cache,
+	)
+	return err
 }
 
 func (f *Feeds) scanAllRows(r *sql.Rows) (feeds []*Feed, err error) {
 	feeds = []*Feed{}
 	for r.Next() {
 		f := &Feed{}
-		data := []byte{}
+		cache := []byte{}
 
-		if err = r.Scan(&f.ID, &f.Time, &data); err != nil {
+		if err = r.Scan(&f.ID, &f.Time, &f.Main, &cache); err != nil {
 			return nil, err
 		}
 
-		f.JSONToData(data)
+		f.JSONToCache(cache)
 		feeds = append(feeds, f)
 	}
 

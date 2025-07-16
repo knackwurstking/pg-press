@@ -15,11 +15,13 @@ type DB struct {
 }
 
 func New(db *sql.DB) *DB {
+	feeds := NewFeeds(db)
+
 	return &DB{
-		Users:          NewUsers(db),
+		Users:          NewUsers(db, feeds),
 		Cookies:        NewCookies(db),
 		TroubleReports: NewTroubleReports(db),
-		Feeds:          NewFeeds(db),
+		Feeds:          feeds,
 		db:             db,
 	}
 }
