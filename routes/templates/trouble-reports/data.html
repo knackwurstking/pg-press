@@ -7,7 +7,7 @@
     </style>
 
     {{range $tr := $data.TroubleReports}}
-    <details style="margin: var(--ui-spacing) auto" class="data">
+    <details id="trouble-report-{{$tr.ID}}" style="margin: var(--ui-spacing) auto" class="data">
         <summary>{{$tr.Title}}</summary>
         <pre>{{$tr.Content}}</pre>
     </details>
