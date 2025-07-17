@@ -202,7 +202,7 @@ func (tr *TroubleReport) AddAttachment(attachment *Attachment) error {
 // Returns:
 //   - error: Validation error if the index is invalid
 func (tr *TroubleReport) RemoveAttachment(index int) error {
-	if tr.LinkedAttachments == nil || len(tr.LinkedAttachments) == 0 {
+	if len(tr.LinkedAttachments) == 0 {
 		return NewValidationError("index", "no attachments to remove", index)
 	}
 
@@ -217,7 +217,7 @@ func (tr *TroubleReport) RemoveAttachment(index int) error {
 
 // HasAttachments returns true if the trouble report has any attachments.
 func (tr *TroubleReport) HasAttachments() bool {
-	return tr.LinkedAttachments != nil && len(tr.LinkedAttachments) > 0
+	return len(tr.LinkedAttachments) > 0
 }
 
 // AttachmentCount returns the number of attachments.
