@@ -1,8 +1,6 @@
 package profile
 
 import (
-	"errors"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -21,30 +19,30 @@ func GETCookies(templates fs.FS, ctx echo.Context, db *pgvis.DB) *echo.HTTPError
 
 	cookies, err := db.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("list cookies for api key failed: %s", err))
+		return utils.HandlePgvisError(ctx, err)
 	}
 	cookies = pgvis.SortCookies(cookies)
 
 	t, err := template.ParseFS(templates, "templates/profile/cookies.html")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template parsing failed: %s", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if err := t.Execute(ctx.Response(), cookies); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Errorf("template executing failed: %s", err))
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
 }
 
 func DELETECookies(templates fs.FS, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	value := ctx.QueryParam("value")
+	value := utils.SanitizeInput(ctx.QueryParam("value"))
 	if value == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.New("query \"value\" is missing"))
+		return echo.NewHTTPError(http.StatusBadRequest, "cookie value parameter is required")
 	}
 
 	if err := db.Cookies.Remove(value); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("removing cookie failed: %s", err))
+		return utils.HandlePgvisError(ctx, err)
 	}
 
 	return GETCookies(templates, ctx, db)

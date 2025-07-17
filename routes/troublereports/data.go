@@ -1,11 +1,9 @@
 package troublereports
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
-	"strconv"
 
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
@@ -27,10 +25,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	trs, err := db.TroubleReports.List()
 	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("list trouble-reports: %s", err.Error()),
-		)
+		return utils.HandlePgvisError(c, err)
 	}
 
 	t, err := template.ParseFS(templates, "templates/trouble-reports/data.html")
@@ -49,44 +44,30 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 }
 
 func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	id, err := strconv.Atoi(c.QueryParam("id"))
-	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("query param \"id\": %s", err.Error()),
-		)
-	}
-	if id <= 0 {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("invalid \"id\": cannot be 0 or lower"),
-		)
+	id, herr := utils.ParseRequiredIDQuery(c, "id")
+	if herr != nil {
+		return herr
 	}
 
+	// Check if user has admin privileges and get user info
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
 
-	if user.IsAdmin() {
-		log.Debugf(
-			"User %d (%s) is deleting the trouble report %d",
-			user.TelegramID, user.UserName, id,
-		)
-
-		if err := db.TroubleReports.Remove(int64(id)); err != nil {
-			return echo.NewHTTPError(
-				http.StatusBadRequest,
-				fmt.Errorf("invalid \"id\" %d: not found", id),
-			)
-		}
-	} else {
+	if !user.IsAdmin() {
 		// TODO: Voting system for deletion
-		log.Warnf(
-			"User %d (%s) not allowed for deletion. "+
-				"Voting system not implemented for now.",
-			user.TelegramID, user.UserName,
-		)
+		log.Warnf("Non-admin user attempted deletion. Voting system not implemented for now.")
+		return echo.NewHTTPError(http.StatusForbidden, "administrator privileges required")
+	}
+
+	log.Debugf(
+		"User %d (%s) is deleting the trouble report %d",
+		user.TelegramID, user.UserName, id,
+	)
+
+	if err := db.TroubleReports.Remove(id); err != nil {
+		return utils.HandlePgvisError(c, err)
 	}
 
 	return GETData(templates, c, db)

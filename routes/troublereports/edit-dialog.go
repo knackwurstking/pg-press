@@ -1,13 +1,10 @@
 package troublereports
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"net/url"
-	"strconv"
-	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
@@ -42,18 +39,16 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 	}
 
 	if !pageData.Submitted && (!pageData.InvalidTitle && !pageData.InvalidContent) {
-		if id, err := strconv.Atoi(c.QueryParam("id")); err == nil {
-			if id > 0 {
+		// Try to get ID from query parameters (optional)
+		if idStr := c.QueryParam("id"); idStr != "" {
+			if id, herr := utils.ParseRequiredIDQuery(c, "id"); herr == nil {
 				log.Debugf("Get database entry with id %d", id)
 
-				pageData.ID = id
+				pageData.ID = int(id)
 
-				tr, err := db.TroubleReports.Get(int64(id))
+				tr, err := db.TroubleReports.Get(id)
 				if err != nil {
-					return echo.NewHTTPError(
-						http.StatusBadRequest,
-						fmt.Errorf("no data: %s", err.Error()),
-					)
+					return utils.HandlePgvisError(c, err)
 				}
 				pageData.Title = tr.Title
 				pageData.Content = tr.Content
@@ -64,17 +59,11 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 
 	t, err := template.ParseFS(templates, "templates/trouble-reports/dialog-edit.html")
 	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template parsing failed: %s", err.Error()),
-		)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if err = t.Execute(c.Response(), pageData); err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template executing failed: %s", err.Error()),
-		)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
@@ -88,9 +77,9 @@ func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 		return herr
 	}
 
-	title, content, err := getTitleAndContent(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
+	title, content, herr := getTitleAndContent(c)
+	if herr != nil {
+		return herr
 	}
 
 	dialogEditData.Title = title
@@ -104,11 +93,8 @@ func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
 		tr := pgvis.NewTroubleReport(modified, title, content)
 
-		if err = db.TroubleReports.Add(tr); err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				fmt.Errorf("add data: %s", err.Error()),
-			)
+		if err := db.TroubleReports.Add(tr); err != nil {
+			return utils.HandlePgvisError(c, err)
 		}
 	} else {
 		dialogEditData.Submitted = false
@@ -118,9 +104,9 @@ func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 }
 
 func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	id, err := strconv.Atoi(c.QueryParam("id"))
-	if err != nil || id <= 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("invalid or missing id"))
+	id, herr := utils.ParseRequiredIDQuery(c, "id")
+	if herr != nil {
+		return herr
 	}
 
 	user, herr := utils.GetUserFromContext(c)
@@ -128,14 +114,14 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 		return herr
 	}
 
-	title, content, err := getTitleAndContent(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "query data: %s", err.Error())
+	title, content, herr := getTitleAndContent(c)
+	if herr != nil {
+		return herr
 	}
 
 	dialogEditData := &EditDialogPageData{
 		Submitted:      true,
-		ID:             id,
+		ID:             int(id),
 		Title:          title,
 		Content:        content,
 		InvalidTitle:   title == "",
@@ -149,14 +135,14 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 		trNew := pgvis.NewTroubleReport(modified, title, content)
 
 		// Need to pass to old data to the modified original field
-		if trOld, err := db.TroubleReports.Get(int64(dialogEditData.ID)); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if trOld, err := db.TroubleReports.Get(id); err != nil {
+			return utils.HandlePgvisError(c, err)
 		} else {
 			modified.Original = trOld
 		}
 
-		if err = db.TroubleReports.Update(int64(dialogEditData.ID), trNew); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		if err := db.TroubleReports.Update(id, trNew); err != nil {
+			return utils.HandlePgvisError(c, err)
 		}
 	} else {
 		dialogEditData.Submitted = false
@@ -165,24 +151,30 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 	return GETDialogEdit(templates, c, db, dialogEditData)
 }
 
-func getTitleAndContent(ctx echo.Context) (title, content string, err error) {
+func getTitleAndContent(ctx echo.Context) (title, content string, httpErr *echo.HTTPError) {
+	var err error
+
 	title, err = url.QueryUnescape(ctx.FormValue("title"))
 	if err != nil {
-		return title, content, echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("query unescape \"title\" failed: %s", err.Error()),
-		)
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "invalid title encoding")
 	}
-	title = strings.Trim(title, " \n\r\t")
+	title = utils.SanitizeInput(title)
 
 	content, err = url.QueryUnescape(ctx.FormValue("content"))
 	if err != nil {
-		return title, content, echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Errorf("query unescape \"content\" failed: %s", err.Error()),
-		)
+		return "", "", echo.NewHTTPError(http.StatusBadRequest, "invalid content encoding")
 	}
-	content = strings.Trim(content, " \n\r\t")
+	content = utils.SanitizeInput(content)
+
+	// Validate title length
+	if httpErr := utils.ValidateStringLength(title, "title", 1, 500); httpErr != nil {
+		return title, content, httpErr
+	}
+
+	// Validate content length
+	if httpErr := utils.ValidateStringLength(content, "content", 1, 50000); httpErr != nil {
+		return title, content, httpErr
+	}
 
 	return title, content, nil
 }

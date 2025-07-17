@@ -39,10 +39,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	{ // Create Feeds
 		feeds, err := db.Feeds.ListRange(0, 100)
 		if err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				fmt.Errorf("list feeds from range 0..100: %s", err.Error()),
-			)
+			return utils.HandlePgvisError(c, err)
 		}
 
 		data.Feeds = feeds
@@ -61,26 +58,17 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 		err := db.Users.Update(user.TelegramID, user)
 		if err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				fmt.Errorf("update user: %s", err.Error()),
-			)
+			return utils.HandlePgvisError(c, err)
 		}
 	}
 
 	t, err := template.ParseFS(templates, "templates/feed/data.html")
 	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template parsing: %s", err.Error()),
-		)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if err = t.Execute(c.Response(), data); err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template executing: %s", err.Error()),
-		)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
