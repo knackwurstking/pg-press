@@ -11,13 +11,15 @@ type Users struct {
 	feeds *Feeds
 }
 
-// TODO: Add last_feed
+// TODO: Remove this DROP TABLE stuff
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	query := `
+        DROP TABLE IF EXISTS users;
 		CREATE TABLE IF NOT EXISTS users (
-			"telegram_id" INTEGER NOT NULL,
-			"user_name" TEXT NOT NULL,
-			"api_key" TEXT NOT NULL UNIQUE,
+			telegram_id INTEGER NOT NULL,
+			user_name TEXT NOT NULL,
+			api_key TEXT NOT NULL UNIQUE,
+			last_feed TEXT NOT NULL,
 			PRIMARY KEY("telegram_id")
 		);
 	`
@@ -45,7 +47,7 @@ func (db *Users) List() ([]*User, error) {
 	for r.Next() {
 		user := &User{}
 
-		err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+		err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 		if err != nil {
 			return users, err
 		}
@@ -57,7 +59,7 @@ func (db *Users) List() ([]*User, error) {
 }
 
 func (db *Users) Get(telegramID int64) (*User, error) {
-	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id=%d`, telegramID)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE telegram_id = %d`, telegramID)
 	r, err := db.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -71,7 +73,7 @@ func (db *Users) Get(telegramID int64) (*User, error) {
 		return nil, ErrNotFound
 	}
 
-	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +82,7 @@ func (db *Users) Get(telegramID int64) (*User, error) {
 }
 
 func (db *Users) GetUserFromApiKey(apiKey string) (*User, error) {
-	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key="%s"`, apiKey)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE api_key = "%s"`, apiKey)
 	r, err := db.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -94,7 +96,7 @@ func (db *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 		return nil, ErrNotFound
 	}
 
-	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey)
+	err = r.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +126,8 @@ func (db *Users) Add(user *User) error {
 	}
 
 	query = fmt.Sprintf(
-		`INSERT INTO users (telegram_id, user_name, api_key) VALUES (%d, "%s", "%s")`,
-		user.TelegramID, user.UserName, user.ApiKey,
+		`INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (%d, "%s", "%s", %d)`,
+		user.TelegramID, user.UserName, user.ApiKey, user.LastFeed,
 	)
 
 	_, err = db.db.Exec(query)
@@ -179,8 +181,8 @@ func (db *Users) Update(telegramID int64, user *User) error {
 	}
 
 	query = fmt.Sprintf(
-		`UPDATE users SET user_name="%s", api_key="%s" WHERE telegram_id=%d`,
-		user.UserName, user.ApiKey, telegramID,
+		`UPDATE users SET user_name="%s", api_key="%s", last_feed=%d WHERE telegram_id=%d`,
+		user.UserName, user.ApiKey, user.LastFeed, telegramID,
 	)
 
 	_, err = db.db.Exec(query)
