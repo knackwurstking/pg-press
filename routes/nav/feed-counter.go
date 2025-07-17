@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"slices"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/utils"
@@ -18,26 +19,37 @@ type FeedCounter struct {
 func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	data := &FeedCounter{}
 
-	_, herr := utils.GetUserFromContext(c)
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
 
-	// TODO: Get number of feeds the user has not viewed yet
-	data.Count = 1 // Just for testing
+	feeds, err := db.Feeds.ListRange(0, 100)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			fmt.Errorf("list feeds: %s", err.Error()),
+		)
+	}
+
+	for _, feed := range feeds {
+		if !slices.Contains(feed.ViewedBy, user.TelegramID) {
+			data.Count++
+		}
+	}
 
 	t, err := template.ParseFS(templates, "templates/nav/feed-counter.html")
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("template parsing failed: %s", err.Error()),
+			fmt.Errorf("template parsing: %s", err.Error()),
 		)
 	}
 
 	if err := t.Execute(c.Response(), data); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("template executing failed: %s", err.Error()),
+			fmt.Errorf("template executing: %s", err.Error()),
 		)
 	}
 
