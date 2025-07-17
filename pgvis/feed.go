@@ -13,15 +13,16 @@ const (
 	userRemoveTemplate     = `<p>%s Kicked!</p>`
 	userNameChangeTemplate = `<p>User name changed from %s to %s</p>`
 
-	troubleReportAddTemplate = `<p>New trouble report: #%d</p>
-<p>Last modified by: %s</p>
-<a href="/trouble-reports#feed%d">%s</a>`
+	// TODO: Trouble report templates needs some modifications to look better
+	troubleReportAddTemplate = `<p>New trouble report: #%d<br />
+Last modified by: %s</p>
+<p><a href="/trouble-reports#feed%d">%s</a></p>`
 
 	troubleReportRemoveTemplate = `<p>Trouble report #%d removed</p>`
 
-	troubleReportUpdateTemplate = `<p>Trouble report #%d updated</p>
-<p>Last modified by: %s</p>
-<a href="/trouble-reports#feed%d">%s</a>`
+	troubleReportUpdateTemplate = `<p>Trouble report #%d updated<br />
+Last modified by: %s</p>
+<p><a href="/trouble-reports#feed%d">%s</a></p>`
 )
 
 // Feed represents a feed entry in the system
