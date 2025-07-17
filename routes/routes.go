@@ -242,8 +242,8 @@ func handleApiKeyLogin(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool, 
 	ctx.SetCookie(cookie)
 
 	// Store session in database
-	c := pgvis.NewCookie(ctx.Request().UserAgent(), cookie.Value, apiKey)
-	if err := db.Cookies.Add(c); err != nil {
+	sessionCookie := pgvis.NewCookie(ctx.Request().UserAgent(), cookie.Value, apiKey)
+	if err := db.Cookies.Add(sessionCookie); err != nil {
 		return false, fmt.Errorf("failed to create session: %w", err)
 	}
 
