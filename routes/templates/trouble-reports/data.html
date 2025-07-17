@@ -36,6 +36,20 @@
         >
             <i class="bi bi-trash"></i>
         </button>
+        {{else}}
+            <!-- TODO: User is not an admin, Add voting system for deleting trouble reports -->
+            <!-- TODO: Store this vote somewhere and highlight it somehow -->
+            <button
+                id="voteForDelete"
+                hx-post="./trouble-reports/vote?id={{$tr.ID}}"
+                hx-trigger="click"
+                hx-swap="outerHTML"
+                class="ghost destructive"
+                disabled
+            >
+                <!-- STIMME FÜR LÖSCHEN -->
+                VOTE FOR DELETE
+            </button>
         {{end}}
 
     </div>
