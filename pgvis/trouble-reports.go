@@ -7,10 +7,11 @@ import (
 )
 
 type TroubleReports struct {
-	db *sql.DB
+	db    *sql.DB
+	feeds *Feeds
 }
 
-func NewTroubleReports(db *sql.DB) *TroubleReports {
+func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -27,7 +28,8 @@ func NewTroubleReports(db *sql.DB) *TroubleReports {
 	}
 
 	return &TroubleReports{
-		db: db,
+		db:    db,
+		feeds: feeds,
 	}
 }
 
@@ -104,6 +106,7 @@ func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	return tr, nil
 }
 
+// TODO: Create a new feed if the trouble report is created successfully
 func (db *TroubleReports) Add(tr *TroubleReport) error {
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
@@ -122,6 +125,7 @@ func (db *TroubleReports) Add(tr *TroubleReport) error {
 	return err
 }
 
+// TODO: Create a new feed if the trouble report is updated successfully
 func (db *TroubleReports) Update(id int64, tr *TroubleReport) error {
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {

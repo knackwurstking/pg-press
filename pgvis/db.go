@@ -20,7 +20,7 @@ func New(db *sql.DB) *DB {
 	return &DB{
 		Users:          NewUsers(db, feeds),
 		Cookies:        NewCookies(db),
-		TroubleReports: NewTroubleReports(db),
+		TroubleReports: NewTroubleReports(db, feeds),
 		Feeds:          feeds,
 		db:             db,
 	}
