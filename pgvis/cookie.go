@@ -12,9 +12,6 @@ import (
 const (
 	// Default cookie expiration time (6 months)
 	DefaultCookieExpiration = 6 * 30 * 24 * time.Hour
-
-	// Minimum API key length for security
-	MinAPIKeyLength = 32
 )
 
 // Cookie represents a user session cookie with authentication information
@@ -199,12 +196,4 @@ func generateSecureToken(length int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
-}
-
-// Helper function to mask sensitive strings for logging
-func maskString(s string) string {
-	if len(s) <= 8 {
-		return strings.Repeat("*", len(s))
-	}
-	return s[:4] + strings.Repeat("*", len(s)-8) + s[len(s)-4:]
 }
