@@ -14,6 +14,7 @@
 
     {{range $feed := $data.Feeds}}
         {{$data.Render $feed}}
+        <hr />
     {{end}}
 </ul>
 {{else}}
