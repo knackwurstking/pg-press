@@ -55,10 +55,9 @@ func NewTroubleReportAddFeed(report *TroubleReport) *Feed {
 	)
 }
 
-// TODO: Update... Just like the trouble report add feed
-func NewTroubleReportRemoveFeed(troubleReportID int) *Feed {
+func NewTroubleReportRemoveFeed(report *TroubleReport) *Feed {
 	return NewFeed(
-		fmt.Sprintf(`<p>Trouble report #%d removed</p>`, troubleReportID),
+		fmt.Sprintf(`<p>Trouble report #%d removed</p>`, report.ID),
 		nil,
 	)
 }

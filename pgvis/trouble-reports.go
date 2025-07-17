@@ -144,8 +144,11 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 }
 
 // Remove deletes a trouble report by ID
-// TODO: Create a new feed entry when the trouble report is removed successfully
 func (tr *TroubleReports) Remove(id int64) error {
+	// Get the trouble report before deleting it.
+	// Ignore any error, just check if it exists before creating a feed entry
+	report, _ := tr.Get(id)
+
 	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete trouble report with ID %d: %w", id, err)
@@ -158,6 +161,14 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 	if rowsAffected == 0 {
 		return ErrNotFound
+	}
+
+	// Create feed entry for the removed trouble report
+	if report != nil {
+		feed := NewTroubleReportRemoveFeed(report)
+		if err := tr.feeds.Add(feed); err != nil {
+			return fmt.Errorf("failed to add feed entry: %w", err)
+		}
 	}
 
 	return nil
