@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-// TODO: Need to find a way to handle feeds viewed per user
 type Feed struct {
 	ID    int
 	Time  int64 // Time contains an UNIX millisecond timestamp

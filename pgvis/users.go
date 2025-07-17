@@ -14,7 +14,6 @@ type Users struct {
 // TODO: Remove this DROP TABLE stuff
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	query := `
-        DROP TABLE IF EXISTS users;
 		CREATE TABLE IF NOT EXISTS users (
 			telegram_id INTEGER NOT NULL,
 			user_name TEXT NOT NULL,

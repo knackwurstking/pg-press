@@ -57,7 +57,7 @@ func (db *TroubleReports) List() ([]*TroubleReport, error) {
 			return nil, err
 		}
 
-		err = json.Unmarshal(modified, tr.Modified)
+		err = json.Unmarshal(modified, &tr.Modified)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(modified, tr.Modified)
+	err = json.Unmarshal(modified, &tr.Modified)
 	if err != nil {
 		return nil, err
 	}

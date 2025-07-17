@@ -63,7 +63,7 @@ func (f *Feeds) Add(feed *Feed) error {
 	}
 
 	_, err = f.db.Exec(
-		"INSERT INTO feeds (time, main, cache) VALUES (?, ?, ?, ?)",
+		"INSERT INTO feeds (time, main, cache) VALUES (?, ?, ?)",
 		feed.Time, feed.Main, cache,
 	)
 	return err
