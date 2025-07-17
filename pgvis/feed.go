@@ -7,11 +7,10 @@ import (
 
 // TODO: Need to find a way to handle feeds viewed per user
 type Feed struct {
-	ID       int
-	Time     int64 // Time contains an UNIX millisecond timestamp
-	Main     string
-	ViewedBy []int64
-	Cache    any
+	ID    int
+	Time  int64 // Time contains an UNIX millisecond timestamp
+	Main  string
+	Cache any
 }
 
 func NewFeed(main string, cache any) *Feed {

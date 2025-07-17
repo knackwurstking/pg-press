@@ -11,6 +11,7 @@ type Users struct {
 	feeds *Feeds
 }
 
+// TODO: Add last_feed
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (

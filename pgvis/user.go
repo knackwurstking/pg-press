@@ -8,9 +8,10 @@ import (
 )
 
 type User struct {
-	TelegramID int64  `json:"telegram_id"`
-	UserName   string `json:"user_name"`
-	ApiKey     string `json:"api_key"` // ApiKey is optional and can be nil
+	TelegramID int64
+	UserName   string
+	ApiKey     string // ApiKey is optional and can be nil
+	LastFeed   int    // LastFeedViewed contains the Feed ID from the last feed the user viewed
 }
 
 func NewUser(telegramID int64, userName string, apiKey string) *User {
