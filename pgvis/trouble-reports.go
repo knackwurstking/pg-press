@@ -1,3 +1,4 @@
+// TroubleReports handles database operations for trouble reports
 package pgvis
 
 import (
