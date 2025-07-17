@@ -97,16 +97,21 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		)
 
 		// Handle Echo HTTP errors
-		if echoErr, ok := err.(*echo.HTTPError); ok {
-			code = echoErr.Code
+		if herr, ok := err.(*echo.HTTPError); ok {
+			if herr != nil {
+				code = herr.Code
 
-			switch msg := echoErr.Message.(type) {
-			case string:
-				message = msg
-			case error:
-				message = msg.Error()
-			default:
-				message = http.StatusText(code)
+				switch msg := herr.Message.(type) {
+				case string:
+					message = msg
+				case error:
+					message = msg.Error()
+				default:
+					message = http.StatusText(code)
+				}
+			} else {
+				code = http.StatusOK
+				message = "OK"
 			}
 		} else if pgvis.IsAPIError(err) {
 			// Handle pgvis API errors
