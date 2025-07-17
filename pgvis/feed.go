@@ -23,36 +23,6 @@ func NewFeed(main string, cache any) *Feed {
 	}
 }
 
-func (f *Feed) CacheToJSON() []byte {
-	b, err := json.Marshal(f.Cache)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-func (f *Feed) JSONToCache(b []byte) {
-	err := json.Unmarshal(b, &f.Cache)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (f *Feed) ViewedByToJSON() []byte {
-	b, err := json.Marshal(f.ViewedBy)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-func (f *Feed) JSONToViewedBy(b []byte) {
-	err := json.Unmarshal(b, &f.ViewedBy)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func NewUserAddFeed(userName string) *Feed {
 	return NewFeed(
 		fmt.Sprintf(`<p>New user: %s</p>`, userName),

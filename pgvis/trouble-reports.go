@@ -2,6 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 )
 
@@ -51,8 +52,15 @@ func (db *TroubleReports) List() ([]*TroubleReport, error) {
 			return nil, err
 		}
 
-		tr.JSONToLinkedAttachments(linkedAttachments)
-		tr.JSONToModified(modified)
+		err = json.Unmarshal(linkedAttachments, tr.LinkedAttachments)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(modified, tr.Modified)
+		if err != nil {
+			return nil, err
+		}
 
 		trs = append(trs, &tr)
 	}
@@ -83,26 +91,52 @@ func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 		return nil, fmt.Errorf("scan data from database: %s", err.Error())
 	}
 
-	tr.JSONToLinkedAttachments(linkedAttachments)
-	tr.JSONToModified(modified)
+	err = json.Unmarshal(linkedAttachments, tr.LinkedAttachments)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(modified, tr.Modified)
+	if err != nil {
+		return nil, err
+	}
 
 	return tr, nil
 }
 
 func (db *TroubleReports) Add(tr *TroubleReport) error {
-	query := `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
+	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+	if err != nil {
+		return err
+	}
 
-	_, err := db.db.Exec(query, tr.Title, tr.Content, tr.LinkedAttachmentsToJSON(), tr.ModifiedToJSON())
+	modified, err := json.Marshal(tr.Modified)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.db.Exec(
+		`INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`,
+		tr.Title, tr.Content, linkedAttachments, modified,
+	)
 	return err
 }
 
 func (db *TroubleReports) Update(id int64, tr *TroubleReport) error {
-	query := fmt.Sprintf(
-		`UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id=%d`,
-		id,
-	)
+	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+	if err != nil {
+		return err
+	}
 
-	_, err := db.db.Exec(query, tr.Title, tr.Content, tr.LinkedAttachmentsToJSON(), tr.ModifiedToJSON())
+	modified, err := json.Marshal(tr.Modified)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.db.Exec(
+		"UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?",
+		tr.Title, tr.Content, linkedAttachments, modified, id,
+	)
 	return err
 }
 

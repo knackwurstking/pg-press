@@ -2,6 +2,7 @@ package pgvis
 
 import (
 	"database/sql"
+	"encoding/json"
 )
 
 type Feeds struct {
@@ -56,9 +57,19 @@ func (f *Feeds) ListRange(from int, count int) ([]*Feed, error) {
 }
 
 func (f *Feeds) Add(feed *Feed) error {
-	_, err := f.db.Exec(
+	viewedBy, err := json.Marshal(feed.ViewedBy)
+	if err != nil {
+		return err
+	}
+
+	cache, err := json.Marshal(feed.Cache)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.db.Exec(
 		"INSERT INTO feeds (time, main, viewed_by, cache) VALUES (?, ?, ?, ?)",
-		feed.Time, feed.Main, feed.ViewedByToJSON(), feed.CacheToJSON(),
+		feed.Time, feed.Main, viewedBy, cache,
 	)
 	return err
 }
@@ -74,8 +85,16 @@ func (f *Feeds) scanAllRows(r *sql.Rows) (feeds []*Feed, err error) {
 			return nil, err
 		}
 
-		f.JSONToViewedBy(viewedBy)
-		f.JSONToCache(cache)
+		err = json.Unmarshal(viewedBy, &f.ViewedBy)
+		if err != nil {
+			return nil, err
+		}
+
+		err = json.Unmarshal(cache, &f.Cache)
+		if err != nil {
+			return nil, err
+		}
+
 		feeds = append(feeds, f)
 	}
 

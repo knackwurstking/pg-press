@@ -1,7 +1,5 @@
 package pgvis
 
-import "encoding/json"
-
 type TroubleReport struct {
 	ID                int                       `json:"id"`
 	Title             string                    `json:"title"`
@@ -19,32 +17,3 @@ func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *Troub
 	}
 }
 
-func (tr *TroubleReport) LinkedAttachmentsToJSON() []byte {
-	data, err := json.Marshal(tr.LinkedAttachments)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
-func (tr *TroubleReport) JSONToLinkedAttachments(b []byte) {
-	err := json.Unmarshal(b, &tr.LinkedAttachments)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (tr *TroubleReport) ModifiedToJSON() []byte {
-	data, err := json.Marshal(tr.Modified)
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
-func (tr *TroubleReport) JSONToModified(b []byte) {
-	err := json.Unmarshal(b, &tr.Modified)
-	if err != nil {
-		panic(err)
-	}
-}
