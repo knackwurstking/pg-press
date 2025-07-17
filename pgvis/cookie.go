@@ -1,4 +1,4 @@
-// TODO: Orgnaized with ai
+// ai: Orgnaize
 package pgvis
 
 import (

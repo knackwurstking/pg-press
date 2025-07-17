@@ -1,4 +1,4 @@
-// NOTE: Organized with ai
+// ai: Organize
 package pgvis
 
 import (
