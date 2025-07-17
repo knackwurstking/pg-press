@@ -23,15 +23,21 @@ const (
 	userNameChangeTemplate = `<p>User name changed from %s to %s</p>` // [%(old-user-name), %(new-user-name)]
 
 	// Trouble report templates with improved formatting
-	troubleReportAddTemplate = `<p>New trouble report:
-<a href="/trouble-reports#trouble-report%d">#%d - %s</a><br />
-Last modified by: %s</p>` // [%(id), %(id), %(title), %(modified)]
+	troubleReportAddTemplate = `
+	<p>
+    	New trouble report: <a href="/trouble-reports#trouble-report-%d">#%d - %s</a> <br />
+        Last modified by: %s
+    </p>
+` // [%(id), %(id), %(title), %(modified)]
 
 	troubleReportRemoveTemplate = `<p>Trouble report #%d removed</p>` // [%(id)]
 
-	troubleReportUpdateTemplate = `<p>Trouble report updated<br />
-<a href="/trouble-reports#trouble-report%d">#%d - %s</a> updated<br />
-Last modified by: %s</p>` // [%(id), %(id), %(title), %(modified)]
+	troubleReportUpdateTemplate = `
+	<p>
+    	Trouble report <a href="/trouble-reports#trouble-report-%d">#%d - %s</a> updated <br />
+        Last modified by: %s
+    </p>
+` // [%(id), %(id), %(title), %(modified)]
 )
 
 // Feed represents a feed entry in the system.
