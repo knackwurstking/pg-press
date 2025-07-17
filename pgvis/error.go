@@ -1,4 +1,23 @@
-// ai: Organize
+// Package pgvis error handling utilities and types.
+//
+// This file defines standard error types, error utilities, and HTTP status code mappings
+// for the pgvis application. It provides a consistent error handling strategy across
+// all application components.
+//
+// Error Categories:
+//   - Data access errors (not found, duplicates, etc.)
+//   - Authentication and authorization errors
+//   - Validation errors with field-specific details
+//   - Database operation errors
+//   - File operation errors
+//   - Network and API errors
+//
+// Custom Error Types:
+//   - ValidationError: Field-specific validation failures
+//   - AuthError: Authentication and authorization failures
+//   - DatabaseError: Database operation failures with context
+//   - APIError: HTTP API errors with status codes
+//   - MultiError: Collection of multiple errors
 package pgvis
 
 import (
@@ -7,7 +26,8 @@ import (
 	"net/http"
 )
 
-// Standard errors for common operations
+// Standard errors for common operations.
+// These sentinel errors can be used with errors.Is() for error checking.
 var (
 	// Data access errors
 	ErrNotFound      = errors.New("not found")
@@ -46,14 +66,16 @@ var (
 	ErrServiceUnavailable = errors.New("service unavailable")
 )
 
-// ValidationError represents a field-specific validation error
+// ValidationError represents a field-specific validation error.
+// It provides detailed information about which field failed validation,
+// the validation message, and optionally the invalid value.
 type ValidationError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 	Value   any    `json:"value,omitempty"`
 }
 
-// Error implements the error interface
+// Error implements the error interface for ValidationError.
 func (e *ValidationError) Error() string {
 	if e.Value != nil {
 		return fmt.Sprintf("validation error for field '%s': %s (value: %v)", e.Field, e.Message, e.Value)
@@ -61,7 +83,8 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error for field '%s': %s", e.Field, e.Message)
 }
 
-// NewValidationError creates a new validation error
+// NewValidationError creates a new validation error with the specified field,
+// message, and optional value that caused the validation failure.
 func NewValidationError(field, message string, value any) *ValidationError {
 	return &ValidationError{
 		Field:   field,
@@ -70,14 +93,16 @@ func NewValidationError(field, message string, value any) *ValidationError {
 	}
 }
 
-// AuthError represents authentication and authorization errors
+// AuthError represents authentication and authorization errors.
+// It distinguishes between authentication failures (invalid credentials)
+// and authorization failures (insufficient permissions).
 type AuthError struct {
 	Type    string `json:"type"` // "authentication" or "authorization"
 	Message string `json:"message"`
 	UserID  string `json:"user_id,omitempty"`
 }
 
-// Error implements the error interface
+// Error implements the error interface for AuthError.
 func (e *AuthError) Error() string {
 	if e.UserID != "" {
 		return fmt.Sprintf("%s error for user '%s': %s", e.Type, e.UserID, e.Message)
@@ -85,7 +110,8 @@ func (e *AuthError) Error() string {
 	return fmt.Sprintf("%s error: %s", e.Type, e.Message)
 }
 
-// NewAuthenticationError creates a new authentication error
+// NewAuthenticationError creates a new authentication error for cases where
+// user credentials are invalid or authentication fails.
 func NewAuthenticationError(message, userID string) *AuthError {
 	return &AuthError{
 		Type:    "authentication",
@@ -94,7 +120,8 @@ func NewAuthenticationError(message, userID string) *AuthError {
 	}
 }
 
-// NewAuthorizationError creates a new authorization error
+// NewAuthorizationError creates a new authorization error for cases where
+// a user is authenticated but lacks sufficient permissions.
 func NewAuthorizationError(message, userID string) *AuthError {
 	return &AuthError{
 		Type:    "authorization",
@@ -103,7 +130,9 @@ func NewAuthorizationError(message, userID string) *AuthError {
 	}
 }
 
-// DatabaseError represents database-related errors
+// DatabaseError represents database-related errors with contextual information.
+// It includes the operation being performed, the table involved (if applicable),
+// and the underlying cause error.
 type DatabaseError struct {
 	Operation string `json:"operation"`
 	Table     string `json:"table,omitempty"`
@@ -111,7 +140,7 @@ type DatabaseError struct {
 	Cause     error  `json:"-"`
 }
 
-// Error implements the error interface
+// Error implements the error interface for DatabaseError.
 func (e *DatabaseError) Error() string {
 	if e.Table != "" {
 		return fmt.Sprintf("database error during %s on table '%s': %s", e.Operation, e.Table, e.Message)
@@ -119,12 +148,14 @@ func (e *DatabaseError) Error() string {
 	return fmt.Sprintf("database error during %s: %s", e.Operation, e.Message)
 }
 
-// Unwrap returns the underlying cause error
+// Unwrap returns the underlying cause error, enabling error unwrapping
+// with errors.Is() and errors.As().
 func (e *DatabaseError) Unwrap() error {
 	return e.Cause
 }
 
-// NewDatabaseError creates a new database error
+// NewDatabaseError creates a new database error with contextual information
+// about the failed operation, table, and underlying cause.
 func NewDatabaseError(operation, table, message string, cause error) *DatabaseError {
 	return &DatabaseError{
 		Operation: operation,
@@ -134,24 +165,27 @@ func NewDatabaseError(operation, table, message string, cause error) *DatabaseEr
 	}
 }
 
-// APIError represents API-related errors with HTTP status codes
+// APIError represents API-related errors with HTTP status codes.
+// It provides a standardized way to represent HTTP errors with
+// appropriate status codes and optional additional details.
 type APIError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 	Details any    `json:"details,omitempty"`
 }
 
-// Error implements the error interface
+// Error implements the error interface for APIError.
 func (e *APIError) Error() string {
 	return fmt.Sprintf("API error %d: %s", e.Code, e.Message)
 }
 
-// StatusCode returns the HTTP status code
+// StatusCode returns the HTTP status code associated with this error.
 func (e *APIError) StatusCode() int {
 	return e.Code
 }
 
-// NewAPIError creates a new API error
+// NewAPIError creates a new API error with the specified HTTP status code,
+// message, and optional details object.
 func NewAPIError(code int, message string, details any) *APIError {
 	return &APIError{
 		Code:    code,
@@ -160,12 +194,14 @@ func NewAPIError(code int, message string, details any) *APIError {
 	}
 }
 
-// MultiError represents multiple errors combined
+// MultiError represents multiple errors combined into a single error.
+// It's useful for operations that can encounter multiple validation
+// or processing errors that should all be reported together.
 type MultiError struct {
 	Errors []error `json:"errors"`
 }
 
-// Error implements the error interface
+// Error implements the error interface for MultiError.
 func (e *MultiError) Error() string {
 	if len(e.Errors) == 0 {
 		return "no errors"
@@ -176,19 +212,20 @@ func (e *MultiError) Error() string {
 	return fmt.Sprintf("multiple errors: %d total", len(e.Errors))
 }
 
-// Add adds an error to the multi-error
+// Add adds an error to the multi-error collection.
+// Nil errors are ignored.
 func (e *MultiError) Add(err error) {
 	if err != nil {
 		e.Errors = append(e.Errors, err)
 	}
 }
 
-// HasErrors returns true if there are any errors
+// HasErrors returns true if the MultiError contains any errors.
 func (e *MultiError) HasErrors() bool {
 	return len(e.Errors) > 0
 }
 
-// First returns the first error or nil if there are no errors
+// First returns the first error in the collection or nil if there are no errors.
 func (e *MultiError) First() error {
 	if len(e.Errors) > 0 {
 		return e.Errors[0]
@@ -196,14 +233,16 @@ func (e *MultiError) First() error {
 	return nil
 }
 
-// NewMultiError creates a new multi-error
+// NewMultiError creates a new empty MultiError collection.
 func NewMultiError() *MultiError {
 	return &MultiError{
 		Errors: make([]error, 0),
 	}
 }
 
-// Utility functions for error handling
+// Utility functions for error handling and type checking.
+// These functions provide convenient ways to check for specific error types
+// and extract information from errors.
 
 // IsNotFound checks if an error represents a "not found" condition
 func IsNotFound(err error) bool {
@@ -274,7 +313,8 @@ func GetHTTPStatusCode(err error) int {
 	}
 }
 
-// WrapError wraps an error with additional context
+// WrapError wraps an error with additional context message.
+// Returns nil if the input error is nil.
 func WrapError(err error, message string) error {
 	if err == nil {
 		return nil
@@ -282,7 +322,8 @@ func WrapError(err error, message string) error {
 	return fmt.Errorf("%s: %w", message, err)
 }
 
-// WrapErrorf wraps an error with formatted additional context
+// WrapErrorf wraps an error with formatted additional context message.
+// Returns nil if the input error is nil.
 func WrapErrorf(err error, format string, args ...any) error {
 	if err == nil {
 		return nil

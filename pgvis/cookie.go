@@ -1,4 +1,8 @@
-// ai: Orgnaize
+// Package pgvis cookie models.
+//
+// This file defines the Cookie data structure and its associated
+// validation and utility methods. Cookies represent user sessions
+// and authentication tokens in the system.
 package pgvis
 
 import (
@@ -12,14 +16,23 @@ import (
 const (
 	// Default cookie expiration time (6 months)
 	DefaultCookieExpiration = 6 * 30 * 24 * time.Hour
+
+	// Validation constants for cookies
+	MinCookieValueLength = 16
+	MaxUserAgentLength   = 1000
 )
 
-// Cookie represents a user session cookie with authentication information
+// Cookie represents a user session cookie with authentication information.
+// It contains session data and authentication tokens for user sessions.
 type Cookie struct {
-	UserAgent string `json:"user_agent"` // Browser user agent string
-	Value     string `json:"value"`      // Cookie value/token
-	ApiKey    string `json:"api_key"`    // API key for authentication
-	LastLogin int64  `json:"last_login"` // Last login timestamp (UNIX milliseconds)
+	// UserAgent is the browser user agent string
+	UserAgent string `json:"user_agent"`
+	// Value is the unique cookie value/token
+	Value string `json:"value"`
+	// ApiKey is the API key for authentication
+	ApiKey string `json:"api_key"`
+	// LastLogin is the last login timestamp (UNIX milliseconds)
+	LastLogin int64 `json:"last_login"`
 }
 
 // NewCookie creates a new cookie with the current timestamp
@@ -46,37 +59,52 @@ func NewCookieWithTime(userAgent, value, apiKey string, timestamp int64) *Cookie
 func GenerateSecureCookie(userAgent string) (*Cookie, error) {
 	value, err := generateSecureToken(32)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate cookie value: %w", err)
+		return nil, WrapError(err, "failed to generate cookie value")
 	}
 
 	apiKey, err := generateSecureToken(MinAPIKeyLength)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate API key: %w", err)
+		return nil, WrapError(err, "failed to generate API key")
 	}
 
 	return NewCookie(userAgent, value, apiKey), nil
 }
 
-// Validate checks if the cookie has valid data
+// Validate checks if the cookie has valid data.
+//
+// Returns:
+//   - error: MultiError containing all validation failures, or nil if valid
 func (c *Cookie) Validate() error {
+	multiErr := NewMultiError()
+
+	// Validate user agent
 	if c.UserAgent == "" {
-		return fmt.Errorf("user agent cannot be empty")
+		multiErr.Add(NewValidationError("user_agent", "cannot be empty", c.UserAgent))
+	} else if len(c.UserAgent) > MaxUserAgentLength {
+		multiErr.Add(NewValidationError("user_agent", "too long", len(c.UserAgent)))
 	}
 
+	// Validate cookie value
 	if c.Value == "" {
-		return fmt.Errorf("cookie value cannot be empty")
+		multiErr.Add(NewValidationError("value", "cannot be empty", c.Value))
+	} else if len(c.Value) < MinCookieValueLength {
+		multiErr.Add(NewValidationError("value", "too short for security", len(c.Value)))
 	}
 
+	// Validate API key
 	if c.ApiKey == "" {
-		return fmt.Errorf("API key cannot be empty")
+		multiErr.Add(NewValidationError("api_key", "cannot be empty", c.ApiKey))
+	} else if len(c.ApiKey) < MinAPIKeyLength {
+		multiErr.Add(NewValidationError("api_key", "too short for security", len(c.ApiKey)))
 	}
 
-	if len(c.ApiKey) < MinAPIKeyLength {
-		return fmt.Errorf("API key must be at least %d characters long", MinAPIKeyLength)
-	}
-
+	// Validate timestamp
 	if c.LastLogin <= 0 {
-		return fmt.Errorf("last login timestamp must be positive")
+		multiErr.Add(NewValidationError("last_login", "must be positive", c.LastLogin))
+	}
+
+	if multiErr.HasErrors() {
+		return multiErr
 	}
 
 	return nil
@@ -128,7 +156,7 @@ func (c *Cookie) UpdateLastLogin() {
 func (c *Cookie) RefreshToken() error {
 	newValue, err := generateSecureToken(32)
 	if err != nil {
-		return fmt.Errorf("failed to refresh token: %w", err)
+		return WrapError(err, "failed to refresh token")
 	}
 
 	c.Value = newValue
@@ -140,7 +168,7 @@ func (c *Cookie) RefreshToken() error {
 func (c *Cookie) RefreshAPIKey() error {
 	newAPIKey, err := generateSecureToken(MinAPIKeyLength)
 	if err != nil {
-		return fmt.Errorf("failed to refresh API key: %w", err)
+		return WrapError(err, "failed to refresh API key")
 	}
 
 	c.ApiKey = newAPIKey

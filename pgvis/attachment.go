@@ -1,4 +1,8 @@
-// ai: Organize
+// Package pgvis attachment models.
+//
+// This file defines the Attachment data structure and its associated
+// validation and utility methods. Attachments represent files that can
+// be linked to trouble reports or other entities in the system.
 package pgvis
 
 import (
@@ -8,11 +12,23 @@ import (
 	"strings"
 )
 
-// Attachment represents a file attachment with its metadata
+const (
+	// Validation constants for attachments
+	MinAttachmentNameLength = 1
+	MaxAttachmentNameLength = 255
+	MaxAttachmentPathLength = 1000
+)
+
+// Attachment represents a file attachment with its metadata.
+// It contains information about files that can be linked to trouble reports
+// or other entities in the system.
 type Attachment struct {
-	Name         string `json:"name"`          // Display name of the attachment
-	Link         string `json:"link"`          // URL or link to access the attachment
-	RelativePath string `json:"relative_path"` // Relative path to the file on the filesystem
+	// Name is the display name of the attachment
+	Name string `json:"name"`
+	// Link is the URL or link to access the attachment
+	Link string `json:"link"`
+	// RelativePath is the relative path to the file on the filesystem
+	RelativePath string `json:"relative_path"`
 }
 
 // NewAttachment creates a new attachment with the provided details
@@ -37,18 +53,41 @@ func NewAttachmentFromPath(relativePath string) *Attachment {
 	}
 }
 
-// Validate checks if the attachment has valid data
+// Validate checks if the attachment has valid data.
+//
+// Returns:
+//   - error: MultiError containing all validation failures, or nil if valid
 func (a *Attachment) Validate() error {
+	multiErr := NewMultiError()
+
+	// Validate name
 	if a.Name == "" {
-		return fmt.Errorf("attachment name cannot be empty")
+		multiErr.Add(NewValidationError("name", "cannot be empty", a.Name))
+	} else {
+		if len(a.Name) < MinAttachmentNameLength {
+			multiErr.Add(NewValidationError("name", "too short", len(a.Name)))
+		}
+		if len(a.Name) > MaxAttachmentNameLength {
+			multiErr.Add(NewValidationError("name", "too long", len(a.Name)))
+		}
 	}
 
+	// Validate link
 	if a.Link == "" {
-		return fmt.Errorf("attachment link cannot be empty")
+		multiErr.Add(NewValidationError("link", "cannot be empty", a.Link))
 	}
 
+	// Validate relative path
 	if a.RelativePath == "" {
-		return fmt.Errorf("attachment relative path cannot be empty")
+		multiErr.Add(NewValidationError("relative_path", "cannot be empty", a.RelativePath))
+	} else {
+		if len(a.RelativePath) > MaxAttachmentPathLength {
+			multiErr.Add(NewValidationError("relative_path", "too long", len(a.RelativePath)))
+		}
+	}
+
+	if multiErr.HasErrors() {
+		return multiErr
 	}
 
 	return nil
@@ -137,19 +176,70 @@ func (a *Attachment) Clone() *Attachment {
 	}
 }
 
-// UpdateLink updates the attachment's link
-func (a *Attachment) UpdateLink(newLink string) {
-	a.Link = strings.TrimSpace(newLink)
+// UpdateLink updates the attachment's link with validation.
+//
+// Parameters:
+//   - newLink: The new link for the attachment
+//
+// Returns:
+//   - error: Validation error if the link is invalid
+func (a *Attachment) UpdateLink(newLink string) error {
+	newLink = strings.TrimSpace(newLink)
+
+	if newLink == "" {
+		return NewValidationError("link", "cannot be empty", newLink)
+	}
+
+	a.Link = newLink
+	return nil
 }
 
-// UpdateName updates the attachment's display name
-func (a *Attachment) UpdateName(newName string) {
-	a.Name = strings.TrimSpace(newName)
+// UpdateName updates the attachment's display name with validation.
+//
+// Parameters:
+//   - newName: The new display name for the attachment
+//
+// Returns:
+//   - error: Validation error if the name is invalid
+func (a *Attachment) UpdateName(newName string) error {
+	newName = strings.TrimSpace(newName)
+
+	if newName == "" {
+		return NewValidationError("name", "cannot be empty", newName)
+	}
+
+	if len(newName) < MinAttachmentNameLength {
+		return NewValidationError("name", "too short", len(newName))
+	}
+
+	if len(newName) > MaxAttachmentNameLength {
+		return NewValidationError("name", "too long", len(newName))
+	}
+
+	a.Name = newName
+	return nil
 }
 
-// UpdatePath updates the attachment's relative path
-func (a *Attachment) UpdatePath(newPath string) {
-	a.RelativePath = strings.TrimSpace(newPath)
+// UpdatePath updates the attachment's relative path with validation.
+//
+// Parameters:
+//   - newPath: The new relative path for the attachment
+//
+// Returns:
+//   - error: Validation error if the path is invalid
+func (a *Attachment) UpdatePath(newPath string) error {
+	newPath = strings.TrimSpace(newPath)
+
+	if newPath == "" {
+		return NewValidationError("relative_path", "cannot be empty", newPath)
+	}
+
+	if len(newPath) > MaxAttachmentPathLength {
+		return NewValidationError("relative_path", "too long", len(newPath))
+	}
+
+	a.RelativePath = newPath
+	return nil
 }
 
 // Equals checks if two attachments are equal

@@ -12,7 +12,7 @@ const (
 	version      = "v0.0.1"
 	databaseFile = "pgvis.db"
 
-	exitCodeGeneric   	= 1 
+	exitCodeGeneric     = 1
 	exitCodeNotFound    = 10
 	exitCodeServerStart = 20 // exitCodeServerStart failed
 )
