@@ -9,10 +9,8 @@ type Feeds struct {
 	db *sql.DB
 }
 
-// TODO: Remove this DROP TABLE stuff
 func NewFeeds(db *sql.DB) *Feeds {
 	query := `
-	    DROP TABLE IF EXISTS feeds;
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
