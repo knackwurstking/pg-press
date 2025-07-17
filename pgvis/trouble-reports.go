@@ -115,7 +115,6 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 }
 
 // Update modifies an existing trouble report
-// TODO: Create a new feed entry when the trouble report is updated successfully
 func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
@@ -133,6 +132,12 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 	)
 	if err != nil {
 		return fmt.Errorf("failed to update trouble report with ID %d: %w", id, err)
+	}
+
+	// Create feed entry for the updated trouble report
+	feed := NewTroubleReportUpdateFeed(report)
+	if err := tr.feeds.Add(feed); err != nil {
+		return fmt.Errorf("failed to add feed entry: %w", err)
 	}
 
 	return nil
