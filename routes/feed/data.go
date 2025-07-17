@@ -20,7 +20,7 @@ type Data struct {
 func (d *Data) Render(f *pgvis.Feed) template.HTML {
 	return template.HTML(
 		fmt.Sprintf(
-			`<article id="feed%d">
+			`<article id="feed-%d">
          		<main>%s</main>
          		<footer><small>%s</small></footer>
           	</article>`,
