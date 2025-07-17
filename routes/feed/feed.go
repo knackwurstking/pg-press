@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 )
 
-// TODO: Server side rendering feeds for user (Maybe just render the last 100 feeds from new to old), using HTMX
 // TODO: Websocket handler for the nav icon button count per user
 // TODO: Websocket handler for live feeds
 
