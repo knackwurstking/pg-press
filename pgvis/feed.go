@@ -40,3 +40,33 @@ func NewUserNameChangeFeed(old, new string) *Feed {
 		nil,
 	)
 }
+
+func NewTroubleReportAddFeed(tr *TroubleReport) *Feed {
+	return NewFeed(
+		fmt.Sprintf(
+			`
+			    <p>New trouble report: #%d: %s</p>
+				<p>Last modified by: %s</p>
+				<a href="/trouble-reports#feed%d">View</a>
+			`,
+			tr.ID, tr.Title, tr.Modified.User.UserName, tr.ID,
+		),
+		nil,
+	)
+}
+
+// TODO: Update... Just like the trouble report add feed
+func NewTroubleReportRemoveFeed(troubleReportID int) *Feed {
+	return NewFeed(
+		fmt.Sprintf(`<p>Trouble report #%d removed</p>`, troubleReportID),
+		nil,
+	)
+}
+
+// TODO: Update... Just like the trouble report add feed
+func NewTroubleReportUpdateFeed(troubleReportID int) *Feed {
+	return NewFeed(
+		fmt.Sprintf(`<p>Trouble report #%d updated</p>`, troubleReportID),
+		nil,
+	)
+}
