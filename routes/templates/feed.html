@@ -24,10 +24,10 @@
 
 {{define "content"}}
 <main class="container fluid">
-    <blockquote>
-        <i>Under Construction...</i>
-    </blockquote>
-
-    <span id="data" hx-get="./feed/data" hx-trigger="load" hx-swap="outerHTML"></span>
+    <span id="data" 
+        hx-get="./feed/data" 
+        hx-trigger="load" 
+        hx-swap="outerHTML"
+    ></span>
 </main>
 {{end}}
