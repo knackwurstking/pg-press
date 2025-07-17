@@ -11,7 +11,7 @@ type Feed struct {
 	ID       int
 	Time     int64 // Time contains an UNIX millisecond timestamp
 	Main     string
-	ViewedBy []*User
+	ViewedBy []int64
 	Cache    any
 }
 
