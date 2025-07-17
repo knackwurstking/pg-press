@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"slices"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/utils"
@@ -33,8 +32,10 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 	}
 
 	for _, feed := range feeds {
-		if !slices.Contains(feed.ViewedBy, user.TelegramID) {
+		if feed.ID > user.LastFeed {
 			data.Count++
+		} else {
+			break
 		}
 	}
 

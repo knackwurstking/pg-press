@@ -52,7 +52,7 @@ func (db *TroubleReports) List() ([]*TroubleReport, error) {
 			return nil, err
 		}
 
-		err = json.Unmarshal(linkedAttachments, tr.LinkedAttachments)
+		err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 		return nil, fmt.Errorf("scan data from database: %s", err.Error())
 	}
 
-	err = json.Unmarshal(linkedAttachments, tr.LinkedAttachments)
+	err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
 	if err != nil {
 		return nil, err
 	}
