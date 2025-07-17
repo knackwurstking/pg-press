@@ -133,7 +133,7 @@ func (db *Users) Add(user *User) error {
 	// Feed...
 	if err == nil {
 		feed := NewUserAddFeed(user.UserName)
-		if err := db.feeds.Add(feed); err != nil {
+		if err = db.feeds.Add(feed); err != nil {
 			return fmt.Errorf("add new feed: %s", err.Error())
 		}
 	}
@@ -154,7 +154,7 @@ func (db *Users) Remove(telegramID int64) error {
 	// Feed...
 	if err == nil && user != nil {
 		feed := NewUserRemoveFeed(user.UserName)
-		if err := db.feeds.Add(feed); err != nil {
+		if err = db.feeds.Add(feed); err != nil {
 			return fmt.Errorf("add new feed: %s", err.Error())
 		}
 	}
