@@ -136,7 +136,7 @@ func serveLogin(e *echo.Echo, options Options) {
 				return nil
 			} else if err != nil {
 				// Log authentication errors
-				log.Errorf("Login failed for API key: %v", err)
+				log.Warnf("Login failed for API key: %v", err)
 			}
 		}
 
