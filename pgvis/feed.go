@@ -1,7 +1,6 @@
 package pgvis
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
