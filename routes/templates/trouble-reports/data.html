@@ -1,6 +1,4 @@
-{{$data := .}}
-
-{{if ne (len $data.TroubleReports) 0}}
+{{$data := .}} {{if ne (len $data.TroubleReports) 0}}
 <ul id="data">
     <style>
         pre {
@@ -9,7 +7,7 @@
     </style>
 
     {{range $tr := $data.TroubleReports}}
-    <details style="margin: var(--ui-spacing) auto;" class="data">
+    <details style="margin: var(--ui-spacing) auto" class="data">
         <summary>{{$tr.Title}}</summary>
         <pre>{{$tr.Content}}</pre>
     </details>
@@ -37,19 +35,19 @@
             <i class="bi bi-trash"></i>
         </button>
         {{else}}
-            <!-- TODO: User is not an admin, Add voting system for deleting trouble reports -->
-            <!-- TODO: Store this vote somewhere and highlight it somehow -->
-            <button
-                id="voteForDelete"
-                hx-post="./trouble-reports/vote?id={{$tr.ID}}"
-                hx-trigger="click"
-                hx-swap="outerHTML"
-                class="ghost destructive"
-                disabled
-            >
-                <!-- STIMME FÜR LÖSCHEN -->
-                VOTE FOR DELETE
-            </button>
+        <!-- TODO: User is not an admin, Add voting system for deleting trouble reports -->
+        <!-- TODO: Store this vote somewhere and highlight it somehow -->
+        <button
+            id="voteForDelete"
+            hx-post="./trouble-reports/vote?id={{$tr.ID}}"
+            hx-trigger="click"
+            hx-swap="outerHTML"
+            class="ghost destructive flex column justify-between align-center"
+            style="transform: scale(0.75);"
+        >
+            <i class="bi bi-trash"></i>
+            <small>VOTE</small>
+        </button>
         {{end}}
 
     </div>
