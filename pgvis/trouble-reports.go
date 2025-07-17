@@ -6,13 +6,9 @@ import (
 	"fmt"
 )
 
-type TroubleReports struct {
-	db    *sql.DB
-	feeds *Feeds
-}
-
-func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
-	query := `
+const (
+	// SQL queries for trouble reports table
+	createTroubleReportsTableQuery = `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
@@ -23,8 +19,23 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 		);
 	`
 
-	if _, err := db.Exec(query); err != nil {
-		panic(err)
+	selectAllTroubleReportsQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
+	selectTroubleReportByIDQuery = `SELECT * FROM trouble_reports WHERE id = ?`
+	insertTroubleReportQuery     = `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
+	updateTroubleReportQuery     = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?`
+	deleteTroubleReportQuery     = `DELETE FROM trouble_reports WHERE id = ?`
+)
+
+// TroubleReports handles database operations for trouble reports
+type TroubleReports struct {
+	db    *sql.DB
+	feeds *Feeds
+}
+
+// NewTroubleReports creates a new TroubleReports instance and initializes the database table
+func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
+	if _, err := db.Exec(createTroubleReportsTableQuery); err != nil {
+		panic(fmt.Errorf("failed to create trouble_reports table: %w", err))
 	}
 
 	return &TroubleReports{
@@ -33,132 +44,154 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	}
 }
 
-func (db *TroubleReports) List() ([]*TroubleReport, error) {
-	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
-	r, err := db.db.Query(query)
+// List retrieves all trouble reports ordered by ID in descending order
+func (tr *TroubleReports) List() ([]*TroubleReport, error) {
+	rows, err := tr.db.Query(selectAllTroubleReportsQuery)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to query trouble reports: %w", err)
 	}
-	defer r.Close()
+	defer rows.Close()
 
-	trs := []*TroubleReport{}
+	var reports []*TroubleReport
 
-	for r.Next() {
-		tr := TroubleReport{}
-
-		linkedAttachments := []byte{}
-		modified := []byte{}
-
-		err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &linkedAttachments, &modified)
+	for rows.Next() {
+		report, err := tr.scanTroubleReport(rows)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan trouble report: %w", err)
 		}
-
-		err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
-		if err != nil {
-			return nil, err
-		}
-
-		err = json.Unmarshal(modified, &tr.Modified)
-		if err != nil {
-			return nil, err
-		}
-
-		trs = append(trs, &tr)
+		reports = append(reports, report)
 	}
 
-	return trs, nil
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return reports, nil
 }
 
-func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
-	query := fmt.Sprintf(`SELECT * FROM trouble_reports WHERE id = %d`, id)
-	r, err := db.db.Query(query)
+// Get retrieves a specific trouble report by ID
+func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
+	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
+
+	report, err := tr.scanTroubleReportRow(row)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to get trouble report with ID %d: %w", id, err)
 	}
 
-	defer r.Close()
-
-	if !r.Next() {
-		return nil, ErrNotFound
-	}
-
-	tr := &TroubleReport{}
-
-	linkedAttachments := []byte{}
-	modified := []byte{}
-
-	err = r.Scan(&tr.ID, &tr.Title, &tr.Content, &linkedAttachments, &modified)
-	if err != nil {
-		return nil, fmt.Errorf("scan data from database: %s", err.Error())
-	}
-
-	err = json.Unmarshal(linkedAttachments, &tr.LinkedAttachments)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(modified, &tr.Modified)
-	if err != nil {
-		return nil, err
-	}
-
-	return tr, nil
+	return report, nil
 }
 
-func (db *TroubleReports) Add(tr *TroubleReport) error {
-	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+// Add creates a new trouble report and adds a corresponding feed entry
+func (tr *TroubleReports) Add(report *TroubleReport) error {
+	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal linked attachments: %w", err)
 	}
 
-	modified, err := json.Marshal(tr.Modified)
+	modified, err := json.Marshal(report.Modified)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal modified data: %w", err)
 	}
 
-	_, err = db.db.Exec(
-		`INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`,
-		tr.Title, tr.Content, linkedAttachments, modified,
+	_, err = tr.db.Exec(
+		insertTroubleReportQuery,
+		report.Title, report.Content, linkedAttachments, modified,
 	)
-
-	// Feed...
-	if err == nil {
-		feed := NewTroubleReportAddFeed(tr)
-		err = db.feeds.Add(feed)
-		if err != nil {
-			return fmt.Errorf("add new feed: %s", err.Error())
-		}
+	if err != nil {
+		return fmt.Errorf("failed to insert trouble report: %w", err)
 	}
 
-	return err
+	// Create feed entry for the new trouble report
+	feed := NewTroubleReportAddFeed(report)
+	if err := tr.feeds.Add(feed); err != nil {
+		return fmt.Errorf("failed to add feed entry: %w", err)
+	}
+
+	return nil
 }
 
-// TODO: Create a new feed if the trouble report is updated successfully
-func (db *TroubleReports) Update(id int64, tr *TroubleReport) error {
-	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
+// Update modifies an existing trouble report
+// TODO: Create a new feed entry when the trouble report is updated successfully
+func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
+	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal linked attachments: %w", err)
 	}
 
-	modified, err := json.Marshal(tr.Modified)
+	modified, err := json.Marshal(report.Modified)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to marshal modified data: %w", err)
 	}
 
-	_, err = db.db.Exec(
-		"UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?",
-		tr.Title, tr.Content, linkedAttachments, modified, id,
+	_, err = tr.db.Exec(
+		updateTroubleReportQuery,
+		report.Title, report.Content, linkedAttachments, modified, id,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to update trouble report with ID %d: %w", id, err)
+	}
+
+	return nil
 }
 
-func (db *TroubleReports) Remove(id int64) error {
-	query := fmt.Sprintf(
-		`DELETE FROM trouble_reports WHERE id = %d`,
-		id,
-	)
+// Remove deletes a trouble report by ID
+// TODO: Create a new feed entry when the trouble report is removed successfully
+func (tr *TroubleReports) Remove(id int64) error {
+	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
+	if err != nil {
+		return fmt.Errorf("failed to delete trouble report with ID %d: %w", id, err)
+	}
 
-	_, err := db.db.Exec(query)
-	return err
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}
+
+func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, error) {
+	report := &TroubleReport{}
+	var linkedAttachments, modified []byte
+
+	if err := rows.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &modified); err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	if err := json.Unmarshal(linkedAttachments, &report.LinkedAttachments); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal linked attachments: %w", err)
+	}
+
+	if err := json.Unmarshal(modified, &report.Modified); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal modified data: %w", err)
+	}
+
+	return report, nil
+}
+
+// scanTroubleReportRow scans a trouble report from a single row
+func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, error) {
+	report := &TroubleReport{}
+	var linkedAttachments, modified []byte
+
+	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &modified); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(linkedAttachments, &report.LinkedAttachments); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal linked attachments: %w", err)
+	}
+
+	if err := json.Unmarshal(modified, &report.Modified); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal modified data: %w", err)
+	}
+
+	return report, nil
 }
