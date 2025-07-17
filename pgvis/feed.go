@@ -8,10 +8,11 @@ import (
 
 // TODO: Need to find a way to handle feeds viewed per user
 type Feed struct {
-	ID    int
-	Time  int64 // Time contains an UNIX millisecond timestamp
-	Main  string
-	Cache any
+	ID       int
+	Time     int64 // Time contains an UNIX millisecond timestamp
+	Main     string
+	ViewedBy []*User
+	Cache    any
 }
 
 func NewFeed(main string, cache any) *Feed {
@@ -32,6 +33,21 @@ func (f *Feed) CacheToJSON() []byte {
 
 func (f *Feed) JSONToCache(b []byte) {
 	err := json.Unmarshal(b, &f.Cache)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (f *Feed) ViewedByToJSON() []byte {
+	b, err := json.Marshal(f.ViewedBy)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (f *Feed) JSONToViewedBy(b []byte) {
+	err := json.Unmarshal(b, &f.ViewedBy)
 	if err != nil {
 		panic(err)
 	}

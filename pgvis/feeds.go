@@ -10,10 +10,12 @@ type Feeds struct {
 
 func NewFeeds(db *sql.DB) *Feeds {
 	query := `
+	    DROP TABLE IF EXISTS feeds;
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
 			main TEXT NOT NULL,
+			viewed_by BLOB NOT NULL,
 			cache BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -30,7 +32,7 @@ func NewFeeds(db *sql.DB) *Feeds {
 
 func (f *Feeds) List() ([]*Feed, error) {
 	r, err := f.db.Query(
-		"SELECT id, time, main, cache FROM feeds ORDER BY id DESC",
+		"SELECT id, time, main, viewed_by, cache FROM feeds ORDER BY id DESC",
 	)
 	if err != nil {
 		return nil, err
@@ -42,7 +44,7 @@ func (f *Feeds) List() ([]*Feed, error) {
 
 func (f *Feeds) ListRange(from int, count int) ([]*Feed, error) {
 	r, err := f.db.Query(
-		"SELECT id, time, main, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?",
+		"SELECT id, time, main, viewed_by, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?",
 		count, from,
 	)
 	if err != nil {
@@ -55,8 +57,8 @@ func (f *Feeds) ListRange(from int, count int) ([]*Feed, error) {
 
 func (f *Feeds) Add(feed *Feed) error {
 	_, err := f.db.Exec(
-		"INSERT INTO feeds (time, main, cache) VALUES (?, ?, ?)",
-		feed.Time, feed.Main, feed.CacheToJSON(),
+		"INSERT INTO feeds (time, main, viewed_by, cache) VALUES (?, ?, ?, ?)",
+		feed.Time, feed.Main, feed.ViewedByToJSON(), feed.CacheToJSON(),
 	)
 	return err
 }
@@ -66,11 +68,13 @@ func (f *Feeds) scanAllRows(r *sql.Rows) (feeds []*Feed, err error) {
 	for r.Next() {
 		f := &Feed{}
 		cache := []byte{}
+		viewedBy := []byte{}
 
-		if err = r.Scan(&f.ID, &f.Time, &f.Main, &cache); err != nil {
+		if err = r.Scan(&f.ID, &f.Time, &f.Main, &viewedBy, &cache); err != nil {
 			return nil, err
 		}
 
+		f.JSONToViewedBy(viewedBy)
 		f.JSONToCache(cache)
 		feeds = append(feeds, f)
 	}
