@@ -106,7 +106,6 @@ func (db *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	return tr, nil
 }
 
-// TODO: Create a new feed if the trouble report is created successfully
 func (db *TroubleReports) Add(tr *TroubleReport) error {
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
@@ -122,6 +121,16 @@ func (db *TroubleReports) Add(tr *TroubleReport) error {
 		`INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`,
 		tr.Title, tr.Content, linkedAttachments, modified,
 	)
+
+	// Feed...
+	if err == nil {
+		feed := NewTroubleReportAddFeed(tr)
+		err = db.feeds.Add(feed)
+		if err != nil {
+			return fmt.Errorf("add new feed: %s", err.Error())
+		}
+	}
+
 	return err
 }
 
