@@ -39,7 +39,7 @@
         <!-- TODO: Store this vote somewhere and highlight it somehow -->
         <button
             id="voteForDelete"
-            hx-post="./trouble-reports/vote?id={{$tr.ID}}"
+            hx-post="./trouble-reports/vote?id={{$tr.ID}}&mode=delete"
             hx-trigger="click"
             hx-swap="outerHTML"
             class="ghost destructive flex column justify-between align-center"
