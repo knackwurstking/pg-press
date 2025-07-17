@@ -56,6 +56,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 		for _, feed := range data.Feeds {
 			user.LastFeed = feed.ID
+			break
 		}
 
 		err := db.Users.Update(user.TelegramID, user)
