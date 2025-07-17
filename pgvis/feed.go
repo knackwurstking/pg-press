@@ -18,20 +18,20 @@ const (
 	MaxFeedMainLength = 10000
 
 	// HTML templates for different feed types
-	userAddTemplate        = `<p>New user: %s</p>`
-	userRemoveTemplate     = `<p>%s Kicked!</p>`
-	userNameChangeTemplate = `<p>User name changed from %s to %s</p>`
+	userAddTemplate        = `<p>New user: %s</p>`                    // [%(user-name)]
+	userRemoveTemplate     = `<p>%s Kicked!</p>`                      // [%(user-name)]
+	userNameChangeTemplate = `<p>User name changed from %s to %s</p>` // [%(old-user-name), %(new-user-name)]
 
 	// Trouble report templates with improved formatting
-	troubleReportAddTemplate = `<p>New trouble report: #%d<br />
-Last modified by: %s</p>
-<p><a href="/trouble-reports#feed%d">%s</a></p>`
+	troubleReportAddTemplate = `<p>New trouble report:
+<a href="/trouble-reports#trouble-report%d">#%d - %s</a><br />
+Last modified by: %s</p>` // [%(id), %(id), %(title), %(modified)]
 
-	troubleReportRemoveTemplate = `<p>Trouble report #%d removed</p>`
+	troubleReportRemoveTemplate = `<p>Trouble report #%d removed</p>` // [%(id)]
 
-	troubleReportUpdateTemplate = `<p>Trouble report #%d updated<br />
-Last modified by: %s</p>
-<p><a href="/trouble-reports#feed%d">%s</a></p>`
+	troubleReportUpdateTemplate = `<p>Trouble report updated<br />
+<a href="/trouble-reports#trouble-report%d">#%d - %s</a> updated<br />
+Last modified by: %s</p>` // [%(id), %(id), %(title), %(modified)]
 )
 
 // Feed represents a feed entry in the system.
@@ -151,7 +151,7 @@ func NewUserAddFeed(userName string) *Feed {
 	}
 	escapedUserName := html.EscapeString(userName)
 	main := fmt.Sprintf(userAddTemplate, escapedUserName)
-	return NewFeed(main, map[string]interface{}{
+	return NewFeed(main, map[string]any{
 		"type":      "user_add",
 		"user_name": userName,
 	})
@@ -164,7 +164,7 @@ func NewUserRemoveFeed(userName string) *Feed {
 	}
 	escapedUserName := html.EscapeString(userName)
 	main := fmt.Sprintf(userRemoveTemplate, escapedUserName)
-	return NewFeed(main, map[string]interface{}{
+	return NewFeed(main, map[string]any{
 		"type":      "user_remove",
 		"user_name": userName,
 	})
@@ -193,7 +193,7 @@ func NewUserNameChangeFeed(oldName, newName string) *Feed {
 // NewTroubleReportAddFeed creates a feed entry for when a new trouble report is added
 func NewTroubleReportAddFeed(report *TroubleReport) *Feed {
 	if report == nil {
-		return NewFeed("<p>New trouble report added</p>", map[string]interface{}{
+		return NewFeed("<p>New trouble report added</p>", map[string]any{
 			"type": "trouble_report_add",
 		})
 	}
@@ -209,12 +209,12 @@ func NewTroubleReportAddFeed(report *TroubleReport) *Feed {
 	main := fmt.Sprintf(
 		troubleReportAddTemplate,
 		report.ID,
-		modifiedBy,
 		report.ID,
 		escapedTitle,
+		modifiedBy,
 	)
 
-	return NewFeed(main, map[string]interface{}{
+	return NewFeed(main, map[string]any{
 		"type":                 "trouble_report_add",
 		"trouble_report_id":    report.ID,
 		"trouble_report_title": report.Title,
@@ -257,9 +257,9 @@ func NewTroubleReportUpdateFeed(report *TroubleReport) *Feed {
 	main := fmt.Sprintf(
 		troubleReportUpdateTemplate,
 		report.ID,
-		modifiedBy,
 		report.ID,
 		escapedTitle,
+		modifiedBy,
 	)
 
 	return NewFeed(main, map[string]interface{}{
