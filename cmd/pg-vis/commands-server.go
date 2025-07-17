@@ -54,7 +54,6 @@ func serverCommand() cli.Command {
 				// Configure logging
 				log.SetLevel(log.DebugLevel)
 				log.SetReportCaller(true)
-				log.Infof("Starting pg-vis server on %s", *addr)
 
 				// Setup middleware
 				e.Use(middlewareLogger())
