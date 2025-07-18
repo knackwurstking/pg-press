@@ -70,7 +70,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if err != nil {
 		log.Errorf("Failed to parse data template: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
-			"Failed to load page template: "+err.Error())
+			pgvis.WrapError(err, "failed to load page template"))
 	}
 
 	// Prepare page data with trouble reports and user permissions
@@ -83,7 +83,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	if err = t.Execute(c.Response(), pageData); err != nil {
 		log.Errorf("Failed to execute data template: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
-			"Failed to render page: "+err.Error())
+			pgvis.WrapError(err, "Failed to render page"))
 	}
 
 	return nil

@@ -38,18 +38,18 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
+				log.SetLevel(log.DebugLevel)
+				log.SetReportCaller(true)
+				log.SetReportTimestamp(false)
+
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					log.Errorf("Failed to open database: %v", err)
+					log.Errorf("Failed to open database: %s", err)
 					return err
 				}
 
 				e := echo.New()
 				e.HideBanner = true
-
-				log.SetLevel(log.DebugLevel)
-				log.SetReportCaller(true)
-				log.SetReportTimestamp(false)
 
 				e.Use(middlewareLogger())
 				e.Use(middlewareKeyAuth(db))
@@ -62,7 +62,7 @@ func serverCommand() cli.Command {
 
 				log.Infof("Server listening on %s", *addr)
 				if err := e.Start(*addr); err != nil && err != http.ErrServerClosed {
-					log.Errorf("Server startup failed: %v", err)
+					log.Errorf("Server startup failed: %s", err)
 					os.Exit(exitCodeServerStart)
 				}
 
@@ -102,9 +102,9 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		if code >= 500 {
-			log.Errorf("Server error (%d): %v", code, err)
+			log.Errorf("Server error (%d): %s", code, message)
 		} else if code >= 400 {
-			log.Warnf("Client error (%d): %v", code, err)
+			log.Warnf("Client error (%d): %s", code, message)
 		}
 
 		if !c.Response().Committed {

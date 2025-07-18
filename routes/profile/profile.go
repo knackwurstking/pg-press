@@ -18,7 +18,6 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -82,24 +81,18 @@ func handleMainPage(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 		// Authenticate user and retrieve context information
 		user, herr := utils.GetUserFromContext(c)
 		if herr != nil {
-			log.Warnf("Failed to get user from context for profile page: %v", herr)
 			return herr
 		}
 		pageData.User = user
 
 		// Handle username change if submitted
 		if err := handleUserNameChange(c, pageData, db); err != nil {
-			log.Errorf("Failed to handle username change: %v", err)
 			return utils.HandlePgvisError(c, err)
 		}
 
 		// Load user's authentication cookies/sessions
-		if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err != nil {
-			log.Errorf("Failed to retrieve cookies for user %s: %v", user.UserName, err)
-			// Continue with empty cookies list rather than failing completely
-		} else {
+		if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err == nil {
 			pageData.Cookies = cookies
-			log.Debugf("Loaded %d cookies for user %s", len(cookies), user.UserName)
 		}
 
 		// Parse required templates for the profile page
@@ -109,16 +102,14 @@ func handleMainPage(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 			shared.NavFeedTemplatePath,
 		)
 		if err != nil {
-			log.Errorf("Failed to parse profile page templates: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError,
-				"Failed to load page templates: "+err.Error())
+				pgvis.WrapError(err, "failed to parse template"))
 		}
 
 		// Render the profile page with user data
 		if err = t.Execute(c.Response(), pageData); err != nil {
-			log.Errorf("Failed to execute profile page template: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError,
-				"Failed to render page: "+err.Error())
+				pgvis.WrapError(err, "failed to execute template"))
 		}
 
 		return nil
@@ -176,13 +167,8 @@ func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) err
 		return nil // No change requested or same username
 	}
 
-	log.Debugf("Processing username change for user %d: %s => %s",
-		pageData.User.TelegramID, pageData.User.UserName, userName)
-
 	// Validate new username length
 	if len(userName) < shared.UserNameMinLength || len(userName) > shared.UserNameMaxLength {
-		log.Warnf("Invalid username length: %d characters (min: %d, max: %d)",
-			len(userName), shared.UserNameMinLength, shared.UserNameMaxLength)
 		return pgvis.NewValidationError(shared.UserNameFormField,
 			"username must be between 1 and 100 characters", len(userName))
 	}
@@ -192,15 +178,10 @@ func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) err
 
 	// Update user in database
 	if err := db.Users.Update(pageData.User.TelegramID, updatedUser); err != nil {
-		log.Errorf("Failed to update username in database: %v", err)
 		return err
 	}
 
 	// Update the profile data for immediate display
 	pageData.User.UserName = userName
-
-	log.Infof("Successfully updated username for user %d to: %s",
-		pageData.User.TelegramID, userName)
-
 	return nil
 }
