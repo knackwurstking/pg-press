@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.8";
+const VERSION = "v0.0.9";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -49,7 +49,7 @@ const STATIC_ASSETS = [
     "./maskable-icon-512x512.png",
 
     // Stylesheets
-    "./ui-dev.min.css",
+    "./ui-v5.0.1-dev.min.css",
     "./css/bootstrap-icons.min.css",
 
     // Fonts
