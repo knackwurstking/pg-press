@@ -218,7 +218,10 @@ class ServiceWorkerManager {
                 actions: [
                     {
                         text: "Update Now",
-                        action: () => this.activateUpdate(),
+                        action: () => {
+                            this.activateUpdate();
+                            this.hideNotification("sw-update");
+                        },
                         primary: true,
                     },
                     {
