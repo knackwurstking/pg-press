@@ -33,8 +33,6 @@
 
     .profile-header {
         background: var(--ui-color-100);
-        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
-        border-radius: var(--ui-radius);
         padding: calc(var(--ui-spacing) * 2);
         margin-bottom: calc(var(--ui-spacing) * 2);
     }
@@ -66,34 +64,12 @@
         background: var(--ui-color-200);
         padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
         border-radius: var(--ui-radius);
-        border: var(--ui-border-width) var(--ui-border-style) var(--ui-color-300);
-    }
-
-    .logout-btn {
-        background: var(--ui-destructive);
-        color: var(--ui-destructive-text);
-        padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
-        border-radius: var(--ui-radius);
-        text-decoration: none;
-        transition: all 0.2s ease;
-        font-size: 0.9rem;
-    }
-
-    .logout-btn:hover {
-        background: var(--ui-destructive--hover);
-        transform: scale(1.02);
-    }
-
-    .cookies-section {
-        background: var(--ui-color-50);
-        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
-        border-radius: var(--ui-radius);
-        overflow: hidden;
+        border: var(--ui-border-width) var(--ui-border-style)
+            var(--ui-color-300);
     }
 
     .profile-dialog {
         background: var(--ui-bg);
-        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
         border-radius: calc(var(--ui-radius) * 2);
         padding: calc(var(--ui-spacing) * 2);
         box-shadow: 0 10px 25px var(--ui-backdrop-color);
@@ -107,49 +83,18 @@
         margin-top: calc(var(--ui-spacing) / 2);
         font-size: 1rem;
     }
-
-    .dialog-footer {
-        margin-top: calc(var(--ui-spacing) * 2);
-        gap: var(--ui-spacing);
-    }
-
-    .close-btn {
-        background: var(--ui-secondary);
-        color: var(--ui-secondary-text);
-        padding: var(--ui-spacing) calc(var(--ui-spacing) * 2);
-        border-radius: var(--ui-radius);
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .close-btn:hover {
-        background: var(--ui-secondary--hover);
-    }
-
-    .submit-btn {
-        background: var(--ui-primary);
-        color: var(--ui-primary-text);
-        border: none;
-        padding: var(--ui-spacing) calc(var(--ui-spacing) * 2);
-        border-radius: var(--ui-radius);
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .submit-btn:hover {
-        background: var(--ui-primary--hover);
-    }
 </style>
 
 <main class="container fluid">
     <div class="profile-container">
-        <div class="profile-header">
+        <div class="profile-header border">
             <div class="user-name-section">
                 <h1>{{.User.UserName}}</h1>
                 <button
-                    class="button secondary icon"
+                    class="secondary icon"
                     onclick='document.querySelector("#dialogEditUserName").showModal();'
-                    title="Benutzername bearbeiten">
+                    title="Benutzername bearbeiten"
+                >
                     <i class="bi bi-pen"></i>
                 </button>
             </div>
@@ -159,23 +104,28 @@
                     <i class="bi bi-telegram"></i>
                     Telegram ID: {{.User.TelegramID}}
                 </div>
-                <a href="./logout" class="logout-btn">
+                <a role="button" href="./logout" class="ghost destructive flex row gap">
                     <i class="bi bi-box-arrow-right"></i>
                     Logout
                 </a>
             </div>
         </div>
 
-        <div class="cookies-section">
+        <div style="overflow: hidden; background: var(--ui-color-50);" class="border">
             <span
                 id="cookies"
                 hx-get="./profile/cookies"
                 hx-trigger="load"
-                hx-swap="outerHTML"></span>
+                hx-swap="outerHTML"
+            ></span>
         </div>
     </div>
 
-    <dialog id="dialogEditUserName" class="profile-dialog" oncancel="event.preventDefault()">
+    <dialog
+        id="dialogEditUserName"
+        class="profile-dialog border"
+        oncancel="event.preventDefault()"
+    >
         <form action="./profile">
             <label class="flex column">
                 <strong>Benutzername ändern</strong>
@@ -184,15 +134,17 @@
                     type="text"
                     value="{{.User.UserName}}"
                     placeholder="Neuer Benutzername"
-                    required />
+                    required
+                />
             </label>
 
-            <footer class="dialog-footer flex row justify-end">
-                <a href="./profile" class="close-btn">
+            <footer style="margin-top: calc(var(--ui-spacing) * 2);" class="flex row gap justify-end">
+                <a role="button" href="./profile" class="secondary flex row gap">
                     <i class="bi bi-x-circle"></i>
                     Schließen
                 </a>
-                <button type="submit" class="submit-btn">
+
+                <button type="submit" class="primary flex row gap">
                     <i class="bi bi-check-circle"></i>
                     Ändern
                 </button>

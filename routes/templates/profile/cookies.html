@@ -32,12 +32,14 @@
         color: var(--ui-text);
         font-weight: 600;
         padding: calc(var(--ui-spacing) * 1.5);
-        border-bottom: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+        border-bottom: var(--ui-border-width) var(--ui-border-style)
+            var(--ui-border-color);
     }
 
     .cookies-table td {
         padding: var(--ui-spacing);
-        border-bottom: var(--ui-border-width) var(--ui-border-style) var(--ui-color-200);
+        border-bottom: var(--ui-border-width) var(--ui-border-style)
+            var(--ui-color-200);
         vertical-align: middle;
     }
 
@@ -50,7 +52,7 @@
     }
 
     .time-cell {
-        font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
         color: var(--ui-color-600);
         font-size: 0.9rem;
         min-width: 140px;
@@ -63,27 +65,6 @@
         word-break: break-word;
     }
 
-    .delete-btn {
-        background: var(--ui-destructive);
-        color: var(--ui-destructive-text);
-        border: none;
-        border-radius: var(--ui-radius);
-        padding: calc(var(--ui-spacing) / 2);
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .delete-btn:hover {
-        background: var(--ui-destructive--hover);
-        transform: scale(1.1);
-    }
-
-    .delete-btn i {
-        font-size: 1rem;
-    }
-
     .no-cookies {
         text-align: center;
         color: var(--ui-color-600);
@@ -94,8 +75,7 @@
     }
 </style>
 
-{{$cookies := .}}
-{{if ne (len $cookies) 0}}
+{{$cookies := .}} {{if ne (len $cookies) 0}}
 <details id="cookies" class="cookies-details" open>
     <summary class="cookies-summary">
         <i class="bi bi-cookie"></i>
@@ -107,7 +87,7 @@
             <tr>
                 <th>Letzte Anmeldung</th>
                 <th class="left">Benutzeragent</th>
-                <th style="width: 60px;"></th>
+                <th style="width: 60px"></th>
             </tr>
         </thead>
 
@@ -123,8 +103,10 @@
                         hx-trigger="click"
                         hx-target="#cookies"
                         hx-swap="outerHTML"
-                        class="delete-btn"
-                        title="Sitzung beenden">
+                        role="button"
+                        class="ghost destructive icon"
+                        title="Sitzung beenden"
+                    >
                         <i class="bi bi-trash"></i>
                     </a>
                 </td>

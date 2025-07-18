@@ -220,7 +220,6 @@ class ServiceWorkerManager {
                         text: "Update Now",
                         action: () => {
                             this.activateUpdate();
-                            this.hideNotification("sw-update");
                         },
                         primary: true,
                     },
@@ -304,18 +303,18 @@ class ServiceWorkerManager {
             this.swRegistration,
             this.swRegistration.waiting,
         );
+
         if (!this.swRegistration || !this.swRegistration.waiting) {
+            this.hideNotification("sw-update");
+            window.location.reload();
             return;
         }
 
         // Tell the waiting service worker to skip waiting
         this.swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
 
-        // Listen for the controlling service worker change
-        navigator.serviceWorker.addEventListener("controllerchange", () => {
-            console.debug("Service worker update activated");
-            window.location.reload();
-        });
+        window.location.reload();
+        this.hideNotification("sw-update");
     }
 
     /**
