@@ -73,38 +73,35 @@ func GenerateSecureCookie(userAgent string) (*Cookie, error) {
 // Validate checks if the cookie has valid data.
 //
 // Returns:
-//   - error: MultiError containing all validation failures, or nil if valid
+//   - error: ValidationError for the first validation failure, or nil if valid
 func (c *Cookie) Validate() error {
-	multiErr := NewMultiError()
-
 	// Validate user agent
 	if c.UserAgent == "" {
-		multiErr.Add(NewValidationError("user_agent", "cannot be empty", c.UserAgent))
-	} else if len(c.UserAgent) > MaxUserAgentLength {
-		multiErr.Add(NewValidationError("user_agent", "too long", len(c.UserAgent)))
+		return NewValidationError("user_agent", "cannot be empty", c.UserAgent)
+	}
+	if len(c.UserAgent) > MaxUserAgentLength {
+		return NewValidationError("user_agent", "too long", len(c.UserAgent))
 	}
 
 	// Validate cookie value
 	if c.Value == "" {
-		multiErr.Add(NewValidationError("value", "cannot be empty", c.Value))
-	} else if len(c.Value) < MinCookieValueLength {
-		multiErr.Add(NewValidationError("value", "too short for security", len(c.Value)))
+		return NewValidationError("value", "cannot be empty", c.Value)
+	}
+	if len(c.Value) < MinCookieValueLength {
+		return NewValidationError("value", "too short for security", len(c.Value))
 	}
 
 	// Validate API key
 	if c.ApiKey == "" {
-		multiErr.Add(NewValidationError("api_key", "cannot be empty", c.ApiKey))
-	} else if len(c.ApiKey) < MinAPIKeyLength {
-		multiErr.Add(NewValidationError("api_key", "too short for security", len(c.ApiKey)))
+		return NewValidationError("api_key", "cannot be empty", c.ApiKey)
+	}
+	if len(c.ApiKey) < MinAPIKeyLength {
+		return NewValidationError("api_key", "too short for security", len(c.ApiKey))
 	}
 
 	// Validate timestamp
 	if c.LastLogin <= 0 {
-		multiErr.Add(NewValidationError("last_login", "must be positive", c.LastLogin))
-	}
-
-	if multiErr.HasErrors() {
-		return multiErr
+		return NewValidationError("last_login", "must be positive", c.LastLogin)
 	}
 
 	return nil

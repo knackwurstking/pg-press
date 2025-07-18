@@ -77,46 +77,38 @@ func NewBasicTroubleReport(title, content string) *TroubleReport {
 // Validate checks if the trouble report has valid data.
 //
 // Returns:
-//   - error: MultiError containing all validation failures, or nil if valid
+//   - error: ValidationError for the first validation failure, or nil if valid
 func (tr *TroubleReport) Validate() error {
-	multiErr := NewMultiError()
-
 	// Validate title
 	if tr.Title == "" {
-		multiErr.Add(NewValidationError("title", "cannot be empty", tr.Title))
-	} else {
-		if len(tr.Title) < MinTitleLength {
-			multiErr.Add(NewValidationError("title", "too short", len(tr.Title)))
-		}
-		if len(tr.Title) > MaxTitleLength {
-			multiErr.Add(NewValidationError("title", "too long", len(tr.Title)))
-		}
+		return NewValidationError("title", "cannot be empty", tr.Title)
+	}
+	if len(tr.Title) < MinTitleLength {
+		return NewValidationError("title", "too short", len(tr.Title))
+	}
+	if len(tr.Title) > MaxTitleLength {
+		return NewValidationError("title", "too long", len(tr.Title))
 	}
 
 	// Validate content
 	if tr.Content == "" {
-		multiErr.Add(NewValidationError("content", "cannot be empty", tr.Content))
-	} else {
-		if len(tr.Content) < MinContentLength {
-			multiErr.Add(NewValidationError("content", "too short", len(tr.Content)))
-		}
-		if len(tr.Content) > MaxContentLength {
-			multiErr.Add(NewValidationError("content", "too long", len(tr.Content)))
-		}
+		return NewValidationError("content", "cannot be empty", tr.Content)
+	}
+	if len(tr.Content) < MinContentLength {
+		return NewValidationError("content", "too short", len(tr.Content))
+	}
+	if len(tr.Content) > MaxContentLength {
+		return NewValidationError("content", "too long", len(tr.Content))
 	}
 
 	// Validate attachments if present
 	if tr.LinkedAttachments != nil {
 		for i, attachment := range tr.LinkedAttachments {
 			if attachment == nil {
-				multiErr.Add(NewValidationError("linked_attachments",
-					"attachment cannot be nil", i))
+				return NewValidationError("linked_attachments",
+					"attachment cannot be nil", i)
 			}
 		}
-	}
-
-	if multiErr.HasErrors() {
-		return multiErr
 	}
 
 	return nil

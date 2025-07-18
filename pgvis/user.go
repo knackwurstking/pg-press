@@ -46,33 +46,26 @@ func NewBasicUser(telegramID int64, userName string) *User {
 
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
-	multiErr := NewMultiError()
-
 	if u.TelegramID <= 0 {
-		multiErr.Add(NewValidationError("telegram_id", "must be positive", u.TelegramID))
+		return NewValidationError("telegram_id", "must be positive", u.TelegramID)
 	}
 
 	if u.UserName == "" {
-		multiErr.Add(NewValidationError("user_name", "cannot be empty", u.UserName))
-	} else {
-		if len(u.UserName) < MinUserNameLength {
-			multiErr.Add(NewValidationError("user_name", "too short", len(u.UserName)))
-		}
-		if len(u.UserName) > MaxUserNameLength {
-			multiErr.Add(NewValidationError("user_name", "too long", len(u.UserName)))
-		}
+		return NewValidationError("user_name", "cannot be empty", u.UserName)
+	}
+	if len(u.UserName) < MinUserNameLength {
+		return NewValidationError("user_name", "too short", len(u.UserName))
+	}
+	if len(u.UserName) > MaxUserNameLength {
+		return NewValidationError("user_name", "too long", len(u.UserName))
 	}
 
 	if u.ApiKey != "" && len(u.ApiKey) < MinAPIKeyLength {
-		multiErr.Add(NewValidationError("api_key", "too short for security", len(u.ApiKey)))
+		return NewValidationError("api_key", "too short for security", len(u.ApiKey))
 	}
 
 	if u.LastFeed < 0 {
-		multiErr.Add(NewValidationError("last_feed", "cannot be negative", u.LastFeed))
-	}
-
-	if multiErr.HasErrors() {
-		return multiErr
+		return NewValidationError("last_feed", "cannot be negative", u.LastFeed)
 	}
 
 	return nil

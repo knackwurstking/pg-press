@@ -89,29 +89,22 @@ func NewFeedWithTime(main string, cache any, timestamp int64) *Feed {
 // Validate checks if the feed has valid data.
 //
 // Returns:
-//   - error: MultiError containing all validation failures, or nil if valid
+//   - error: ValidationError for the first validation failure, or nil if valid
 func (f *Feed) Validate() error {
-	multiErr := NewMultiError()
-
 	// Validate main content
 	if f.Main == "" {
-		multiErr.Add(NewValidationError("main", "cannot be empty", f.Main))
-	} else {
-		if len(f.Main) < MinFeedMainLength {
-			multiErr.Add(NewValidationError("main", "too short", len(f.Main)))
-		}
-		if len(f.Main) > MaxFeedMainLength {
-			multiErr.Add(NewValidationError("main", "too long", len(f.Main)))
-		}
+		return NewValidationError("main", "cannot be empty", f.Main)
+	}
+	if len(f.Main) < MinFeedMainLength {
+		return NewValidationError("main", "too short", len(f.Main))
+	}
+	if len(f.Main) > MaxFeedMainLength {
+		return NewValidationError("main", "too long", len(f.Main))
 	}
 
 	// Validate timestamp
 	if f.Time <= 0 {
-		multiErr.Add(NewValidationError("time", "must be positive", f.Time))
-	}
-
-	if multiErr.HasErrors() {
-		return multiErr
+		return NewValidationError("time", "must be positive", f.Time)
 	}
 
 	return nil

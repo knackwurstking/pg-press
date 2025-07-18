@@ -61,20 +61,14 @@ func (f *Feeds) List() ([]*Feed, error) {
 // ListRange retrieves a specific range of feeds with pagination support
 func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 	// Validate parameters
-	multiErr := NewMultiError()
-
 	if offset < 0 {
-		multiErr.Add(NewValidationError("offset", "must be non-negative", offset))
+		return nil, NewValidationError("offset", "must be non-negative", offset)
 	}
 	if limit <= 0 {
-		multiErr.Add(NewValidationError("limit", "must be positive", limit))
+		return nil, NewValidationError("limit", "must be positive", limit)
 	}
 	if limit > 1000 {
-		multiErr.Add(NewValidationError("limit", "must not exceed 1000", limit))
-	}
-
-	if multiErr.HasErrors() {
-		return nil, multiErr
+		return nil, NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
 	rows, err := f.db.Query(selectFeedsRangeQuery, limit, offset)
@@ -98,17 +92,11 @@ func (f *Feeds) Add(feed *Feed) error {
 	}
 
 	// Validate feed data
-	multiErr := NewMultiError()
-
 	if feed.Main == "" {
-		multiErr.Add(NewValidationError("main", "cannot be empty", feed.Main))
+		return NewValidationError("main", "cannot be empty", feed.Main)
 	}
 	if feed.Time <= 0 {
-		multiErr.Add(NewValidationError("time", "must be positive", feed.Time))
-	}
-
-	if multiErr.HasErrors() {
-		return multiErr
+		return NewValidationError("time", "must be positive", feed.Time)
 	}
 
 	cache, err := json.Marshal(feed.Cache)

@@ -56,38 +56,30 @@ func NewAttachmentFromPath(relativePath string) *Attachment {
 // Validate checks if the attachment has valid data.
 //
 // Returns:
-//   - error: MultiError containing all validation failures, or nil if valid
+//   - error: ValidationError for the first validation failure, or nil if valid
 func (a *Attachment) Validate() error {
-	multiErr := NewMultiError()
-
 	// Validate name
 	if a.Name == "" {
-		multiErr.Add(NewValidationError("name", "cannot be empty", a.Name))
-	} else {
-		if len(a.Name) < MinAttachmentNameLength {
-			multiErr.Add(NewValidationError("name", "too short", len(a.Name)))
-		}
-		if len(a.Name) > MaxAttachmentNameLength {
-			multiErr.Add(NewValidationError("name", "too long", len(a.Name)))
-		}
+		return NewValidationError("name", "cannot be empty", a.Name)
+	}
+	if len(a.Name) < MinAttachmentNameLength {
+		return NewValidationError("name", "too short", len(a.Name))
+	}
+	if len(a.Name) > MaxAttachmentNameLength {
+		return NewValidationError("name", "too long", len(a.Name))
 	}
 
 	// Validate link
 	if a.Link == "" {
-		multiErr.Add(NewValidationError("link", "cannot be empty", a.Link))
+		return NewValidationError("link", "cannot be empty", a.Link)
 	}
 
 	// Validate relative path
 	if a.RelativePath == "" {
-		multiErr.Add(NewValidationError("relative_path", "cannot be empty", a.RelativePath))
-	} else {
-		if len(a.RelativePath) > MaxAttachmentPathLength {
-			multiErr.Add(NewValidationError("relative_path", "too long", len(a.RelativePath)))
-		}
+		return NewValidationError("relative_path", "cannot be empty", a.RelativePath)
 	}
-
-	if multiErr.HasErrors() {
-		return multiErr
+	if len(a.RelativePath) > MaxAttachmentPathLength {
+		return NewValidationError("relative_path", "too long", len(a.RelativePath))
 	}
 
 	return nil

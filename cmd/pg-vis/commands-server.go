@@ -113,10 +113,6 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				code = http.StatusOK
 				message = "OK"
 			}
-		} else if pgvis.IsAPIError(err) {
-			// Handle pgvis API errors
-			code = pgvis.GetHTTPStatusCode(err)
-			message = err.Error()
 		} else {
 			// Handle other errors
 			code = pgvis.GetHTTPStatusCode(err)
