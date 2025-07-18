@@ -26,67 +26,190 @@
 
 {{define "content"}}
 <style>
-    hgroup>.user-name>* {
-        margin: 0;
+    .profile-container {
+        max-width: 42rem;
+        margin: 0 auto;
     }
 
-    hgroup>.user-name {
+    .profile-header {
+        background: var(--ui-color-100);
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+        border-radius: var(--ui-radius);
+        padding: calc(var(--ui-spacing) * 2);
+        margin-bottom: calc(var(--ui-spacing) * 2);
+    }
+
+    .user-name-section {
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
         align-items: center;
-        gap: var(--pico-spacing);
+        justify-content: space-between;
+        margin-bottom: var(--ui-spacing);
+    }
+
+    .user-name-section h1 {
+        margin: 0;
+        color: var(--ui-text);
+        font-size: 2.25rem;
+    }
+
+    .edit-user-btn {
+        background: var(--ui-secondary);
+        color: var(--ui-secondary-text);
+        border: none;
+        border-radius: var(--ui-radius);
+        padding: calc(var(--ui-spacing) / 2);
+        transition: all 0.2s ease;
+    }
+
+    .edit-user-btn:hover {
+        background: var(--ui-secondary--hover);
+        transform: scale(1.05);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: var(--ui-spacing);
+    }
+
+    .telegram-id {
+        color: var(--ui-color-600);
+        font-size: 0.95rem;
+        background: var(--ui-color-200);
+        padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
+        border-radius: var(--ui-radius);
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-color-300);
+    }
+
+    .logout-btn {
+        background: var(--ui-destructive);
+        color: var(--ui-destructive-text);
+        padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
+        border-radius: var(--ui-radius);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .logout-btn:hover {
+        background: var(--ui-destructive--hover);
+        transform: scale(1.02);
+    }
+
+    .cookies-section {
+        background: var(--ui-color-50);
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+        border-radius: var(--ui-radius);
+        overflow: hidden;
+    }
+
+    .profile-dialog {
+        background: var(--ui-bg);
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+        border-radius: calc(var(--ui-radius) * 2);
+        padding: calc(var(--ui-spacing) * 2);
+        box-shadow: 0 10px 25px var(--ui-backdrop-color);
+    }
+
+    .profile-dialog label {
+        margin-bottom: var(--ui-spacing);
+    }
+
+    .profile-dialog input {
+        margin-top: calc(var(--ui-spacing) / 2);
+        font-size: 1rem;
+    }
+
+    .dialog-footer {
+        margin-top: calc(var(--ui-spacing) * 2);
+        gap: var(--ui-spacing);
+    }
+
+    .close-btn {
+        background: var(--ui-secondary);
+        color: var(--ui-secondary-text);
+        padding: var(--ui-spacing) calc(var(--ui-spacing) * 2);
+        border-radius: var(--ui-radius);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+        background: var(--ui-secondary--hover);
+    }
+
+    .submit-btn {
+        background: var(--ui-primary);
+        color: var(--ui-primary-text);
+        border: none;
+        padding: var(--ui-spacing) calc(var(--ui-spacing) * 2);
+        border-radius: var(--ui-radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .submit-btn:hover {
+        background: var(--ui-primary--hover);
     }
 </style>
 
 <main class="container fluid">
-    <hgroup class="flex column gap">
-        <span class="user-name">
-            <h1>{{.User.UserName}}</h1>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="user-name-section">
+                <h1>{{.User.UserName}}</h1>
+                <button
+                    class="edit-user-btn icon"
+                    onclick='document.querySelector("#dialogEditUserName").showModal();'
+                    title="Benutzername bearbeiten">
+                    <i class="bi bi-pen"></i>
+                </button>
+            </div>
 
-            <button
-                class="ghost icon"
-                onclick='
-                    document.querySelector("#dialogEditUserName").showModal();
-                '>
-                <i class="bi bi-pen"></i>
-            </button>
-        </span>
-
-        <div class="flex gap justify-between">
-            <p>Telegram ID: {{.User.TelegramID}}</p>
-            <a
-                style="float: right"
-                role="button"
-                href="./logout"
-                class="ghost destructive">
-                Logout
-            </a>
+            <div class="user-info">
+                <div class="telegram-id">
+                    <i class="bi bi-telegram"></i>
+                    Telegram ID: {{.User.TelegramID}}
+                </div>
+                <a href="./logout" class="logout-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Logout
+                </a>
+            </div>
         </div>
-    </hgroup>
 
-    <br />
+        <div class="cookies-section">
+            <span
+                id="cookies"
+                hx-get="./profile/cookies"
+                hx-trigger="load"
+                hx-swap="outerHTML"></span>
+        </div>
+    </div>
 
-    <span
-        id="cookies"
-        hx-get="./profile/cookies"
-        hx-trigger="load"
-        hx-swap="outerHTML"></span>
-
-    <dialog id="dialogEditUserName" class="clean" oncancel="event.preventDefault()">
+    <dialog id="dialogEditUserName" class="profile-dialog" oncancel="event.preventDefault()">
         <form action="./profile">
             <label class="flex column">
-                User Name
+                <strong>Benutzername ändern</strong>
                 <input
                     name="user-name"
                     type="text"
                     value="{{.User.UserName}}"
-                    placeholder="User Name" />
+                    placeholder="Neuer Benutzername"
+                    required />
             </label>
 
-            <footer class="flex row gap justify-end">
-                <a role="button" class="flex-item secondary" href="./profile">Schließen</a>
-                <button type="flex-item submit">Ändern</button>
+            <footer class="dialog-footer flex row justify-end">
+                <a href="./profile" class="close-btn">
+                    <i class="bi bi-x-circle"></i>
+                    Schließen
+                </a>
+                <button type="submit" class="submit-btn">
+                    <i class="bi bi-check-circle"></i>
+                    Ändern
+                </button>
             </footer>
         </form>
     </dialog>
