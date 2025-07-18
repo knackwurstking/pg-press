@@ -1,3 +1,4 @@
+// NOTE: Cleaned up by AI
 // Package pgvis provides feed models for tracking system events and user actions.
 package pgvis
 
