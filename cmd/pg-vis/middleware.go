@@ -1,3 +1,4 @@
+// NOTE: Cleaned up by AI
 package main
 
 import (
@@ -16,7 +17,6 @@ import (
 )
 
 var (
-	// FIXME: Find a better way to to this !!!
 	keyAuthSkipperRegExp = regexp.MustCompile(
 		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico|.*service-worker\.js|.*\.woff|.*\.woff2|.*htmx.min.js|.*sw-register.js)`,
 	)
@@ -35,36 +35,19 @@ func init() {
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		//Format: "${custom} ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
 		Format: "${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
 		Output: os.Stderr,
-
-		//CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-		//	t := time.Now()
-		//	buf.Write(fmt.Appendf(nil,
-		//		"%d/%02d/%02d %02d:%02d:%02d",
-		//		t.Year(), int(t.Month()), t.Day(),
-		//		t.Hour(), t.Minute(), t.Second(),
-		//	))
-
-		//	return 0, nil
-		//},
 	})
 }
 
 func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper: keyAuthSkipper,
-
-		KeyLookup: "header:" + echo.HeaderAuthorization +
-			",query:access_token,cookie:" + routes.CookieName,
-
+		Skipper:    keyAuthSkipper,
+		KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + routes.CookieName,
 		AuthScheme: "Bearer",
-
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
 			return keyAuthValidator(auth, ctx, db)
 		},
-
 		ErrorHandler: func(err error, c echo.Context) error {
 			log.Errorf("KeyAuth -> ErrorHandler -> %#v", err.Error())
 			log.Debugf("KeyAuth -> ErrorHandler -> User-Agent=%#v", c.Request().UserAgent())
@@ -75,12 +58,10 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 
 func keyAuthSkipper(ctx echo.Context) bool {
 	url := ctx.Request().URL.String()
-
-	if ok := keyAuthSkipperRegExp.MatchString(url); ok {
+	if keyAuthSkipperRegExp.MatchString(url) {
 		log.Debugf("KeyAuth -> Skipper -> Skip: %s", url)
 		return true
 	}
-
 	return false
 }
 
@@ -89,41 +70,45 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 
 	user, err := db.Users.GetUserFromApiKey(auth)
 	if err != nil {
-		if cookie, err := ctx.Cookie(routes.CookieName); err == nil {
-			if c, err := db.Cookies.Get(cookie.Value); err != nil {
-				return false, nil
-			} else {
-				log.Debugf("KeyAuth -> Validator -> Cookie found, try to search for the user...")
-
-				if user, err = db.Users.GetUserFromApiKey(c.ApiKey); err != nil {
-					return false, nil
-				}
-
-				log.Debugf("KeyAuth -> Validator -> ctx.Request().URL.Path=%#v", ctx.Request().URL.Path)
-				if slices.Contains(pages, ctx.Request().URL.Path) {
-					log.Debugf("KeyAuth -> Validator -> Update cookies last login timestamp")
-
-					c.LastLogin = time.Now().UnixMilli()
-
-					// Update expiration for the browser cookie
-					cookie.Expires = time.Now().Add(routes.CookieExpirationDuration)
-
-					if err := db.Cookies.Update(c.Value, c); err != nil {
-						log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
-					}
-				}
-			}
-		} else {
+		user, err = validateUserFromCookie(ctx, db)
+		if err != nil {
 			return false, nil
 		}
 	}
 
-	log.Debugf(
-		"KeyAuth -> Validator -> Authorized: telegram_id=%#v; user_name=%#v",
-		user.TelegramID, user.UserName,
-	)
+	log.Debugf("KeyAuth -> Validator -> Authorized: telegram_id=%#v; user_name=%#v",
+		user.TelegramID, user.UserName)
 
 	ctx.Set("user", user)
-
 	return true, nil
+}
+
+func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error) {
+	cookie, err := ctx.Cookie(routes.CookieName)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := db.Cookies.Get(cookie.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Debugf("KeyAuth -> Validator -> Cookie found, try to search for the user...")
+	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if slices.Contains(pages, ctx.Request().URL.Path) {
+		log.Debugf("KeyAuth -> Validator -> Update cookies last login timestamp")
+		c.LastLogin = time.Now().UnixMilli()
+		cookie.Expires = time.Now().Add(routes.CookieExpirationDuration)
+
+		if err := db.Cookies.Update(c.Value, c); err != nil {
+			log.Errorf("KeyAuth -> Validator -> Update cookies database error: %#v", err)
+		}
+	}
+
+	return user, nil
 }
