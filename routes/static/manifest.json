@@ -1,6 +1,6 @@
 {
     "name": "PG-VIS - Press Group Visualization",
-    "short_name": "PG-VIS",
+    "short_name": "PG Presse",
     "description": "Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities.",
     "version": "1.0.0",
     "manifest_version": 3,
