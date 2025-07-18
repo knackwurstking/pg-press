@@ -261,7 +261,7 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 
 	// Special handling for different error types
 	if pgvis.IsValidationError(err) {
-		return echo.NewHTTPError(code, map[string]interface{}{
+		return echo.NewHTTPError(code, map[string]any{
 			"error":   "Validation failed",
 			"code":    code,
 			"status":  http.StatusText(code),
