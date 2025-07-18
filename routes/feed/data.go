@@ -31,6 +31,8 @@ func (d *Data) Render(f *pgvis.Feed) template.HTML {
 	html += string(f.Main)
 	html += `</main>`
 
+	html += `<br />`
+
 	html += `<footer><small>`
 	html += template.HTMLEscapeString(
 		time.UnixMilli(f.Time).Local().Format("2006-01-02 15:04:05"))
