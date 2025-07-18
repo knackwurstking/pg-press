@@ -52,23 +52,18 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	// Authenticate user and retrieve context information
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
-		log.Warnf("Failed to get user from context: %v", herr)
 		return herr
 	}
 
 	// Fetch all trouble reports from database
 	trs, err := db.TroubleReports.List()
 	if err != nil {
-		log.Errorf("Failed to retrieve trouble reports: %v", err)
 		return utils.HandlePgvisError(c, err)
 	}
-
-	log.Debugf("Retrieved %d trouble reports for user %s", len(trs), user.UserName)
 
 	// Parse the data template
 	t, err := template.ParseFS(templates, shared.TroubleReportsDataTemplatePath)
 	if err != nil {
-		log.Errorf("Failed to parse data template: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			pgvis.WrapError(err, "failed to load page template"))
 	}
@@ -81,7 +76,6 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	// Execute template with the prepared data
 	if err = t.Execute(c.Response(), pageData); err != nil {
-		log.Errorf("Failed to execute data template: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			pgvis.WrapError(err, "Failed to render page"))
 	}
@@ -127,14 +121,12 @@ func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	// Parse and validate the report ID from query parameters
 	id, herr := utils.ParseRequiredIDQuery(c, "id")
 	if herr != nil {
-		log.Warnf("Invalid or missing ID parameter: %v", herr)
 		return herr
 	}
 
 	// Authenticate user and retrieve context information
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
-		log.Warnf("Failed to get user from context: %v", herr)
 		return herr
 	}
 
@@ -157,11 +149,8 @@ func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 
 	// Attempt to remove the trouble report from the database
 	if err := db.TroubleReports.Remove(id); err != nil {
-		log.Errorf("Failed to delete trouble report %d: %v", id, err)
 		return utils.HandlePgvisError(c, err)
 	}
-
-	log.Infof("Successfully deleted trouble report %d", id)
 
 	// Return updated data table by calling GETData
 	// This ensures the client receives the current state after deletion
