@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
 	"os"
 	"regexp"
@@ -37,19 +35,20 @@ func init() {
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${custom} ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
+		//Format: "${custom} ${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
+		Format: "${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
 		Output: os.Stderr,
 
-		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-			t := time.Now()
-			buf.Write(fmt.Appendf(nil,
-				"%d/%02d/%02d %02d:%02d:%02d",
-				t.Year(), int(t.Month()), t.Day(),
-				t.Hour(), t.Minute(), t.Second(),
-			))
+		//CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
+		//	t := time.Now()
+		//	buf.Write(fmt.Appendf(nil,
+		//		"%d/%02d/%02d %02d:%02d:%02d",
+		//		t.Year(), int(t.Month()), t.Day(),
+		//		t.Hour(), t.Minute(), t.Second(),
+		//	))
 
-			return 0, nil
-		},
+		//	return 0, nil
+		//},
 	})
 }
 
