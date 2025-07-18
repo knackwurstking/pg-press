@@ -1,5 +1,4 @@
-// ai: Clean up and organize
-// ai: Implement errors from ./error.go
+// NOTE: Cleaned up by AI
 package pgvis
 
 import (
@@ -8,7 +7,6 @@ import (
 )
 
 const (
-	// SQL queries for feeds table
 	createFeedsTableQuery = `
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
@@ -20,9 +18,11 @@ const (
 
 	selectAllFeedsQuery    = `SELECT id, time, cache FROM feeds ORDER BY id DESC`
 	selectFeedsRangeQuery  = `SELECT id, time, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
+	selectFeedByIDQuery    = `SELECT id, time, cache FROM feeds WHERE id = ?`
 	insertFeedQuery        = `INSERT INTO feeds (time, cache) VALUES (?, ?)`
 	countFeedsQuery        = `SELECT COUNT(*) FROM feeds`
 	deleteFeedsByTimeQuery = `DELETE FROM feeds WHERE time < ?`
+	deleteFeedByIDQuery    = `DELETE FROM feeds WHERE id = ?`
 )
 
 // Feeds handles database operations for feed entries
@@ -36,9 +36,7 @@ func NewFeeds(db *sql.DB) *Feeds {
 		panic(NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
 	}
 
-	return &Feeds{
-		db: db,
-	}
+	return &Feeds{db: db}
 }
 
 // List retrieves all feeds ordered by ID in descending order
@@ -49,17 +47,11 @@ func (f *Feeds) List() ([]*Feed, error) {
 	}
 	defer rows.Close()
 
-	feeds, err := f.scanAllRows(rows)
-	if err != nil {
-		return nil, WrapError(err, "failed to scan feeds")
-	}
-
-	return feeds, nil
+	return f.scanAllRows(rows)
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
 func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
-	// Validate parameters
 	if offset < 0 {
 		return nil, NewValidationError("offset", "must be non-negative", offset)
 	}
@@ -142,8 +134,7 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 		return nil, NewValidationError("id", "must be positive", id)
 	}
 
-	row := f.db.QueryRow("SELECT id, time, main, cache FROM feeds WHERE id = ?", id)
-
+	row := f.db.QueryRow(selectFeedByIDQuery, id)
 	feed, err := f.scanFeedRow(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -161,7 +152,7 @@ func (f *Feeds) Delete(id int) error {
 		return NewValidationError("id", "must be positive", id)
 	}
 
-	result, err := f.db.Exec("DELETE FROM feeds WHERE id = ?", id)
+	result, err := f.db.Exec(deleteFeedByIDQuery, id)
 	if err != nil {
 		return NewDatabaseError("delete", "feeds", "failed to delete feed", err)
 	}
@@ -199,28 +190,20 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 
 // scanFeed scans a single feed from a database row
 func (f *Feeds) scanFeed(rows *sql.Rows) (*Feed, error) {
-	feed := &Feed{}
-	var cache []byte
-
-	if err := rows.Scan(&feed.ID, &feed.Time, &cache); err != nil {
-		return nil, err
-	}
-
-	if len(cache) > 0 {
-		if err := json.Unmarshal(cache, &feed.Cache); err != nil {
-			return nil, WrapError(err, "failed to unmarshal cache data")
-		}
-	}
-
-	return feed, nil
+	return f.scanFeedData(rows.Scan)
 }
 
 // scanFeedRow scans a single feed from a query row
 func (f *Feeds) scanFeedRow(row *sql.Row) (*Feed, error) {
+	return f.scanFeedData(row.Scan)
+}
+
+// scanFeedData scans feed data using the provided scan function
+func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
 	feed := &Feed{}
 	var cache []byte
 
-	if err := row.Scan(&feed.ID, &feed.Time, &cache); err != nil {
+	if err := scanFunc(&feed.ID, &feed.Time, &cache); err != nil {
 		return nil, err
 	}
 
