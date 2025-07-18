@@ -168,7 +168,6 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 // Returns:
 //   - error: Validation, database, or feed creation error
 func (u *Users) Add(user *User) error {
-	// FIXME: Validate using user.Validate()
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
