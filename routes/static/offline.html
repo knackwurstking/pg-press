@@ -6,6 +6,72 @@
     <title>Offline - PG-VIS</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
+        :root {
+            --ui-hue: 250;
+            --ui-saturation: 10%;
+            --ui-color-50: hsl(var(--ui-hue), var(--ui-saturation), 98%);
+            --ui-color-100: hsl(var(--ui-hue), var(--ui-saturation), 96%);
+            --ui-color-200: hsl(var(--ui-hue), var(--ui-saturation), 90%);
+            --ui-color-300: hsl(var(--ui-hue), var(--ui-saturation), 84%);
+            --ui-color-400: hsl(var(--ui-hue), var(--ui-saturation), 65%);
+            --ui-color-500: hsl(var(--ui-hue), var(--ui-saturation), 46%);
+            --ui-color-600: hsl(var(--ui-hue), var(--ui-saturation), 34%);
+            --ui-color-700: hsl(var(--ui-hue), var(--ui-saturation), 26%);
+            --ui-color-800: hsl(var(--ui-hue), var(--ui-saturation), 16%);
+            --ui-color-900: hsl(var(--ui-hue), var(--ui-saturation), 10%);
+            --ui-color-950: hsl(var(--ui-hue), 0%, 0%);
+            --ui-bg: var(--ui-color-50);
+            --ui-text: var(--ui-color-950);
+            --ui-primary: var(--ui-color-700);
+            --ui-primary-text: var(--ui-bg);
+            --ui-primary--hover: hsl(var(--ui-hue), var(--ui-saturation), 31%);
+            --ui-secondary: var(--ui-color-400);
+            --ui-secondary-text: var(--ui-text);
+            --ui-secondary--hover: hsl(var(--ui-hue), var(--ui-saturation), 60%);
+            --ui-destructive: hsl(0, 72%, 51%);
+            --ui-destructive-text: hsl(0, 93%, 94%);
+            --ui-destructive--hover: hsl(0, 72%, 56%);
+            --ui-muted: hsl(var(--ui-hue), 0%, 80%);
+            --ui-muted-text: hsl(var(--ui-hue), 0%, 15%);
+            --ui-warning: hsl(37, 80%, 39%);
+            --ui-warning-text: hsl(51, 80%, 88%);
+            --ui-border-color: var(--ui-color-300);
+            --ui-radius: 0.25rem;
+            --ui-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ui-color-50: hsl(var(--ui-hue), 0%, 0%);
+                --ui-color-100: hsl(var(--ui-hue), var(--ui-saturation), 10%);
+                --ui-color-200: hsl(var(--ui-hue), var(--ui-saturation), 16%);
+                --ui-color-300: hsl(var(--ui-hue), var(--ui-saturation), 26%);
+                --ui-color-400: hsl(var(--ui-hue), var(--ui-saturation), 34%);
+                --ui-color-500: hsl(var(--ui-hue), var(--ui-saturation), 46%);
+                --ui-color-600: hsl(var(--ui-hue), var(--ui-saturation), 65%);
+                --ui-color-700: hsl(var(--ui-hue), var(--ui-saturation), 84%);
+                --ui-color-800: hsl(var(--ui-hue), var(--ui-saturation), 90%);
+                --ui-color-900: hsl(var(--ui-hue), var(--ui-saturation), 96%);
+                --ui-color-950: hsl(var(--ui-hue), 0%, 100%);
+                --ui-bg: var(--ui-color-50);
+                --ui-text: var(--ui-color-950);
+                --ui-primary: var(--ui-color-700);
+                --ui-primary-text: var(--ui-bg);
+                --ui-primary--hover: hsl(var(--ui-hue), var(--ui-saturation), 79%);
+                --ui-secondary: var(--ui-color-500);
+                --ui-secondary-text: var(--ui-text);
+                --ui-secondary--hover: hsl(var(--ui-hue), var(--ui-saturation), 51%);
+                --ui-destructive: hsl(0, 91%, 71%);
+                --ui-destructive-text: hsl(0, 63%, 31%);
+                --ui-destructive--hover: hsl(0, 91%, 66%);
+                --ui-muted: hsl(var(--ui-hue), 0%, 20%);
+                --ui-muted-text: hsl(var(--ui-hue), 0%, 85%);
+                --ui-warning: hsl(44, 80%, 53%);
+                --ui-warning-text: hsl(24, 60%, 26%);
+                --ui-border-color: var(--ui-color-400);
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,18 +79,18 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #3e3c49 0%, #2f2d38 100%);
+            font-family: var(--ui-font-family);
+            background: linear-gradient(135deg, var(--ui-primary) 0%, var(--ui-color-800) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333;
+            color: var(--ui-text);
             line-height: 1.6;
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--ui-bg);
             border-radius: 16px;
             padding: 3rem 2rem;
             text-align: center;
@@ -64,19 +130,19 @@
         h1 {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #2c3e50;
+            color: var(--ui-text);
             margin-bottom: 1rem;
         }
 
         .subtitle {
             font-size: 1.2rem;
-            color: #7f8c8d;
+            color: var(--ui-muted-text);
             margin-bottom: 2rem;
             font-weight: 300;
         }
 
         .message {
-            color: #555;
+            color: var(--ui-text);
             margin-bottom: 2rem;
             font-size: 1rem;
         }
@@ -95,7 +161,7 @@
             gap: 0.5rem;
             padding: 0.875rem 2rem;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--ui-radius);
             font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
@@ -105,23 +171,24 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #3e3c49 0%, #2f2d38 100%);
-            color: white;
+            background: var(--ui-primary);
+            color: var(--ui-primary-text);
         }
 
         .btn-primary:hover {
+            background: var(--ui-primary--hover);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(62, 60, 73, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .btn-secondary {
-            background: rgba(108, 117, 125, 0.1);
-            color: #6c757d;
-            border: 1px solid rgba(108, 117, 125, 0.2);
+            background: var(--ui-secondary);
+            color: var(--ui-secondary-text);
+            border: 1px solid var(--ui-border-color);
         }
 
         .btn-secondary:hover {
-            background: rgba(108, 117, 125, 0.15);
+            background: var(--ui-secondary--hover);
             transform: translateY(-1px);
         }
 
@@ -129,19 +196,19 @@
             margin-top: 2rem;
             padding: 1rem;
             background: rgba(255, 193, 7, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid #ffc107;
+            border-radius: var(--ui-radius);
+            border-left: 4px solid var(--ui-warning);
             text-align: left;
         }
 
         .status-title {
             font-weight: 600;
-            color: #856404;
+            color: var(--ui-warning-text);
             margin-bottom: 0.5rem;
         }
 
         .status-text {
-            color: #664d03;
+            color: var(--ui-warning-text);
             font-size: 0.9rem;
         }
 
@@ -151,7 +218,7 @@
         }
 
         .features h3 {
-            color: #2c3e50;
+            color: var(--ui-text);
             margin-bottom: 1rem;
             font-size: 1.1rem;
         }
@@ -163,7 +230,7 @@
 
         .feature-list li {
             padding: 0.5rem 0;
-            color: #555;
+            color: var(--ui-text);
             font-size: 0.9rem;
             display: flex;
             align-items: center;
@@ -172,7 +239,7 @@
 
         .feature-list li::before {
             content: "✓";
-            color: #28a745;
+            color: var(--ui-primary);
             font-weight: bold;
         }
 
@@ -188,13 +255,13 @@
         }
 
         .network-offline {
-            background: #dc3545;
-            color: white;
+            background: var(--ui-destructive);
+            color: var(--ui-destructive-text);
         }
 
         .network-online {
-            background: #28a745;
-            color: white;
+            background: var(--ui-primary);
+            color: var(--ui-primary-text);
         }
 
         @media (max-width: 480px) {

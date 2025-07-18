@@ -361,41 +361,8 @@ async function getOfflineFallback(type) {
         }
     }
 
-    // Generate basic offline response
-    const offlineHTML = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Offline - PG-VIS</title>
-            <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                       text-align: center; padding: 2rem; background: #faf9fa; }
-                .container { max-width: 400px; margin: 0 auto; background: white;
-                            padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                .icon { font-size: 3rem; margin-bottom: 1rem; }
-                h1 { color: #333; margin-bottom: 1rem; }
-                p { color: #666; margin-bottom: 1.5rem; }
-                button { background: #3e3c49; color: white; border: none;
-                        padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; }
-                button:hover { background: #2f2d38; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="icon">📡</div>
-                <h1>You're Offline</h1>
-                <p>Check your internet connection and try again.</p>
-                <button onclick="window.location.reload()">Retry</button>
-            </div>
-        </body>
-        </html>
-    `;
-
-    return new Response(offlineHTML, {
-        headers: { "Content-Type": "text/html" },
-    });
+    // Redirect to proper offline page with CSS variables
+    return Response.redirect("./offline.html", 302);
 }
 
 /**

@@ -498,19 +498,20 @@ style.textContent = `
         top: 20px;
         right: 20px;
         max-width: 400px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        border-left: 4px solid #007bff;
+        background: var(--ui-bg);
+        border-radius: var(--ui-radius);
+        box-shadow: 0 4px 20px var(--ui-backdrop-color);
+        border-left: 4px solid var(--ui-primary);
         z-index: 9999;
         animation: slideInRight 0.3s ease-out;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--ui-font-family);
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
     }
 
-    .sw-notification-success { border-left-color: #28a745; }
-    .sw-notification-warning { border-left-color: #ffc107; }
-    .sw-notification-error { border-left-color: #dc3545; }
-    .sw-notification-info { border-left-color: #17a2b8; }
+    .sw-notification-success { border-left-color: var(--ui-primary); }
+    .sw-notification-warning { border-left-color: var(--ui-warning); }
+    .sw-notification-error { border-left-color: var(--ui-destructive); }
+    .sw-notification-info { border-left-color: var(--ui-secondary); }
 
     .sw-notification-content {
         padding: 16px;
@@ -529,12 +530,12 @@ style.textContent = `
 
     .sw-notification-title {
         font-weight: 600;
-        color: #333;
+        color: var(--ui-text);
         font-size: 14px;
     }
 
     .sw-notification-message {
-        color: #666;
+        color: var(--ui-muted-text);
         font-size: 13px;
         line-height: 1.4;
         margin-bottom: 12px;
@@ -548,27 +549,28 @@ style.textContent = `
 
     .sw-notification-btn {
         padding: 6px 12px;
-        border: 1px solid #ddd;
-        background: white;
-        border-radius: 4px;
+        border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+        background: var(--ui-bg);
+        border-radius: var(--ui-radius);
         font-size: 12px;
         cursor: pointer;
         transition: all 0.2s ease;
+        color: var(--ui-text);
     }
 
     .sw-notification-btn:hover {
-        background: #f8f9fa;
+        background: var(--ui-muted);
     }
 
     .sw-notification-btn.primary {
-        background: #007bff;
-        color: white;
-        border-color: #007bff;
+        background: var(--ui-primary);
+        color: var(--ui-primary-text);
+        border-color: var(--ui-primary);
     }
 
     .sw-notification-btn.primary:hover {
-        background: #0056b3;
-        border-color: #0056b3;
+        background: var(--ui-primary--hover);
+        border-color: var(--ui-primary--hover);
     }
 
     .sw-notification-close {
@@ -579,7 +581,7 @@ style.textContent = `
         border: none;
         font-size: 18px;
         cursor: pointer;
-        color: #999;
+        color: var(--ui-muted-text);
         width: 24px;
         height: 24px;
         display: flex;
@@ -589,8 +591,8 @@ style.textContent = `
     }
 
     .sw-notification-close:hover {
-        background: #f8f9fa;
-        color: #666;
+        background: var(--ui-muted);
+        color: var(--ui-text);
     }
 
     @keyframes slideInRight {

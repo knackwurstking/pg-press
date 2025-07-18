@@ -56,8 +56,8 @@
         :root {
             --ui-hue: 250;
             --ui-saturation: 10%;
-            --pwa-theme-color: #3e3c49;
-            --pwa-background-color: #faf9fa;
+            --pwa-theme-color: var(--ui-primary);
+            --pwa-background-color: var(--ui-bg);
         }
 
         body.debug,
@@ -81,10 +81,10 @@
             left: 20px;
             right: 20px;
             background: var(--pwa-theme-color);
-            color: white;
+            color: var(--ui-primary-text);
             padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border-radius: var(--ui-radius);
+            box-shadow: 0 4px 20px var(--ui-backdrop-color);
             z-index: 1000;
             display: none;
             animation: slideUp 0.3s ease-out;
@@ -121,26 +121,27 @@
 
         .pwa-install-btn {
             padding: 0.5rem 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-radius: 4px;
+            border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+            background: var(--ui-muted);
+            color: var(--ui-text);
+            border-radius: var(--ui-radius);
             cursor: pointer;
             font-size: 0.9rem;
             transition: background 0.2s ease;
         }
 
         .pwa-install-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--ui-secondary);
         }
 
         .pwa-install-btn.primary {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--pwa-theme-color);
+            background: var(--ui-bg);
+            color: var(--ui-primary);
         }
 
         .pwa-install-btn.primary:hover {
-            background: white;
+            background: var(--ui-primary);
+            color: var(--ui-primary-text);
         }
 
         @keyframes slideUp {
@@ -160,8 +161,8 @@
             top: 0;
             left: 0;
             right: 0;
-            background: #dc3545;
-            color: white;
+            background: var(--ui-destructive);
+            color: var(--ui-destructive-text);
             padding: 0.5rem;
             text-align: center;
             font-size: 0.9rem;
