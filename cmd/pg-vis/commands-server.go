@@ -83,6 +83,10 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		message := "Internal server error"
 
 		if herr, ok := err.(*echo.HTTPError); ok {
+			if herr == nil {
+				return
+			}
+
 			code = herr.Code
 			switch msg := herr.Message.(type) {
 			case string:
