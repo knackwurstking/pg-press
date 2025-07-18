@@ -54,6 +54,7 @@ func serverCommand() cli.Command {
 				// Configure logging
 				log.SetLevel(log.DebugLevel)
 				log.SetReportCaller(true)
+				log.SetReportTimestamp(false)
 
 				// Setup middleware
 				e.Use(middlewareLogger())
