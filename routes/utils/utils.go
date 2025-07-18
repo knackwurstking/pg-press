@@ -273,10 +273,6 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 		return echo.NewHTTPError(code, "Resource not found")
 	}
 
-	if pgvis.IsAuthError(err) {
-		return echo.NewHTTPError(code, "Authentication failed")
-	}
-
 	// Generic error response
 	return echo.NewHTTPError(code, message)
 }
