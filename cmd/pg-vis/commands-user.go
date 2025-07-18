@@ -133,11 +133,9 @@ func addUserCommand() cli.Command {
 				cli.Optional,
 			)
 
-			apiKey := cli.String(cmd, "api-key",
-				cli.Optional)
-
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 			userName := cli.StringArg(cmd, "user-name", cli.Required)
+			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				db, err := openDB(*customDBPath)
@@ -145,13 +143,7 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				var user *pgvis.User
-				if *apiKey != "" {
-					user = pgvis.NewUser(*telegramID, *userName, *apiKey)
-				} else {
-					user = pgvis.NewBasicUser(*telegramID, *userName)
-				}
-
+				user := pgvis.NewUser(*telegramID, *userName, *apiKey)
 				if err = db.Users.Add(user); errors.Is(err, pgvis.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
@@ -204,9 +196,6 @@ func modUserCommand() cli.Command {
 			apiKey := cli.String(cmd, "api-key",
 				cli.Optional)
 
-			deleteApiKey := cli.Bool(cmd, "delete-api-key",
-				cli.Optional)
-
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
@@ -226,10 +215,6 @@ func modUserCommand() cli.Command {
 
 				if *apiKey != "" {
 					user.ApiKey = *apiKey
-				}
-
-				if *deleteApiKey {
-					user.ApiKey = ""
 				}
 
 				err = db.Users.Update(*telegramID, user)

@@ -2,6 +2,7 @@
 package pgvis
 
 import (
+	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -18,7 +19,7 @@ const (
 type User struct {
 	TelegramID int64  `json:"telegram_id"` // Telegram user ID
 	UserName   string `json:"user_name"`   // Display name
-	ApiKey     string `json:"api_key"`     // API key for authentication (optional)
+	ApiKey     string `json:"api_key"`     // API key for authentication
 	LastFeed   int    `json:"last_feed"`   // Last viewed feed ID
 }
 
@@ -39,11 +40,6 @@ func NewUserWithLastFeed(telegramID int64, userName, apiKey string, lastFeed int
 	return user
 }
 
-// NewBasicUser creates a new user with minimal information
-func NewBasicUser(telegramID int64, userName string) *User {
-	return NewUser(telegramID, userName, "")
-}
-
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
 	if u.TelegramID <= 0 {
@@ -60,8 +56,18 @@ func (u *User) Validate() error {
 		return NewValidationError("user_name", "too long", len(u.UserName))
 	}
 
-	if u.ApiKey != "" && len(u.ApiKey) < MinAPIKeyLength {
-		return NewValidationError("api_key", "too short for security", len(u.ApiKey))
+	if u.ApiKey == "" {
+		return NewValidationError("api_key", "cannot be empty", u.ApiKey)
+	}
+	if len(u.ApiKey) < MinAPIKeyLength {
+		return NewValidationError(
+			"api_key",
+			fmt.Sprintf(
+				"too short for security, must be at least %d characters",
+				MinAPIKeyLength,
+			),
+			len(u.ApiKey),
+		)
 	}
 
 	if u.LastFeed < 0 {
@@ -84,16 +90,13 @@ func (u *User) IsAdmin() bool {
 	return slices.Contains(adminIDs, userIDStr)
 }
 
-// HasAPIKey checks if the user has an API key configured
+// HasAPIKey checks if the user has an API key configured (always true since API key is required)
 func (u *User) HasAPIKey() bool {
-	return u.ApiKey != ""
+	return true
 }
 
 // IsValidAPIKey checks if the provided API key matches the user's API key
 func (u *User) IsValidAPIKey(apiKey string) bool {
-	if !u.HasAPIKey() {
-		return false
-	}
 	return u.ApiKey == apiKey
 }
 
@@ -121,7 +124,10 @@ func (u *User) UpdateUserName(newUserName string) error {
 func (u *User) UpdateAPIKey(newAPIKey string) error {
 	newAPIKey = strings.TrimSpace(newAPIKey)
 
-	if newAPIKey != "" && len(newAPIKey) < MinAPIKeyLength {
+	if newAPIKey == "" {
+		return NewValidationError("api_key", "cannot be empty", newAPIKey)
+	}
+	if len(newAPIKey) < MinAPIKeyLength {
 		return NewValidationError("api_key", "too short for security", len(newAPIKey))
 	}
 
@@ -139,9 +145,9 @@ func (u *User) UpdateLastFeed(feedID int) error {
 	return nil
 }
 
-// ClearAPIKey removes the user's API key
+// ClearAPIKey is deprecated - API key is now required and cannot be cleared
 func (u *User) ClearAPIKey() {
-	u.ApiKey = ""
+	// No-op: API key is required and cannot be cleared
 }
 
 // GetDisplayInfo returns safe user information for display (without API key)
@@ -149,7 +155,7 @@ func (u *User) GetDisplayInfo() map[string]any {
 	return map[string]any{
 		"telegram_id": u.TelegramID,
 		"user_name":   u.UserName,
-		"has_api_key": u.HasAPIKey(),
+		"has_api_key": true, // Always true since API key is required
 		"is_admin":    u.IsAdmin(),
 		"last_feed":   u.LastFeed,
 	}
@@ -162,10 +168,7 @@ func (u *User) String() string {
 		adminStatus = " (admin)"
 	}
 
-	apiKeyStatus := ""
-	if u.HasAPIKey() {
-		apiKeyStatus = " [has API key]"
-	}
+	apiKeyStatus := " [has API key]" // Always present since API key is required
 
 	return "User{ID: " + strconv.FormatInt(u.TelegramID, 10) +
 		", Name: " + u.UserName + adminStatus + apiKeyStatus + "}"
@@ -184,9 +187,7 @@ func (u *User) Clone() *User {
 // Sanitize creates a version of the user with sensitive data removed (for logging)
 func (u *User) Sanitize() *User {
 	sanitized := u.Clone()
-	if sanitized.ApiKey != "" {
-		sanitized.ApiKey = maskString(sanitized.ApiKey)
-	}
+	sanitized.ApiKey = maskString(sanitized.ApiKey)
 	return sanitized
 }
 

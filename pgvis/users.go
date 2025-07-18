@@ -168,22 +168,13 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 // Returns:
 //   - error: Validation, database, or feed creation error
 func (u *Users) Add(user *User) error {
+	// FIXME: Validate using user.Validate()
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
 
-	if user.TelegramID == 0 {
-		return NewValidationError("telegram_id", "Telegram ID cannot be 0", user.TelegramID)
-	}
-
-	if user.UserName == "" {
-		return NewValidationError("user_name", "username cannot be empty", user.UserName)
-	}
-
-	if len(user.ApiKey) < MinAPIKeyLength {
-		return NewValidationError("api_key",
-			fmt.Sprintf("API key must be at least %d characters", MinAPIKeyLength),
-			len(user.ApiKey))
+	if err := user.Validate(); err != nil {
+		return err
 	}
 
 	// Check if user already exists
@@ -268,6 +259,10 @@ func (u *Users) Update(telegramID int64, user *User) error {
 
 	if user.UserName == "" {
 		return NewValidationError("user_name", "username cannot be empty", user.UserName)
+	}
+
+	if user.ApiKey == "" {
+		return NewValidationError("api_key", "API key cannot be empty", user.ApiKey)
 	}
 
 	if len(user.ApiKey) < MinAPIKeyLength {
