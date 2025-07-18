@@ -1,37 +1,95 @@
 {
-    "version": "0.0.1",
+    "name": "PG-VIS - Press Group Visualization",
+    "short_name": "PG-VIS",
+    "description": "Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities.",
+    "version": "1.0.0",
     "manifest_version": 3,
-    "name": "PG: Presse",
-    "short_name": "PG: Presse",
-    "id": "",
+    "start_url": "./",
+    "scope": "./",
+    "id": "pg-vis-app",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "theme_color": "#667eea",
+    "background_color": "#ffffff",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["productivity", "business", "utilities"],
     "icons": [
         {
             "src": "./pwa-64x64.png",
             "sizes": "64x64",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "./pwa-192x192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "./pwa-512x512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "./maskable-icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "./apple-touch-icon-180x180.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
         }
     ],
     "screenshots": [],
-    "theme_color": "#000000",
-    "background_color": "#000000",
-    "display": "standalone",
-    "scope": ".",
-    "start_url": "./",
-    "public_path": ""
+    "shortcuts": [
+        {
+            "name": "Trouble Reports",
+            "short_name": "Reports",
+            "description": "View and manage trouble reports",
+            "url": "./trouble-reports",
+            "icons": [
+                {
+                    "src": "./icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Feed",
+            "short_name": "Feed",
+            "description": "View latest feed updates",
+            "url": "./feed",
+            "icons": [
+                {
+                    "src": "./icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Profile",
+            "short_name": "Profile",
+            "description": "Manage your profile and settings",
+            "url": "./profile",
+            "icons": [
+                {
+                    "src": "./icon.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    }
 }

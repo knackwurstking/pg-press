@@ -1,0 +1,556 @@
+/**
+ * Service Worker Registration and Management for PG-VIS
+ *
+ * This script handles the registration, updates, and communication with the
+ * service worker for the PG-VIS application. It provides user notifications
+ * about offline capabilities and handles service worker lifecycle events.
+ */
+
+class ServiceWorkerManager {
+    constructor() {
+        this.swRegistration = null;
+        this.isOnline = navigator.onLine;
+        this.updateCheckInterval = null;
+        this.init();
+    }
+
+    /**
+     * Initialize the service worker manager
+     */
+    async init() {
+        if (!('serviceWorker' in navigator)) {
+            console.warn('[SW Manager] Service Worker not supported');
+            return;
+        }
+
+        // Register service worker
+        await this.registerServiceWorker();
+
+        // Set up event listeners
+        this.setupEventListeners();
+
+        // Check for updates periodically
+        this.startUpdateChecker();
+
+        // Show offline notification if applicable
+        this.showOfflineNotification();
+    }
+
+    /**
+     * Register the service worker
+     */
+    async registerServiceWorker() {
+        try {
+            const registration = await navigator.serviceWorker.register('./service-worker.js', {
+                scope: './'
+            });
+
+            this.swRegistration = registration;
+            console.log('[SW Manager] Service Worker registered successfully:', registration);
+
+            // Handle different registration states
+            if (registration.installing) {
+                console.log('[SW Manager] Service Worker installing...');
+                this.trackInstalling(registration.installing);
+            } else if (registration.waiting) {
+                console.log('[SW Manager] Service Worker waiting...');
+                this.showUpdateNotification();
+            } else if (registration.active) {
+                console.log('[SW Manager] Service Worker active');
+            }
+
+            // Listen for updates
+            registration.addEventListener('updatefound', () => {
+                console.log('[SW Manager] Service Worker update found');
+                this.trackInstalling(registration.installing);
+            });
+
+        } catch (error) {
+            console.error('[SW Manager] Service Worker registration failed:', error);
+        }
+    }
+
+    /**
+     * Track service worker installation progress
+     */
+    trackInstalling(worker) {
+        worker.addEventListener('statechange', () => {
+            console.log('[SW Manager] Service Worker state:', worker.state);
+
+            if (worker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                    // New worker available
+                    this.showUpdateNotification();
+                } else {
+                    // First time installation
+                    this.showInstallNotification();
+                }
+            }
+        });
+    }
+
+    /**
+     * Set up event listeners for online/offline and other events
+     */
+    setupEventListeners() {
+        // Online/offline detection
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            this.hideOfflineNotification();
+            console.log('[SW Manager] App is online');
+        });
+
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+            this.showOfflineNotification();
+            console.log('[SW Manager] App is offline');
+        });
+
+        // Listen for messages from service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            this.handleServiceWorkerMessage(event.data);
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.swRegistration) {
+                this.checkForUpdates();
+            }
+        });
+    }
+
+    /**
+     * Handle messages from the service worker
+     */
+    handleServiceWorkerMessage(data) {
+        console.log('[SW Manager] Message from SW:', data);
+
+        switch (data.type) {
+            case 'CACHE_UPDATED':
+                this.showCacheUpdateNotification();
+                break;
+            case 'OFFLINE_READY':
+                this.showOfflineReadyNotification();
+                break;
+            default:
+                console.log('[SW Manager] Unknown message type:', data.type);
+        }
+    }
+
+    /**
+     * Check for service worker updates
+     */
+    async checkForUpdates() {
+        if (!this.swRegistration) return;
+
+        try {
+            await this.swRegistration.update();
+            console.log('[SW Manager] Checked for updates');
+        } catch (error) {
+            console.error('[SW Manager] Update check failed:', error);
+        }
+    }
+
+    /**
+     * Start periodic update checker
+     */
+    startUpdateChecker() {
+        // Check for updates every 30 minutes
+        this.updateCheckInterval = setInterval(() => {
+            this.checkForUpdates();
+        }, 30 * 60 * 1000);
+    }
+
+    /**
+     * Stop the update checker
+     */
+    stopUpdateChecker() {
+        if (this.updateCheckInterval) {
+            clearInterval(this.updateCheckInterval);
+            this.updateCheckInterval = null;
+        }
+    }
+
+    /**
+     * Show notification for first-time installation
+     */
+    showInstallNotification() {
+        this.showNotification({
+            title: 'App Ready for Offline Use',
+            message: 'PG-VIS is now available offline! You can use core features even without an internet connection.',
+            type: 'success',
+            persistent: false,
+            actions: [
+                {
+                    text: 'Got it',
+                    action: () => this.hideNotification('sw-install')
+                }
+            ]
+        }, 'sw-install');
+    }
+
+    /**
+     * Show notification for app updates
+     */
+    showUpdateNotification() {
+        this.showNotification({
+            title: 'App Update Available',
+            message: 'A new version of PG-VIS is ready. Reload to get the latest features.',
+            type: 'info',
+            persistent: true,
+            actions: [
+                {
+                    text: 'Update Now',
+                    action: () => this.activateUpdate(),
+                    primary: true
+                },
+                {
+                    text: 'Later',
+                    action: () => this.hideNotification('sw-update')
+                }
+            ]
+        }, 'sw-update');
+    }
+
+    /**
+     * Show offline notification
+     */
+    showOfflineNotification() {
+        if (!this.isOnline) {
+            this.showNotification({
+                title: 'You\'re Offline',
+                message: 'Some features may be limited. Your changes will sync when you\'re back online.',
+                type: 'warning',
+                persistent: true,
+                actions: [
+                    {
+                        text: 'Dismiss',
+                        action: () => this.hideNotification('offline')
+                    }
+                ]
+            }, 'offline');
+        }
+    }
+
+    /**
+     * Hide offline notification
+     */
+    hideOfflineNotification() {
+        this.hideNotification('offline');
+    }
+
+    /**
+     * Show cache update notification
+     */
+    showCacheUpdateNotification() {
+        this.showNotification({
+            title: 'Content Updated',
+            message: 'New content has been cached for offline use.',
+            type: 'success',
+            persistent: false
+        }, 'cache-update');
+    }
+
+    /**
+     * Show offline ready notification
+     */
+    showOfflineReadyNotification() {
+        this.showNotification({
+            title: 'Offline Mode Ready',
+            message: 'All essential content is now cached for offline use.',
+            type: 'success',
+            persistent: false
+        }, 'offline-ready');
+    }
+
+    /**
+     * Activate service worker update
+     */
+    async activateUpdate() {
+        if (!this.swRegistration || !this.swRegistration.waiting) {
+            return;
+        }
+
+        // Tell the waiting service worker to skip waiting
+        this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+        // Listen for the controlling service worker change
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
+        });
+    }
+
+    /**
+     * Generic notification system
+     */
+    showNotification(config, id) {
+        // Remove existing notification with same ID
+        this.hideNotification(id);
+
+        const notification = document.createElement('div');
+        notification.id = `sw-notification-${id}`;
+        notification.className = `sw-notification sw-notification-${config.type}`;
+
+        const typeIcons = {
+            success: '✅',
+            info: 'ℹ️',
+            warning: '⚠️',
+            error: '❌'
+        };
+
+        notification.innerHTML = `
+            <div class="sw-notification-content">
+                <div class="sw-notification-header">
+                    <span class="sw-notification-icon">${typeIcons[config.type] || 'ℹ️'}</span>
+                    <span class="sw-notification-title">${config.title}</span>
+                </div>
+                <div class="sw-notification-message">${config.message}</div>
+                ${config.actions ? `
+                    <div class="sw-notification-actions">
+                        ${config.actions.map(action => `
+                            <button class="sw-notification-btn ${action.primary ? 'primary' : ''}"
+                                    onclick="window.swManager.executeNotificationAction('${id}', ${config.actions.indexOf(action)})">
+                                ${action.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+            ${!config.persistent ? `
+                <button class="sw-notification-close" onclick="window.swManager.hideNotification('${id}')">&times;</button>
+            ` : ''}
+        `;
+
+        // Store actions for execution
+        notification._actions = config.actions || [];
+
+        document.body.appendChild(notification);
+
+        // Auto-hide non-persistent notifications
+        if (!config.persistent) {
+            setTimeout(() => {
+                this.hideNotification(id);
+            }, 5000);
+        }
+    }
+
+    /**
+     * Execute notification action
+     */
+    executeNotificationAction(notificationId, actionIndex) {
+        const notification = document.getElementById(`sw-notification-${notificationId}`);
+        if (notification && notification._actions && notification._actions[actionIndex]) {
+            notification._actions[actionIndex].action();
+        }
+    }
+
+    /**
+     * Hide notification
+     */
+    hideNotification(id) {
+        const notification = document.getElementById(`sw-notification-${id}`);
+        if (notification) {
+            notification.remove();
+        }
+    }
+
+    /**
+     * Preload important URLs for offline use
+     */
+    preloadUrls(urls) {
+        if (!this.swRegistration || !this.swRegistration.active) {
+            return;
+        }
+
+        this.swRegistration.active.postMessage({
+            type: 'CACHE_URLS',
+            urls: urls
+        });
+    }
+
+    /**
+     * Get cache status information
+     */
+    async getCacheStatus() {
+        if (!('caches' in window)) {
+            return { supported: false };
+        }
+
+        try {
+            const cacheNames = await caches.keys();
+            const pgvisCaches = cacheNames.filter(name => name.includes('pgvis'));
+
+            let totalSize = 0;
+            for (const cacheName of pgvisCaches) {
+                const cache = await caches.open(cacheName);
+                const keys = await cache.keys();
+                totalSize += keys.length;
+            }
+
+            return {
+                supported: true,
+                cacheCount: pgvisCaches.length,
+                itemCount: totalSize,
+                cacheNames: pgvisCaches
+            };
+        } catch (error) {
+            console.error('[SW Manager] Cache status check failed:', error);
+            return { supported: true, error: error.message };
+        }
+    }
+
+    /**
+     * Clear all caches (for debugging/reset)
+     */
+    async clearAllCaches() {
+        if (!('caches' in window)) {
+            return false;
+        }
+
+        try {
+            const cacheNames = await caches.keys();
+            const pgvisCaches = cacheNames.filter(name => name.includes('pgvis'));
+
+            await Promise.all(pgvisCaches.map(cacheName => caches.delete(cacheName)));
+
+            console.log('[SW Manager] All caches cleared');
+            return true;
+        } catch (error) {
+            console.error('[SW Manager] Cache clearing failed:', error);
+            return false;
+        }
+    }
+}
+
+// Initialize service worker manager when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.swManager = new ServiceWorkerManager();
+    });
+} else {
+    window.swManager = new ServiceWorkerManager();
+}
+
+// Add CSS for notifications
+const style = document.createElement('style');
+style.textContent = `
+    .sw-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        max-width: 400px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid #007bff;
+        z-index: 9999;
+        animation: slideInRight 0.3s ease-out;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .sw-notification-success { border-left-color: #28a745; }
+    .sw-notification-warning { border-left-color: #ffc107; }
+    .sw-notification-error { border-left-color: #dc3545; }
+    .sw-notification-info { border-left-color: #17a2b8; }
+
+    .sw-notification-content {
+        padding: 16px;
+    }
+
+    .sw-notification-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .sw-notification-icon {
+        font-size: 16px;
+    }
+
+    .sw-notification-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .sw-notification-message {
+        color: #666;
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+
+    .sw-notification-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .sw-notification-btn {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .sw-notification-btn:hover {
+        background: #f8f9fa;
+    }
+
+    .sw-notification-btn.primary {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .sw-notification-btn.primary:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .sw-notification-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: #999;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .sw-notification-close:hover {
+        background: #f8f9fa;
+        color: #666;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sw-notification {
+            left: 10px;
+            right: 10px;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(style);

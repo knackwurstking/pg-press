@@ -24,7 +24,7 @@ pg-vis/
 ├── go.mod                 # Go module definition
 ├── go.sum                 # Go module checksums
 ├── Makefile              # Build automation
-└── tsconfig.json         # TypeScript configuration
+└── SERVICE_WORKER.md     # Service Worker documentation
 ```
 
 ## Major Improvements Made

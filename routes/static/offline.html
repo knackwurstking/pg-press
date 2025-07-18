@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - PG-VIS</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            max-width: 450px;
+            width: 90%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .message {
+            color: #555;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 160px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(108, 117, 125, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 193, 7, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            text-align: left;
+        }
+
+        .status-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-text {
+            color: #664d03;
+            font-size: 0.9rem;
+        }
+
+        .features {
+            margin-top: 2rem;
+            text-align: left;
+        }
+
+        .features h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: #555;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .network-status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .network-offline {
+            background: #dc3545;
+            color: white;
+        }
+
+        .network-online {
+            background: #28a745;
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="network-status" id="networkStatus">
+        <span id="networkText">Offline</span>
+    </div>
+
+    <div class="container">
+        <div class="icon">📡</div>
+        <h1>You're Offline</h1>
+        <p class="subtitle">PG-VIS - Press Group Visualization</p>
+        <p class="message">
+            It looks like you're not connected to the internet right now. 
+            Don't worry - we've got you covered with some offline features!
+        </p>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="retryConnection()">
+                <span>🔄</span>
+                Try Again
+            </button>
+            <a href="./" class="btn btn-secondary">
+                <span>🏠</span>
+                Go Home
+            </a>
+        </div>
+
+        <div class="status">
+            <div class="status-title">Connection Status</div>
+            <div class="status-text" id="connectionDetails">
+                Unable to reach PG-VIS servers. Please check your internet connection.
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>Available Offline Features:</h3>
+            <ul class="feature-list">
+                <li>Browse cached trouble reports</li>
+                <li>View previously loaded feed content</li>
+                <li>Access your profile information</li>
+                <li>Draft new trouble reports (synced when online)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Network status monitoring
+        function updateNetworkStatus() {
+            const networkStatus = document.getElementById('networkStatus');
+            const networkText = document.getElementById('networkText');
+            const connectionDetails = document.getElementById('connectionDetails');
+            
+            if (navigator.onLine) {
+                networkStatus.className = 'network-status network-online';
+                networkText.textContent = 'Online';
+                connectionDetails.textContent = 'Connection restored! You can now access all features.';
+                
+                // Auto-redirect after a short delay when back online
+                setTimeout(() => {
+                    window.location.href = './';
+                }, 2000);
+            } else {
+                networkStatus.className = 'network-status network-offline';
+                networkText.textContent = 'Offline';
+                connectionDetails.textContent = 'Unable to reach PG-VIS servers. Please check your internet connection.';
+            }
+        }
+
+        // Retry connection function
+        function retryConnection() {
+            const button = event.target.closest('.btn-primary');
+            const originalContent = button.innerHTML;
+            
+            button.innerHTML = '<span>⏳</span> Checking...';
+            button.disabled = true;
+            
+            // Check if we can reach the server
+            fetch('./', { 
+                method: 'HEAD',
+                cache: 'no-cache'
+            })
+            .then(response => {
+                if (response.ok) {
+                    button.innerHTML = '<span>✅</span> Connected!';
+                    setTimeout(() => {
+                        window.location.href = './';
+                    }, 1000);
+                } else {
+                    throw new Error('Server not reachable');
+                }
+            })
+            .catch(() => {
+                button.innerHTML = '<span>❌</span> Still Offline';
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                }, 2000);
+            });
+        }
+
+        // Service Worker status
+        function checkServiceWorkerStatus() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    console.log('Service Worker ready:', registration);
+                }).catch(error => {
+                    console.log('Service Worker error:', error);
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNetworkStatus();
+            checkServiceWorkerStatus();
+            
+            // Listen for online/offline events
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            
+            // Periodically check connection
+            setInterval(() => {
+                if (!navigator.onLine) {
+                    updateNetworkStatus();
+                }
+            }, 5000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'r' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                retryConnection();
+            } else if (event.key === 'h' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                window.location.href = './';
+            }
+        });
+
+        // Handle visibility change to check connection when tab becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateNetworkStatus();
+            }
+        });
+    </script>
+</body>
+</html>

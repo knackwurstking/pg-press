@@ -1,8 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "CommonJS",
-    "checkJs": true,
-    "outDir": ".trash"
-  },
-  "include": ["html/static/service-worker.js", "html/routes/*.html"]
-}
