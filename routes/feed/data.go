@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -24,24 +23,22 @@ func (d *Data) Render(f *pgvis.Feed) template.HTML {
 		return template.HTML("")
 	}
 
-	// Use strings.Builder for more efficient string concatenation
-	var html strings.Builder
+	var html string
 
-	html.WriteString(fmt.Sprintf(`<article id="feed-%d">`, f.ID))
+	html += fmt.Sprintf(`<article id="feed-%d">`, f.ID)
 
-	html.WriteString(`<main>`)
-	html.WriteString(template.HTMLEscapeString(f.Main))
-	html.WriteString(`</main>`)
+	html += `<main>`
+	html += string(f.Main)
+	html += `</main>`
 
-	html.WriteString(`<footer><small>`)
-	html.WriteString(template.HTMLEscapeString(
-		time.UnixMilli(f.Time).Local().Format("2006-01-02 15:04:05")),
-	)
-	html.WriteString(`</small></footer>`)
+	html += `<footer><small>`
+	html += template.HTMLEscapeString(
+		time.UnixMilli(f.Time).Local().Format("2006-01-02 15:04:05"))
+	html += `</small></footer>`
 
-	html.WriteString(`</article>`)
+	html += `</article>`
 
-	return template.HTML(html.String())
+	return template.HTML(html)
 }
 
 func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {

@@ -8,7 +8,7 @@ package pgvis
 import (
 	"fmt"
 	"html"
-	"strings"
+	"html/template"
 	"time"
 )
 
@@ -48,7 +48,7 @@ type Feed struct {
 	// Time is the UNIX millisecond timestamp when the event occurred
 	Time int64 `json:"time"`
 	// Main contains the HTML content for displaying the feed entry
-	Main string `json:"main"`
+	Main template.HTML `json:"main"`
 	// Cache contains additional cached data related to the feed entry
 	Cache any `json:"cache"`
 }
@@ -61,10 +61,10 @@ type Feed struct {
 //
 // Returns:
 //   - *Feed: The newly created feed entry
-func NewFeed(main string, cache any) *Feed {
+func NewFeed(main template.HTML, cache any) *Feed {
 	return &Feed{
 		Time:  time.Now().UnixMilli(),
-		Main:  strings.TrimSpace(main),
+		Main:  main,
 		Cache: cache,
 	}
 }
@@ -78,10 +78,10 @@ func NewFeed(main string, cache any) *Feed {
 //
 // Returns:
 //   - *Feed: The newly created feed entry
-func NewFeedWithTime(main string, cache any, timestamp int64) *Feed {
+func NewFeedWithTime(main template.HTML, cache any, timestamp int64) *Feed {
 	return &Feed{
 		Time:  timestamp,
-		Main:  strings.TrimSpace(main),
+		Main:  main,
 		Cache: cache,
 	}
 }
@@ -149,7 +149,7 @@ func NewUserAddFeed(userName string) *Feed {
 		userName = "Unknown User"
 	}
 	escapedUserName := html.EscapeString(userName)
-	main := fmt.Sprintf(userAddTemplate, escapedUserName)
+	main := template.HTML(fmt.Sprintf(userAddTemplate, escapedUserName))
 	return NewFeed(main, map[string]any{
 		"type":      "user_add",
 		"user_name": userName,
@@ -162,7 +162,7 @@ func NewUserRemoveFeed(userName string) *Feed {
 		userName = "Unknown User"
 	}
 	escapedUserName := html.EscapeString(userName)
-	main := fmt.Sprintf(userRemoveTemplate, escapedUserName)
+	main := template.HTML(fmt.Sprintf(userRemoveTemplate, escapedUserName))
 	return NewFeed(main, map[string]any{
 		"type":      "user_remove",
 		"user_name": userName,
@@ -179,7 +179,7 @@ func NewUserNameChangeFeed(oldName, newName string) *Feed {
 	}
 	escapedOldName := html.EscapeString(oldName)
 	escapedNewName := html.EscapeString(newName)
-	main := fmt.Sprintf(userNameChangeTemplate, escapedOldName, escapedNewName)
+	main := template.HTML(fmt.Sprintf(userNameChangeTemplate, escapedOldName, escapedNewName))
 	return NewFeed(main, map[string]interface{}{
 		"type":     "user_name_change",
 		"old_name": oldName,
@@ -205,12 +205,14 @@ func NewTroubleReportAddFeed(report *TroubleReport) *Feed {
 	}
 
 	escapedTitle := html.EscapeString(report.Title)
-	main := fmt.Sprintf(
-		troubleReportAddTemplate,
-		report.ID,
-		report.ID,
-		escapedTitle,
-		modifiedBy,
+	main := template.HTML(
+		fmt.Sprintf(
+			troubleReportAddTemplate,
+			report.ID,
+			report.ID,
+			escapedTitle,
+			modifiedBy,
+		),
 	)
 
 	return NewFeed(main, map[string]any{
@@ -229,7 +231,7 @@ func NewTroubleReportRemoveFeed(report *TroubleReport) *Feed {
 		})
 	}
 
-	main := fmt.Sprintf(troubleReportRemoveTemplate, report.ID)
+	main := template.HTML(fmt.Sprintf(troubleReportRemoveTemplate, report.ID))
 	return NewFeed(main, map[string]interface{}{
 		"type":                 "trouble_report_remove",
 		"trouble_report_id":    report.ID,
@@ -253,12 +255,14 @@ func NewTroubleReportUpdateFeed(report *TroubleReport) *Feed {
 	}
 
 	escapedTitle := html.EscapeString(report.Title)
-	main := fmt.Sprintf(
-		troubleReportUpdateTemplate,
-		report.ID,
-		report.ID,
-		escapedTitle,
-		modifiedBy,
+	main := template.HTML(
+		fmt.Sprintf(
+			troubleReportUpdateTemplate,
+			report.ID,
+			report.ID,
+			escapedTitle,
+			modifiedBy,
+		),
 	)
 
 	return NewFeed(main, map[string]interface{}{

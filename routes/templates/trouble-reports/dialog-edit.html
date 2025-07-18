@@ -74,12 +74,15 @@
                 hx-target="#dialogEdit"
                 hx-swap="outerHTML"
                 type="button"
-                class="secondary">
+                class="secondary flex row gap"
+            >
+                <i class="bi bi-x-circle"></i>
                 Schließen
             </button>
 
             <!-- Set button text based on ID value -->
-            <button type="submit">
+            <button type="submit flex row gap">
+                <i class="bi bi-check-circle"></i>
                 {{if gt .ID 0}} Aktualisieren {{else}} Erstellen {{end}}
             </button>
         </footer>
