@@ -371,15 +371,15 @@ async function getOfflineFallback(type) {
             <title>Offline - PG-VIS</title>
             <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                       text-align: center; padding: 2rem; background: #f5f5f5; }
+                       text-align: center; padding: 2rem; background: #faf9fa; }
                 .container { max-width: 400px; margin: 0 auto; background: white;
                             padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                 .icon { font-size: 3rem; margin-bottom: 1rem; }
                 h1 { color: #333; margin-bottom: 1rem; }
                 p { color: #666; margin-bottom: 1.5rem; }
-                button { background: #007bff; color: white; border: none;
+                button { background: #3e3c49; color: white; border: none;
                         padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; }
-                button:hover { background: #0056b3; }
+                button:hover { background: #2f2d38; }
             </style>
         </head>
         <body>
