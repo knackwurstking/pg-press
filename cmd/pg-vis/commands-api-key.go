@@ -19,7 +19,8 @@ func apiKeyCommand() cli.Command {
 					fmt.Fprintf(os.Stderr, "Generating a new api key failed: %s\n", err.Error())
 				}
 
-				fmt.Println(apiKey)
+				fmt.Print(apiKey)
+				fmt.Fprintf(os.Stderr, "\n")
 
 				return nil
 			}
