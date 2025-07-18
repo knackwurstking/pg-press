@@ -135,7 +135,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		// Send error response
 		if !c.Response().Committed {
 			if c.Request().Header.Get("Accept") == "application/json" {
-				c.JSON(code, map[string]interface{}{
+				c.JSON(code, map[string]any{
 					"error":  message,
 					"code":   code,
 					"status": http.StatusText(code),
