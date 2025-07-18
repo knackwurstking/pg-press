@@ -137,7 +137,7 @@ func addUserCommand() cli.Command {
 				cli.Optional)
 
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
-			userName := cli.StringArg(cmd, "user-name", cli.Optional)
+			userName := cli.StringArg(cmd, "user-name", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				db, err := openDB(*customDBPath)
@@ -145,14 +145,14 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				user := pgvis.NewUser(*telegramID, *userName, *apiKey)
-
+				var user *pgvis.User
 				if *apiKey != "" {
-					user.ApiKey = *apiKey
+					user = pgvis.NewUser(*telegramID, *userName, *apiKey)
+				} else {
+					user = pgvis.NewBasicUser(*telegramID, *userName)
 				}
 
-				err = db.Users.Add(user)
-				if errors.Is(err, pgvis.ErrAlreadyExists) {
+				if err = db.Users.Add(user); errors.Is(err, pgvis.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
 				}
