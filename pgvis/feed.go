@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// TOOD: This (html) feed(s) and templates here have to move somewhere into the ../routes directory
 const (
 	// Validation constants for feeds
 	MinFeedMainLength = 1
