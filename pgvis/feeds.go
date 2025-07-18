@@ -13,15 +13,14 @@ const (
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
-			main TEXT NOT NULL,
 			cache BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
-	selectAllFeedsQuery    = `SELECT id, time, main, cache FROM feeds ORDER BY id DESC`
-	selectFeedsRangeQuery  = `SELECT id, time, main, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
-	insertFeedQuery        = `INSERT INTO feeds (time, main, cache) VALUES (?, ?, ?)`
+	selectAllFeedsQuery    = `SELECT id, time, cache FROM feeds ORDER BY id DESC`
+	selectFeedsRangeQuery  = `SELECT id, time, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
+	insertFeedQuery        = `INSERT INTO feeds (time, cache) VALUES (?, ?)`
 	countFeedsQuery        = `SELECT COUNT(*) FROM feeds`
 	deleteFeedsByTimeQuery = `DELETE FROM feeds WHERE time < ?`
 )
@@ -91,12 +90,8 @@ func (f *Feeds) Add(feed *Feed) error {
 		return NewValidationError("feed", "cannot be nil", nil)
 	}
 
-	// Validate feed data
-	if feed.Main == "" {
-		return NewValidationError("main", "cannot be empty", feed.Main)
-	}
-	if feed.Time <= 0 {
-		return NewValidationError("time", "must be positive", feed.Time)
+	if err := feed.Validate(); err != nil {
+		return err
 	}
 
 	cache, err := json.Marshal(feed.Cache)
@@ -104,7 +99,7 @@ func (f *Feeds) Add(feed *Feed) error {
 		return WrapError(err, "failed to marshal feed cache")
 	}
 
-	_, err = f.db.Exec(insertFeedQuery, feed.Time, feed.Main, cache)
+	_, err = f.db.Exec(insertFeedQuery, feed.Time, cache)
 	if err != nil {
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
@@ -207,7 +202,7 @@ func (f *Feeds) scanFeed(rows *sql.Rows) (*Feed, error) {
 	feed := &Feed{}
 	var cache []byte
 
-	if err := rows.Scan(&feed.ID, &feed.Time, &feed.Main, &cache); err != nil {
+	if err := rows.Scan(&feed.ID, &feed.Time, &cache); err != nil {
 		return nil, err
 	}
 
@@ -225,7 +220,7 @@ func (f *Feeds) scanFeedRow(row *sql.Row) (*Feed, error) {
 	feed := &Feed{}
 	var cache []byte
 
-	if err := row.Scan(&feed.ID, &feed.Time, &feed.Main, &cache); err != nil {
+	if err := row.Scan(&feed.ID, &feed.Time, &cache); err != nil {
 		return nil, err
 	}
 

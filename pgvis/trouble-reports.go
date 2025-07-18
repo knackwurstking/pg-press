@@ -160,7 +160,11 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 	}
 
 	// Create feed entry for the new trouble report
-	feed := NewTroubleReportAddFeed(report)
+	feed := NewFeed(&FeedTroubleReportAdd{
+		ID:         report.ID,
+		Title:      report.Title,
+		ModifiedBy: report.Modified.User,
+	})
 	if err := tr.feeds.Add(feed); err != nil {
 		return WrapError(err, "failed to add feed entry")
 	}
@@ -201,7 +205,11 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 	}
 
 	// Create feed entry for the updated trouble report
-	feed := NewTroubleReportUpdateFeed(report)
+	feed := NewFeed(&FeedTroubleReportUpdate{
+		ID:         report.ID,
+		Title:      report.Title,
+		ModifiedBy: report.Modified.User,
+	})
 	if err := tr.feeds.Add(feed); err != nil {
 		return WrapError(err, "failed to add feed entry")
 	}
@@ -239,7 +247,11 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 	// Create feed entry for the removed trouble report
 	if report != nil {
-		feed := NewTroubleReportRemoveFeed(report)
+		feed := NewFeed(&FeedTroubleReportRemove{
+			ID:         report.ID,
+			Title:      report.Title,
+			ModifiedBy: report.Modified.User,
+		})
 		if err := tr.feeds.Add(feed); err != nil {
 			return WrapError(err, "failed to add feed entry")
 		}

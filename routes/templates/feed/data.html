@@ -13,7 +13,7 @@
     </style>
 
     {{range $feed := $data.Feeds}}
-        {{$data.Render $feed}}
+        {{$feed.Render}}
         <hr />
     {{end}}
 </ul>

@@ -197,7 +197,7 @@ func (u *Users) Add(user *User) error {
 	}
 
 	// Create feed entry for the new user
-	feed := NewUserAddFeed(user.UserName)
+	feed := NewFeed(FeedUserAdd{user.TelegramID, user.UserName})
 	if err := u.feeds.Add(feed); err != nil {
 		return WrapError(err, "failed to add feed entry")
 	}
@@ -234,7 +234,7 @@ func (u *Users) Remove(telegramID int64) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := NewUserRemoveFeed(user.UserName)
+		feed := NewFeed(FeedUserRemove{user.TelegramID, user.UserName})
 		if err := u.feeds.Add(feed); err != nil {
 			return WrapError(err, "failed to add feed entry")
 		}
@@ -286,7 +286,12 @@ func (u *Users) Update(telegramID int64, user *User) error {
 
 	// Create feed entry if username changed
 	if prevUser.UserName != user.UserName {
-		feed := NewUserNameChangeFeed(prevUser.UserName, user.UserName)
+		feed := NewFeed(FeedUserNameChange{
+			ID:  user.TelegramID,
+			Old: prevUser.UserName,
+			New: user.UserName,
+		})
+
 		if err := u.feeds.Add(feed); err != nil {
 			return WrapError(err, "failed to add feed entry")
 		}

@@ -1,11 +1,9 @@
 package feed
 
 import (
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -16,31 +14,6 @@ import (
 
 type Data struct {
 	Feeds []*pgvis.Feed
-}
-
-func (d *Data) Render(f *pgvis.Feed) template.HTML {
-	if f == nil {
-		return template.HTML("")
-	}
-
-	var html string
-
-	html += fmt.Sprintf(`<article id="feed-%d">`, f.ID)
-
-	html += `<main>`
-	html += string(f.Main)
-	html += `</main>`
-
-	html += `<br />`
-
-	html += `<footer><small>`
-	html += template.HTMLEscapeString(
-		time.UnixMilli(f.Time).Local().Format("2006-01-02 15:04:05"))
-	html += `</small></footer>`
-
-	html += `</article>`
-
-	return template.HTML(html)
 }
 
 func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
