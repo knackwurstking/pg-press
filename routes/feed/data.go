@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
@@ -62,7 +63,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
-	t, err := template.ParseFS(templates, "templates/feed/data.html")
+	t, err := template.ParseFS(templates, shared.FeedDataTemplatePath)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

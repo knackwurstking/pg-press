@@ -241,58 +241,6 @@ func ParseSearchQuery(ctx echo.Context) (string, *echo.HTTPError) {
 	return query, nil
 }
 
-// Response Utilities
-
-// JSONResponse sends a JSON response with the specified status code and data.
-//
-// Parameters:
-//   - ctx: Echo context for the response
-//   - code: HTTP status code
-//   - data: Data to serialize as JSON
-//
-// Returns:
-//   - error: Error if response fails to send
-func JSONResponse(ctx echo.Context, code int, data interface{}) error {
-	return ctx.JSON(code, data)
-}
-
-// JSONError sends a JSON error response with consistent formatting.
-//
-// Parameters:
-//   - ctx: Echo context for the response
-//   - code: HTTP status code
-//   - message: Error message
-//
-// Returns:
-//   - error: Error if response fails to send
-func JSONError(ctx echo.Context, code int, message string) error {
-	return ctx.JSON(code, map[string]interface{}{
-		"error":  message,
-		"code":   code,
-		"status": http.StatusText(code),
-	})
-}
-
-// JSONSuccess sends a JSON success response with optional data.
-//
-// Parameters:
-//   - ctx: Echo context for the response
-//   - data: Optional data to include in response
-//
-// Returns:
-//   - error: Error if response fails to send
-func JSONSuccess(ctx echo.Context, data interface{}) error {
-	response := map[string]interface{}{
-		"success": true,
-	}
-
-	if data != nil {
-		response["data"] = data
-	}
-
-	return ctx.JSON(http.StatusOK, response)
-}
-
 // Error Handling Utilities
 
 // HandlePgvisError converts pgvis errors to appropriate HTTP responses.
@@ -331,46 +279,6 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 
 	// Generic error response
 	return echo.NewHTTPError(code, message)
-}
-
-// Validation Utilities
-
-// ValidateContentType checks if the request has the expected content type.
-//
-// Parameters:
-//   - ctx: Echo context containing the request
-//   - expected: Expected content type (e.g., "application/json")
-//
-// Returns:
-//   - *echo.HTTPError: HTTP error if content type doesn't match
-func ValidateContentType(ctx echo.Context, expected string) *echo.HTTPError {
-	contentType := ctx.Request().Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, expected) {
-		return echo.NewHTTPError(http.StatusUnsupportedMediaType,
-			"expected content type: "+expected)
-	}
-	return nil
-}
-
-// RequireAdmin checks if the authenticated user has administrator privileges.
-//
-// Parameters:
-//   - ctx: Echo context containing the authenticated user
-//
-// Returns:
-//   - *echo.HTTPError: HTTP error if user is not an admin
-func RequireAdmin(ctx echo.Context) *echo.HTTPError {
-	user, httpErr := GetUserFromContext(ctx)
-	if httpErr != nil {
-		return httpErr
-	}
-
-	if !user.IsAdmin() {
-		return echo.NewHTTPError(http.StatusForbidden,
-			"administrator privileges required")
-	}
-
-	return nil
 }
 
 // Security Utilities
@@ -416,25 +324,4 @@ func ValidateStringLength(value, fieldName string, min, max int) *echo.HTTPError
 	}
 
 	return nil
-}
-
-// Logging Utilities
-
-// LogRequest logs basic request information for debugging purposes.
-//
-// Parameters:
-//   - ctx: Echo context containing request information
-//   - action: Description of the action being performed
-func LogRequest(ctx echo.Context, action string) {
-	method := ctx.Request().Method
-	path := ctx.Request().URL.Path
-	userAgent := ctx.Request().UserAgent()
-
-	// Get user info if available
-	var userInfo string
-	if user, err := GetUserFromContext(ctx); err == nil {
-		userInfo = " user=" + user.UserName
-	}
-
-	ctx.Logger().Infof("%s: %s %s%s ua=%s", action, method, path, userInfo, userAgent)
 }

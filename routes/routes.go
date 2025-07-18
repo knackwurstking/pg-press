@@ -29,6 +29,7 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/feed"
 	"github.com/knackwurstking/pg-vis/routes/nav"
 	"github.com/knackwurstking/pg-vis/routes/profile"
+	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/troublereports"
 )
 
@@ -87,9 +88,9 @@ func serveHome(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
 		// Parse required templates for the home page
 		t, err := template.ParseFS(templates,
-			"templates/layout.html",
-			"templates/home.html",
-			"templates/nav/feed.html",
+			shared.LayoutTemplatePath,
+			shared.HomeTemplatePath,
+			shared.NavFeedTemplatePath,
 		)
 		if err != nil {
 			log.Errorf("Failed to parse home page templates: %v", err)
@@ -122,7 +123,7 @@ func serveLogin(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/login", func(c echo.Context) error {
 		// Get form parameters
 		formParams, _ := c.FormParams()
-		apiKey := formParams.Get("api-key")
+		apiKey := formParams.Get(shared.APIKeyFormField)
 
 		// Attempt login if API key is provided
 		if apiKey != "" {
@@ -148,8 +149,8 @@ func serveLogin(e *echo.Echo, options Options) {
 
 		// Parse and execute login template
 		t, err := template.ParseFS(templates,
-			"templates/layout.html",
-			"templates/login.html",
+			shared.LayoutTemplatePath,
+			shared.LoginTemplatePath,
 		)
 		if err != nil {
 			log.Errorf("Failed to parse login page templates: %v", err)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -41,7 +42,7 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 		}
 	}
 
-	t, err := template.ParseFS(templates, "templates/nav/feed-counter.html")
+	t, err := template.ParseFS(templates, shared.FeedCounterTemplatePath)
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
