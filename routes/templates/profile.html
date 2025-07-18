@@ -52,20 +52,6 @@
         font-size: 2.25rem;
     }
 
-    .edit-user-btn {
-        background: var(--ui-secondary);
-        color: var(--ui-secondary-text);
-        border: none;
-        border-radius: var(--ui-radius);
-        padding: calc(var(--ui-spacing) / 2);
-        transition: all 0.2s ease;
-    }
-
-    .edit-user-btn:hover {
-        background: var(--ui-secondary--hover);
-        transform: scale(1.05);
-    }
-
     .user-info {
         display: flex;
         align-items: center;
@@ -161,7 +147,7 @@
             <div class="user-name-section">
                 <h1>{{.User.UserName}}</h1>
                 <button
-                    class="edit-user-btn icon"
+                    class="button secondary icon"
                     onclick='document.querySelector("#dialogEditUserName").showModal();'
                     title="Benutzername bearbeiten">
                     <i class="bi bi-pen"></i>
