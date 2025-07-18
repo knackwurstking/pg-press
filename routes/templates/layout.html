@@ -8,7 +8,7 @@
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-    
+
     <!-- PWA and mobile optimization -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -22,13 +22,13 @@
     <meta name="description" content="PG-VIS - Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities." />
     <meta name="keywords" content="press, visualization, trouble reports, feed, profile management, PWA, offline" />
     <meta name="author" content="PG-VIS Team" />
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="PG-VIS - Press Group Visualization" />
     <meta property="og:description" content="Manage trouble reports, feeds, and profiles with offline capabilities" />
     <meta property="og:site_name" content="PG-VIS" />
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="PG-VIS - Press Group Visualization" />
@@ -39,7 +39,7 @@
     <link rel="icon" href="./icon.png" type="image/png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
     <link rel="mask-icon" href="./icon.png" color="#3e3c49" />
-    
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json" />
 
@@ -54,8 +54,8 @@
 
     <style>
         :root {
-            --ui-hue: 250;
-            --ui-saturation: 10%;
+            --ui-hue: 225;
+            --ui-saturation: 25%;
             --pwa-theme-color: var(--ui-primary);
             --pwa-background-color: var(--ui-bg);
         }
@@ -250,7 +250,7 @@
 
                 const prompt = this.createInstallPrompt();
                 document.body.appendChild(prompt);
-                
+
                 // Show with animation
                 setTimeout(() => {
                     prompt.classList.add('show');
@@ -261,7 +261,7 @@
                 const prompt = document.createElement('div');
                 prompt.className = 'pwa-install-prompt';
                 prompt.id = 'pwa-install-prompt';
-                
+
                 prompt.innerHTML = `
                     <div class="pwa-install-content">
                         <div class="pwa-install-text">
@@ -288,7 +288,7 @@
 
                 // Wait for the user to respond to the prompt
                 const { outcome } = await this.deferredPrompt.userChoice;
-                
+
                 if (outcome === 'accepted') {
                     console.log('[PWA] User accepted the install prompt');
                 } else {
@@ -323,7 +323,7 @@
             isRecentlyDismissed() {
                 const dismissed = localStorage.getItem('pwa-install-dismissed');
                 if (!dismissed) return false;
-                
+
                 const dismissedTime = parseInt(dismissed);
                 const sevenDays = 7 * 24 * 60 * 60 * 1000;
                 return Date.now() - dismissedTime < sevenDays;
@@ -363,7 +363,7 @@
                 this.isOnline = true;
                 this.hideOfflineIndicator();
                 console.log('[PWA] App is online');
-                
+
                 // Notify service worker
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({
@@ -377,7 +377,7 @@
                 this.isOnline = false;
                 this.showOfflineIndicator();
                 console.log('[PWA] App is offline');
-                
+
                 // Notify service worker
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({
@@ -406,7 +406,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize PWA install manager
             window.pwaInstall = new PWAInstallManager();
-            
+
             // Initialize offline status manager
             window.offlineStatus = new OfflineStatusManager();
 
@@ -422,7 +422,7 @@
             // Add HTMX offline handling
             document.body.addEventListener('htmx:sendError', (event) => {
                 console.log('[HTMX] Request failed, possibly offline:', event.detail);
-                
+
                 // Show user-friendly error for offline requests
                 if (!navigator.onLine) {
                     event.preventDefault();
@@ -464,7 +464,7 @@
 
 <body>
     <!-- Offline indicator (created by JavaScript) -->
-    
+
     <header class="container fluid">
         <nav class="flex row gap justify-between">
             <div class="flex row gap justify-start align-center">
@@ -502,7 +502,7 @@
         // Handle form submissions with offline support
         document.addEventListener('submit', (event) => {
             const form = event.target;
-            
+
             // Add loading state
             const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
             if (submitBtn) {
