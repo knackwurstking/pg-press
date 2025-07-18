@@ -18,8 +18,8 @@ class ServiceWorkerManager {
      * Initialize the service worker manager
      */
     async init() {
-        if (!('serviceWorker' in navigator)) {
-            console.warn('[SW Manager] Service Worker not supported');
+        if (!("serviceWorker" in navigator)) {
+            console.warn("[SW Manager] Service Worker not supported");
             return;
         }
 
@@ -41,32 +41,40 @@ class ServiceWorkerManager {
      */
     async registerServiceWorker() {
         try {
-            const registration = await navigator.serviceWorker.register('./service-worker.js', {
-                scope: './'
-            });
+            const registration = await navigator.serviceWorker.register(
+                "./service-worker.js",
+                {
+                    scope: "./",
+                },
+            );
 
             this.swRegistration = registration;
-            console.log('[SW Manager] Service Worker registered successfully:', registration);
+            console.log(
+                "[SW Manager] Service Worker registered successfully:",
+                registration,
+            );
 
             // Handle different registration states
             if (registration.installing) {
-                console.log('[SW Manager] Service Worker installing...');
+                console.log("[SW Manager] Service Worker installing...");
                 this.trackInstalling(registration.installing);
             } else if (registration.waiting) {
-                console.log('[SW Manager] Service Worker waiting...');
+                console.log("[SW Manager] Service Worker waiting...");
                 this.showUpdateNotification();
             } else if (registration.active) {
-                console.log('[SW Manager] Service Worker active');
+                console.log("[SW Manager] Service Worker active");
             }
 
             // Listen for updates
-            registration.addEventListener('updatefound', () => {
-                console.log('[SW Manager] Service Worker update found');
+            registration.addEventListener("updatefound", () => {
+                console.log("[SW Manager] Service Worker update found");
                 this.trackInstalling(registration.installing);
             });
-
         } catch (error) {
-            console.error('[SW Manager] Service Worker registration failed:', error);
+            console.error(
+                "[SW Manager] Service Worker registration failed:",
+                error,
+            );
         }
     }
 
@@ -74,10 +82,10 @@ class ServiceWorkerManager {
      * Track service worker installation progress
      */
     trackInstalling(worker) {
-        worker.addEventListener('statechange', () => {
-            console.log('[SW Manager] Service Worker state:', worker.state);
+        worker.addEventListener("statechange", () => {
+            console.log("[SW Manager] Service Worker state:", worker.state);
 
-            if (worker.state === 'installed') {
+            if (worker.state === "installed") {
                 if (navigator.serviceWorker.controller) {
                     // New worker available
                     this.showUpdateNotification();
@@ -94,25 +102,25 @@ class ServiceWorkerManager {
      */
     setupEventListeners() {
         // Online/offline detection
-        window.addEventListener('online', () => {
+        window.addEventListener("online", () => {
             this.isOnline = true;
             this.hideOfflineNotification();
-            console.log('[SW Manager] App is online');
+            console.log("[SW Manager] App is online");
         });
 
-        window.addEventListener('offline', () => {
+        window.addEventListener("offline", () => {
             this.isOnline = false;
             this.showOfflineNotification();
-            console.log('[SW Manager] App is offline');
+            console.log("[SW Manager] App is offline");
         });
 
         // Listen for messages from service worker
-        navigator.serviceWorker.addEventListener('message', (event) => {
+        navigator.serviceWorker.addEventListener("message", (event) => {
             this.handleServiceWorkerMessage(event.data);
         });
 
         // Handle page visibility changes
-        document.addEventListener('visibilitychange', () => {
+        document.addEventListener("visibilitychange", () => {
             if (!document.hidden && this.swRegistration) {
                 this.checkForUpdates();
             }
@@ -123,17 +131,17 @@ class ServiceWorkerManager {
      * Handle messages from the service worker
      */
     handleServiceWorkerMessage(data) {
-        console.log('[SW Manager] Message from SW:', data);
+        console.log("[SW Manager] Message from SW:", data);
 
         switch (data.type) {
-            case 'CACHE_UPDATED':
+            case "CACHE_UPDATED":
                 this.showCacheUpdateNotification();
                 break;
-            case 'OFFLINE_READY':
+            case "OFFLINE_READY":
                 this.showOfflineReadyNotification();
                 break;
             default:
-                console.log('[SW Manager] Unknown message type:', data.type);
+                console.log("[SW Manager] Unknown message type:", data.type);
         }
     }
 
@@ -145,9 +153,9 @@ class ServiceWorkerManager {
 
         try {
             await this.swRegistration.update();
-            console.log('[SW Manager] Checked for updates');
+            console.log("[SW Manager] Checked for updates");
         } catch (error) {
-            console.error('[SW Manager] Update check failed:', error);
+            console.error("[SW Manager] Update check failed:", error);
         }
     }
 
@@ -156,9 +164,12 @@ class ServiceWorkerManager {
      */
     startUpdateChecker() {
         // Check for updates every 30 minutes
-        this.updateCheckInterval = setInterval(() => {
-            this.checkForUpdates();
-        }, 30 * 60 * 1000);
+        this.updateCheckInterval = setInterval(
+            () => {
+                this.checkForUpdates();
+            },
+            30 * 60 * 1000,
+        );
     }
 
     /**
@@ -175,41 +186,49 @@ class ServiceWorkerManager {
      * Show notification for first-time installation
      */
     showInstallNotification() {
-        this.showNotification({
-            title: 'App Ready for Offline Use',
-            message: 'PG-VIS is now available offline! You can use core features even without an internet connection.',
-            type: 'success',
-            persistent: false,
-            actions: [
-                {
-                    text: 'Got it',
-                    action: () => this.hideNotification('sw-install')
-                }
-            ]
-        }, 'sw-install');
+        this.showNotification(
+            {
+                title: "App Ready for Offline Use",
+                message:
+                    "PG-VIS is now available offline! You can use core features even without an internet connection.",
+                type: "success",
+                persistent: false,
+                actions: [
+                    {
+                        text: "Got it",
+                        action: () => this.hideNotification("sw-install"),
+                    },
+                ],
+            },
+            "sw-install",
+        );
     }
 
     /**
      * Show notification for app updates
      */
     showUpdateNotification() {
-        this.showNotification({
-            title: 'App Update Available',
-            message: 'A new version of PG-VIS is ready. Reload to get the latest features.',
-            type: 'info',
-            persistent: true,
-            actions: [
-                {
-                    text: 'Update Now',
-                    action: () => this.activateUpdate(),
-                    primary: true
-                },
-                {
-                    text: 'Later',
-                    action: () => this.hideNotification('sw-update')
-                }
-            ]
-        }, 'sw-update');
+        this.showNotification(
+            {
+                title: "App Update Available",
+                message:
+                    "A new version of PG-VIS is ready. Reload to get the latest features.",
+                type: "info",
+                persistent: true,
+                actions: [
+                    {
+                        text: "Update Now",
+                        action: () => this.activateUpdate(),
+                        primary: true,
+                    },
+                    {
+                        text: "Later",
+                        action: () => this.hideNotification("sw-update"),
+                    },
+                ],
+            },
+            "sw-update",
+        );
     }
 
     /**
@@ -217,18 +236,22 @@ class ServiceWorkerManager {
      */
     showOfflineNotification() {
         if (!this.isOnline) {
-            this.showNotification({
-                title: 'You\'re Offline',
-                message: 'Some features may be limited. Your changes will sync when you\'re back online.',
-                type: 'warning',
-                persistent: true,
-                actions: [
-                    {
-                        text: 'Dismiss',
-                        action: () => this.hideNotification('offline')
-                    }
-                ]
-            }, 'offline');
+            this.showNotification(
+                {
+                    title: "You're Offline",
+                    message:
+                        "Some features may be limited. Your changes will sync when you're back online.",
+                    type: "warning",
+                    persistent: true,
+                    actions: [
+                        {
+                            text: "Dismiss",
+                            action: () => this.hideNotification("offline"),
+                        },
+                    ],
+                },
+                "offline",
+            );
         }
     }
 
@@ -236,46 +259,58 @@ class ServiceWorkerManager {
      * Hide offline notification
      */
     hideOfflineNotification() {
-        this.hideNotification('offline');
+        this.hideNotification("offline");
     }
 
     /**
      * Show cache update notification
      */
     showCacheUpdateNotification() {
-        this.showNotification({
-            title: 'Content Updated',
-            message: 'New content has been cached for offline use.',
-            type: 'success',
-            persistent: false
-        }, 'cache-update');
+        this.showNotification(
+            {
+                title: "Content Updated",
+                message: "New content has been cached for offline use.",
+                type: "success",
+                persistent: false,
+            },
+            "cache-update",
+        );
     }
 
     /**
      * Show offline ready notification
      */
     showOfflineReadyNotification() {
-        this.showNotification({
-            title: 'Offline Mode Ready',
-            message: 'All essential content is now cached for offline use.',
-            type: 'success',
-            persistent: false
-        }, 'offline-ready');
+        this.showNotification(
+            {
+                title: "Offline Mode Ready",
+                message: "All essential content is now cached for offline use.",
+                type: "success",
+                persistent: false,
+            },
+            "offline-ready",
+        );
     }
 
     /**
      * Activate service worker update
      */
     async activateUpdate() {
+        console.debug(
+            "Activating service worker update",
+            this.swRegistration,
+            this.swRegistration.waiting,
+        );
         if (!this.swRegistration || !this.swRegistration.waiting) {
             return;
         }
 
         // Tell the waiting service worker to skip waiting
-        this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        this.swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
 
         // Listen for the controlling service worker change
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            console.debug("Service worker update activated");
             window.location.reload();
         });
     }
@@ -287,38 +322,50 @@ class ServiceWorkerManager {
         // Remove existing notification with same ID
         this.hideNotification(id);
 
-        const notification = document.createElement('div');
+        const notification = document.createElement("div");
         notification.id = `sw-notification-${id}`;
         notification.className = `sw-notification sw-notification-${config.type}`;
 
         const typeIcons = {
-            success: '✅',
-            info: 'ℹ️',
-            warning: '⚠️',
-            error: '❌'
+            success: "✅",
+            info: "ℹ️",
+            warning: "⚠️",
+            error: "❌",
         };
 
         notification.innerHTML = `
             <div class="sw-notification-content">
                 <div class="sw-notification-header">
-                    <span class="sw-notification-icon">${typeIcons[config.type] || 'ℹ️'}</span>
+                    <span class="sw-notification-icon">${typeIcons[config.type] || "ℹ️"}</span>
                     <span class="sw-notification-title">${config.title}</span>
                 </div>
                 <div class="sw-notification-message">${config.message}</div>
-                ${config.actions ? `
+                ${
+                    config.actions
+                        ? `
                     <div class="sw-notification-actions">
-                        ${config.actions.map(action => `
-                            <button class="sw-notification-btn ${action.primary ? 'primary' : ''}"
+                        ${config.actions
+                            .map(
+                                (action) => `
+                            <button class="sw-notification-btn ${action.primary ? "primary" : ""}"
                                     onclick="window.swManager.executeNotificationAction('${id}', ${config.actions.indexOf(action)})">
                                 ${action.text}
                             </button>
-                        `).join('')}
+                        `,
+                            )
+                            .join("")}
                     </div>
-                ` : ''}
+                `
+                        : ""
+                }
             </div>
-            ${!config.persistent ? `
+            ${
+                !config.persistent
+                    ? `
                 <button class="sw-notification-close" onclick="window.swManager.hideNotification('${id}')">&times;</button>
-            ` : ''}
+            `
+                    : ""
+            }
         `;
 
         // Store actions for execution
@@ -338,8 +385,14 @@ class ServiceWorkerManager {
      * Execute notification action
      */
     executeNotificationAction(notificationId, actionIndex) {
-        const notification = document.getElementById(`sw-notification-${notificationId}`);
-        if (notification && notification._actions && notification._actions[actionIndex]) {
+        const notification = document.getElementById(
+            `sw-notification-${notificationId}`,
+        );
+        if (
+            notification &&
+            notification._actions &&
+            notification._actions[actionIndex]
+        ) {
             notification._actions[actionIndex].action();
         }
     }
@@ -363,8 +416,8 @@ class ServiceWorkerManager {
         }
 
         this.swRegistration.active.postMessage({
-            type: 'CACHE_URLS',
-            urls: urls
+            type: "CACHE_URLS",
+            urls: urls,
         });
     }
 
@@ -372,13 +425,15 @@ class ServiceWorkerManager {
      * Get cache status information
      */
     async getCacheStatus() {
-        if (!('caches' in window)) {
+        if (!("caches" in window)) {
             return { supported: false };
         }
 
         try {
             const cacheNames = await caches.keys();
-            const pgvisCaches = cacheNames.filter(name => name.includes('pgvis'));
+            const pgvisCaches = cacheNames.filter((name) =>
+                name.includes("pgvis"),
+            );
 
             let totalSize = 0;
             for (const cacheName of pgvisCaches) {
@@ -391,10 +446,10 @@ class ServiceWorkerManager {
                 supported: true,
                 cacheCount: pgvisCaches.length,
                 itemCount: totalSize,
-                cacheNames: pgvisCaches
+                cacheNames: pgvisCaches,
             };
         } catch (error) {
-            console.error('[SW Manager] Cache status check failed:', error);
+            console.error("[SW Manager] Cache status check failed:", error);
             return { supported: true, error: error.message };
         }
     }
@@ -403,28 +458,32 @@ class ServiceWorkerManager {
      * Clear all caches (for debugging/reset)
      */
     async clearAllCaches() {
-        if (!('caches' in window)) {
+        if (!("caches" in window)) {
             return false;
         }
 
         try {
             const cacheNames = await caches.keys();
-            const pgvisCaches = cacheNames.filter(name => name.includes('pgvis'));
+            const pgvisCaches = cacheNames.filter((name) =>
+                name.includes("pgvis"),
+            );
 
-            await Promise.all(pgvisCaches.map(cacheName => caches.delete(cacheName)));
+            await Promise.all(
+                pgvisCaches.map((cacheName) => caches.delete(cacheName)),
+            );
 
-            console.log('[SW Manager] All caches cleared');
+            console.log("[SW Manager] All caches cleared");
             return true;
         } catch (error) {
-            console.error('[SW Manager] Cache clearing failed:', error);
+            console.error("[SW Manager] Cache clearing failed:", error);
             return false;
         }
     }
 }
 
 // Initialize service worker manager when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
         window.swManager = new ServiceWorkerManager();
     });
 } else {
@@ -432,7 +491,7 @@ if (document.readyState === 'loading') {
 }
 
 // Add CSS for notifications
-const style = document.createElement('style');
+const style = document.createElement("style");
 style.textContent = `
     .sw-notification {
         position: fixed;
