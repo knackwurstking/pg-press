@@ -87,15 +87,17 @@ type FeedTroubleReportAdd struct {
 
 func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	return &FeedTroubleReportAdd{
-		ID:         int(data["id"].(float64)),
-		Title:      data["title"].(string),
-		ModifiedBy: data["modified_by"].(*User),
+		ID:    int(data["id"].(float64)),
+		Title: data["title"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
 	}
 }
 
 func (f *FeedTroubleReportAdd) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s added a new trouble report titled <a href="./trouble-reports/%d">%s</a>.</div></div>`,
+		`<div class="feed-item"><div class="feed-item-content">User %s added a new trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.</div></div>`,
 		f.ModifiedBy.UserName, f.ID, f.Title,
 	))
 }
@@ -109,15 +111,17 @@ type FeedTroubleReportUpdate struct {
 
 func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 	return &FeedTroubleReportUpdate{
-		ID:         int(data["id"].(float64)),
-		Title:      data["title"].(string),
-		ModifiedBy: data["modified_by"].(*User),
+		ID:    int(data["id"].(float64)),
+		Title: data["title"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
 	}
 }
 
 func (f *FeedTroubleReportUpdate) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s updated the trouble report titled <a href="./trouble-reports/%d">%s</a>.</div></div>`,
+		`<div class="feed-item"><div class="feed-item-content">User %s updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.</div></div>`,
 		f.ModifiedBy.UserName, f.ID, f.Title,
 	))
 }
@@ -131,9 +135,11 @@ type FeedTroubleReportRemove struct {
 
 func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	return &FeedTroubleReportRemove{
-		ID:         int(data["id"].(float64)),
-		Title:      data["title"].(string),
-		ModifiedBy: data["modified_by"].(*User),
+		ID:    int(data["id"].(float64)),
+		Title: data["title"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
 	}
 }
 
