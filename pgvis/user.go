@@ -31,6 +31,17 @@ func NewUser(telegramID int64, userName, apiKey string) *User {
 	}
 }
 
+func NewUserFromInterfaceMap(modified map[string]any) *User {
+	user := &User{
+		TelegramID: int64(modified["telegram_id"].(float64)),
+		UserName:   modified["user_name"].(string),
+		ApiKey:     modified["api_key"].(string),
+		LastFeed:   int(modified["last_feed"].(float64)),
+	}
+
+	return user
+}
+
 // NewUserWithLastFeed creates a new user with a specific last feed ID
 func NewUserWithLastFeed(telegramID int64, userName, apiKey string, lastFeed int) *User {
 	user := NewUser(telegramID, userName, apiKey)
