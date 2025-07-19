@@ -62,10 +62,6 @@ func (e *DatabaseError) Error() string {
 	return fmt.Sprintf("database error during %s: %s: %s", e.Operation, e.Message, e.Cause)
 }
 
-func (e *DatabaseError) Unwrap() error {
-	return e.Cause
-}
-
 // NewDatabaseError creates a new database error.
 func NewDatabaseError(operation, table, message string, cause error) *DatabaseError {
 	return &DatabaseError{
