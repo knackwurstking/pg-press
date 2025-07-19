@@ -13,25 +13,19 @@ import (
 )
 
 const (
-	// Validation constants for attachments
 	MinAttachmentNameLength = 1
 	MaxAttachmentNameLength = 255
 	MaxAttachmentPathLength = 1000
 )
 
 // Attachment represents a file attachment with its metadata.
-// It contains information about files that can be linked to trouble reports
-// or other entities in the system.
 type Attachment struct {
-	// Name is the display name of the attachment
-	Name string `json:"name"`
-	// Link is the URL or link to access the attachment
-	Link string `json:"link"`
-	// RelativePath is the relative path to the file on the filesystem
+	Name         string `json:"name"`
+	Link         string `json:"link"`
 	RelativePath string `json:"relative_path"`
 }
 
-// NewAttachment creates a new attachment with the provided details
+// NewAttachment creates a new attachment with the provided details.
 func NewAttachment(name, link, relativePath string) *Attachment {
 	return &Attachment{
 		Name:         strings.TrimSpace(name),
@@ -40,8 +34,7 @@ func NewAttachment(name, link, relativePath string) *Attachment {
 	}
 }
 
-// NewAttachmentFromPath creates a new attachment from a file path
-// The name is derived from the filename, and the link is constructed from the relative path
+// NewAttachmentFromPath creates a new attachment from a file path.
 func NewAttachmentFromPath(relativePath string) *Attachment {
 	name := filepath.Base(relativePath)
 	link := fmt.Sprintf("/attachments/%s", relativePath)
@@ -54,11 +47,7 @@ func NewAttachmentFromPath(relativePath string) *Attachment {
 }
 
 // Validate checks if the attachment has valid data.
-//
-// Returns:
-//   - error: ValidationError for the first validation failure, or nil if valid
 func (a *Attachment) Validate() error {
-	// Validate name
 	if a.Name == "" {
 		return NewValidationError("name", "cannot be empty", a.Name)
 	}
@@ -69,12 +58,10 @@ func (a *Attachment) Validate() error {
 		return NewValidationError("name", "too long", len(a.Name))
 	}
 
-	// Validate link
 	if a.Link == "" {
 		return NewValidationError("link", "cannot be empty", a.Link)
 	}
 
-	// Validate relative path
 	if a.RelativePath == "" {
 		return NewValidationError("relative_path", "cannot be empty", a.RelativePath)
 	}
@@ -85,46 +72,23 @@ func (a *Attachment) Validate() error {
 	return nil
 }
 
-// GetFileExtension returns the file extension of the attachment
+// GetFileExtension returns the file extension of the attachment.
 func (a *Attachment) GetFileExtension() string {
 	return filepath.Ext(a.Name)
 }
 
-// GetFileName returns the filename without extension
+// GetFileName returns the filename without extension.
 func (a *Attachment) GetFileName() string {
 	ext := filepath.Ext(a.Name)
 	return strings.TrimSuffix(a.Name, ext)
 }
 
-// IsImage checks if the attachment is an image file based on its extension
-func (a *Attachment) IsImage() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	imageExtensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"}
+var (
+	imageExtensions    = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"}
+	documentExtensions = []string{".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt"}
+	archiveExtensions  = []string{".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"}
 
-	return slices.Contains(imageExtensions, ext)
-}
-
-// IsDocument checks if the attachment is a document file based on its extension
-func (a *Attachment) IsDocument() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	documentExtensions := []string{".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt"}
-
-	return slices.Contains(documentExtensions, ext)
-}
-
-// IsArchive checks if the attachment is an archive file based on its extension
-func (a *Attachment) IsArchive() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	archiveExtensions := []string{".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"}
-
-	return slices.Contains(archiveExtensions, ext)
-}
-
-// GetMimeType returns the MIME type based on the file extension
-func (a *Attachment) GetMimeType() string {
-	ext := strings.ToLower(a.GetFileExtension())
-
-	mimeTypes := map[string]string{
+	mimeTypes = map[string]string{
 		".jpg":  "image/jpeg",
 		".jpeg": "image/jpeg",
 		".png":  "image/png",
@@ -145,21 +109,42 @@ func (a *Attachment) GetMimeType() string {
 		".gz":   "application/gzip",
 		".bz2":  "application/x-bzip2",
 	}
+)
 
+// IsImage checks if the attachment is an image file based on its extension.
+func (a *Attachment) IsImage() bool {
+	ext := strings.ToLower(a.GetFileExtension())
+	return slices.Contains(imageExtensions, ext)
+}
+
+// IsDocument checks if the attachment is a document file based on its extension.
+func (a *Attachment) IsDocument() bool {
+	ext := strings.ToLower(a.GetFileExtension())
+	return slices.Contains(documentExtensions, ext)
+}
+
+// IsArchive checks if the attachment is an archive file based on its extension.
+func (a *Attachment) IsArchive() bool {
+	ext := strings.ToLower(a.GetFileExtension())
+	return slices.Contains(archiveExtensions, ext)
+}
+
+// GetMimeType returns the MIME type based on the file extension.
+func (a *Attachment) GetMimeType() string {
+	ext := strings.ToLower(a.GetFileExtension())
 	if mimeType, exists := mimeTypes[ext]; exists {
 		return mimeType
 	}
-
 	return "application/octet-stream"
 }
 
-// String returns a string representation of the attachment
+// String returns a string representation of the attachment.
 func (a *Attachment) String() string {
 	return fmt.Sprintf("Attachment{Name: %s, Link: %s, Path: %s}",
 		a.Name, a.Link, a.RelativePath)
 }
 
-// Clone creates a deep copy of the attachment
+// Clone creates a deep copy of the attachment.
 func (a *Attachment) Clone() *Attachment {
 	return &Attachment{
 		Name:         a.Name,
@@ -169,77 +154,49 @@ func (a *Attachment) Clone() *Attachment {
 }
 
 // UpdateLink updates the attachment's link with validation.
-//
-// Parameters:
-//   - newLink: The new link for the attachment
-//
-// Returns:
-//   - error: Validation error if the link is invalid
 func (a *Attachment) UpdateLink(newLink string) error {
 	newLink = strings.TrimSpace(newLink)
-
 	if newLink == "" {
 		return NewValidationError("link", "cannot be empty", newLink)
 	}
-
 	a.Link = newLink
 	return nil
 }
 
 // UpdateName updates the attachment's display name with validation.
-//
-// Parameters:
-//   - newName: The new display name for the attachment
-//
-// Returns:
-//   - error: Validation error if the name is invalid
 func (a *Attachment) UpdateName(newName string) error {
 	newName = strings.TrimSpace(newName)
-
 	if newName == "" {
 		return NewValidationError("name", "cannot be empty", newName)
 	}
-
 	if len(newName) < MinAttachmentNameLength {
 		return NewValidationError("name", "too short", len(newName))
 	}
-
 	if len(newName) > MaxAttachmentNameLength {
 		return NewValidationError("name", "too long", len(newName))
 	}
-
 	a.Name = newName
 	return nil
 }
 
 // UpdatePath updates the attachment's relative path with validation.
-//
-// Parameters:
-//   - newPath: The new relative path for the attachment
-//
-// Returns:
-//   - error: Validation error if the path is invalid
 func (a *Attachment) UpdatePath(newPath string) error {
 	newPath = strings.TrimSpace(newPath)
-
 	if newPath == "" {
 		return NewValidationError("relative_path", "cannot be empty", newPath)
 	}
-
 	if len(newPath) > MaxAttachmentPathLength {
 		return NewValidationError("relative_path", "too long", len(newPath))
 	}
-
 	a.RelativePath = newPath
 	return nil
 }
 
-// Equals checks if two attachments are equal
+// Equals checks if two attachments are equal.
 func (a *Attachment) Equals(other *Attachment) bool {
 	if other == nil {
 		return false
 	}
-
 	return a.Name == other.Name &&
 		a.Link == other.Link &&
 		a.RelativePath == other.RelativePath

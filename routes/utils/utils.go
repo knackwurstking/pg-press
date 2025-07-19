@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 // Package utils provides utility functions for HTTP route handlers.
 package utils
 

@@ -1,4 +1,3 @@
-// ai: Organize
 package pgvis
 
 import (
@@ -10,17 +9,16 @@ import (
 )
 
 const (
-	// User validation constants
 	MinUserNameLength = 1
 	MaxUserNameLength = 100
 )
 
 // User represents a system user with Telegram integration
 type User struct {
-	TelegramID int64  `json:"telegram_id"` // Telegram user ID
-	UserName   string `json:"user_name"`   // Display name
-	ApiKey     string `json:"api_key"`     // API key for authentication
-	LastFeed   int    `json:"last_feed"`   // Last viewed feed ID
+	TelegramID int64  `json:"telegram_id"`
+	UserName   string `json:"user_name"`
+	ApiKey     string `json:"api_key"`
+	LastFeed   int    `json:"last_feed"`
 }
 
 // NewUser creates a new user with the provided details
@@ -62,10 +60,7 @@ func (u *User) Validate() error {
 	if len(u.ApiKey) < MinAPIKeyLength {
 		return NewValidationError(
 			"api_key",
-			fmt.Sprintf(
-				"too short for security, must be at least %d characters",
-				MinAPIKeyLength,
-			),
+			fmt.Sprintf("too short for security, must be at least %d characters", MinAPIKeyLength),
 			len(u.ApiKey),
 		)
 	}
@@ -90,11 +85,6 @@ func (u *User) IsAdmin() bool {
 	return slices.Contains(adminIDs, userIDStr)
 }
 
-// HasAPIKey checks if the user has an API key configured (always true since API key is required)
-func (u *User) HasAPIKey() bool {
-	return true
-}
-
 // IsValidAPIKey checks if the provided API key matches the user's API key
 func (u *User) IsValidAPIKey(apiKey string) bool {
 	return u.ApiKey == apiKey
@@ -107,11 +97,9 @@ func (u *User) UpdateUserName(newUserName string) error {
 	if newUserName == "" {
 		return NewValidationError("user_name", "cannot be empty", newUserName)
 	}
-
 	if len(newUserName) < MinUserNameLength {
 		return NewValidationError("user_name", "too short", len(newUserName))
 	}
-
 	if len(newUserName) > MaxUserNameLength {
 		return NewValidationError("user_name", "too long", len(newUserName))
 	}
@@ -145,17 +133,12 @@ func (u *User) UpdateLastFeed(feedID int) error {
 	return nil
 }
 
-// ClearAPIKey is deprecated - API key is now required and cannot be cleared
-func (u *User) ClearAPIKey() {
-	// No-op: API key is required and cannot be cleared
-}
-
 // GetDisplayInfo returns safe user information for display (without API key)
 func (u *User) GetDisplayInfo() map[string]any {
 	return map[string]any{
 		"telegram_id": u.TelegramID,
 		"user_name":   u.UserName,
-		"has_api_key": true, // Always true since API key is required
+		"has_api_key": true,
 		"is_admin":    u.IsAdmin(),
 		"last_feed":   u.LastFeed,
 	}
@@ -168,10 +151,8 @@ func (u *User) String() string {
 		adminStatus = " (admin)"
 	}
 
-	apiKeyStatus := " [has API key]" // Always present since API key is required
-
-	return "User{ID: " + strconv.FormatInt(u.TelegramID, 10) +
-		", Name: " + u.UserName + adminStatus + apiKeyStatus + "}"
+	return fmt.Sprintf("User{ID: %d, Name: %s%s [has API key]}",
+		u.TelegramID, u.UserName, adminStatus)
 }
 
 // Clone creates a deep copy of the user

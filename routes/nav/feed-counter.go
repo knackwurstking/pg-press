@@ -23,22 +23,20 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("list feeds: %s", err.Error()),
+			fmt.Errorf("list feeds: %w", err),
 		)
 	}
 
-	{ // Create the feed count
-		user, herr := utils.GetUserFromContext(c)
-		if herr != nil {
-			return herr
-		}
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
 
-		for _, feed := range feeds {
-			if feed.ID > user.LastFeed {
-				data.Count++
-			} else {
-				break
-			}
+	for _, feed := range feeds {
+		if feed.ID > user.LastFeed {
+			data.Count++
+		} else {
+			break
 		}
 	}
 
@@ -46,14 +44,14 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("template parsing: %s", err.Error()),
+			fmt.Errorf("template parsing: %w", err),
 		)
 	}
 
 	if err := t.Execute(c.Response(), data); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("template executing: %s", err.Error()),
+			fmt.Errorf("template executing: %w", err),
 		)
 	}
 

@@ -1,9 +1,4 @@
-// Package pgvis trouble reports management.
-//
-// This file provides database operations for managing trouble reports,
-// including CRUD operations and integration with the activity feed system.
-// Trouble reports are used to track issues, problems, and their resolutions
-// within the system.
+// Package pgvis provides trouble reports management.
 package pgvis
 
 import (
@@ -12,9 +7,7 @@ import (
 	"fmt"
 )
 
-// SQL queries for trouble reports operations
 const (
-	// createTroubleReportsTableQuery creates the trouble_reports table if it doesn't exist
 	createTroubleReportsTableQuery = `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -26,42 +19,20 @@ const (
 		);
 	`
 
-	// selectAllTroubleReportsQuery retrieves all trouble reports ordered by ID descending
 	selectAllTroubleReportsQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
-
-	// selectTroubleReportByIDQuery retrieves a specific trouble report by ID
 	selectTroubleReportByIDQuery = `SELECT * FROM trouble_reports WHERE id = ?`
-
-	// insertTroubleReportQuery creates a new trouble report
-	insertTroubleReportQuery = `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
-
-	// updateTroubleReportQuery updates an existing trouble report
-	updateTroubleReportQuery = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?`
-
-	// deleteTroubleReportQuery removes a trouble report by ID
-	deleteTroubleReportQuery = `DELETE FROM trouble_reports WHERE id = ?`
+	insertTroubleReportQuery     = `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
+	updateTroubleReportQuery     = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?`
+	deleteTroubleReportQuery     = `DELETE FROM trouble_reports WHERE id = ?`
 )
 
 // TroubleReports provides database operations for managing trouble reports.
-// It handles CRUD operations and maintains integration with the activity feed system
-// to track trouble report lifecycle events (create, update, delete).
 type TroubleReports struct {
-	db    *sql.DB // Database connection
-	feeds *Feeds  // Feed system for activity tracking
+	db    *sql.DB
+	feeds *Feeds
 }
 
 // NewTroubleReports creates a new TroubleReports instance and initializes the database table.
-// It creates the trouble_reports table if it doesn't exist and sets up the necessary
-// database schema for trouble report management.
-//
-// Parameters:
-//   - db: Active database connection
-//   - feeds: Feed system for activity tracking
-//
-// Returns:
-//   - *TroubleReports: Initialized trouble reports handler
-//
-// Panics if the database table cannot be created.
 func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	if _, err := db.Exec(createTroubleReportsTableQuery); err != nil {
 		panic(NewDatabaseError("create_table", "trouble_reports",
@@ -74,11 +45,7 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	}
 }
 
-// List retrieves all trouble reports ordered by ID in descending order (newest first).
-//
-// Returns:
-//   - []*TroubleReport: Slice of all trouble reports
-//   - error: Database or scanning error
+// List retrieves all trouble reports ordered by ID descending.
 func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 	rows, err := tr.db.Query(selectAllTroubleReportsQuery)
 	if err != nil {
@@ -106,13 +73,6 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 }
 
 // Get retrieves a specific trouble report by ID.
-//
-// Parameters:
-//   - id: The unique identifier of the trouble report
-//
-// Returns:
-//   - *TroubleReport: The requested trouble report
-//   - error: ErrNotFound if not found, or database error
 func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
 
@@ -129,12 +89,6 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-//
-// Parameters:
-//   - report: The trouble report to create
-//
-// Returns:
-//   - error: Validation, database, or feed creation error
 func (tr *TroubleReports) Add(report *TroubleReport) error {
 	if report == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -159,7 +113,6 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 			"failed to insert trouble report", err)
 	}
 
-	// Create feed entry for the new trouble report
 	feed := NewFeed(&FeedTroubleReportAdd{
 		ID:         report.ID,
 		Title:      report.Title,
@@ -173,13 +126,6 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-//
-// Parameters:
-//   - id: The ID of the trouble report to update
-//   - report: The updated trouble report data
-//
-// Returns:
-//   - error: Validation, database, or feed creation error
 func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 	if report == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -204,7 +150,6 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
-	// Create feed entry for the updated trouble report
 	feed := NewFeed(&FeedTroubleReportUpdate{
 		ID:         report.ID,
 		Title:      report.Title,
@@ -218,15 +163,7 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 }
 
 // Remove deletes a trouble report by ID and generates an activity feed entry.
-//
-// Parameters:
-//   - id: The ID of the trouble report to delete
-//
-// Returns:
-//   - error: ErrNotFound if not found, database error, or feed creation error
 func (tr *TroubleReports) Remove(id int64) error {
-	// Get the trouble report before deleting it for the feed entry
-	// Ignore any error, just check if it exists before creating a feed entry
 	report, _ := tr.Get(id)
 
 	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
@@ -245,7 +182,6 @@ func (tr *TroubleReports) Remove(id int64) error {
 		return ErrNotFound
 	}
 
-	// Create feed entry for the removed trouble report
 	if report != nil {
 		feed := NewFeed(&FeedTroubleReportRemove{
 			ID:         report.ID,
@@ -260,8 +196,6 @@ func (tr *TroubleReports) Remove(id int64) error {
 	return nil
 }
 
-// scanTroubleReport scans a trouble report from database rows.
-// This is a helper method for handling multiple rows from SELECT queries.
 func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, error) {
 	report := &TroubleReport{}
 	var linkedAttachments, modified []byte
@@ -282,14 +216,12 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 	return report, nil
 }
 
-// scanTroubleReportRow scans a trouble report from a single database row.
-// This is a helper method for handling single row results from QueryRow.
 func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, error) {
 	report := &TroubleReport{}
 	var linkedAttachments, modified []byte
 
 	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &modified); err != nil {
-		return nil, err // Return raw error for ErrNoRows detection
+		return nil, err
 	}
 
 	if err := json.Unmarshal(linkedAttachments, &report.LinkedAttachments); err != nil {

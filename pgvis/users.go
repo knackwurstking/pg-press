@@ -13,7 +13,6 @@ import (
 
 // SQL queries for user operations
 const (
-	// createUsersTableQuery creates the users table if it doesn't exist
 	createUsersTableQuery = `
 		CREATE TABLE IF NOT EXISTS users (
 			telegram_id INTEGER NOT NULL,
@@ -24,48 +23,24 @@ const (
 		);
 	`
 
-	// selectAllUsersQuery retrieves all users
-	selectAllUsersQuery = `SELECT * FROM users`
-
-	// selectUserByTelegramIDQuery retrieves a user by Telegram ID
+	selectAllUsersQuery         = `SELECT * FROM users`
 	selectUserByTelegramIDQuery = `SELECT * FROM users WHERE telegram_id = ?`
-
-	// selectUserByAPIKeyQuery retrieves a user by API key
-	selectUserByAPIKeyQuery = `SELECT * FROM users WHERE api_key = ?`
-
-	// selectUserExistsQuery checks if a user exists by Telegram ID or username
-	selectUserExistsQuery = `SELECT COUNT(*) FROM users WHERE telegram_id = ? OR user_name = ?`
-
-	// insertUserQuery creates a new user
-	insertUserQuery = `INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
-
-	// updateUserQuery updates an existing user
-	updateUserQuery = `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
-
-	// deleteUserQuery removes a user by Telegram ID
-	deleteUserQuery = `DELETE FROM users WHERE telegram_id = ?`
+	selectUserByAPIKeyQuery     = `SELECT * FROM users WHERE api_key = ?`
+	selectUserExistsQuery       = `SELECT COUNT(*) FROM users WHERE telegram_id = ? OR user_name = ?`
+	insertUserQuery             = `INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
+	updateUserQuery             = `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
+	deleteUserQuery             = `DELETE FROM users WHERE telegram_id = ?`
 )
 
 // Users provides database operations for managing user accounts.
 // It handles CRUD operations and maintains integration with the activity feed system
 // to track user lifecycle events (create, update, delete).
 type Users struct {
-	db    *sql.DB // Database connection
-	feeds *Feeds  // Feed system for activity tracking
+	db    *sql.DB
+	feeds *Feeds
 }
 
 // NewUsers creates a new Users instance and initializes the database table.
-// It creates the users table if it doesn't exist and sets up the necessary
-// database schema for user management.
-//
-// Parameters:
-//   - db: Active database connection
-//   - feeds: Feed system for activity tracking
-//
-// Returns:
-//   - *Users: Initialized users handler
-//
-// Panics if the database table cannot be created.
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	if _, err := db.Exec(createUsersTableQuery); err != nil {
 		panic(NewDatabaseError("create_table", "users",
@@ -79,10 +54,6 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 }
 
 // List retrieves all users from the database.
-//
-// Returns:
-//   - []*User: Slice of all users
-//   - error: Database or scanning error
 func (u *Users) List() ([]*User, error) {
 	rows, err := u.db.Query(selectAllUsersQuery)
 	if err != nil {
@@ -92,7 +63,6 @@ func (u *Users) List() ([]*User, error) {
 	defer rows.Close()
 
 	var users []*User
-
 	for rows.Next() {
 		user, err := u.scanUser(rows)
 		if err != nil {
@@ -110,13 +80,6 @@ func (u *Users) List() ([]*User, error) {
 }
 
 // Get retrieves a specific user by Telegram ID.
-//
-// Parameters:
-//   - telegramID: The Telegram ID of the user
-//
-// Returns:
-//   - *User: The requested user
-//   - error: ErrNotFound if not found, or database error
 func (u *Users) Get(telegramID int64) (*User, error) {
 	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
 
@@ -133,14 +96,6 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 }
 
 // GetUserFromApiKey retrieves a user by their API key.
-// This method is used for authentication purposes.
-//
-// Parameters:
-//   - apiKey: The API key to look up
-//
-// Returns:
-//   - *User: The user associated with the API key
-//   - error: ErrNotFound if not found, or database error
 func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -161,12 +116,6 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 }
 
 // Add creates a new user and generates a corresponding activity feed entry.
-//
-// Parameters:
-//   - user: The user to create
-//
-// Returns:
-//   - error: Validation, database, or feed creation error
 func (u *Users) Add(user *User) error {
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
@@ -206,12 +155,6 @@ func (u *Users) Add(user *User) error {
 }
 
 // Remove deletes a user by Telegram ID and generates an activity feed entry.
-//
-// Parameters:
-//   - telegramID: The Telegram ID of the user to delete
-//
-// Returns:
-//   - error: ErrNotFound if not found, database error, or feed creation error
 func (u *Users) Remove(telegramID int64) error {
 	// Get the user before deleting for the feed entry
 	user, _ := u.Get(telegramID)
@@ -244,13 +187,6 @@ func (u *Users) Remove(telegramID int64) error {
 }
 
 // Update modifies an existing user and generates activity feed entries for changes.
-//
-// Parameters:
-//   - telegramID: The Telegram ID of the user to update
-//   - user: The updated user data
-//
-// Returns:
-//   - error: Validation, database, or feed creation error
 func (u *Users) Update(telegramID int64, user *User) error {
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
@@ -273,7 +209,7 @@ func (u *Users) Update(telegramID int64, user *User) error {
 	// Get the current user for comparison
 	prevUser, err := u.Get(telegramID)
 	if err != nil {
-		return err // This will return ErrNotFound if user doesn't exist
+		return err
 	}
 
 	// Update the user
@@ -301,28 +237,22 @@ func (u *Users) Update(telegramID int64, user *User) error {
 }
 
 // scanUser scans a user from database rows.
-// This is a helper method for handling multiple rows from SELECT queries.
 func (u *Users) scanUser(rows *sql.Rows) (*User, error) {
 	user := &User{}
-
 	err := rows.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		return nil, NewDatabaseError("scan", "users",
 			"failed to scan row", err)
 	}
-
 	return user, nil
 }
 
 // scanUserRow scans a user from a single database row.
-// This is a helper method for handling single row results from QueryRow.
 func (u *Users) scanUserRow(row *sql.Row) (*User, error) {
 	user := &User{}
-
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
-		return nil, err // Return raw error for ErrNoRows detection
+		return nil, err
 	}
-
 	return user, nil
 }

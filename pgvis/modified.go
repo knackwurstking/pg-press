@@ -1,4 +1,3 @@
-// ai: Organize
 package pgvis
 
 import (
@@ -7,21 +6,16 @@ import (
 )
 
 // Modified represents a modification record that tracks changes made to any type T
-// It stores information about who made the change, when it was made, and the original value
 type Modified[T any] struct {
-	User     *User `json:"user"`     // The user who made the modification
-	Time     int64 `json:"time"`     // UNIX millisecond timestamp of the modification
-	Original T     `json:"original"` // The original value before modification
+	User     *User `json:"user"`
+	Time     int64 `json:"time"`
+	Original T     `json:"original"`
 }
 
 // NewModified creates a new modification record with the current timestamp
-// It records the user who made the change and the original value being modified
 func NewModified[T any](user *User, original T) *Modified[T] {
 	if user == nil {
-		// Create a default user for system modifications
-		user = &User{
-			UserName: "system",
-		}
+		user = &User{UserName: "system"}
 	}
 
 	return &Modified[T]{
@@ -32,12 +26,9 @@ func NewModified[T any](user *User, original T) *Modified[T] {
 }
 
 // NewModifiedWithTime creates a new modification record with a specific timestamp
-// Useful for importing historical data or testing
 func NewModifiedWithTime[T any](user *User, original T, timestamp int64) *Modified[T] {
 	if user == nil {
-		user = &User{
-			UserName: "system",
-		}
+		user = &User{UserName: "system"}
 	}
 
 	return &Modified[T]{
@@ -53,7 +44,6 @@ func (m *Modified[T]) GetTime() time.Time {
 }
 
 // GetUserName returns the username of the user who made the modification
-// Returns "unknown" if the user is nil
 func (m *Modified[T]) GetUserName() string {
 	if m.User == nil {
 		return "unknown"
@@ -71,9 +61,9 @@ func (m *Modified[T]) IsModifiedBy(userName string) bool {
 
 // String returns a human-readable representation of the modification
 func (m *Modified[T]) String() string {
-	userName := m.GetUserName()
-	timeStr := m.GetTime().Format("2006-01-02 15:04:05")
-	return fmt.Sprintf("Modified by %s at %s", userName, timeStr)
+	return fmt.Sprintf("Modified by %s at %s",
+		m.GetUserName(),
+		m.GetTime().Format("2006-01-02 15:04:05"))
 }
 
 // Age returns the duration since the modification was made
@@ -96,10 +86,8 @@ func (m *Modified[T]) Validate() error {
 	if m.Time <= 0 {
 		return fmt.Errorf("modification time must be positive")
 	}
-
 	if m.Time > time.Now().UnixMilli() {
 		return fmt.Errorf("modification time cannot be in the future")
 	}
-
 	return nil
 }

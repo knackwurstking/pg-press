@@ -1,5 +1,3 @@
-// NOTE: Cleaned up by AI
-//
 // Package main command line interface for pg-vis server.
 //
 // This file implements the server command which starts the HTTP server

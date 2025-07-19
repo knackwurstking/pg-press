@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 package main
 
 import (

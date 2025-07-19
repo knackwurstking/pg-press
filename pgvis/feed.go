@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 // Package pgvis provides feed models for tracking system events and user actions.
 package pgvis
 
@@ -90,16 +89,16 @@ type FeedTroubleReportRemove struct {
 
 func (f *FeedTroubleReportRemove) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s removed the trouble report titled <a href="./trouble-reports/%d">"%s"</a>.</div></div>`,
-		f.ModifiedBy.UserName, f.ID, f.Title,
+		`<div class="feed-item"><div class="feed-item-content">User %s removed the trouble report titled %s.</div></div>`,
+		f.ModifiedBy.UserName, f.Title,
 	))
 }
 
 // Feed represents a feed entry in the system that tracks activity events.
 type Feed struct {
-	ID    int   `json:"id"`    // Unique identifier for the feed entry
-	Time  int64 `json:"time"`  // UNIX millisecond timestamp when the event occurred
-	Cache any   `json:"cache"` // Cached data related to the feed entry
+	ID    int   `json:"id"`
+	Time  int64 `json:"time"`
+	Cache any   `json:"cache"`
 }
 
 // NewFeed creates a new feed entry with the current timestamp.

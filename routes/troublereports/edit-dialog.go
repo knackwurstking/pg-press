@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 // Package troublereports provides HTTP route handlers for trouble report management.
 package troublereports
 

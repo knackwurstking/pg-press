@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 package pgvis
 
 import (
@@ -35,7 +34,6 @@ func NewFeeds(db *sql.DB) *Feeds {
 	if _, err := db.Exec(createFeedsTableQuery); err != nil {
 		panic(NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
 	}
-
 	return &Feeds{db: db}
 }
 
@@ -68,12 +66,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 	}
 	defer rows.Close()
 
-	feeds, err := f.scanAllRows(rows)
-	if err != nil {
-		return nil, WrapErrorf(err, "failed to scan feeds range (offset: %d, limit: %d)", offset, limit)
-	}
-
-	return feeds, nil
+	return f.scanAllRows(rows)
 }
 
 // Add creates a new feed entry in the database
@@ -81,7 +74,6 @@ func (f *Feeds) Add(feed *Feed) error {
 	if feed == nil {
 		return NewValidationError("feed", "cannot be nil", nil)
 	}
-
 	if err := feed.Validate(); err != nil {
 		return err
 	}
@@ -95,7 +87,6 @@ func (f *Feeds) Add(feed *Feed) error {
 	if err != nil {
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
-
 	return nil
 }
 
@@ -124,7 +115,6 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 	if err != nil {
 		return 0, NewDatabaseError("delete", "feeds", "failed to get rows affected", err)
 	}
-
 	return rowsAffected, nil
 }
 
@@ -142,7 +132,6 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 		}
 		return nil, NewDatabaseError("select", "feeds", "failed to get feed by ID", err)
 	}
-
 	return feed, nil
 }
 
@@ -165,14 +154,12 @@ func (f *Feeds) Delete(id int) error {
 	if rowsAffected == 0 {
 		return ErrNotFound
 	}
-
 	return nil
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
 func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 	var feeds []*Feed
-
 	for rows.Next() {
 		feed, err := f.scanFeed(rows)
 		if err != nil {
@@ -184,7 +171,6 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 	if err := rows.Err(); err != nil {
 		return nil, NewDatabaseError("scan", "feeds", "error iterating over rows", err)
 	}
-
 	return feeds, nil
 }
 
@@ -212,6 +198,5 @@ func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
 			return nil, WrapError(err, "failed to unmarshal cache data")
 		}
 	}
-
 	return feed, nil
 }

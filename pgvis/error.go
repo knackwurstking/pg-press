@@ -1,18 +1,4 @@
-// Package pgvis error handling utilities and types.
-//
-// This file defines standard error types, error utilities, and HTTP status code mappings
-// for the pgvis application. It provides a consistent error handling strategy across
-// all application components.
-//
-// Error Categories:
-//   - Data access errors (not found, duplicates, etc.)
-//   - Validation errors with field-specific details
-//   - Database operation errors
-//   - Network and API errors
-//
-// Custom Error Types:
-//   - ValidationError: Field-specific validation failures
-//   - DatabaseError: Database operation failures with context
+// Package pgvis provides error handling utilities and types.
 package pgvis
 
 import (
@@ -22,34 +8,27 @@ import (
 )
 
 // Standard errors for common operations.
-// These sentinel errors can be used with errors.Is() for error checking.
 var (
-	// Data access errors
 	ErrNotFound      = errors.New("not found")
 	ErrAlreadyExists = errors.New("already exists")
 
-	// Authentication and authorization errors
 	ErrUnauthorized       = errors.New("unauthorized")
 	ErrForbidden          = errors.New("forbidden")
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrTokenExpired       = errors.New("token expired")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 
-	// Network and API errors
 	ErrRateLimited        = errors.New("rate limited")
 	ErrServiceUnavailable = errors.New("service unavailable")
 )
 
 // ValidationError represents a field-specific validation error.
-// It provides detailed information about which field failed validation,
-// the validation message, and optionally the invalid value.
 type ValidationError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
 	Value   any    `json:"value,omitempty"`
 }
 
-// Error implements the error interface for ValidationError.
 func (e *ValidationError) Error() string {
 	if e.Value != nil {
 		return fmt.Sprintf("validation error for field '%s': %s (value: %v)", e.Field, e.Message, e.Value)
@@ -57,8 +36,7 @@ func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation error for field '%s': %s", e.Field, e.Message)
 }
 
-// NewValidationError creates a new validation error with the specified field,
-// message, and optional value that caused the validation failure.
+// NewValidationError creates a new validation error.
 func NewValidationError(field, message string, value any) *ValidationError {
 	return &ValidationError{
 		Field:   field,
@@ -68,8 +46,6 @@ func NewValidationError(field, message string, value any) *ValidationError {
 }
 
 // DatabaseError represents database-related errors with contextual information.
-// It includes the operation being performed, the table involved (if applicable),
-// and the underlying cause error.
 type DatabaseError struct {
 	Operation string `json:"operation"`
 	Table     string `json:"table,omitempty"`
@@ -77,7 +53,6 @@ type DatabaseError struct {
 	Cause     error  `json:"-"`
 }
 
-// Error implements the error interface for DatabaseError.
 func (e *DatabaseError) Error() string {
 	if e.Table != "" {
 		return fmt.Sprintf("database error during %s on table '%s': %s", e.Operation, e.Table, e.Message)
@@ -85,14 +60,11 @@ func (e *DatabaseError) Error() string {
 	return fmt.Sprintf("database error during %s: %s", e.Operation, e.Message)
 }
 
-// Unwrap returns the underlying cause error, enabling error unwrapping
-// with errors.Is() and errors.As().
 func (e *DatabaseError) Unwrap() error {
 	return e.Cause
 }
 
-// NewDatabaseError creates a new database error with contextual information
-// about the failed operation, table, and underlying cause.
+// NewDatabaseError creates a new database error.
 func NewDatabaseError(operation, table, message string, cause error) *DatabaseError {
 	return &DatabaseError{
 		Operation: operation,
@@ -102,34 +74,29 @@ func NewDatabaseError(operation, table, message string, cause error) *DatabaseEr
 	}
 }
 
-// Utility functions for error handling and type checking.
-// These functions provide convenient ways to check for specific error types
-// and extract information from errors.
-
-// IsNotFound checks if an error represents a "not found" condition
+// IsNotFound checks if an error represents a "not found" condition.
 func IsNotFound(err error) bool {
 	return errors.Is(err, ErrNotFound)
 }
 
-// IsValidationError checks if an error is a validation error
+// IsValidationError checks if an error is a validation error.
 func IsValidationError(err error) bool {
 	var validationErr *ValidationError
 	return errors.As(err, &validationErr)
 }
 
-// IsDatabaseError checks if an error is a database error
+// IsDatabaseError checks if an error is a database error.
 func IsDatabaseError(err error) bool {
 	var dbErr *DatabaseError
 	return errors.As(err, &dbErr)
 }
 
-// GetHTTPStatusCode returns the appropriate HTTP status code for an error
+// GetHTTPStatusCode returns the appropriate HTTP status code for an error.
 func GetHTTPStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
 
-	// Check for specific error types
 	switch {
 	case IsNotFound(err):
 		return http.StatusNotFound
@@ -159,7 +126,6 @@ func GetHTTPStatusCode(err error) int {
 }
 
 // WrapError wraps an error with additional context message.
-// Returns nil if the input error is nil.
 func WrapError(err error, message string) error {
 	if err == nil {
 		return nil
@@ -168,7 +134,6 @@ func WrapError(err error, message string) error {
 }
 
 // WrapErrorf wraps an error with formatted additional context message.
-// Returns nil if the input error is nil.
 func WrapErrorf(err error, format string, args ...any) error {
 	if err == nil {
 		return nil

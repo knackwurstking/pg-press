@@ -1,4 +1,3 @@
-// NOTE: Cleaned up by AI
 // Package routes provides HTTP route handlers and web interface for the pgvis application.
 package routes
 
