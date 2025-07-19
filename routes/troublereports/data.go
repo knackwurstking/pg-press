@@ -2,7 +2,6 @@
 package troublereports
 
 import (
-	"html/template"
 	"io/fs"
 	"net/http"
 
@@ -12,6 +11,10 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/utils"
+)
+
+const (
+	AdminPrivilegesRequiredMessage = "administrator privileges required"
 )
 
 // TroubleReportsPageData contains all the reports and user information.
@@ -32,22 +35,17 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	t, err := template.ParseFS(templates, shared.TroubleReportsDataTemplatePath)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			pgvis.WrapError(err, "failed to load page template"))
-	}
-
-	err = t.Execute(c.Response(), TroubleReportsPageData{
-		TroubleReports: trs,
-		User:           user,
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			pgvis.WrapError(err, "failed to render page"))
-	}
-
-	return nil
+	return utils.HandleTemplate(
+		c,
+		TroubleReportsPageData{
+			TroubleReports: trs,
+			User:           user,
+		},
+		templates,
+		[]string{
+			shared.TroubleReportsDataTemplatePath,
+		},
+	)
 }
 
 // DELETEData handles DELETE requests to remove trouble reports.
@@ -63,10 +61,10 @@ func DELETEData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	}
 
 	if !user.IsAdmin() {
-		log.Warnf("Non-admin user %s (ID: %d) attempted to delete trouble report %d",
-			user.UserName, user.TelegramID, id)
-		return echo.NewHTTPError(http.StatusForbidden,
-			"administrator privileges required for deletion")
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			AdminPrivilegesRequiredMessage,
+		)
 	}
 
 	log.Infof("Administrator %s (Telegram ID: %d) is deleting trouble report %d",

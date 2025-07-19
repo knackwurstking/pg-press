@@ -2,7 +2,6 @@
 package troublereports
 
 import (
-	"html/template"
 	"io/fs"
 	"net/http"
 	"net/url"
@@ -12,6 +11,11 @@ import (
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/utils"
+)
+
+const (
+	InvalidContentFormFieldMessage = "invalid content form value"
+	InvalidTitleFormFieldMessage   = "invalid title form value"
 )
 
 // EditDialogPageData contains data for the edit dialog template.
@@ -55,18 +59,12 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 		}
 	}
 
-	t, err := template.ParseFS(templates, shared.TroubleReportsDialogTemplatePath)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			pgvis.WrapError(err, "Failed to load dialog template"))
-	}
-
-	if err = t.Execute(c.Response(), pageData); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			pgvis.WrapError(err, "failed to render dialog"))
-	}
-
-	return nil
+	return utils.HandleTemplate(c, pageData,
+		templates,
+		[]string{
+			shared.TroubleReportsDialogTemplatePath,
+		},
+	)
 }
 
 // POSTDialogEdit handles POST requests to create new trouble reports.
@@ -156,14 +154,14 @@ func extractAndValidateFormData(ctx echo.Context) (title, content string, httpEr
 	title, err = url.QueryUnescape(ctx.FormValue(shared.TitleFormField))
 	if err != nil {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest,
-			pgvis.WrapError(err, "invalid title encoding"))
+			pgvis.WrapError(err, InvalidTitleFormFieldMessage))
 	}
 	title = utils.SanitizeInput(title)
 
 	content, err = url.QueryUnescape(ctx.FormValue(shared.ContentFormField))
 	if err != nil {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest,
-			pgvis.WrapError(err, "invalid content encoding"))
+			pgvis.WrapError(err, InvalidContentFormFieldMessage))
 	}
 	content = utils.SanitizeInput(content)
 

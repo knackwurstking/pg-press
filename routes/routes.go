@@ -4,7 +4,6 @@ package routes
 import (
 	"embed"
 	"errors"
-	"html/template"
 	"net/http"
 	"time"
 
@@ -18,11 +17,14 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/profile"
 	"github.com/knackwurstking/pg-vis/routes/shared"
 	"github.com/knackwurstking/pg-vis/routes/troublereports"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
 const (
 	CookieName               = "pgvis-api-key"
 	CookieExpirationDuration = time.Hour * 24 * 31 * 6
+
+	redirectFailedMessage = "failed to redirect"
 )
 
 var (
@@ -53,26 +55,14 @@ func Serve(e *echo.Echo, o Options) {
 
 func serveHome(e *echo.Echo, options Options) {
 	e.GET(options.ServerPathPrefix+"/", func(c echo.Context) error {
-		t, err := template.ParseFS(templates,
-			shared.LayoutTemplatePath,
-			shared.HomeTemplatePath,
-			shared.NavFeedTemplatePath,
+		return utils.HandleTemplate(c, nil,
+			templates,
+			[]string{
+				shared.LayoutTemplatePath,
+				shared.HomeTemplatePath,
+				shared.NavFeedTemplatePath,
+			},
 		)
-		if err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"failed to parse templates",
-			)
-		}
-
-		if err := t.Execute(c.Response(), nil); err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"failed to execute template",
-			)
-		}
-
-		return nil
 	})
 }
 
@@ -91,37 +81,24 @@ func serveLogin(e *echo.Echo, options Options) {
 				if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
 					return echo.NewHTTPError(
 						http.StatusInternalServerError,
-						"redirect failed",
+						redirectFailedMessage,
 					)
 				}
 				return nil
 			}
 		}
 
-		pageData := LoginPageData{
-			ApiKey:        apiKey,
-			InvalidApiKey: apiKey != "",
-		}
-
-		t, err := template.ParseFS(templates,
-			shared.LayoutTemplatePath,
-			shared.LoginTemplatePath,
-		)
-		if err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"failed to load page templates",
-			)
-		}
-
-		if err := t.Execute(c.Response(), pageData); err != nil {
-			return echo.NewHTTPError(
-				http.StatusInternalServerError,
-				"failed to render page",
-			)
-		}
-
-		return nil
+		return utils.HandleTemplate(
+			c,
+			LoginPageData{
+				ApiKey:        apiKey,
+				InvalidApiKey: apiKey != "",
+			},
+			templates,
+			[]string{
+				shared.LayoutTemplatePath,
+				shared.LoginTemplatePath,
+			})
 	})
 }
 
@@ -134,11 +111,9 @@ func serveLogout(e *echo.Echo, options Options) {
 		}
 
 		if err := c.Redirect(http.StatusSeeOther, "./login"); err != nil {
-			log.Errorf("Failed to redirect after logout: %s", err)
-
 			return echo.NewHTTPError(
 				http.StatusInternalServerError,
-				"redirect failed",
+				redirectFailedMessage,
 			)
 		}
 

@@ -2,9 +2,7 @@
 package profile
 
 import (
-	"html/template"
 	"io/fs"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -53,22 +51,14 @@ func handleMainPage(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 			pageData.Cookies = cookies
 		}
 
-		t, err := template.ParseFS(templates,
-			shared.LayoutTemplatePath,
-			shared.ProfileTemplatePath,
-			shared.NavFeedTemplatePath,
+		return utils.HandleTemplate(c, pageData,
+			templates,
+			[]string{
+				shared.LayoutTemplatePath,
+				shared.ProfileTemplatePath,
+				shared.NavFeedTemplatePath,
+			},
 		)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				pgvis.WrapError(err, "failed to parse template"))
-		}
-
-		if err = t.Execute(c.Response(), pageData); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				pgvis.WrapError(err, "failed to execute template"))
-		}
-
-		return nil
 	}
 }
 

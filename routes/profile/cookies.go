@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"html/template"
 	"io/fs"
 	"net/http"
 
@@ -14,29 +13,25 @@ import (
 
 // GETCookies handles GET requests for the cookies page.
 // It retrieves and displays all cookies associated with the authenticated user's API key.
-func GETCookies(templates fs.FS, ctx echo.Context, db *pgvis.DB) *echo.HTTPError {
-	user, herr := utils.GetUserFromContext(ctx)
+func GETCookies(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
+	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
 
 	cookies, err := db.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return utils.HandlePgvisError(ctx, err)
+		return utils.HandlePgvisError(c, err)
 	}
 
 	cookies = pgvis.SortCookies(cookies)
 
-	t, err := template.ParseFS(templates, shared.ProfileCookiesTemplatePath)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := t.Execute(ctx.Response(), cookies); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return nil
+	return utils.HandleTemplate(c, cookies,
+		templates,
+		[]string{
+			shared.ProfileCookiesTemplatePath,
+		},
+	)
 }
 
 // DELETECookies handles DELETE requests for removing cookies.

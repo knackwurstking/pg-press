@@ -1,9 +1,7 @@
 package feed
 
 import (
-	"html/template"
 	"io/fs"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -42,14 +40,10 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 		}
 	}
 
-	t, err := template.ParseFS(templates, shared.FeedDataTemplatePath)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	if err = t.Execute(c.Response(), data); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	return nil
+	return utils.HandleTemplate(c, data,
+		templates,
+		[]string{
+			shared.FeedDataTemplatePath,
+		},
+	)
 }

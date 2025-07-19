@@ -2,14 +2,13 @@
 package troublereports
 
 import (
-	"html/template"
 	"io/fs"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/shared"
+	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
 // Serve configures and registers all trouble report related HTTP routes.
@@ -31,22 +30,14 @@ func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB)
 
 func handleMainPage(templates fs.FS) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		t, err := template.ParseFS(templates,
-			shared.LayoutTemplatePath,
-			shared.TroubleReportsTemplatePath,
-			shared.NavFeedTemplatePath,
+		return utils.HandleTemplate(c, nil,
+			templates,
+			[]string{
+				shared.LayoutTemplatePath,
+				shared.TroubleReportsTemplatePath,
+				shared.NavFeedTemplatePath,
+			},
 		)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				pgvis.WrapError(err, "failed to parse templates"))
-		}
-
-		if err = t.Execute(c.Response(), nil); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				pgvis.WrapError(err, "failed to render page"))
-		}
-
-		return nil
 	}
 }
 

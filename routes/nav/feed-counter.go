@@ -2,7 +2,6 @@ package nav
 
 import (
 	"fmt"
-	"html/template"
 	"io/fs"
 	"net/http"
 
@@ -40,20 +39,10 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 		}
 	}
 
-	t, err := template.ParseFS(templates, shared.FeedCounterTemplatePath)
-	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template parsing: %w", err),
-		)
-	}
-
-	if err := t.Execute(c.Response(), data); err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			fmt.Errorf("template executing: %w", err),
-		)
-	}
-
-	return nil
+	return utils.HandleTemplate(c, data,
+		templates,
+		[]string{
+			shared.FeedCounterTemplatePath,
+		},
+	)
 }

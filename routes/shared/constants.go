@@ -1,8 +1,6 @@
 // Package shared provides shared constants and configuration for all route handlers.
 package shared
 
-// TODO: Do i really need all of this?
-
 // Template file paths
 const (
 	LayoutTemplatePath  = "templates/layout.html"
@@ -34,9 +32,9 @@ const (
 const (
 	IDQueryParam     = "id"
 	CancelQueryParam = "cancel"
-	PageQueryParam   = "page"
-	LimitQueryParam  = "limit"
-	SearchQueryParam = "q"
+	//PageQueryParam   = "page"
+	//LimitQueryParam  = "limit"
+	//SearchQueryParam = "q"
 )
 
 // Validation constants
@@ -54,16 +52,6 @@ const (
 
 // Form values
 const (
-	TrueValue  = "true"
-	FalseValue = "false"
-)
-
-// Error messages
-const (
-	AuthenticationRequiredMessage  = "authentication required"
-	AdminPrivilegesRequiredMessage = "administrator privileges required"
-	InvalidParameterMessage        = "invalid parameter"
-	ValidationFailedMessage        = "validation failed"
-	TemplateParseErrorMessage      = "failed to parse templates"
-	TemplateExecuteErrorMessage    = "failed to render page"
+	TrueValue = "true"
+	//FalseValue = "false"
 )

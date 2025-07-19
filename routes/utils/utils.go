@@ -3,6 +3,8 @@ package utils
 
 import (
 	"errors"
+	"html/template"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,15 +20,26 @@ const (
 	MaxPageSize     = 100
 	DefaultPageSize = 20
 	MaxSearchLength = 500
+
+	AuthenticationRequiredMessage = "authentication required"
+	InvalidUserSessionMessage     = "invalid user session"
+	TemplateParseErrorMessage     = "failed to parse templates"
+	TemplateExecuteErrorMessage   = "failed to render page"
 )
 
 func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
 	user, ok := ctx.Get(UserContextKey).(*pgvis.User)
 	if !ok {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "authentication required")
+		return nil, echo.NewHTTPError(
+			http.StatusUnauthorized,
+			AuthenticationRequiredMessage,
+		)
 	}
 	if user == nil {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "invalid user session")
+		return nil, echo.NewHTTPError(
+			http.StatusUnauthorized,
+			InvalidUserSessionMessage,
+		)
 	}
 	return user, nil
 }
@@ -159,5 +172,24 @@ func ValidateStringLength(value, fieldName string, min, max int) *echo.HTTPError
 	if length > max {
 		return echo.NewHTTPError(http.StatusBadRequest, fieldName+" must not exceed "+strconv.Itoa(max)+" characters")
 	}
+	return nil
+}
+
+func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []string) *echo.HTTPError {
+	t, err := template.ParseFS(templates, patterns...)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			TemplateParseErrorMessage,
+		)
+	}
+
+	if err := t.Execute(c.Response(), pageData); err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			TemplateExecuteErrorMessage,
+		)
+	}
+
 	return nil
 }
