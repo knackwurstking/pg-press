@@ -17,7 +17,7 @@ import (
 
 var (
 	keyAuthSkipperRegExp = regexp.MustCompile(
-		`(.*/login.*|.*\.css|manifest.json|.*\.png|.*\.ico|.*service-worker\.js|.*\.woff|.*\.woff2|.*htmx.min.js|.*sw-register.js)`,
+		`(.*/login.*|.*\.css|.*\.png|.*\.ico|.*\.woff|.*\.woff2|.*manifest.json|.*service-worker\.js|.*htmx.min.js|.*sw-register.js|.*pwa-manager.js)`,
 	)
 
 	pages []string

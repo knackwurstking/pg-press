@@ -49,15 +49,16 @@ const STATIC_ASSETS = [
     "./maskable-icon-512x512.png",
 
     // Stylesheets
-    "./ui.min.css",
     "./css/bootstrap-icons.min.css",
+    "./css/ui.min.css",
+    "./css/layout.css",
 
     // Fonts
     "./bootstrap-icons.woff",
     "./bootstrap-icons.woff2",
 
     // JavaScript libraries
-    "./htmx.min.js",
+    "./js/htmx.min.js",
 ];
 
 // Offline fallback pages

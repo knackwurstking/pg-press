@@ -1,538 +1,170 @@
 <!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
 
-<head>
-    <meta charset="utf-8" />
+        <!-- Viewport and responsive design -->
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
 
-    <!-- Viewport and responsive design -->
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-    />
+        <!-- PWA and mobile optimization -->
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="PG-VIS" />
+        <meta name="application-name" content="PG-VIS" />
+        <meta name="msapplication-TileColor" content="#3e3c49" />
+        <meta name="theme-color" content="#3e3c49" />
 
-    <!-- PWA and mobile optimization -->
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="PG-VIS" />
-    <meta name="application-name" content="PG-VIS" />
-    <meta name="msapplication-TileColor" content="#3e3c49" />
-    <meta name="theme-color" content="#3e3c49" />
+        <!-- SEO and social media -->
+        <meta
+            name="description"
+            content="PG-VIS - Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities."
+        />
+        <meta
+            name="keywords"
+            content="press, visualization, trouble reports, feed, profile management, PWA, offline"
+        />
+        <meta name="author" content="PG-VIS Team" />
 
-    <!-- SEO and social media -->
-    <meta name="description" content="PG-VIS - Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities." />
-    <meta name="keywords" content="press, visualization, trouble reports, feed, profile management, PWA, offline" />
-    <meta name="author" content="PG-VIS Team" />
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:title"
+            content="PG-VIS - Press Group Visualization"
+        />
+        <meta
+            property="og:description"
+            content="Manage trouble reports, feeds, and profiles with offline capabilities"
+        />
+        <meta property="og:site_name" content="PG-VIS" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="PG-VIS - Press Group Visualization" />
-    <meta property="og:description" content="Manage trouble reports, feeds, and profiles with offline capabilities" />
-    <meta property="og:site_name" content="PG-VIS" />
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary" />
+        <meta
+            name="twitter:title"
+            content="PG-VIS - Press Group Visualization"
+        />
+        <meta
+            name="twitter:description"
+            content="Manage trouble reports, feeds, and profiles with offline capabilities"
+        />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="PG-VIS - Press Group Visualization" />
-    <meta name="twitter:description" content="Manage trouble reports, feeds, and profiles with offline capabilities" />
+        <!-- Icons and manifest -->
+        <link rel="icon" href="./favicon.ico" sizes="any" />
+        <link rel="icon" href="./icon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+        <link rel="mask-icon" href="./icon.png" color="#3e3c49" />
 
-    <!-- Icons and manifest -->
-    <link rel="icon" href="./favicon.ico" sizes="any" />
-    <link rel="icon" href="./icon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
-    <link rel="mask-icon" href="./icon.png" color="#3e3c49" />
+        <!-- PWA Manifest -->
+        <link rel="manifest" href="./manifest.json" />
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.json" />
+        <!-- Stylesheets -->
+        <link rel="stylesheet" href="./css/bootstrap-icons.min.css" />
+        <link rel="stylesheet" href="./css/ui.min.css" />
+        <link rel="stylesheet" href="./css/layout.css" />
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="./css/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="./ui.min.css" />
+        <!-- Preconnect for performance -->
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
 
-    <!-- Preconnect for performance -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <title>{{block "title" .}}PG-VIS{{end}}</title>
 
-    <title>{{block "title" .}}PG-VIS{{end}}</title>
+        <!-- HTMX for dynamic content -->
+        <script src="./js/htmx.min.js"></script>
 
-    <style>
-        :root {
-            --pwa-theme-color: var(--ui-primary);
-            --pwa-background-color: var(--ui-bg);
-        }
+        <!-- Service Worker Registration -->
+        <script src="./js/sw-register.js"></script>
 
-        body.debug,
-        body.debug * {
-            border-color: var(--ui-border-color) !important;
-        }
+        <!-- PWA Manager -->
+        <script src="./js/pwa-manager.js"></script>
+    </head>
 
-        details summary::after {
-            font-family: "bootstrap-icons";
-            content: "\f285";
-        }
-
-        details[open] summary::after {
-            content: "\f282";
-        }
-
-        /* PWA install prompt styles */
-        .pwa-install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: var(--pwa-theme-color);
-            color: var(--ui-primary-text);
-            padding: 1rem;
-            border-radius: var(--ui-radius);
-            box-shadow: 0 4px 20px var(--ui-backdrop-color);
-            z-index: 1000;
-            display: none;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .pwa-install-prompt.show {
-            display: block;
-        }
-
-        .pwa-install-content {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .pwa-install-text {
-            flex: 1;
-        }
-
-        .pwa-install-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .pwa-install-message {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .pwa-install-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .pwa-install-btn {
-            padding: 0.5rem 1rem;
-            border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
-            background: var(--ui-muted);
-            color: var(--ui-text);
-            border-radius: var(--ui-radius);
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s ease;
-        }
-
-        .pwa-install-btn:hover {
-            background: var(--ui-secondary);
-        }
-
-        .pwa-install-btn.primary {
-            background: var(--ui-bg);
-            color: var(--ui-primary);
-        }
-
-        .pwa-install-btn.primary:hover {
-            background: var(--ui-primary);
-            color: var(--ui-primary-text);
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Offline indicator styles */
-        .offline-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--ui-destructive);
-            color: var(--ui-destructive-text);
-            padding: 0.5rem;
-            text-align: center;
-            font-size: 0.9rem;
-            z-index: 1001;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease;
-        }
-
-        .offline-indicator.show {
-            transform: translateY(0);
-        }
-
-        /* Loading states for offline content */
-        .htmx-request .loading {
-            opacity: 0.6;
-        }
-
-        .htmx-request .loading::after {
-            content: " ⏳";
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            .pwa-install-prompt {
-                left: 10px;
-                right: 10px;
-                bottom: 10px;
-            }
-
-            .pwa-install-content {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .pwa-install-actions {
-                justify-content: center;
-                width: 100%;
-            }
-
-            .pwa-install-btn {
-                flex: 1;
-            }
-        }
-    </style>
-
-    <!-- HTMX for dynamic content -->
-    <script src="./htmx.min.js"></script>
-
-    <!-- Service Worker Registration -->
-    <script src="./js/sw-register.js"></script>
-
-    <!-- PWA functionality -->
-    <script>
-        // PWA Install Prompt Management
-        class PWAInstallManager {
-            constructor() {
-                this.deferredPrompt = null;
-                this.init();
-            }
-
-            init() {
-                // Listen for the beforeinstallprompt event
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    // Prevent the mini-infobar from appearing
-                    e.preventDefault();
-                    // Stash the event so it can be triggered later
-                    this.deferredPrompt = e;
-                    // Show our custom install prompt
-                    this.showInstallPrompt();
-                });
-
-                // Listen for app installation
-                window.addEventListener('appinstalled', () => {
-                    console.log('[PWA] App was installed');
-                    this.hideInstallPrompt();
-                    this.deferredPrompt = null;
-                });
-            }
-
-            showInstallPrompt() {
-                // Don't show if already installed or dismissed recently
-                if (this.isInstalled() || this.isRecentlyDismissed()) {
-                    return;
-                }
-
-                const prompt = this.createInstallPrompt();
-                document.body.appendChild(prompt);
-
-                // Show with animation
-                setTimeout(() => {
-                    prompt.classList.add('show');
-                }, 100);
-            }
-
-            createInstallPrompt() {
-                const prompt = document.createElement('div');
-                prompt.className = 'pwa-install-prompt';
-                prompt.id = 'pwa-install-prompt';
-
-                prompt.innerHTML = `
-                    <div class="pwa-install-content">
-                        <div class="pwa-install-text">
-                            <div class="pwa-install-title">Install PG-VIS</div>
-                            <div class="pwa-install-message">Add to your home screen for quick access and offline use</div>
-                        </div>
-                        <div class="pwa-install-actions">
-                            <button class="pwa-install-btn primary" onclick="window.pwaInstall.install()">Install</button>
-                            <button class="pwa-install-btn" onclick="window.pwaInstall.dismiss()">Later</button>
-                        </div>
+    <body>
+        <header class="container fluid">
+            <nav class="flex row gap justify-between">
+                <div class="flex row gap justify-start align-center">
+                    <div>
+                        <h5>{{block "app-bar-title" .}}PG-VIS{{end}}</h5>
                     </div>
-                `;
-
-                return prompt;
-            }
-
-            async install() {
-                if (!this.deferredPrompt) {
-                    return;
-                }
-
-                // Show the install prompt
-                this.deferredPrompt.prompt();
-
-                // Wait for the user to respond to the prompt
-                const { outcome } = await this.deferredPrompt.userChoice;
-
-                if (outcome === 'accepted') {
-                    console.log('[PWA] User accepted the install prompt');
-                } else {
-                    console.log('[PWA] User dismissed the install prompt');
-                }
-
-                this.hideInstallPrompt();
-                this.deferredPrompt = null;
-            }
-
-            dismiss() {
-                this.hideInstallPrompt();
-                // Remember dismissal for 7 days
-                localStorage.setItem('pwa-install-dismissed', Date.now().toString());
-            }
-
-            hideInstallPrompt() {
-                const prompt = document.getElementById('pwa-install-prompt');
-                if (prompt) {
-                    prompt.classList.remove('show');
-                    setTimeout(() => {
-                        prompt.remove();
-                    }, 300);
-                }
-            }
-
-            isInstalled() {
-                return window.matchMedia('(display-mode: standalone)').matches ||
-                       window.navigator.standalone === true;
-            }
-
-            isRecentlyDismissed() {
-                const dismissed = localStorage.getItem('pwa-install-dismissed');
-                if (!dismissed) return false;
-
-                const dismissedTime = parseInt(dismissed);
-                const sevenDays = 7 * 24 * 60 * 60 * 1000;
-                return Date.now() - dismissedTime < sevenDays;
-            }
-        }
-
-        // Offline Status Management
-        class OfflineStatusManager {
-            constructor() {
-                this.isOnline = navigator.onLine;
-                this.init();
-            }
-
-            init() {
-                // Create offline indicator
-                this.createOfflineIndicator();
-
-                // Listen for online/offline events
-                window.addEventListener('online', () => this.handleOnline());
-                window.addEventListener('offline', () => this.handleOffline());
-
-                // Initial state
-                if (!this.isOnline) {
-                    this.showOfflineIndicator();
-                }
-            }
-
-            createOfflineIndicator() {
-                const indicator = document.createElement('div');
-                indicator.className = 'offline-indicator';
-                indicator.id = 'offline-indicator';
-                indicator.innerHTML = '📡 You\'re offline - Some features may be limited';
-                document.body.appendChild(indicator);
-            }
-
-            handleOnline() {
-                this.isOnline = true;
-                this.hideOfflineIndicator();
-                console.log('[PWA] App is online');
-
-                // Notify service worker
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'ONLINE_STATUS_CHANGED',
-                        isOnline: true
-                    });
-                }
-            }
-
-            handleOffline() {
-                this.isOnline = false;
-                this.showOfflineIndicator();
-                console.log('[PWA] App is offline');
-
-                // Notify service worker
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'ONLINE_STATUS_CHANGED',
-                        isOnline: false
-                    });
-                }
-            }
-
-            showOfflineIndicator() {
-                const indicator = document.getElementById('offline-indicator');
-                if (indicator) {
-                    indicator.classList.add('show');
-                }
-            }
-
-            hideOfflineIndicator() {
-                const indicator = document.getElementById('offline-indicator');
-                if (indicator) {
-                    indicator.classList.remove('show');
-                }
-            }
-        }
-
-        // Initialize PWA features when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize PWA install manager
-            window.pwaInstall = new PWAInstallManager();
-
-            // Initialize offline status manager
-            window.offlineStatus = new OfflineStatusManager();
-
-            // Preload critical pages for offline use
-            if (window.swManager) {
-                window.swManager.preloadUrls([
-                    './trouble-reports',
-                    './feed',
-                    './profile'
-                ]);
-            }
-
-            // Add HTMX offline handling
-            document.body.addEventListener('htmx:sendError', (event) => {
-                console.log('[HTMX] Request failed, possibly offline:', event.detail);
-
-                // Show user-friendly error for offline requests
-                if (!navigator.onLine) {
-                    event.preventDefault();
-                    // Could show a toast notification here
-                    console.log('[HTMX] Request failed due to offline status');
-                }
-            });
-
-            // Log PWA status
-            console.log('[PWA] Installation status:', {
-                isInstalled: window.pwaInstall.isInstalled(),
-                isOnline: navigator.onLine,
-                hasServiceWorker: 'serviceWorker' in navigator
-            });
-        });
-
-        // Handle page visibility changes for PWA optimization
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                // Page became visible - check for updates
-                if (window.swManager) {
-                    window.swManager.checkForUpdates();
-                }
-            }
-        });
-
-        // Keyboard shortcuts for PWA features
-        document.addEventListener('keydown', (event) => {
-            // Ctrl/Cmd + I to show install info
-            if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
-                if (window.pwaInstall && !window.pwaInstall.isInstalled()) {
-                    event.preventDefault();
-                    window.pwaInstall.showInstallPrompt();
-                }
-            }
-        });
-    </script>
-</head>
-
-<body>
-    <!-- Offline indicator (created by JavaScript) -->
-
-    <header class="container fluid">
-        <nav class="flex row gap justify-between">
-            <div class="flex row gap justify-start align-center">
-                <div>
-                    <h5>{{block "app-bar-title" .}}PG-VIS{{end}}</h5>
                 </div>
-            </div>
 
-            {{block "nav" .}}{{end}}
-        </nav>
-    </header>
+                {{block "nav" .}}{{end}}
+            </nav>
+        </header>
 
-    <main>
-        {{block "content" .}}{{end}}
-    </main>
+        <main>{{block "content" .}}{{end}}</main>
 
-    <!-- PWA install prompt (created by JavaScript) -->
+        <!-- Additional PWA features -->
 
-    <!-- Additional PWA features -->
-    <script>
-        // Handle form submissions with offline support
-        document.addEventListener('submit', (event) => {
-            const form = event.target;
+        <script>
+            // Handle form submissions with offline support
+            document.addEventListener("submit", (event) => {
+                const form = event.target;
 
-            // Add loading state
-            const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-            if (submitBtn) {
-                submitBtn.classList.add('loading');
-            }
+                // Add loading state
+                const submitBtn = form.querySelector(
+                    'button[type="submit"], input[type="submit"]',
+                );
+                if (submitBtn) {
+                    submitBtn.classList.add("loading");
+                }
 
-            // If offline, queue the submission
-            if (!navigator.onLine && 'serviceWorker' in navigator) {
-                // This would integrate with the background sync feature
-                console.log('[PWA] Form submitted while offline - queuing for sync');
-            }
-        });
-
-        // Add visual feedback for cached content
-        document.addEventListener('htmx:afterSwap', (event) => {
-            // Check if content was served from cache
-            const response = event.detail.xhr;
-            if (response && response.getResponseHeader('X-Cache-Status') === 'HIT') {
-                console.log('[PWA] Content loaded from cache');
-            }
-        });
-
-        // Performance monitoring for PWA
-        if ('performance' in window) {
-            window.addEventListener('load', () => {
-                setTimeout(() => {
-                    const perfData = performance.getEntriesByType('navigation')[0];
-                    console.log('[PWA] Performance metrics:', {
-                        loadTime: perfData.loadEventEnd - perfData.loadEventStart,
-                        domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
-                        firstPaint: performance.getEntriesByName('first-paint')[0]?.startTime || 'N/A'
-                    });
-                }, 0);
+                // If offline, queue the submission
+                if (!navigator.onLine && "serviceWorker" in navigator) {
+                    // This would integrate with the background sync feature
+                    console.log(
+                        "[PWA] Form submitted while offline - queuing for sync",
+                    );
+                }
             });
-        }
-    </script>
-</body>
 
+            // Add visual feedback for cached content
+            document.addEventListener("htmx:afterSwap", (event) => {
+                // Check if content was served from cache
+                const response = event.detail.xhr;
+                if (
+                    response &&
+                    response.getResponseHeader("X-Cache-Status") === "HIT"
+                ) {
+                    console.log("[PWA] Content loaded from cache");
+                }
+            });
+
+            // Performance monitoring for PWA
+            if ("performance" in window) {
+                window.addEventListener("load", () => {
+                    setTimeout(() => {
+                        const perfData =
+                            performance.getEntriesByType("navigation")[0];
+                        console.log("[PWA] Performance metrics:", {
+                            loadTime:
+                                perfData.loadEventEnd - perfData.loadEventStart,
+                            domContentLoaded:
+                                perfData.domContentLoadedEventEnd -
+                                perfData.domContentLoadedEventStart,
+                            firstPaint:
+                                performance.getEntriesByName("first-paint")[0]
+                                    ?.startTime || "N/A",
+                        });
+                    }, 0);
+                });
+            }
+        </script>
+    </body>
 </html>
 
 {{define "basic-nav-elements"}}
 <div class="flex row gap justify-end align-center">
     {{template "nav-feed"}}
 
-    <a role="button" class="ghost contrast icon" href="./profile" title="Profile">
+    <a
+        role="button"
+        class="ghost contrast icon"
+        href="./profile"
+        title="Profile"
+    >
         <i class="bi bi-person-circle"></i>
     </a>
 
