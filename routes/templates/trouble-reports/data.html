@@ -7,8 +7,9 @@
     </style>
 
     {{range $troubleReport := $pageData.TroubleReports}}
+    {{$id := print "trouble-report-" $troubleReport.ID}}
     <details
-        id="trouble-report-{{$troubleReport.ID}}"
+        id="{{$id}}"
         class="data"
         style="margin: var(--ui-spacing) auto"
     >
@@ -68,6 +69,14 @@
     </div>
     <hr />
     {{end}}
+
+    <script>
+        const el = document.querySelector(location.hash);
+        console.debug(el, location.hash)
+        if (el) {
+            el.open = true
+        }
+    </script>
 </ul>
 {{else}}
 <span id="data"></span>
