@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.19";
+const VERSION = "v0.0.23";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -34,6 +34,10 @@ const CACHE_DURATION = {
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
+    // Service worker related
+    "./js/sw-register.js",
+    "./js/pwa-manager.js",
+
     // Core application files
     "./",
     "./manifest.json",
@@ -173,6 +177,8 @@ self.addEventListener("fetch", (event) => {
     if (!url.startsWith("http")) {
         return;
     }
+
+    console.warn("[SW] requested: ", url);
 
     event.respondWith(handleFetch(request));
 });

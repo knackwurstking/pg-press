@@ -29,9 +29,6 @@ class ServiceWorkerManager {
         // Set up event listeners
         this.setupEventListeners();
 
-        // Check for updates periodically
-        this.startUpdateChecker();
-
         // Show offline notification if applicable
         this.showOfflineNotification();
     }
@@ -118,17 +115,6 @@ class ServiceWorkerManager {
         navigator.serviceWorker.addEventListener("message", (event) => {
             this.handleServiceWorkerMessage(event.data);
         });
-
-        // Handle page visibility changes
-        document.addEventListener("visibilitychange", () => {
-            console.debug("[SW Manager] Page visibility changed", {
-                updating: !document.hidden && this.swRegistration,
-            });
-
-            if (!document.hidden && this.swRegistration) {
-                this.checkForUpdates();
-            }
-        });
     }
 
     /**
@@ -154,40 +140,13 @@ class ServiceWorkerManager {
      */
     async checkForUpdates() {
         if (!this.swRegistration) return;
-        console.debug("[SW Manager] Checking for updates...");
+        console.warn("[SW Manager] Checking for updates...");
 
         try {
             await this.swRegistration.update();
-            console.log("[SW Manager] Checked for updates");
+            console.warn("[SW Manager] Checked for updates");
         } catch (error) {
             console.error("[SW Manager] Update check failed:", error);
-        }
-    }
-
-    /**
-     * Start periodic update checker
-     */
-    startUpdateChecker() {
-        console.info(
-            "[SW Manager] Starting update checker... This will check for updates every 30 minutes.",
-        );
-
-        // Check for updates every 30 minutes
-        this.updateCheckInterval = setInterval(
-            () => {
-                this.checkForUpdates();
-            },
-            30 * 60 * 1000,
-        );
-    }
-
-    /**
-     * Stop the update checker
-     */
-    stopUpdateChecker() {
-        if (this.updateCheckInterval) {
-            clearInterval(this.updateCheckInterval);
-            this.updateCheckInterval = null;
         }
     }
 
