@@ -56,7 +56,6 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 func keyAuthSkipper(ctx echo.Context) bool {
 	url := ctx.Request().URL.String()
 	if keyAuthSkipperRegExp.MatchString(url) {
-		log.Debugf("Skipping authorization for url: %s", url)
 		return true
 	}
 	return false
@@ -67,7 +66,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 	if err != nil {
 		user, err = validateUserFromCookie(ctx, db)
 		if err != nil {
-			return false, nil
+			return false, pgvis.WrapError(err, "failed to validate user from cookie")
 		}
 	}
 
@@ -78,17 +77,17 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error) {
 	cookie, err := ctx.Cookie(routes.CookieName)
 	if err != nil {
-		return nil, err
+		return nil, pgvis.WrapError(err, "failed to get cookie")
 	}
 
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
-		return nil, err
+		return nil, pgvis.WrapError(err, "failed to get cookie value")
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
-		return nil, err
+		return nil, pgvis.WrapError(err, "failed to get user from API key")
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {
