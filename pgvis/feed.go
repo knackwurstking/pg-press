@@ -80,7 +80,7 @@ func (f *FeedUserNameChange) Render() template.HTML {
 
 // FeedTroubleReportAdd represents a trouble report creation event.
 type FeedTroubleReportAdd struct {
-	ID         int    `json:"id"`
+	ID         int    `json:"id"` // FIXME: ID is not set if adding a trouble report
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
 }
