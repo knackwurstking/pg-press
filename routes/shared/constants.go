@@ -1,9 +1,7 @@
 // Package shared provides shared constants and configuration for all route handlers.
-//
-// This package centralizes commonly used template paths, form field names, and other
-// constants to reduce duplication across route handlers and ensure consistency.
-// It's separated from the main routes package to avoid import cycles.
 package shared
+
+// TODO: Do i really need all of this?
 
 // Template file paths
 const (
