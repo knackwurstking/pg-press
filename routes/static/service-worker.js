@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.23";
+const VERSION = "v0.0.25";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -177,8 +177,6 @@ self.addEventListener("fetch", (event) => {
     if (!url.startsWith("http")) {
         return;
     }
-
-    console.warn("[SW] requested: ", url);
 
     event.respondWith(handleFetch(request));
 });

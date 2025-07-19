@@ -140,11 +140,12 @@ class ServiceWorkerManager {
      */
     async checkForUpdates() {
         if (!this.swRegistration) return;
-        console.warn("[SW Manager] Checking for updates...");
+
+        console.debug("[SW Manager] Checking for updates...");
 
         try {
             await this.swRegistration.update();
-            console.warn("[SW Manager] Checked for updates");
+            console.debug("[SW Manager] Checked for updates");
         } catch (error) {
             console.error("[SW Manager] Update check failed:", error);
         }

@@ -231,14 +231,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Handle page visibility changes for PWA optimization
-document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        // Page became visible - check for updates
-        if (window.swManager) {
-            window.swManager.checkForUpdates();
-        }
-    }
-});
+//document.addEventListener("visibilitychange", () => {
+//    if (!document.hidden) {
+//        // Page became visible - check for updates
+//        if (window.swManager) {
+//            window.swManager.checkForUpdates();
+//        }
+//    }
+//});
 
 // Keyboard shortcuts for PWA features
 document.addEventListener("keydown", (event) => {
