@@ -120,15 +120,15 @@ class ServiceWorkerManager {
         });
 
         // Handle page visibility changes
-        document.addEventListener("visibilitychange", () => {
-            console.debug("[SW Manager] Page visibility changed", {
-                updating: !document.hidden && this.swRegistration,
-            });
-
-            if (!document.hidden && this.swRegistration) {
-                this.checkForUpdates();
-            }
-        });
+        //document.addEventListener("visibilitychange", () => {
+        //    console.debug("[SW Manager] Page visibility changed", {
+        //        updating: !document.hidden && this.swRegistration,
+        //    });
+        //
+        //    if (!document.hidden && this.swRegistration) {
+        //        this.checkForUpdates();
+        //    }
+        //});
     }
 
     /**
