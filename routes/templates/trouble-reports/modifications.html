@@ -1,14 +1,22 @@
-<div id="data">
-    <button class="contrast flex gap">
-        <i class="fa fa-arrow-left"></i>Zurück
-    </button>
+<div id="data" class="flex column gap">
+    <span>
+        <button
+            hx-get="/trouble-reports/data"
+            hx-trigger="click"
+            hx-target="#data"
+            hx-swap="outerHTML"
+            class="contrast flex gap"
+        >
+            <i class="bi bi-arrow-left"></i>Zurück
+        </button>
+    </span>
 
     <!-- TODO: List of modifications, who did it, when and show a preview for each modification, and allow to roll back (only for admins) -->
 
-    <!-- NOTE: The following is just for show and testing purposes -->
-    <div class="modifications-list">
-        <h3>Modification History</h3>
+    <div id="modifications-list" class="flex column gap">
+        <h3>Änderungsverlauf</h3>
 
+        <!-- NOTE: The following is just for show and testing purposes -->
         <div class="modification-item">
             <div class="modification-header">
                 <div class="modification-info">
@@ -149,10 +157,6 @@
     </script>
 
     <style>
-        .modifications-list {
-            margin-top: 20px;
-        }
-
         .modification-item {
             border: 1px solid #ddd;
             margin-bottom: 10px;

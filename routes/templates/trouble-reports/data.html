@@ -17,14 +17,23 @@
     </details>
 
     <div class="actions flex row gap justify-end align-center">
-        <!-- TODO: Modification Handler -->
+        <button
+            hx-get="./trouble-reports/modifications?id={{$troubleReport.ID}}"
+            hx-trigger="click"
+            hx-target="#data"
+            hx-swap="outerHTML"
+            class="ghost secondary icon"
+        >
+            <i class="bi bi-clock-history"></i>
+        </button>
 
         <button
-            hx-get="./trouble-reports/dialog-edit?id={{$tr.ID}}"
+            hx-get="./trouble-reports/dialog-edit?id={{$troubleReport.ID}}"
             hx-trigger="click"
             hx-target="#dialogEdit"
             hx-swap="outerHTML"
-            class="ghost primary icon"
+            class="ghost icon"
+            style="color: green;"
         >
             <i class="bi bi-pen"></i>
         </button>
@@ -55,7 +64,6 @@
             <i class="bi bi-trash"></i>
             <small>VOTE</small>
         </button>
-
         {{end}}
     </div>
     <hr />
