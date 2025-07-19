@@ -14,8 +14,8 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/utils"
 )
 
-// DataPageData contains the data structure for trouble reports templates.
-type DataPageData struct {
+// TroubleReportsPageData contains all the reports and user information.
+type TroubleReportsPageData struct {
 	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
 	User           *pgvis.User            `json:"user"`
 }
@@ -38,7 +38,7 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 			pgvis.WrapError(err, "failed to load page template"))
 	}
 
-	err = t.Execute(c.Response(), DataPageData{
+	err = t.Execute(c.Response(), TroubleReportsPageData{
 		TroubleReports: trs,
 		User:           user,
 	})
