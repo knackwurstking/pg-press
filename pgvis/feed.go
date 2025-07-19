@@ -201,14 +201,21 @@ func (f *Feed) Render() template.HTML {
 
 	default:
 		return template.HTML(fmt.Sprintf(
-			`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content"><pre>%#v</pre></div></div>`,
-			f.ID, f.ID, f.Time, timeStr, f.Data,
+			`
+			<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d">
+				<div class="feed-content"><pre>%#v</pre></div>
+				<small class="feed-time">%s</small>
+			</div>`,
+			f.ID, f.ID, f.Time, f.Data, timeStr,
 		))
 	}
 
-	return template.HTML(fmt.Sprintf(
-		`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content">%s</div></div>`,
-		f.ID, f.ID, f.Time, timeStr, feedContent,
+	return template.HTML(fmt.Sprintf(`
+		<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d">
+			<div class="feed-content">%s</div>
+			<small class="feed-time">%s</small>
+		</div>`,
+		f.ID, f.ID, f.Time, feedContent, timeStr,
 	))
 }
 
