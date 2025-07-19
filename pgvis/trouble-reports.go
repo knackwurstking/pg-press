@@ -113,11 +113,14 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 			"failed to insert trouble report", err)
 	}
 
-	feed := NewFeed(&FeedTroubleReportAdd{
-		ID:         report.ID,
-		Title:      report.Title,
-		ModifiedBy: report.Modified.User,
-	})
+	feed := NewFeed(
+		FeedTypeTroubleReportAdd,
+		&FeedTroubleReportAdd{
+			ID:         report.ID,
+			Title:      report.Title,
+			ModifiedBy: report.Modified.User,
+		},
+	)
 	if err := tr.feeds.Add(feed); err != nil {
 		return WrapError(err, "failed to add feed entry")
 	}
@@ -150,11 +153,14 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
-	feed := NewFeed(&FeedTroubleReportUpdate{
-		ID:         report.ID,
-		Title:      report.Title,
-		ModifiedBy: report.Modified.User,
-	})
+	feed := NewFeed(
+		FeedTypeTroubleReportUpdate,
+		&FeedTroubleReportUpdate{
+			ID:         report.ID,
+			Title:      report.Title,
+			ModifiedBy: report.Modified.User,
+		},
+	)
 	if err := tr.feeds.Add(feed); err != nil {
 		return WrapError(err, "failed to add feed entry")
 	}
@@ -183,11 +189,14 @@ func (tr *TroubleReports) Remove(id int64) error {
 	}
 
 	if report != nil {
-		feed := NewFeed(&FeedTroubleReportRemove{
-			ID:         report.ID,
-			Title:      report.Title,
-			ModifiedBy: report.Modified.User,
-		})
+		feed := NewFeed(
+			FeedTypeTroubleReportRemove,
+			&FeedTroubleReportRemove{
+				ID:         report.ID,
+				Title:      report.Title,
+				ModifiedBy: report.Modified.User,
+			},
+		)
 		if err := tr.feeds.Add(feed); err != nil {
 			return WrapError(err, "failed to add feed entry")
 		}

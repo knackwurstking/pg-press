@@ -7,15 +7,26 @@ import (
 	"time"
 )
 
-// FeedCacheHandler defines the interface for rendering feed cache content.
-type FeedCacheHandler interface {
-	Render() template.HTML
-}
+const (
+	FeedTypeUserAdd             = "user_add"
+	FeedTypeUserRemove          = "user_remove"
+	FeedTypeUserNameChange      = "user_name_change"
+	FeedTypeTroubleReportAdd    = "trouble_report_add"
+	FeedTypeTroubleReportUpdate = "trouble_report_update"
+	FeedTypeTroubleReportRemove = "trouble_report_remove"
+)
 
 // FeedUserAdd represents a user addition event.
 type FeedUserAdd struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
+	return &FeedUserAdd{
+		ID:   int64(data["id"].(float64)),
+		Name: data["name"].(string),
+	}
 }
 
 func (f *FeedUserAdd) Render() template.HTML {
@@ -29,6 +40,13 @@ func (f *FeedUserAdd) Render() template.HTML {
 type FeedUserRemove struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
+	return &FeedUserRemove{
+		ID:   int64(data["id"].(float64)),
+		Name: data["name"].(string),
+	}
 }
 
 func (f *FeedUserRemove) Render() template.HTML {
@@ -45,6 +63,14 @@ type FeedUserNameChange struct {
 	New string `json:"new"`
 }
 
+func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
+	return &FeedUserNameChange{
+		ID:  int64(data["id"].(float64)),
+		Old: data["old"].(string),
+		New: data["new"].(string),
+	}
+}
+
 func (f *FeedUserNameChange) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
 		`<div class="feed-item"><div class="feed-item-content">User %s changed their name to %s.</div></div>`,
@@ -57,6 +83,14 @@ type FeedTroubleReportAdd struct {
 	ID         int    `json:"id"`
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
+	return &FeedTroubleReportAdd{
+		ID:         int(data["id"].(float64)),
+		Title:      data["title"].(string),
+		ModifiedBy: data["modified_by"].(*User),
+	}
 }
 
 func (f *FeedTroubleReportAdd) Render() template.HTML {
@@ -73,6 +107,14 @@ type FeedTroubleReportUpdate struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
+func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
+	return &FeedTroubleReportUpdate{
+		ID:         int(data["id"].(float64)),
+		Title:      data["title"].(string),
+		ModifiedBy: data["modified_by"].(*User),
+	}
+}
+
 func (f *FeedTroubleReportUpdate) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
 		`<div class="feed-item"><div class="feed-item-content">User %s updated the trouble report titled <a href="./trouble-reports/%d">%s</a>.</div></div>`,
@@ -87,6 +129,14 @@ type FeedTroubleReportRemove struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
+func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
+	return &FeedTroubleReportRemove{
+		ID:         int(data["id"].(float64)),
+		Title:      data["title"].(string),
+		ModifiedBy: data["modified_by"].(*User),
+	}
+}
+
 func (f *FeedTroubleReportRemove) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
 		`<div class="feed-item"><div class="feed-item-content">User %s removed the trouble report titled %s.</div></div>`,
@@ -96,48 +146,79 @@ func (f *FeedTroubleReportRemove) Render() template.HTML {
 
 // Feed represents a feed entry in the system that tracks activity events.
 type Feed struct {
-	ID    int   `json:"id"`
-	Time  int64 `json:"time"`
-	Cache any   `json:"cache"`
+	ID       int    `json:"id"`
+	Time     int64  `json:"time"`
+	DataType string `json:"data_type"`
+	Data     any    `json:"data"`
 }
 
 // NewFeed creates a new feed entry with the current timestamp.
-func NewFeed(cache any) *Feed {
+func NewFeed(dataType string, data any) *Feed {
 	return &Feed{
-		Time:  time.Now().UnixMilli(),
-		Cache: cache,
+		Time:     time.Now().UnixMilli(),
+		DataType: dataType,
+		Data:     data,
 	}
 }
 
 // NewFeedWithTime creates a new feed entry with a specific timestamp.
-func NewFeedWithTime(cache any, timestamp int64) *Feed {
+func NewFeedWithTime(dataType string, data any, timestamp int64) *Feed {
 	return &Feed{
-		Time:  timestamp,
-		Cache: cache,
+		Time:     timestamp,
+		DataType: dataType,
+		Data:     data,
 	}
 }
 
 // Render generates HTML for the feed entry.
 func (f *Feed) Render() template.HTML {
 	timeStr := f.GetTime().Format("2006-01-02 15:04:05")
+	var feedContent template.HTML
 
-	if h, ok := f.Cache.(FeedCacheHandler); ok {
+	data, _ := f.Data.(map[string]any)
+
+	switch f.DataType {
+
+	// User Types
+
+	case FeedTypeUserAdd:
+		feedContent = NewFeedUserAdd(data).Render()
+	case FeedTypeUserNameChange:
+		feedContent = NewFeedUserNameChange(data).Render()
+	case FeedTypeUserRemove:
+		feedContent = NewFeedUserRemove(data).Render()
+
+	// Trouble Report Types
+
+	case FeedTypeTroubleReportAdd:
+		feedContent = NewFeedTroubleReportAdd(data).Render()
+	case FeedTypeTroubleReportUpdate:
+		feedContent = NewFeedTroubleReportUpdate(data).Render()
+	case FeedTypeTroubleReportRemove:
+		feedContent = NewFeedTroubleReportRemove(data).Render()
+
+	// Fallback
+
+	default:
 		return template.HTML(fmt.Sprintf(
-			`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content">%s</div></div>`,
-			f.ID, f.ID, f.Time, timeStr, h.Render(),
+			`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content"><pre>%#v</pre></div></div>`,
+			f.ID, f.ID, f.Time, timeStr, f.Data,
 		))
 	}
 
 	return template.HTML(fmt.Sprintf(
-		`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content">%#v</div></div>`,
-		f.ID, f.ID, f.Time, timeStr, f.Cache,
+		`<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d"><div class="feed-time">%s</div><div class="feed-content">%s</div></div>`,
+		f.ID, f.ID, f.Time, timeStr, feedContent,
 	))
 }
 
 // Validate checks if the feed has valid data.
 func (f *Feed) Validate() error {
-	if f.Cache == nil {
-		return NewValidationError("cache", "cannot be nil", f.Cache)
+	if f.Data == nil {
+		return NewValidationError("cache", "cannot be nil", f.Data)
+	}
+	if f.DataType == "" {
+		return NewValidationError("data type", "cannot be empty", f.DataType)
 	}
 	if f.Time <= 0 {
 		return NewValidationError("time", "must be positive", f.Time)
@@ -163,14 +244,14 @@ func (f *Feed) IsOlderThan(duration time.Duration) bool {
 // String returns a string representation of the feed.
 func (f *Feed) String() string {
 	return fmt.Sprintf("Feed{ID: %d, Time: %s, Cache: %#v}",
-		f.ID, f.GetTime().Format("2006-01-02 15:04:05"), f.Cache)
+		f.ID, f.GetTime().Format("2006-01-02 15:04:05"), f.Data)
 }
 
 // Clone creates a copy of the feed.
 func (f *Feed) Clone() *Feed {
 	return &Feed{
-		ID:    f.ID,
-		Time:  f.Time,
-		Cache: f.Cache,
+		ID:   f.ID,
+		Time: f.Time,
+		Data: f.Data,
 	}
 }

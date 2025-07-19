@@ -10,15 +10,16 @@ const (
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
 			time INTEGER NOT NULL,
-			cache BLOB NOT NULL,
+			data_type TEXT NOT NULL,
+			data BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
-	selectAllFeedsQuery    = `SELECT id, time, cache FROM feeds ORDER BY id DESC`
-	selectFeedsRangeQuery  = `SELECT id, time, cache FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
-	selectFeedByIDQuery    = `SELECT id, time, cache FROM feeds WHERE id = ?`
-	insertFeedQuery        = `INSERT INTO feeds (time, cache) VALUES (?, ?)`
+	selectAllFeedsQuery    = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
+	selectFeedsRangeQuery  = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
+	selectFeedByIDQuery    = `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
+	insertFeedQuery        = `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
 	countFeedsQuery        = `SELECT COUNT(*) FROM feeds`
 	deleteFeedsByTimeQuery = `DELETE FROM feeds WHERE time < ?`
 	deleteFeedByIDQuery    = `DELETE FROM feeds WHERE id = ?`
@@ -78,12 +79,12 @@ func (f *Feeds) Add(feed *Feed) error {
 		return err
 	}
 
-	cache, err := json.Marshal(feed.Cache)
+	data, err := json.Marshal(feed.Data)
 	if err != nil {
-		return WrapError(err, "failed to marshal feed cache")
+		return WrapError(err, "failed to marshal feed data")
 	}
 
-	_, err = f.db.Exec(insertFeedQuery, feed.Time, cache)
+	_, err = f.db.Exec(insertFeedQuery, feed.Time, feed.DataType, data)
 	if err != nil {
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
@@ -187,15 +188,15 @@ func (f *Feeds) scanFeedRow(row *sql.Row) (*Feed, error) {
 // scanFeedData scans feed data using the provided scan function
 func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
 	feed := &Feed{}
-	var cache []byte
+	var data []byte
 
-	if err := scanFunc(&feed.ID, &feed.Time, &cache); err != nil {
+	if err := scanFunc(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {
 		return nil, err
 	}
 
-	if len(cache) > 0 {
-		if err := json.Unmarshal(cache, &feed.Cache); err != nil {
-			return nil, WrapError(err, "failed to unmarshal cache data")
+	if len(data) > 0 {
+		if err := json.Unmarshal(data, &feed.Data); err != nil {
+			return nil, WrapError(err, "failed to unmarshal feed data")
 		}
 	}
 	return feed, nil
