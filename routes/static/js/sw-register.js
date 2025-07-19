@@ -121,6 +121,10 @@ class ServiceWorkerManager {
 
         // Handle page visibility changes
         document.addEventListener("visibilitychange", () => {
+            console.warn("Page visibility changed", {
+                updating: !document.hidden && this.swRegistration,
+            }); // TODO: Remove later
+
             if (!document.hidden && this.swRegistration) {
                 this.checkForUpdates();
             }
@@ -150,6 +154,7 @@ class ServiceWorkerManager {
      */
     async checkForUpdates() {
         if (!this.swRegistration) return;
+        console.warn("Checking for updates..."); // TODO: Remove later
 
         try {
             await this.swRegistration.update();
@@ -163,6 +168,8 @@ class ServiceWorkerManager {
      * Start periodic update checker
      */
     startUpdateChecker() {
+        console.warn("Starting update checker..."); // TODO: Remove later
+
         // Check for updates every 30 minutes
         this.updateCheckInterval = setInterval(
             () => {
