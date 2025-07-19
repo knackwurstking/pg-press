@@ -71,11 +71,10 @@
     {{end}}
 
     <script>
-        const el = document.querySelector(location.hash);
-        console.debug(el, location.hash)
-        if (el) {
-            el.open = true
-        }
+        ((el) => {
+            if (!el) return;
+            el.open = true;
+        })(document.querySelector(location.hash));
     </script>
 </ul>
 {{else}}
