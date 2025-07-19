@@ -72,11 +72,6 @@ func NewDatabaseError(operation, table, message string, cause error) *DatabaseEr
 	}
 }
 
-// IsNotFound checks if an error represents a "not found" condition.
-func IsNotFound(err error) bool {
-	return errors.Is(err, ErrNotFound)
-}
-
 // IsValidationError checks if an error is a validation error.
 func IsValidationError(err error) bool {
 	var validationErr *ValidationError
@@ -96,7 +91,7 @@ func GetHTTPStatusCode(err error) int {
 	}
 
 	switch {
-	case IsNotFound(err):
+	case errors.Is(err, ErrNotFound):
 		return http.StatusNotFound
 	case IsValidationError(err):
 		return http.StatusBadRequest

@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -137,7 +138,7 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 		})
 	}
 
-	if pgvis.IsNotFound(err) {
+	if errors.Is(err, pgvis.ErrNotFound) {
 		return echo.NewHTTPError(code, "Resource not found")
 	}
 

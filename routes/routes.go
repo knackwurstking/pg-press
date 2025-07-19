@@ -3,6 +3,7 @@ package routes
 
 import (
 	"embed"
+	"errors"
 	"html/template"
 	"net/http"
 	"time"
@@ -152,7 +153,7 @@ func handleApiKeyLogin(apiKey string, db *pgvis.DB, ctx echo.Context) (ok bool) 
 
 	user, err := db.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
-		if pgvis.IsNotFound(err) {
+		if errors.Is(err, pgvis.ErrNotFound) {
 			return false
 		}
 
