@@ -17,7 +17,7 @@ import (
 // DataPageData contains the data structure for trouble reports templates.
 type DataPageData struct {
 	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
-	IsAdmin        bool                   `json:"is_admin"`
+	User           *pgvis.User            `json:"user"`
 }
 
 // GETData handles GET requests to retrieve and render trouble reports data.
@@ -38,12 +38,11 @@ func GETData(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 			pgvis.WrapError(err, "failed to load page template"))
 	}
 
-	pageData := DataPageData{
+	err = t.Execute(c.Response(), DataPageData{
 		TroubleReports: trs,
-		IsAdmin:        user.IsAdmin(),
-	}
-
-	if err = t.Execute(c.Response(), pageData); err != nil {
+		User:           user,
+	})
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			pgvis.WrapError(err, "failed to render page"))
 	}

@@ -1,4 +1,4 @@
-{{$data := .}} {{if ne (len $data.TroubleReports) 0}}
+{{$pageData := .}} {{if ne (len $pageData.TroubleReports) 0}}
 <ul id="data">
     <style>
         pre {
@@ -6,13 +6,18 @@
         }
     </style>
 
-    {{range $tr := $data.TroubleReports}}
-    <details id="trouble-report-{{$tr.ID}}" style="margin: var(--ui-spacing) auto" class="data">
-        <summary>{{$tr.Title}}</summary>
-        <pre>{{$tr.Content}}</pre>
+    {{range $troubleReport := $pageData.TroubleReports}}
+    <details
+        id="trouble-report-{{$troubleReport.ID}}"
+        class="data"
+        style="margin: var(--ui-spacing) auto"
+    >
+        <summary>{{$troubleReport.Title}}</summary>
+        <pre>{{$troubleReport.Content}}</pre>
     </details>
 
     <div class="actions flex row gap justify-end align-center">
+        <!-- TODO: Modification Handler -->
 
         <button
             hx-get="./trouble-reports/dialog-edit?id={{$tr.ID}}"
@@ -24,9 +29,12 @@
             <i class="bi bi-pen"></i>
         </button>
 
-        {{if $data.IsAdmin}}
+        {{if $pageData.User.IsAdmin}}
+
+        <!-- Admin Actions -->
+
         <button
-            hx-delete="./trouble-reports/data?id={{$tr.ID}}"
+            hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
             hx-trigger="click"
             hx-target="#data"
             hx-swap="outerHTML"
@@ -34,13 +42,17 @@
         >
             <i class="bi bi-trash"></i>
         </button>
+
         {{else}}
+
+        <!-- User Actions -->
+
         <!-- TODO: User is not an admin, Add voting system for deleting trouble reports -->
         <!-- TODO: Store this vote somewhere and highlight it somehow -->
-        <!-- TODO: Modification Handler -->
+
         <button
             id="voteForDelete"
-            hx-post="./trouble-reports/vote?id={{$tr.ID}}&mode=delete"
+            hx-post="./trouble-reports/vote?id={{$troubleReport.ID}}&mode=delete"
             hx-trigger="click"
             hx-swap="outerHTML"
             class="ghost destructive flex column justify-between align-center"
@@ -49,8 +61,8 @@
             <i class="bi bi-trash"></i>
             <small>VOTE</small>
         </button>
-        {{end}}
 
+        {{end}}
     </div>
 
     <hr />
