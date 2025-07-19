@@ -31,7 +31,9 @@ func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
 
 func (f *FeedUserAdd) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s was added.</div></div>`,
+		`<div class="feed-item">
+    		<div class="feed-item-content">User %s was added.</div>
+    	</div>`,
 		f.Name,
 	))
 }
@@ -51,7 +53,9 @@ func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
 
 func (f *FeedUserRemove) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s was removed.</div></div>`,
+		`<div class="feed-item">
+			<div class="feed-item-content">User %s was removed.</div>
+		</div>`,
 		f.Name,
 	))
 }
@@ -73,14 +77,16 @@ func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 
 func (f *FeedUserNameChange) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s changed their name to %s.</div></div>`,
+		`<div class="feed-item">
+			<div class="feed-item-content">User %s changed their name to %s.</div>
+		</div>`,
 		f.Old, f.New,
 	))
 }
 
 // FeedTroubleReportAdd represents a trouble report creation event.
 type FeedTroubleReportAdd struct {
-	ID         int    `json:"id"` // FIXME: ID is not set if adding a trouble report
+	ID         int    `json:"id"`
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
 }
@@ -97,7 +103,11 @@ func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 
 func (f *FeedTroubleReportAdd) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s added a new trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.</div></div>`,
+		`<div class="feed-item">
+    		<div class="feed-item-content">
+                User %s added a new trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
+            </div>
+        </div>`,
 		f.ModifiedBy.UserName, f.ID, f.Title,
 	))
 }
@@ -121,7 +131,11 @@ func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 
 func (f *FeedTroubleReportUpdate) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.</div></div>`,
+		`<div class="feed-item">
+		    <div class="feed-item-content">
+				User %s updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
+			</div>
+		</div>`,
 		f.ModifiedBy.UserName, f.ID, f.Title,
 	))
 }
