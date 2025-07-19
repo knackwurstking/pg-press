@@ -159,7 +159,11 @@ func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 
 func (f *FeedTroubleReportRemove) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item"><div class="feed-item-content">User %s removed the trouble report titled %s.</div></div>`,
+		`<div class="feed-item">
+		    <div class="feed-item-content">
+				User %s removed the trouble report titled %s.
+			</div>
+		</div>`,
 		f.ModifiedBy.UserName, f.Title,
 	))
 }
