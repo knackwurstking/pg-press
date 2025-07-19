@@ -1,6 +1,8 @@
 // Package pgvis provides error handling utilities and types.
 package pgvis
 
+// TODO: Simplify error handling and types.
+
 import (
 	"errors"
 	"fmt"
@@ -55,9 +57,9 @@ type DatabaseError struct {
 
 func (e *DatabaseError) Error() string {
 	if e.Table != "" {
-		return fmt.Sprintf("database error during %s on table '%s': %s", e.Operation, e.Table, e.Message)
+		return fmt.Sprintf("database error during %s on table '%s': %s: %s", e.Operation, e.Table, e.Message, e.Cause)
 	}
-	return fmt.Sprintf("database error during %s: %s", e.Operation, e.Message)
+	return fmt.Sprintf("database error during %s: %s: %s", e.Operation, e.Message, e.Cause)
 }
 
 func (e *DatabaseError) Unwrap() error {
