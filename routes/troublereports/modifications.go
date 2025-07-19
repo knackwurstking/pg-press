@@ -14,7 +14,6 @@ type ModificationsPageData struct {
 	User *pgvis.User
 }
 
-// TODO: Modifications "GET ./trouble-reports/modifications" ...
 func GETModifications(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
 	user, ok := c.Get("user").(*pgvis.User)
 	if !ok {
