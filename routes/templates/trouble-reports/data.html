@@ -30,9 +30,6 @@
         </button>
 
         {{if $pageData.User.IsAdmin}}
-
-        <!-- Admin Actions -->
-
         <button
             hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
             hx-trigger="click"
@@ -44,9 +41,6 @@
         </button>
 
         {{else}}
-
-        <!-- User Actions -->
-
         <!-- TODO: User is not an admin, Add voting system for deleting trouble reports -->
         <!-- TODO: Store this vote somewhere and highlight it somehow -->
 
@@ -64,7 +58,6 @@
 
         {{end}}
     </div>
-
     <hr />
     {{end}}
 </ul>
