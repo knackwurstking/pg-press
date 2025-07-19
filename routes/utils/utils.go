@@ -21,10 +21,10 @@ const (
 	DefaultPageSize = 20
 	MaxSearchLength = 500
 
-	AuthenticationRequiredMessage = "authentication required"
-	InvalidUserSessionMessage     = "invalid user session"
-	TemplateParseErrorMessage     = "failed to parse templates"
-	TemplateExecuteErrorMessage   = "failed to render page"
+	authenticationRequiredMessage = "authentication required"
+	invalidUserSessionMessage     = "invalid user session"
+	templateParseErrorMessage     = "failed to parse templates"
+	templateExecuteErrorMessage   = "failed to render page"
 )
 
 func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
@@ -32,13 +32,13 @@ func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
 	if !ok {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
-			AuthenticationRequiredMessage,
+			authenticationRequiredMessage,
 		)
 	}
 	if user == nil {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
-			InvalidUserSessionMessage,
+			invalidUserSessionMessage,
 		)
 	}
 	return user, nil
@@ -180,14 +180,14 @@ func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []st
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			TemplateParseErrorMessage,
+			pgvis.WrapError(err, templateParseErrorMessage),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			TemplateExecuteErrorMessage,
+			pgvis.WrapError(err, templateExecuteErrorMessage),
 		)
 	}
 
