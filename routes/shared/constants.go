@@ -16,11 +16,12 @@ const (
 	ProfileTemplatePath        = "templates/profile.html"
 	TroubleReportsTemplatePath = "templates/trouble-reports.html"
 
-	FeedDataTemplatePath             = "templates/feed/data.html"
-	FeedCounterTemplatePath          = "templates/nav/feed-counter.html"
-	ProfileCookiesTemplatePath       = "templates/profile/cookies.html"
-	TroubleReportsDataTemplatePath   = "templates/trouble-reports/data.html"
-	TroubleReportsDialogTemplatePath = "templates/trouble-reports/dialog-edit.html"
+	FeedDataTemplatePath                    = "templates/feed/data.html"
+	FeedCounterTemplatePath                 = "templates/nav/feed-counter.html"
+	ProfileCookiesTemplatePath              = "templates/profile/cookies.html"
+	TroubleReportsDataTemplatePath          = "templates/trouble-reports/data.html"
+	TroubleReportsModificationsTemplatePath = "templates/trouble-reports/modifications.html"
+	TroubleReportsDialogTemplatePath        = "templates/trouble-reports/dialog-edit.html"
 )
 
 // Form field names

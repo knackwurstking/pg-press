@@ -24,6 +24,9 @@ func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB)
 	dataPath := serverPathPrefix + "/trouble-reports/data"
 	e.GET(dataPath, handleGetData(templates, db))
 	e.DELETE(dataPath, handleDeleteReport(templates, db))
+
+	modificationsPath := serverPathPrefix + "/trouble-reports/modifications"
+	e.GET(modificationsPath, handleGetModifications(templates, db))
 }
 
 func handleMainPage(templates fs.FS) echo.HandlerFunc {
@@ -74,5 +77,11 @@ func handleGetData(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 func handleDeleteReport(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return DELETEData(templates, c, db)
+	}
+}
+
+func handleGetModifications(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return GETModifications(templates, c, db)
 	}
 }
