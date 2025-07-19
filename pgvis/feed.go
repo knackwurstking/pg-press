@@ -86,14 +86,14 @@ func (f *FeedUserNameChange) Render() template.HTML {
 
 // FeedTroubleReportAdd represents a trouble report creation event.
 type FeedTroubleReportAdd struct {
-	ID         int    `json:"id"`
+	ID         int64  `json:"id"`
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
 }
 
 func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	return &FeedTroubleReportAdd{
-		ID:    int(data["id"].(float64)),
+		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
 		ModifiedBy: NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
@@ -114,14 +114,14 @@ func (f *FeedTroubleReportAdd) Render() template.HTML {
 
 // FeedTroubleReportUpdate represents a trouble report update event.
 type FeedTroubleReportUpdate struct {
-	ID         int    `json:"id"`
+	ID         int64  `json:"id"`
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
 }
 
 func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 	return &FeedTroubleReportUpdate{
-		ID:    int(data["id"].(float64)),
+		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
 		ModifiedBy: NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
@@ -142,14 +142,14 @@ func (f *FeedTroubleReportUpdate) Render() template.HTML {
 
 // FeedTroubleReportRemove represents a trouble report removal event.
 type FeedTroubleReportRemove struct {
-	ID         int    `json:"id"`
+	ID         int64  `json:"id"`
 	Title      string `json:"title"`
 	ModifiedBy *User  `json:"modified_by"`
 }
 
 func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	return &FeedTroubleReportRemove{
-		ID:    int(data["id"].(float64)),
+		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
 		ModifiedBy: NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
@@ -170,7 +170,7 @@ func (f *FeedTroubleReportRemove) Render() template.HTML {
 
 // Feed represents a feed entry in the system that tracks activity events.
 type Feed struct {
-	ID       int    `json:"id"`
+	ID       int64  `json:"id"`
 	Time     int64  `json:"time"`
 	DataType string `json:"data_type"`
 	Data     any    `json:"data"`

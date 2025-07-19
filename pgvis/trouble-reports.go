@@ -104,7 +104,8 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 		return WrapError(err, "failed to marshal modified data")
 	}
 
-	_, err = tr.db.Exec(
+	// After exec this insert query, i need to get the id
+	result, err := tr.db.Exec(
 		insertTroubleReportQuery,
 		report.Title, report.Content, linkedAttachments, modified,
 	)
@@ -113,10 +114,16 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 			"failed to insert trouble report", err)
 	}
 
+	id, err := result.LastInsertId()
+	if err != nil {
+		return NewDatabaseError("insert", "trouble_reports",
+			"failed to get last insert ID", err)
+	}
+
 	feed := NewFeed(
 		FeedTypeTroubleReportAdd,
 		&FeedTroubleReportAdd{
-			ID:         report.ID,
+			ID:         id,
 			Title:      report.Title,
 			ModifiedBy: report.Modified.User,
 		},

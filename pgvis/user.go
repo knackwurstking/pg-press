@@ -18,7 +18,7 @@ type User struct {
 	TelegramID int64  `json:"telegram_id"`
 	UserName   string `json:"user_name"`
 	ApiKey     string `json:"api_key"`
-	LastFeed   int    `json:"last_feed"`
+	LastFeed   int64  `json:"last_feed"`
 }
 
 // NewUser creates a new user with the provided details
@@ -36,14 +36,14 @@ func NewUserFromInterfaceMap(modified map[string]any) *User {
 		TelegramID: int64(modified["telegram_id"].(float64)),
 		UserName:   modified["user_name"].(string),
 		ApiKey:     modified["api_key"].(string),
-		LastFeed:   int(modified["last_feed"].(float64)),
+		LastFeed:   int64(modified["last_feed"].(float64)),
 	}
 
 	return user
 }
 
 // NewUserWithLastFeed creates a new user with a specific last feed ID
-func NewUserWithLastFeed(telegramID int64, userName, apiKey string, lastFeed int) *User {
+func NewUserWithLastFeed(telegramID int64, userName, apiKey string, lastFeed int64) *User {
 	user := NewUser(telegramID, userName, apiKey)
 	user.LastFeed = lastFeed
 	return user
@@ -135,7 +135,7 @@ func (u *User) UpdateAPIKey(newAPIKey string) error {
 }
 
 // UpdateLastFeed updates the last viewed feed ID
-func (u *User) UpdateLastFeed(feedID int) error {
+func (u *User) UpdateLastFeed(feedID int64) error {
 	if feedID < 0 {
 		return NewValidationError("feed_id", "cannot be negative", feedID)
 	}

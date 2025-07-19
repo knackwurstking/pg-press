@@ -15,7 +15,7 @@ const (
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int                       `json:"id"`
+	ID                int64                     `json:"id"`
 	Title             string                    `json:"title"`
 	Content           string                    `json:"content"`
 	LinkedAttachments []*Attachment             `json:"linked_attachments"`
