@@ -11,14 +11,28 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type FeedCounter struct {
-	Count int
+type Handler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
 }
 
-func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	data := &FeedCounter{}
+func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler {
+	return &Handler{
+		db:               db,
+		serverPathPrefix: serverPathPrefix,
+		templates:        templates,
+	}
+}
 
-	feeds, err := db.Feeds.ListRange(0, 100)
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
+	e.GET(h.serverPathPrefix+"/nav/feed-counter", h.handleGetFeedCounter)
+}
+
+func (h *Handler) handleGetFeedCounter(c echo.Context) error {
+	data := &FeedCounterTemplateData{}
+
+	feeds, err := h.db.Feeds.ListRange(0, 100)
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
@@ -40,9 +54,13 @@ func GETFeedCounter(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 	}
 
 	return utils.HandleTemplate(c, data,
-		templates,
+		h.templates,
 		[]string{
 			constants.LegacyFeedCounterTemplatePath,
 		},
 	)
+}
+
+type FeedCounterTemplateData struct {
+	Count int
 }

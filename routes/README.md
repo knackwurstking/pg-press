@@ -6,19 +6,18 @@ This package provides HTTP route handlers and web interface for the pgvis applic
 
 ```
 routes/
-├── router.go              # Main router setup and configuration
-├── handlers/              # HTTP handlers organized by domain
-│   ├── auth/             # Authentication (login/logout)
-│   ├── home/             # Home page
-│   ├── feed/             # Feed management
-│   ├── profile/          # User profile management
-│   └── troublereports/   # Trouble report management
-├── components/           # Reusable UI components
-│   └── nav/             # Navigation components
-├── constants/           # Public constants package
+├── router.go           # Main router setup and configuration
+├── handlers/           # HTTP handlers organized by domain
+│   ├── auth/           # Authentication (login/logout)
+│   ├── home/           # Home page
+│   ├── nav/            # Navigation components
+│   ├── feed/           # Feed management
+│   ├── profile/        # User profile management
+│   └── troublereports/ # Trouble report management
+├── constants/          # Public constants package
 ├── internal/           # Internal utilities (routes package only)
-├── assets/            # Static assets (CSS, JS, images)
-└── templates/         # HTML templates
+├── assets/             # Static assets (CSS, JS, images)
+└── templates/          # HTML templates
 ```
 
 ## Key Principles
@@ -55,7 +54,6 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 ### 3. Clean Separation of Concerns
 
 - **Handlers**: HTTP request/response logic
-- **Components**: Reusable UI functionality
 - **Constants**: Shared configuration and constants
 - **Internal**: Package-private utilities
 - **Assets**: Static files (CSS, JS, images)
@@ -145,7 +143,6 @@ This structure replaces the previous flat organization. Key changes:
 - `utils/` → `internal/utils/` (package-private utilities)
 - `static/` → `assets/` (better semantic naming)
 - Domain handlers moved to `handlers/` subdirectories
-- Navigation components moved to `components/nav/`
 
 All existing functionality is preserved with improved organization.
 
