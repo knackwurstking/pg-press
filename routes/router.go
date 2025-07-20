@@ -7,10 +7,10 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/components/nav"
 	"github.com/knackwurstking/pg-vis/routes/handlers/auth"
 	"github.com/knackwurstking/pg-vis/routes/handlers/feed"
 	"github.com/knackwurstking/pg-vis/routes/handlers/home"
+	"github.com/knackwurstking/pg-vis/routes/handlers/nav"
 	"github.com/knackwurstking/pg-vis/routes/handlers/profile"
 	"github.com/knackwurstking/pg-vis/routes/handlers/troublereports"
 )
@@ -35,19 +35,29 @@ func Serve(e *echo.Echo, o Options) {
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
 	// Initialize handlers
-	authHandler := auth.NewHandler(o.DB, o.ServerPathPrefix, templates)
-	homeHandler := home.NewHandler(o.DB, o.ServerPathPrefix, templates)
-	feedHandler := feed.NewHandler(o.DB, o.ServerPathPrefix, templates)
-	profileHandler := profile.NewHandler(o.DB, o.ServerPathPrefix, templates)
+	authHandler := auth.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
+
+	homeHandler := home.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
+
+	feedHandler := feed.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
+
+	profileHandler := profile.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
+
+	troublereportsHandler := troublereports.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
+
+	navHandler := nav.NewHandler(
+		o.DB, o.ServerPathPrefix, templates)
 
 	// Register routes
 	authHandler.RegisterRoutes(e)
 	homeHandler.RegisterRoutes(e)
 	feedHandler.RegisterRoutes(e)
 	profileHandler.RegisterRoutes(e)
-
-	// Legacy handlers (to be migrated)
-	// TODO: Migrate legacy handlers to use the new handlers
-	troublereports.Serve(templates, o.ServerPathPrefix, e, o.DB)
-	nav.Serve(templates, o.ServerPathPrefix, e, o.DB)
+	troublereportsHandler.RegisterRoutes(e)
+	navHandler.RegisterRoutes(e)
 }

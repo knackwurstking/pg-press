@@ -11,30 +11,44 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
-// Serve configures and registers all trouble report related HTTP routes.
-func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
-	e.GET(serverPathPrefix+"/trouble-reports", handleMainPage(templates))
-
-	editDialogPath := serverPathPrefix + "/trouble-reports/dialog-edit"
-	e.GET(editDialogPath, handleGetEditDialog(templates, db))
-	e.POST(editDialogPath, handleCreateReport(templates, db))
-	e.PUT(editDialogPath, handleUpdateReport(templates, db))
-
-	dataPath := serverPathPrefix + "/trouble-reports/data"
-	e.GET(dataPath, handleGetData(templates, db))
-	e.DELETE(dataPath, handleDeleteReport(templates, db))
-
-	modificationsPath := serverPathPrefix + "/trouble-reports/modifications"
-	e.GET(modificationsPath, handleGetModifications(templates, db))
+type Handler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
 }
 
-func handleMainPage(templates fs.FS) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return utils.HandleTemplate(c, nil,
-			templates,
-			constants.TroubleReportsPageTemplates,
-		)
+func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler {
+	return &Handler{
+		db:               db,
+		serverPathPrefix: serverPathPrefix,
+		templates:        templates,
 	}
+}
+
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
+	e.GET(h.serverPathPrefix+"/trouble-reports", h.handleMainPage)
+
+	// TODO: ...
+	editDialogPath := h.serverPathPrefix + "/trouble-reports/dialog-edit"
+	e.GET(editDialogPath, handleGetEditDialog(h.templates, h.db))
+	e.POST(editDialogPath, handleCreateReport(h.templates, h.db))
+	e.PUT(editDialogPath, handleUpdateReport(h.templates, h.db))
+
+	// TODO: ...
+	dataPath := h.serverPathPrefix + "/trouble-reports/data"
+	e.GET(dataPath, handleGetData(h.templates, h.db))
+	e.DELETE(dataPath, handleDeleteReport(h.templates, h.db))
+
+	// TODO: ...
+	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications"
+	e.GET(modificationsPath, handleGetModifications(h.templates, h.db))
+}
+
+func (h *Handler) handleMainPage(c echo.Context) error {
+	return utils.HandleTemplate(c, nil,
+		h.templates,
+		constants.TroubleReportsPageTemplates,
+	)
 }
 
 func handleGetEditDialog(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
