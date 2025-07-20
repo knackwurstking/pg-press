@@ -3,6 +3,7 @@ package profile
 
 import (
 	"io/fs"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 
@@ -11,67 +12,90 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
-// Profile contains the data structure passed to the profile page template.
-type Profile struct {
-	User    *pgvis.User     `json:"user"`
-	Cookies []*pgvis.Cookie `json:"cookies"`
+type Handler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
 }
 
-// CookiesSorted returns the user's cookies sorted by last login time.
-func (p *Profile) CookiesSorted() []*pgvis.Cookie {
-	return pgvis.SortCookies(p.Cookies)
+func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler {
+	return &Handler{
+		db:               db,
+		serverPathPrefix: serverPathPrefix,
+		templates:        templates,
+	}
 }
 
-// Serve configures and registers all profile related HTTP routes.
-func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
-	e.GET(serverPathPrefix+"/profile", handleMainPage(templates, db))
-
-	cookiesPath := serverPathPrefix + "/profile/cookies"
-	e.GET(cookiesPath, handleGetCookies(templates, db))
-	e.DELETE(cookiesPath, handleDeleteCookies(templates, db))
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
+	e.GET(h.serverPathPrefix+"/profile", h.handleMainPage)
+	e.GET(h.serverPathPrefix+"/profile/cookies", h.handleGetCookies)
+	e.DELETE(h.serverPathPrefix+"/profile/cookies", h.handleDeleteCookies)
 }
 
-func handleMainPage(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		pageData := &Profile{
-			Cookies: make([]*pgvis.Cookie, 0),
-		}
+func (h *Handler) handleMainPage(c echo.Context) error {
+	pageData := &ProfilePageData{
+		Cookies: make([]*pgvis.Cookie, 0),
+	}
 
-		user, herr := utils.GetUserFromContext(c)
-		if herr != nil {
-			return herr
-		}
-		pageData.User = user
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+	pageData.User = user
 
-		if err := handleUserNameChange(c, pageData, db); err != nil {
-			return utils.HandlePgvisError(c, err)
-		}
+	if err := h.handleUserNameChange(c, pageData); err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
 
-		if cookies, err := db.Cookies.ListApiKey(pageData.User.ApiKey); err == nil {
-			pageData.Cookies = cookies
-		}
+	if cookies, err := h.db.Cookies.ListApiKey(pageData.User.ApiKey); err == nil {
+		pageData.Cookies = cookies
+	}
 
-		return utils.HandleTemplate(c, pageData,
-			templates,
-			constants.ProfilePageTemplates,
+	return utils.HandleTemplate(c, pageData,
+		h.templates,
+		constants.ProfilePageTemplates,
+	)
+}
+
+func (h *Handler) handleGetCookies(c echo.Context) error {
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	cookies, err := h.db.Cookies.ListApiKey(user.ApiKey)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	cookies = pgvis.SortCookies(cookies)
+
+	return utils.HandleTemplate(c, cookies,
+		h.templates,
+		[]string{
+			constants.LegacyProfileCookiesTemplatePath,
+		},
+	)
+}
+
+func (h *Handler) handleDeleteCookies(c echo.Context) error {
+	value := utils.SanitizeInput(c.QueryParam("value"))
+	if value == "" {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"cookie value parameter is required",
 		)
 	}
-}
 
-func handleGetCookies(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return GETCookies(templates, c, db)
+	if err := h.db.Cookies.Remove(value); err != nil {
+		return utils.HandlePgvisError(c, err)
 	}
+
+	return h.handleGetCookies(c)
 }
 
-func handleDeleteCookies(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return DELETECookies(templates, c, db)
-	}
-}
-
-func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) error {
-	formParams, _ := ctx.FormParams()
+func (h *Handler) handleUserNameChange(c echo.Context, pageData *ProfilePageData) error {
+	formParams, _ := c.FormParams()
 	userName := utils.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
 	if userName == "" || userName == pageData.User.UserName {
@@ -85,10 +109,21 @@ func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) err
 
 	updatedUser := pgvis.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
 
-	if err := db.Users.Update(pageData.User.TelegramID, updatedUser); err != nil {
+	if err := h.db.Users.Update(pageData.User.TelegramID, updatedUser); err != nil {
 		return err
 	}
 
 	pageData.User.UserName = userName
 	return nil
+}
+
+// Profile contains the data structure passed to the profile page template.
+type ProfilePageData struct {
+	User    *pgvis.User     `json:"user"`
+	Cookies []*pgvis.Cookie `json:"cookies"`
+}
+
+// CookiesSorted returns the user's cookies sorted by last login time.
+func (p *ProfilePageData) CookiesSorted() []*pgvis.Cookie {
+	return pgvis.SortCookies(p.Cookies)
 }

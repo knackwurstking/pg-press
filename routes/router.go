@@ -38,14 +38,16 @@ func Serve(e *echo.Echo, o Options) {
 	authHandler := auth.NewHandler(o.DB, o.ServerPathPrefix, templates)
 	homeHandler := home.NewHandler(o.DB, o.ServerPathPrefix, templates)
 	feedHandler := feed.NewHandler(o.DB, o.ServerPathPrefix, templates)
+	profileHandler := profile.NewHandler(o.DB, o.ServerPathPrefix, templates)
 
 	// Register routes
 	authHandler.RegisterRoutes(e)
 	homeHandler.RegisterRoutes(e)
 	feedHandler.RegisterRoutes(e)
+	profileHandler.RegisterRoutes(e)
 
 	// Legacy handlers (to be migrated)
-	profile.Serve(templates, o.ServerPathPrefix, e, o.DB)
+	// TODO: Migrate legacy handlers to use the new handlers
 	troublereports.Serve(templates, o.ServerPathPrefix, e, o.DB)
 	nav.Serve(templates, o.ServerPathPrefix, e, o.DB)
 }
