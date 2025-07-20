@@ -52,6 +52,10 @@ func (m *Modified[T]) GetTime() time.Time {
 	return time.UnixMilli(m.Time)
 }
 
+func (m *Modified[T]) GetTimeString() string {
+	return m.GetTime().Format("2006-01-02 15:04:05")
+}
+
 // GetUserName returns the username of the user who made the modification
 func (m *Modified[T]) GetUserName() string {
 	if m.User == nil {
