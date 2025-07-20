@@ -28,7 +28,7 @@ func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler
 
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/feed", h.handleFeed)
-	e.GET(h.serverPathPrefix+"/feed/data", h.handleGETData)
+	e.GET(h.serverPathPrefix+"/feed/data", h.handleGetData)
 }
 
 func (h *Handler) handleFeed(c echo.Context) error {
@@ -38,7 +38,7 @@ func (h *Handler) handleFeed(c echo.Context) error {
 	)
 }
 
-func (h *Handler) handleGETData(c echo.Context) error {
+func (h *Handler) handleGetData(c echo.Context) error {
 	data := &DataTemplateData{
 		Feeds: make([]*pgvis.Feed, 0),
 	}
