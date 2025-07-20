@@ -165,7 +165,7 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 		return WrapError(err, "failed to marshal mods data")
 	}
 
-	_, err = tr.db.Exec(
+	result, err := tr.db.Exec(
 		updateTroubleReportQuery,
 		report.Title, report.Content, linkedAttachments, mods, id,
 	)
@@ -174,10 +174,16 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
+	id, err = result.LastInsertId()
+	if err != nil {
+		return NewDatabaseError("update", "trouble_reports",
+			"failed to get last insert ID", err)
+	}
+
 	feed := NewFeed(
 		FeedTypeTroubleReportUpdate,
 		&FeedTroubleReportUpdate{
-			ID:         report.ID,
+			ID:         id,
 			Title:      report.Title,
 			ModifiedBy: report.Mods.Current().User,
 		},
