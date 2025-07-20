@@ -3,12 +3,21 @@ package troublereports
 
 import (
 	"io/fs"
+	"net/http"
+	"net/url"
 
+	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/constants"
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
+)
+
+const (
+	adminPrivilegesRequiredMessage = "administrator privileges required"
+	invalidContentFormFieldMessage = "invalid content form value"
+	invalidTitleFormFieldMessage   = "invalid title form value"
 )
 
 type Handler struct {
@@ -30,19 +39,27 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 
 	editDialogPath := h.serverPathPrefix + "/trouble-reports/dialog-edit"
 	e.GET(editDialogPath, func(c echo.Context) error {
-		return h.handleGetEditDialog(c, nil)
+		return h.handleGetDialogEdit(c, nil)
 	})
 	e.POST(editDialogPath, func(c echo.Context) error {
 		return h.handlePostDialogEdit(c)
 	})
-	e.PUT(editDialogPath, handleUpdateReport(h.templates, h.db)) // TODO: ...
+	e.PUT(editDialogPath, func(c echo.Context) error {
+		return h.handlePutDialogEdit(c)
+	})
 
 	dataPath := h.serverPathPrefix + "/trouble-reports/data"
-	e.GET(dataPath, handleGetData(h.templates, h.db))         // TODO: ...
-	e.DELETE(dataPath, handleDeleteReport(h.templates, h.db)) // TODO: ...
+	e.GET(dataPath, func(c echo.Context) error {
+		return h.handleGetData(c)
+	})
+	e.DELETE(dataPath, func(c echo.Context) error {
+		return h.handleDeleteData(c)
+	})
 
 	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications"
-	e.GET(modificationsPath, handleGetModifications(h.templates, h.db)) // TODO: ...
+	e.GET(modificationsPath, func(c echo.Context) error {
+		return h.handleGetModifications(c)
+	})
 }
 
 func (h *Handler) handleMainPage(c echo.Context) error {
@@ -52,7 +69,7 @@ func (h *Handler) handleMainPage(c echo.Context) error {
 	)
 }
 
-func (h *Handler) handleGetEditDialog(c echo.Context, pageData *EditDialogTemplateData) error {
+func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTemplateData) error {
 	if pageData == nil {
 		pageData = &EditDialogTemplateData{}
 	}
@@ -63,7 +80,7 @@ func (h *Handler) handleGetEditDialog(c echo.Context, pageData *EditDialogTempla
 
 	if !pageData.Submitted && !pageData.InvalidTitle && !pageData.InvalidContent {
 		if idStr := c.QueryParam(constants.IDQueryParam); idStr != "" {
-			id, herr := utils.ParseRequiredIDQuery(c, constants.IDQueryParam)
+			id, herr := utils.ParseIDQuery(c, constants.IDQueryParam)
 			if herr != nil {
 				return herr
 			}
@@ -99,7 +116,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	title, content, herr := extractAndValidateFormData(c)
+	title, content, herr := h.validateFormData(c)
 	if herr != nil {
 		return herr
 	}
@@ -120,7 +137,141 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 		dialogEditData.Submitted = false
 	}
 
-	return h.handleGetEditDialog(c, dialogEditData)
+	return h.handleGetDialogEdit(c, dialogEditData)
+}
+
+func (h *Handler) handlePutDialogEdit(c echo.Context) error {
+	id, herr := utils.ParseIDQuery(c, constants.IDQueryParam)
+	if herr != nil {
+		return herr
+	}
+
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	title, content, herr := h.validateFormData(c)
+	if herr != nil {
+		return herr
+	}
+
+	dialogEditData := &EditDialogTemplateData{
+		Submitted:      true,
+		ID:             int(id),
+		Title:          title,
+		Content:        content,
+		InvalidTitle:   title == "",
+		InvalidContent: content == "",
+	}
+
+	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
+		trOld, err := h.db.TroubleReports.Get(id)
+		if err != nil {
+			return utils.HandlePgvisError(c, err)
+		}
+
+		modified := pgvis.NewModified(user, trOld)
+		trNew := pgvis.NewTroubleReport(modified, title, content)
+
+		if err := h.db.TroubleReports.Update(id, trNew); err != nil {
+			return utils.HandlePgvisError(c, err)
+		}
+	} else {
+		dialogEditData.Submitted = false
+	}
+
+	return h.handleGetDialogEdit(c, dialogEditData)
+}
+
+func (h *Handler) handleGetData(c echo.Context) error {
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	trs, err := h.db.TroubleReports.List()
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	return utils.HandleTemplate(
+		c,
+		TroubleReportsTemplateData{
+			TroubleReports: trs,
+			User:           user,
+		},
+		h.templates,
+		[]string{
+			constants.LegacyTroubleReportsDataTemplatePath,
+		},
+	)
+}
+
+func (h *Handler) handleDeleteData(c echo.Context) error {
+	id, herr := utils.ParseIDQuery(c, "id")
+	if herr != nil {
+		return herr
+	}
+
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	if !user.IsAdmin() {
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			adminPrivilegesRequiredMessage,
+		)
+	}
+
+	log.Infof("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
+		user.UserName, user.TelegramID, id)
+
+	if err := h.db.TroubleReports.Remove(id); err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	return h.handleGetData(c)
+}
+
+func (h *Handler) handleGetModifications(c echo.Context) error {
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	return utils.HandleTemplate(
+		c,
+		ModificationsTemplateData{
+			User: user,
+		},
+		h.templates,
+		[]string{
+			constants.LegacyTroubleReportsModificationsTemplatePath,
+		},
+	)
+}
+
+func (h *Handler) validateFormData(ctx echo.Context) (title, content string, httpErr *echo.HTTPError) {
+	var err error
+
+	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest,
+			pgvis.WrapError(err, invalidTitleFormFieldMessage))
+	}
+	title = utils.SanitizeInput(title)
+
+	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest,
+			pgvis.WrapError(err, invalidContentFormFieldMessage))
+	}
+	content = utils.SanitizeInput(content)
+
+	return title, content, nil
 }
 
 type EditDialogTemplateData struct {
@@ -133,28 +284,11 @@ type EditDialogTemplateData struct {
 	InvalidContent    bool                `json:"invalid_content"`
 }
 
-// .................................................................................... //
-
-func handleUpdateReport(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return PUTDialogEdit(templates, c, db)
-	}
+type TroubleReportsTemplateData struct {
+	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
+	User           *pgvis.User            `json:"user"`
 }
 
-func handleGetData(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return GETData(templates, c, db)
-	}
-}
-
-func handleDeleteReport(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return DELETEData(templates, c, db)
-	}
-}
-
-func handleGetModifications(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return GETModifications(templates, c, db)
-	}
+type ModificationsTemplateData struct {
+	User *pgvis.User
 }
