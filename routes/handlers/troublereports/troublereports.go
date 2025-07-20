@@ -172,7 +172,7 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 		}
 
 		modified := pgvis.NewModified(user, trOld)
-		trNew := pgvis.NewTroubleReport(title, content, modified)
+		trNew := pgvis.NewTroubleReport(title, content, append(trOld.Mods, modified)...)
 
 		if err := h.db.TroubleReports.Update(id, trNew); err != nil {
 			return utils.HandlePgvisError(c, err)
