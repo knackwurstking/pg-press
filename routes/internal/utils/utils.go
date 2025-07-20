@@ -56,7 +56,7 @@ func SetAPIKeyInContext(ctx echo.Context, apiKey string) {
 	ctx.Set(apiKeyContextKey, apiKey)
 }
 
-func ParseIDParam(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
+func ParseInt64Param(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
 	idStr := ctx.Param(paramName)
 	if idStr == "" {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" parameter")
@@ -72,7 +72,7 @@ func ParseIDParam(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
 	return id, nil
 }
 
-func ParseIDQuery(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
+func ParseInt64Query(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
 	idStr := ctx.QueryParam(paramName)
 	if idStr == "" {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" query parameter")

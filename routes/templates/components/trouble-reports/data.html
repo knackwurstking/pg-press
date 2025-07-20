@@ -19,7 +19,7 @@
 
     <div class="actions flex row gap justify-end align-center">
         <button
-            hx-get="./trouble-reports/modifications?id={{$troubleReport.ID}}"
+            hx-get="./trouble-reports/modifications/{{$troubleReport.ID}}"
             hx-trigger="click"
             hx-target="#data"
             hx-swap="outerHTML"

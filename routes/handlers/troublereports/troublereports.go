@@ -48,7 +48,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(dataPath, h.handleGetData)
 	e.DELETE(dataPath, h.handleDeleteData)
 
-	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications"
+	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
 	e.GET(modificationsPath, h.handleGetModifications)
 }
 
@@ -80,7 +80,7 @@ func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTempla
 
 	if !pageData.Submitted && !pageData.InvalidTitle && !pageData.InvalidContent {
 		if idStr := c.QueryParam(constants.IDQueryParam); idStr != "" {
-			id, herr := utils.ParseIDQuery(c, constants.IDQueryParam)
+			id, herr := utils.ParseInt64Query(c, constants.IDQueryParam)
 			if herr != nil {
 				return herr
 			}
@@ -141,7 +141,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 }
 
 func (h *Handler) handlePutDialogEdit(c echo.Context) error {
-	id, herr := utils.ParseIDQuery(c, constants.IDQueryParam)
+	id, herr := utils.ParseInt64Query(c, constants.IDQueryParam)
 	if herr != nil {
 		return herr
 	}
@@ -234,7 +234,7 @@ func (h *Handler) handleGetData(c echo.Context) error {
 }
 
 func (h *Handler) handleDeleteData(c echo.Context) error {
-	id, herr := utils.ParseIDQuery(c, "id")
+	id, herr := utils.ParseInt64Query(c, "id")
 	if herr != nil {
 		return herr
 	}
@@ -262,20 +262,34 @@ func (h *Handler) handleDeleteData(c echo.Context) error {
 }
 
 type ModificationsTemplateData struct {
-	User *pgvis.User
+	User          *pgvis.User
+	TroubleReport *pgvis.TroubleReport
 }
 
 func (h *Handler) handleGetModifications(c echo.Context) error {
+	id, herr := utils.ParseInt64Param(c, constants.IDQueryParam)
+	if herr != nil {
+		return herr
+	}
+
+	tr, err := h.db.TroubleReports.Get(id)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
 
+	data := &ModificationsTemplateData{
+		User:          user,
+		TroubleReport: tr,
+	}
+
 	return utils.HandleTemplate(
 		c,
-		ModificationsTemplateData{
-			User: user,
-		},
+		data,
 		h.templates,
 		[]string{
 			constants.TroubleReportsModificationsComponentTemplatePath,
