@@ -9,25 +9,6 @@ const (
 	CookieExpirationDuration = time.Hour * 24 * 31 * 6
 )
 
-// Template file paths
-const (
-	LayoutTemplatePath  = "templates/layouts/main.html"
-	NavFeedTemplatePath = "templates/components/nav/feed.html"
-
-	HomeTemplatePath           = "templates/pages/home.html"
-	LoginTemplatePath          = "templates/pages/login.html"
-	FeedTemplatePath           = "templates/pages/feed.html"
-	ProfileTemplatePath        = "templates/pages/profile.html"
-	TroubleReportsTemplatePath = "templates/pages/trouble-reports.html"
-
-	FeedDataTemplatePath                    = "templates/components/feed/data.html"
-	FeedCounterTemplatePath                 = "templates/components/nav/feed-counter.html"
-	ProfileCookiesTemplatePath              = "templates/components/profile/cookies.html"
-	TroubleReportsDataTemplatePath          = "templates/components/trouble-reports/data.html"
-	TroubleReportsModificationsTemplatePath = "templates/components/trouble-reports/modifications.html"
-	TroubleReportsDialogTemplatePath        = "templates/components/trouble-reports/dialog-edit.html"
-)
-
 // Form field names
 const (
 	APIKeyFormField   = "api-key"

@@ -56,7 +56,7 @@ func (h *Handler) handleGetFeedCounter(c echo.Context) error {
 	return utils.HandleTemplate(c, data,
 		h.templates,
 		[]string{
-			constants.LegacyFeedCounterTemplatePath,
+			constants.FeedCounterComponentTemplatePath,
 		},
 	)
 }

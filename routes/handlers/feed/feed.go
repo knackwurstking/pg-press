@@ -67,7 +67,7 @@ func (h *Handler) handleGetData(c echo.Context) error {
 	return utils.HandleTemplate(c, data,
 		h.templates,
 		[]string{
-			constants.LegacyFeedDataTemplatePath,
+			constants.FeedDataComponentTemplatePath,
 		},
 	)
 }

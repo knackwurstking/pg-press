@@ -91,7 +91,7 @@ func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTempla
 	return utils.HandleTemplate(c, pageData,
 		h.templates,
 		[]string{
-			constants.LegacyTroubleReportsDialogTemplatePath,
+			constants.TroubleReportsDialogEditComponentTemplatePath,
 		},
 	)
 }
@@ -193,7 +193,7 @@ func (h *Handler) handleGetData(c echo.Context) error {
 		},
 		h.templates,
 		[]string{
-			constants.LegacyTroubleReportsDataTemplatePath,
+			constants.TroubleReportsDataComponentTemplatePath,
 		},
 	)
 }
@@ -239,7 +239,7 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 		},
 		h.templates,
 		[]string{
-			constants.LegacyTroubleReportsModificationsTemplatePath,
+			constants.TroubleReportsModificationsComponentTemplatePath,
 		},
 	)
 }

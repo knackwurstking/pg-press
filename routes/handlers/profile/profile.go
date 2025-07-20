@@ -73,7 +73,7 @@ func (h *Handler) handleGetCookies(c echo.Context) error {
 	return utils.HandleTemplate(c, cookies,
 		h.templates,
 		[]string{
-			constants.LegacyProfileCookiesTemplatePath,
+			constants.ProfileCookiesComponentTemplatePath,
 		},
 	)
 }
