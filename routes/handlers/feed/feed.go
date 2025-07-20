@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/shared"
-	"github.com/knackwurstking/pg-vis/routes/utils"
+	"github.com/knackwurstking/pg-vis/routes/constants"
+	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
 // Serve configures and registers all feed related HTTP routes.
@@ -22,10 +22,7 @@ func handleMainPage(templates fs.FS) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return utils.HandleTemplate(c, nil,
 			templates,
-			[]string{
-				shared.LayoutTemplatePath,
-				shared.FeedTemplatePath,
-			},
+			constants.FeedPageTemplates,
 		)
 	}
 }

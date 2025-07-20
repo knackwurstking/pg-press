@@ -7,8 +7,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/shared"
-	"github.com/knackwurstking/pg-vis/routes/utils"
+	"github.com/knackwurstking/pg-vis/routes/constants"
+	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
 // Profile contains the data structure passed to the profile page template.
@@ -53,11 +53,7 @@ func handleMainPage(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 
 		return utils.HandleTemplate(c, pageData,
 			templates,
-			[]string{
-				shared.LayoutTemplatePath,
-				shared.ProfileTemplatePath,
-				shared.NavFeedTemplatePath,
-			},
+			constants.ProfilePageTemplates,
 		)
 	}
 }
@@ -76,14 +72,14 @@ func handleDeleteCookies(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
 
 func handleUserNameChange(ctx echo.Context, pageData *Profile, db *pgvis.DB) error {
 	formParams, _ := ctx.FormParams()
-	userName := utils.SanitizeInput(formParams.Get(shared.UserNameFormField))
+	userName := utils.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
 	if userName == "" || userName == pageData.User.UserName {
 		return nil
 	}
 
-	if len(userName) < shared.UserNameMinLength || len(userName) > shared.UserNameMaxLength {
-		return pgvis.NewValidationError(shared.UserNameFormField,
+	if len(userName) < constants.UserNameMinLength || len(userName) > constants.UserNameMaxLength {
+		return pgvis.NewValidationError(constants.UserNameFormField,
 			"username must be between 1 and 100 characters", len(userName))
 	}
 

@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/shared"
-	"github.com/knackwurstking/pg-vis/routes/utils"
+	"github.com/knackwurstking/pg-vis/routes/constants"
+	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
 const (
@@ -35,13 +35,13 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 		pageData = &EditDialogPageData{}
 	}
 
-	if c.QueryParam(shared.CancelQueryParam) == shared.TrueValue {
+	if c.QueryParam(constants.CancelQueryParam) == constants.TrueValue {
 		pageData.Submitted = true
 	}
 
 	if !pageData.Submitted && !pageData.InvalidTitle && !pageData.InvalidContent {
-		if idStr := c.QueryParam(shared.IDQueryParam); idStr != "" {
-			id, herr := utils.ParseRequiredIDQuery(c, shared.IDQueryParam)
+		if idStr := c.QueryParam(constants.IDQueryParam); idStr != "" {
+			id, herr := utils.ParseRequiredIDQuery(c, constants.IDQueryParam)
 			if herr != nil {
 				return herr
 			}
@@ -62,7 +62,7 @@ func GETDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB, pageData *Edit
 	return utils.HandleTemplate(c, pageData,
 		templates,
 		[]string{
-			shared.TroubleReportsDialogTemplatePath,
+			constants.LegacyTroubleReportsDialogTemplatePath,
 		},
 	)
 }
@@ -104,7 +104,7 @@ func POSTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErr
 
 // PUTDialogEdit handles PUT requests to update existing trouble reports.
 func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPError {
-	id, herr := utils.ParseRequiredIDQuery(c, shared.IDQueryParam)
+	id, herr := utils.ParseRequiredIDQuery(c, constants.IDQueryParam)
 	if herr != nil {
 		return herr
 	}
@@ -151,25 +151,25 @@ func PUTDialogEdit(templates fs.FS, c echo.Context, db *pgvis.DB) *echo.HTTPErro
 func extractAndValidateFormData(ctx echo.Context) (title, content string, httpErr *echo.HTTPError) {
 	var err error
 
-	title, err = url.QueryUnescape(ctx.FormValue(shared.TitleFormField))
+	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest,
 			pgvis.WrapError(err, InvalidTitleFormFieldMessage))
 	}
 	title = utils.SanitizeInput(title)
 
-	content, err = url.QueryUnescape(ctx.FormValue(shared.ContentFormField))
+	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
 	if err != nil {
 		return "", "", echo.NewHTTPError(http.StatusBadRequest,
 			pgvis.WrapError(err, InvalidContentFormFieldMessage))
 	}
 	content = utils.SanitizeInput(content)
 
-	if httpErr := utils.ValidateStringLength(title, shared.TitleFormField, shared.TitleMinLength, shared.TitleMaxLength); httpErr != nil {
+	if httpErr := utils.ValidateStringLength(title, constants.TitleFormField, constants.TitleMinLength, constants.TitleMaxLength); httpErr != nil {
 		return title, content, httpErr
 	}
 
-	if httpErr := utils.ValidateStringLength(content, shared.ContentFormField, shared.ContentMinLength, shared.ContentMaxLength); httpErr != nil {
+	if httpErr := utils.ValidateStringLength(content, constants.ContentFormField, constants.ContentMinLength, constants.ContentMaxLength); httpErr != nil {
 		return title, content, httpErr
 	}
 
