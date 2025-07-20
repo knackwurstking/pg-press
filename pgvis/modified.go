@@ -5,36 +5,45 @@ import (
 	"time"
 )
 
+type Mods[T any] []*Modified[T]
+
+func (m *Mods[T]) Current() *Modified[T] {
+	if len(*m) == 0 {
+		return nil
+	}
+	return (*m)[len(*m)-1]
+}
+
 // Modified represents a modification record that tracks changes made to any type T
 type Modified[T any] struct {
-	User     *User `json:"user"`
-	Time     int64 `json:"time"`
-	Original T     `json:"original"`
+	User *User `json:"user"`
+	Time int64 `json:"time"`
+	Data T     `json:"data"`
 }
 
 // NewModified creates a new modification record with the current timestamp
-func NewModified[T any](user *User, original T) *Modified[T] {
+func NewModified[T any](user *User, data T) *Modified[T] {
 	if user == nil {
 		user = &User{UserName: "system"}
 	}
 
 	return &Modified[T]{
-		User:     user,
-		Time:     time.Now().UnixMilli(),
-		Original: original,
+		User: user,
+		Time: time.Now().UnixMilli(),
+		Data: data,
 	}
 }
 
 // NewModifiedWithTime creates a new modification record with a specific timestamp
-func NewModifiedWithTime[T any](user *User, original T, timestamp int64) *Modified[T] {
+func NewModifiedWithTime[T any](user *User, data T, timestamp int64) *Modified[T] {
 	if user == nil {
 		user = &User{UserName: "system"}
 	}
 
 	return &Modified[T]{
-		User:     user,
-		Time:     timestamp,
-		Original: original,
+		User: user,
+		Time: timestamp,
+		Data: data,
 	}
 }
 
