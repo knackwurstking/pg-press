@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
@@ -127,7 +128,11 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 	dialogEditData.InvalidContent = content == ""
 
 	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
-		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
+		modified := pgvis.NewModified[pgvis.TroubleReportMod](user, pgvis.TroubleReportMod{
+			Title:             title,
+			Content:           content,
+			LinkedAttachments: []*pgvis.Attachment{}, // NOTE: Not implemented yet
+		})
 		tr := pgvis.NewTroubleReport(title, content, modified)
 
 		if err := h.db.TroubleReports.Add(tr); err != nil {
@@ -171,10 +176,14 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 			return utils.HandlePgvisError(c, err)
 		}
 
-		modified := pgvis.NewModified(user, trOld)
-		trNew := pgvis.NewTroubleReport(title, content, append(trOld.Mods, modified)...)
+		tr := pgvis.NewTroubleReport(title, content, trOld.Mods...)
+		tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
+			Title:             tr.Title,
+			Content:           tr.Content,
+			LinkedAttachments: tr.LinkedAttachments,
+		}))
 
-		if err := h.db.TroubleReports.Update(id, trNew); err != nil {
+		if err := h.db.TroubleReports.Update(id, tr); err != nil {
 			return utils.HandlePgvisError(c, err)
 		}
 	} else {
@@ -264,7 +273,14 @@ func (h *Handler) handleDeleteData(c echo.Context) error {
 type ModificationsTemplateData struct {
 	User          *pgvis.User
 	TroubleReport *pgvis.TroubleReport
-	Mods          pgvis.Mods[*pgvis.TroubleReport]
+	Mods          pgvis.Mods[pgvis.TroubleReportMod]
+}
+
+func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.TroubleReportMod] {
+	if len(mtd.TroubleReport.Mods) == 0 {
+		return nil
+	}
+	return mtd.TroubleReport.Mods[0]
 }
 
 func (h *Handler) handleGetModifications(c echo.Context) error {
@@ -283,10 +299,13 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 		return herr
 	}
 
+	mods := slices.Clone(tr.Mods)
+	slices.Reverse(mods)
+
 	data := &ModificationsTemplateData{
 		User:          user,
 		TroubleReport: tr,
-		Mods:          tr.Mods,
+		Mods:          mods,
 	}
 
 	return utils.HandleTemplate(

@@ -17,11 +17,13 @@
     <div id="modifications-list" class="flex column gap">
         <h3>Änderungsverlauf</h3>
 
-        {{$mods := .Mods}}
-        {{range $mods}}
+        {{$firstModified := .FirstModified}}
+        {{$currentModified := .TroubleReport.Mods.Current}}
+
+        {{range .Mods}}
 
         <div
-            {{if eq $mods.Current.Time .Time}}
+            {{if eq $currentModified.Time .Time}}
             style="padding: var(--ui-spacing); border-color: var(--ui-primary)"
             {{else}}
             style="padding: var(--ui-spacing);"
@@ -29,17 +31,16 @@
 
             class="border"
         >
-            <p>{{.String}}</p>
-
-            {{if eq $mods.Current.Time .Time}}
-            <pre>{{.Data}}</pre>
+            {{if eq $firstModified.Time .Time }}
+            <p>Erstellt von {{.User.UserName}} am {{.GetTimeString}}</p>
             {{else}}
+            <p>Geändert von {{.User.UserName}} am {{.GetTimeString}}</p>
+            {{end}}
+
             <div class="flex column gap">
                 <strong>{{.Data.Title}}</strong>
                 <pre>{{.Data.Content}}</pre>
-                <pre>{{.Data}}</pre>
             </div>
-            {{end}}
         </div>
 
         {{end}}
