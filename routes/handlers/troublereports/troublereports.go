@@ -41,25 +41,15 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(editDialogPath, func(c echo.Context) error {
 		return h.handleGetDialogEdit(c, nil)
 	})
-	e.POST(editDialogPath, func(c echo.Context) error {
-		return h.handlePostDialogEdit(c)
-	})
-	e.PUT(editDialogPath, func(c echo.Context) error {
-		return h.handlePutDialogEdit(c)
-	})
+	e.POST(editDialogPath, h.handlePostDialogEdit)
+	e.PUT(editDialogPath, h.handlePutDialogEdit)
 
 	dataPath := h.serverPathPrefix + "/trouble-reports/data"
-	e.GET(dataPath, func(c echo.Context) error {
-		return h.handleGetData(c)
-	})
-	e.DELETE(dataPath, func(c echo.Context) error {
-		return h.handleDeleteData(c)
-	})
+	e.GET(dataPath, h.handleGetData)
+	e.DELETE(dataPath, h.handleDeleteData)
 
 	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications"
-	e.GET(modificationsPath, func(c echo.Context) error {
-		return h.handleGetModifications(c)
-	})
+	e.GET(modificationsPath, h.handleGetModifications)
 }
 
 func (h *Handler) handleMainPage(c echo.Context) error {
