@@ -1,8 +1,6 @@
 // Package pgvis provides error handling utilities and types.
 package pgvis
 
-// TODO: Simplify error handling and types.
-
 import (
 	"errors"
 	"fmt"
