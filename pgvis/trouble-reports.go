@@ -8,9 +8,7 @@ import (
 )
 
 const (
-	// TODO: Remove drop table query if everything is working fine.
 	createTroubleReportsTableQuery = `
-	    DROP TABLE IF EXISTS trouble_reports;
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
