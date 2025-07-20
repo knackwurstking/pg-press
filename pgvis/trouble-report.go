@@ -15,28 +15,21 @@ const (
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64                     `json:"id"`
-	Title             string                    `json:"title"`
-	Content           string                    `json:"content"`
-	LinkedAttachments []*Attachment             `json:"linked_attachments"`
-	Modified          *Modified[*TroubleReport] `json:"modified"`
+	ID                int64                `json:"id"`
+	Title             string               `json:"title"`
+	Content           string               `json:"content"`
+	LinkedAttachments []*Attachment        `json:"linked_attachments"`
+	Mods              Mods[*TroubleReport] `json:"mods"`
 }
 
 // NewTroubleReport creates a new trouble report with the provided details.
-func NewTroubleReport(m *Modified[*TroubleReport], title, content string) *TroubleReport {
+func NewTroubleReport(title, content string, m ...*Modified[*TroubleReport]) *TroubleReport {
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]*Attachment, 0),
-		Modified:          m,
+		Mods:              m,
 	}
-}
-
-// NewBasicTroubleReport creates a trouble report with minimal metadata.
-func NewBasicTroubleReport(title, content string) *TroubleReport {
-	systemUser := &User{UserName: "system"}
-	modified := NewModified(systemUser, (*TroubleReport)(nil))
-	return NewTroubleReport(modified, title, content)
 }
 
 // Validate checks if the trouble report has valid data.
@@ -47,6 +40,11 @@ func (tr *TroubleReport) Validate() error {
 	if err := tr.validateContent(tr.Content); err != nil {
 		return err
 	}
+
+	if len(tr.Mods) == 0 {
+		return NewValidationError("mods", "cannot be empty", tr.Mods)
+	}
+
 	return tr.validateAttachments()
 }
 
@@ -152,24 +150,6 @@ func (tr *TroubleReport) GetSummary(maxLength int) string {
 		return content[:maxLength]
 	}
 	return content[:maxLength-3] + "..."
-}
-
-// Clone creates a deep copy of the trouble report.
-func (tr *TroubleReport) Clone() *TroubleReport {
-	clone := &TroubleReport{
-		ID:      tr.ID,
-		Title:   tr.Title,
-		Content: tr.Content,
-	}
-	if tr.LinkedAttachments != nil {
-		clone.LinkedAttachments = make([]*Attachment, len(tr.LinkedAttachments))
-		copy(clone.LinkedAttachments, tr.LinkedAttachments)
-	}
-	if tr.Modified != nil {
-		clonedModified := *tr.Modified
-		clone.Modified = &clonedModified
-	}
-	return clone
 }
 
 // String returns a string representation of the trouble report.
