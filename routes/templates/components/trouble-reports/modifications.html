@@ -11,244 +11,32 @@
         </button>
     </span>
 
-    <!-- TODO: List of modifications, who did it, when and show a preview for each modification, and allow to roll back (only for admins) -->
+    <!-- TODO: List of modifications, who did it, when and show a preview for each
+               modification, and allow to roll back (only for admins) -->
 
     <div id="modifications-list" class="flex column gap">
         <h3>Änderungsverlauf</h3>
 
-        <!-- NOTE: The following is just for show and testing purposes -->
-        <div class="modification-item">
-            <div class="modification-header">
-                <div class="modification-info">
-                    <span class="modification-user">John Doe</span>
-                    <span class="modification-date">2024-01-15 14:30:22</span>
-                </div>
-                <div class="modification-actions">
-                    <button class="btn-preview" onclick="showPreview(1)">
-                        <i class="fa fa-eye"></i> Preview
-                    </button>
-                    <button
-                        class="btn-rollback admin-only"
-                        onclick="rollback(1)"
-                    >
-                        <i class="fa fa-undo"></i> Roll Back
-                    </button>
-                </div>
-            </div>
-            <div
-                class="modification-preview"
-                id="preview-1"
-                style="display: none"
-            >
-                <div class="preview-content">
-                    <h4>Changes made:</h4>
-                    <div class="diff-view">
-                        <div class="diff-removed">- Old content line</div>
-                        <div class="diff-added">+ New content line</div>
-                    </div>
-                </div>
-            </div>
+        {{$mods := .Mods}}
+        {{range $mods}}
+
+        <div
+            {{if eq $mods.Current.Time .Time}}
+            style="padding: var(--ui-spacing); border-color: var(--ui-primary)"
+            {{else}}
+            style="padding: var(--ui-spacing);"
+            {{end}}
+
+            class="border"
+        >
+            <p>{{.String}}</p>
+            <span class="flex column gap">
+                <strong>{{.Data.Title}}</strong>
+                <pre>{{.Data.Content}}</pre>
+                <pre>{{.Data}}</pre>
+            </span>
         </div>
 
-        <div class="modification-item">
-            <div class="modification-header">
-                <div class="modification-info">
-                    <span class="modification-user">Jane Smith</span>
-                    <span class="modification-date">2024-01-14 09:15:45</span>
-                </div>
-                <div class="modification-actions">
-                    <button class="btn-preview" onclick="showPreview(2)">
-                        <i class="fa fa-eye"></i> Preview
-                    </button>
-                    <button
-                        class="btn-rollback admin-only"
-                        onclick="rollback(2)"
-                    >
-                        <i class="fa fa-undo"></i> Roll Back
-                    </button>
-                </div>
-            </div>
-            <div
-                class="modification-preview"
-                id="preview-2"
-                style="display: none"
-            >
-                <div class="preview-content">
-                    <h4>Changes made:</h4>
-                    <div class="diff-view">
-                        <div class="diff-removed">- Previous version text</div>
-                        <div class="diff-added">+ Updated version text</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modification-item">
-            <div class="modification-header">
-                <div class="modification-info">
-                    <span class="modification-user">Mike Johnson</span>
-                    <span class="modification-date">2024-01-13 16:42:18</span>
-                </div>
-                <div class="modification-actions">
-                    <button class="btn-preview" onclick="showPreview(3)">
-                        <i class="fa fa-eye"></i> Preview
-                    </button>
-                    <button
-                        class="btn-rollback admin-only"
-                        onclick="rollback(3)"
-                    >
-                        <i class="fa fa-undo"></i> Roll Back
-                    </button>
-                </div>
-            </div>
-            <div
-                class="modification-preview"
-                id="preview-3"
-                style="display: none"
-            >
-                <div class="preview-content">
-                    <h4>Changes made:</h4>
-                    <div class="diff-view">
-                        <div class="diff-removed">- Original text here</div>
-                        <div class="diff-added">+ Modified text here</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{end}}
     </div>
-
-    <script>
-        function showPreview(id) {
-            const preview = document.getElementById(`preview-${id}`);
-            if (preview.style.display === "none") {
-                preview.style.display = "block";
-            } else {
-                preview.style.display = "none";
-            }
-        }
-
-        function rollback(id) {
-            if (
-                confirm("Are you sure you want to roll back to this version?")
-            ) {
-                // Implementation for rollback functionality
-                console.log(`Rolling back to modification ${id}`);
-                // Add actual rollback logic here
-            }
-        }
-
-        // Hide rollback buttons for non-admins
-        document.addEventListener("DOMContentLoaded", function () {
-            const isAdmin = checkUserPermissions(); // Implement this function based on your auth system
-            if (!isAdmin) {
-                const rollbackButtons =
-                    document.querySelectorAll(".admin-only");
-                rollbackButtons.forEach((button) => {
-                    button.style.display = "none";
-                });
-            }
-        });
-
-        function checkUserPermissions() {
-            // Implement your admin check logic here
-            // This is just a placeholder
-            return true; // Replace with actual admin check
-        }
-    </script>
-
-    <style>
-        .modification-item {
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .modification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-        }
-
-        .modification-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .modification-user {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .modification-date {
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .modification-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-preview,
-        .btn-rollback {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .btn-preview {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .btn-rollback {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .btn-preview:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-rollback:hover {
-            background-color: #c82333;
-        }
-
-        .modification-preview {
-            border-top: 1px solid #ddd;
-            background-color: #fff;
-        }
-
-        .preview-content {
-            padding: 15px;
-        }
-
-        .diff-view {
-            font-family: monospace;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .diff-removed {
-            color: #d73027;
-            background-color: #ffeaea;
-            padding: 2px 5px;
-            margin: 2px 0;
-        }
-
-        .diff-added {
-            color: #1a9641;
-            background-color: #eafff0;
-            padding: 2px 5px;
-            margin: 2px 0;
-        }
-    </style>
 </div>
