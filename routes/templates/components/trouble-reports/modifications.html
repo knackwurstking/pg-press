@@ -30,11 +30,16 @@
             class="border"
         >
             <p>{{.String}}</p>
-            <span class="flex column gap">
+
+            {{if eq $mods.Current.Time .Time}}
+            <pre>{{.Data}}</pre>
+            {{else}}
+            <div class="flex column gap">
                 <strong>{{.Data.Title}}</strong>
                 <pre>{{.Data.Content}}</pre>
                 <pre>{{.Data}}</pre>
-            </span>
+            </div>
+            {{end}}
         </div>
 
         {{end}}
