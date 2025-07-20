@@ -59,6 +59,16 @@ func (h *Handler) handleMainPage(c echo.Context) error {
 	)
 }
 
+type EditDialogTemplateData struct {
+	ID                int                 `json:"id"`
+	Submitted         bool                `json:"submitted"`
+	Title             string              `json:"title"`
+	Content           string              `json:"content"`
+	LinkedAttachments []*pgvis.Attachment `json:"linked_attachments,omitempty"`
+	InvalidTitle      bool                `json:"invalid_title"`
+	InvalidContent    bool                `json:"invalid_content"`
+}
+
 func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTemplateData) error {
 	if pageData == nil {
 		pageData = &EditDialogTemplateData{}
@@ -106,7 +116,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	title, content, herr := h.validateFormData(c)
+	title, content, herr := h.validateDialogEditFormData(c)
 	if herr != nil {
 		return herr
 	}
@@ -141,7 +151,7 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	title, content, herr := h.validateFormData(c)
+	title, content, herr := h.validateDialogEditFormData(c)
 	if herr != nil {
 		return herr
 	}
@@ -172,6 +182,31 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	return h.handleGetDialogEdit(c, dialogEditData)
+}
+
+func (h *Handler) validateDialogEditFormData(ctx echo.Context) (title, content string, httpErr *echo.HTTPError) {
+	var err error
+
+	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest,
+			pgvis.WrapError(err, invalidTitleFormFieldMessage))
+	}
+	title = utils.SanitizeInput(title)
+
+	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
+	if err != nil {
+		return "", "", echo.NewHTTPError(http.StatusBadRequest,
+			pgvis.WrapError(err, invalidContentFormFieldMessage))
+	}
+	content = utils.SanitizeInput(content)
+
+	return title, content, nil
+}
+
+type TroubleReportsTemplateData struct {
+	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
+	User           *pgvis.User            `json:"user"`
 }
 
 func (h *Handler) handleGetData(c echo.Context) error {
@@ -226,6 +261,10 @@ func (h *Handler) handleDeleteData(c echo.Context) error {
 	return h.handleGetData(c)
 }
 
+type ModificationsTemplateData struct {
+	User *pgvis.User
+}
+
 func (h *Handler) handleGetModifications(c echo.Context) error {
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
@@ -242,43 +281,4 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 			constants.TroubleReportsModificationsComponentTemplatePath,
 		},
 	)
-}
-
-func (h *Handler) validateFormData(ctx echo.Context) (title, content string, httpErr *echo.HTTPError) {
-	var err error
-
-	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
-	if err != nil {
-		return "", "", echo.NewHTTPError(http.StatusBadRequest,
-			pgvis.WrapError(err, invalidTitleFormFieldMessage))
-	}
-	title = utils.SanitizeInput(title)
-
-	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
-	if err != nil {
-		return "", "", echo.NewHTTPError(http.StatusBadRequest,
-			pgvis.WrapError(err, invalidContentFormFieldMessage))
-	}
-	content = utils.SanitizeInput(content)
-
-	return title, content, nil
-}
-
-type EditDialogTemplateData struct {
-	ID                int                 `json:"id"`
-	Submitted         bool                `json:"submitted"`
-	Title             string              `json:"title"`
-	Content           string              `json:"content"`
-	LinkedAttachments []*pgvis.Attachment `json:"linked_attachments,omitempty"`
-	InvalidTitle      bool                `json:"invalid_title"`
-	InvalidContent    bool                `json:"invalid_content"`
-}
-
-type TroubleReportsTemplateData struct {
-	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
-	User           *pgvis.User            `json:"user"`
-}
-
-type ModificationsTemplateData struct {
-	User *pgvis.User
 }
