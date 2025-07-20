@@ -8,21 +8,23 @@ import (
 )
 
 const (
+	// TODO: Remove drop table query if everything is working fine.
 	createTroubleReportsTableQuery = `
+	    DROP TABLE IF EXISTS trouble_reports;
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
 			linked_attachments BLOB NOT NULL,
-			modified BLOB NOT NULL,
+			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
 	selectAllTroubleReportsQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	selectTroubleReportByIDQuery = `SELECT * FROM trouble_reports WHERE id = ?`
-	insertTroubleReportQuery     = `INSERT INTO trouble_reports (title, content, linked_attachments, modified) VALUES (?, ?, ?, ?)`
-	updateTroubleReportQuery     = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, modified = ? WHERE id = ?`
+	insertTroubleReportQuery     = `INSERT INTO trouble_reports (title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
+	updateTroubleReportQuery     = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, mods = ? WHERE id = ?`
 	deleteTroubleReportQuery     = `DELETE FROM trouble_reports WHERE id = ?`
 )
 
@@ -35,8 +37,12 @@ type TroubleReports struct {
 // NewTroubleReports creates a new TroubleReports instance and initializes the database table.
 func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	if _, err := db.Exec(createTroubleReportsTableQuery); err != nil {
-		panic(NewDatabaseError("create_table", "trouble_reports",
-			"failed to create trouble_reports table", err))
+		panic(NewDatabaseError(
+			"create_table",
+			"trouble_reports",
+			"failed to create trouble_reports table",
+			err,
+		))
 	}
 
 	return &TroubleReports{
@@ -94,20 +100,24 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
+	if err := report.Validate(); err != nil {
+		return err
+	}
+
 	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
 		return WrapError(err, "failed to marshal linked attachments")
 	}
 
-	modified, err := json.Marshal(report.Modified)
+	mods, err := json.Marshal(report.Mods)
 	if err != nil {
-		return WrapError(err, "failed to marshal modified data")
+		return WrapError(err, "failed to marshal mods data")
 	}
 
 	// After exec this insert query, i need to get the id
 	result, err := tr.db.Exec(
 		insertTroubleReportQuery,
-		report.Title, report.Content, linkedAttachments, modified,
+		report.Title, report.Content, linkedAttachments, mods,
 	)
 	if err != nil {
 		return NewDatabaseError("insert", "trouble_reports",
@@ -125,7 +135,7 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 		&FeedTroubleReportAdd{
 			ID:         id,
 			Title:      report.Title,
-			ModifiedBy: report.Modified.User,
+			ModifiedBy: report.Mods.Current().User,
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
@@ -141,19 +151,23 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
+	if err := report.Validate(); err != nil {
+		return err
+	}
+
 	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
 		return WrapError(err, "failed to marshal linked attachments")
 	}
 
-	modified, err := json.Marshal(report.Modified)
+	mods, err := json.Marshal(report.Mods)
 	if err != nil {
-		return WrapError(err, "failed to marshal modified data")
+		return WrapError(err, "failed to marshal mods data")
 	}
 
 	_, err = tr.db.Exec(
 		updateTroubleReportQuery,
-		report.Title, report.Content, linkedAttachments, modified, id,
+		report.Title, report.Content, linkedAttachments, mods, id,
 	)
 	if err != nil {
 		return NewDatabaseError("update", "trouble_reports",
@@ -165,7 +179,7 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 		&FeedTroubleReportUpdate{
 			ID:         report.ID,
 			Title:      report.Title,
-			ModifiedBy: report.Modified.User,
+			ModifiedBy: report.Mods.Current().User,
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
@@ -201,7 +215,7 @@ func (tr *TroubleReports) Remove(id int64) error {
 			&FeedTroubleReportRemove{
 				ID:         report.ID,
 				Title:      report.Title,
-				ModifiedBy: report.Modified.User,
+				ModifiedBy: report.Mods.Current().User,
 			},
 		)
 		if err := tr.feeds.Add(feed); err != nil {
@@ -214,9 +228,9 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, error) {
 	report := &TroubleReport{}
-	var linkedAttachments, modified []byte
+	var linkedAttachments, mods []byte
 
-	if err := rows.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &modified); err != nil {
+	if err := rows.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "trouble_reports",
 			"failed to scan row", err)
 	}
@@ -225,8 +239,8 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 		return nil, WrapError(err, "failed to unmarshal linked attachments")
 	}
 
-	if err := json.Unmarshal(modified, &report.Modified); err != nil {
-		return nil, WrapError(err, "failed to unmarshal modified data")
+	if err := json.Unmarshal(mods, &report.Mods); err != nil {
+		return nil, WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return report, nil
@@ -234,9 +248,9 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 
 func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, error) {
 	report := &TroubleReport{}
-	var linkedAttachments, modified []byte
+	var linkedAttachments, mods []byte
 
-	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &modified); err != nil {
+	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
 		return nil, err
 	}
 
@@ -244,8 +258,8 @@ func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, er
 		return nil, WrapError(err, "failed to unmarshal linked attachments")
 	}
 
-	if err := json.Unmarshal(modified, &report.Modified); err != nil {
-		return nil, WrapError(err, "failed to unmarshal modified data")
+	if err := json.Unmarshal(mods, &report.Mods); err != nil {
+		return nil, WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return report, nil
