@@ -38,6 +38,10 @@ func (h *Handler) handleFeed(c echo.Context) error {
 	)
 }
 
+type DataTemplateData struct {
+	Feeds []*pgvis.Feed
+}
+
 func (h *Handler) handleGetData(c echo.Context) error {
 	data := &DataTemplateData{
 		Feeds: make([]*pgvis.Feed, 0),
@@ -70,8 +74,4 @@ func (h *Handler) handleGetData(c echo.Context) error {
 			constants.FeedDataComponentTemplatePath,
 		},
 	)
-}
-
-type DataTemplateData struct {
-	Feeds []*pgvis.Feed
 }

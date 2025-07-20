@@ -29,6 +29,10 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/nav/feed-counter", h.handleGetFeedCounter)
 }
 
+type FeedCounterTemplateData struct {
+	Count int
+}
+
 func (h *Handler) handleGetFeedCounter(c echo.Context) error {
 	data := &FeedCounterTemplateData{}
 
@@ -59,8 +63,4 @@ func (h *Handler) handleGetFeedCounter(c echo.Context) error {
 			constants.FeedCounterComponentTemplatePath,
 		},
 	)
-}
-
-type FeedCounterTemplateData struct {
-	Count int
 }

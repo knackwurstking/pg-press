@@ -38,6 +38,11 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/logout", h.handleLogout)
 }
 
+type LoginTemplateData struct {
+	ApiKey        string
+	InvalidApiKey bool
+}
+
 // handleLogin handles the login page and form submission.
 func (h *Handler) handleLogin(c echo.Context) error {
 	formParams, _ := c.FormParams()
@@ -135,9 +140,4 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	return true
-}
-
-type LoginTemplateData struct {
-	ApiKey        string
-	InvalidApiKey bool
 }
