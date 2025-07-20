@@ -128,7 +128,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 
 	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
 		modified := pgvis.NewModified[*pgvis.TroubleReport](user, nil)
-		tr := pgvis.NewTroubleReport(modified, title, content)
+		tr := pgvis.NewTroubleReport(title, content, modified)
 
 		if err := h.db.TroubleReports.Add(tr); err != nil {
 			return utils.HandlePgvisError(c, err)
@@ -172,7 +172,7 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 		}
 
 		modified := pgvis.NewModified(user, trOld)
-		trNew := pgvis.NewTroubleReport(modified, title, content)
+		trNew := pgvis.NewTroubleReport(title, content, modified)
 
 		if err := h.db.TroubleReports.Update(id, trNew); err != nil {
 			return utils.HandlePgvisError(c, err)
@@ -264,6 +264,7 @@ func (h *Handler) handleDeleteData(c echo.Context) error {
 type ModificationsTemplateData struct {
 	User          *pgvis.User
 	TroubleReport *pgvis.TroubleReport
+	Mods          pgvis.Mods[*pgvis.TroubleReport]
 }
 
 func (h *Handler) handleGetModifications(c echo.Context) error {
@@ -285,6 +286,7 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 	data := &ModificationsTemplateData{
 		User:          user,
 		TroubleReport: tr,
+		Mods:          tr.Mods,
 	}
 
 	return utils.HandleTemplate(
