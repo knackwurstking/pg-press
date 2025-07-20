@@ -11,25 +11,67 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 )
 
-// Serve configures and registers all feed related HTTP routes.
-func Serve(templates fs.FS, serverPathPrefix string, e *echo.Echo, db *pgvis.DB) {
-	e.GET(serverPathPrefix+"/feed", handleMainPage(templates))
-	e.GET(serverPathPrefix+"/feed/data", handleGetData(templates, db))
+type Handler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
 }
 
-// handleMainPage returns a handler for the main feed page.
-func handleMainPage(templates fs.FS) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return utils.HandleTemplate(c, nil,
-			templates,
-			constants.FeedPageTemplates,
-		)
+// NewHandler creates a new feed handler.
+func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler {
+	return &Handler{
+		db:               db,
+		serverPathPrefix: serverPathPrefix,
+		templates:        templates,
 	}
 }
 
-// handleGetData returns a handler for the feed data endpoint.
-func handleGetData(templates fs.FS, db *pgvis.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return GETData(templates, c, db)
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
+	e.GET(h.serverPathPrefix+"/feed", h.handleFeed)
+	e.GET(h.serverPathPrefix+"/feed/data", h.handleGETData)
+}
+
+func (h *Handler) handleFeed(c echo.Context) error {
+	return utils.HandleTemplate(c, nil,
+		h.templates,
+		constants.FeedPageTemplates,
+	)
+}
+
+func (h *Handler) handleGETData(c echo.Context) error {
+	data := &DataTemplateData{
+		Feeds: make([]*pgvis.Feed, 0),
 	}
+
+	// Get feeds
+	feeds, err := h.db.Feeds.ListRange(0, 100)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+	data.Feeds = feeds
+
+	// Update user's last feed
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr
+	}
+
+	if len(data.Feeds) > 0 {
+		user.LastFeed = data.Feeds[0].ID
+		err := h.db.Users.Update(user.TelegramID, user)
+		if err != nil {
+			return utils.HandlePgvisError(c, err)
+		}
+	}
+
+	return utils.HandleTemplate(c, data,
+		h.templates,
+		[]string{
+			constants.LegacyFeedDataTemplatePath,
+		},
+	)
+}
+
+type DataTemplateData struct {
+	Feeds []*pgvis.Feed
 }

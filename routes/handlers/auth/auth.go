@@ -38,12 +38,6 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/logout", h.handleLogout)
 }
 
-// LoginPageData represents data for the login page template.
-type LoginPageData struct {
-	ApiKey        string
-	InvalidApiKey bool
-}
-
 // handleLogin handles the login page and form submission.
 func (h *Handler) handleLogin(c echo.Context) error {
 	formParams, _ := c.FormParams()
@@ -63,7 +57,7 @@ func (h *Handler) handleLogin(c echo.Context) error {
 
 	return utils.HandleTemplate(
 		c,
-		LoginPageData{
+		LoginTemplateData{
 			ApiKey:        apiKey,
 			InvalidApiKey: apiKey != "",
 		},
@@ -141,4 +135,9 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	return true
+}
+
+type LoginTemplateData struct {
+	ApiKey        string
+	InvalidApiKey bool
 }
