@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"net/http"
 	"os"
 	"regexp"
@@ -34,8 +35,20 @@ func init() {
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${status} ${method} ${uri} (${remote_ip}) ${latency_human}\n",
+		Format: "${status} ${method} ${uri} (${remote_ip}) ${latency_human} ${custom}\n",
 		Output: os.Stderr,
+		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
+			if !slices.Contains(pages, c.Request().URL.Path) {
+				return 0, nil
+			}
+
+			user, ok := c.Get("user").(*pgvis.User)
+			if !ok {
+				return 0, nil
+			}
+
+			return buf.WriteString(user.String())
+		},
 	})
 }
 
