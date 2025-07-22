@@ -30,7 +30,7 @@ func (h *Handler) handleGetModifications(c echo.Context, tr *pgvis.TroubleReport
 		return herr
 	}
 
-	if tr != nil {
+	if tr == nil {
 		var err error
 		tr, err = h.db.TroubleReports.Get(id)
 		if err != nil {
