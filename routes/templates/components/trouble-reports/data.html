@@ -8,66 +8,67 @@
 
     {{range $troubleReport := $pageData.TroubleReports}}
     {{$id := print "trouble-report-" $troubleReport.ID}}
-    <details
-        id="{{$id}}"
-        class="data"
-        style="margin: var(--ui-spacing) auto"
-    >
-        <summary>{{$troubleReport.Title}}</summary>
-        <pre>{{$troubleReport.Content}}</pre>
-    </details>
-
-    <div class="actions flex row gap justify-end align-center">
-        <button
-            hx-get="./trouble-reports/modifications/{{$troubleReport.ID}}"
-            hx-trigger="click"
-            hx-target="#data"
-            hx-swap="outerHTML"
-            class="ghost secondary icon"
+    <span class="trouble-report">
+        <details
+            id="{{$id}}"
+            style="margin: var(--ui-spacing) auto"
         >
-            <i class="bi bi-clock-history"></i>
-        </button>
+            <summary>{{$troubleReport.Title}}</summary>
+            <pre>{{$troubleReport.Content}}</pre>
+        </details>
 
-        <button
-            hx-get="./trouble-reports/dialog-edit?id={{$troubleReport.ID}}"
-            hx-trigger="click"
-            hx-target="#dialogEdit"
-            hx-swap="outerHTML"
-            class="ghost icon"
-            style="color: green;"
-        >
-            <i class="bi bi-pen"></i>
-        </button>
+        <div class="actions flex row gap justify-end align-center">
+            <button
+                hx-get="./trouble-reports/modifications/{{$troubleReport.ID}}"
+                hx-trigger="click"
+                hx-target="#data"
+                hx-swap="outerHTML"
+                class="ghost secondary icon"
+            >
+                <i class="bi bi-clock-history"></i>
+            </button>
 
-        {{if $pageData.User.IsAdmin}}
-        <button
-            hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
-            hx-trigger="click"
-            hx-target="#data"
-            hx-swap="outerHTML"
-            hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
-            class="ghost destructive icon"
-        >
-            <i class="bi bi-trash"></i>
-        </button>
+            <button
+                hx-get="./trouble-reports/dialog-edit?id={{$troubleReport.ID}}"
+                hx-trigger="click"
+                hx-target="#dialogEdit"
+                hx-swap="outerHTML"
+                class="ghost icon"
+                style="color: green;"
+            >
+                <i class="bi bi-pen"></i>
+            </button>
 
-        {{else}}
-        <!-- TODO: User is not an admin, Add voting system for deleting trouble reports, not implemented yet -->
+            {{if $pageData.User.IsAdmin}}
+            <button
+                hx-delete="./trouble-reports/data?id={{$troubleReport.ID}}"
+                hx-trigger="click"
+                hx-target="#data"
+                hx-swap="outerHTML"
+                hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
+                class="ghost destructive icon"
+            >
+                <i class="bi bi-trash"></i>
+            </button>
 
-        <button
-            id="voteForDelete"
-            hx-post="./trouble-reports/vote?id={{$troubleReport.ID}}&mode=delete"
-            hx-trigger="click"
-            hx-swap="outerHTML"
-            class="ghost destructive flex column justify-between align-center"
-            style="transform: scale(0.75);"
-        >
-            <i class="bi bi-trash"></i>
-            <small>VOTE</small>
-        </button>
-        {{end}}
-    </div>
-    <hr />
+            {{else}}
+            <!-- TODO: User is not an admin, Add voting system for deleting trouble reports, not implemented yet -->
+
+            <button
+                id="voteForDelete"
+                hx-post="./trouble-reports/vote?id={{$troubleReport.ID}}&mode=delete"
+                hx-trigger="click"
+                hx-swap="outerHTML"
+                class="ghost destructive flex column justify-between align-center"
+                style="transform: scale(0.75);"
+            >
+                <i class="bi bi-trash"></i>
+                <small>VOTE</small>
+            </button>
+            {{end}}
+        </div>
+        <hr />
+    </span>
     {{end}}
 
     <script>

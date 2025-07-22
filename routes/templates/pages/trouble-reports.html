@@ -16,7 +16,7 @@
 <script>
     function search(event) {
         const rg = new RegExp(event.currentTarget.value, "si");
-        const elements = document.querySelectorAll("details.data");
+        const elements = document.querySelectorAll(".trouble-report");
 
         elements.forEach((element) => {
             if (rg.test(element.textContent)) {
