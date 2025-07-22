@@ -1,6 +1,7 @@
 package troublereports
 
 import (
+	"errors"
 	"slices"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -55,4 +56,9 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 			constants.TroubleReportsModificationsComponentTemplatePath,
 		},
 	)
+}
+
+func (h *Handler) handlePostModifications(c echo.Context) error {
+
+	return errors.New("under construction")
 }

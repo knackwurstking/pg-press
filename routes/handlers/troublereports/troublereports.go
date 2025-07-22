@@ -47,6 +47,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 
 	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
 	e.GET(modificationsPath, h.handleGetModifications)
+	e.POST(modificationsPath, h.handlePostModifications)
 }
 
 func (h *Handler) handleMainPage(c echo.Context) error {
