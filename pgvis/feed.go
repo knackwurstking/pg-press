@@ -195,7 +195,7 @@ func NewFeedWithTime(dataType string, data any, timestamp int64) *Feed {
 }
 
 // Render generates HTML for the feed entry.
-func (f *Feed) Render() template.HTML {
+func (f *Feed) Render(opacity float64) template.HTML {
 	timeStr := f.GetTime().Format("2006-01-02 15:04:05")
 	var feedContent template.HTML
 
@@ -226,20 +226,20 @@ func (f *Feed) Render() template.HTML {
 	default:
 		return template.HTML(fmt.Sprintf(
 			`
-			<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d">
+			<div id="feed-%d" class="feed-entry" style="opacity: %f;" data-id="%d" data-time="%d">
 				<div class="feed-content"><pre>%#v</pre></div>
 				<small class="feed-time">%s</small>
 			</div>`,
-			f.ID, f.ID, f.Time, f.Data, timeStr,
+			f.ID, opacity, f.ID, f.Time, f.Data, timeStr,
 		))
 	}
 
 	return template.HTML(fmt.Sprintf(`
-		<div id="feed-%d" class="feed-entry" data-id="%d" data-time="%d">
+		<div id="feed-%d" class="feed-entry" style="opacity: %f;" data-id="%d" data-time="%d">
 			<div class="feed-content">%s</div>
 			<small class="feed-time">%s</small>
 		</div>`,
-		f.ID, f.ID, f.Time, feedContent, timeStr,
+		f.ID, opacity, f.ID, f.Time, feedContent, timeStr,
 	))
 }
 

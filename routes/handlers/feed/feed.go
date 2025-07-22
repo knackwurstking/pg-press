@@ -39,7 +39,8 @@ func (h *Handler) handleFeed(c echo.Context) error {
 }
 
 type DataTemplateData struct {
-	Feeds []*pgvis.Feed
+	Feeds      []*pgvis.Feed
+	LastFeedID int64
 }
 
 func (h *Handler) handleGetData(c echo.Context) error {
@@ -59,6 +60,8 @@ func (h *Handler) handleGetData(c echo.Context) error {
 	if herr != nil {
 		return herr
 	}
+
+	data.LastFeedID = user.LastFeed
 
 	if len(data.Feeds) > 0 {
 		user.LastFeed = data.Feeds[0].ID
