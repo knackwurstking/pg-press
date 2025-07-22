@@ -1,19 +1,19 @@
 <div id="data" class="flex column gap">
-    <span>
+    <div class="flex gap justify-between align-center wrap">
         <button
             hx-get="./trouble-reports/data"
             hx-trigger="click"
             hx-target="#data"
             hx-swap="outerHTML"
-            class="contrast flex gap"
+            class="ghost secondary flex gap"
         >
             <i class="bi bi-arrow-left"></i>Zurück
         </button>
-    </span>
+
+        <h4>Änderungsverlauf</h4>
+    </div>
 
     <div id="modifications-list" class="flex column gap">
-
-        <h3 style="margin-bottom: var(--ui-spacing);">Änderungsverlauf</h3>
 
         {{$troubleReport := .TroubleReport}}
         {{$firstModified := .FirstModified}}
