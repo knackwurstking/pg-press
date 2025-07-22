@@ -22,16 +22,14 @@
         {{range $mod := .Mods}}
 
         <!-- Modification Container -->
-        <div
+        <article
             {{if eq $currentModified.Time $mod.Time}}
             style="
-                padding: calc(var(--ui-spacing) * 1.5);
                 border: 2px solid var(--ui-primary);
                 border-radius: var(--ui-radius);
             "
             {{else}}
             style="
-                padding: calc(var(--ui-spacing) * 1.5);
                 border: 1px solid var(--ui-border-color);
                 border-radius: var(--ui-radius);
             "
@@ -120,7 +118,7 @@
                 </button>
             </div>
             {{end}}
-        </div>
+        </article>
 
         {{end}}
     </div>
