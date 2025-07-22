@@ -14,13 +14,14 @@
     <div id="modifications-list" class="flex column gap">
         <h3>Änderungsverlauf</h3>
 
+        {{$troubleReport := .TroubleReport}}
         {{$firstModified := .FirstModified}}
-        {{$currentModified := .TroubleReport.Mods.Current}}
+        {{$currentModified := $troubleReport.Mods.Current}}
 
-        {{range .Mods}}
+        {{range $mod := .Mods}}
 
         <div
-            {{if eq $currentModified.Time .Time}}
+            {{if eq $currentModified.Time $mod.Time}}
             style="padding: var(--ui-spacing); border-color: var(--ui-primary)"
             {{else}}
             style="padding: var(--ui-spacing);"
@@ -28,20 +29,20 @@
 
             class="border"
         >
-            {{if eq $firstModified.Time .Time }}
-            <p>Erstellt von {{.User.UserName}} am {{.GetTimeString}}</p>
+            {{if eq $firstModified.Time $mod.Time }}
+            <p>Erstellt von {{$mod.User.UserName}} am {{$mod.GetTimeString}}</p>
             {{else}}
-            <p>Geändert von {{.User.UserName}} am {{.GetTimeString}}</p>
+            <p>Geändert von {{$mod.User.UserName}} am {{$mod.GetTimeString}}</p>
             {{end}}
 
             <div class="flex column gap">
-                <strong>{{.Data.Title}}</strong>
-                <pre>{{.Data.Content}}</pre>
+                <strong>{{$mod.Data.Title}}</strong>
+                <pre>{{$mod.Data.Content}}</pre>
             </div>
 
             <div class="flex gap" style="margin-top: var(--ui-spacing); justify-content: flex-end;">
                 <button
-                    hx-post="./trouble-reports/modifications/{{.ID}}?time={{.Time}}"
+                    hx-post="./trouble-reports/modifications/{{$troubleReport.ID}}?time={{$mod.Time}}"
                     hx-trigger="click"
                     hx-target="#data"
                     hx-swap="outerHTML"

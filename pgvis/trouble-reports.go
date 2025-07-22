@@ -82,7 +82,7 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 
 // Get retrieves a specific trouble report by ID.
 func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
-	log.Debug("Getting trouble report by ID", id)
+	log.Debug("Getting trouble report by ID", "id", id)
 
 	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
 
@@ -100,7 +100,7 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
 func (tr *TroubleReports) Add(report *TroubleReport) error {
-	log.Debug("Adding trouble report", report)
+	log.Debug("Adding trouble report", "report", report)
 
 	if report == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -153,7 +153,7 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 
 // Update modifies an existing trouble report and generates an activity feed entry.
 func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
-	log.Debug("Updating trouble report", report, "id", id)
+	log.Debug("Updating trouble report", "id", id, "report", report)
 
 	if report == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -199,7 +199,7 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 
 // Remove deletes a trouble report by ID and generates an activity feed entry.
 func (tr *TroubleReports) Remove(id int64) error {
-	log.Debug("Removing trouble report", id)
+	log.Debug("Removing trouble report", "id", id)
 
 	report, _ := tr.Get(id)
 

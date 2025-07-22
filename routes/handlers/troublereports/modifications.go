@@ -80,7 +80,7 @@ func (h *Handler) handlePostModifications(c echo.Context) error {
 
 	// Move modification to the top (last item in list)
 	newMods := []*pgvis.Modified[pgvis.TroubleReportMod]{}
-	mod := &pgvis.Modified[pgvis.TroubleReportMod]{}
+	var mod *pgvis.Modified[pgvis.TroubleReportMod]
 	for _, m := range tr.Mods {
 		if m.Time == timeQuery {
 			if mod != nil {
