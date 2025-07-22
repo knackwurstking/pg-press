@@ -103,7 +103,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 
 // GetUserFromApiKey retrieves a user by their API key.
 func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
-	log.Debug("Getting user by API key", apiKey)
+	log.Debug("Getting user by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)

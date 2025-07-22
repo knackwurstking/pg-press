@@ -73,7 +73,7 @@ func (c *Cookies) List() ([]*Cookie, error) {
 
 // ListApiKey retrieves all cookies associated with a specific API key.
 func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
-	log.Debug("Listing cookies by API key", "api_key", apiKey)
+	log.Debug("Listing cookies by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -103,7 +103,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 
 // Get retrieves a specific cookie by its value.
 func (c *Cookies) Get(value string) (*Cookie, error) {
-	log.Debug("Getting cookie by value", "value", value)
+	log.Debug("Getting cookie by value")
 
 	if value == "" {
 		return nil, NewValidationError("value", "cookie value cannot be empty", value)
@@ -209,7 +209,7 @@ func (c *Cookies) Remove(value string) error {
 
 // RemoveApiKey removes all cookie sessions associated with a specific API key.
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	log.Debug("Removing cookies by API key", "api_key", apiKey)
+	log.Debug("Removing cookies by API key")
 
 	if apiKey == "" {
 		return NewValidationError("api_key", "API key cannot be empty", apiKey)
