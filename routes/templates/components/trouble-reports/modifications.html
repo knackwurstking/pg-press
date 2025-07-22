@@ -40,6 +40,8 @@
                 <strong>{{.Data.Title}}</strong>
                 <pre>{{.Data.Content}}</pre>
             </div>
+
+            <!-- TODO: Add an action bar to the bottom, allow admins to roll back modifications, use "POST ./trouble-reports/modifications/{{.ID}}?time={{.Time}}" -->
         </div>
 
         {{end}}
