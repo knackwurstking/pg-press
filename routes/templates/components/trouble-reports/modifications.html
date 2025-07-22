@@ -40,6 +40,7 @@
                 <pre>{{$mod.Data.Content}}</pre>
             </div>
 
+            {{if ne $currentModified.Time $mod.Time}}
             <div class="flex gap" style="margin-top: var(--ui-spacing); justify-content: flex-end;">
                 <button
                     hx-post="./trouble-reports/modifications/{{$troubleReport.ID}}?time={{$mod.Time}}"
@@ -53,6 +54,7 @@
                     Zurücksetzen
                 </button>
             </div>
+            {{end}}
         </div>
 
         {{end}}
