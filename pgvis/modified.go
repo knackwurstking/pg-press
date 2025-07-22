@@ -7,6 +7,7 @@ import (
 
 type Mods[T any] []*Modified[T]
 
+// TODO: Maybe add a field `Current bool` to `Modified` struct to indicate if it's the current modification
 func (m *Mods[T]) Current() *Modified[T] {
 	if len(*m) == 0 {
 		return nil
