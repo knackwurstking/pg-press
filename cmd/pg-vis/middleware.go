@@ -35,7 +35,7 @@ func init() {
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${status} ${method} ${uri} (${remote_ip}) ${latency_human} ${custom}\n",
+		Format: "${time_rfc3339} ${status} ${method} ${uri} (${remote_ip}) ${latency_human} ${custom}\n",
 		Output: os.Stderr,
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
 			if !slices.Contains(pages, c.Request().URL.Path) {

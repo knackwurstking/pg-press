@@ -8,6 +8,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/charmbracelet/log"
@@ -38,7 +39,7 @@ func serverCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				log.SetLevel(log.DebugLevel)
 				log.SetReportCaller(true)
-				log.SetReportTimestamp(false)
+				log.SetTimeFormat(time.RFC3339)
 
 				db, err := openDB(*customDBPath)
 				if err != nil {
