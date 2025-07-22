@@ -9,6 +9,8 @@ package pgvis
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/charmbracelet/log"
 )
 
 // SQL queries for user operations
@@ -55,6 +57,8 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 
 // List retrieves all users from the database.
 func (u *Users) List() ([]*User, error) {
+	log.Debug("Listing users")
+
 	rows, err := u.db.Query(selectAllUsersQuery)
 	if err != nil {
 		return nil, NewDatabaseError("select", "users",
@@ -81,6 +85,8 @@ func (u *Users) List() ([]*User, error) {
 
 // Get retrieves a specific user by Telegram ID.
 func (u *Users) Get(telegramID int64) (*User, error) {
+	log.Debug("Getting user by Telegram ID", telegramID)
+
 	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
 
 	user, err := u.scanUserRow(row)
@@ -97,6 +103,8 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 
 // GetUserFromApiKey retrieves a user by their API key.
 func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
+	log.Debug("Getting user by API key", apiKey)
+
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
@@ -117,6 +125,8 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 
 // Add creates a new user and generates a corresponding activity feed entry.
 func (u *Users) Add(user *User) error {
+	log.Debug("Adding user", user.TelegramID, user.UserName)
+
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
@@ -159,6 +169,8 @@ func (u *Users) Add(user *User) error {
 
 // Remove deletes a user by Telegram ID and generates an activity feed entry.
 func (u *Users) Remove(telegramID int64) error {
+	log.Debug("Removing user", telegramID)
+
 	// Get the user before deleting for the feed entry
 	user, _ := u.Get(telegramID)
 
@@ -194,6 +206,8 @@ func (u *Users) Remove(telegramID int64) error {
 
 // Update modifies an existing user and generates activity feed entries for changes.
 func (u *Users) Update(telegramID int64, user *User) error {
+	log.Debug("Update user", user, "telegramID", telegramID)
+
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
