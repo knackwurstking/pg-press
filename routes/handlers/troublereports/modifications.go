@@ -1,7 +1,9 @@
 package troublereports
 
 import (
+	"errors"
 	"slices"
+	"time"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/constants"
@@ -22,15 +24,18 @@ func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.Trou
 	return mtd.TroubleReport.Mods[0]
 }
 
-func (h *Handler) handleGetModifications(c echo.Context) error {
+func (h *Handler) handleGetModifications(c echo.Context, tr *pgvis.TroubleReport) *echo.HTTPError {
 	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
 	}
 
-	tr, err := h.db.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
+	if tr != nil {
+		var err error
+		tr, err = h.db.TroubleReports.Get(id)
+		if err != nil {
+			return utils.HandlePgvisError(c, err)
+		}
 	}
 
 	user, herr := utils.GetUserFromContext(c)
@@ -73,15 +78,39 @@ func (h *Handler) handlePostModifications(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
+	// Move modification to the top (last item in list)
+	newMods := []*pgvis.Modified[pgvis.TroubleReportMod]{}
 	mod := &pgvis.Modified[pgvis.TroubleReportMod]{}
 	for _, m := range tr.Mods {
 		if m.Time == timeQuery {
+			if mod != nil {
+				panic("multiple modifications with the same time")
+			}
+
 			mod = m
-			break
+		} else {
+			newMods = append(newMods, m)
 		}
 	}
 
-	// TODO: Set mod as current, just move mod to top (last item in list) and update the time field
+	if mod == nil {
+		return utils.HandlePgvisError(c, errors.New("modification not found"))
+	}
 
-	return h.handleGetModifications(c)
+	mod.Time = time.Now().UnixMilli()
+
+	// Update mods with a new order
+	tr.Mods = append(newMods, mod)
+
+	// Update trouble reports data
+	tr.Title = mod.Data.Title
+	tr.Content = mod.Data.Content
+	tr.LinkedAttachments = mod.Data.LinkedAttachments
+
+	// Update trouble reports database
+	if err = h.db.TroubleReports.Update(id, tr); err != nil {
+		return utils.HandlePgvisError(c, pgvis.WrapError(err, "failed to update trouble report"))
+	}
+
+	return h.handleGetModifications(c, tr)
 }

@@ -20,7 +20,7 @@ type EditDialogTemplateData struct {
 	InvalidContent    bool                `json:"invalid_content"`
 }
 
-func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTemplateData) error {
+func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTemplateData) *echo.HTTPError {
 	if pageData == nil {
 		pageData = &EditDialogTemplateData{}
 	}

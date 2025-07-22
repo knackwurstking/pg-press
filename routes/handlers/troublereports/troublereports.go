@@ -46,7 +46,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.DELETE(dataPath, h.handleDeleteData)
 
 	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
-	e.GET(modificationsPath, h.handleGetModifications)
+	e.GET(modificationsPath, func(c echo.Context) error {
+		return h.handleGetModifications(c, nil)
+	})
 	e.POST(modificationsPath, h.handlePostModifications)
 }
 
