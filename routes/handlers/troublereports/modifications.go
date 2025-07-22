@@ -1,7 +1,6 @@
 package troublereports
 
 import (
-	"errors"
 	"slices"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -84,5 +83,5 @@ func (h *Handler) handlePostModifications(c echo.Context) error {
 
 	// TODO: Set mod as current, just move mod to top (last item in list) and update the time field
 
-	return errors.New("under construction")
+	return h.handleGetModifications(c)
 }
