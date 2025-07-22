@@ -262,7 +262,8 @@ func (f *Feed) Render(highlight bool) template.HTML {
 
 	// Fallback
 
-	// TODO: Handle the highlight somehow
+	// TODO: Using card component from the ui.min.css, and handle highlight for already watched articles
+	
 	default:
 		return template.HTML(fmt.Sprintf(
 			`
