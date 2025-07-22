@@ -18,67 +18,68 @@ const (
 	AddUserRenderTemplate = `
 <div class="feed-item">
 	<div
-    	class="feed-item-content;"
-        style="padding: var(--ui-spacing);"
-    >
-        User <strong>%s</strong> was added.
-    </div>
+		class="feed-item-content;"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> wurde hinzugefügt.
+	</div>
 </div>
 `
 
 	RemoveUserRenderTemplate = `
 <div class="feed-item">
-    <div
-       	class="feed-item-content;"
-        style="padding: var(--ui-spacing);"
-    >
-        User <strong>%s</strong> was removed.
-    </div>
+	<div
+		class="feed-item-content;"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> wurde entfernt.
+	</div>
 </div>
 `
 
 	ChangeUserNameRenderTemplate = `
 <div class="feed-item">
-    <div
-       	class="feed-item-content "
-        style="padding: var(--ui-spacing);"
-    >
-        User <strong>%s</strong> changed their name to <strong>%s</strong>.
-    </div>
+	<div
+		class="feed-item-content "
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat den Namen zu <strong>%s</strong> geändert.
+	</div>
 </div>
 `
 
 	AddTroubleReportRenderTemplate = `
 <div class="feed-item">
 	<div
-	    class="feed-item-content"
+		class="feed-item-content"
 		style="padding: var(--ui-spacing);"
 	>
-  		User <strong>%s</strong> added a new trouble report titled  <a
- 			href="./trouble-reports#trouble-report-%d"
-		>%s</a>.
+		Benutzer <strong>%s</strong> hat einen neuen Problembericht mit dem Titel
+		<a href="./trouble-reports#trouble-report-%d">%s</a> hinzugefügt.
 	</div>
 </div>
 `
 
 	UpdateTroubleReportRenderTemplate = `
 <div class="feed-item">
-    <div
-	    class="feed-item-content"
+	<div
+		class="feed-item-content"
 		style="padding: var(--ui-spacing);"
 	>
-		User <strong>%s</strong> updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
+		Benutzer <strong>%s</strong> hat den Problembericht mit dem Titel
+		<a href="./trouble-reports#trouble-report-%d">%s</a> aktualisiert.
 	</div>
 </div>
 `
 
 	RemoveTroubleReportRenderTemplate = `
 <div class="feed-item">
-    <div
-	    class="feed-item-content"
+	<div
+		class="feed-item-content"
 		style="padding: var(--ui-spacing);"
 	>
-		User <strong>%s</strong> removed the trouble report titled <strong>%s</strong>.
+		Benutzer <strong>%s</strong> hat den Problembericht mit dem Titel
+		<strong>%s</strong> entfernt.
 	</div>
 </div>
 `
@@ -266,8 +267,8 @@ func (f *Feed) Render(highlight bool) template.HTML {
 		return template.HTML(fmt.Sprintf(
 			`
 			<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
-				<div class="feed-content"><pre>%#v</pre></div>
-				<small class="feed-time">%s</small>
+				<div style="margin-bottom: var(--ui-spacing);" class="feed-content"><pre>%#v</pre></div>
+				<small class="feed-time" style="position: absolute; bottom: 0; right: 0; margin: var(--ui-spacing);">%s</small>
 			</article>`,
 			f.ID, f.ID, f.Time, f.Data, timeStr,
 		))
@@ -275,8 +276,8 @@ func (f *Feed) Render(highlight bool) template.HTML {
 
 	return template.HTML(fmt.Sprintf(`
 		<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
-			<div class="feed-content">%s</div>
-			<small class="feed-time">%s</small>
+			<div style="margin-bottom: var(--ui-spacing);" class="feed-content">%s</div>
+			<small class="feed-time" style="position: absolute; bottom: 0; right: 0; margin: var(--ui-spacing);">%s</small>
 		</article>`,
 		f.ID, f.ID, f.Time, feedContent, timeStr,
 	))
