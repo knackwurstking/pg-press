@@ -14,6 +14,74 @@ const (
 	FeedTypeTroubleReportAdd    = "trouble_report_add"
 	FeedTypeTroubleReportUpdate = "trouble_report_update"
 	FeedTypeTroubleReportRemove = "trouble_report_remove"
+
+	AddUserRenderTemplate = `
+<div class="feed-item">
+	<div
+    	class="feed-item-content;"
+        style="padding: var(--ui-spacing);"
+    >
+        User <strong>%s</strong> was added.
+    </div>
+</div>
+`
+
+	RemoveUserRenderTemplate = `
+<div class="feed-item">
+    <div
+       	class="feed-item-content;"
+        style="padding: var(--ui-spacing);"
+    >
+        User <strong>%s</strong> was removed.
+    </div>
+</div>
+`
+
+	ChangeUserNameRenderTemplate = `
+<div class="feed-item">
+    <div
+       	class="feed-item-content "
+        style="padding: var(--ui-spacing);"
+    >
+        User <strong>%s</strong> changed their name to <strong>%s</strong>.
+    </div>
+</div>
+`
+
+	AddTroubleReportRenderTemplate = `
+<div class="feed-item">
+	<div
+	    class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+  		User <strong>%s</strong> added a new trouble report titled  <a
+ 			href="./trouble-reports#trouble-report-%d"
+		>%s</a>.
+	</div>
+</div>
+`
+
+	UpdateTroubleReportRenderTemplate = `
+<div class="feed-item">
+    <div
+	    class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		User <strong>%s</strong> updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
+	</div>
+</div>
+`
+
+	RemoveTroubleReportRenderTemplate = `
+<div class="feed-item">
+    <div
+	    class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		User <strong>%s</strong> removed the trouble report titled <strong>%s</strong>.
+	</div>
+</div>
+`
 )
 
 // FeedUserAdd represents a user addition event.
@@ -30,12 +98,7 @@ func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
 }
 
 func (f *FeedUserAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-    		<div class="feed-item-content">User %s was added.</div>
-    	</div>`,
-		f.Name,
-	))
+	return template.HTML(fmt.Sprintf(AddUserRenderTemplate, f.Name))
 }
 
 // FeedUserRemove represents a user removal event.
@@ -52,12 +115,7 @@ func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
 }
 
 func (f *FeedUserRemove) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-			<div class="feed-item-content">User %s was removed.</div>
-		</div>`,
-		f.Name,
-	))
+	return template.HTML(fmt.Sprintf(RemoveUserRenderTemplate, f.Name))
 }
 
 // FeedUserNameChange represents a user name change event.
@@ -76,12 +134,7 @@ func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 }
 
 func (f *FeedUserNameChange) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-			<div class="feed-item-content">User %s changed their name to %s.</div>
-		</div>`,
-		f.Old, f.New,
-	))
+	return template.HTML(fmt.Sprintf(ChangeUserNameRenderTemplate, f.Old, f.New))
 }
 
 // FeedTroubleReportAdd represents a trouble report creation event.
@@ -102,14 +155,7 @@ func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 }
 
 func (f *FeedTroubleReportAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-    		<div class="feed-item-content">
-                User %s added a new trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
-            </div>
-        </div>`,
-		f.ModifiedBy.UserName, f.ID, f.Title,
-	))
+	return template.HTML(fmt.Sprintf(AddTroubleReportRenderTemplate, f.ModifiedBy.UserName, f.ID, f.Title))
 }
 
 // FeedTroubleReportUpdate represents a trouble report update event.
@@ -131,11 +177,7 @@ func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 
 func (f *FeedTroubleReportUpdate) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-		    <div class="feed-item-content">
-				User %s updated the trouble report titled <a href="./trouble-reports#trouble-report-%d">%s</a>.
-			</div>
-		</div>`,
+		UpdateTroubleReportRenderTemplate,
 		f.ModifiedBy.UserName, f.ID, f.Title,
 	))
 }
@@ -159,11 +201,7 @@ func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 
 func (f *FeedTroubleReportRemove) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(
-		`<div class="feed-item">
-		    <div class="feed-item-content">
-				User %s removed the trouble report titled %s.
-			</div>
-		</div>`,
+		RemoveTroubleReportRenderTemplate,
 		f.ModifiedBy.UserName, f.Title,
 	))
 }
@@ -195,7 +233,7 @@ func NewFeedWithTime(dataType string, data any, timestamp int64) *Feed {
 }
 
 // Render generates HTML for the feed entry.
-func (f *Feed) Render(opacity float64) template.HTML {
+func (f *Feed) Render(highlight bool) template.HTML {
 	timeStr := f.GetTime().Format("2006-01-02 15:04:05")
 	var feedContent template.HTML
 
@@ -223,23 +261,24 @@ func (f *Feed) Render(opacity float64) template.HTML {
 
 	// Fallback
 
+	// TODO: Handle the highlight somehow
 	default:
 		return template.HTML(fmt.Sprintf(
 			`
-			<div id="feed-%d" class="feed-entry" style="opacity: %f;" data-id="%d" data-time="%d">
+			<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
 				<div class="feed-content"><pre>%#v</pre></div>
 				<small class="feed-time">%s</small>
-			</div>`,
-			f.ID, opacity, f.ID, f.Time, f.Data, timeStr,
+			</article>`,
+			f.ID, f.ID, f.Time, f.Data, timeStr,
 		))
 	}
 
 	return template.HTML(fmt.Sprintf(`
-		<div id="feed-%d" class="feed-entry" style="opacity: %f;" data-id="%d" data-time="%d">
+		<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
 			<div class="feed-content">%s</div>
 			<small class="feed-time">%s</small>
-		</div>`,
-		f.ID, opacity, f.ID, f.Time, feedContent, timeStr,
+		</article>`,
+		f.ID, f.ID, f.Time, feedContent, timeStr,
 	))
 }
 

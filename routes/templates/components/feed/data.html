@@ -14,13 +14,14 @@
 
     {{range $feed := $data.Feeds}}
 
+    <section>
     {{if lt $data.LastFeedID $feed.ID}}
-    {{$feed.Render 1.0}}
+    {{$feed.Render true}}
     {{else}}
-    {{$feed.Render 0.7}}
+    {{$feed.Render false}}
     {{end}}
+    </section>
 
-    <hr />
     {{end}}
 </ul>
 {{else}}
