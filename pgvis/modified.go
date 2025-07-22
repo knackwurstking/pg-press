@@ -7,8 +7,6 @@ import (
 
 type Mods[T any] []*Modified[T]
 
-// TODO: Maybe add a field `Current bool` to `Modified` struct to indicate if it's the current modification, and a method `IsCurrent()` to check if it's the current modification
-// NOTE: Than i should update the modifications handler, so that the order of modifications will never change
 func (m *Mods[T]) Current() *Modified[T] {
 	if len(*m) == 0 {
 		return nil
