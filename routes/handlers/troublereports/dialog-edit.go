@@ -25,13 +25,13 @@ func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTempla
 		pageData = &EditDialogTemplateData{}
 	}
 
-	if c.QueryParam(constants.CancelQueryParam) == constants.TrueValue {
+	if c.QueryParam(constants.QueryParamCancel) == constants.TrueValue {
 		pageData.Submitted = true
 	}
 
 	if !pageData.Submitted && !pageData.InvalidTitle && !pageData.InvalidContent {
-		if idStr := c.QueryParam(constants.IDQueryParam); idStr != "" {
-			id, herr := utils.ParseInt64Query(c, constants.IDQueryParam)
+		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
+			id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
 			if herr != nil {
 				return herr
 			}
@@ -96,7 +96,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 }
 
 func (h *Handler) handlePutDialogEdit(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.IDQueryParam)
+	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
 	}

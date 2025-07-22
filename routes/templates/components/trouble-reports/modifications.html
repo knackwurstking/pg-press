@@ -39,7 +39,19 @@
                 <pre>{{.Data.Content}}</pre>
             </div>
 
-            <!-- TODO: Add an action bar to the bottom, allow admins to roll back modifications, use "POST ./trouble-reports/modifications/{{.ID}}?time={{.Time}}" -->
+            <div class="flex gap" style="margin-top: var(--ui-spacing); justify-content: flex-end;">
+                <button
+                    hx-post="./trouble-reports/modifications/{{.ID}}?time={{.Time}}"
+                    hx-trigger="click"
+                    hx-target="#data"
+                    hx-swap="outerHTML"
+                    hx-confirm="Möchten Sie wirklich zu dieser Version zurückkehren?"
+                    class="secondary"
+                >
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Zurücksetzen
+                </button>
+            </div>
         </div>
 
         {{end}}

@@ -19,8 +19,9 @@ const (
 
 // Query parameter names
 const (
-	IDQueryParam     = "id"
-	CancelQueryParam = "cancel"
+	QueryParamID     = "id"
+	QueryParamCancel = "cancel"
+	QueryParamTime   = "time"
 	//PageQueryParam   = "page"
 	//LimitQueryParam  = "limit"
 	//SearchQueryParam = "q"
@@ -31,12 +32,12 @@ const (
 	UserNameMinLength = 1
 	UserNameMaxLength = 100
 
-	TitleMinLength   = 1
-	TitleMaxLength   = 500
-	ContentMinLength = 1
-	ContentMaxLength = 50000
+	//TitleMinLength   = 1
+	//TitleMaxLength   = 500
+	//ContentMinLength = 1
+	//ContentMaxLength = 50000
 
-	MaxSearchQueryLength = 500
+	//MaxSearchQueryLength = 500
 )
 
 // Form values

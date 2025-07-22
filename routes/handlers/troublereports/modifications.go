@@ -24,7 +24,7 @@ func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.Trou
 }
 
 func (h *Handler) handleGetModifications(c echo.Context) error {
-	id, herr := utils.ParseInt64Param(c, constants.IDQueryParam)
+	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
 	}
@@ -59,7 +59,30 @@ func (h *Handler) handleGetModifications(c echo.Context) error {
 }
 
 func (h *Handler) handlePostModifications(c echo.Context) error {
-	// TODO: ...
+	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
+	if herr != nil {
+		return herr
+	}
+
+	timeQuery, herr := utils.ParseInt64Query(c, constants.QueryParamTime)
+	if herr != nil {
+		return herr
+	}
+
+	tr, err := h.db.TroubleReports.Get(id)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	mod := &pgvis.Modified[pgvis.TroubleReportMod]{}
+	for _, m := range tr.Mods {
+		if m.Time == timeQuery {
+			mod = m
+			break
+		}
+	}
+
+	// TODO: Set mod as current, just move mod to top (last item in list) and update the time field
 
 	return errors.New("under construction")
 }
