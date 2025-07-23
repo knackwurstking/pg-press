@@ -4,67 +4,62 @@
 // validation and utility methods. Attachments represent files that can
 // be linked to trouble reports or other entities in the system.
 //
-// TODO:
-//   - Change attachments to store data in byte form and the mime type
-//   - Unique: ID, Path
-//   - Other Fields: MimeType string, Data []byte
+// Attachments store data in byte form with mime type and unique ID.
 package pgvis
 
 import (
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strings"
 )
 
 const (
-	MinAttachmentNameLength = 1
-	MaxAttachmentNameLength = 255
-	MaxAttachmentPathLength = 1000
+	MinAttachmentIDLength = 1
+	MaxAttachmentIDLength = 255
+	MaxAttachmentDataSize = 10 * 1024 * 1024 // 10MB
 )
 
-// Attachment represents a file attachment with its metadata.
+// Attachment represents a file attachment with its data and metadata.
 type Attachment struct {
-	Name         string `json:"name"`
-	Link         string `json:"link"`
-	RelativePath string `json:"relative_path"`
+	ID       string `json:"id"`
+	MimeType string `json:"mime_type"`
+	Data     []byte `json:"data"`
 }
 
 // Validate checks if the attachment has valid data.
 func (a *Attachment) Validate() error {
-	if a.Name == "" {
-		return NewValidationError("name", "cannot be empty", a.Name)
+	if a.ID == "" {
+		return NewValidationError("id", "cannot be empty", a.ID)
 	}
-	if len(a.Name) < MinAttachmentNameLength {
-		return NewValidationError("name", "too short", len(a.Name))
+	if len(a.ID) < MinAttachmentIDLength {
+		return NewValidationError("id", "too short", len(a.ID))
 	}
-	if len(a.Name) > MaxAttachmentNameLength {
-		return NewValidationError("name", "too long", len(a.Name))
-	}
-
-	if a.Link == "" {
-		return NewValidationError("link", "cannot be empty", a.Link)
+	if len(a.ID) > MaxAttachmentIDLength {
+		return NewValidationError("id", "too long", len(a.ID))
 	}
 
-	if a.RelativePath == "" {
-		return NewValidationError("relative_path", "cannot be empty", a.RelativePath)
+	if a.MimeType == "" {
+		return NewValidationError("mime_type", "cannot be empty", a.MimeType)
 	}
-	if len(a.RelativePath) > MaxAttachmentPathLength {
-		return NewValidationError("relative_path", "too long", len(a.RelativePath))
+
+	if a.Data == nil {
+		return NewValidationError("data", "cannot be nil", a.Data)
+	}
+	if len(a.Data) > MaxAttachmentDataSize {
+		return NewValidationError("data", "too large", len(a.Data))
 	}
 
 	return nil
 }
 
-// GetFileExtension returns the file extension of the attachment.
+// GetFileExtension returns the file extension based on the mime type.
 func (a *Attachment) GetFileExtension() string {
-	return filepath.Ext(a.Name)
-}
-
-// GetFileName returns the filename without extension.
-func (a *Attachment) GetFileName() string {
-	ext := filepath.Ext(a.Name)
-	return strings.TrimSuffix(a.Name, ext)
+	for ext, mimeType := range mimeTypes {
+		if mimeType == a.MimeType {
+			return ext
+		}
+	}
+	return ""
 }
 
 var (
@@ -95,84 +90,95 @@ var (
 	}
 )
 
-// IsImage checks if the attachment is an image file based on its extension.
+// IsImage checks if the attachment is an image file based on its mime type.
 func (a *Attachment) IsImage() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	return slices.Contains(imageExtensions, ext)
+	return strings.HasPrefix(a.MimeType, "image/")
 }
 
-// IsDocument checks if the attachment is a document file based on its extension.
+// IsDocument checks if the attachment is a document file based on its mime type.
 func (a *Attachment) IsDocument() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	return slices.Contains(documentExtensions, ext)
-}
-
-// IsArchive checks if the attachment is an archive file based on its extension.
-func (a *Attachment) IsArchive() bool {
-	ext := strings.ToLower(a.GetFileExtension())
-	return slices.Contains(archiveExtensions, ext)
-}
-
-// GetMimeType returns the MIME type based on the file extension.
-func (a *Attachment) GetMimeType() string {
-	ext := strings.ToLower(a.GetFileExtension())
-	if mimeType, exists := mimeTypes[ext]; exists {
-		return mimeType
+	documentMimeTypes := []string{
+		"application/pdf",
+		"application/msword",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		"text/plain",
+		"application/rtf",
+		"application/vnd.oasis.opendocument.text",
 	}
-	return "application/octet-stream"
+	return slices.Contains(documentMimeTypes, a.MimeType)
+}
+
+// IsArchive checks if the attachment is an archive file based on its mime type.
+func (a *Attachment) IsArchive() bool {
+	archiveMimeTypes := []string{
+		"application/zip",
+		"application/vnd.rar",
+		"application/x-7z-compressed",
+		"application/x-tar",
+		"application/gzip",
+		"application/x-bzip2",
+	}
+	return slices.Contains(archiveMimeTypes, a.MimeType)
+}
+
+// GetMimeType returns the MIME type of the attachment.
+func (a *Attachment) GetMimeType() string {
+	return a.MimeType
 }
 
 // String returns a string representation of the attachment.
 func (a *Attachment) String() string {
-	return fmt.Sprintf("Attachment{Name: %s, Link: %s, Path: %s}",
-		a.Name, a.Link, a.RelativePath)
+	return fmt.Sprintf("Attachment{ID: %s, MimeType: %s, DataSize: %d}",
+		a.ID, a.MimeType, len(a.Data))
 }
 
 // Clone creates a deep copy of the attachment.
 func (a *Attachment) Clone() *Attachment {
+	dataCopy := make([]byte, len(a.Data))
+	copy(dataCopy, a.Data)
 	return &Attachment{
-		Name:         a.Name,
-		Link:         a.Link,
-		RelativePath: a.RelativePath,
+		ID:       a.ID,
+		MimeType: a.MimeType,
+		Data:     dataCopy,
 	}
 }
 
-// UpdateLink updates the attachment's link with validation.
-func (a *Attachment) UpdateLink(newLink string) error {
-	newLink = strings.TrimSpace(newLink)
-	if newLink == "" {
-		return NewValidationError("link", "cannot be empty", newLink)
+// UpdateID updates the attachment's ID with validation.
+func (a *Attachment) UpdateID(newID string) error {
+	newID = strings.TrimSpace(newID)
+	if newID == "" {
+		return NewValidationError("id", "cannot be empty", newID)
 	}
-	a.Link = newLink
+	if len(newID) < MinAttachmentIDLength {
+		return NewValidationError("id", "too short", len(newID))
+	}
+	if len(newID) > MaxAttachmentIDLength {
+		return NewValidationError("id", "too long", len(newID))
+	}
+	a.ID = newID
 	return nil
 }
 
-// UpdateName updates the attachment's display name with validation.
-func (a *Attachment) UpdateName(newName string) error {
-	newName = strings.TrimSpace(newName)
-	if newName == "" {
-		return NewValidationError("name", "cannot be empty", newName)
+// UpdateMimeType updates the attachment's MIME type with validation.
+func (a *Attachment) UpdateMimeType(newMimeType string) error {
+	newMimeType = strings.TrimSpace(newMimeType)
+	if newMimeType == "" {
+		return NewValidationError("mime_type", "cannot be empty", newMimeType)
 	}
-	if len(newName) < MinAttachmentNameLength {
-		return NewValidationError("name", "too short", len(newName))
-	}
-	if len(newName) > MaxAttachmentNameLength {
-		return NewValidationError("name", "too long", len(newName))
-	}
-	a.Name = newName
+	a.MimeType = newMimeType
 	return nil
 }
 
-// UpdatePath updates the attachment's relative path with validation.
-func (a *Attachment) UpdatePath(newPath string) error {
-	newPath = strings.TrimSpace(newPath)
-	if newPath == "" {
-		return NewValidationError("relative_path", "cannot be empty", newPath)
+// UpdateData updates the attachment's data with validation.
+func (a *Attachment) UpdateData(newData []byte) error {
+	if newData == nil {
+		return NewValidationError("data", "cannot be nil", newData)
 	}
-	if len(newPath) > MaxAttachmentPathLength {
-		return NewValidationError("relative_path", "too long", len(newPath))
+	if len(newData) > MaxAttachmentDataSize {
+		return NewValidationError("data", "too large", len(newData))
 	}
-	a.RelativePath = newPath
+	a.Data = make([]byte, len(newData))
+	copy(a.Data, newData)
 	return nil
 }
 
@@ -181,7 +187,16 @@ func (a *Attachment) Equals(other *Attachment) bool {
 	if other == nil {
 		return false
 	}
-	return a.Name == other.Name &&
-		a.Link == other.Link &&
-		a.RelativePath == other.RelativePath
+	if a.ID != other.ID || a.MimeType != other.MimeType {
+		return false
+	}
+	if len(a.Data) != len(other.Data) {
+		return false
+	}
+	for i := range a.Data {
+		if a.Data[i] != other.Data[i] {
+			return false
+		}
+	}
+	return true
 }
