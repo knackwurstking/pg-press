@@ -42,7 +42,6 @@ Implemented a comprehensive WebSocket suspension handling system with two main c
 ### Testing & Documentation
 
 - **`WEBSOCKET_SUSPENSION_FIX.md`** (NEW) - Detailed implementation guide
-- **`validate-websocket-fix.sh`** (NEW) - Automated validation script
 - **`IMPLEMENTATION_SUMMARY.md`** (NEW) - This summary document
 
 ## 🔧 Key Technical Improvements
@@ -242,12 +241,9 @@ Page visible → Smart logic → Automatic reconnection
 
 ### Automated Checks
 
-```bash
-# Run validation script
-./validate-websocket-fix.sh
+### Automated Validation
 
-# Expected output: All 35 checks passed
-```
+Manual verification steps have been documented in the WebSocket suspension fix guide.
 
 ### Manual Verification
 

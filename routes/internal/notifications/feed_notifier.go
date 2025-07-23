@@ -266,9 +266,6 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		conn.Conn.Close()
 	}()
 
-	// Remove aggressive read deadline to handle browser suspension
-	// conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-
 	for {
 		var message string
 		err := websocket.Message.Receive(conn.Conn, &message)
@@ -286,9 +283,6 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 			}
 			break
 		}
-
-		// Don't reset read deadline - let connection stay alive during suspension
-		// conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 		// Handle ping/pong manually since golang.org/x/net/websocket doesn't have built-in support
 		if message == "ping" {

@@ -86,7 +86,6 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 	return true, nil
 }
 
-// TODO: Checking the expiration time of the cookie
 func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
@@ -96,6 +95,12 @@ func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error)
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
 		return nil, pgvis.WrapError(err, "failed to get cookie value")
+	}
+
+	// Check if cookie has expired
+	expirationThreshold := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
+	if c.LastLogin < expirationThreshold {
+		return nil, pgvis.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
