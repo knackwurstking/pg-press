@@ -6,12 +6,11 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/charmbracelet/log"
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -37,13 +36,9 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
-				log.SetLevel(log.DebugLevel)
-				log.SetReportCaller(true)
-				log.SetTimeFormat(time.RFC3339)
-
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					log.Errorf("Failed to open database: %s", err)
+					log.Printf("[Server] Failed to open database: %s", err)
 					return err
 				}
 
@@ -59,9 +54,9 @@ func serverCommand() cli.Command {
 					DB:               db,
 				})
 
-				log.Infof("Server listening on %s", *addr)
+				log.Printf("[Server] Server listening on %s", *addr)
 				if err := e.Start(*addr); err != nil && err != http.ErrServerClosed {
-					log.Errorf("Server startup failed: %s", err)
+					log.Printf("[Server] Server startup failed: %s", err)
 					os.Exit(exitCodeServerStart)
 				}
 
@@ -101,9 +96,9 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		if code >= 500 {
-			log.Errorf("Server error (%d): %s", code, message)
+			log.Printf("[Server] Server error (%d): %s", code, message)
 		} else if code >= 400 {
-			log.Warnf("Client error (%d): %s", code, message)
+			log.Printf("[Server] Client error (%d): %s", code, message)
 		}
 
 		if !c.Response().Committed {

@@ -3,9 +3,8 @@ package pgvis
 
 import (
 	"database/sql"
+	"log"
 	"slices"
-
-	"github.com/charmbracelet/log"
 )
 
 const (
@@ -47,7 +46,7 @@ func NewCookies(db *sql.DB) *Cookies {
 
 // List retrieves all cookies ordered by last login time (most recent first).
 func (c *Cookies) List() ([]*Cookie, error) {
-	log.Debug("Listing all cookies")
+	log.Printf("[Cookies] Listing all cookies")
 
 	rows, err := c.db.Query(selectAllCookiesQuery)
 	if err != nil {
@@ -73,7 +72,7 @@ func (c *Cookies) List() ([]*Cookie, error) {
 
 // ListApiKey retrieves all cookies associated with a specific API key.
 func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
-	log.Debug("Listing cookies by API key")
+	log.Printf("[Cookies] Listing cookies by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -103,7 +102,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 
 // Get retrieves a specific cookie by its value.
 func (c *Cookies) Get(value string) (*Cookie, error) {
-	log.Debug("Getting cookie by value")
+	log.Printf("[Cookies] Getting cookie by value")
 
 	if value == "" {
 		return nil, NewValidationError("value", "cookie value cannot be empty", value)
@@ -123,7 +122,7 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 
 // Add creates a new cookie session in the database.
 func (c *Cookies) Add(cookie *Cookie) error {
-	log.Debug("Adding cookie", "cookie", cookie)
+	log.Printf("[Cookies] Adding cookie: %+v", cookie)
 
 	if cookie == nil {
 		return NewValidationError("cookie", "cookie cannot be nil", nil)
@@ -157,7 +156,7 @@ func (c *Cookies) Add(cookie *Cookie) error {
 
 // Update modifies an existing cookie session.
 func (c *Cookies) Update(value string, cookie *Cookie) error {
-	log.Debug("Updating cookie", "cookie", cookie, "value", value)
+	log.Printf("[Cookies] Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
 		return NewValidationError("value", "current cookie value cannot be empty", value)
@@ -193,7 +192,7 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 
 // Remove deletes a cookie session by its value.
 func (c *Cookies) Remove(value string) error {
-	log.Debug("Removing cookie", "value", value)
+	log.Printf("[Cookies] Removing cookie, value: %s", value)
 
 	if value == "" {
 		return NewValidationError("value", "cookie value cannot be empty", value)
@@ -209,7 +208,7 @@ func (c *Cookies) Remove(value string) error {
 
 // RemoveApiKey removes all cookie sessions associated with a specific API key.
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	log.Debug("Removing cookies by API key")
+	log.Printf("[Cookies] Removing cookies by API key")
 
 	if apiKey == "" {
 		return NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -225,7 +224,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 
 // RemoveExpired removes all cookie sessions that are older than the specified timestamp.
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
-	log.Debug("Removing expired cookies", "before_timestamp", beforeTimestamp)
+	log.Printf("[Cookies] Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	if beforeTimestamp <= 0 {
 		return 0, NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)

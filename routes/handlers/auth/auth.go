@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
@@ -75,7 +76,7 @@ func (h *Handler) handleLogin(c echo.Context) error {
 func (h *Handler) handleLogout(c echo.Context) error {
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
 		if err := h.db.Cookies.Remove(cookie.Value); err != nil {
-			log.Errorf("Failed to remove cookie from database: %s", err)
+			log.Printf("[Auth] Failed to remove cookie from database: %s", err)
 		}
 	}
 
@@ -101,7 +102,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 			return false
 		}
 
-		log.Errorf("Failed to get user from API key: %s", err)
+		log.Printf("[Auth] Failed to get user from API key: %s", err)
 		return false
 	}
 
@@ -110,14 +111,14 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
-		log.Debug("Removing existing authentication cookie")
+		log.Printf("[Auth] Removing existing authentication cookie")
 
 		if err := h.db.Cookies.Remove(existingCookie.Value); err != nil {
-			log.Warnf("Failed to remove existing cookie: %s", err)
+			log.Printf("[Auth] Failed to remove existing cookie: %s", err)
 		}
 	}
 
-	log.Debugf("Creating new session for user %s (Telegram ID: %d)",
+	log.Printf("[Auth] Creating new session for user %s (Telegram ID: %d)",
 		user.UserName, user.TelegramID)
 
 	cookie := &http.Cookie{
@@ -135,7 +136,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	)
 
 	if err := h.db.Cookies.Add(sessionCookie); err != nil {
-		log.Errorf("Failed to create session: %s", err)
+		log.Printf("[Auth] Failed to create session: %s", err)
 		return false
 	}
 

@@ -8,7 +8,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"log"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -74,7 +75,7 @@ func keyAuthSkipper(ctx echo.Context) bool {
 func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error) {
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		log.Warn("failed to validate user from cookie", "error", err)
+		log.Printf("[Middleware] failed to validate user from cookie: %v", err)
 		user, err = db.Users.GetUserFromApiKey(auth)
 		if err != nil {
 			return false, pgvis.WrapError(err, "failed to validate user from cookie")
@@ -103,13 +104,13 @@ func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error)
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {
-		log.Debugf("Updating cookies last login timestamp for user %s", user)
+		log.Printf("[Middleware] Updating cookies last login timestamp for user %s", user)
 
 		c.LastLogin = time.Now().UnixMilli()
 		cookie.Expires = time.Now().Add(constants.CookieExpirationDuration)
 
 		if err := db.Cookies.Update(c.Value, c); err != nil {
-			log.Errorf("Failed to update cookie for user %s: %s", user, err)
+			log.Printf("[Middleware] Failed to update cookie for user %s: %s", user, err)
 		}
 	}
 
