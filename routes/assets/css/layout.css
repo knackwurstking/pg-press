@@ -3,10 +3,6 @@
     --pwa-background-color: var(--ui-bg);
 }
 
-html {
-    overscroll-behavior: auto;
-}
-
 body.debug,
 body.debug * {
     border-color: var(--ui-border-color) !important;
