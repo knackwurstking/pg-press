@@ -15,6 +15,7 @@
 
     <div id="modifications-list" class="flex column gap">
 
+        {{$user := .User}}
         {{$troubleReport := .TroubleReport}}
         {{$firstModified := .FirstModified}}
         {{$currentModified := $troubleReport.Mods.Current}}
@@ -104,6 +105,7 @@
                 "
                 class="flex gap"
             >
+                {{if $user.IsAdmin}}
                 <!-- Rollback Button -->
                 <button
                     hx-post="./trouble-reports/modifications/{{$troubleReport.ID}}?time={{$mod.Time}}"
@@ -117,6 +119,21 @@
                     <i class="bi bi-arrow-counterclockwise"></i>
                     Zu dieser Version zurücksetzen
                 </button>
+                {{else}}
+                <!-- Rollback Button (Vote) -->
+                <button
+                    hx-post="./trouble-reports/modifications/vote/{{$troubleReport.ID}}?time={{$mod.Time}}"
+                    hx-trigger="click"
+                    hx-target="#data"
+                    hx-swap="outerHTML"
+                    class="secondary flex gap"
+                    style="font-size: 0.9em;"
+                    disabled
+                >
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <small>ABSTIMMEN:</small> Zu dieser Version zurücksetzen
+                </button>
+                {{end}}
             </div>
             {{end}}
         </article>
