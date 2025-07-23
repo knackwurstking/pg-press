@@ -85,9 +85,9 @@
     <table class="cookies-table">
         <thead>
             <tr>
-                <th>Letzte Anmeldung</th>
-                <th class="left">Benutzeragent</th>
-                <th style="width: 60px"></th>
+                <th style="width: fit-content;">Letzte Anmeldung</th>
+                <th style="width: 100%;" class="left">Benutzeragent</th>
+                <th style="width: fit-content;"></th>
             </tr>
         </thead>
 
@@ -103,6 +103,7 @@
                         hx-trigger="click"
                         hx-target="#cookies"
                         hx-swap="outerHTML"
+                        hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
                         role="button"
                         class="ghost destructive icon"
                         title="Sitzung beenden"

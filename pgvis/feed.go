@@ -234,7 +234,7 @@ func NewFeedWithTime(dataType string, data any, timestamp int64) *Feed {
 }
 
 // Render generates HTML for the feed entry.
-func (f *Feed) Render(highlight bool) template.HTML {
+func (f *Feed) Render() template.HTML {
 	timeStr := f.GetTime().Format("2006-01-02 15:04:05")
 	var feedContent template.HTML
 
@@ -262,23 +262,25 @@ func (f *Feed) Render(highlight bool) template.HTML {
 
 	// Fallback
 
-	// TODO: Using card component from the ui.min.css, and handle highlight for already watched articles
-	
 	default:
 		return template.HTML(fmt.Sprintf(
 			`
-			<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
-				<div style="margin-bottom: var(--ui-spacing);" class="feed-content"><pre>%#v</pre></div>
-				<small class="feed-time" style="position: absolute; bottom: 0; right: 0; margin: var(--ui-spacing);">%s</small>
+			<article id="feed-%d" class="card" data-id="%d" data-time="%d">
+				<div style="margin-bottom: var(--ui-spacing);" class="card-body"><pre>%#v</pre></div>
+				<div class="card-footer">
+					<small style="float: right;">%s</small>
+				</div>
 			</article>`,
 			f.ID, f.ID, f.Time, f.Data, timeStr,
 		))
 	}
 
 	return template.HTML(fmt.Sprintf(`
-		<article id="feed-%d" class="feed-entry border" data-id="%d" data-time="%d">
-			<div style="margin-bottom: var(--ui-spacing);" class="feed-content">%s</div>
-			<small class="feed-time" style="position: absolute; bottom: 0; right: 0; margin: var(--ui-spacing);">%s</small>
+		<article id="feed-%d" class="card" data-id="%d" data-time="%d">
+			<div style="margin-bottom: var(--ui-spacing);" class="card-body">%s</div>
+			<div class="card-footer">
+				<small style="float: right;">%s</small>
+			</div>
 		</article>`,
 		f.ID, f.ID, f.Time, feedContent, timeStr,
 	))

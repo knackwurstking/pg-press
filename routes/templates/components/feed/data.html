@@ -3,6 +3,7 @@
 {{if ne (len $data.Feeds) 0}}
 <ul id="data">
     <style>
+        /*
         footer {
             display: flex;
             flex-direction: row;
@@ -10,16 +11,23 @@
             align-items: center;
             gap: var(--ui-spacing);
         }
+        */
+
+        section {
+            position: relative;
+        }
     </style>
 
     {{range $feed := $data.Feeds}}
 
     <section>
-    {{if lt $data.LastFeedID $feed.ID}}
-    {{$feed.Render true}}
-    {{else}}
-    {{$feed.Render false}}
-    {{end}}
+        {{if lt $data.LastFeedID $feed.ID}}
+        <div style="position: absolute; top: 8px; right: 8px; z-index: 10;">
+            <i class="bi bi-eye info ghost" title="Neuer Feed"></i>
+        </div>
+        {{end}}
+
+        {{$feed.Render}}
     </section>
 
     {{end}}
