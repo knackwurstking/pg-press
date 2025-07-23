@@ -123,12 +123,3 @@ func WrapError(err error, message string) error {
 	}
 	return fmt.Errorf("%s: %w", message, err)
 }
-
-// WrapErrorf wraps an error with formatted additional context message.
-func WrapErrorf(err error, format string, args ...any) error {
-	if err == nil {
-		return nil
-	}
-	message := fmt.Sprintf(format, args...)
-	return fmt.Errorf("%s: %w", message, err)
-}

@@ -25,27 +25,6 @@ type Attachment struct {
 	RelativePath string `json:"relative_path"`
 }
 
-// NewAttachment creates a new attachment with the provided details.
-func NewAttachment(name, link, relativePath string) *Attachment {
-	return &Attachment{
-		Name:         strings.TrimSpace(name),
-		Link:         strings.TrimSpace(link),
-		RelativePath: strings.TrimSpace(relativePath),
-	}
-}
-
-// NewAttachmentFromPath creates a new attachment from a file path.
-func NewAttachmentFromPath(relativePath string) *Attachment {
-	name := filepath.Base(relativePath)
-	link := fmt.Sprintf("/attachments/%s", relativePath)
-
-	return &Attachment{
-		Name:         name,
-		Link:         link,
-		RelativePath: relativePath,
-	}
-}
-
 // Validate checks if the attachment has valid data.
 func (a *Attachment) Validate() error {
 	if a.Name == "" {

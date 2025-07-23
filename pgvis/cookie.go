@@ -33,31 +33,6 @@ func NewCookie(userAgent, value, apiKey string) *Cookie {
 	}
 }
 
-// NewCookieWithTime creates a new cookie with a specific timestamp.
-func NewCookieWithTime(userAgent, value, apiKey string, timestamp int64) *Cookie {
-	return &Cookie{
-		UserAgent: strings.TrimSpace(userAgent),
-		Value:     strings.TrimSpace(value),
-		ApiKey:    strings.TrimSpace(apiKey),
-		LastLogin: timestamp,
-	}
-}
-
-// GenerateSecureCookie creates a new cookie with generated secure values.
-func GenerateSecureCookie(userAgent string) (*Cookie, error) {
-	value, err := generateSecureToken(32)
-	if err != nil {
-		return nil, WrapError(err, "failed to generate cookie value")
-	}
-
-	apiKey, err := generateSecureToken(MinAPIKeyLength)
-	if err != nil {
-		return nil, WrapError(err, "failed to generate API key")
-	}
-
-	return NewCookie(userAgent, value, apiKey), nil
-}
-
 // Validate checks if the cookie has valid data.
 func (c *Cookie) Validate() error {
 	if c.UserAgent == "" {

@@ -42,13 +42,6 @@ func NewUserFromInterfaceMap(modified map[string]any) *User {
 	return user
 }
 
-// NewUserWithLastFeed creates a new user with a specific last feed ID
-func NewUserWithLastFeed(telegramID int64, userName, apiKey string, lastFeed int64) *User {
-	user := NewUser(telegramID, userName, apiKey)
-	user.LastFeed = lastFeed
-	return user
-}
-
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
 	if u.TelegramID <= 0 {

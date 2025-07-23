@@ -224,15 +224,6 @@ func NewFeed(dataType string, data any) *Feed {
 	}
 }
 
-// NewFeedWithTime creates a new feed entry with a specific timestamp.
-func NewFeedWithTime(dataType string, data any, timestamp int64) *Feed {
-	return &Feed{
-		Time:     timestamp,
-		DataType: dataType,
-		Data:     data,
-	}
-}
-
 // Render generates HTML for the feed entry.
 func (f *Feed) Render() template.HTML {
 	timeStr := f.GetTime().Format("2006-01-02 15:04:05")

@@ -15,8 +15,7 @@ import (
 )
 
 const (
-	userContextKey   = "user"
-	apiKeyContextKey = "api_key"
+	userContextKey = "user"
 
 	authenticationRequiredMessage = "authentication required"
 	invalidUserSessionMessage     = "invalid user session"
@@ -39,22 +38,6 @@ func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
 		)
 	}
 	return user, nil
-}
-
-func SetUserInContext(ctx echo.Context, user *pgvis.User) {
-	ctx.Set(userContextKey, user)
-}
-
-func GetAPIKeyFromContext(ctx echo.Context) (string, *echo.HTTPError) {
-	apiKey, ok := ctx.Get(apiKeyContextKey).(string)
-	if !ok || apiKey == "" {
-		return "", echo.NewHTTPError(http.StatusUnauthorized, "API key required")
-	}
-	return apiKey, nil
-}
-
-func SetAPIKeyInContext(ctx echo.Context, apiKey string) {
-	ctx.Set(apiKeyContextKey, apiKey)
 }
 
 func ParseInt64Param(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {

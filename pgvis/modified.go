@@ -34,19 +34,6 @@ func NewModified[T any](user *User, data T) *Modified[T] {
 	}
 }
 
-// NewModifiedWithTime creates a new modification record with a specific timestamp
-func NewModifiedWithTime[T any](user *User, data T, timestamp int64) *Modified[T] {
-	if user == nil {
-		user = &User{UserName: "system"}
-	}
-
-	return &Modified[T]{
-		User: user,
-		Time: timestamp,
-		Data: data,
-	}
-}
-
 // GetTime returns the modification time as a Go time.Time
 func (m *Modified[T]) GetTime() time.Time {
 	return time.UnixMilli(m.Time)
