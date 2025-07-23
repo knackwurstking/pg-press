@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.36";
+const VERSION = "v0.0.37";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -64,6 +64,7 @@ const STATIC_ASSETS = [
     // JavaScript libraries
     "./js/htmx-v2.0.6.min.js",
     "./js/htmx-ext-ws-v2.0.3.min.js",
+    "./js/websocket-manager.js",
 ];
 
 // Offline fallback pages
