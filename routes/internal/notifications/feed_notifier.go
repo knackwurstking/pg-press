@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -129,7 +130,7 @@ func (fn *FeedNotifier) sendInitialFeedCounter(conn *FeedConnection) {
 	case <-conn.Done:
 		// Connection was closed
 		return
-	case <-time.After(5 * time.Second):
+	case <-time.After(30 * time.Second):
 		log.Printf("[FeedNotifier] Timeout sending initial feed counter to user %d", conn.UserID)
 	}
 }
@@ -164,9 +165,9 @@ func (fn *FeedNotifier) sendFeedCounterUpdate(conn *FeedConnection) {
 	case <-conn.Done:
 		// Connection was closed, unregister it
 		fn.UnregisterConnection(conn)
-	case <-time.After(5 * time.Second):
+	case <-time.After(30 * time.Second):
 		log.Printf("[FeedNotifier] Timeout sending feed counter update to user %d", conn.UserID)
-		// Don't unregister on timeout, the connection might just be slow
+		// Don't unregister on timeout, the connection might just be slow or suspended
 	}
 }
 
@@ -223,7 +224,7 @@ func (fn *FeedNotifier) ConnectionCount() int {
 
 // WritePump handles writing messages to the WebSocket connection
 func (conn *FeedConnection) WritePump() {
-	ticker := time.NewTicker(54 * time.Second)
+	ticker := time.NewTicker(5 * time.Minute)
 	defer ticker.Stop()
 	defer conn.Conn.Close()
 
@@ -235,8 +236,8 @@ func (conn *FeedConnection) WritePump() {
 				return
 			}
 
-			// Set write deadline
-			conn.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			// Set write deadline - longer timeout for suspended connections
+			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
 
 			if err := websocket.Message.Send(conn.Conn, string(message)); err != nil {
 				log.Printf("[FeedConnection] Error writing message to user %d: %v", conn.UserID, err)
@@ -246,7 +247,7 @@ func (conn *FeedConnection) WritePump() {
 		case <-ticker.C:
 			// Send ping message - golang.org/x/net/websocket doesn't have built-in ping/pong
 			// We'll send a simple ping message instead
-			conn.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
 			if err := websocket.Message.Send(conn.Conn, "ping"); err != nil {
 				log.Printf("[FeedConnection] Error sending ping to user %d: %v", conn.UserID, err)
 				return
@@ -265,8 +266,8 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		conn.Conn.Close()
 	}()
 
-	// Set read deadline
-	conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	// Remove aggressive read deadline to handle browser suspension
+	// conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 	for {
 		var message string
@@ -275,13 +276,19 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 			if err == io.EOF {
 				log.Printf("[FeedConnection] Connection closed normally for user %d", conn.UserID)
 			} else {
+				// Check if error is due to timeout or suspension-related issues
+				if isTemporaryError(err) {
+					log.Printf("[FeedConnection] Temporary error for user %d (possibly suspended): %v", conn.UserID, err)
+					// Continue without breaking - browser might be suspended
+					continue
+				}
 				log.Printf("[FeedConnection] Error reading message from user %d: %v", conn.UserID, err)
 			}
 			break
 		}
 
-		// Reset read deadline on successful message
-		conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		// Don't reset read deadline - let connection stay alive during suspension
+		// conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 		// Handle ping/pong manually since golang.org/x/net/websocket doesn't have built-in support
 		if message == "ping" {
@@ -298,4 +305,14 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		// Client sent a message, could trigger immediate update if needed
 		// For now, we just acknowledge that the connection is active
 	}
+}
+
+// isTemporaryError checks if an error is temporary and the connection should be kept alive
+func isTemporaryError(err error) bool {
+	// Check for common suspension-related errors
+	errStr := err.Error()
+	return strings.Contains(errStr, "timeout") ||
+		strings.Contains(errStr, "deadline") ||
+		strings.Contains(errStr, "broken pipe") ||
+		strings.Contains(errStr, "connection reset")
 }
