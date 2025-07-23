@@ -3,6 +3,11 @@
 // This file defines the Attachment data structure and its associated
 // validation and utility methods. Attachments represent files that can
 // be linked to trouble reports or other entities in the system.
+//
+// TODO:
+//   - Change attachments to store data in byte form and the mime type
+//   - Unique: ID, Path
+//   - Other Fields: MimeType string, Data []byte
 package pgvis
 
 import (
