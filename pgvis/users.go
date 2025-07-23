@@ -125,11 +125,11 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
 
 // Add creates a new user and generates a corresponding activity feed entry.
 func (u *Users) Add(user *User) error {
-	log.Debug("Adding user", user.TelegramID, user.UserName)
-
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
+
+	log.Debug("Adding user", user.TelegramID, user.UserName)
 
 	if err := user.Validate(); err != nil {
 		return err

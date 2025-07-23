@@ -299,36 +299,3 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		// For now, we just acknowledge that the connection is active
 	}
 }
-
-// CreateWebSocketHandler creates a WebSocket handler function for use with net/http
-func (fn *FeedNotifier) CreateWebSocketHandler(getUserFromRequest func(ws *websocket.Conn) (*pgvis.User, error)) websocket.Handler {
-	return websocket.Handler(func(ws *websocket.Conn) {
-		// Get user from request context
-		user, err := getUserFromRequest(ws)
-		if err != nil {
-			log.Printf("[WebSocket] User authentication failed: %v", err)
-			ws.Close()
-			return
-		}
-
-		log.Printf("[WebSocket] User authenticated: %s (LastFeed: %d)", user.UserName, user.LastFeed)
-
-		// Register the connection with the feed notifier
-		feedConn := fn.RegisterConnection(user.TelegramID, user.LastFeed, ws)
-		if feedConn == nil {
-			log.Printf("[WebSocket] Failed to register connection for user %s", user.UserName)
-			ws.Close()
-			return
-		}
-
-		log.Printf("[WebSocket] Connection registered for user %s", user.UserName)
-
-		// Start the write pump in a goroutine
-		go feedConn.WritePump()
-
-		// Start the read pump (this will block until connection closes)
-		feedConn.ReadPump(fn)
-
-		log.Printf("[WebSocket] Connection closed for user %s", user.UserName)
-	})
-}

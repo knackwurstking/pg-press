@@ -68,10 +68,7 @@ func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
 
 func keyAuthSkipper(ctx echo.Context) bool {
 	url := ctx.Request().URL.String()
-	if keyAuthSkipperRegExp.MatchString(url) {
-		return true
-	}
-	return false
+	return keyAuthSkipperRegExp.MatchString(url)
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error) {
