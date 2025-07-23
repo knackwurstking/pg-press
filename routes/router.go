@@ -2,6 +2,7 @@
 package routes
 
 import (
+	"context"
 	"embed"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ import (
 	"github.com/knackwurstking/pg-vis/routes/handlers/nav"
 	"github.com/knackwurstking/pg-vis/routes/handlers/profile"
 	"github.com/knackwurstking/pg-vis/routes/handlers/troublereports"
+	"github.com/knackwurstking/pg-vis/routes/internal/notifications"
 )
 
 var (
@@ -34,6 +36,16 @@ func Serve(e *echo.Echo, o Options) {
 	// Serve static assets
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
+	// Initialize feed notification system
+	feedNotifier := notifications.NewFeedNotifier(o.DB, templates)
+
+	// Start the feed notification manager in a goroutine
+	ctx := context.Background()
+	go feedNotifier.Start(ctx)
+
+	// Set the notifier on the feeds for real-time updates
+	o.DB.Feeds.SetNotifier(feedNotifier)
+
 	// Initialize handlers
 	authHandler := auth.NewHandler(
 		o.DB, o.ServerPathPrefix, templates)
@@ -51,7 +63,7 @@ func Serve(e *echo.Echo, o Options) {
 		o.DB, o.ServerPathPrefix, templates)
 
 	navHandler := nav.NewHandler(
-		o.DB, o.ServerPathPrefix, templates)
+		o.DB, o.ServerPathPrefix, templates, feedNotifier)
 
 	// Register routes
 	authHandler.RegisterRoutes(e)

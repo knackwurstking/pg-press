@@ -7,6 +7,11 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+// FeedNotifier interface for handling feed update notifications
+type FeedNotifier interface {
+	NotifyNewFeed()
+}
+
 const (
 	createFeedsTableQuery = `
 		CREATE TABLE IF NOT EXISTS feeds (
@@ -29,7 +34,8 @@ const (
 
 // Feeds handles database operations for feed entries
 type Feeds struct {
-	db *sql.DB
+	db       *sql.DB
+	notifier FeedNotifier
 }
 
 // NewFeeds creates a new Feeds instance and initializes the database table
@@ -38,6 +44,11 @@ func NewFeeds(db *sql.DB) *Feeds {
 		panic(NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
 	}
 	return &Feeds{db: db}
+}
+
+// SetNotifier sets the feed notifier for real-time updates
+func (f *Feeds) SetNotifier(notifier FeedNotifier) {
+	f.notifier = notifier
 }
 
 // List retrieves all feeds ordered by ID in descending order
@@ -96,6 +107,12 @@ func (f *Feeds) Add(feed *Feed) error {
 	if err != nil {
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
+
+	// Notify about new feed if notifier is set
+	if f.notifier != nil {
+		f.notifier.NotifyNewFeed()
+	}
+
 	return nil
 }
 

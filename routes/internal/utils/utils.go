@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"bytes"
 	"errors"
 	"html/template"
 	"io/fs"
@@ -135,4 +136,18 @@ func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []st
 	}
 
 	return nil
+}
+
+func RenderTemplateToString(templates fs.FS, patterns []string, pageData any) (string, error) {
+	t, err := template.ParseFS(templates, patterns...)
+	if err != nil {
+		return "", pgvis.WrapError(err, templateParseErrorMessage)
+	}
+
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, pageData); err != nil {
+		return "", pgvis.WrapError(err, templateExecuteErrorMessage)
+	}
+
+	return buf.String(), nil
 }

@@ -29,6 +29,9 @@ func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/feed", h.handleFeed)
 	e.GET(h.serverPathPrefix+"/feed/data", h.handleGetData)
+
+	// Register test routes for development/testing
+	h.RegisterTestRoutes(e)
 }
 
 func (h *Handler) handleFeed(c echo.Context) error {

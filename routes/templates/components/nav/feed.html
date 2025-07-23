@@ -1,25 +1,14 @@
 {{define "nav-feed"}}
 <a
-    hx-get="./nav/feed-counter"
-    hx-trigger="load"
-    hx-target="#feedCounter"
-    hx-swap="outerHTML"
     role="button"
     class="ghost contrast icon"
     href="./feed"
+    style="position: relative; display: inline-block;"
+    hx-ws="connect:./nav/feed-counter"
+    hx-target="#feedCounter"
+    hx-swap="outerHTML"
 >
     <i class="bi bi-bell"></i>
-    <span
-        style="
-            position: absolute;
-            color: var(--ui-destructive);
-            background-color: var(--ui-destructive-text);
-            top: 0;
-            right: 0;
-            font-size: 0.65rem;
-            border-radius: 50%;
-        "
-        id="feedCounter"
-    ></span>
+    <span id="feedCounter"></span>
 </a>
 {{end}}
