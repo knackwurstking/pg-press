@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -295,38 +295,38 @@
 
     <div class="container">
         <div class="icon">📡</div>
-        <h1>You're Offline</h1>
-        <p class="subtitle">PG-VIS - Press Group Visualization</p>
+        <h1>Sie sind offline</h1>
+        <p class="subtitle">PG-VIS - Pressgruppen-Visualisierung</p>
         <p class="message">
-            It looks like you're not connected to the internet right now. 
-            Don't worry - we've got you covered with some offline features!
+            Es sieht so aus, als wären Sie gerade nicht mit dem Internet verbunden. 
+            Keine Sorge - wir haben einige Offline-Funktionen für Sie!
         </p>
 
         <div class="actions">
             <button class="btn btn-primary" onclick="retryConnection()">
                 <span>🔄</span>
-                Try Again
+                Erneut versuchen
             </button>
             <a href="./" class="btn btn-secondary">
                 <span>🏠</span>
-                Go Home
+                Zur Startseite
             </a>
         </div>
 
         <div class="status">
-            <div class="status-title">Connection Status</div>
+            <div class="status-title">Verbindungsstatus</div>
             <div class="status-text" id="connectionDetails">
-                Unable to reach PG-VIS servers. Please check your internet connection.
+                PG-VIS Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.
             </div>
         </div>
 
         <div class="features">
-            <h3>Available Offline Features:</h3>
+            <h3>Verfügbare Offline-Funktionen:</h3>
             <ul class="feature-list">
-                <li>Browse cached trouble reports</li>
-                <li>View previously loaded feed content</li>
-                <li>Access your profile information</li>
-                <li>Draft new trouble reports (synced when online)</li>
+                <li>Zwischengespeicherte Problemberichte durchsuchen</li>
+                <li>Zuvor geladene Feed-Inhalte anzeigen</li>
+                <li>Auf Ihre Profilinformationen zugreifen</li>
+                <li>Neue Problemberichte entwerfen (werden online synchronisiert)</li>
             </ul>
         </div>
     </div>
@@ -341,7 +341,7 @@
             if (navigator.onLine) {
                 networkStatus.className = 'network-status network-online';
                 networkText.textContent = 'Online';
-                connectionDetails.textContent = 'Connection restored! You can now access all features.';
+                connectionDetails.textContent = 'Verbindung wiederhergestellt! Sie können jetzt alle Funktionen nutzen.';
                 
                 // Auto-redirect after a short delay when back online
                 setTimeout(() => {
@@ -350,7 +350,7 @@
             } else {
                 networkStatus.className = 'network-status network-offline';
                 networkText.textContent = 'Offline';
-                connectionDetails.textContent = 'Unable to reach PG-VIS servers. Please check your internet connection.';
+                connectionDetails.textContent = 'PG-VIS Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.';
             }
         }
 
@@ -359,7 +359,7 @@
             const button = event.target.closest('.btn-primary');
             const originalContent = button.innerHTML;
             
-            button.innerHTML = '<span>⏳</span> Checking...';
+            button.innerHTML = '<span>⏳</span> Überprüfung...';
             button.disabled = true;
             
             // Check if we can reach the server
@@ -369,7 +369,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    button.innerHTML = '<span>✅</span> Connected!';
+                    button.innerHTML = '<span>✅</span> Verbunden!';
                     setTimeout(() => {
                         window.location.href = './';
                     }, 1000);
@@ -378,7 +378,7 @@
                 }
             })
             .catch(() => {
-                button.innerHTML = '<span>❌</span> Still Offline';
+                button.innerHTML = '<span>❌</span> Noch offline';
                 setTimeout(() => {
                     button.innerHTML = originalContent;
                     button.disabled = false;

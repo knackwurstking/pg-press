@@ -1,7 +1,7 @@
 {
-    "name": "PG-VIS - Press Group Visualization",
+    "name": "PG-VIS - Pressgruppen-Visualisierung",
     "short_name": "PG Presse",
-    "description": "Press Group Visualization system for managing trouble reports, feeds, and user profiles with offline capabilities.",
+    "description": "Pressgruppen-Visualisierungssystem zur Verwaltung von Problemberichten, Feeds und Benutzerprofilen mit Offline-Funktionen.",
     "version": "1.0.0",
     "manifest_version": 3,
     "start_url": "./",
@@ -11,7 +11,7 @@
     "orientation": "portrait-primary",
     "theme_color": "#000000",
     "background_color": "#000000",
-    "lang": "en",
+    "lang": "de",
     "dir": "ltr",
     "categories": ["productivity", "business", "utilities"],
     "icons": [
@@ -49,9 +49,9 @@
     "screenshots": [],
     "shortcuts": [
         {
-            "name": "Trouble Reports",
-            "short_name": "Reports",
-            "description": "View and manage trouble reports",
+            "name": "Problemberichte",
+            "short_name": "Berichte",
+            "description": "Problemberichte anzeigen und verwalten",
             "url": "./trouble-reports",
             "icons": [
                 {
@@ -63,7 +63,7 @@
         {
             "name": "Feed",
             "short_name": "Feed",
-            "description": "View latest feed updates",
+            "description": "Neueste Feed-Updates anzeigen",
             "url": "./feed",
             "icons": [
                 {
@@ -73,9 +73,9 @@
             ]
         },
         {
-            "name": "Profile",
-            "short_name": "Profile",
-            "description": "Manage your profile and settings",
+            "name": "Profil",
+            "short_name": "Profil",
+            "description": "Ihr Profil und Einstellungen verwalten",
             "url": "./profile",
             "icons": [
                 {

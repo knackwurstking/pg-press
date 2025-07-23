@@ -47,12 +47,12 @@ class PWAInstallManager {
         prompt.innerHTML = `
             <div class="pwa-install-content">
                 <div class="pwa-install-text">
-                    <div class="pwa-install-title">Install PG-VIS</div>
-                    <div class="pwa-install-message">Add to your home screen for quick access and offline use</div>
+                    <div class="pwa-install-title">PG-VIS installieren</div>
+                    <div class="pwa-install-message">Zum Startbildschirm hinzufügen für schnellen Zugriff und Offline-Nutzung</div>
                 </div>
                 <div class="pwa-install-actions">
-                    <button class="pwa-install-btn primary" onclick="window.pwaInstall.install()">Install</button>
-                    <button class="pwa-install-btn" onclick="window.pwaInstall.dismiss()">Later</button>
+                    <button class="pwa-install-btn primary" onclick="window.pwaInstall.install()">Installieren</button>
+                    <button class="pwa-install-btn" onclick="window.pwaInstall.dismiss()">Später</button>
                 </div>
             </div>
         `;
@@ -140,7 +140,7 @@ class OfflineStatusManager {
         indicator.className = "offline-indicator";
         indicator.id = "offline-indicator";
         indicator.innerHTML =
-            "📡 You're offline - Some features may be limited";
+            "📡 Sie sind offline - Einige Funktionen sind möglicherweise eingeschränkt";
         document.body.appendChild(indicator);
     }
 
