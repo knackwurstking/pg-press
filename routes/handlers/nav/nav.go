@@ -2,9 +2,9 @@ package nav
 
 import (
 	"io/fs"
-	"log"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 	"github.com/knackwurstking/pg-vis/routes/internal/notifications"
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -40,22 +40,22 @@ func (h *Handler) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		// Get user from echo context
 		user, herr := utils.GetUserFromContext(c)
 		if herr != nil {
-			log.Printf("[WebSocket] User authentication failed: %v", herr)
+			logger.WebSocket().Error("User authentication failed: %v", herr)
 			ws.Close()
 			return
 		}
 
-		log.Printf("[WebSocket] User authenticated: %s (LastFeed: %d)", user.UserName, user.LastFeed)
+		logger.WebSocket().Info("User authenticated: %s (LastFeed: %d)", user.UserName, user.LastFeed)
 
 		// Register the connection with the feed notifier
 		feedConn := h.feedNotifier.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			log.Printf("[WebSocket] Failed to register connection for user %s", user.UserName)
+			logger.WebSocket().Error("Failed to register connection for user %s", user.UserName)
 			ws.Close()
 			return
 		}
 
-		log.Printf("[WebSocket] Connection registered for user %s", user.UserName)
+		logger.WebSocket().Info("Connection registered for user %s", user.UserName)
 
 		// Start the write pump in a goroutine
 		go feedConn.WritePump()
@@ -63,7 +63,7 @@ func (h *Handler) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		// Start the read pump (this will block until connection closes)
 		feedConn.ReadPump(h.feedNotifier)
 
-		log.Printf("[WebSocket] Connection closed for user %s", user.UserName)
+		logger.WebSocket().Info("Connection closed for user %s", user.UserName)
 	})
 
 	// Serve the WebSocket connection

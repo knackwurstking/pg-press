@@ -3,9 +3,8 @@ package troublereports
 import (
 	"net/http"
 
-	"log"
-
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 	"github.com/knackwurstking/pg-vis/routes/constants"
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -58,7 +57,7 @@ func (h *Handler) handleDeleteData(c echo.Context) error {
 		)
 	}
 
-	log.Printf("[TroubleReports] Administrator %s (Telegram ID: %d) is deleting trouble report %d",
+	logger.TroubleReport().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
 	if err := h.db.TroubleReports.Remove(id); err != nil {

@@ -5,9 +5,8 @@ import (
 	"slices"
 	"time"
 
-	"log"
-
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 	"github.com/knackwurstking/pg-vis/routes/constants"
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -87,7 +86,7 @@ func (h *Handler) handlePostModifications(c echo.Context) error {
 		if m.Time == timeQuery {
 			if mod != nil {
 				// NOTE: Should never happen, but it is possible theoretically
-				log.Printf("[TroubleReports] Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
+				logger.TroubleReport().Warn("Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
 				newMods = append(newMods, m)
 			} else {
 				mod = m

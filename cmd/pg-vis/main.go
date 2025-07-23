@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
+
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 )
 
 const (
@@ -35,6 +37,16 @@ func init() {
 }
 
 func main() {
+	// Initialize colored logger
+	logger.Initialize()
+
+	// Configure logger based on environment
+	if os.Getenv("DEBUG") != "" {
+		logger.SetupDevelopment()
+	} else if os.Getenv("PRODUCTION") != "" {
+		logger.SetupProduction()
+	}
+
 	a := cli.App{
 		Name: appName,
 		Usage: cli.Usage(`Exit Codes:

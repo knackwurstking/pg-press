@@ -6,7 +6,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 	"github.com/knackwurstking/pg-vis/routes"
 )
 
@@ -38,7 +38,7 @@ func serverCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					log.Printf("[Server] Failed to open database: %s", err)
+					logger.Server().Error("Failed to open database: %v", err)
 					return err
 				}
 
@@ -54,9 +54,9 @@ func serverCommand() cli.Command {
 					DB:               db,
 				})
 
-				log.Printf("[Server] Server listening on %s", *addr)
+				logger.Server().Info("Server listening on %s", *addr)
 				if err := e.Start(*addr); err != nil && err != http.ErrServerClosed {
-					log.Printf("[Server] Server startup failed: %s", err)
+					logger.Server().Error("Server startup failed: %v", err)
 					os.Exit(exitCodeServerStart)
 				}
 
@@ -96,9 +96,9 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		if code >= 500 {
-			log.Printf("[Server] Server error (%d): %s", code, message)
+			logger.Server().Error("Server error (%d): %s", code, message)
 		} else if code >= 400 {
-			log.Printf("[Server] Client error (%d): %s", code, message)
+			logger.Server().Warn("Client error (%d): %s", code, message)
 		}
 
 		if !c.Response().Committed {

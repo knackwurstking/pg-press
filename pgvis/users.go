@@ -10,6 +10,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 )
 
 // SQL queries for user operations
@@ -56,7 +58,7 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 
 // List retrieves all users from the database.
 func (u *Users) List() ([]*User, error) {
-	log.Printf("[Users] Listing users")
+	logger.User().Info("Listing all users")
 
 	rows, err := u.db.Query(selectAllUsersQuery)
 	if err != nil {
@@ -102,7 +104,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 
 // GetUserFromApiKey retrieves a user by their API key.
 func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
-	log.Printf("[Users] Getting user by API key")
+	logger.User().Debug("Getting user by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -128,7 +130,7 @@ func (u *Users) Add(user *User) error {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
 
-	log.Printf("[Users] Adding user: %d %s", user.TelegramID, user.UserName)
+	logger.User().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
 
 	if err := user.Validate(); err != nil {
 		return err
@@ -168,7 +170,7 @@ func (u *Users) Add(user *User) error {
 
 // Remove deletes a user by Telegram ID and generates an activity feed entry.
 func (u *Users) Remove(telegramID int64) error {
-	log.Printf("[Users] Removing user: %d", telegramID)
+	logger.User().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
 	user, _ := u.Get(telegramID)

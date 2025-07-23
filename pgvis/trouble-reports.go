@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"log"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 )
 
 const (
@@ -53,7 +53,7 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 
 // List retrieves all trouble reports ordered by ID descending.
 func (tr *TroubleReports) List() ([]*TroubleReport, error) {
-	log.Printf("[TroubleReports] Listing all trouble reports")
+	logger.TroubleReport().Info("Listing trouble reports")
 
 	rows, err := tr.db.Query(selectAllTroubleReportsQuery)
 	if err != nil {
@@ -82,7 +82,7 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 
 // Get retrieves a specific trouble report by ID.
 func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
-	log.Printf("[TroubleReports] Getting trouble report by ID: %d", id)
+	logger.TroubleReport().Debug("Getting trouble report, id: %d", id)
 
 	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
 
@@ -99,23 +99,23 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(report *TroubleReport) error {
-	log.Printf("[TroubleReports] Adding trouble report: %+v", report)
+func (tr *TroubleReports) Add(troubleReport *TroubleReport) error {
+	logger.TroubleReport().Info("Adding trouble report: %+v", troubleReport)
 
-	if report == nil {
+	if troubleReport == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
-	if err := report.Validate(); err != nil {
+	if err := troubleReport.Validate(); err != nil {
 		return err
 	}
 
-	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
+	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
 		return WrapError(err, "failed to marshal linked attachments")
 	}
 
-	mods, err := json.Marshal(report.Mods)
+	mods, err := json.Marshal(troubleReport.Mods)
 	if err != nil {
 		return WrapError(err, "failed to marshal mods data")
 	}
@@ -123,7 +123,7 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 	// After exec this insert query, i need to get the id
 	result, err := tr.db.Exec(
 		insertTroubleReportQuery,
-		report.Title, report.Content, linkedAttachments, mods,
+		troubleReport.Title, troubleReport.Content, linkedAttachments, mods,
 	)
 	if err != nil {
 		return NewDatabaseError("insert", "trouble_reports",
@@ -140,8 +140,8 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 		FeedTypeTroubleReportAdd,
 		&FeedTroubleReportAdd{
 			ID:         id,
-			Title:      report.Title,
-			ModifiedBy: report.Mods.Current().User,
+			Title:      troubleReport.Title,
+			ModifiedBy: troubleReport.Mods.Current().User,
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
@@ -152,30 +152,30 @@ func (tr *TroubleReports) Add(report *TroubleReport) error {
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
-	log.Printf("[TroubleReports] Updating trouble report, id: %d, report: %+v", id, report)
+func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
+	logger.TroubleReport().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
-	if report == nil {
+	if troubleReport == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
-	if err := report.Validate(); err != nil {
+	if err := troubleReport.Validate(); err != nil {
 		return err
 	}
 
-	linkedAttachments, err := json.Marshal(report.LinkedAttachments)
+	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
 		return WrapError(err, "failed to marshal linked attachments")
 	}
 
-	mods, err := json.Marshal(report.Mods)
+	mods, err := json.Marshal(troubleReport.Mods)
 	if err != nil {
 		return WrapError(err, "failed to marshal mods data")
 	}
 
 	_, err = tr.db.Exec(
 		updateTroubleReportQuery,
-		report.Title, report.Content, linkedAttachments, mods, id,
+		troubleReport.Title, troubleReport.Content, linkedAttachments, mods, id,
 	)
 	if err != nil {
 		return NewDatabaseError("update", "trouble_reports",
@@ -186,8 +186,8 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 		FeedTypeTroubleReportUpdate,
 		&FeedTroubleReportUpdate{
 			ID:         id,
-			Title:      report.Title,
-			ModifiedBy: report.Mods.Current().User,
+			Title:      troubleReport.Title,
+			ModifiedBy: troubleReport.Mods.Current().User,
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
@@ -199,7 +199,7 @@ func (tr *TroubleReports) Update(id int64, report *TroubleReport) error {
 
 // Remove deletes a trouble report by ID and generates an activity feed entry.
 func (tr *TroubleReports) Remove(id int64) error {
-	log.Printf("[TroubleReports] Removing trouble report, id: %d", id)
+	logger.TroubleReport().Info("Removing trouble report, id: %d", id)
 
 	report, _ := tr.Get(id)
 

@@ -3,7 +3,8 @@ package pgvis
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
+
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 )
 
 // FeedNotifier interface for handling feed update notifications
@@ -52,7 +53,7 @@ func (f *Feeds) SetNotifier(notifier FeedNotifier) {
 
 // List retrieves all feeds ordered by ID in descending order
 func (f *Feeds) List() ([]*Feed, error) {
-	log.Printf("[Feeds] Listing all feeds")
+	logger.Feed().Info("Listing all feeds")
 
 	rows, err := f.db.Query(selectAllFeedsQuery)
 	if err != nil {
@@ -65,7 +66,7 @@ func (f *Feeds) List() ([]*Feed, error) {
 
 // ListRange retrieves a specific range of feeds with pagination support
 func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
-	log.Printf("[Feeds] Listing range of feeds, offset: %d, limit: %d", offset, limit)
+	logger.Feed().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
 		return nil, NewValidationError("offset", "must be non-negative", offset)
@@ -88,7 +89,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 
 // Add creates a new feed entry in the database
 func (f *Feeds) Add(feed *Feed) error {
-	log.Printf("[Feeds] Adding feed: %+v", feed)
+	logger.Feed().Info("Adding feed: %+v", feed)
 
 	if feed == nil {
 		return NewValidationError("feed", "cannot be nil", nil)
@@ -117,7 +118,7 @@ func (f *Feeds) Add(feed *Feed) error {
 
 // Count returns the total number of feeds in the database
 func (f *Feeds) Count() (int, error) {
-	log.Printf("[Feeds] Counting feeds")
+	logger.Feed().Debug("Counting feeds")
 
 	var count int
 	err := f.db.QueryRow(countFeedsQuery).Scan(&count)
@@ -129,7 +130,7 @@ func (f *Feeds) Count() (int, error) {
 
 // DeleteBefore removes all feeds created before the specified timestamp
 func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
-	log.Printf("[Feeds] Deleting feeds before timestamp: %d", timestamp)
+	logger.Feed().Info("Deleting feeds before timestamp: %d", timestamp)
 
 	if timestamp <= 0 {
 		return 0, NewValidationError("timestamp", "must be positive", timestamp)
@@ -149,7 +150,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 
 // Get retrieves a specific feed by ID
 func (f *Feeds) Get(id int) (*Feed, error) {
-	log.Printf("[Feeds] Getting feed by ID: %d", id)
+	logger.Feed().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
 		return nil, NewValidationError("id", "must be positive", id)
@@ -168,7 +169,7 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 
 // Delete removes a specific feed by ID
 func (f *Feeds) Delete(id int) error {
-	log.Printf("[Feeds] Deleting feed by ID: %d", id)
+	logger.Feed().Info("Deleting feed by ID: %d", id)
 
 	if id <= 0 {
 		return NewValidationError("id", "must be positive", id)

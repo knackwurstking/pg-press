@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"log"
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -76,7 +76,7 @@ func (h *Handler) handleLogin(c echo.Context) error {
 func (h *Handler) handleLogout(c echo.Context) error {
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
 		if err := h.db.Cookies.Remove(cookie.Value); err != nil {
-			log.Printf("[Auth] Failed to remove cookie from database: %s", err)
+			logger.Auth().Error("Failed to remove cookie from database: %v", err)
 		}
 	}
 
@@ -102,7 +102,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 			return false
 		}
 
-		log.Printf("[Auth] Failed to get user from API key: %s", err)
+		logger.Auth().Error("Failed to get user from API key: %v", err)
 		return false
 	}
 
@@ -111,14 +111,14 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
-		log.Printf("[Auth] Removing existing authentication cookie")
+		logger.Auth().Info("Removing existing authentication cookie")
 
 		if err := h.db.Cookies.Remove(existingCookie.Value); err != nil {
-			log.Printf("[Auth] Failed to remove existing cookie: %s", err)
+			logger.Auth().Error("Failed to remove existing cookie: %v", err)
 		}
 	}
 
-	log.Printf("[Auth] Creating new session for user %s (Telegram ID: %d)",
+	logger.Auth().Info("Creating new session for user %s (Telegram ID: %d)",
 		user.UserName, user.TelegramID)
 
 	cookie := &http.Cookie{
@@ -136,7 +136,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	)
 
 	if err := h.db.Cookies.Add(sessionCookie); err != nil {
-		log.Printf("[Auth] Failed to create session: %s", err)
+		logger.Auth().Error("Failed to create session: %v", err)
 		return false
 	}
 

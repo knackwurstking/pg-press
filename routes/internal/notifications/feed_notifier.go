@@ -4,10 +4,11 @@ import (
 	"context"
 	"io"
 	"io/fs"
-	"log"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/knackwurstking/pg-vis/pgvis/logger"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/constants"
@@ -54,19 +55,19 @@ func NewFeedNotifier(db *pgvis.DB, templates fs.FS) *FeedNotifier {
 
 // Start begins the notification manager's main loop
 func (fn *FeedNotifier) Start(ctx context.Context) {
-	log.Printf("[FeedNotifier] Starting feed notification manager")
+	logger.Feed().Info("Starting feed notification manager")
 
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("[FeedNotifier] Shutting down feed notification manager")
+			logger.Feed().Info("Shutting down feed notification manager")
 			fn.closeAllConnections()
 			return
 		case conn := <-fn.register:
 			fn.mu.Lock()
 			fn.connections[conn] = true
 			fn.mu.Unlock()
-			log.Printf("[FeedNotifier] Registered new connection for user ID %d", conn.UserID)
+			logger.Feed().Info("Registered new connection for user ID %d", conn.UserID)
 
 			// Send initial feed counter to new connection
 			go fn.sendInitialFeedCounter(conn)
@@ -79,7 +80,7 @@ func (fn *FeedNotifier) Start(ctx context.Context) {
 				close(conn.Done)
 			}
 			fn.mu.Unlock()
-			log.Printf("[FeedNotifier] Unregistered connection for user ID %d", conn.UserID)
+			logger.Feed().Info("Unregistered connection for user ID %d", conn.UserID)
 
 		case <-fn.broadcast:
 			fn.broadcastToAllConnections()
@@ -110,9 +111,9 @@ func (fn *FeedNotifier) UnregisterConnection(conn *FeedConnection) {
 func (fn *FeedNotifier) NotifyNewFeed() {
 	select {
 	case fn.broadcast <- struct{}{}:
-		log.Printf("[FeedNotifier] Feed update notification queued")
+		logger.Feed().Info("Feed update notification queued")
 	default:
-		log.Printf("[FeedNotifier] Broadcast channel full, skipping notification")
+		logger.Feed().Warn("Broadcast channel full, skipping notification")
 	}
 }
 
@@ -120,7 +121,7 @@ func (fn *FeedNotifier) NotifyNewFeed() {
 func (fn *FeedNotifier) sendInitialFeedCounter(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
-		log.Printf("[FeedNotifier] Error rendering initial feed counter for user %d: %v", conn.UserID, err)
+		logger.Feed().Error("Error rendering initial feed counter for user %d: %v", conn.UserID, err)
 		return
 	}
 
@@ -131,7 +132,7 @@ func (fn *FeedNotifier) sendInitialFeedCounter(conn *FeedConnection) {
 		// Connection was closed
 		return
 	case <-time.After(30 * time.Second):
-		log.Printf("[FeedNotifier] Timeout sending initial feed counter to user %d", conn.UserID)
+		logger.Feed().Warn("Timeout sending initial feed counter to user %d", conn.UserID)
 	}
 }
 
@@ -144,7 +145,7 @@ func (fn *FeedNotifier) broadcastToAllConnections() {
 	}
 	fn.mu.RUnlock()
 
-	log.Printf("[FeedNotifier] Broadcasting feed counter update to %d connections", len(connections))
+	logger.Feed().Info("Broadcasting feed counter update to %d connections", len(connections))
 
 	for _, conn := range connections {
 		go fn.sendFeedCounterUpdate(conn)
@@ -155,7 +156,7 @@ func (fn *FeedNotifier) broadcastToAllConnections() {
 func (fn *FeedNotifier) sendFeedCounterUpdate(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
-		log.Printf("[FeedNotifier] Error rendering feed counter for user %d: %v", conn.UserID, err)
+		logger.Feed().Error("Error rendering feed counter for user %d: %v", conn.UserID, err)
 		return
 	}
 
@@ -166,7 +167,7 @@ func (fn *FeedNotifier) sendFeedCounterUpdate(conn *FeedConnection) {
 		// Connection was closed, unregister it
 		fn.UnregisterConnection(conn)
 	case <-time.After(30 * time.Second):
-		log.Printf("[FeedNotifier] Timeout sending feed counter update to user %d", conn.UserID)
+		logger.Feed().Warn("Timeout sending feed counter update to user %d", conn.UserID)
 		// Don't unregister on timeout, the connection might just be slow or suspended
 	}
 }
@@ -212,7 +213,7 @@ func (fn *FeedNotifier) closeAllConnections() {
 		delete(fn.connections, conn)
 	}
 
-	log.Printf("[FeedNotifier] Closed all WebSocket connections")
+	logger.Feed().Info("Closed all WebSocket connections")
 }
 
 // ConnectionCount returns the number of active connections
@@ -240,7 +241,7 @@ func (conn *FeedConnection) WritePump() {
 			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
 
 			if err := websocket.Message.Send(conn.Conn, string(message)); err != nil {
-				log.Printf("[FeedConnection] Error writing message to user %d: %v", conn.UserID, err)
+				logger.WebSocket().Error("Error writing message to user %d: %v", conn.UserID, err)
 				return
 			}
 
@@ -249,7 +250,7 @@ func (conn *FeedConnection) WritePump() {
 			// We'll send a simple ping message instead
 			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
 			if err := websocket.Message.Send(conn.Conn, "ping"); err != nil {
-				log.Printf("[FeedConnection] Error sending ping to user %d: %v", conn.UserID, err)
+				logger.WebSocket().Error("Error sending ping to user %d: %v", conn.UserID, err)
 				return
 			}
 
@@ -271,15 +272,15 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		err := websocket.Message.Receive(conn.Conn, &message)
 		if err != nil {
 			if err == io.EOF {
-				log.Printf("[FeedConnection] Connection closed normally for user %d", conn.UserID)
+				logger.WebSocket().Info("Connection closed normally for user %d", conn.UserID)
 			} else {
 				// Check if error is due to timeout or suspension-related issues
 				if isTemporaryError(err) {
-					log.Printf("[FeedConnection] Temporary error for user %d (possibly suspended): %v", conn.UserID, err)
+					logger.WebSocket().Warn("Temporary error for user %d (possibly suspended): %v", conn.UserID, err)
 					// Continue without breaking - browser might be suspended
 					continue
 				}
-				log.Printf("[FeedConnection] Error reading message from user %d: %v", conn.UserID, err)
+				logger.WebSocket().Error("Error reading message from user %d: %v", conn.UserID, err)
 			}
 			break
 		}
@@ -288,7 +289,7 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		if message == "ping" {
 			// Respond with pong
 			if err := websocket.Message.Send(conn.Conn, "pong"); err != nil {
-				log.Printf("[FeedConnection] Error sending pong to user %d: %v", conn.UserID, err)
+				logger.WebSocket().Error("Error sending pong to user %d: %v", conn.UserID, err)
 				break
 			}
 		} else if message == "pong" {
