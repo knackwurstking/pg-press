@@ -2,15 +2,16 @@ package notifications
 
 import (
 	"context"
+	"io"
 	"io/fs"
 	"log"
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/knackwurstking/pg-vis/routes/constants"
 	"github.com/knackwurstking/pg-vis/routes/internal/utils"
+	"golang.org/x/net/websocket"
 )
 
 // FeedConnection represents a WebSocket connection for feed updates
@@ -229,21 +230,24 @@ func (conn *FeedConnection) WritePump() {
 	for {
 		select {
 		case message, ok := <-conn.Send:
-			conn.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 			if !ok {
 				// The channel was closed
-				conn.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			if err := conn.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			// Set write deadline
+			conn.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+
+			if err := websocket.Message.Send(conn.Conn, string(message)); err != nil {
 				log.Printf("[FeedConnection] Error writing message to user %d: %v", conn.UserID, err)
 				return
 			}
 
 		case <-ticker.C:
+			// Send ping message - golang.org/x/net/websocket doesn't have built-in ping/pong
+			// We'll send a simple ping message instead
 			conn.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
-			if err := conn.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			if err := websocket.Message.Send(conn.Conn, "ping"); err != nil {
 				log.Printf("[FeedConnection] Error sending ping to user %d: %v", conn.UserID, err)
 				return
 			}
@@ -261,21 +265,70 @@ func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
 		conn.Conn.Close()
 	}()
 
-	conn.Conn.SetReadLimit(512)
+	// Set read deadline
 	conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-	conn.Conn.SetPongHandler(func(string) error {
-		conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
-		return nil
-	})
 
 	for {
-		_, _, err := conn.Conn.ReadMessage()
+		var message string
+		err := websocket.Message.Receive(conn.Conn, &message)
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("[FeedConnection] Unexpected close error for user %d: %v", conn.UserID, err)
+			if err == io.EOF {
+				log.Printf("[FeedConnection] Connection closed normally for user %d", conn.UserID)
+			} else {
+				log.Printf("[FeedConnection] Error reading message from user %d: %v", conn.UserID, err)
 			}
 			break
 		}
+
+		// Reset read deadline on successful message
+		conn.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+
+		// Handle ping/pong manually since golang.org/x/net/websocket doesn't have built-in support
+		if message == "ping" {
+			// Respond with pong
+			if err := websocket.Message.Send(conn.Conn, "pong"); err != nil {
+				log.Printf("[FeedConnection] Error sending pong to user %d: %v", conn.UserID, err)
+				break
+			}
+		} else if message == "pong" {
+			// Received pong response, connection is alive
+			continue
+		}
+
 		// Client sent a message, could trigger immediate update if needed
+		// For now, we just acknowledge that the connection is active
 	}
+}
+
+// CreateWebSocketHandler creates a WebSocket handler function for use with net/http
+func (fn *FeedNotifier) CreateWebSocketHandler(getUserFromRequest func(ws *websocket.Conn) (*pgvis.User, error)) websocket.Handler {
+	return websocket.Handler(func(ws *websocket.Conn) {
+		// Get user from request context
+		user, err := getUserFromRequest(ws)
+		if err != nil {
+			log.Printf("[WebSocket] User authentication failed: %v", err)
+			ws.Close()
+			return
+		}
+
+		log.Printf("[WebSocket] User authenticated: %s (LastFeed: %d)", user.UserName, user.LastFeed)
+
+		// Register the connection with the feed notifier
+		feedConn := fn.RegisterConnection(user.TelegramID, user.LastFeed, ws)
+		if feedConn == nil {
+			log.Printf("[WebSocket] Failed to register connection for user %s", user.UserName)
+			ws.Close()
+			return
+		}
+
+		log.Printf("[WebSocket] Connection registered for user %s", user.UserName)
+
+		// Start the write pump in a goroutine
+		go feedConn.WritePump()
+
+		// Start the read pump (this will block until connection closes)
+		feedConn.ReadPump(fn)
+
+		log.Printf("[WebSocket] Connection closed for user %s", user.UserName)
+	})
 }
