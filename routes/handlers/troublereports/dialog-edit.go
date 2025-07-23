@@ -1,3 +1,7 @@
+// TODO:
+//   - Update this dialog to allow uploading attachments, currently with a 10mb limit per attachment
+//   - Attachments order will be set per attachment ID value
+//   - Before submitting, the user should be allowed to reorder attachments manually
 package troublereports
 
 import (
