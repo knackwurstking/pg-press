@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.34";
+const VERSION = "v0.0.35";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -62,7 +62,8 @@ const STATIC_ASSETS = [
     "./bootstrap-icons.woff2",
 
     // JavaScript libraries
-    "./js/htmx.min.js",
+    "./js/htmx-v2.0.6.min.js",
+    "./js/htmx-ext-ws-v2.0.3.min.js",
 ];
 
 // Offline fallback pages
