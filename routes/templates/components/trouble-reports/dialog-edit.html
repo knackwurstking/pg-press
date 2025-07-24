@@ -152,11 +152,11 @@
         hx-swap="outerHTML"
         enctype="multipart/form-data"
         class="flex column gap">
-        
+
         <!-- Hidden field for attachment order -->
         <input type="hidden" name="attachment_order" id="attachment-order" value="">
-        
-        <div class="content flex-item flex column gap">
+
+        <div class="content flex-item flex column gap auto-scroll-y">
             <label for="title" class="flex column">
                 Titel
                 <input
@@ -169,7 +169,7 @@
                     {{end}} />
             </label>
 
-            <label for="content" class="flex-item flex column">
+            <label for="content" class="flex column">
                 Bericht
                 <textarea
                     name="content"
@@ -182,9 +182,9 @@
             </label>
 
             <!-- Attachments Section -->
-            <div class="attachments-container">
+            <div class="attachments-container flex-item">
                 <div class="attachments-label">Anhänge (max. 10MB pro Datei, max. 10 Dateien)</div>
-                
+
                 {{if .AttachmentError}}
                 <div class="attachment-error">{{.AttachmentError}}</div>
                 {{end}}
@@ -225,7 +225,7 @@
                 {{end}}
 
                 <!-- File Upload Area -->
-                <div class="file-input-area" 
+                <div class="file-input-area"
                      onclick="document.getElementById('attachments').click()"
                      ondrop="handleFileDrop(event)"
                      ondragover="handleDragOver(event)"
@@ -233,10 +233,10 @@
                     <i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
                     <div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
                     <div class="text-muted">Unterstützte Formate: Bilder, PDFs, Dokumente, Archive</div>
-                    <input type="file" 
-                           name="attachments" 
-                           id="attachments" 
-                           multiple 
+                    <input type="file"
+                           name="attachments"
+                           id="attachments"
+                           multiple
                            accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
                            onchange="handleFileSelect(event)">
                 </div>
@@ -301,7 +301,7 @@
             event.stopPropagation();
             const area = event.currentTarget;
             area.classList.remove('dragover');
-            
+
             const files = event.dataTransfer.files;
             document.getElementById('attachments').files = files;
             displayFilePreview(files);
@@ -324,11 +324,11 @@
 
             if (files.length > 0) {
                 previewArea.style.display = 'block';
-                
+
                 Array.from(files).forEach((file, index) => {
                     const sizeClass = file.size > 10 * 1024 * 1024 ? 'attachment-error' : 'text-muted';
                     const sizeText = file.size > 10 * 1024 * 1024 ? 'ZU GROSS!' : formatFileSize(file.size);
-                    
+
                     const item = document.createElement('div');
                     item.className = 'attachment-item';
                     item.innerHTML = `
@@ -354,13 +354,13 @@
         function removeFileFromPreview(index) {
             const fileInput = document.getElementById('attachments');
             const dt = new DataTransfer();
-            
+
             Array.from(fileInput.files).forEach((file, i) => {
                 if (i !== index) {
                     dt.items.add(file);
                 }
             });
-            
+
             fileInput.files = dt.files;
             displayFilePreview(fileInput.files);
         }
@@ -411,19 +411,19 @@
         document.querySelector('form').addEventListener('submit', function(e) {
             const files = document.getElementById('attachments').files;
             let hasOversizedFiles = false;
-            
+
             Array.from(files).forEach(file => {
                 if (file.size > 10 * 1024 * 1024) {
                     hasOversizedFiles = true;
                 }
             });
-            
+
             if (hasOversizedFiles) {
                 e.preventDefault();
                 alert('Einige Dateien sind zu groß. Die maximale Dateigröße beträgt 10MB.');
                 return false;
             }
-            
+
             const totalFiles = files.length + (document.querySelectorAll('#existing-attachments .attachment-item').length || 0);
             if (totalFiles > 10) {
                 e.preventDefault();
