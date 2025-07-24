@@ -67,7 +67,7 @@
 
                     <div id="existing-attachments">
                         {{range .LinkedAttachments}}
-                        <div class="attachment-item flex row gap" data-id="{{.ID}}">
+                        <div class="attachment-item" data-id="{{.ID}}">
                             <div class="attachment-info">
                                 <i class="bi bi-grip-vertical"></i>
 
@@ -89,20 +89,24 @@
                             <div class="attachment-actions">
                                 <button
                                     type="button"
-                                    class="secondary small"
+                                    class="secondary row gap"
                                     onclick="viewAttachment({{$.ID}}, '{{.ID}}')"
                                 >
-                                    <i class="bi bi-eye"></i>
-                                    Anzeigen
+                                    <small>
+                                        <i class="bi bi-eye"></i>
+                                        Anzeigen
+                                    </small>
                                 </button>
 
                                 <button
                                     type="button"
-                                    class="destructive small"
+                                    class="destructive row gap"
                                     onclick="deleteAttachment({{$.ID}}, '{{.ID}}')"
                                 >
-                                    <i class="bi bi-trash"></i>
-                                    Löschen
+                                    <small>
+                                        <i class="bi bi-trash"></i>
+                                        Löschen
+                                    </small>
                                 </button>
                             </div>
                         </div>
@@ -112,24 +116,31 @@
                 {{end}}
 
                 <!-- File Upload Area -->
-                <div class="file-input-area"
-                     onclick="document.getElementById('attachments').click()"
-                     ondrop="handleFileDrop(event)"
-                     ondragover="handleDragOver(event)"
-                     ondragleave="handleDragLeave(event)"
+                <div
+                    class="file-input-area"
+                    onclick="document.getElementById('attachments').click()"
+                    ondrop="handleFileDrop(event)"
+                    ondragover="handleDragOver(event)"
+                    ondragleave="handleDragLeave(event)"
                 >
-                    <i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
+                    <i
+                        class="bi bi-cloud-upload"
+                        style="font-size: 2em; margin-bottom: 8px;"
+                    ></i>
 
                     <div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
 
-                    <div class="text-muted">Unterstützte Formate: Bilder, PDFs, Dokumente, Archive</div>
+                    <div class="text-muted">
+                        Unterstützte Formate: Bilder, PDFs, Dokumente, Archive
+                    </div>
 
-                    <input type="file"
-                           name="attachments"
-                           id="attachments"
-                           multiple
-                           accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
-                           onchange="handleFileSelect(event)"
+                    <input
+                        type="file"
+                        name="attachments"
+                        id="attachments"
+                        multiple
+                        accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
+                        onchange="handleFileSelect(event)"
                     />
                 </div>
 
@@ -149,7 +160,7 @@
                 hx-target="#dialogEdit"
                 hx-swap="outerHTML"
                 type="button"
-                class="secondary flex row gap"
+                class="secondary flex gap"
             >
                 <i class="bi bi-x-circle"></i>
                 Schließen

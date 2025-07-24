@@ -2,6 +2,8 @@ document.querySelector("#dialogEdit").showModal();
 
 // Initialize variables and functions
 (function () {
+    const html = String.raw;
+
     // Local variables to avoid global conflicts
     let attachmentOrder = [];
     let selectedFiles = [];
@@ -94,16 +96,26 @@ document.querySelector("#dialogEdit").showModal();
                         : formatFileSize(file.size);
 
                 const item = document.createElement("div");
-                item.className = "attachment-item flex row gap";
-                item.innerHTML = `
+                item.className = "attachment-item";
+                item.innerHTML = html`
                     <div class="attachment-info">
                         <i class="bi bi-file-earmark attachment-icon"></i>
+
                         <span class="ellipsis">${file.name}</span>
+
                         <span class="${sizeClass}">(${sizeText})</span>
                     </div>
+
                     <div class="attachment-actions">
-                        <button type="button" class="destructive small" onclick="window.dialogEditFunctions.removeFileFromPreview(${index})">
-                            <i class="bi bi-trash"></i> Entfernen
+                        <button
+                            type="button"
+                            class="destructive flex gap"
+                            onclick="window.dialogEditFunctions.removeFileFromPreview(${index})"
+                        >
+                            <small>
+                                <i class="bi bi-trash"></i>
+                                Entfernen
+                            </small>
                         </button>
                     </div>
                 `;

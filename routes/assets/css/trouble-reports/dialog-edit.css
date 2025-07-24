@@ -46,6 +46,7 @@ textarea[name="content"] {
     border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
     border-radius: 4px;
     cursor: move;
+    gap: var(--ui-spacing);
 }
 
 .attachment-info {
@@ -111,9 +112,4 @@ textarea[name="content"] {
 .text-muted {
     color: var(--ui-muted-text, #666);
     font-size: 12px;
-}
-
-.small {
-    font-size: 11px;
-    padding: 2px 6px;
 }
