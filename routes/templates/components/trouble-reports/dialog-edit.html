@@ -33,7 +33,7 @@
         .attachments-section {
             max-height: 200px;
             overflow-y: auto;
-            border: 1px solid var(--border-color, #ccc);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 8px;
             margin-top: 8px;
@@ -311,11 +311,11 @@
             function updateFileInput() {
                 const fileInput = document.getElementById('attachments');
                 const dt = new DataTransfer();
-                
+
                 selectedFiles.forEach(file => {
                     dt.items.add(file);
                 });
-                
+
                 fileInput.files = dt.files;
             }
 
