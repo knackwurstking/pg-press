@@ -97,7 +97,7 @@
                                 <button
                                     type="button"
                                     class="secondary row gap"
-                                    onclick="viewAttachment({{$.ID}}, {{.GetID}})"
+                                    onclick="viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
                                 >
                                     <small>
                                         <i class="bi bi-eye"></i>
