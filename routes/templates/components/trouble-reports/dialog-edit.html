@@ -45,13 +45,9 @@
             justify-content: space-between;
             padding: 8px;
             margin: 4px 0;
-            background: var(--background-secondary, #f5f5f5);
+            border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
             border-radius: 4px;
             cursor: move;
-        }
-
-        .attachment-item:hover {
-            background: var(--background-hover, #e9e9e9);
         }
 
         .attachment-info {
@@ -59,6 +55,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            overflow: hidden;
         }
 
         .attachment-actions {
@@ -72,7 +69,7 @@
         }
 
         .file-input-area {
-            border: 2px dashed var(--border-color, #ccc);
+            border: 2px dashed var(--ui-border-color);
             border-radius: 4px;
             padding: 20px;
             text-align: center;
@@ -82,12 +79,11 @@
         }
 
         .file-input-area:hover {
-            border-color: var(--primary-color, #007bff);
+            border-color: var(--ui-info);
         }
 
         .file-input-area.dragover {
-            border-color: var(--primary-color, #007bff);
-            background: var(--background-hover, #f0f8ff);
+            border-color: var(--ui-info);
         }
 
         #attachments {
@@ -95,7 +91,7 @@
         }
 
         .attachment-error {
-            color: var(--error-color, #dc3545);
+            color: var(--ui-destructive);
             font-size: 12px;
             margin-top: 4px;
         }
@@ -114,30 +110,14 @@
             margin-top: 8px;
         }
 
-        .attachment-icon {
-            width: 16px;
-            height: 16px;
-        }
-
         .text-muted {
-            color: var(--text-muted, #666);
+            color: var(--ui-muted-text, #666);
             font-size: 12px;
         }
 
         .small {
             font-size: 11px;
             padding: 2px 6px;
-        }
-
-        .danger {
-            background-color: var(--danger-color, #dc3545);
-            color: white;
-            border: none;
-        }
-
-        .secondary {
-            background-color: var(--secondary-color, #6c757d);
-            color: white;
         }
     </style>
 
@@ -198,7 +178,7 @@
                     <div class="attachments-label">Vorhandene Anhänge:</div>
                     <div id="existing-attachments">
                         {{range .LinkedAttachments}}
-                        <div class="attachment-item" data-id="{{.ID}}">
+                        <div class="attachment-item flex row gap" data-id="{{.ID}}">
                             <div class="attachment-info">
                                 <i class="bi bi-grip-vertical"></i>
                                 {{if .IsImage}}
@@ -210,14 +190,14 @@
                                 {{else}}
                                 <i class="bi bi-file-earmark attachment-icon"></i>
                                 {{end}}
-                                <span>{{.ID}}</span>
+                                <span class="ellipsis">{{.ID}}</span>
                                 <span class="text-muted">({{.GetMimeType}})</span>
                             </div>
                             <div class="attachment-actions">
                                 <button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, '{{.ID}}')">
                                     <i class="bi bi-eye"></i> Anzeigen
                                 </button>
-                                <button type="button" class="danger small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
+                                <button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
                                     <i class="bi bi-trash"></i> Löschen
                                 </button>
                             </div>
@@ -275,122 +255,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        (() => {
-            document.querySelector("#dialogEdit").showModal();
+        document.querySelector("#dialogEdit").showModal();
 
+        // Initialize attachment order from existing attachments
+        function initializeAttachmentOrder() {
             // Attachment Management Functions
             let attachmentOrder = [];
 
-            // Initialize attachment order from existing attachments
-            function initializeAttachmentOrder() {
-                const existingAttachments = document.querySelectorAll('#existing-attachments .attachment-item');
-                attachmentOrder = Array.from(existingAttachments).map(item => item.dataset.id);
-                updateAttachmentOrderInput();
-            }
-
             // Update hidden input with current attachment order
-            function updateAttachmentOrderInput() {
+            const updateAttachmentOrderInput = () => {
                 document.getElementById('attachment-order').value = attachmentOrder.join(',');
-            }
-
-            // Handle file selection
-            function handleFileSelect(event) {
-                const files = event.target.files;
-                displayFilePreview(files);
-            }
-
-            // Handle drag and drop
-            function handleFileDrop(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                const area = event.currentTarget;
-                area.classList.remove('dragover');
-
-                const files = event.dataTransfer.files;
-                document.getElementById('attachments').files = files;
-                displayFilePreview(files);
-            }
-
-            function handleDragOver(event) {
-                event.preventDefault();
-                event.currentTarget.classList.add('dragover');
-            }
-
-            function handleDragLeave(event) {
-                event.currentTarget.classList.remove('dragover');
-            }
-
-            // Display file preview
-            function displayFilePreview(files) {
-                const previewArea = document.getElementById('file-preview');
-                const container = document.getElementById('new-attachments');
-                container.innerHTML = '';
-
-                if (files.length > 0) {
-                    previewArea.style.display = 'block';
-
-                    Array.from(files).forEach((file, index) => {
-                        const sizeClass = file.size > 10 * 1024 * 1024 ? 'attachment-error' : 'text-muted';
-                        const sizeText = file.size > 10 * 1024 * 1024 ? 'ZU GROSS!' : formatFileSize(file.size);
-
-                        const item = document.createElement('div');
-                        item.className = 'attachment-item';
-                        item.innerHTML = `
-                            <div class="attachment-info">
-                                <i class="bi bi-file-earmark attachment-icon"></i>
-                                <span>${file.name}</span>
-                                <span class="${sizeClass}">(${sizeText})</span>
-                            </div>
-                            <div class="attachment-actions">
-                                <button type="button" class="danger small" onclick="removeFileFromPreview(${index})">
-                                    <i class="bi bi-trash"></i> Entfernen
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(item);
-                    });
-                } else {
-                    previewArea.style.display = 'none';
-                }
-            }
-
-            // Remove file from preview
-            function removeFileFromPreview(index) {
-                const fileInput = document.getElementById('attachments');
-                const dt = new DataTransfer();
-
-                Array.from(fileInput.files).forEach((file, i) => {
-                    if (i !== index) {
-                        dt.items.add(file);
-                    }
-                });
-
-                fileInput.files = dt.files;
-                displayFilePreview(fileInput.files);
-            }
-
-            // Format file size
-            function formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            }
-
-            // View attachment
-            function viewAttachment(reportId, attachmentId) {
-                window.open(`./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, '_blank');
-            }
-
-            // Delete attachment
-            function deleteAttachment(reportId, attachmentId) {
-                if (confirm('Sind Sie sicher, dass Sie diesen Anhang löschen möchten?')) {
-                    htmx.ajax('DELETE', `./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, {
-                        target: '#dialogEdit',
-                        swap: 'outerHTML'
-                    });
-                }
             }
 
             // Initialize sortable for existing attachments
@@ -408,34 +282,138 @@
                 });
             }
 
-            // Initialize attachment order on load
-            initializeAttachmentOrder();
+            const existingAttachments = document.querySelectorAll('#existing-attachments .attachment-item');
+            attachmentOrder = Array.from(existingAttachments).map(item => item.dataset.id);
+            updateAttachmentOrderInput();
+        }
 
-            // Form validation
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const files = document.getElementById('attachments').files;
-                let hasOversizedFiles = false;
+        // Handle file selection
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            displayFilePreview(files);
+        }
 
-                Array.from(files).forEach(file => {
-                    if (file.size > 10 * 1024 * 1024) {
-                        hasOversizedFiles = true;
-                    }
+        // Handle drag and drop
+        function handleFileDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const area = event.currentTarget;
+            area.classList.remove('dragover');
+
+            const files = event.dataTransfer.files;
+            document.getElementById('attachments').files = files;
+            displayFilePreview(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        // Display file preview
+        function displayFilePreview(files) {
+            const previewArea = document.getElementById('file-preview');
+            const container = document.getElementById('new-attachments');
+            container.innerHTML = '';
+
+            if (files.length > 0) {
+                previewArea.style.display = 'block';
+
+                Array.from(files).forEach((file, index) => {
+                    const sizeClass = file.size > 10 * 1024 * 1024 ? 'attachment-error' : 'text-muted';
+                    const sizeText = file.size > 10 * 1024 * 1024 ? 'ZU GROSS!' : formatFileSize(file.size);
+
+                    const item = document.createElement('div');
+                    item.className = 'attachment-item flex row gap';
+                    item.innerHTML = `
+                        <div class="attachment-info">
+                            <i class="bi bi-file-earmark attachment-icon"></i>
+                            <span class="ellipsis">${file.name}</span>
+                            <span class="${sizeClass}">(${sizeText})</span>
+                        </div>
+                        <div class="attachment-actions">
+                            <button type="button" class="destructive small" onclick="removeFileFromPreview(${index})">
+                                <i class="bi bi-trash"></i> Entfernen
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(item);
                 });
+            } else {
+                previewArea.style.display = 'none';
+            }
+        }
 
-                if (hasOversizedFiles) {
-                    e.preventDefault();
-                    alert('Einige Dateien sind zu groß. Die maximale Dateigröße beträgt 10MB.');
-                    return false;
-                }
+        // Remove file from preview
+        function removeFileFromPreview(index) {
+            const fileInput = document.getElementById('attachments');
+            const dt = new DataTransfer();
 
-                const totalFiles = files.length + (document.querySelectorAll('#existing-attachments .attachment-item').length || 0);
-                if (totalFiles > 10) {
-                    e.preventDefault();
-                    alert('Zu viele Anhänge. Maximal 10 Anhänge sind erlaubt.');
-                    return false;
+            Array.from(fileInput.files).forEach((file, i) => {
+                if (i !== index) {
+                    dt.items.add(file);
                 }
             });
-        })();
+
+            fileInput.files = dt.files;
+            displayFilePreview(fileInput.files);
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // View attachment
+        function viewAttachment(reportId, attachmentId) {
+            window.open(`./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, '_blank');
+        }
+
+        // Delete attachment
+        function deleteAttachment(reportId, attachmentId) {
+            if (confirm('Sind Sie sicher, dass Sie diesen Anhang löschen möchten?')) {
+                htmx.ajax('DELETE', `./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, {
+                    target: '#dialogEdit',
+                    swap: 'outerHTML'
+                });
+            }
+        }
+
+        // Initialize attachment order on load
+        initializeAttachmentOrder();
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const files = document.getElementById('attachments').files;
+            let hasOversizedFiles = false;
+
+            Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    hasOversizedFiles = true;
+                }
+            });
+
+            if (hasOversizedFiles) {
+                e.preventDefault();
+                alert('Einige Dateien sind zu groß. Die maximale Dateigröße beträgt 10MB.');
+                return false;
+            }
+
+            const totalFiles = files.length + (document.querySelectorAll('#existing-attachments .attachment-item').length || 0);
+            if (totalFiles > 10) {
+                e.preventDefault();
+                alert('Zu viele Anhänge. Maximal 10 Anhänge sind erlaubt.');
+                return false;
+            }
+        });
     </script>
 </dialog>
 {{else}}
