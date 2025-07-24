@@ -25,3 +25,6 @@ dev:
 
 build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
+
+count:
+	find . | grep -e '\.go$$' -e '\.html$$' -e '\.css$$' -e '\.js$$' | xargs cat | wc -l
