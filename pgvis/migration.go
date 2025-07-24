@@ -34,6 +34,21 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 		return nil
 	}
 
+	// Check if there are any trouble reports at all
+	var totalCount int
+	err = m.db.QueryRow("SELECT COUNT(*) FROM trouble_reports").Scan(&totalCount)
+	if err != nil {
+		return NewDatabaseError("count", "trouble_reports",
+			"failed to count trouble reports", err)
+	}
+
+	if totalCount == 0 {
+		logger.TroubleReport().Info("No trouble reports found - skipping migration")
+		return nil
+	}
+
+	logger.TroubleReport().Info("Found %d trouble reports, proceeding with migration", totalCount)
+
 	// Start transaction for migration
 	tx, err := m.db.Begin()
 	if err != nil {
@@ -66,29 +81,61 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 			continue
 		}
 
-		// Parse existing attachments
-		var existingAttachments []*Attachment
-		if err := json.Unmarshal(linkedAttachmentsJSON, &existingAttachments); err != nil {
-			logger.TroubleReport().Error("Failed to unmarshal attachments for report %d: %v", reportID, err)
+		// Check if already migrated by trying to unmarshal as array of IDs first
+		var attachmentIDs []int64
+		if err := json.Unmarshal(linkedAttachmentsJSON, &attachmentIDs); err == nil {
+			// Already migrated - data is array of IDs
+			logger.TroubleReport().Debug("Report %d already migrated (contains IDs)", reportID)
 			continue
 		}
 
-		// Skip if no attachments or if already migrated (contains only IDs)
+		// Try to parse as old format (full attachment objects)
+		var existingAttachments []*Attachment
+		if err := json.Unmarshal(linkedAttachmentsJSON, &existingAttachments); err != nil {
+			// Check if it's just an empty array or invalid JSON
+			var rawArray []interface{}
+			if err2 := json.Unmarshal(linkedAttachmentsJSON, &rawArray); err2 == nil {
+				if len(rawArray) == 0 {
+					logger.TroubleReport().Debug("Report %d has empty attachments array", reportID)
+					continue
+				}
+				logger.TroubleReport().Error("Report %d has unexpected attachment format: %s", reportID, string(linkedAttachmentsJSON))
+			} else {
+				logger.TroubleReport().Error("Failed to unmarshal attachments for report %d: %v, data: %s", reportID, err, string(linkedAttachmentsJSON))
+			}
+			continue
+		}
+
+		// Skip if no attachments
 		if len(existingAttachments) == 0 {
 			continue
 		}
 
-		// Check if already migrated by looking at first attachment structure
-		if len(existingAttachments) > 0 && existingAttachments[0].Data == nil {
-			logger.TroubleReport().Debug("Report %d already migrated", reportID)
+		// Validate that we have old-format attachments with data
+		hasOldFormatData := false
+		for _, att := range existingAttachments {
+			if att != nil && att.Data != nil && len(att.Data) > 0 {
+				hasOldFormatData = true
+				break
+			}
+		}
+
+		if !hasOldFormatData {
+			logger.TroubleReport().Debug("Report %d has no attachment data to migrate", reportID)
 			continue
 		}
 
 		// Migrate attachments to separate table
-		var attachmentIDs []int64
+		var newAttachmentIDs []int64
 		for _, attachment := range existingAttachments {
-			if attachment == nil || attachment.Data == nil {
+			if attachment == nil || attachment.Data == nil || len(attachment.Data) == 0 {
 				continue
+			}
+
+			// Validate attachment before migration
+			if attachment.MimeType == "" {
+				logger.TroubleReport().Warn("Attachment for report %d has empty MIME type, setting default", reportID)
+				attachment.MimeType = "application/octet-stream"
 			}
 
 			// Insert attachment into attachments table
@@ -107,15 +154,16 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 				continue
 			}
 
-			attachmentIDs = append(attachmentIDs, attachmentID)
+			newAttachmentIDs = append(newAttachmentIDs, attachmentID)
 		}
 
-		if len(attachmentIDs) == 0 {
+		if len(newAttachmentIDs) == 0 {
+			logger.TroubleReport().Debug("No valid attachments to migrate for report %d", reportID)
 			continue
 		}
 
 		// Update trouble report with attachment IDs
-		attachmentIDsJSON, err := json.Marshal(attachmentIDs)
+		attachmentIDsJSON, err := json.Marshal(newAttachmentIDs)
 		if err != nil {
 			logger.TroubleReport().Error("Failed to marshal attachment IDs for report %d: %v", reportID, err)
 			continue
@@ -130,7 +178,7 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 
 		// Update attachment references in mods
 		for i := range mods {
-			mods[i].Data.LinkedAttachments = attachmentIDs
+			mods[i].Data.LinkedAttachments = newAttachmentIDs
 		}
 
 		updatedModsJSON, err := json.Marshal(mods)
@@ -150,7 +198,7 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 		}
 
 		migratedCount++
-		logger.TroubleReport().Debug("Migrated report %d with %d attachments", reportID, len(attachmentIDs))
+		logger.TroubleReport().Debug("Migrated report %d with %d attachments", reportID, len(newAttachmentIDs))
 	}
 
 	if err := rows.Err(); err != nil {
@@ -170,37 +218,62 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 
 // checkIfMigrationNeeded checks if there are any trouble reports with BLOB attachment data
 func (m *Migration) checkIfMigrationNeeded() (bool, error) {
-	// Check if there are any trouble reports with non-empty linked_attachments that contain BLOB data
-	var count int
-	err := m.db.QueryRow(`
-		SELECT COUNT(*)
+	// Get a sample of trouble reports with non-empty linked_attachments
+	rows, err := m.db.Query(`
+		SELECT linked_attachments
 		FROM trouble_reports
 		WHERE linked_attachments != '[]'
 		  AND linked_attachments != ''
-		  AND linked_attachments NOT LIKE '[%]'
-	`).Scan(&count)
-
+		  AND linked_attachments IS NOT NULL
+		LIMIT 10
+	`)
 	if err != nil {
-		// If there's an error, assume migration is needed to be safe
-		logger.TroubleReport().Warn("Could not determine if migration is needed: %v", err)
-		return true, nil
+		logger.TroubleReport().Warn("Could not query for migration check: %v", err)
+		return true, nil // Assume migration needed to be safe
+	}
+	defer rows.Close()
+
+	needsMigration := false
+	for rows.Next() {
+		var linkedAttachmentsJSON []byte
+		if err := rows.Scan(&linkedAttachmentsJSON); err != nil {
+			continue
+		}
+
+		// Try to unmarshal as array of int64 (new format)
+		var attachmentIDs []int64
+		if err := json.Unmarshal(linkedAttachmentsJSON, &attachmentIDs); err == nil {
+			// This is already in new format, continue checking others
+			continue
+		}
+
+		// Try to unmarshal as array of attachment objects (old format)
+		var attachments []*Attachment
+		if err := json.Unmarshal(linkedAttachmentsJSON, &attachments); err == nil {
+			// Check if any attachment has actual data (indicating old format)
+			for _, att := range attachments {
+				if att != nil && att.Data != nil && len(att.Data) > 0 {
+					needsMigration = true
+					break
+				}
+			}
+			if needsMigration {
+				break
+			}
+		} else {
+			// Unknown format, assume migration needed
+			logger.TroubleReport().Debug("Unknown attachment format found, assuming migration needed")
+			needsMigration = true
+			break
+		}
 	}
 
-	// Also check for any records that might have the old BLOB format
-	var blobCount int
-	err = m.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM trouble_reports
-		WHERE typeof(linked_attachments) = 'blob'
-	`).Scan(&blobCount)
-
-	if err != nil {
-		// If there's an error checking for blobs, check for any non-empty attachments
-		logger.TroubleReport().Debug("Could not check for BLOB attachments: %v", err)
-		return count > 0, nil
+	if err := rows.Err(); err != nil {
+		logger.TroubleReport().Warn("Error during migration check iteration: %v", err)
+		return true, nil // Assume migration needed to be safe
 	}
 
-	return count > 0 || blobCount > 0, nil
+	return needsMigration, nil
 }
 
 // MigrateAttachmentColumnType migrates the linked_attachments column from BLOB to TEXT
@@ -304,5 +377,97 @@ func (m *Migration) RunAllMigrations() error {
 	}
 
 	logger.TroubleReport().Info("All migrations completed successfully")
+	return nil
+}
+
+// DiagnoseAttachmentData provides diagnostic information about attachment data in the database
+func (m *Migration) DiagnoseAttachmentData() error {
+	logger.TroubleReport().Info("Starting attachment data diagnosis")
+
+	// Get sample of trouble reports with attachment data
+	rows, err := m.db.Query(`
+		SELECT id, title, linked_attachments
+		FROM trouble_reports
+		WHERE linked_attachments != '[]'
+		  AND linked_attachments != ''
+		  AND linked_attachments IS NOT NULL
+		LIMIT 5
+	`)
+	if err != nil {
+		return NewDatabaseError("select", "trouble_reports",
+			"failed to query for diagnosis", err)
+	}
+	defer rows.Close()
+
+	var reportCount int
+	for rows.Next() {
+		var reportID int64
+		var title string
+		var linkedAttachmentsJSON []byte
+
+		if err := rows.Scan(&reportID, &title, &linkedAttachmentsJSON); err != nil {
+			logger.TroubleReport().Error("Failed to scan report for diagnosis: %v", err)
+			continue
+		}
+
+		reportCount++
+		logger.TroubleReport().Info("=== Report %d: %s ===", reportID, title)
+		logger.TroubleReport().Info("Raw attachment data: %s", string(linkedAttachmentsJSON))
+
+		// Try different parsing approaches
+		var attachmentIDs []int64
+		if err := json.Unmarshal(linkedAttachmentsJSON, &attachmentIDs); err == nil {
+			logger.TroubleReport().Info("✅ Successfully parsed as int64 array: %v", attachmentIDs)
+		} else {
+			logger.TroubleReport().Info("❌ Failed to parse as int64 array: %v", err)
+
+			var attachments []*Attachment
+			if err := json.Unmarshal(linkedAttachmentsJSON, &attachments); err == nil {
+				logger.TroubleReport().Info("✅ Successfully parsed as Attachment array: %d items", len(attachments))
+				for i, att := range attachments {
+					if att == nil {
+						logger.TroubleReport().Info("  [%d] nil attachment", i)
+						continue
+					}
+					dataSize := 0
+					if att.Data != nil {
+						dataSize = len(att.Data)
+					}
+					logger.TroubleReport().Info("  [%d] ID: %s, MimeType: %s, DataSize: %d", i, att.ID, att.MimeType, dataSize)
+				}
+			} else {
+				logger.TroubleReport().Info("❌ Failed to parse as Attachment array: %v", err)
+
+				var rawData interface{}
+				if err := json.Unmarshal(linkedAttachmentsJSON, &rawData); err == nil {
+					logger.TroubleReport().Info("✅ Successfully parsed as generic interface: %T", rawData)
+				} else {
+					logger.TroubleReport().Info("❌ Failed to parse as any JSON: %v", err)
+				}
+			}
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return NewDatabaseError("select", "trouble_reports",
+			"error during diagnosis iteration", err)
+	}
+
+	if reportCount == 0 {
+		logger.TroubleReport().Info("No trouble reports with attachment data found")
+	} else {
+		logger.TroubleReport().Info("Diagnosed %d trouble reports", reportCount)
+	}
+
+	// Check attachments table
+	var attachmentCount int
+	err = m.db.QueryRow("SELECT COUNT(*) FROM attachments").Scan(&attachmentCount)
+	if err != nil {
+		logger.TroubleReport().Warn("Could not count attachments table: %v", err)
+	} else {
+		logger.TroubleReport().Info("Attachments table contains %d records", attachmentCount)
+	}
+
+	logger.TroubleReport().Info("Attachment data diagnosis completed")
 	return nil
 }
