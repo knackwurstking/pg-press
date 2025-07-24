@@ -21,6 +21,7 @@ const (
 	TroubleReportsDataComponentTemplatePath          = "templates/components/trouble-reports/data.html"
 	TroubleReportsModificationsComponentTemplatePath = "templates/components/trouble-reports/modifications.html"
 	TroubleReportsDialogEditComponentTemplatePath    = "templates/components/trouble-reports/dialog-edit.html"
+	AttachmentsSectionComponentTemplatePath          = "templates/components/attachments/section.html"
 )
 
 // Template sets for common page combinations

@@ -1,6 +1,7 @@
 package troublereports
 
 import (
+	"io/fs"
 	"net/http"
 
 	"github.com/knackwurstking/pg-vis/pgvis"
@@ -10,12 +11,25 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type TroubleReportsTemplateData struct {
+type TemplateData struct {
 	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
 	User           *pgvis.User            `json:"user"`
 }
 
-func (h *Handler) handleGetData(c echo.Context) error {
+type DataHandler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
+}
+
+func (h *DataHandler) RegisterRoutes(e *echo.Echo) {
+	dataPath := h.serverPathPrefix + "/trouble-reports/data"
+
+	e.GET(dataPath, h.handleGetData)
+	e.DELETE(dataPath, h.handleDeleteData)
+}
+
+func (h *DataHandler) handleGetData(c echo.Context) error {
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
@@ -28,7 +42,7 @@ func (h *Handler) handleGetData(c echo.Context) error {
 
 	return utils.HandleTemplate(
 		c,
-		TroubleReportsTemplateData{
+		TemplateData{
 			TroubleReports: trs,
 			User:           user,
 		},
@@ -39,7 +53,7 @@ func (h *Handler) handleGetData(c echo.Context) error {
 	)
 }
 
-func (h *Handler) handleDeleteData(c echo.Context) error {
+func (h *DataHandler) handleDeleteData(c echo.Context) error {
 	id, herr := utils.ParseInt64Query(c, "id")
 	if herr != nil {
 		return herr

@@ -26,43 +26,45 @@ type Handler struct {
 	db               *pgvis.DB
 	serverPathPrefix string
 	templates        fs.FS
+
+	dialogEditHandler    *DialogEditHandler
+	dataHandler          *DataHandler
+	modificationsHandler *ModificationsHandler
+	attachmentsHandler   *AttachmentsHandler
 }
 
 func NewHandler(db *pgvis.DB, serverPathPrefix string, templates fs.FS) *Handler {
+	dialogEditHandler := &DialogEditHandler{db, serverPathPrefix, templates}
+
 	return &Handler{
 		db:               db,
 		serverPathPrefix: serverPathPrefix,
 		templates:        templates,
+
+		dialogEditHandler:    dialogEditHandler,
+		dataHandler:          &DataHandler{db, serverPathPrefix, templates},
+		modificationsHandler: &ModificationsHandler{db, serverPathPrefix, templates},
+
+		attachmentsHandler: &AttachmentsHandler{
+			db:                db,
+			serverPathPrefix:  serverPathPrefix,
+			templates:         templates,
+			dialogEditHandler: dialogEditHandler,
+		},
 	}
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.serverPathPrefix+"/trouble-reports", h.handleMainPage)
 
-	editDialogPath := h.serverPathPrefix + "/trouble-reports/dialog-edit"
-	e.GET(editDialogPath, func(c echo.Context) error {
-		return h.handleGetDialogEdit(c, nil)
-	})
-	e.POST(editDialogPath, h.handlePostDialogEdit)
-	e.PUT(editDialogPath, h.handlePutDialogEdit)
+	h.dialogEditHandler.RegisterRoutes(e)
 
-	dataPath := h.serverPathPrefix + "/trouble-reports/data"
-	e.GET(dataPath, h.handleGetData)
-	e.DELETE(dataPath, h.handleDeleteData)
+	h.dataHandler.RegisterRoutes(e)
 
-	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
-	e.GET(modificationsPath, func(c echo.Context) error {
-		return h.handleGetModifications(c, nil)
-	})
-	e.POST(modificationsPath, h.handlePostModifications)
+	h.modificationsHandler.RegisterRoutes(e)
 
 	// Attachment management routes
-	attachmentReorderPath := h.serverPathPrefix + "/trouble-reports/attachments/reorder"
-	e.POST(attachmentReorderPath, h.handlePostAttachmentReorder)
-
-	attachmentPath := h.serverPathPrefix + "/trouble-reports/attachments"
-	e.GET(attachmentPath, h.handleGetAttachment)
-	e.DELETE(attachmentPath, h.handleDeleteAttachment)
+	h.attachmentsHandler.RegisterRoutes(e)
 }
 
 func (h *Handler) handleMainPage(c echo.Context) error {

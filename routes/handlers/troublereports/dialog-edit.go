@@ -1,13 +1,9 @@
-// TODO:
-//   - Update this dialog to allow uploading attachments, currently with a 10mb limit per attachment
-//   - Attachments order will be set per attachment ID value
-//   - Before submitting, the user should be allowed to reorder attachments manually
 package troublereports
 
 import (
 	"fmt"
-	"html/template"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -21,7 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type EditDialogTemplateData struct {
+type DialogEditTemplateData struct {
 	ID                int                 `json:"id"`
 	Submitted         bool                `json:"submitted"`
 	Title             string              `json:"title"`
@@ -32,9 +28,26 @@ type EditDialogTemplateData struct {
 	AttachmentError   string              `json:"attachment_error,omitempty"`
 }
 
-func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTemplateData) *echo.HTTPError {
+type DialogEditHandler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
+}
+
+func (h *DialogEditHandler) RegisterRoutes(e *echo.Echo) {
+	editDialogPath := h.serverPathPrefix + "/trouble-reports/dialog-edit"
+
+	e.GET(editDialogPath, func(c echo.Context) error {
+		return h.handleGetDialogEdit(c, nil)
+	})
+
+	e.POST(editDialogPath, h.handlePostDialogEdit)
+	e.PUT(editDialogPath, h.handlePutDialogEdit)
+}
+
+func (h *DialogEditHandler) handleGetDialogEdit(c echo.Context, pageData *DialogEditTemplateData) *echo.HTTPError {
 	if pageData == nil {
-		pageData = &EditDialogTemplateData{}
+		pageData = &DialogEditTemplateData{}
 	}
 
 	if c.QueryParam(constants.QueryParamCancel) == constants.TrueValue {
@@ -69,8 +82,8 @@ func (h *Handler) handleGetDialogEdit(c echo.Context, pageData *EditDialogTempla
 	)
 }
 
-func (h *Handler) handlePostDialogEdit(c echo.Context) error {
-	dialogEditData := &EditDialogTemplateData{
+func (h *DialogEditHandler) handlePostDialogEdit(c echo.Context) error {
+	dialogEditData := &DialogEditTemplateData{
 		Submitted: true,
 	}
 
@@ -109,7 +122,7 @@ func (h *Handler) handlePostDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, dialogEditData)
 }
 
-func (h *Handler) handlePutDialogEdit(c echo.Context) error {
+func (h *DialogEditHandler) handlePutDialogEdit(c echo.Context) error {
 	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
@@ -125,7 +138,7 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	dialogEditData := &EditDialogTemplateData{
+	dialogEditData := &DialogEditTemplateData{
 		Submitted:         true,
 		ID:                int(id),
 		Title:             title,
@@ -159,7 +172,7 @@ func (h *Handler) handlePutDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, dialogEditData)
 }
 
-func (h *Handler) validateDialogEditFormData(ctx echo.Context) (title, content string, attachments []*pgvis.Attachment, httpErr *echo.HTTPError) {
+func (h *DialogEditHandler) validateDialogEditFormData(ctx echo.Context) (title, content string, attachments []*pgvis.Attachment, httpErr *echo.HTTPError) {
 	var err error
 
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
@@ -187,7 +200,7 @@ func (h *Handler) validateDialogEditFormData(ctx echo.Context) (title, content s
 }
 
 // processAttachments handles file uploads and existing attachment reordering
-func (h *Handler) processAttachments(ctx echo.Context) ([]*pgvis.Attachment, error) {
+func (h *DialogEditHandler) processAttachments(ctx echo.Context) ([]*pgvis.Attachment, error) {
 	var attachments []*pgvis.Attachment
 
 	// Get existing attachments if we're editing an existing trouble report
@@ -257,182 +270,8 @@ func (h *Handler) processAttachments(ctx echo.Context) ([]*pgvis.Attachment, err
 	return attachments, nil
 }
 
-// handlePostAttachmentReorder handles reordering of attachments
-func (h *Handler) handlePostAttachmentReorder(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
-	}
-
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
-	}
-
-	// Get the new order from form data
-	newOrder := c.FormValue("new_order")
-	if newOrder == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing new_order parameter")
-	}
-
-	// Parse the new order (comma-separated attachment IDs)
-	orderParts := strings.Split(newOrder, ",")
-
-	// Get existing trouble report
-	tr, err := h.db.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Reorder attachments based on the new order
-	reorderedAttachments := make([]*pgvis.Attachment, 0, len(tr.LinkedAttachments))
-	for _, attachmentID := range orderParts {
-		attachmentID = strings.TrimSpace(attachmentID)
-		if attachmentID == "" {
-			continue
-		}
-
-		// Find the attachment with this ID
-		for _, attachment := range tr.LinkedAttachments {
-			if attachment.ID == attachmentID {
-				reorderedAttachments = append(reorderedAttachments, attachment)
-				break
-			}
-		}
-	}
-
-	// Update the trouble report with reordered attachments
-	tr.LinkedAttachments = reorderedAttachments
-	tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}))
-
-	if err := h.db.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Return updated dialog
-	pageData := &EditDialogTemplateData{
-		Submitted:         true, // Prevent reloading from database
-		ID:                int(id),
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}
-
-	return h.handleGetDialogEdit(c, pageData)
-}
-
-// handleDeleteAttachment handles deletion of a specific attachment
-func (h *Handler) handleDeleteAttachment(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
-	}
-
-	attachmentID := c.QueryParam("attachment_id")
-	if attachmentID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
-	}
-
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
-	}
-
-	// Get existing trouble report
-	tr, err := h.db.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Find and remove the attachment
-	newAttachments := make([]*pgvis.Attachment, 0, len(tr.LinkedAttachments))
-	found := false
-
-	// Trim whitespace from attachment ID to avoid comparison issues
-	attachmentID = strings.TrimSpace(attachmentID)
-
-	for _, attachment := range tr.LinkedAttachments {
-		trimmedAttachmentID := strings.TrimSpace(attachment.ID)
-		if trimmedAttachmentID != attachmentID {
-			newAttachments = append(newAttachments, attachment)
-		} else {
-			found = true
-		}
-	}
-
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound, "attachment not found")
-	}
-
-	// Update the trouble report
-	tr.LinkedAttachments = newAttachments
-	tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}))
-
-	if err := h.db.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Return only the attachments section HTML
-	return h.renderAttachmentsSection(c, int(id), tr.LinkedAttachments)
-}
-
-// handleGetAttachment handles downloading/viewing of attachments
-func (h *Handler) handleGetAttachment(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
-	}
-
-	attachmentID := c.QueryParam("attachment_id")
-	if attachmentID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
-	}
-
-	// Get trouble report
-	tr, err := h.db.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Find the attachment
-	var attachment *pgvis.Attachment
-	for _, att := range tr.LinkedAttachments {
-		if att.ID == attachmentID {
-			attachment = att
-			break
-		}
-	}
-
-	if attachment == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "attachment not found")
-	}
-
-	// Set appropriate headers
-	c.Response().Header().Set("Content-Type", attachment.MimeType)
-	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
-
-	// Try to determine filename from attachment ID
-	filename := attachment.ID
-	if ext := attachment.GetFileExtension(); ext != "" {
-		if !strings.HasSuffix(filename, ext) {
-			filename += ext
-		}
-	}
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-
-	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
-}
-
 // processFileUpload processes a single uploaded file
-func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader, index int) (*pgvis.Attachment, error) {
+func (h *DialogEditHandler) processFileUpload(fileHeader *multipart.FileHeader, index int) (*pgvis.Attachment, error) {
 	if fileHeader.Size > pgvis.MaxAttachmentDataSize {
 		return nil, fmt.Errorf("file %s is too large (max 10MB)", fileHeader.Filename)
 	}
@@ -496,7 +335,7 @@ func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader, index int)
 }
 
 // sanitizeFilename removes or replaces invalid characters from filename
-func (h *Handler) sanitizeFilename(filename string) string {
+func (h *DialogEditHandler) sanitizeFilename(filename string) string {
 	// Remove file extension for ID generation
 	if idx := strings.LastIndex(filename, "."); idx > 0 {
 		filename = filename[:idx]
@@ -527,7 +366,7 @@ func (h *Handler) sanitizeFilename(filename string) string {
 }
 
 // getMimeTypeFromFilename tries to determine MIME type from file extension
-func (h *Handler) getMimeTypeFromFilename(filename string) string {
+func (h *DialogEditHandler) getMimeTypeFromFilename(filename string) string {
 	ext := strings.ToLower(filename)
 	if idx := strings.LastIndex(ext, "."); idx >= 0 {
 		ext = ext[idx:]
@@ -575,84 +414,4 @@ func (h *Handler) getMimeTypeFromFilename(filename string) string {
 
 	// Default fallback
 	return "application/octet-stream"
-}
-
-// renderAttachmentsSection renders only the attachments section HTML
-func (h *Handler) renderAttachmentsSection(c echo.Context, reportID int, attachments []*pgvis.Attachment) error {
-	data := struct {
-		ID                int                 `json:"id"`
-		LinkedAttachments []*pgvis.Attachment `json:"linked_attachments"`
-	}{
-		ID:                reportID,
-		LinkedAttachments: attachments,
-	}
-
-	// Return just the attachments section content
-	attachmentsSectionHTML := `
-		<div class="attachments-label">Anhänge (max. 10MB pro Datei, max. 10 Dateien)</div>
-
-		{{if .LinkedAttachments}}
-		<div class="attachments-section">
-			<div class="attachments-label">Vorhandene Anhänge:</div>
-			<div id="existing-attachments">
-				{{range .LinkedAttachments}}
-				<div class="attachment-item flex row gap" data-id="{{.ID}}">
-					<div class="attachment-info">
-						<i class="bi bi-grip-vertical"></i>
-						{{if .IsImage}}
-						<i class="bi bi-image attachment-icon"></i>
-						{{else if .IsDocument}}
-						<i class="bi bi-file-text attachment-icon"></i>
-						{{else if .IsArchive}}
-						<i class="bi bi-file-zip attachment-icon"></i>
-						{{else}}
-						<i class="bi bi-file-earmark attachment-icon"></i>
-						{{end}}
-						<span class="ellipsis">{{.ID}}</span>
-						<span class="text-muted">({{.GetMimeType}})</span>
-					</div>
-					<div class="attachment-actions">
-						<button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, '{{.ID}}')">
-							<i class="bi bi-eye"></i> Anzeigen
-						</button>
-						<button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
-							<i class="bi bi-trash"></i> Löschen
-						</button>
-					</div>
-				</div>
-				{{end}}
-			</div>
-		</div>
-		{{end}}
-
-		<!-- File Upload Area -->
-		<div class="file-input-area"
-			 onclick="document.getElementById('attachments').click()"
-			 ondrop="handleFileDrop(event)"
-			 ondragover="handleDragOver(event)"
-			 ondragleave="handleDragLeave(event)">
-			<i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
-			<div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
-			<div class="text-muted">Unterstützte Formate: Bilder, PDFs, Dokumente, Archive</div>
-			<input type="file"
-				   name="attachments"
-				   id="attachments"
-				   multiple
-				   accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
-				   onchange="handleFileSelect(event)">
-		</div>
-
-		<!-- File Preview Area -->
-		<div id="file-preview" class="file-preview">
-			<div class="attachments-label">Neue Dateien:</div>
-			<div id="new-attachments"></div>
-		</div>
-	`
-
-	tmpl, err := template.New("attachments").Parse(attachmentsSectionHTML)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse attachments template")
-	}
-
-	return tmpl.Execute(c.Response(), data)
 }

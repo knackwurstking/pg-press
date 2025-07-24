@@ -2,6 +2,7 @@ package troublereports
 
 import (
 	"errors"
+	"io/fs"
 	"slices"
 	"time"
 
@@ -25,7 +26,23 @@ func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.Trou
 	return mtd.TroubleReport.Mods[0]
 }
 
-func (h *Handler) handleGetModifications(c echo.Context, tr *pgvis.TroubleReport) *echo.HTTPError {
+type ModificationsHandler struct {
+	db               *pgvis.DB
+	serverPathPrefix string
+	templates        fs.FS
+}
+
+func (h *ModificationsHandler) RegisterRoutes(e *echo.Echo) {
+	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
+
+	e.GET(modificationsPath, func(c echo.Context) error {
+		return h.handleGetModifications(c, nil)
+	})
+
+	e.POST(modificationsPath, h.handlePostModifications)
+}
+
+func (h *ModificationsHandler) handleGetModifications(c echo.Context, tr *pgvis.TroubleReport) *echo.HTTPError {
 	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
@@ -63,7 +80,7 @@ func (h *Handler) handleGetModifications(c echo.Context, tr *pgvis.TroubleReport
 	)
 }
 
-func (h *Handler) handlePostModifications(c echo.Context) error {
+func (h *ModificationsHandler) handlePostModifications(c echo.Context) error {
 	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
