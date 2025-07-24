@@ -12,9 +12,14 @@ import (
 )
 
 const (
-	adminPrivilegesRequiredMessage = "administrator privileges required"
-	invalidContentFormFieldMessage = "invalid content form value"
-	invalidTitleFormFieldMessage   = "invalid title form value"
+	adminPrivilegesRequiredMessage   = "administrator privileges required"
+	invalidContentFormFieldMessage   = "invalid content form value"
+	invalidTitleFormFieldMessage     = "invalid title form value"
+	attachmentTooLargeMessage        = "attachment exceeds maximum size limit (10MB)"
+	attachmentNotFoundMessage        = "attachment not found"
+	invalidAttachmentMessage         = "invalid attachment data"
+	tooManyAttachmentsMessage        = "too many attachments (maximum 10 allowed)"
+	attachmentProcessingErrorMessage = "failed to process attachment"
 )
 
 type Handler struct {
@@ -50,6 +55,14 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 		return h.handleGetModifications(c, nil)
 	})
 	e.POST(modificationsPath, h.handlePostModifications)
+
+	// Attachment management routes
+	attachmentReorderPath := h.serverPathPrefix + "/trouble-reports/attachments/reorder"
+	e.POST(attachmentReorderPath, h.handlePostAttachmentReorder)
+
+	attachmentPath := h.serverPathPrefix + "/trouble-reports/attachments"
+	e.GET(attachmentPath, h.handleGetAttachment)
+	e.DELETE(attachmentPath, h.handleDeleteAttachment)
 }
 
 func (h *Handler) handleMainPage(c echo.Context) error {
