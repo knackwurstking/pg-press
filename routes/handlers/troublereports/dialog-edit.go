@@ -6,6 +6,7 @@ package troublereports
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -314,6 +315,7 @@ func (h *Handler) handlePostAttachmentReorder(c echo.Context) error {
 
 	// Return updated dialog
 	pageData := &EditDialogTemplateData{
+		Submitted:         true, // Prevent reloading from database
 		ID:                int(id),
 		Title:             tr.Title,
 		Content:           tr.Content,
@@ -349,8 +351,13 @@ func (h *Handler) handleDeleteAttachment(c echo.Context) error {
 	// Find and remove the attachment
 	newAttachments := make([]*pgvis.Attachment, 0, len(tr.LinkedAttachments))
 	found := false
+
+	// Trim whitespace from attachment ID to avoid comparison issues
+	attachmentID = strings.TrimSpace(attachmentID)
+
 	for _, attachment := range tr.LinkedAttachments {
-		if attachment.ID != attachmentID {
+		trimmedAttachmentID := strings.TrimSpace(attachment.ID)
+		if trimmedAttachmentID != attachmentID {
 			newAttachments = append(newAttachments, attachment)
 		} else {
 			found = true
@@ -373,15 +380,8 @@ func (h *Handler) handleDeleteAttachment(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	// Return updated dialog
-	pageData := &EditDialogTemplateData{
-		ID:                int(id),
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}
-
-	return h.handleGetDialogEdit(c, pageData)
+	// Return only the attachments section HTML
+	return h.renderAttachmentsSection(c, int(id), tr.LinkedAttachments)
 }
 
 // handleGetAttachment handles downloading/viewing of attachments
@@ -575,4 +575,84 @@ func (h *Handler) getMimeTypeFromFilename(filename string) string {
 
 	// Default fallback
 	return "application/octet-stream"
+}
+
+// renderAttachmentsSection renders only the attachments section HTML
+func (h *Handler) renderAttachmentsSection(c echo.Context, reportID int, attachments []*pgvis.Attachment) error {
+	data := struct {
+		ID                int                 `json:"id"`
+		LinkedAttachments []*pgvis.Attachment `json:"linked_attachments"`
+	}{
+		ID:                reportID,
+		LinkedAttachments: attachments,
+	}
+
+	// Return just the attachments section content
+	attachmentsSectionHTML := `
+		<div class="attachments-label">Anhänge (max. 10MB pro Datei, max. 10 Dateien)</div>
+
+		{{if .LinkedAttachments}}
+		<div class="attachments-section">
+			<div class="attachments-label">Vorhandene Anhänge:</div>
+			<div id="existing-attachments">
+				{{range .LinkedAttachments}}
+				<div class="attachment-item flex row gap" data-id="{{.ID}}">
+					<div class="attachment-info">
+						<i class="bi bi-grip-vertical"></i>
+						{{if .IsImage}}
+						<i class="bi bi-image attachment-icon"></i>
+						{{else if .IsDocument}}
+						<i class="bi bi-file-text attachment-icon"></i>
+						{{else if .IsArchive}}
+						<i class="bi bi-file-zip attachment-icon"></i>
+						{{else}}
+						<i class="bi bi-file-earmark attachment-icon"></i>
+						{{end}}
+						<span class="ellipsis">{{.ID}}</span>
+						<span class="text-muted">({{.GetMimeType}})</span>
+					</div>
+					<div class="attachment-actions">
+						<button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, '{{.ID}}')">
+							<i class="bi bi-eye"></i> Anzeigen
+						</button>
+						<button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
+							<i class="bi bi-trash"></i> Löschen
+						</button>
+					</div>
+				</div>
+				{{end}}
+			</div>
+		</div>
+		{{end}}
+
+		<!-- File Upload Area -->
+		<div class="file-input-area"
+			 onclick="document.getElementById('attachments').click()"
+			 ondrop="handleFileDrop(event)"
+			 ondragover="handleDragOver(event)"
+			 ondragleave="handleDragLeave(event)">
+			<i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
+			<div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
+			<div class="text-muted">Unterstützte Formate: Bilder, PDFs, Dokumente, Archive</div>
+			<input type="file"
+				   name="attachments"
+				   id="attachments"
+				   multiple
+				   accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
+				   onchange="handleFileSelect(event)">
+		</div>
+
+		<!-- File Preview Area -->
+		<div id="file-preview" class="file-preview">
+			<div class="attachments-label">Neue Dateien:</div>
+			<div id="new-attachments"></div>
+		</div>
+	`
+
+	tmpl, err := template.New("attachments").Parse(attachmentsSectionHTML)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to parse attachments template")
+	}
+
+	return tmpl.Execute(c.Response(), data)
 }
