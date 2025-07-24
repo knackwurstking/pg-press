@@ -31,9 +31,9 @@
                 <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
                     {{if .IsImage}}
                     <div class="attachment-preview-image">
-                        <img 
-                            src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}" 
-                            alt="Attachment {{.ID}}" 
+                        <img
+                            src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
+                            alt="Attachment {{.ID}}"
                             class="preview-thumbnail"
                         />
                     </div>
@@ -125,7 +125,6 @@
             el.open = true;
         })();
     </script>
-    <script src="./js/trouble-reports/data.js"></script>
 </ul>
 {{else}}
 <span id="data"></span>
