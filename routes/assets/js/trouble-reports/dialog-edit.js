@@ -25,6 +25,19 @@ document.querySelector("#dialogEdit").showModal();
         }
     }
 
+    // Check if there are validation errors in the form
+    function hasValidationErrors() {
+        const titleInput = document.getElementById("title");
+        const contentInput = document.getElementById("content");
+
+        return (
+            (titleInput &&
+                titleInput.getAttribute("aria-invalid") === "true") ||
+            (contentInput &&
+                contentInput.getAttribute("aria-invalid") === "true")
+        );
+    }
+
     // Update hidden input with current attachment order
     function updateAttachmentOrderInput() {
         document.getElementById("attachment-order").value =
@@ -194,7 +207,12 @@ document.querySelector("#dialogEdit").showModal();
     };
 
     // Reset file state and initialize attachment order on load
-    resetFileState();
+    // If there are validation errors, always reset to clear any uploaded files
+    if (hasValidationErrors()) {
+        resetFileState();
+    } else {
+        resetFileState();
+    }
     initializeAttachmentOrder();
 
     // Form validation

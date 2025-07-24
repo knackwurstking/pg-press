@@ -56,12 +56,19 @@
                     Anhänge (max. 10MB pro Datei, max. 10 Dateien)
                 </div>
 
+                {{if or .InvalidTitle .InvalidContent}}
+                <div class="attachment-error">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.
+                </div>
+                {{end}}
+
                 {{if .AttachmentError}}
                 <div class="attachment-error">{{.AttachmentError}}</div>
                 {{end}}
 
                 <!-- Existing Attachments -->
-                {{if .LinkedAttachments}}
+                {{if and .LinkedAttachments (gt (len .LinkedAttachments) 0)}}
                 <div class="attachments-section">
                     <div class="attachments-label">Vorhandene Anhänge:</div>
 

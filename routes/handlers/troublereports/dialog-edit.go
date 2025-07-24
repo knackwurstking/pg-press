@@ -103,11 +103,11 @@ func (h *DialogEditHandler) handlePostDialogEdit(c echo.Context) error {
 
 	dialogEditData.Title = title
 	dialogEditData.Content = content
-	dialogEditData.LinkedAttachments = attachments
 	dialogEditData.InvalidTitle = title == ""
 	dialogEditData.InvalidContent = content == ""
 
 	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
+		dialogEditData.LinkedAttachments = attachments
 		modified := pgvis.NewModified[pgvis.TroubleReportMod](user, pgvis.TroubleReportMod{
 			Title:             title,
 			Content:           content,
@@ -120,6 +120,7 @@ func (h *DialogEditHandler) handlePostDialogEdit(c echo.Context) error {
 		}
 	} else {
 		dialogEditData.Submitted = false
+		// Don't set LinkedAttachments when validation fails - keeps them nil
 	}
 
 	return h.handleGetDialogEdit(c, dialogEditData)
@@ -142,16 +143,16 @@ func (h *DialogEditHandler) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	dialogEditData := &DialogEditTemplateData{
-		Submitted:         true,
-		ID:                int(id),
-		Title:             title,
-		Content:           content,
-		LinkedAttachments: attachments,
-		InvalidTitle:      title == "",
-		InvalidContent:    content == "",
+		Submitted:      true,
+		ID:             int(id),
+		Title:          title,
+		Content:        content,
+		InvalidTitle:   title == "",
+		InvalidContent: content == "",
 	}
 
 	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
+		dialogEditData.LinkedAttachments = attachments
 		trOld, err := h.db.TroubleReports.Get(id)
 		if err != nil {
 			return utils.HandlePgvisError(c, err)
@@ -187,6 +188,7 @@ func (h *DialogEditHandler) handlePutDialogEdit(c echo.Context) error {
 		}
 	} else {
 		dialogEditData.Submitted = false
+		// Don't set LinkedAttachments when validation fails - keeps them nil
 	}
 
 	return h.handleGetDialogEdit(c, dialogEditData)
