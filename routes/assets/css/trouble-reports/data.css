@@ -4,13 +4,12 @@
     border: 1px solid var(--ui-border-color);
     border-radius: 4px;
     padding: 12px;
-    background: var(--ui-background-secondary, #f8f9fa);
 }
 
 .attachments-preview-label {
     font-weight: bold;
     margin-bottom: 8px;
-    color: var(--ui-text-primary);
+    color: var(--ui-primary-text);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -39,7 +38,7 @@
 }
 
 .attachments-preview-scroll::-webkit-scrollbar-thumb:hover {
-    background: var(--ui-text-muted);
+    background: var(--ui-muted-text);
 }
 
 /* Attachment Preview Items */
@@ -50,7 +49,6 @@
     padding: 12px;
     border: 1px solid var(--ui-border-color);
     border-radius: 6px;
-    background: white;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
@@ -76,14 +74,13 @@
     color: var(--ui-info);
     margin-bottom: 8px;
     border-radius: 4px;
-    background: var(--ui-background-secondary, #f8f9fa);
     border: 1px solid var(--ui-border-color);
 }
 
 .attachment-preview-name {
     font-size: 12px;
     font-weight: 500;
-    color: var(--ui-text-primary);
+    color: var(--ui-primary-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -92,7 +89,7 @@
 
 .attachment-preview-type {
     font-size: 10px;
-    color: var(--ui-text-muted);
+    color: var(--ui-muted-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -106,7 +103,6 @@
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 8px;
-    background: var(--ui-background-secondary, #f8f9fa);
     border: 1px solid var(--ui-border-color);
 }
 

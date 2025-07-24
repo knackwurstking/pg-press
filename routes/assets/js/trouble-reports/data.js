@@ -32,7 +32,7 @@
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
-                <div class="image-viewer-body">
+                <div class="image-viewer-body no-user-select">
                     <div class="image-loading">
                         <i class="bi bi-hourglass-split"></i>
                         <span>Bild wird geladen...</span>
