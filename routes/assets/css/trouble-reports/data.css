@@ -46,6 +46,7 @@
 .attachment-preview-item {
     flex-shrink: 0;
     width: 120px;
+    height: 160px;
     padding: 12px;
     border: 1px solid var(--ui-border-color);
     border-radius: 6px;
@@ -66,9 +67,17 @@
 }
 
 .attachment-preview-icon {
-    font-size: 24px;
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
     color: var(--ui-info);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    background: var(--ui-background-secondary, #f8f9fa);
+    border: 1px solid var(--ui-border-color);
 }
 
 .attachment-preview-name {
@@ -88,6 +97,28 @@
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+}
+
+/* Image Preview Styles */
+.attachment-preview-image {
+    width: 96px;
+    height: 96px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: var(--ui-background-secondary, #f8f9fa);
+    border: 1px solid var(--ui-border-color);
+}
+
+.preview-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+.attachment-preview-item:hover .preview-thumbnail {
+    transform: scale(1.05);
 }
 
 /* Image Viewer Dialog Styles (copied from dialog-edit.css) */

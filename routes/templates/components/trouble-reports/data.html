@@ -17,11 +17,7 @@
             <pre>{{$troubleReport.Content}}</pre>
         </details>
 
-        <!-- Debug: Show attachment info -->
-        <div style="background: #f0f0f0; padding: 8px; margin: 8px 0; font-size: 12px;">
-            Debug: LinkedAttachments count: {{len $troubleReport.LinkedAttachments}} | 
-            LoadedAttachments count: {{len $troubleReport.LoadedAttachments}}
-        </div>
+
 
         <!-- Attachments Preview Container -->
         {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
@@ -33,10 +29,17 @@
             <div class="attachments-preview-scroll">
                 {{range $troubleReport.LoadedAttachments}}
                 <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
+                    {{if .IsImage}}
+                    <div class="attachment-preview-image">
+                        <img 
+                            src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}" 
+                            alt="Attachment {{.ID}}" 
+                            class="preview-thumbnail"
+                        />
+                    </div>
+                    {{else}}
                     <div class="attachment-preview-icon">
-                        {{if .IsImage}}
-                        <i class="bi bi-image"></i>
-                        {{else if .IsDocument}}
+                        {{if .IsDocument}}
                         <i class="bi bi-file-text"></i>
                         {{else if .IsArchive}}
                         <i class="bi bi-file-zip"></i>
@@ -44,6 +47,7 @@
                         <i class="bi bi-file-earmark"></i>
                         {{end}}
                     </div>
+                    {{end}}
                     <div class="attachment-preview-name">
                         Attachment {{.ID}}
                     </div>
@@ -54,18 +58,9 @@
                 {{end}}
             </div>
         </div>
-        {{else}}
-        <div style="background: #ffe6e6; padding: 8px; margin: 8px 0; font-size: 12px;">
-            Debug: No attachments found or LoadedAttachments is nil
-        </div>
         {{end}}
 
-        <!-- Debug: Actions section -->
-        <div style="background: #e6ffe6; padding: 4px; margin: 4px 0; font-size: 12px;">
-            Debug: Actions section for report {{$troubleReport.ID}}
-        </div>
-        
-        <div class="actions flex row gap justify-end align-center" style="border: 2px solid red; padding: 8px;">
+        <div class="actions flex row gap justify-end align-center">
             <button
                 hx-get="./trouble-reports/modifications/{{$troubleReport.ID}}"
                 hx-trigger="click"
