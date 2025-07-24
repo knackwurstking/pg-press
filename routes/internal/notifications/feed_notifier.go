@@ -1,3 +1,4 @@
+// Package notifications provides real-time notification functionality for feeds and events in the pg-vis application.
 package notifications
 
 import (

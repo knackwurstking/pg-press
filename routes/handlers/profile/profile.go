@@ -32,7 +32,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	e.DELETE(h.serverPathPrefix+"/profile/cookies", h.handleDeleteCookies)
 }
 
-// Profile contains the data structure passed to the profile page template.
+// ProfilePageData contains the data structure passed to the profile page template.
 type ProfilePageData struct {
 	User    *pgvis.User     `json:"user"`
 	Cookies []*pgvis.Cookie `json:"cookies"`

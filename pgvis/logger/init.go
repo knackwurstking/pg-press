@@ -1,3 +1,5 @@
+// Package logger provides structured logging functionality for the pg-vis application.
+// It supports different log levels, colored output, and component-specific loggers.
 package logger
 
 import (
@@ -6,7 +8,7 @@ import (
 	"strings"
 )
 
-// Global logger instance for the application
+// AppLogger is the global logger instance for the application
 var AppLogger *Logger
 
 // Initialize sets up the application logger with appropriate defaults
@@ -65,21 +67,6 @@ func SetupProduction() {
 	AppLogger.SetPrefix("[PROD] ")
 }
 
-// SetupTesting configures logger for testing environment
-func SetupTesting() {
-	AppLogger.SetLevel(WARN)
-	AppLogger.SetColors(false)
-	AppLogger.SetPrefix("[TEST] ")
-}
-
-// GetLogger returns the application logger instance
-func GetLogger() *Logger {
-	if AppLogger == nil {
-		Initialize()
-	}
-	return AppLogger
-}
-
 // Component-specific logger helpers
 
 // NewComponentLogger creates a new logger for a specific component
@@ -92,11 +79,6 @@ func NewComponentLogger(component string) *Logger {
 // Server returns a logger configured for server operations
 func Server() *Logger {
 	return NewComponentLogger("Server")
-}
-
-// Database returns a logger configured for database operations
-func Database() *Logger {
-	return NewComponentLogger("Database")
 }
 
 // WebSocket returns a logger configured for WebSocket operations

@@ -64,10 +64,6 @@ func (a *Attachment) GetFileExtension() string {
 }
 
 var (
-	imageExtensions    = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"}
-	documentExtensions = []string{".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt"}
-	archiveExtensions  = []string{".zip", ".rar", ".7z", ".tar", ".gz", ".bz2"}
-
 	mimeTypes = map[string]string{
 		".jpg":  "image/jpeg",
 		".jpeg": "image/jpeg",

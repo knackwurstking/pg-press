@@ -210,48 +210,6 @@ func (l *Logger) Printf(format string, args ...interface{}) {
 	l.log(INFO, format, args...)
 }
 
-// Package-level functions using the default logger
-
-// SetLevel sets the log level for the default logger
-func SetLevel(level LogLevel) {
-	defaultLogger.SetLevel(level)
-}
-
-// SetColors enables or disables colors for the default logger
-func SetColors(enabled bool) {
-	defaultLogger.SetColors(enabled)
-}
-
-// SetPrefix sets a prefix for the default logger
-func SetPrefix(prefix string) {
-	defaultLogger.SetPrefix(prefix)
-}
-
-// Debug logs a debug message using the default logger
-func Debug(format string, args ...interface{}) {
-	defaultLogger.Debug(format, args...)
-}
-
-// Info logs an info message using the default logger
-func Info(format string, args ...interface{}) {
-	defaultLogger.Info(format, args...)
-}
-
-// Warn logs a warning message using the default logger
-func Warn(format string, args ...interface{}) {
-	defaultLogger.Warn(format, args...)
-}
-
-// Error logs an error message using the default logger
-func Error(format string, args ...interface{}) {
-	defaultLogger.Error(format, args...)
-}
-
-// Printf provides compatibility with standard log.Printf using the default logger
-func Printf(format string, args ...interface{}) {
-	defaultLogger.Printf(format, args...)
-}
-
 // InitializeFromStandardLog configures the logger to replace standard log package
 func InitializeFromStandardLog() {
 	// Set the standard log package to use our logger
@@ -269,47 +227,4 @@ func (w *loggerWriter) Write(p []byte) (n int, err error) {
 	message := strings.TrimSuffix(string(p), "\n")
 	w.logger.Info("%s", message)
 	return len(p), nil
-}
-
-// Helper functions for common log patterns
-
-// LogError logs an error with additional context
-func LogError(operation, component, message string, err error) {
-	if err != nil {
-		Error("[%s] %s in %s: %v", operation, message, component, err)
-	}
-}
-
-// LogRequest logs HTTP request information
-func LogRequest(method, path, userAgent string, statusCode int) {
-	if statusCode >= 500 {
-		Error("[HTTP] %s %s - %d (%s)", method, path, statusCode, userAgent)
-	} else if statusCode >= 400 {
-		Warn("[HTTP] %s %s - %d (%s)", method, path, statusCode, userAgent)
-	} else {
-		Info("[HTTP] %s %s - %d (%s)", method, path, statusCode, userAgent)
-	}
-}
-
-// LogOperation logs the start and completion of operations
-func LogOperation(component, operation string, args ...interface{}) {
-	if len(args) > 0 {
-		Info("[%s] %s: %v", component, operation, args)
-	} else {
-		Info("[%s] %s", component, operation)
-	}
-}
-
-// LogValidation logs validation errors
-func LogValidation(field, message string, value interface{}) {
-	Warn("[Validation] %s: %s (value: %v)", field, message, value)
-}
-
-// LogDatabase logs database operations
-func LogDatabase(operation, table, message string, err error) {
-	if err != nil {
-		Error("[Database] %s %s: %s - %v", operation, table, message, err)
-	} else {
-		Debug("[Database] %s %s: %s", operation, table, message)
-	}
 }

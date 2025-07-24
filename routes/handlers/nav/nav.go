@@ -1,3 +1,4 @@
+// Package nav provides navigation and menu handling functionality for the pg-vis web interface.
 package nav
 
 import (
