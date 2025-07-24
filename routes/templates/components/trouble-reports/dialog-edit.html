@@ -1,19 +1,22 @@
 {{if not .Submitted}}
 <dialog id="dialogEdit" class="clean fullscreen" oncancel="event.preventDefault()">
     <form
+        class="flex column gap"
+
         {{if gt .ID 0}}
         hx-put="./trouble-reports/dialog-edit?id={{.ID}}"
         {{else}}
         hx-post="./trouble-reports/dialog-edit"
         {{end}}
+
         hx-trigger="submit"
         hx-target="#dialogEdit"
         hx-swap="outerHTML"
-        enctype="multipart/form-data"
-        class="flex column gap">
 
+        enctype="multipart/form-data"
+    >
         <!-- Hidden field for attachment order -->
-        <input type="hidden" name="attachment_order" id="attachment-order" value="">
+        <input type="hidden" name="attachment_order" id="attachment-order" value=""/>
 
         <div
             style="padding: var(--ui-spacing);"
@@ -21,22 +24,29 @@
         >
             <label for="title" class="flex column">
                 Titel
+
                 <input
                     name="title"
                     id="title"
+
                     placeholder="Titel"
                     value="{{.Title}}"
+
                     {{if .InvalidTitle}}
                     aria-invalid="true"
-                    {{end}} />
+                    {{end}}
+                />
             </label>
 
             <label for="content" class="flex column">
                 Bericht
+
                 <textarea
                     name="content"
                     id="content"
+
                     placeholder="Bericht"
+
                     {{if .InvalidContent}}
                     aria-invalid="true"
                     {{end}}
@@ -45,7 +55,9 @@
 
             <!-- Attachments Section -->
             <div id="attachments-section" class="attachments-container flex-item">
-                <div class="attachments-label">Anhänge (max. 10MB pro Datei, max. 10 Dateien)</div>
+                <div class="attachments-label">
+                    Anhänge (max. 10MB pro Datei, max. 10 Dateien)
+                </div>
 
                 {{if .AttachmentError}}
                 <div class="attachment-error">{{.AttachmentError}}</div>
@@ -55,11 +67,13 @@
                 {{if .LinkedAttachments}}
                 <div class="attachments-section">
                     <div class="attachments-label">Vorhandene Anhänge:</div>
+
                     <div id="existing-attachments">
                         {{range .LinkedAttachments}}
                         <div class="attachment-item flex row gap" data-id="{{.ID}}">
                             <div class="attachment-info">
                                 <i class="bi bi-grip-vertical"></i>
+
                                 {{if .IsImage}}
                                 <i class="bi bi-image attachment-icon"></i>
                                 {{else if .IsDocument}}
@@ -69,15 +83,29 @@
                                 {{else}}
                                 <i class="bi bi-file-earmark attachment-icon"></i>
                                 {{end}}
+
                                 <span class="ellipsis">{{.ID}}</span>
+
                                 <span class="text-muted">({{.GetMimeType}})</span>
                             </div>
+
                             <div class="attachment-actions">
-                                <button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, '{{.ID}}')">
-                                    <i class="bi bi-eye"></i> Anzeigen
+                                <button
+                                    type="button"
+                                    class="secondary small"
+                                    onclick="viewAttachment({{$.ID}}, '{{.ID}}')"
+                                >
+                                    <i class="bi bi-eye"></i>
+                                    Anzeigen
                                 </button>
-                                <button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
-                                    <i class="bi bi-trash"></i> Löschen
+
+                                <button
+                                    type="button"
+                                    class="destructive small"
+                                    onclick="deleteAttachment({{$.ID}}, '{{.ID}}')"
+                                >
+                                    <i class="bi bi-trash"></i>
+                                    Löschen
                                 </button>
                             </div>
                         </div>
@@ -91,21 +119,27 @@
                      onclick="document.getElementById('attachments').click()"
                      ondrop="handleFileDrop(event)"
                      ondragover="handleDragOver(event)"
-                     ondragleave="handleDragLeave(event)">
+                     ondragleave="handleDragLeave(event)"
+                >
                     <i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
+
                     <div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
+
                     <div class="text-muted">Unterstützte Formate: Bilder, PDFs, Dokumente, Archive</div>
+
                     <input type="file"
                            name="attachments"
                            id="attachments"
                            multiple
                            accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
-                           onchange="handleFileSelect(event)">
+                           onchange="handleFileSelect(event)"
+                    />
                 </div>
 
                 <!-- File Preview Area -->
                 <div id="file-preview" class="file-preview">
                     <div class="attachments-label">Neue Dateien:</div>
+
                     <div id="new-attachments"></div>
                 </div>
             </div>
