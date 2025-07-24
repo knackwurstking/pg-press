@@ -39,28 +39,39 @@ func (h *AttachmentsHandler) handleGetAttachment(c echo.Context) error {
 		return herr
 	}
 
-	attachmentID := c.QueryParam("attachment_id")
-	if attachmentID == "" {
+	attachmentIDStr := c.QueryParam("attachment_id")
+	if attachmentIDStr == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
 	}
 
-	// Get trouble report
+	attachmentID, err := strconv.ParseInt(attachmentIDStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid attachment_id parameter")
+	}
+
+	// Get trouble report to verify attachment belongs to it
 	tr, err := h.db.TroubleReports.Get(id)
 	if err != nil {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	// Find the attachment
-	var attachment *pgvis.Attachment
-	for _, att := range tr.LinkedAttachments {
-		if att.ID == attachmentID {
-			attachment = att
+	// Check if attachment ID is in the trouble report's linked attachments
+	var found bool
+	for _, linkedID := range tr.LinkedAttachments {
+		if linkedID == attachmentID {
+			found = true
 			break
 		}
 	}
 
-	if attachment == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "attachment not found")
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "attachment not found in this trouble report")
+	}
+
+	// Get the attachment from the attachments table
+	attachment, err := h.db.Attachments.Get(attachmentID)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
 	}
 
 	// Set appropriate headers
@@ -68,11 +79,9 @@ func (h *AttachmentsHandler) handleGetAttachment(c echo.Context) error {
 	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
 
 	// Try to determine filename from attachment ID
-	filename := attachment.ID
+	filename := fmt.Sprintf("attachment_%d", attachmentID)
 	if ext := attachment.GetFileExtension(); ext != "" {
-		if !strings.HasSuffix(filename, ext) {
-			filename += ext
-		}
+		filename += ext
 	}
 	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
@@ -106,25 +115,30 @@ func (h *AttachmentsHandler) handlePostAttachmentReorder(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	// Reorder attachments based on the new order
-	reorderedAttachments := make([]*pgvis.Attachment, 0, len(tr.LinkedAttachments))
-	for _, attachmentID := range orderParts {
-		attachmentID = strings.TrimSpace(attachmentID)
-		if attachmentID == "" {
+	// Reorder attachment IDs based on the new order
+	reorderedAttachmentIDs := make([]int64, 0, len(tr.LinkedAttachments))
+	for _, attachmentIDStr := range orderParts {
+		attachmentIDStr = strings.TrimSpace(attachmentIDStr)
+		if attachmentIDStr == "" {
 			continue
 		}
 
-		// Find the attachment with this ID
-		for _, attachment := range tr.LinkedAttachments {
-			if attachment.ID == attachmentID {
-				reorderedAttachments = append(reorderedAttachments, attachment)
+		attachmentID, err := strconv.ParseInt(attachmentIDStr, 10, 64)
+		if err != nil {
+			continue // Skip invalid IDs
+		}
+
+		// Check if this ID exists in the current attachments
+		for _, existingID := range tr.LinkedAttachments {
+			if existingID == attachmentID {
+				reorderedAttachmentIDs = append(reorderedAttachmentIDs, attachmentID)
 				break
 			}
 		}
 	}
 
-	// Update the trouble report with reordered attachments
-	tr.LinkedAttachments = reorderedAttachments
+	// Update the trouble report with reordered attachment IDs
+	tr.LinkedAttachments = reorderedAttachmentIDs
 	tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
 		Title:             tr.Title,
 		Content:           tr.Content,
@@ -135,13 +149,19 @@ func (h *AttachmentsHandler) handlePostAttachmentReorder(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
+	// Load attachments for dialog
+	attachments, err := h.db.TroubleReportService.LoadAttachments(tr)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
 	// Return updated dialog
 	pageData := &DialogEditTemplateData{
 		Submitted:         true, // Prevent reloading from database
 		ID:                int(id),
 		Title:             tr.Title,
 		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
+		LinkedAttachments: attachments,
 	}
 
 	return h.dialogEditHandler.handleGetDialogEdit(c, pageData)
@@ -154,9 +174,14 @@ func (h *AttachmentsHandler) handleDeleteAttachment(c echo.Context) error {
 		return herr
 	}
 
-	attachmentID := c.QueryParam("attachment_id")
-	if attachmentID == "" {
+	attachmentIDStr := c.QueryParam("attachment_id")
+	if attachmentIDStr == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
+	}
+
+	attachmentID, err := strconv.ParseInt(attachmentIDStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid attachment_id parameter")
 	}
 
 	user, herr := utils.GetUserFromContext(c)
@@ -170,17 +195,13 @@ func (h *AttachmentsHandler) handleDeleteAttachment(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	// Find and remove the attachment
-	newAttachments := make([]*pgvis.Attachment, 0, len(tr.LinkedAttachments))
+	// Find and remove the attachment ID
+	newAttachmentIDs := make([]int64, 0, len(tr.LinkedAttachments))
 	found := false
 
-	// Trim whitespace from attachment ID to avoid comparison issues
-	attachmentID = strings.TrimSpace(attachmentID)
-
-	for _, attachment := range tr.LinkedAttachments {
-		trimmedAttachmentID := strings.TrimSpace(attachment.ID)
-		if trimmedAttachmentID != attachmentID {
-			newAttachments = append(newAttachments, attachment)
+	for _, linkedID := range tr.LinkedAttachments {
+		if linkedID != attachmentID {
+			newAttachmentIDs = append(newAttachmentIDs, linkedID)
 		} else {
 			found = true
 		}
@@ -191,7 +212,7 @@ func (h *AttachmentsHandler) handleDeleteAttachment(c echo.Context) error {
 	}
 
 	// Update the trouble report
-	tr.LinkedAttachments = newAttachments
+	tr.LinkedAttachments = newAttachmentIDs
 	tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
 		Title:             tr.Title,
 		Content:           tr.Content,
@@ -202,8 +223,13 @@ func (h *AttachmentsHandler) handleDeleteAttachment(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	// Return only the attachments section HTML
-	return h.renderAttachmentsSection(c, int(id), tr.LinkedAttachments)
+	// Load attachments and return only the attachments section HTML
+	attachments, err := h.db.TroubleReportService.LoadAttachments(tr)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	return h.renderAttachmentsSection(c, int(id), attachments)
 }
 
 // renderAttachmentsSection renders only the attachments section HTML

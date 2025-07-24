@@ -5,7 +5,7 @@
 	<div class="attachments-label">Vorhandene Anhänge:</div>
 	<div id="existing-attachments">
 		{{range .LinkedAttachments}}
-		<div class="attachment-item flex row gap" data-id="{{.ID}}">
+		<div class="attachment-item flex row gap" data-id="{{.GetID}}">
 			<div class="attachment-info">
 				<i class="bi bi-grip-vertical"></i>
 				{{if .IsImage}}
@@ -17,14 +17,14 @@
 				{{else}}
 				<i class="bi bi-file-earmark attachment-icon"></i>
 				{{end}}
-				<span class="ellipsis">{{.ID}}</span>
+				<span class="ellipsis">Attachment {{.GetID}}</span>
 				<span class="text-muted">({{.GetMimeType}})</span>
 			</div>
 			<div class="attachment-actions">
-				<button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, '{{.ID}}')">
+				<button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, {{.GetID}})">
 					<i class="bi bi-eye"></i> Anzeigen
 				</button>
-				<button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, '{{.ID}}')">
+				<button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, {{.GetID}})">
 					<i class="bi bi-trash"></i> Löschen
 				</button>
 			</div>

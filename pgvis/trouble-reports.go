@@ -15,7 +15,7 @@ const (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
-			linked_attachments BLOB NOT NULL,
+			linked_attachments TEXT NOT NULL,
 			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -123,7 +123,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport) error {
 	// After exec this insert query, i need to get the id
 	result, err := tr.db.Exec(
 		insertTroubleReportQuery,
-		troubleReport.Title, troubleReport.Content, linkedAttachments, mods,
+		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods,
 	)
 	if err != nil {
 		return NewDatabaseError("insert", "trouble_reports",
@@ -175,7 +175,7 @@ func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
 
 	_, err = tr.db.Exec(
 		updateTroubleReportQuery,
-		troubleReport.Title, troubleReport.Content, linkedAttachments, mods, id,
+		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods, id,
 	)
 	if err != nil {
 		return NewDatabaseError("update", "trouble_reports",
@@ -238,14 +238,15 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, error) {
 	report := &TroubleReport{}
-	var linkedAttachments, mods []byte
+	var linkedAttachments string
+	var mods []byte
 
 	if err := rows.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "trouble_reports",
 			"failed to scan row", err)
 	}
 
-	if err := json.Unmarshal(linkedAttachments, &report.LinkedAttachments); err != nil {
+	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
 		return nil, WrapError(err, "failed to unmarshal linked attachments")
 	}
 
@@ -258,13 +259,14 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 
 func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, error) {
 	report := &TroubleReport{}
-	var linkedAttachments, mods []byte
+	var linkedAttachments string
+	var mods []byte
 
 	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(linkedAttachments, &report.LinkedAttachments); err != nil {
+	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
 		return nil, WrapError(err, "failed to unmarshal linked attachments")
 	}
 

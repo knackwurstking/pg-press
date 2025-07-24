@@ -67,7 +67,7 @@
 
                     <div id="existing-attachments">
                         {{range .LinkedAttachments}}
-                        <div class="attachment-item" data-id="{{.ID}}">
+                        <div class="attachment-item" data-id="{{.GetID}}">
                             <div class="attachment-info">
                                 <i class="bi bi-grip-vertical"></i>
 
@@ -81,7 +81,7 @@
                                 <i class="bi bi-file-earmark attachment-icon"></i>
                                 {{end}}
 
-                                <span class="ellipsis">{{.ID}}</span>
+                                <span class="ellipsis">Attachment {{.ID}}</span>
 
                                 <span class="text-muted">({{.GetMimeType}})</span>
                             </div>
@@ -90,7 +90,7 @@
                                 <button
                                     type="button"
                                     class="secondary row gap"
-                                    onclick="viewAttachment({{$.ID}}, '{{.ID}}')"
+                                    onclick="viewAttachment({{$.ID}}, {{.GetID}})"
                                 >
                                     <small>
                                         <i class="bi bi-eye"></i>
@@ -101,7 +101,7 @@
                                 <button
                                     type="button"
                                     class="destructive row gap"
-                                    onclick="deleteAttachment({{$.ID}}, '{{.ID}}')"
+                                    onclick="deleteAttachment({{$.ID}}, {{.GetID}})"
                                 >
                                     <small>
                                         <i class="bi bi-trash"></i>

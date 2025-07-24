@@ -12,8 +12,8 @@ import (
 )
 
 type TemplateData struct {
-	TroubleReports []*pgvis.TroubleReport `json:"trouble_reports"`
-	User           *pgvis.User            `json:"user"`
+	TroubleReports []*pgvis.TroubleReportWithAttachments `json:"trouble_reports"`
+	User           *pgvis.User                           `json:"user"`
 }
 
 type DataHandler struct {
@@ -35,7 +35,7 @@ func (h *DataHandler) handleGetData(c echo.Context) error {
 		return herr
 	}
 
-	trs, err := h.db.TroubleReports.List()
+	trs, err := h.db.TroubleReportService.ListWithAttachments()
 	if err != nil {
 		return utils.HandlePgvisError(c, err)
 	}
@@ -74,7 +74,7 @@ func (h *DataHandler) handleDeleteData(c echo.Context) error {
 	logger.TroubleReport().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
-	if err := h.db.TroubleReports.Remove(id); err != nil {
+	if err := h.db.TroubleReportService.RemoveWithAttachments(id); err != nil {
 		return utils.HandlePgvisError(c, err)
 	}
 

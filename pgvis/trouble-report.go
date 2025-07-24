@@ -16,7 +16,7 @@ const (
 type TroubleReportMod struct {
 	Title             string
 	Content           string
-	LinkedAttachments []*Attachment
+	LinkedAttachments []int64
 }
 
 // TroubleReport represents a trouble report in the system.
@@ -24,7 +24,7 @@ type TroubleReport struct {
 	ID                int64                  `json:"id"`
 	Title             string                 `json:"title"`
 	Content           string                 `json:"content"`
-	LinkedAttachments []*Attachment          `json:"linked_attachments"`
+	LinkedAttachments []int64                `json:"linked_attachments"`
 	Mods              Mods[TroubleReportMod] `json:"mods"`
 }
 
@@ -33,7 +33,7 @@ func NewTroubleReport(title, content string, m ...*Modified[TroubleReportMod]) *
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
-		LinkedAttachments: make([]*Attachment, 0),
+		LinkedAttachments: make([]int64, 0),
 		Mods:              m,
 	}
 }
@@ -81,9 +81,9 @@ func (tr *TroubleReport) validateContent(content string) error {
 }
 
 func (tr *TroubleReport) validateAttachments() error {
-	for i, attachment := range tr.LinkedAttachments {
-		if attachment == nil {
-			return NewValidationError("linked_attachments", "attachment cannot be nil", i)
+	for i, attachmentID := range tr.LinkedAttachments {
+		if attachmentID <= 0 {
+			return NewValidationError("linked_attachments", "attachment ID must be positive", i)
 		}
 	}
 	return nil
@@ -109,15 +109,15 @@ func (tr *TroubleReport) UpdateContent(newContent string) error {
 	return nil
 }
 
-// AddAttachment adds a new attachment to the trouble report.
-func (tr *TroubleReport) AddAttachment(attachment *Attachment) error {
-	if attachment == nil {
-		return NewValidationError("attachment", "cannot be nil", nil)
+// AddAttachment adds a new attachment ID to the trouble report.
+func (tr *TroubleReport) AddAttachment(attachmentID int64) error {
+	if attachmentID <= 0 {
+		return NewValidationError("attachment_id", "must be positive", attachmentID)
 	}
 	if tr.LinkedAttachments == nil {
-		tr.LinkedAttachments = make([]*Attachment, 0)
+		tr.LinkedAttachments = make([]int64, 0)
 	}
-	tr.LinkedAttachments = append(tr.LinkedAttachments, attachment)
+	tr.LinkedAttachments = append(tr.LinkedAttachments, attachmentID)
 	return nil
 }
 
@@ -175,8 +175,8 @@ func (tr *TroubleReport) Equals(other *TroubleReport) bool {
 	if tr.AttachmentCount() != other.AttachmentCount() {
 		return false
 	}
-	for i, attachment := range tr.LinkedAttachments {
-		if attachment != other.LinkedAttachments[i] {
+	for i, attachmentID := range tr.LinkedAttachments {
+		if attachmentID != other.LinkedAttachments[i] {
 			return false
 		}
 	}

@@ -14,9 +14,10 @@ import (
 )
 
 type ModificationsTemplateData struct {
-	User          *pgvis.User
-	TroubleReport *pgvis.TroubleReport
-	Mods          pgvis.Mods[pgvis.TroubleReportMod]
+	User              *pgvis.User
+	TroubleReport     *pgvis.TroubleReport
+	LoadedAttachments []*pgvis.Attachment
+	Mods              pgvis.Mods[pgvis.TroubleReportMod]
 }
 
 func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.TroubleReportMod] {
@@ -61,13 +62,20 @@ func (h *ModificationsHandler) handleGetModifications(c echo.Context, tr *pgvis.
 		return herr
 	}
 
+	// Load attachments for the trouble report
+	loadedAttachments, err := h.db.TroubleReportService.LoadAttachments(tr)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
 	data := &ModificationsTemplateData{
-		User:          user,
-		TroubleReport: tr,
-		Mods:          mods,
+		User:              user,
+		TroubleReport:     tr,
+		LoadedAttachments: loadedAttachments,
+		Mods:              mods,
 	}
 
 	return utils.HandleTemplate(

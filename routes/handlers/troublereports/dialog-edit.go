@@ -70,7 +70,11 @@ func (h *DialogEditHandler) handleGetDialogEdit(c echo.Context, pageData *Dialog
 
 			pageData.Title = tr.Title
 			pageData.Content = tr.Content
-			pageData.LinkedAttachments = tr.LinkedAttachments
+
+			// Load attachments for display
+			if loadedAttachments, err := h.db.TroubleReportService.LoadAttachments(tr); err == nil {
+				pageData.LinkedAttachments = loadedAttachments
+			}
 		}
 	}
 
@@ -107,12 +111,11 @@ func (h *DialogEditHandler) handlePostDialogEdit(c echo.Context) error {
 		modified := pgvis.NewModified[pgvis.TroubleReportMod](user, pgvis.TroubleReportMod{
 			Title:             title,
 			Content:           content,
-			LinkedAttachments: attachments,
+			LinkedAttachments: []int64{}, // Will be set by the service
 		})
 		tr := pgvis.NewTroubleReport(title, content, modified)
-		tr.LinkedAttachments = attachments
 
-		if err := h.db.TroubleReports.Add(tr); err != nil {
+		if err := h.db.TroubleReportService.AddWithAttachments(tr, attachments); err != nil {
 			return utils.HandlePgvisError(c, err)
 		}
 	} else {
@@ -155,14 +158,31 @@ func (h *DialogEditHandler) handlePutDialogEdit(c echo.Context) error {
 		}
 
 		tr := pgvis.NewTroubleReport(title, content, trOld.Mods...)
-		tr.LinkedAttachments = attachments
+
+		// Convert existing attachments to IDs for reordering
+		var existingAttachmentIDs []int64
+		for _, att := range attachments {
+			if att.GetID() > 0 { // Only include existing attachments (with IDs)
+				existingAttachmentIDs = append(existingAttachmentIDs, att.GetID())
+			}
+		}
+
+		// Filter out new attachments (those without valid IDs)
+		var newAttachments []*pgvis.Attachment
+		for _, att := range attachments {
+			if att.GetID() == 0 { // New attachments don't have IDs yet
+				newAttachments = append(newAttachments, att)
+			}
+		}
+
+		tr.LinkedAttachments = existingAttachmentIDs
 		tr.Mods = append(tr.Mods, pgvis.NewModified(user, pgvis.TroubleReportMod{
 			Title:             tr.Title,
 			Content:           tr.Content,
-			LinkedAttachments: tr.LinkedAttachments,
+			LinkedAttachments: []int64{}, // Will be set by the service
 		}))
 
-		if err := h.db.TroubleReports.Update(id, tr); err != nil {
+		if err := h.db.TroubleReportService.UpdateWithAttachments(id, tr, newAttachments); err != nil {
 			return utils.HandlePgvisError(c, err)
 		}
 	} else {
@@ -208,9 +228,11 @@ func (h *DialogEditHandler) processAttachments(ctx echo.Context) ([]*pgvis.Attac
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err == nil {
 			if existingTR, err := h.db.TroubleReports.Get(id); err == nil {
-				// Start with existing attachments
-				attachments = make([]*pgvis.Attachment, len(existingTR.LinkedAttachments))
-				copy(attachments, existingTR.LinkedAttachments)
+				// Load existing attachments using the service
+				if loadedAttachments, err := h.db.TroubleReportService.LoadAttachments(existingTR); err == nil {
+					attachments = make([]*pgvis.Attachment, len(loadedAttachments))
+					copy(attachments, loadedAttachments)
+				}
 			}
 		}
 	}
@@ -227,9 +249,15 @@ func (h *DialogEditHandler) processAttachments(ctx echo.Context) ([]*pgvis.Attac
 				continue
 			}
 
+			// Parse the attachment ID
+			attachmentID, err := strconv.ParseInt(idStr, 10, 64)
+			if err != nil {
+				continue
+			}
+
 			// Find attachment with this ID in current attachments
 			for _, att := range attachments {
-				if att.ID == idStr {
+				if att.GetID() == attachmentID {
 					reorderedAttachments = append(reorderedAttachments, att)
 					break
 				}
@@ -287,23 +315,24 @@ func (h *DialogEditHandler) processFileUpload(fileHeader *multipart.FileHeader, 
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Generate a unique ID for the attachment using timestamp and sanitized filename
+	// For new attachments, use a temporary ID (will be replaced with database ID)
+	// We'll use a combination of filename and timestamp for identification during upload
 	sanitizedFilename := h.sanitizeFilename(fileHeader.Filename)
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	attachmentID := fmt.Sprintf("%s_%s_%d", sanitizedFilename, timestamp, index)
+	attachmentID := fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
 
 	// Ensure ID doesn't exceed maximum length
 	if len(attachmentID) > pgvis.MaxAttachmentIDLength {
 		// Keep the timestamp and index, truncate filename part
-		maxFilenameLen := pgvis.MaxAttachmentIDLength - len(timestamp) - len(fmt.Sprintf("_%d", index)) - 2
+		maxFilenameLen := pgvis.MaxAttachmentIDLength - len(timestamp) - len(fmt.Sprintf("temp_%d", index)) - 2
 		if maxFilenameLen > 0 {
 			if len(sanitizedFilename) > maxFilenameLen {
 				sanitizedFilename = sanitizedFilename[:maxFilenameLen]
 			}
-			attachmentID = fmt.Sprintf("%s_%s_%d", sanitizedFilename, timestamp, index)
+			attachmentID = fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
 		} else {
 			// Fallback to just timestamp and index
-			attachmentID = fmt.Sprintf("attachment_%s_%d", timestamp, index)
+			attachmentID = fmt.Sprintf("temp_%s_%d", timestamp, index)
 		}
 	}
 

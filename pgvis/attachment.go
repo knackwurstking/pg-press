@@ -10,6 +10,7 @@ package pgvis
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -124,6 +125,15 @@ func (a *Attachment) IsArchive() bool {
 // GetMimeType returns the MIME type of the attachment.
 func (a *Attachment) GetMimeType() string {
 	return a.MimeType
+}
+
+// GetID returns the numeric ID of the attachment.
+func (a *Attachment) GetID() int64 {
+	// Try to parse the string ID as int64
+	if id, err := strconv.ParseInt(a.ID, 10, 64); err == nil {
+		return id
+	}
+	return 0 // Return 0 for invalid IDs
 }
 
 // String returns a string representation of the attachment.
