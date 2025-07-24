@@ -1,0 +1,118 @@
+form {
+    width: 100%;
+    height: 100%;
+}
+
+.content {
+    height: 100%;
+    margin: 0;
+}
+
+label[for="title"] {
+    max-height: fit-content;
+}
+
+input[name="title"] {
+    width: 100%;
+}
+
+label[for="content"] {
+    height: 100%;
+}
+
+textarea[name="content"] {
+    width: 100%;
+    height: 100%;
+    resize: none;
+}
+
+/* Attachment Styles */
+.attachments-section {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    margin: 4px 0;
+    border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+    border-radius: 4px;
+    cursor: move;
+}
+
+.attachment-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.attachment-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.attachment-actions button {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.file-input-area {
+    border: 2px dashed var(--ui-border-color);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    margin-top: 8px;
+}
+
+.file-input-area:hover {
+    border-color: var(--ui-info);
+}
+
+.file-input-area.dragover {
+    border-color: var(--ui-info);
+}
+
+#attachments {
+    display: none;
+}
+
+.attachment-error {
+    color: var(--ui-destructive);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.attachments-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.file-preview {
+    display: none;
+    margin-top: 8px;
+}
+
+.text-muted {
+    color: var(--ui-muted-text, #666);
+    font-size: 12px;
+}
+
+.small {
+    font-size: 11px;
+    padding: 2px 6px;
+}
