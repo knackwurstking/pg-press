@@ -272,165 +272,167 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        document.querySelector("#dialogEdit").showModal();
+        (() => {
+            document.querySelector("#dialogEdit").showModal();
 
-        // Attachment Management Functions
-        let attachmentOrder = [];
+            // Attachment Management Functions
+            let attachmentOrder = [];
 
-        // Initialize attachment order from existing attachments
-        function initializeAttachmentOrder() {
-            const existingAttachments = document.querySelectorAll('#existing-attachments .attachment-item');
-            attachmentOrder = Array.from(existingAttachments).map(item => item.dataset.id);
-            updateAttachmentOrderInput();
-        }
+            // Initialize attachment order from existing attachments
+            function initializeAttachmentOrder() {
+                const existingAttachments = document.querySelectorAll('#existing-attachments .attachment-item');
+                attachmentOrder = Array.from(existingAttachments).map(item => item.dataset.id);
+                updateAttachmentOrderInput();
+            }
 
-        // Update hidden input with current attachment order
-        function updateAttachmentOrderInput() {
-            document.getElementById('attachment-order').value = attachmentOrder.join(',');
-        }
+            // Update hidden input with current attachment order
+            function updateAttachmentOrderInput() {
+                document.getElementById('attachment-order').value = attachmentOrder.join(',');
+            }
 
-        // Handle file selection
-        function handleFileSelect(event) {
-            const files = event.target.files;
-            displayFilePreview(files);
-        }
+            // Handle file selection
+            function handleFileSelect(event) {
+                const files = event.target.files;
+                displayFilePreview(files);
+            }
 
-        // Handle drag and drop
-        function handleFileDrop(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            const area = event.currentTarget;
-            area.classList.remove('dragover');
+            // Handle drag and drop
+            function handleFileDrop(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const area = event.currentTarget;
+                area.classList.remove('dragover');
 
-            const files = event.dataTransfer.files;
-            document.getElementById('attachments').files = files;
-            displayFilePreview(files);
-        }
+                const files = event.dataTransfer.files;
+                document.getElementById('attachments').files = files;
+                displayFilePreview(files);
+            }
 
-        function handleDragOver(event) {
-            event.preventDefault();
-            event.currentTarget.classList.add('dragover');
-        }
+            function handleDragOver(event) {
+                event.preventDefault();
+                event.currentTarget.classList.add('dragover');
+            }
 
-        function handleDragLeave(event) {
-            event.currentTarget.classList.remove('dragover');
-        }
+            function handleDragLeave(event) {
+                event.currentTarget.classList.remove('dragover');
+            }
 
-        // Display file preview
-        function displayFilePreview(files) {
-            const previewArea = document.getElementById('file-preview');
-            const container = document.getElementById('new-attachments');
-            container.innerHTML = '';
+            // Display file preview
+            function displayFilePreview(files) {
+                const previewArea = document.getElementById('file-preview');
+                const container = document.getElementById('new-attachments');
+                container.innerHTML = '';
 
-            if (files.length > 0) {
-                previewArea.style.display = 'block';
+                if (files.length > 0) {
+                    previewArea.style.display = 'block';
 
-                Array.from(files).forEach((file, index) => {
-                    const sizeClass = file.size > 10 * 1024 * 1024 ? 'attachment-error' : 'text-muted';
-                    const sizeText = file.size > 10 * 1024 * 1024 ? 'ZU GROSS!' : formatFileSize(file.size);
+                    Array.from(files).forEach((file, index) => {
+                        const sizeClass = file.size > 10 * 1024 * 1024 ? 'attachment-error' : 'text-muted';
+                        const sizeText = file.size > 10 * 1024 * 1024 ? 'ZU GROSS!' : formatFileSize(file.size);
 
-                    const item = document.createElement('div');
-                    item.className = 'attachment-item';
-                    item.innerHTML = `
-                        <div class="attachment-info">
-                            <i class="bi bi-file-earmark attachment-icon"></i>
-                            <span>${file.name}</span>
-                            <span class="${sizeClass}">(${sizeText})</span>
-                        </div>
-                        <div class="attachment-actions">
-                            <button type="button" class="danger small" onclick="removeFileFromPreview(${index})">
-                                <i class="bi bi-trash"></i> Entfernen
-                            </button>
-                        </div>
-                    `;
-                    container.appendChild(item);
+                        const item = document.createElement('div');
+                        item.className = 'attachment-item';
+                        item.innerHTML = `
+                            <div class="attachment-info">
+                                <i class="bi bi-file-earmark attachment-icon"></i>
+                                <span>${file.name}</span>
+                                <span class="${sizeClass}">(${sizeText})</span>
+                            </div>
+                            <div class="attachment-actions">
+                                <button type="button" class="danger small" onclick="removeFileFromPreview(${index})">
+                                    <i class="bi bi-trash"></i> Entfernen
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(item);
+                    });
+                } else {
+                    previewArea.style.display = 'none';
+                }
+            }
+
+            // Remove file from preview
+            function removeFileFromPreview(index) {
+                const fileInput = document.getElementById('attachments');
+                const dt = new DataTransfer();
+
+                Array.from(fileInput.files).forEach((file, i) => {
+                    if (i !== index) {
+                        dt.items.add(file);
+                    }
                 });
-            } else {
-                previewArea.style.display = 'none';
+
+                fileInput.files = dt.files;
+                displayFilePreview(fileInput.files);
             }
-        }
 
-        // Remove file from preview
-        function removeFileFromPreview(index) {
-            const fileInput = document.getElementById('attachments');
-            const dt = new DataTransfer();
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
 
-            Array.from(fileInput.files).forEach((file, i) => {
-                if (i !== index) {
-                    dt.items.add(file);
+            // View attachment
+            function viewAttachment(reportId, attachmentId) {
+                window.open(`./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, '_blank');
+            }
+
+            // Delete attachment
+            function deleteAttachment(reportId, attachmentId) {
+                if (confirm('Sind Sie sicher, dass Sie diesen Anhang löschen möchten?')) {
+                    htmx.ajax('DELETE', `./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, {
+                        target: '#dialogEdit',
+                        swap: 'outerHTML'
+                    });
                 }
-            });
+            }
 
-            fileInput.files = dt.files;
-            displayFilePreview(fileInput.files);
-        }
-
-        // Format file size
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // View attachment
-        function viewAttachment(reportId, attachmentId) {
-            window.open(`./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, '_blank');
-        }
-
-        // Delete attachment
-        function deleteAttachment(reportId, attachmentId) {
-            if (confirm('Sind Sie sicher, dass Sie diesen Anhang löschen möchten?')) {
-                htmx.ajax('DELETE', `./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`, {
-                    target: '#dialogEdit',
-                    swap: 'outerHTML'
+            // Initialize sortable for existing attachments
+            if (window.Sortable && document.getElementById('existing-attachments')) {
+                new Sortable(document.getElementById('existing-attachments'), {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    handle: '.bi-grip-vertical',
+                    onEnd: function(evt) {
+                        // Update attachment order
+                        const items = document.querySelectorAll('#existing-attachments .attachment-item');
+                        attachmentOrder = Array.from(items).map(item => item.dataset.id);
+                        updateAttachmentOrderInput();
+                    }
                 });
             }
-        }
 
-        // Initialize sortable for existing attachments
-        if (window.Sortable && document.getElementById('existing-attachments')) {
-            new Sortable(document.getElementById('existing-attachments'), {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                handle: '.bi-grip-vertical',
-                onEnd: function(evt) {
-                    // Update attachment order
-                    const items = document.querySelectorAll('#existing-attachments .attachment-item');
-                    attachmentOrder = Array.from(items).map(item => item.dataset.id);
-                    updateAttachmentOrderInput();
+            // Initialize attachment order on load
+            initializeAttachmentOrder();
+
+            // Form validation
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const files = document.getElementById('attachments').files;
+                let hasOversizedFiles = false;
+
+                Array.from(files).forEach(file => {
+                    if (file.size > 10 * 1024 * 1024) {
+                        hasOversizedFiles = true;
+                    }
+                });
+
+                if (hasOversizedFiles) {
+                    e.preventDefault();
+                    alert('Einige Dateien sind zu groß. Die maximale Dateigröße beträgt 10MB.');
+                    return false;
+                }
+
+                const totalFiles = files.length + (document.querySelectorAll('#existing-attachments .attachment-item').length || 0);
+                if (totalFiles > 10) {
+                    e.preventDefault();
+                    alert('Zu viele Anhänge. Maximal 10 Anhänge sind erlaubt.');
+                    return false;
                 }
             });
-        }
-
-        // Initialize attachment order on load
-        initializeAttachmentOrder();
-
-        // Form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const files = document.getElementById('attachments').files;
-            let hasOversizedFiles = false;
-
-            Array.from(files).forEach(file => {
-                if (file.size > 10 * 1024 * 1024) {
-                    hasOversizedFiles = true;
-                }
-            });
-
-            if (hasOversizedFiles) {
-                e.preventDefault();
-                alert('Einige Dateien sind zu groß. Die maximale Dateigröße beträgt 10MB.');
-                return false;
-            }
-
-            const totalFiles = files.length + (document.querySelectorAll('#existing-attachments .attachment-item').length || 0);
-            if (totalFiles > 10) {
-                e.preventDefault();
-                alert('Zu viele Anhänge. Maximal 10 Anhänge sind erlaubt.');
-                return false;
-            }
-        });
+        })();
     </script>
 </dialog>
 {{else}}
