@@ -3,9 +3,10 @@ form {
     height: 100%;
 }
 
-.content {
+.form-content {
     height: 100%;
     margin: 0;
+    padding: var(--ui-spacing);
 }
 
 label[for="title"] {
