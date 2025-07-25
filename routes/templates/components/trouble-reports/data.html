@@ -18,7 +18,7 @@
 
             <!-- Attachments Preview Container -->
             {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
-            <div 
+            <div
                 class="attachments-preview-placeholder"
                 data-trouble-report-id="{{$troubleReport.ID}}"
                 hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
@@ -89,28 +89,40 @@
     </span>
     {{end}}
 
-    <script>
+    <script defer>
         (() => {
-            // Handle hash-based navigation
-            if (location.hash) {
-                const el = document.querySelector(location.hash);
-                if (el) {
-                    el.open = true;
-                    // Trigger attachment loading if details is opened
-                    const troubleReportId = el.id.replace('trouble-report-', '');
+            // Function to handle attachment loading
+            function loadAttachmentsForTroubleReport(troubleReportId) {
+                const placeholder = document.querySelector(`[data-trouble-report-id="${troubleReportId}"]`);
+                if (placeholder) {
                     htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
                 }
             }
+
+            // Handle hash-based navigation after HTMX has loaded
+            function handleHashNavigation() {
+                if (location.hash) {
+                    const el = document.querySelector(location.hash);
+                    if (el) {
+                        el.open = true;
+                        const troubleReportId = el.id.replace('trouble-report-', '');
+                        loadAttachmentsForTroubleReport(troubleReportId);
+                    }
+                }
+            }
+
+            // Run hash navigation after HTMX has finished processing
+            document.addEventListener('htmx:load', handleHashNavigation);
+            
+            // Also run immediately in case HTMX has already loaded
+            handleHashNavigation();
 
             // Add event listeners for details toggle
             document.querySelectorAll('details[id^="trouble-report-"]').forEach(details => {
                 details.addEventListener('toggle', function() {
                     if (this.open) {
                         const troubleReportId = this.id.replace('trouble-report-', '');
-                        const placeholder = this.querySelector('.attachments-preview-placeholder');
-                        if (placeholder) {
-                            htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
-                        }
+                        loadAttachmentsForTroubleReport(troubleReportId);
                     }
                 });
             });
