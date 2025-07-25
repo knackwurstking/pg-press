@@ -17,6 +17,7 @@
             <pre>{{$troubleReport.Content}}</pre>
 
             <!-- Attachments Preview Container -->
+            <!-- TODO: Only load attachments preview if the details tag is open -->
             {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
             <div class="attachments-preview-container">
                 <div class="attachments-preview-label">
