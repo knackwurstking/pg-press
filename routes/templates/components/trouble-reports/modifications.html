@@ -11,6 +11,8 @@
         </button>
 
         <h4>Änderungsverlauf</h4>
+
+
     </div>
 
     <div id="modifications-list" class="flex column gap">
@@ -96,43 +98,27 @@
                 >{{$mod.Data.Content}}</pre>
 
                 <!-- Attachments for this modification -->
-                {{$modAttachments := index $.ModAttachments $mod.Time}}
-                {{if $modAttachments}}
-                <div class="attachments-preview-container" style="margin-top: var(--ui-spacing);">
-                    <div class="attachments-preview-label">
+                {{if and $mod.Data.LinkedAttachments (gt (len $mod.Data.LinkedAttachments) 0)}}
+                <div
+                    class="attachments-preview-placeholder"
+                    data-modification-id="{{$troubleReport.ID}}-{{$mod.Time}}"
+                    hx-get="./trouble-reports/modifications/attachments-preview/{{$troubleReport.ID}}?time={{$mod.Time}}"
+                    hx-trigger="load-mod-attachments-{{$troubleReport.ID}}-{{$mod.Time}} from:body"
+                    hx-swap="outerHTML"
+                    style="
+                        margin-top: var(--ui-spacing);
+                        border: 1px solid var(--ui-border-color);
+                        border-radius: var(--ui-radius);
+                        padding: var(--ui-spacing);
+                        transition: all 0.2s ease;
+                    "
+                >
+                    <div class="attachments-preview-label" style="margin: 0;">
                         <i class="bi bi-paperclip"></i>
-                        Anhänge ({{len $modAttachments}})
-                    </div>
-                    <div class="attachments-preview-scroll">
-                        {{range $modAttachments}}
-                        <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
-                            {{if .IsImage}}
-                            <div class="attachment-preview-image">
-                                <img
-                                    src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
-                                    alt="Attachment {{.ID}}"
-                                    class="preview-thumbnail"
-                                />
-                            </div>
-                            {{else}}
-                            <div class="attachment-preview-icon">
-                                {{if .IsDocument}}
-                                <i class="bi bi-file-text"></i>
-                                {{else if .IsArchive}}
-                                <i class="bi bi-file-zip"></i>
-                                {{else}}
-                                <i class="bi bi-file-earmark"></i>
-                                {{end}}
-                            </div>
-                            {{end}}
-                            <div class="attachment-preview-name">
-                                Attachment {{.ID}}
-                            </div>
-                            <div class="attachment-preview-type">
-                                {{.GetMimeType}}
-                            </div>
-                        </div>
-                        {{end}}
+                        <span class="attachment-placeholder-text">
+                            Anhänge ({{len $mod.Data.LinkedAttachments}}) - Klicken zum Laden
+                        </span>
+                        <i class="bi bi-mouse attachment-click-icon" style="opacity: 0.6; margin-left: 4px;"></i>
                     </div>
                 </div>
                 {{end}}
@@ -182,4 +168,41 @@
 
         {{end}}
     </div>
+
+    <script defer>
+        (() => {
+            // Function to handle attachment loading for modifications
+            function loadAttachmentsForModification(troubleReportId, modificationTime) {
+                const placeholder = document.querySelector(`[data-modification-id="${troubleReportId}-${modificationTime}"]`);
+                if (placeholder) {
+                    htmx.trigger(document.body, `load-mod-attachments-${troubleReportId}-${modificationTime}`);
+                }
+            }
+
+            // Set up click event listeners for all attachment placeholders
+            document.querySelectorAll('.attachments-preview-placeholder[data-modification-id]').forEach(placeholder => {
+                placeholder.style.cursor = 'pointer';
+                placeholder.style.transition = 'all 0.2s ease';
+                placeholder.style.borderStyle = 'solid';
+                
+                placeholder.addEventListener('click', function() {
+                    const modificationId = this.getAttribute('data-modification-id');
+                    const [troubleReportId, modificationTime] = modificationId.split('-');
+                    loadAttachmentsForModification(troubleReportId, modificationTime);
+                });
+                
+                // Add hover effect for clickable placeholders
+                placeholder.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'var(--ui-info)';
+                    this.style.borderColor = 'var(--ui-primary)';
+                    this.style.color = 'var(--ui-info-text)';
+                });
+                placeholder.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                    this.style.borderColor = 'var(--ui-border-color)';
+                    this.style.color = '';
+                });
+            });
+        })();
+    </script>
 </div>

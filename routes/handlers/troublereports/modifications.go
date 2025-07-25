@@ -18,7 +18,12 @@ type ModificationsTemplateData struct {
 	TroubleReport     *pgvis.TroubleReport
 	LoadedAttachments []*pgvis.Attachment
 	Mods              pgvis.Mods[pgvis.TroubleReportMod]
-	ModAttachments    map[int64][]*pgvis.Attachment // map modification time to its attachments
+}
+
+type ModificationAttachmentsTemplateData struct {
+	TroubleReport *pgvis.TroubleReport
+	Modification  *pgvis.Modified[pgvis.TroubleReportMod]
+	Attachments   []*pgvis.Attachment
 }
 
 func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.TroubleReportMod] {
@@ -36,10 +41,13 @@ type ModificationsHandler struct {
 
 func (h *ModificationsHandler) RegisterRoutes(e *echo.Echo) {
 	modificationsPath := h.serverPathPrefix + "/trouble-reports/modifications/:id"
+	modificationsAttachmentsPath := h.serverPathPrefix + "/trouble-reports/modifications/attachments-preview/:id"
 
 	e.GET(modificationsPath, func(c echo.Context) error {
 		return h.handleGetModifications(c, nil)
 	})
+
+	e.GET(modificationsAttachmentsPath, h.handleGetModificationAttachmentsPreview)
 
 	e.POST(modificationsPath, h.handlePostModifications)
 }
@@ -72,24 +80,11 @@ func (h *ModificationsHandler) handleGetModifications(c echo.Context, tr *pgvis.
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
-	// Load attachments for each modification
-	modAttachments := make(map[int64][]*pgvis.Attachment)
-	for _, mod := range tr.Mods {
-		if len(mod.Data.LinkedAttachments) > 0 {
-			attachments, err := h.db.Attachments.GetByIDs(mod.Data.LinkedAttachments)
-			if err != nil {
-				return utils.HandlePgvisError(c, err)
-			}
-			modAttachments[mod.Time] = attachments
-		}
-	}
-
 	data := &ModificationsTemplateData{
 		User:              user,
 		TroubleReport:     tr,
 		LoadedAttachments: loadedAttachments,
 		Mods:              mods,
-		ModAttachments:    modAttachments,
 	}
 
 	return utils.HandleTemplate(
@@ -155,4 +150,58 @@ func (h *ModificationsHandler) handlePostModifications(c echo.Context) error {
 	}
 
 	return h.handleGetModifications(c, tr)
+}
+
+func (h *ModificationsHandler) handleGetModificationAttachmentsPreview(c echo.Context) error {
+	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
+	if herr != nil {
+		return herr
+	}
+
+	timeQuery, herr := utils.ParseInt64Query(c, constants.QueryParamTime)
+	if herr != nil {
+		return herr
+	}
+
+	tr, err := h.db.TroubleReports.Get(id)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	// Find the specific modification
+	var targetMod *pgvis.Modified[pgvis.TroubleReportMod]
+	for _, mod := range tr.Mods {
+		if mod.Time == timeQuery {
+			targetMod = mod
+			break
+		}
+	}
+
+	if targetMod == nil {
+		return utils.HandlePgvisError(c, errors.New("modification not found"))
+	}
+
+	// Load attachments for this modification
+	var attachments []*pgvis.Attachment
+	if len(targetMod.Data.LinkedAttachments) > 0 {
+		attachments, err = h.db.Attachments.GetByIDs(targetMod.Data.LinkedAttachments)
+		if err != nil {
+			return utils.HandlePgvisError(c, err)
+		}
+	}
+
+	data := &ModificationAttachmentsTemplateData{
+		TroubleReport: tr,
+		Modification:  targetMod,
+		Attachments:   attachments,
+	}
+
+	return utils.HandleTemplate(
+		c,
+		data,
+		h.templates,
+		[]string{
+			constants.TroubleReportsModificationAttachmentsPreviewComponentTemplatePath,
+		},
+	)
 }

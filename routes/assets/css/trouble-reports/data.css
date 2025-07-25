@@ -9,10 +9,14 @@
 .attachments-preview-label {
     font-weight: bold;
     margin-bottom: 8px;
-    color: var(--ui-primary-text);
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.attachments-preview-placeholder {
+    background-color: var(--ui-info);
+    color: var(--ui-info-text);
 }
 
 .attachments-preview-scroll {
