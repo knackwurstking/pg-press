@@ -17,43 +17,17 @@
             <pre>{{$troubleReport.Content}}</pre>
 
             <!-- Attachments Preview Container -->
-            <!-- TODO: Only load attachments preview if the details tag is open -->
             {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
-            <div class="attachments-preview-container">
+            <div 
+                class="attachments-preview-placeholder"
+                data-trouble-report-id="{{$troubleReport.ID}}"
+                hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
+                hx-trigger="load-attachments-{{$troubleReport.ID}} from:body"
+                hx-swap="outerHTML"
+            >
                 <div class="attachments-preview-label">
                     <i class="bi bi-paperclip"></i>
-                    Anhänge ({{len $troubleReport.LoadedAttachments}})
-                </div>
-                <div class="attachments-preview-scroll">
-                    {{range $troubleReport.LoadedAttachments}}
-                    <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
-                        {{if .IsImage}}
-                        <div class="attachment-preview-image">
-                            <img
-                                src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
-                                alt="Attachment {{.ID}}"
-                                class="preview-thumbnail"
-                            />
-                        </div>
-                        {{else}}
-                        <div class="attachment-preview-icon">
-                            {{if .IsDocument}}
-                            <i class="bi bi-file-text"></i>
-                            {{else if .IsArchive}}
-                            <i class="bi bi-file-zip"></i>
-                            {{else}}
-                            <i class="bi bi-file-earmark"></i>
-                            {{end}}
-                        </div>
-                        {{end}}
-                        <div class="attachment-preview-name">
-                            Attachment {{.ID}}
-                        </div>
-                        <div class="attachment-preview-type">
-                            {{.GetMimeType}}
-                        </div>
-                    </div>
-                    {{end}}
+                    Anhänge ({{len $troubleReport.LoadedAttachments}}) - Klicken Sie hier, um zu laden...
                 </div>
             </div>
             {{end}}
@@ -117,12 +91,29 @@
 
     <script>
         (() => {
-            if (!location.hash) return
+            // Handle hash-based navigation
+            if (location.hash) {
+                const el = document.querySelector(location.hash);
+                if (el) {
+                    el.open = true;
+                    // Trigger attachment loading if details is opened
+                    const troubleReportId = el.id.replace('trouble-report-', '');
+                    htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
+                }
+            }
 
-            const el = document.querySelector(location.hash);
-            if (!el) return;
-
-            el.open = true;
+            // Add event listeners for details toggle
+            document.querySelectorAll('details[id^="trouble-report-"]').forEach(details => {
+                details.addEventListener('toggle', function() {
+                    if (this.open) {
+                        const troubleReportId = this.id.replace('trouble-report-', '');
+                        const placeholder = this.querySelector('.attachments-preview-placeholder');
+                        if (placeholder) {
+                            htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
+                        }
+                    }
+                });
+            });
         })();
     </script>
 </ul>

@@ -24,9 +24,11 @@ type DataHandler struct {
 
 func (h *DataHandler) RegisterRoutes(e *echo.Echo) {
 	dataPath := h.serverPathPrefix + "/trouble-reports/data"
+	attachmentsPreviewPath := h.serverPathPrefix + "/trouble-reports/attachments-preview"
 
 	e.GET(dataPath, h.handleGetData)
 	e.DELETE(dataPath, h.handleDeleteData)
+	e.GET(attachmentsPreviewPath, h.handleGetAttachmentsPreview)
 }
 
 func (h *DataHandler) handleGetData(c echo.Context) error {
@@ -79,4 +81,31 @@ func (h *DataHandler) handleDeleteData(c echo.Context) error {
 	}
 
 	return h.handleGetData(c)
+}
+
+type AttachmentsPreviewTemplateData struct {
+	TroubleReport *pgvis.TroubleReportWithAttachments `json:"trouble_report"`
+}
+
+func (h *DataHandler) handleGetAttachmentsPreview(c echo.Context) error {
+	id, herr := utils.ParseInt64Query(c, "id")
+	if herr != nil {
+		return herr
+	}
+
+	tr, err := h.db.TroubleReportService.GetWithAttachments(id)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	return utils.HandleTemplate(
+		c,
+		AttachmentsPreviewTemplateData{
+			TroubleReport: tr,
+		},
+		h.templates,
+		[]string{
+			constants.TroubleReportsAttachmentsPreviewComponentTemplatePath,
+		},
+	)
 }

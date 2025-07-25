@@ -14,14 +14,15 @@ const (
 	TroubleReportsPageTemplatePath = "templates/pages/trouble-reports.html"
 
 	// Component templates
-	NavFeedComponentTemplatePath                     = "templates/components/nav/feed.html"
-	FeedCounterComponentTemplatePath                 = "templates/components/nav/feed-counter.html"
-	FeedDataComponentTemplatePath                    = "templates/components/feed/data.html"
-	ProfileCookiesComponentTemplatePath              = "templates/components/profile/cookies.html"
-	TroubleReportsDataComponentTemplatePath          = "templates/components/trouble-reports/data.html"
-	TroubleReportsModificationsComponentTemplatePath = "templates/components/trouble-reports/modifications.html"
-	TroubleReportsDialogEditComponentTemplatePath    = "templates/components/trouble-reports/dialog-edit.html"
-	AttachmentsSectionComponentTemplatePath          = "templates/components/attachments/section.html"
+	NavFeedComponentTemplatePath                          = "templates/components/nav/feed.html"
+	FeedCounterComponentTemplatePath                      = "templates/components/nav/feed-counter.html"
+	FeedDataComponentTemplatePath                         = "templates/components/feed/data.html"
+	ProfileCookiesComponentTemplatePath                   = "templates/components/profile/cookies.html"
+	TroubleReportsDataComponentTemplatePath               = "templates/components/trouble-reports/data.html"
+	TroubleReportsModificationsComponentTemplatePath      = "templates/components/trouble-reports/modifications.html"
+	TroubleReportsDialogEditComponentTemplatePath         = "templates/components/trouble-reports/dialog-edit.html"
+	TroubleReportsAttachmentsPreviewComponentTemplatePath = "templates/components/trouble-reports/attachments-preview.html"
+	AttachmentsSectionComponentTemplatePath               = "templates/components/attachments/section.html"
 )
 
 // Template sets for common page combinations
