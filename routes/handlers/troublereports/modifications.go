@@ -18,6 +18,7 @@ type ModificationsTemplateData struct {
 	TroubleReport     *pgvis.TroubleReport
 	LoadedAttachments []*pgvis.Attachment
 	Mods              pgvis.Mods[pgvis.TroubleReportMod]
+	ModAttachments    map[int64][]*pgvis.Attachment // map modification time to its attachments
 }
 
 func (mtd *ModificationsTemplateData) FirstModified() *pgvis.Modified[pgvis.TroubleReportMod] {
@@ -71,11 +72,24 @@ func (h *ModificationsHandler) handleGetModifications(c echo.Context, tr *pgvis.
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
+	// Load attachments for each modification
+	modAttachments := make(map[int64][]*pgvis.Attachment)
+	for _, mod := range tr.Mods {
+		if len(mod.Data.LinkedAttachments) > 0 {
+			attachments, err := h.db.Attachments.GetByIDs(mod.Data.LinkedAttachments)
+			if err != nil {
+				return utils.HandlePgvisError(c, err)
+			}
+			modAttachments[mod.Time] = attachments
+		}
+	}
+
 	data := &ModificationsTemplateData{
 		User:              user,
 		TroubleReport:     tr,
 		LoadedAttachments: loadedAttachments,
 		Mods:              mods,
+		ModAttachments:    modAttachments,
 	}
 
 	return utils.HandleTemplate(

@@ -94,6 +94,48 @@
                         overflow-y: auto;
                     "
                 >{{$mod.Data.Content}}</pre>
+
+                <!-- Attachments for this modification -->
+                {{$modAttachments := index $.ModAttachments $mod.Time}}
+                {{if $modAttachments}}
+                <div class="attachments-preview-container" style="margin-top: var(--ui-spacing);">
+                    <div class="attachments-preview-label">
+                        <i class="bi bi-paperclip"></i>
+                        Anhänge ({{len $modAttachments}})
+                    </div>
+                    <div class="attachments-preview-scroll">
+                        {{range $modAttachments}}
+                        <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
+                            {{if .IsImage}}
+                            <div class="attachment-preview-image">
+                                <img
+                                    src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
+                                    alt="Attachment {{.ID}}"
+                                    class="preview-thumbnail"
+                                />
+                            </div>
+                            {{else}}
+                            <div class="attachment-preview-icon">
+                                {{if .IsDocument}}
+                                <i class="bi bi-file-text"></i>
+                                {{else if .IsArchive}}
+                                <i class="bi bi-file-zip"></i>
+                                {{else}}
+                                <i class="bi bi-file-earmark"></i>
+                                {{end}}
+                            </div>
+                            {{end}}
+                            <div class="attachment-preview-name">
+                                Attachment {{.ID}}
+                            </div>
+                            <div class="attachment-preview-type">
+                                {{.GetMimeType}}
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
             </div>
 
             {{if ne $currentModified.Time $mod.Time}}
