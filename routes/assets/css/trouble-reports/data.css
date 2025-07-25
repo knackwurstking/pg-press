@@ -16,6 +16,7 @@
 }
 
 .attachments-preview-scroll {
+    padding: var(--ui-spacing);
     display: flex;
     gap: 12px;
     overflow-x: auto;
