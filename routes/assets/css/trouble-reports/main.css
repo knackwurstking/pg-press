@@ -1,4 +1,13 @@
-/* Shared Image Viewer Dialog Styles */
+/*
+ * Trouble Reports Main CSS
+ * Contains shared styles used across multiple trouble report components
+ */
+
+/* =================================================================
+ * SHARED IMAGE VIEWER DIALOG
+ * Used for viewing attachment images in full screen
+ * ================================================================= */
+
 .image-viewer-dialog {
     padding: 0;
     border: none;
@@ -90,11 +99,9 @@
     animation: spin 2s linear infinite;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
+/* =================================================================
+ * ANIMATIONS
+ * All keyframe animations are centralized in data.css to avoid duplication
+ * ================================================================= */
+
+/* Note: spin animation is defined in data.css */

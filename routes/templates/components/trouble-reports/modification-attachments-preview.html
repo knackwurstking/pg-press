@@ -10,7 +10,11 @@
     </div>
     <div class="attachments-preview-scroll">
         {{range $attachments}}
-        <div class="attachment-preview-item" onclick="viewAttachmentFromData({{$troubleReport.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')">
+        <div class="attachment-preview-item" 
+             data-report-id="{{$troubleReport.ID}}" 
+             data-attachment-id="{{.GetID}}" 
+             data-is-image="{{.IsImage}}"
+             onclick="viewAttachmentFromData(this.dataset.reportId, this.dataset.attachmentId, this.dataset.isImage)">
             {{if .IsImage}}
             <div class="attachment-preview-image">
                 <img

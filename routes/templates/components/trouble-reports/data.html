@@ -24,6 +24,8 @@
                 hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
                 hx-trigger="load-attachments-{{$troubleReport.ID}} from:body"
                 hx-swap="outerHTML"
+                onclick="loadAttachmentsForTroubleReport('{{$troubleReport.ID}}')"
+                style="cursor: pointer;"
             >
                 <div class="attachments-preview-label">
                     <i class="bi bi-paperclip"></i>
@@ -123,21 +125,31 @@
 
             // Function to handle attachment loading
             function loadAttachmentsForTroubleReport(troubleReportId) {
+                console.log('🔍 Loading attachments for trouble report ID:', troubleReportId);
                 const placeholder = document.querySelector(`[data-trouble-report-id="${troubleReportId}"]`);
+                console.log('🎯 Found placeholder element:', placeholder);
                 if (placeholder) {
+                    console.log('🚀 Triggering HTMX load for:', `load-attachments-${troubleReportId}`);
                     htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
+                } else {
+                    console.warn('❌ No placeholder found for trouble report ID:', troubleReportId);
                 }
             }
 
             // Handle hash-based navigation after HTMX has loaded
             function handleHashNavigation() {
+                console.log('🔗 Hash navigation check, current hash:', location.hash);
                 if (location.hash) {
                     const el = document.querySelector(location.hash);
+                    console.log('🎯 Found hash element:', el);
                     if (el) {
                         el.open = true;
                         const troubleReportId = el.id.replace('trouble-report-', '');
+                        console.log('🆔 Extracted trouble report ID from hash:', troubleReportId);
                         loadAttachmentsForTroubleReport(troubleReportId);
                     }
+                } else {
+                    console.log('ℹ️ No hash in URL');
                 }
             }
 
@@ -149,145 +161,61 @@
 
             // Add event listeners for details toggle
             document.querySelectorAll('details[id^="trouble-report-"]').forEach(details => {
+                console.log('📋 Setting up toggle listener for:', details.id);
                 details.addEventListener('toggle', function() {
+                    console.log('🔄 Details toggle event for:', this.id, 'open:', this.open);
                     if (this.open) {
                         const troubleReportId = this.id.replace('trouble-report-', '');
+                        console.log('✅ Details opened, loading attachments for ID:', troubleReportId);
                         loadAttachmentsForTroubleReport(troubleReportId);
                     }
                 });
             });
 
-            // Function to share trouble report PDF
-            window.shareTroubleReportPDF = async function(troubleReportId, title) {
-                let button = null;
-                let originalContent = '';
+            // PDF sharing functionality is now in main.js
 
-                try {
-                    // Show loading state
-                    button = event.target.closest('button');
-                    if (!button) {
-                        alert('Fehler: Share-Button nicht gefunden.');
-                        return;
-                    }
-
-                    originalContent = button.innerHTML;
-                    button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-                    button.disabled = true;
-
-                    // Check HTTPS requirement for Web Share API
-                    const isHTTPS = location.protocol === 'https:';
-                    const canUseWebShare = isHTTPS;
-
-                    console.log('=== PDF Share Decision Path ===');
-                    console.log('Current URL:', location.href);
-                    console.log('Protocol:', location.protocol);
-                    console.log('Hostname:', location.hostname);
-                    console.log('HTTPS:', isHTTPS);
-                    console.log('Can use Web Share API:', canUseWebShare);
-                    console.log('navigator.share exists:', 'share' in navigator);
-                    console.log('navigator.canShare exists:', 'canShare' in navigator);
-
-                    if (!canUseWebShare) {
-                        console.log('🚫 Decision: FORCE DIRECT DOWNLOAD - HTTPS required for Web Share API, skipping entirely');
-                    } else {
-                        console.log('✅ Decision: HTTPS detected - will attempt Web Share API');
-                    }
-
-                    // Fetch PDF from server
-                    const response = await fetch(`./trouble-reports/share-pdf?id=${troubleReportId}`);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const blob = await response.blob();
-                    const filename = `fehlerbericht_${troubleReportId}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-                    // Decision: Use Web Share API only if HTTPS/localhost AND browser supports it
-                    if (canUseWebShare) {
-                        console.log('🔒 Secure context confirmed - checking Web Share API support...');
-
-                        if (navigator.share && navigator.canShare) {
-                            const file = new File([blob], filename, { type: 'application/pdf' });
-                            const shareData = {
-                                title: `Fehlerbericht: ${title}`,
-                                text: `Fehlerbericht #${troubleReportId}`,
-                                files: [file]
-                            };
-
-                            // Check if we can share files and attempt to share
-                            if (navigator.canShare(shareData)) {
-                                console.log('Attempting Web Share API with file...');
-                                try {
-                                    await navigator.share(shareData);
-                                    // Show success feedback
-                                    button.innerHTML = '<i class="bi bi-check-circle"></i>';
-                                    button.style.color = 'green';
-                                    setTimeout(() => {
-                                        button.innerHTML = originalContent;
-                                        button.style.color = 'blue';
-                                        button.disabled = false;
-                                    }, 1500);
-                                    return; // Success - exit function
-                                } catch (shareError) {
-                                    console.log('Web Share API failed:', shareError);
-
-                                    // Handle specific error types
-                                    if (shareError.name === 'NotAllowedError') {
-                                        console.log('Share permission denied');
-                                    } else if (shareError.name === 'AbortError') {
-                                        console.log('Share cancelled by user');
-                                    } else {
-                                        console.log('Other share error:', shareError.name);
-                                    }
-
-                                    // Fall through to download
-                                }
-                            } else {
-                                console.log('Cannot share files - falling back to download');
-                            }
-                        } else {
-                            console.log('Web Share API not available - falling back to download');
-                        }
-                    } else {
-                        console.log('🚫 Non-HTTPS connection - FORCING direct download, NO Web Share API attempt');
-                        console.log('This prevents empty shares with missing PDF files');
-                    }
-
-                    // Download the PDF (fallback or direct)
-                    console.log('📥 Starting PDF download...');
-                    console.log('Reason:', canUseWebShare ? 'Web Share API failed/unsupported' : 'Non-HTTPS connection - direct download');
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-
-                    // Show download success feedback
-                    button.innerHTML = '<i class="bi bi-download"></i>';
-                    button.style.color = 'green';
-                    setTimeout(() => {
-                        button.innerHTML = originalContent;
-                        button.style.color = 'blue';
-                        button.disabled = false;
-                    }, 1500);
-
-                } catch (error) {
-                    console.error('Error sharing/downloading PDF:', error);
-                    alert('Fehler beim Erstellen oder Teilen der PDF. Bitte versuchen Sie es erneut.');
-                    // Restore button state on error
-                    if (button && originalContent) {
-                        button.innerHTML = originalContent;
-                        button.style.color = 'blue';
-                        button.disabled = false;
-                    }
+            // Add HTMX event listeners for debugging attachment loading
+            document.addEventListener('htmx:beforeRequest', function(event) {
+                if (event.detail.requestConfig.path.includes('attachments-preview')) {
+                    console.log('🔄 HTMX: Before attachment request', {
+                        path: event.detail.requestConfig.path,
+                        trigger: event.detail.requestConfig.triggeringEvent,
+                        target: event.target
+                    });
                 }
-            };
+            });
 
+            document.addEventListener('htmx:afterRequest', function(event) {
+                if (event.detail.requestConfig.path.includes('attachments-preview')) {
+                    console.log('✅ HTMX: After attachment request', {
+                        path: event.detail.requestConfig.path,
+                        status: event.detail.xhr.status,
+                        response: event.detail.xhr.responseText.substring(0, 200),
+                        target: event.target
+                    });
+                }
+            });
+
+            document.addEventListener('htmx:responseError', function(event) {
+                if (event.detail.requestConfig.path.includes('attachments-preview')) {
+                    console.error('❌ HTMX: Attachment request error', {
+                        path: event.detail.requestConfig.path,
+                        status: event.detail.xhr.status,
+                        error: event.detail.xhr.responseText,
+                        target: event.target
+                    });
+                }
+            });
+
+            document.addEventListener('htmx:swapError', function(event) {
+                if (event.detail.requestConfig.path.includes('attachments-preview')) {
+                    console.error('🔄 HTMX: Attachment swap error', {
+                        path: event.detail.requestConfig.path,
+                        error: event.detail.error,
+                        target: event.target
+                    });
+                }
+            });
 
         })();
     </script>

@@ -247,22 +247,4 @@ document.querySelector("#dialogEdit").showModal();
     });
 })();
 
-// Global functions for backward compatibility
-function handleFileSelect(event) {
-    window.dialogEditFunctions.handleFileSelect(event);
-}
-function handleFileDrop(event) {
-    window.dialogEditFunctions.handleFileDrop(event);
-}
-function handleDragOver(event) {
-    window.dialogEditFunctions.handleDragOver(event);
-}
-function handleDragLeave(event) {
-    window.dialogEditFunctions.handleDragLeave(event);
-}
-function viewAttachment(reportId, attachmentId, isImage) {
-    window.dialogEditFunctions.viewAttachment(reportId, attachmentId, isImage);
-}
-function deleteAttachment(reportId, attachmentId) {
-    window.dialogEditFunctions.deleteAttachment(reportId, attachmentId);
-}
+// Global functions are now consolidated in main.js

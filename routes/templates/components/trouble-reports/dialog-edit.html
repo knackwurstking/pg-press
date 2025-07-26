@@ -97,7 +97,7 @@
                                 <button
                                     type="button"
                                     class="secondary row gap"
-                                    onclick="viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
+                                    onclick="window.dialogEditFunctions.viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
                                 >
                                     <small>
                                         <i class="bi bi-eye"></i>
@@ -108,7 +108,7 @@
                                 <button
                                     type="button"
                                     class="destructive row gap"
-                                    onclick="deleteAttachment({{$.ID}}, {{.GetID}})"
+                                    onclick="window.dialogEditFunctions.deleteAttachment({{$.ID}}, {{.GetID}})"
                                 >
                                     <small>
                                         <i class="bi bi-trash"></i>
@@ -126,9 +126,9 @@
                 <div
                     class="file-input-area"
                     onclick="document.getElementById('attachments').click()"
-                    ondrop="handleFileDrop(event)"
-                    ondragover="handleDragOver(event)"
-                    ondragleave="handleDragLeave(event)"
+                    ondrop="window.dialogEditFunctions.handleFileDrop(event)"
+                    ondragover="window.dialogEditFunctions.handleDragOver(event)"
+                    ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
                 >
                     <i
                         class="bi bi-cloud-upload"
@@ -147,7 +147,7 @@
                         id="attachments"
                         multiple
                         accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
-                        onchange="handleFileSelect(event)"
+                        onchange="window.dialogEditFunctions.handleFileSelect(event)"
                     />
                 </div>
 

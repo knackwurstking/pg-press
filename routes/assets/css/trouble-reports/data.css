@@ -1,3 +1,12 @@
+/*
+ * Trouble Reports Data CSS
+ * Contains styles for trouble report listings, attachment previews, and action buttons
+ */
+
+/* =================================================================
+ * ATTACHMENT PREVIEW STYLES
+ * ================================================================= */
+
 /* Attachment Preview Container */
 .attachments-preview-container {
     margin: var(--ui-spacing) 0;
@@ -101,6 +110,10 @@
     width: 100%;
 }
 
+/* =================================================================
+ * IMAGE PREVIEW STYLES
+ * ================================================================= */
+
 /* Image Preview Styles */
 .attachment-preview-image {
     width: 96px;
@@ -121,6 +134,10 @@
 .attachment-preview-item:hover .preview-thumbnail {
     transform: scale(1.05);
 }
+
+/* =================================================================
+ * SHARE BUTTON STYLES
+ * ================================================================= */
 
 /* Share Button Styles */
 .actions button[title="Als PDF teilen"] {
@@ -183,27 +200,29 @@
     }
 }
 
-/* Debug Button Warning Styles */
-.actions button.warning {
-    border: 1px dashed #ffc107;
-    background-color: rgba(255, 193, 7, 0.1);
-}
+/* =================================================================
+ * SHARED ANIMATIONS
+ * Used across multiple trouble report components
+ * ================================================================= */
 
-.actions button.warning:hover {
-    background-color: rgba(255, 193, 7, 0.2);
-    border-color: #e0a800;
-}
-
-.actions button.warning i {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%,
-    100% {
-        opacity: 1;
+/* Spin animation - used for loading states */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
     }
-    50% {
-        opacity: 0.6;
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Scale-in animation - used for success feedback */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
 }
