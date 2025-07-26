@@ -159,7 +159,37 @@ Deleted Files:
 
 - Keep JavaScript functions in appropriate modules (main.js for shared, dialog-edit.js for dialog-specific)
 - Maintain CSS organization with clear section headers
-- Use the consolidated attachment preview component rather than creating new ones
+- Use the appropriate attachment preview components (separate for regular vs modification contexts)
 - Follow the established namespacing pattern for global functions
+- When debugging is needed, add temporary logging but ensure it's removed before production
+
+### Debugging Best Practices
+
+If future attachment loading issues arise:
+
+1. Add temporary console logging to trace the loading flow
+2. Monitor HTMX requests and responses
+3. Verify template data structures match expectations
+4. Always remove debugging code after issue resolution
+
+## Post-Cleanup Status
+
+### Issue Resolution
+
+After the initial cleanup, a temporary issue was discovered where regular trouble report attachments were not displaying (while modification attachments worked correctly). This was diagnosed and resolved through:
+
+1. **Debugging Phase**: Temporarily added comprehensive logging to identify the root cause
+2. **Template Fixes**: Corrected Go template syntax and data attribute handling
+3. **Cleanup Phase**: Removed all debugging code, returning to clean production state
+
+### Final State
+
+The codebase is now in a clean, production-ready state with:
+
+- ✅ All duplicate code eliminated
+- ✅ Dead code removed
+- ✅ Proper code organization maintained
+- ✅ Attachment functionality working correctly in both contexts
+- ✅ No debugging code or temporary fixes remaining
 
 This cleanup significantly improves the codebase maintainability while preserving all existing functionality.

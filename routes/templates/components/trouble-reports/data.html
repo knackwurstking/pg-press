@@ -24,8 +24,6 @@
                 hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
                 hx-trigger="load-attachments-{{$troubleReport.ID}} from:body"
                 hx-swap="outerHTML"
-                onclick="loadAttachmentsForTroubleReport('{{$troubleReport.ID}}')"
-                style="cursor: pointer;"
             >
                 <div class="attachments-preview-label">
                     <i class="bi bi-paperclip"></i>
@@ -125,31 +123,21 @@
 
             // Function to handle attachment loading
             function loadAttachmentsForTroubleReport(troubleReportId) {
-                console.log('🔍 Loading attachments for trouble report ID:', troubleReportId);
                 const placeholder = document.querySelector(`[data-trouble-report-id="${troubleReportId}"]`);
-                console.log('🎯 Found placeholder element:', placeholder);
                 if (placeholder) {
-                    console.log('🚀 Triggering HTMX load for:', `load-attachments-${troubleReportId}`);
                     htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
-                } else {
-                    console.warn('❌ No placeholder found for trouble report ID:', troubleReportId);
                 }
             }
 
             // Handle hash-based navigation after HTMX has loaded
             function handleHashNavigation() {
-                console.log('🔗 Hash navigation check, current hash:', location.hash);
                 if (location.hash) {
                     const el = document.querySelector(location.hash);
-                    console.log('🎯 Found hash element:', el);
                     if (el) {
                         el.open = true;
                         const troubleReportId = el.id.replace('trouble-report-', '');
-                        console.log('🆔 Extracted trouble report ID from hash:', troubleReportId);
                         loadAttachmentsForTroubleReport(troubleReportId);
                     }
-                } else {
-                    console.log('ℹ️ No hash in URL');
                 }
             }
 
@@ -161,61 +149,15 @@
 
             // Add event listeners for details toggle
             document.querySelectorAll('details[id^="trouble-report-"]').forEach(details => {
-                console.log('📋 Setting up toggle listener for:', details.id);
                 details.addEventListener('toggle', function() {
-                    console.log('🔄 Details toggle event for:', this.id, 'open:', this.open);
                     if (this.open) {
                         const troubleReportId = this.id.replace('trouble-report-', '');
-                        console.log('✅ Details opened, loading attachments for ID:', troubleReportId);
                         loadAttachmentsForTroubleReport(troubleReportId);
                     }
                 });
             });
 
             // PDF sharing functionality is now in main.js
-
-            // Add HTMX event listeners for debugging attachment loading
-            document.addEventListener('htmx:beforeRequest', function(event) {
-                if (event.detail.requestConfig.path.includes('attachments-preview')) {
-                    console.log('🔄 HTMX: Before attachment request', {
-                        path: event.detail.requestConfig.path,
-                        trigger: event.detail.requestConfig.triggeringEvent,
-                        target: event.target
-                    });
-                }
-            });
-
-            document.addEventListener('htmx:afterRequest', function(event) {
-                if (event.detail.requestConfig.path.includes('attachments-preview')) {
-                    console.log('✅ HTMX: After attachment request', {
-                        path: event.detail.requestConfig.path,
-                        status: event.detail.xhr.status,
-                        response: event.detail.xhr.responseText.substring(0, 200),
-                        target: event.target
-                    });
-                }
-            });
-
-            document.addEventListener('htmx:responseError', function(event) {
-                if (event.detail.requestConfig.path.includes('attachments-preview')) {
-                    console.error('❌ HTMX: Attachment request error', {
-                        path: event.detail.requestConfig.path,
-                        status: event.detail.xhr.status,
-                        error: event.detail.xhr.responseText,
-                        target: event.target
-                    });
-                }
-            });
-
-            document.addEventListener('htmx:swapError', function(event) {
-                if (event.detail.requestConfig.path.includes('attachments-preview')) {
-                    console.error('🔄 HTMX: Attachment swap error', {
-                        path: event.detail.requestConfig.path,
-                        error: event.detail.error,
-                        target: event.target
-                    });
-                }
-            });
 
         })();
     </script>
