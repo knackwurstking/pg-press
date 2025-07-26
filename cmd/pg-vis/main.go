@@ -6,7 +6,7 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 const (

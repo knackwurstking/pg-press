@@ -1,11 +1,11 @@
-// Package pgvis provides attachment management with lazy loading.
-package pgvis
+// Package database provides attachment management with lazy loading.
+package database
 
 import (
 	"database/sql"
 	"fmt"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 const (

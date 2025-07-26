@@ -1,11 +1,11 @@
-// Package pgvis provides database migration utilities.
-package pgvis
+// Package database provides database migration utilities.
+package database
 
 import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 // Migration handles database schema and data migrations.

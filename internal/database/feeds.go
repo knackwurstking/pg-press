@@ -1,10 +1,10 @@
-package pgvis
+package database
 
 import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 // FeedNotifier interface for handling feed update notifications

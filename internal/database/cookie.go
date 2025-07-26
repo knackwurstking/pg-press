@@ -1,5 +1,5 @@
-// Package pgvis defines cookie models for user sessions and authentication.
-package pgvis
+// Package database defines cookie models for user sessions and authentication.
+package database
 
 import (
 	"crypto/rand"

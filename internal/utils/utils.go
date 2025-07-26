@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
 	"github.com/labstack/echo/v4"
+
+	"github.com/knackwurstking/pg-vis/internal/database"
 )
 
 const (
@@ -23,8 +24,8 @@ const (
 	templateExecuteErrorMessage   = "failed to render page"
 )
 
-func GetUserFromContext(ctx echo.Context) (*pgvis.User, *echo.HTTPError) {
-	user, ok := ctx.Get(userContextKey).(*pgvis.User)
+func GetUserFromContext(ctx echo.Context) (*database.User, *echo.HTTPError) {
+	user, ok := ctx.Get(userContextKey).(*database.User)
 	if !ok {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
@@ -77,10 +78,10 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 		return nil
 	}
 
-	code := pgvis.GetHTTPStatusCode(err)
+	code := database.GetHTTPStatusCode(err)
 	message := err.Error()
 
-	if pgvis.IsValidationError(err) {
+	if database.IsValidationError(err) {
 		return echo.NewHTTPError(code, map[string]any{
 			"error":   "Validation failed",
 			"code":    code,
@@ -89,7 +90,7 @@ func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
 		})
 	}
 
-	if errors.Is(err, pgvis.ErrNotFound) {
+	if errors.Is(err, database.ErrNotFound) {
 		return echo.NewHTTPError(code, "Resource not found")
 	}
 
@@ -107,14 +108,14 @@ func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []st
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			pgvis.WrapError(err, templateParseErrorMessage),
+			database.WrapError(err, templateParseErrorMessage),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			pgvis.WrapError(err, templateExecuteErrorMessage),
+			database.WrapError(err, templateExecuteErrorMessage),
 		)
 	}
 
@@ -124,12 +125,12 @@ func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []st
 func RenderTemplateToString(templates fs.FS, patterns []string, pageData any) (string, error) {
 	t, err := template.ParseFS(templates, patterns...)
 	if err != nil {
-		return "", pgvis.WrapError(err, templateParseErrorMessage)
+		return "", database.WrapError(err, templateParseErrorMessage)
 	}
 
 	var buf bytes.Buffer
 	if err := t.Execute(&buf, pageData); err != nil {
-		return "", pgvis.WrapError(err, templateExecuteErrorMessage)
+		return "", database.WrapError(err, templateExecuteErrorMessage)
 	}
 
 	return buf.String(), nil

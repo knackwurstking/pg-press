@@ -9,11 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/constants"
-	"github.com/knackwurstking/pg-vis/routes/internal/utils"
+	"github.com/knackwurstking/pg-vis/internal/constants"
+	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pg-vis/internal/utils"
 	"golang.org/x/net/websocket"
 )
 
@@ -32,7 +32,7 @@ type FeedNotifier struct {
 	register    chan *FeedConnection
 	unregister  chan *FeedConnection
 	broadcast   chan struct{}
-	db          *pgvis.DB
+	db          *database.DB
 	templates   fs.FS
 	mu          sync.RWMutex
 }
@@ -43,7 +43,7 @@ type FeedCounterTemplateData struct {
 }
 
 // NewFeedNotifier creates a new feed notification manager
-func NewFeedNotifier(db *pgvis.DB, templates fs.FS) *FeedNotifier {
+func NewFeedNotifier(db *database.DB, templates fs.FS) *FeedNotifier {
 	return &FeedNotifier{
 		connections: make(map[*FeedConnection]bool),
 		register:    make(chan *FeedConnection),

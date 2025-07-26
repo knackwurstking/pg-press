@@ -1,51 +1,40 @@
-// Package auth provides HTTP route handlers for authentication.
-package auth
+package handler
 
 import (
-	"embed"
 	"errors"
 	"net/http"
 	"time"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
-
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/constants"
-	"github.com/knackwurstking/pg-vis/routes/internal/utils"
+	"github.com/knackwurstking/pg-vis/internal/constants"
+	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pg-vis/internal/utils"
 )
 
-// Handler handles authentication-related HTTP requests.
-type Handler struct {
-	db               *pgvis.DB
-	serverPathPrefix string
-	templates        embed.FS
-}
-
-// NewHandler creates a new authentication handler.
-func NewHandler(db *pgvis.DB, serverPathPrefix string, templates embed.FS) *Handler {
-	return &Handler{
-		db:               db,
-		serverPathPrefix: serverPathPrefix,
-		templates:        templates,
-	}
-}
-
-// RegisterRoutes registers all authentication routes.
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
-	e.GET(h.serverPathPrefix+"/login", h.handleLogin)
-	e.GET(h.serverPathPrefix+"/logout", h.handleLogout)
-}
-
-type LoginTemplateData struct {
+type AuthTemplateData struct {
 	ApiKey        string
 	InvalidApiKey bool
 }
 
+type Auth struct {
+	*Base
+}
+
+// NewHandler creates a new authentication handler.
+func NewAuth(base *Base) *Auth {
+	return &Auth{base}
+}
+
+func (h *Auth) RegisterRoutes(e *echo.Echo) {
+	e.GET(h.ServerPathPrefix+"/login", h.handleLogin)
+	e.GET(h.ServerPathPrefix+"/logout", h.handleLogout)
+}
+
 // handleLogin handles the login page and form submission.
-func (h *Handler) handleLogin(c echo.Context) error {
+func (h *Auth) handleLogin(c echo.Context) error {
 	formParams, _ := c.FormParams()
 	apiKey := formParams.Get(constants.APIKeyFormField)
 
@@ -63,19 +52,19 @@ func (h *Handler) handleLogin(c echo.Context) error {
 
 	return utils.HandleTemplate(
 		c,
-		LoginTemplateData{
+		AuthTemplateData{
 			ApiKey:        apiKey,
 			InvalidApiKey: apiKey != "",
 		},
-		h.templates,
+		h.Templates,
 		constants.LoginPageTemplates,
 	)
 }
 
 // handleLogout handles user logout.
-func (h *Handler) handleLogout(c echo.Context) error {
+func (h *Auth) handleLogout(c echo.Context) error {
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
-		if err := h.db.Cookies.Remove(cookie.Value); err != nil {
+		if err := h.DB.Cookies.Remove(cookie.Value); err != nil {
 			logger.Auth().Error("Failed to remove cookie from database: %v", err)
 		}
 	}
@@ -91,14 +80,14 @@ func (h *Handler) handleLogout(c echo.Context) error {
 }
 
 // processApiKeyLogin processes API key authentication and creates a session.
-func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
+func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if apiKey == "" {
 		return false
 	}
 
-	user, err := h.db.Users.GetUserFromApiKey(apiKey)
+	user, err := h.DB.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
-		if errors.Is(err, pgvis.ErrNotFound) {
+		if errors.Is(err, database.ErrNotFound) {
 			return false
 		}
 
@@ -113,7 +102,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
 		logger.Auth().Info("Removing existing authentication cookie")
 
-		if err := h.db.Cookies.Remove(existingCookie.Value); err != nil {
+		if err := h.DB.Cookies.Remove(existingCookie.Value); err != nil {
 			logger.Auth().Error("Failed to remove existing cookie: %v", err)
 		}
 	}
@@ -129,13 +118,13 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	ctx.SetCookie(cookie)
 
-	sessionCookie := pgvis.NewCookie(
+	sessionCookie := database.NewCookie(
 		ctx.Request().UserAgent(),
 		cookie.Value,
 		apiKey,
 	)
 
-	if err := h.db.Cookies.Add(sessionCookie); err != nil {
+	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
 		logger.Auth().Error("Failed to create session: %v", err)
 		return false
 	}

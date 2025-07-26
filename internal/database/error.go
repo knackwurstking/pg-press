@@ -1,5 +1,5 @@
-// Package pgvis provides error handling utilities and types.
-package pgvis
+// Package database provides error handling utilities and types.
+package database
 
 import (
 	"errors"

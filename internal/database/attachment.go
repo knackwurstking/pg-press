@@ -5,7 +5,7 @@
 // be linked to trouble reports or other entities in the system.
 //
 // Attachments store data in byte form with mime type and unique ID.
-package pgvis
+package database
 
 import (
 	"fmt"

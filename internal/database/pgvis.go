@@ -1,5 +1,5 @@
-// Package pgvis provides a PostgreSQL visualization and management system.
-package pgvis
+// Package database provides a PostgreSQL visualization and management system.
+package database
 
 import "strings"
 

@@ -1,4 +1,4 @@
-package pgvis
+package database
 
 import (
 	"fmt"

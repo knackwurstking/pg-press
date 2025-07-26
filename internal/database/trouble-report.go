@@ -1,5 +1,5 @@
-// Package pgvis provides trouble report models for tracking issues and problems.
-package pgvis
+// Package database provides trouble report models for tracking issues and problems.
+package database
 
 import (
 	"fmt"

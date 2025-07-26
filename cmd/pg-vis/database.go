@@ -6,10 +6,10 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/internal/database"
 )
 
-func openDB(customPath string) (*pgvis.DB, error) {
+func openDB(customPath string) (*database.DB, error) {
 	path := filepath.Join(configPath, databaseFile)
 
 	if customPath != "" {
@@ -25,5 +25,5 @@ func openDB(customPath string) (*pgvis.DB, error) {
 		return nil, err
 	}
 
-	return pgvis.New(db), nil
+	return database.New(db), nil
 }

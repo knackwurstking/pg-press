@@ -1,11 +1,11 @@
-// Package pgvis provides cookie and session management.
-package pgvis
+// Package database provides cookie and session management.
+package database
 
 import (
 	"database/sql"
 	"slices"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 const (

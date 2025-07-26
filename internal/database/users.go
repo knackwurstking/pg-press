@@ -1,17 +1,17 @@
-// Package pgvis user management.
+// Package database user management.
 //
 // This file provides database operations for managing users,
 // including CRUD operations, authentication via API keys, and integration
 // with the activity feed system. All database operations use parameterized
 // queries to prevent SQL injection attacks.
-package pgvis
+package database
 
 import (
 	"database/sql"
 	"fmt"
 	"log"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 // SQL queries for user operations

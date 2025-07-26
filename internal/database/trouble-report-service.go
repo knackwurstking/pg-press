@@ -1,10 +1,10 @@
-// Package pgvis provides service layer for trouble report operations with attachment lazy loading.
-package pgvis
+// Package database provides service layer for trouble report operations with attachment lazy loading.
+package database
 
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.

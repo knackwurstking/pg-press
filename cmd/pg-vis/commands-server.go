@@ -12,9 +12,9 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
-	"github.com/knackwurstking/pg-vis/routes"
+	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pg-vis/internal/router"
 )
 
 // serverCommand creates the CLI command for starting the HTTP server.
@@ -49,7 +49,7 @@ func serverCommand() cli.Command {
 				e.Use(middlewareKeyAuth(db))
 				e.HTTPErrorHandler = createHTTPErrorHandler()
 
-				routes.Serve(e, routes.Options{
+				router.Serve(e, router.Options{
 					ServerPathPrefix: serverPathPrefix,
 					DB:               db,
 				})
@@ -91,7 +91,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				message = http.StatusText(code)
 			}
 		} else {
-			code = pgvis.GetHTTPStatusCode(err)
+			code = database.GetHTTPStatusCode(err)
 			message = err.Error()
 		}
 

@@ -8,13 +8,13 @@ import (
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/constants"
+	"github.com/knackwurstking/pg-vis/internal/constants"
+	"github.com/knackwurstking/pg-vis/internal/database"
 )
 
 var (
@@ -43,7 +43,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 				return 0, nil
 			}
 
-			user, ok := c.Get("user").(*pgvis.User)
+			user, ok := c.Get("user").(*database.User)
 			if !ok {
 				return 0, nil
 			}
@@ -53,7 +53,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 	})
 }
 
-func middlewareKeyAuth(db *pgvis.DB) echo.MiddlewareFunc {
+func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper:    keyAuthSkipper,
 		KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + constants.CookieName,
@@ -72,13 +72,13 @@ func keyAuthSkipper(ctx echo.Context) bool {
 	return keyAuthSkipperRegExp.MatchString(url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error) {
+func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
 		user, err = db.Users.GetUserFromApiKey(auth)
 		if err != nil {
-			return false, pgvis.WrapError(err, "failed to validate user from cookie")
+			return false, database.WrapError(err, "failed to validate user from cookie")
 		}
 	}
 
@@ -86,26 +86,26 @@ func keyAuthValidator(auth string, ctx echo.Context, db *pgvis.DB) (bool, error)
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *pgvis.DB) (*pgvis.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
-		return nil, pgvis.WrapError(err, "failed to get cookie")
+		return nil, database.WrapError(err, "failed to get cookie")
 	}
 
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
-		return nil, pgvis.WrapError(err, "failed to get cookie value")
+		return nil, database.WrapError(err, "failed to get cookie value")
 	}
 
 	// Check if cookie has expired
 	expirationThreshold := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
 	if c.LastLogin < expirationThreshold {
-		return nil, pgvis.NewValidationError("cookie", "cookie has expired", nil)
+		return nil, database.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
-		return nil, pgvis.WrapError(err, "failed to get user from API key")
+		return nil, database.WrapError(err, "failed to get user from API key")
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {

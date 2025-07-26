@@ -1,11 +1,36 @@
 [Unit]
 Description=PG Vis Server
 After=network.target
+#Documentation=man:pg-vis(1)
 
 [Service]
+Type=simple
 Environment="SERVER_ADDR=:9020"
 Environment="SERVER_PATH_PREFIX=/pg-vis"
-ExecStart=pg-vis server
+ExecStart=/usr/bin/pg-vis server
+Restart=on-failure
+RestartSec=5
+User=pg-vis
+Group=pg-vis
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
+
+
+# NOTE: The following is a backup configuration for a systemd service file.
+#
+#[Unit]
+#Description=PG Vis Server
+#After=network.target
+#
+#[Service]
+#Environment="SERVER_ADDR=:9020"
+#Environment="SERVER_PATH_PREFIX=/pg-vis"
+#ExecStart=pg-vis server
+#
+#[Install]
+#WantedBy=default.target

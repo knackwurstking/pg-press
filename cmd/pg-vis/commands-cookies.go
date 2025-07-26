@@ -8,8 +8,8 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
-	"github.com/knackwurstking/pg-vis/routes/constants"
+	"github.com/knackwurstking/pg-vis/internal/constants"
+	"github.com/knackwurstking/pg-vis/internal/database"
 )
 
 func removeCookiesCommand() cli.Command {
@@ -73,7 +73,7 @@ func autoCleanCookiesCommand() cli.Command {
 				}
 
 				t := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
-				isExpired := func(cookie *pgvis.Cookie) bool {
+				isExpired := func(cookie *database.Cookie) bool {
 					return t >= cookie.LastLogin
 				}
 
@@ -81,7 +81,7 @@ func autoCleanCookiesCommand() cli.Command {
 				if *telegramID != 0 {
 					u, err := db.Users.Get(*telegramID)
 					if err != nil {
-						if errors.Is(err, pgvis.ErrNotFound) {
+						if errors.Is(err, database.ErrNotFound) {
 							os.Exit(exitCodeNotFound)
 						}
 

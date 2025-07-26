@@ -9,7 +9,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/labstack/gommon/color"
 
-	"github.com/knackwurstking/pg-vis/pgvis"
+	"github.com/knackwurstking/pg-vis/internal/database"
 )
 
 func listUserCommand() cli.Command {
@@ -74,7 +74,7 @@ func showUserCommand() cli.Command {
 
 				user, err := db.Users.Get(*telegramID)
 				if err != nil {
-					if errors.Is(err, pgvis.ErrNotFound) {
+					if errors.Is(err, database.ErrNotFound) {
 						os.Exit(exitCodeNotFound)
 					}
 
@@ -106,7 +106,7 @@ func showUserCommand() cli.Command {
 							color.Underline(color.Bold("Cookies:")),
 						)
 
-						for _, c := range pgvis.SortCookies(cookies) {
+						for _, c := range database.SortCookies(cookies) {
 							fmt.Printf(
 								"%s - %s - %s - \"%s\"\n",
 								c.TimeString(),
@@ -143,8 +143,8 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				user := pgvis.NewUser(*telegramID, *userName, *apiKey)
-				if err = db.Users.Add(user); errors.Is(err, pgvis.ErrAlreadyExists) {
+				user := database.NewUser(*telegramID, *userName, *apiKey)
+				if err = db.Users.Add(user); errors.Is(err, database.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
 				}

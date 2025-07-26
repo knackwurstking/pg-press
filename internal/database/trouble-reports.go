@@ -1,12 +1,12 @@
-// Package pgvis provides trouble reports management.
-package pgvis
+// Package database provides trouble reports management.
+package database
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 
-	"github.com/knackwurstking/pg-vis/pgvis/logger"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
 const (
