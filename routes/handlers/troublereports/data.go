@@ -198,19 +198,19 @@ func (h *DataHandler) handleGetSharePdf(c echo.Context) error {
 
 		pdf.SetFont("Arial", "", 11)
 		createdAt := time.Unix(0, earliestTime*int64(time.Millisecond))
-		pdf.Cell(0, 6, translator(fmt.Sprintf("Erstellt am: %s", createdAt.Format("02.01.2006 15:04:05"))))
+		createdText := fmt.Sprintf("Erstellt am: %s", createdAt.Format("02.01.2006 15:04:05"))
 		if creator != nil {
-			pdf.Cell(0, 6, translator(fmt.Sprintf(" von %s", creator.UserName)))
+			createdText += fmt.Sprintf(" von %s", creator.UserName)
 		}
-		pdf.Ln(5)
+		pdf.MultiCell(0, 6, translator(createdText), "LR", "", false)
 
 		if latestTime != earliestTime {
 			lastModifiedAt := time.Unix(0, latestTime*int64(time.Millisecond))
-			pdf.Cell(0, 6, translator(fmt.Sprintf("Zuletzt geändert: %s", lastModifiedAt.Format("02.01.2006 15:04:05"))))
+			modifiedText := fmt.Sprintf("Zuletzt geändert: %s", lastModifiedAt.Format("02.01.2006 15:04:05"))
 			if lastModifier != nil {
-				pdf.Cell(0, 6, translator(fmt.Sprintf(" von %s", lastModifier.UserName)))
+				modifiedText += fmt.Sprintf(" von %s", lastModifier.UserName)
 			}
-			pdf.Ln(5)
+			pdf.MultiCell(0, 6, translator(modifiedText), "LR", "", false)
 		}
 
 		pdf.Cell(0, 6, translator(fmt.Sprintf("Anzahl Änderungen: %d", len(tr.Mods))))
