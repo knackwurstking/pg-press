@@ -5,17 +5,17 @@ import (
 	"golang.org/x/net/websocket"
 
 	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/notifications"
 	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pg-vis/internal/wshandler"
 )
 
 type Nav struct {
 	*Base
-	feedNotifier *notifications.FeedNotifier
+	feedNotifier *wshandler.FeedHandler
 }
 
 // NewNav creates a new nav handler.
-func NewNav(base *Base, feedNotifier *notifications.FeedNotifier) *Nav {
+func NewNav(base *Base, feedNotifier *wshandler.FeedHandler) *Nav {
 	return &Nav{
 		Base:         base,
 		feedNotifier: feedNotifier,

@@ -1,4 +1,4 @@
-// Package utils provides utility functions for HTTP route handlers.
+// TODO: Check what really matters here
 package utils
 
 import (

@@ -7,11 +7,6 @@ import (
 	"github.com/knackwurstking/pg-vis/internal/logger"
 )
 
-// FeedNotifier interface for handling feed update notifications
-type FeedNotifier interface {
-	NotifyNewFeed()
-}
-
 const (
 	createFeedsTableQuery = `
 		CREATE TABLE IF NOT EXISTS feeds (
@@ -34,8 +29,8 @@ const (
 
 // Feeds handles database operations for feed entries
 type Feeds struct {
-	db       *sql.DB
-	notifier FeedNotifier
+	db          *sql.DB
+	broadcaster Broadcaster
 }
 
 // NewFeeds creates a new Feeds instance and initializes the database table
@@ -47,8 +42,8 @@ func NewFeeds(db *sql.DB) *Feeds {
 }
 
 // SetNotifier sets the feed notifier for real-time updates
-func (f *Feeds) SetNotifier(notifier FeedNotifier) {
-	f.notifier = notifier
+func (f *Feeds) SetBroadcaster(notifier Broadcaster) {
+	f.broadcaster = notifier
 }
 
 // List retrieves all feeds ordered by ID in descending order
@@ -109,8 +104,8 @@ func (f *Feeds) Add(feed *Feed) error {
 	}
 
 	// Notify about new feed if notifier is set
-	if f.notifier != nil {
-		f.notifier.NotifyNewFeed()
+	if f.broadcaster != nil {
+		f.broadcaster.Broadcast()
 	}
 
 	return nil

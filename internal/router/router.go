@@ -8,7 +8,7 @@ import (
 
 	"github.com/knackwurstking/pg-vis/internal/database"
 	"github.com/knackwurstking/pg-vis/internal/handler"
-	"github.com/knackwurstking/pg-vis/internal/notifications"
+	"github.com/knackwurstking/pg-vis/internal/wshandler"
 )
 
 var (
@@ -38,15 +38,15 @@ func Serve(e *echo.Echo, o Options) {
 	}
 
 	// Initialize feed notification system
-	feedNotifier := notifications.NewFeedNotifier(o.DB, templates)
+	wsFeedHandler := wshandler.NewFeedHandler(o.DB, templates)
 
 	{ // Initialize feed notification system
 		// Start the feed notification manager in a goroutine
 		ctx := context.Background()
-		go feedNotifier.Start(ctx)
+		go wsFeedHandler.Start(ctx)
 
 		// Set the notifier on the feeds for real-time updates
-		o.DB.Feeds.SetNotifier(feedNotifier)
+		o.DB.Feeds.SetBroadcaster(wsFeedHandler)
 	}
 
 	// Register routes
@@ -55,5 +55,5 @@ func Serve(e *echo.Echo, o Options) {
 	handler.NewFeed(base).RegisterRoutes(e)
 	handler.NewProfile(base).RegisterRoutes(e)
 	handler.NewTroubleReports(base).RegisterRoutes(e)
-	handler.NewNav(base, feedNotifier).RegisterRoutes(e)
+	handler.NewNav(base, wsFeedHandler).RegisterRoutes(e)
 }

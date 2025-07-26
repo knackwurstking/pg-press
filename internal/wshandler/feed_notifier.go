@@ -1,5 +1,5 @@
 // Package notifications provides real-time notification functionality for feeds and events in the pg-vis application.
-package notifications
+package wshandler
 
 import (
 	"context"
@@ -9,25 +9,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/knackwurstking/pg-vis/internal/logger"
+	"golang.org/x/net/websocket"
 
 	"github.com/knackwurstking/pg-vis/internal/constants"
 	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pg-vis/internal/logger"
 	"github.com/knackwurstking/pg-vis/internal/utils"
-	"golang.org/x/net/websocket"
 )
 
-// FeedConnection represents a WebSocket connection for feed updates
-type FeedConnection struct {
-	UserID   int64
-	LastFeed int64
-	Conn     *websocket.Conn
-	Send     chan []byte
-	Done     chan struct{}
+// FeedCounterTemplateData represents the data for rendering feed counter template
+type FeedCounterTemplateData struct {
+	Count int
 }
 
-// FeedNotifier manages WebSocket connections for feed counter updates
-type FeedNotifier struct {
+// FeedHandler manages WebSocket connections for feed counter updates
+type FeedHandler struct {
 	connections map[*FeedConnection]bool
 	register    chan *FeedConnection
 	unregister  chan *FeedConnection
@@ -37,14 +33,9 @@ type FeedNotifier struct {
 	mu          sync.RWMutex
 }
 
-// FeedCounterTemplateData represents the data for rendering feed counter template
-type FeedCounterTemplateData struct {
-	Count int
-}
-
-// NewFeedNotifier creates a new feed notification manager
-func NewFeedNotifier(db *database.DB, templates fs.FS) *FeedNotifier {
-	return &FeedNotifier{
+// NewFeedHandler creates a new feed notification manager
+func NewFeedHandler(db *database.DB, templates fs.FS) *FeedHandler {
+	return &FeedHandler{
 		connections: make(map[*FeedConnection]bool),
 		register:    make(chan *FeedConnection),
 		unregister:  make(chan *FeedConnection),
@@ -55,7 +46,7 @@ func NewFeedNotifier(db *database.DB, templates fs.FS) *FeedNotifier {
 }
 
 // Start begins the notification manager's main loop
-func (fn *FeedNotifier) Start(ctx context.Context) {
+func (fn *FeedHandler) Start(ctx context.Context) {
 	logger.Feed().Info("Starting feed notification manager")
 
 	for {
@@ -90,7 +81,7 @@ func (fn *FeedNotifier) Start(ctx context.Context) {
 }
 
 // RegisterConnection adds a new WebSocket connection to the manager
-func (fn *FeedNotifier) RegisterConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
+func (fn *FeedHandler) RegisterConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
 	feedConn := &FeedConnection{
 		UserID:   userID,
 		LastFeed: lastFeed,
@@ -104,12 +95,12 @@ func (fn *FeedNotifier) RegisterConnection(userID, lastFeed int64, conn *websock
 }
 
 // UnregisterConnection removes a WebSocket connection from the manager
-func (fn *FeedNotifier) UnregisterConnection(conn *FeedConnection) {
+func (fn *FeedHandler) UnregisterConnection(conn *FeedConnection) {
 	fn.unregister <- conn
 }
 
-// NotifyNewFeed broadcasts feed counter updates to all connected clients
-func (fn *FeedNotifier) NotifyNewFeed() {
+// Broadcast broadcasts feed counter updates to all connected clients
+func (fn *FeedHandler) Broadcast() {
 	select {
 	case fn.broadcast <- struct{}{}:
 		logger.Feed().Info("Feed update notification queued")
@@ -119,7 +110,7 @@ func (fn *FeedNotifier) NotifyNewFeed() {
 }
 
 // sendInitialFeedCounter sends the initial feed counter to a newly connected client
-func (fn *FeedNotifier) sendInitialFeedCounter(conn *FeedConnection) {
+func (fn *FeedHandler) sendInitialFeedCounter(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
 		logger.Feed().Error("Error rendering initial feed counter for user %d: %v", conn.UserID, err)
@@ -138,7 +129,7 @@ func (fn *FeedNotifier) sendInitialFeedCounter(conn *FeedConnection) {
 }
 
 // broadcastToAllConnections sends feed counter updates to all connected clients
-func (fn *FeedNotifier) broadcastToAllConnections() {
+func (fn *FeedHandler) broadcastToAllConnections() {
 	fn.mu.RLock()
 	connections := make([]*FeedConnection, 0, len(fn.connections))
 	for conn := range fn.connections {
@@ -154,7 +145,7 @@ func (fn *FeedNotifier) broadcastToAllConnections() {
 }
 
 // sendFeedCounterUpdate sends an updated feed counter to a specific connection
-func (fn *FeedNotifier) sendFeedCounterUpdate(conn *FeedConnection) {
+func (fn *FeedHandler) sendFeedCounterUpdate(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
 		logger.Feed().Error("Error rendering feed counter for user %d: %v", conn.UserID, err)
@@ -174,7 +165,7 @@ func (fn *FeedNotifier) sendFeedCounterUpdate(conn *FeedConnection) {
 }
 
 // renderFeedCounter renders the feed counter template with current data
-func (fn *FeedNotifier) renderFeedCounter(userLastFeed int64) ([]byte, error) {
+func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 	data := &FeedCounterTemplateData{}
 
 	feeds, err := fn.db.Feeds.ListRange(0, 100)
@@ -203,7 +194,7 @@ func (fn *FeedNotifier) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 }
 
 // closeAllConnections gracefully closes all WebSocket connections
-func (fn *FeedNotifier) closeAllConnections() {
+func (fn *FeedHandler) closeAllConnections() {
 	fn.mu.Lock()
 	defer fn.mu.Unlock()
 
@@ -218,10 +209,19 @@ func (fn *FeedNotifier) closeAllConnections() {
 }
 
 // ConnectionCount returns the number of active connections
-func (fn *FeedNotifier) ConnectionCount() int {
+func (fn *FeedHandler) ConnectionCount() int {
 	fn.mu.RLock()
 	defer fn.mu.RUnlock()
 	return len(fn.connections)
+}
+
+// FeedConnection represents a WebSocket connection for feed updates
+type FeedConnection struct {
+	UserID   int64
+	LastFeed int64
+	Conn     *websocket.Conn
+	Send     chan []byte
+	Done     chan struct{}
 }
 
 // WritePump handles writing messages to the WebSocket connection
@@ -262,7 +262,7 @@ func (conn *FeedConnection) WritePump() {
 }
 
 // ReadPump handles reading messages from the WebSocket connection
-func (conn *FeedConnection) ReadPump(notifier *FeedNotifier) {
+func (conn *FeedConnection) ReadPump(notifier WSHandler) {
 	defer func() {
 		notifier.UnregisterConnection(conn)
 		conn.Conn.Close()
