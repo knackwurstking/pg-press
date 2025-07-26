@@ -4,6 +4,25 @@
  */
 
 /* =================================================================
+ * GENERAL TROUBLE REPORT STYLES
+ * ================================================================= */
+
+/* Pre-formatted text styling */
+pre {
+    text-wrap: wrap;
+}
+
+/* Details element styling */
+details[id^="trouble-report-"] {
+    margin: var(--ui-spacing) auto;
+}
+
+/* Vote button styling */
+#voteForDelete {
+    transform: scale(0.75);
+}
+
+/* =================================================================
  * ATTACHMENT PREVIEW STYLES
  * ================================================================= */
 

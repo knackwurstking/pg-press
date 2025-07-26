@@ -1,17 +1,12 @@
 {{$pageData := .}} {{if ne (len $pageData.TroubleReports) 0}}
 <ul id="data">
-    <style>
-        pre {
-            text-wrap: wrap;
-        }
-    </style>
+
 
     {{range $troubleReport := $pageData.TroubleReports}}
     {{$id := print "trouble-report-" $troubleReport.ID}}
     <span class="trouble-report">
         <details
             id="{{$id}}"
-            style="margin: var(--ui-spacing) auto"
         >
             <summary>{{$troubleReport.Title}}</summary>
             <pre>{{$troubleReport.Content}}</pre>
@@ -87,7 +82,6 @@
                 hx-trigger="click"
                 hx-swap="outerHTML"
                 class="ghost destructive flex column justify-between align-center"
-                style="transform: scale(0.75);"
                 disabled
             >
                 <i class="bi bi-trash"></i>
@@ -99,68 +93,7 @@
     </span>
     {{end}}
 
-    <script defer>
-        (() => {
-
-
-            // Update share button appearance based on HTTPS/HTTP
-            const isHTTPS = location.protocol === 'https:';
-            const canUseWebShare = isHTTPS;
-
-            document.querySelectorAll('[id^="share-btn-"]').forEach(button => {
-                if (!canUseWebShare) {
-                    // HTTP connection - change to download appearance
-                    button.title = 'PDF herunterladen (HTTPS erforderlich für Teilen)';
-                    const icon = button.querySelector('i');
-                    if (icon) {
-                        icon.className = 'bi bi-download';
-                    }
-                } else {
-                    // HTTPS connection - keep share appearance
-                    button.title = 'Als PDF teilen';
-                }
-            });
-
-            // Function to handle attachment loading
-            function loadAttachmentsForTroubleReport(troubleReportId) {
-                const placeholder = document.querySelector(`[data-trouble-report-id="${troubleReportId}"]`);
-                if (placeholder) {
-                    htmx.trigger(document.body, `load-attachments-${troubleReportId}`);
-                }
-            }
-
-            // Handle hash-based navigation after HTMX has loaded
-            function handleHashNavigation() {
-                if (location.hash) {
-                    const el = document.querySelector(location.hash);
-                    if (el) {
-                        el.open = true;
-                        const troubleReportId = el.id.replace('trouble-report-', '');
-                        loadAttachmentsForTroubleReport(troubleReportId);
-                    }
-                }
-            }
-
-            // Run hash navigation after HTMX has finished processing
-            document.addEventListener('htmx:load', handleHashNavigation);
-
-            // Also run immediately in case HTMX has already loaded
-            handleHashNavigation();
-
-            // Add event listeners for details toggle
-            document.querySelectorAll('details[id^="trouble-report-"]').forEach(details => {
-                details.addEventListener('toggle', function() {
-                    if (this.open) {
-                        const troubleReportId = this.id.replace('trouble-report-', '');
-                        loadAttachmentsForTroubleReport(troubleReportId);
-                    }
-                });
-            });
-
-            // PDF sharing functionality is now in main.js
-
-        })();
-    </script>
+    <script src="./js/trouble-reports/data.js"></script>
 </ul>
 {{else}}
 <span id="data"></span>

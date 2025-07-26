@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.70";
+const VERSION = "v0.0.72";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -56,14 +56,20 @@ const STATIC_ASSETS = [
     "./css/bootstrap-icons.min.css",
     "./css/ui.min.css",
     "./css/layout.css",
+    "./css/trouble-reports/data.css",
+    "./css/trouble-reports/dialog-edit.css",
+    "./css/trouble-reports/main.css",
 
     // Fonts
     "./bootstrap-icons.woff",
     "./bootstrap-icons.woff2",
 
     // JavaScript libraries
-    "./js/htmx-v2.0.6.min.js",
+    "./js/trouble-reports/data.js",
+    "./js/trouble-reports/dialog-edit.js",
+    "./js/trouble-reports/main.js",
     "./js/htmx-ext-ws-v2.0.3.min.js",
+    "./js/htmx-v2.0.6.min.js",
     "./js/websocket-manager.js",
 ];
 
