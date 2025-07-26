@@ -59,8 +59,7 @@
             <button
                 id="share-btn-{{$troubleReport.ID}}"
                 onclick="shareTroubleReportPDF({{$troubleReport.ID}}, '{{$troubleReport.Title}}')"
-                class="ghost icon"
-                style="color: blue;"
+                class="ghost icon info"
                 title="Als PDF teilen"
             >
                 <i class="bi bi-share"></i>
@@ -108,12 +107,10 @@
             // Update share button appearance based on HTTPS/HTTP
             const isHTTPS = location.protocol === 'https:';
             const canUseWebShare = isHTTPS;
-            
+
             document.querySelectorAll('[id^="share-btn-"]').forEach(button => {
                 if (!canUseWebShare) {
                     // HTTP connection - change to download appearance
-                    button.style.color = '#6c757d';
-                    button.style.border = '1px dashed #6c757d';
                     button.title = 'PDF herunterladen (HTTPS erforderlich für Teilen)';
                     const icon = button.querySelector('i');
                     if (icon) {
@@ -181,7 +178,7 @@
                     // Check HTTPS requirement for Web Share API
                     const isHTTPS = location.protocol === 'https:';
                     const canUseWebShare = isHTTPS;
-                    
+
                     console.log('=== PDF Share Decision Path ===');
                     console.log('Current URL:', location.href);
                     console.log('Protocol:', location.protocol);
@@ -190,7 +187,7 @@
                     console.log('Can use Web Share API:', canUseWebShare);
                     console.log('navigator.share exists:', 'share' in navigator);
                     console.log('navigator.canShare exists:', 'canShare' in navigator);
-                    
+
                     if (!canUseWebShare) {
                         console.log('🚫 Decision: FORCE DIRECT DOWNLOAD - HTTPS required for Web Share API, skipping entirely');
                     } else {
@@ -210,7 +207,7 @@
                     // Decision: Use Web Share API only if HTTPS/localhost AND browser supports it
                     if (canUseWebShare) {
                         console.log('🔒 Secure context confirmed - checking Web Share API support...');
-                        
+
                         if (navigator.share && navigator.canShare) {
                             const file = new File([blob], filename, { type: 'application/pdf' });
                             const shareData = {
@@ -235,7 +232,7 @@
                                     return; // Success - exit function
                                 } catch (shareError) {
                                     console.log('Web Share API failed:', shareError);
-                                    
+
                                     // Handle specific error types
                                     if (shareError.name === 'NotAllowedError') {
                                         console.log('Share permission denied');
@@ -244,7 +241,7 @@
                                     } else {
                                         console.log('Other share error:', shareError.name);
                                     }
-                                    
+
                                     // Fall through to download
                                 }
                             } else {
@@ -270,7 +267,7 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    
+
                     // Show download success feedback
                     button.innerHTML = '<i class="bi bi-download"></i>';
                     button.style.color = 'green';
