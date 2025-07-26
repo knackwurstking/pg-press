@@ -8,10 +8,6 @@ import (
 
 	"github.com/knackwurstking/pg-vis/internal/database"
 	"github.com/knackwurstking/pg-vis/internal/handler"
-	"github.com/knackwurstking/pg-vis/internal/handler/home"
-	"github.com/knackwurstking/pg-vis/internal/handler/nav"
-	"github.com/knackwurstking/pg-vis/internal/handler/profile"
-	"github.com/knackwurstking/pg-vis/internal/handler/troublereports"
 	"github.com/knackwurstking/pg-vis/internal/notifications"
 )
 
@@ -34,16 +30,6 @@ func Serve(e *echo.Echo, o Options) {
 	// Serve static assets
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
-	// Initialize feed notification system
-	feedNotifier := notifications.NewFeedNotifier(o.DB, templates)
-
-	// Start the feed notification manager in a goroutine
-	ctx := context.Background()
-	go feedNotifier.Start(ctx)
-
-	// Set the notifier on the feeds for real-time updates
-	o.DB.Feeds.SetNotifier(feedNotifier)
-
 	// Initialize handlers
 	base := &handler.Base{
 		DB:               o.DB,
@@ -51,16 +37,23 @@ func Serve(e *echo.Echo, o Options) {
 		Templates:        templates,
 	}
 
-	homeHandler := home.NewHandler(o.DB, o.ServerPathPrefix, templates)                     // TODO: ...
-	profileHandler := profile.NewHandler(o.DB, o.ServerPathPrefix, templates)               // TODO: ...
-	troublereportsHandler := troublereports.NewHandler(o.DB, o.ServerPathPrefix, templates) // TODO: ...
-	navHandler := nav.NewHandler(o.DB, o.ServerPathPrefix, templates, feedNotifier)         // TODO: ...
+	// Initialize feed notification system
+	feedNotifier := notifications.NewFeedNotifier(o.DB, templates)
+
+	{ // Initialize feed notification system
+		// Start the feed notification manager in a goroutine
+		ctx := context.Background()
+		go feedNotifier.Start(ctx)
+
+		// Set the notifier on the feeds for real-time updates
+		o.DB.Feeds.SetNotifier(feedNotifier)
+	}
 
 	// Register routes
 	handler.NewAuth(base).RegisterRoutes(e)
-	homeHandler.RegisterRoutes(e)
+	handler.NewHome(base).RegisterRoutes(e)
 	handler.NewFeed(base).RegisterRoutes(e)
-	profileHandler.RegisterRoutes(e)
-	troublereportsHandler.RegisterRoutes(e)
-	navHandler.RegisterRoutes(e)
+	handler.NewProfile(base).RegisterRoutes(e)
+	handler.NewTroubleReports(base).RegisterRoutes(e)
+	handler.NewNav(base, feedNotifier).RegisterRoutes(e)
 }
