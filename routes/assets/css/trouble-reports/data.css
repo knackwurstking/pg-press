@@ -121,3 +121,89 @@
 .attachment-preview-item:hover .preview-thumbnail {
     transform: scale(1.05);
 }
+
+/* Share Button Styles */
+.actions button[title="Als PDF teilen"] {
+    color: #0066cc !important;
+}
+
+.actions button[title="Als PDF teilen"]:hover {
+    background-color: rgba(0, 102, 204, 0.1);
+    transform: scale(1.05);
+}
+
+.actions button[title="Als PDF teilen"] i {
+    font-size: 16px;
+}
+
+/* Share Button Loading State */
+.actions button[title="Als PDF teilen"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.actions button[title="Als PDF teilen"]:disabled:hover {
+    background-color: transparent;
+    transform: none !important;
+}
+
+.actions button[title="Als PDF teilen"] .bi-hourglass-split {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Share Button Success States */
+.actions button[title="Als PDF teilen"] .bi-check-circle {
+    color: #28a745 !important;
+    animation: scaleIn 0.3s ease;
+}
+
+.actions button[title="Als PDF teilen"] .bi-download {
+    color: #28a745 !important;
+    animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Debug Button Warning Styles */
+.actions button.warning {
+    border: 1px dashed #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.actions button.warning:hover {
+    background-color: rgba(255, 193, 7, 0.2);
+    border-color: #e0a800;
+}
+
+.actions button.warning i {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}

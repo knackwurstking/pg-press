@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/jung-kurt/gofpdf/v2 v2.17.3 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
