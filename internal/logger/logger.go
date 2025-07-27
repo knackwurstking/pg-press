@@ -47,7 +47,7 @@ type Logger struct {
 var defaultLogger *Logger
 
 func init() {
-	defaultLogger = New(os.Stdout, INFO, true)
+	defaultLogger = New(os.Stderr, INFO, true)
 }
 
 // New creates a new Logger instance

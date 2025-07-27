@@ -14,7 +14,7 @@ var AppLogger *Logger
 // Initialize sets up the application logger with appropriate defaults
 func Initialize() {
 	// Create logger with sensible defaults
-	AppLogger = New(os.Stdout, INFO, true)
+	AppLogger = New(os.Stderr, INFO, true)
 
 	// Configure based on environment
 	configureFromEnvironment()
@@ -71,7 +71,7 @@ func SetupProduction() {
 
 // NewComponentLogger creates a new logger for a specific component
 func NewComponentLogger(component string) *Logger {
-	logger := New(os.Stdout, AppLogger.level, AppLogger.enableColors)
+	logger := New(os.Stderr, AppLogger.level, AppLogger.enableColors)
 	logger.SetPrefix(fmt.Sprintf("[%s] ", component))
 	return logger
 }

@@ -80,6 +80,16 @@ func main() {
 				},
 			},
 
+			{
+				Name: "feeds",
+				Usage: cli.Usage(
+					"Handle feeds database table, remove, list, add, show, modify feeds data"),
+				Commands: []cli.Command{
+					listFeedsCommand(),
+					removeFeedsCommand(),
+				},
+			},
+
 			serverCommand(),
 
 			cli.CompletionCommand(),
