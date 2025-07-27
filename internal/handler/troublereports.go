@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"slices"
 	"strconv"
 	"strings"
@@ -26,11 +27,12 @@ const (
 	adminPrivilegesRequiredMessage   = "administrator privileges required"
 	invalidContentFormFieldMessage   = "invalid content form value"
 	invalidTitleFormFieldMessage     = "invalid title form value"
-	attachmentTooLargeMessage        = "attachment exceeds maximum size limit (10MB)"
-	attachmentNotFoundMessage        = "attachment not found"
-	invalidAttachmentMessage         = "invalid attachment data"
-	tooManyAttachmentsMessage        = "too many attachments (maximum 10 allowed)"
-	attachmentProcessingErrorMessage = "failed to process attachment"
+	attachmentTooLargeMessage        = "image exceeds maximum size limit (10MB)"
+	attachmentNotFoundMessage        = "image not found"
+	invalidAttachmentMessage         = "invalid image data"
+	nonImageFileMessage              = "only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)"
+	tooManyAttachmentsMessage        = "too many images (maximum 10 allowed)"
+	attachmentProcessingErrorMessage = "failed to process image"
 )
 
 // Template data structures
@@ -420,6 +422,11 @@ func (h *TroubleReports) processFileUpload(fileHeader *multipart.FileHeader, ind
 		}
 	}
 
+	// Validate that the file is an image
+	if !strings.HasPrefix(mimeType, "image/") {
+		return nil, fmt.Errorf(nonImageFileMessage)
+	}
+
 	attachment := &database.Attachment{
 		ID:       attachmentID,
 		MimeType: mimeType,
@@ -470,16 +477,6 @@ func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
 			return "image/png"
 		case ".gif":
 			return "image/gif"
-		case ".pdf":
-			return "application/pdf"
-		case ".txt":
-			return "text/plain"
-		case ".doc":
-			return "application/msword"
-		case ".docx":
-			return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-		case ".zip":
-			return "application/zip"
 		case ".svg":
 			return "image/svg+xml"
 		case ".webp":
@@ -606,18 +603,18 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(240, 248, 255)
 	pdf.CellFormat(0, 10, "TITEL", "1", 1, "L", true, 0, "")
+	pdf.Ln(5)
 	pdf.SetFont("Arial", "", 12)
-	pdf.MultiCell(0, 8, translator(tr.Title), "LR", "", false)
-	pdf.CellFormat(0, 0, "", "T", 1, "", false, 0, "")
+	pdf.MultiCell(0, 8, translator(tr.Title), "", "", false)
 	pdf.Ln(8)
 
 	// Content section
 	pdf.SetFont("Arial", "B", 14)
 	pdf.SetFillColor(240, 248, 255)
 	pdf.CellFormat(0, 10, "INHALT", "1", 1, "L", true, 0, "")
+	pdf.Ln(5)
 	pdf.SetFont("Arial", "", 11)
-	pdf.MultiCell(0, 6, translator(tr.Content), "LR", "", false)
-	pdf.CellFormat(0, 0, "", "T", 1, "", false, 0, "")
+	pdf.MultiCell(0, 6, translator(tr.Content), "", "", false)
 	pdf.Ln(8)
 
 	// Metadata
@@ -625,6 +622,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		pdf.SetFont("Arial", "B", 14)
 		pdf.SetFillColor(240, 248, 255)
 		pdf.CellFormat(0, 10, "METADATEN", "1", 1, "L", true, 0, "")
+		pdf.Ln(5)
 
 		var earliestTime, latestTime int64 = tr.Mods[0].Time, tr.Mods[0].Time
 		var creator, lastModifier *database.User
@@ -646,7 +644,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		if creator != nil {
 			createdText += fmt.Sprintf(" von %s", creator.UserName)
 		}
-		pdf.MultiCell(0, 6, translator(createdText), "LR", "", false)
+		pdf.MultiCell(0, 6, translator(createdText), "", "", false)
 
 		if latestTime != earliestTime {
 			lastModifiedAt := time.Unix(0, latestTime*int64(time.Millisecond))
@@ -654,38 +652,130 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			if lastModifier != nil {
 				modifiedText += fmt.Sprintf(" von %s", lastModifier.UserName)
 			}
-			pdf.MultiCell(0, 6, translator(modifiedText), "LR", "", false)
+			pdf.MultiCell(0, 6, translator(modifiedText), "", "", false)
 		}
 
 		pdf.Cell(0, 6, translator(fmt.Sprintf("Anzahl Änderungen: %d", len(tr.Mods))))
-		pdf.Ln(5)
-		pdf.CellFormat(0, 0, "", "T", 1, "", false, 0, "")
-		pdf.Ln(8)
+		pdf.Ln(13)
 	}
 
 	// Attachments
 	if len(tr.LoadedAttachments) > 0 {
-		pdf.SetFont("Arial", "B", 14)
-		pdf.SetFillColor(240, 248, 255)
-		pdf.CellFormat(0, 10, translator(fmt.Sprintf("ANHÄNGE (%d)", len(tr.LoadedAttachments))), "1", 1, "L", true, 0, "")
+		// Collect only image attachments
+		var images []*database.Attachment
 
-		pdf.SetFont("Arial", "", 11)
-		for i, attachment := range tr.LoadedAttachments {
-			pdf.Cell(0, 6, translator(fmt.Sprintf("• Anhang %d", i+1)))
-			pdf.Ln(6)
-			pdf.Cell(0, 6, fmt.Sprintf("Typ: %s", attachment.GetMimeType()))
-			pdf.Ln(6)
-
+		for _, attachment := range tr.LoadedAttachments {
 			if attachment.IsImage() {
-				pdf.Cell(0, 6, "Kategorie: Bild")
-			} else if attachment.IsDocument() {
-				pdf.Cell(0, 6, "Kategorie: Dokument")
-			} else if attachment.IsArchive() {
-				pdf.Cell(0, 6, "Kategorie: Archiv")
-			} else {
-				pdf.Cell(0, 6, "Kategorie: Andere")
+				images = append(images, attachment)
 			}
+		}
+
+		// Only proceed if there are images
+		if len(images) > 0 {
+			pdf.SetFont("Arial", "B", 14)
+			pdf.SetFillColor(240, 248, 255)
+			pdf.CellFormat(0, 10, translator(fmt.Sprintf("BILDER (%d)", len(images))), "1", 1, "L", true, 0, "")
+
+			// Display images 2 per row
+			pageWidth, _ := pdf.GetPageSize()
+			leftMargin, _, rightMargin, _ := pdf.GetMargins()
+			usableWidth := pageWidth - leftMargin - rightMargin
+			imageWidth := (usableWidth - 10) / 2 // 10mm spacing between images
+			maxImageHeight := 60.0               // Maximum height for consistency
+
 			pdf.Ln(10)
+
+			// Process images in pairs (2 per row)
+			var currentY float64
+			_, currentY = pdf.GetXY()
+
+			for i := 0; i < len(images); i += 2 {
+				// Check if we need a new page
+				if currentY+maxImageHeight+25 > 270 { // Leave space for footer
+					pdf.AddPage()
+					_, currentY = pdf.GetXY()
+				}
+
+				// Calculate positions for this row
+				captionY := currentY
+				imageY := captionY + 6
+				rightX := leftMargin + imageWidth + 10
+
+				// Add captions first (both left and right if applicable)
+				pdf.SetFont("Arial", "", 9)
+
+				// Left image caption
+				pdf.SetXY(leftMargin, captionY)
+				pdf.CellFormat(imageWidth, 4, translator(fmt.Sprintf("Anhang %d", i+1)), "0", 0, "C", false, 0, "")
+
+				// Right image caption (if exists)
+				if i+1 < len(images) {
+					pdf.SetXY(rightX, captionY)
+					pdf.CellFormat(imageWidth, 4, translator(fmt.Sprintf("Anhang %d", i+2)), "0", 0, "C", false, 0, "")
+				}
+
+				// Process left image
+				leftImage := images[i]
+				tmpFile1, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", leftImage.ID))
+				if err == nil {
+					_, err = tmpFile1.Write(leftImage.Data)
+					tmpFile1.Close()
+
+					if err == nil {
+						// Determine image type from mime type
+						var imageType string
+						switch leftImage.MimeType {
+						case "image/jpeg", "image/jpg":
+							imageType = "JPG"
+						case "image/png":
+							imageType = "PNG"
+						case "image/gif":
+							imageType = "GIF"
+						default:
+							imageType = "JPG" // Default fallback
+						}
+
+						// Add left image
+						pdf.ImageOptions(tmpFile1.Name(), leftMargin, imageY, imageWidth, 0, false,
+							gofpdf.ImageOptions{ImageType: imageType}, 0, "")
+					}
+					os.Remove(tmpFile1.Name())
+				}
+
+				// Process right image if it exists
+				if i+1 < len(images) {
+					rightImage := images[i+1]
+					tmpFile2, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", rightImage.ID))
+					if err == nil {
+						_, err = tmpFile2.Write(rightImage.Data)
+						tmpFile2.Close()
+
+						if err == nil {
+							// Determine image type from mime type
+							var imageType string
+							switch rightImage.MimeType {
+							case "image/jpeg", "image/jpg":
+								imageType = "JPG"
+							case "image/png":
+								imageType = "PNG"
+							case "image/gif":
+								imageType = "GIF"
+							default:
+								imageType = "JPG" // Default fallback
+							}
+
+							// Add right image
+							pdf.ImageOptions(tmpFile2.Name(), rightX, imageY, imageWidth, 0, false,
+								gofpdf.ImageOptions{ImageType: imageType}, 0, "")
+						}
+						os.Remove(tmpFile2.Name())
+					}
+				}
+
+				// Move to next row
+				currentY = imageY + maxImageHeight + 15
+				pdf.SetXY(leftMargin, currentY)
+			}
 		}
 	}
 

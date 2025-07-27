@@ -53,7 +53,7 @@
             <!-- Attachments Section -->
             <div id="attachments-section" class="attachments-container flex-item">
                 <div class="attachments-label">
-                    Anhänge (max. 10MB pro Datei, max. 10 Dateien)
+                    Bilder (max. 10MB pro Datei, max. 10 Dateien)
                 </div>
 
                 {{if or .InvalidTitle .InvalidContent}}
@@ -70,7 +70,7 @@
                 <!-- Existing Attachments -->
                 {{if and .LinkedAttachments (gt (len .LinkedAttachments) 0)}}
                 <div class="attachments-section">
-                    <div class="attachments-label">Vorhandene Anhänge:</div>
+                    <div class="attachments-label">Vorhandene Bilder:</div>
 
                     <div id="existing-attachments">
                         {{range .LinkedAttachments}}
@@ -78,17 +78,9 @@
                             <div class="attachment-info">
                                 <i class="bi bi-grip-vertical"></i>
 
-                                {{if .IsImage}}
                                 <i class="bi bi-image attachment-icon"></i>
-                                {{else if .IsDocument}}
-                                <i class="bi bi-file-text attachment-icon"></i>
-                                {{else if .IsArchive}}
-                                <i class="bi bi-file-zip attachment-icon"></i>
-                                {{else}}
-                                <i class="bi bi-file-earmark attachment-icon"></i>
-                                {{end}}
 
-                                <span class="ellipsis">Attachment {{.ID}}</span>
+                                <span class="ellipsis">Bild {{.ID}}</span>
 
                                 <span class="text-muted">({{.GetMimeType}})</span>
                             </div>
@@ -135,10 +127,10 @@
                         style="font-size: 2em; margin-bottom: 8px;"
                     ></i>
 
-                    <div>Klicken Sie hier oder ziehen Sie Dateien hierher</div>
+                    <div>Klicken Sie hier oder ziehen Sie Bilder hierher</div>
 
                     <div class="text-muted">
-                        Unterstützte Formate: Bilder, PDFs, Dokumente, Archive
+                        Unterstützte Formate: JPG, PNG, GIF, BMP, SVG, WebP
                     </div>
 
                     <input
@@ -146,14 +138,14 @@
                         name="attachments"
                         id="attachments"
                         multiple
-                        accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.zip,.rar,.7z,.tar,.gz,.bz2"
+                        accept="image/*"
                         onchange="window.dialogEditFunctions.handleFileSelect(event)"
                     />
                 </div>
 
                 <!-- File Preview Area -->
                 <div id="file-preview" class="file-preview">
-                    <div class="attachments-label">Neue Dateien:</div>
+                    <div class="attachments-label">Neue Bilder:</div>
 
                     <div id="new-attachments"></div>
                 </div>

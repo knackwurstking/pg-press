@@ -36,7 +36,6 @@ details[id^="trouble-report-"] {
 
 .attachments-preview-label {
     font-weight: bold;
-    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -52,7 +51,6 @@ details[id^="trouble-report-"] {
     display: flex;
     gap: 12px;
     overflow-x: auto;
-    padding-bottom: 4px;
     scrollbar-width: thin;
     scrollbar-color: var(--ui-border-color) transparent;
 }
@@ -77,22 +75,17 @@ details[id^="trouble-report-"] {
 /* Attachment Preview Items */
 .attachment-preview-item {
     flex-shrink: 0;
-    width: 120px;
-    height: 160px;
-    padding: 12px;
-    border: 1px solid var(--ui-border-color);
-    border-radius: 6px;
+    border-radius: var(--ui-radius);
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: var(--ui-spacing);
 }
 
 .attachment-preview-item:hover {
-    border-color: var(--ui-info);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -105,28 +98,8 @@ details[id^="trouble-report-"] {
     justify-content: center;
     font-size: 48px;
     color: var(--ui-info);
-    margin-bottom: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--ui-border-color);
-}
-
-.attachment-preview-name {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ui-primary-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-}
-
-.attachment-preview-type {
-    font-size: 10px;
-    color: var(--ui-muted-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+    border-radius: var(--ui-radius);
+    border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
 }
 
 /* =================================================================
@@ -137,10 +110,9 @@ details[id^="trouble-report-"] {
 .attachment-preview-image {
     width: 96px;
     height: 96px;
-    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 8px;
-    border: 1px solid var(--ui-border-color);
+    border-radius: var(--ui-radius);
+    border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
 }
 
 .preview-thumbnail {

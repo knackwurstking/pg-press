@@ -9,7 +9,6 @@ package database
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -43,6 +42,10 @@ func (a *Attachment) Validate() error {
 		return NewValidationError("mime_type", "cannot be empty", a.MimeType)
 	}
 
+	if !a.IsImage() {
+		return NewValidationError("mime_type", "only image files are allowed", a.MimeType)
+	}
+
 	if a.Data == nil {
 		return NewValidationError("data", "cannot be nil", a.Data)
 	}
@@ -72,50 +75,12 @@ var (
 		".bmp":  "image/bmp",
 		".svg":  "image/svg+xml",
 		".webp": "image/webp",
-		".pdf":  "application/pdf",
-		".doc":  "application/msword",
-		".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-		".txt":  "text/plain",
-		".rtf":  "application/rtf",
-		".odt":  "application/vnd.oasis.opendocument.text",
-		".zip":  "application/zip",
-		".rar":  "application/vnd.rar",
-		".7z":   "application/x-7z-compressed",
-		".tar":  "application/x-tar",
-		".gz":   "application/gzip",
-		".bz2":  "application/x-bzip2",
 	}
 )
 
 // IsImage checks if the attachment is an image file based on its mime type.
 func (a *Attachment) IsImage() bool {
 	return strings.HasPrefix(a.MimeType, "image/")
-}
-
-// IsDocument checks if the attachment is a document file based on its mime type.
-func (a *Attachment) IsDocument() bool {
-	documentMimeTypes := []string{
-		"application/pdf",
-		"application/msword",
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-		"text/plain",
-		"application/rtf",
-		"application/vnd.oasis.opendocument.text",
-	}
-	return slices.Contains(documentMimeTypes, a.MimeType)
-}
-
-// IsArchive checks if the attachment is an archive file based on its mime type.
-func (a *Attachment) IsArchive() bool {
-	archiveMimeTypes := []string{
-		"application/zip",
-		"application/vnd.rar",
-		"application/x-7z-compressed",
-		"application/x-tar",
-		"application/gzip",
-		"application/x-bzip2",
-	}
-	return slices.Contains(archiveMimeTypes, a.MimeType)
 }
 
 // GetMimeType returns the MIME type of the attachment.
