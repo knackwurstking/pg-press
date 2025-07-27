@@ -73,19 +73,25 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		code := http.StatusInternalServerError
-		message := err.Error()
+		var message string
 
 		if herr, ok := err.(*echo.HTTPError); ok {
+			if herr == nil {
+				return
+			}
+
 			code = herr.Code
-			if msg, ok := herr.Message.(string); ok {
-				message = msg
-			} else if msgErr, ok := herr.Message.(error); ok {
-				message = msgErr.Error()
-			} else {
+			switch m := herr.Message.(type) {
+			case string:
+				message = m
+			case error:
+				message = m.Error()
+			default:
 				message = http.StatusText(code)
 			}
 		} else {
 			code = database.GetHTTPStatusCode(err)
+			message = err.Error()
 		}
 
 		if code >= 500 {
@@ -95,15 +101,15 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		if !c.Response().Committed {
-			response := message
 			if c.Request().Header.Get("Accept") == "application/json" {
-				response = map[string]any{
+				c.JSON(code, map[string]any{
 					"error":  message,
 					"code":   code,
 					"status": http.StatusText(code),
-				}
+				})
+			} else {
+				c.JSON(code, message)
 			}
-			c.JSON(code, response)
 		}
 	}
 }
