@@ -25,11 +25,6 @@ type Profile struct {
 	*Base
 }
 
-// NewProfile creates a new profile handler.
-func NewProfile(base *Base) *Profile {
-	return &Profile{base}
-}
-
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.ServerPathPrefix+"/profile", h.handleMainPage)
 	e.GET(h.ServerPathPrefix+"/profile/cookies", h.handleGetCookies)
@@ -37,28 +32,26 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Profile) handleMainPage(c echo.Context) error {
-	pageData := &ProfileTemplateData{
-		Cookies: make([]*database.Cookie, 0),
-	}
-
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
-	pageData.User = user
+
+	pageData := &ProfileTemplateData{
+		User:    user,
+		Cookies: make([]*database.Cookie, 0),
+	}
 
 	if err := h.handleUserNameChange(c, pageData); err != nil {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	if cookies, err := h.DB.Cookies.ListApiKey(pageData.User.ApiKey); err == nil {
+	if cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey); err == nil {
 		pageData.Cookies = cookies
 	}
 
-	return utils.HandleTemplate(c, pageData,
-		h.Templates,
-		constants.ProfilePageTemplates,
-	)
+	return utils.HandleTemplate(c, pageData, h.Templates,
+		constants.ProfilePageTemplates)
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {
@@ -72,23 +65,15 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
-	cookies = database.SortCookies(cookies)
-
-	return utils.HandleTemplate(c, cookies,
-		h.Templates,
-		[]string{
-			constants.ProfileCookiesComponentTemplatePath,
-		},
-	)
+	return utils.HandleTemplate(c, database.SortCookies(cookies), h.Templates,
+		[]string{constants.ProfileCookiesComponentTemplatePath})
 }
 
 func (h *Profile) handleDeleteCookies(c echo.Context) error {
 	value := utils.SanitizeInput(c.QueryParam("value"))
 	if value == "" {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			"cookie value parameter is required",
-		)
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"cookie value parameter is required")
 	}
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
@@ -111,8 +96,8 @@ func (h *Profile) handleUserNameChange(c echo.Context, pageData *ProfileTemplate
 			"username must be between 1 and 100 characters", len(userName))
 	}
 
-	updatedUser := database.NewUser(pageData.User.TelegramID, userName, pageData.User.ApiKey)
-
+	updatedUser := database.NewUser(pageData.User.TelegramID, userName,
+		pageData.User.ApiKey)
 	if err := h.DB.Users.Update(pageData.User.TelegramID, updatedUser); err != nil {
 		return err
 	}

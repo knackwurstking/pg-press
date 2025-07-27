@@ -11,11 +11,6 @@ type Home struct {
 	*Base
 }
 
-// NewHome creates a new home handler.
-func NewHome(base *Base) *Home {
-	return &Home{base}
-}
-
 func (h *Home) RegisterRoutes(e *echo.Echo) {
 	e.GET(h.ServerPathPrefix+"/", h.handleHome)
 }

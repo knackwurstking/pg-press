@@ -14,8 +14,7 @@ func openDB(customPath string) (*database.DB, error) {
 
 	if customPath != "" {
 		var err error
-		path, err = filepath.Abs(customPath)
-		if err != nil {
+		if path, err = filepath.Abs(customPath); err != nil {
 			return nil, err
 		}
 	}

@@ -156,7 +156,8 @@ func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 }
 
 func (f *FeedTroubleReportAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddTroubleReportRenderTemplate, f.ModifiedBy.UserName, f.ID, f.Title))
+	return template.HTML(fmt.Sprintf(AddTroubleReportRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.Title))
 }
 
 // FeedTroubleReportUpdate represents a trouble report update event.

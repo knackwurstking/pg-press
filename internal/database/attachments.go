@@ -18,11 +18,13 @@ const (
 		);
 	`
 
-	selectAllAttachmentsQuery      = `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
-	selectAttachmentByIDQuery      = `SELECT id, mime_type, data FROM attachments WHERE id = ?`
-	selectAttachmentsByIDsQuery    = `SELECT id, mime_type, data FROM attachments WHERE id IN (%s) ORDER BY id ASC`
-	insertAttachmentQuery          = `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
-	updateAttachmentQuery          = `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
+	selectAllAttachmentsQuery   = `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
+	selectAttachmentByIDQuery   = `SELECT id, mime_type, data FROM attachments WHERE id = ?`
+	selectAttachmentsByIDsQuery = `SELECT id, mime_type, data FROM attachments
+		WHERE id IN (%s) ORDER BY id ASC`
+	insertAttachmentQuery = `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
+	updateAttachmentQuery = `UPDATE attachments
+		SET mime_type = ?, data = ? WHERE id = ?`
 	deleteAttachmentQuery          = `DELETE FROM attachments WHERE id = ?`
 	deleteOrphanedAttachmentsQuery = `DELETE FROM attachments WHERE id NOT IN (
 		SELECT DISTINCT json_extract(value, '$')

@@ -1,4 +1,5 @@
-// Package database provides service layer for trouble report operations with attachment lazy loading.
+// Package database provides service layer for trouble report operations
+// with attachment lazy loading.
 package database
 
 import (
@@ -13,14 +14,18 @@ type TroubleReportWithAttachments struct {
 	LoadedAttachments []*Attachment `json:"loaded_attachments"`
 }
 
-// TroubleReportService provides high-level operations for trouble reports with attachment management.
+// TroubleReportService provides high-level operations for trouble reports
+// with attachment management.
 type TroubleReportService struct {
 	troubleReports *TroubleReports
 	attachments    *Attachments
 }
 
 // NewTroubleReportService creates a new service instance.
-func NewTroubleReportService(troubleReports *TroubleReports, attachments *Attachments) *TroubleReportService {
+func NewTroubleReportService(
+	troubleReports *TroubleReports,
+	attachments *Attachments,
+) *TroubleReportService {
 	return &TroubleReportService{
 		troubleReports: troubleReports,
 		attachments:    attachments,
@@ -28,8 +33,11 @@ func NewTroubleReportService(troubleReports *TroubleReports, attachments *Attach
 }
 
 // GetWithAttachments retrieves a trouble report and loads its attachments.
-func (s *TroubleReportService) GetWithAttachments(id int64) (*TroubleReportWithAttachments, error) {
-	logger.TroubleReport().Debug("Getting trouble report with attachments, id: %d", id)
+func (s *TroubleReportService) GetWithAttachments(
+	id int64,
+) (*TroubleReportWithAttachments, error) {
+	logger.TroubleReport().Debug(
+		"Getting trouble report with attachments, id: %d", id)
 
 	// Get the trouble report
 	tr, err := s.troubleReports.Get(id)
@@ -65,7 +73,8 @@ func (s *TroubleReportService) ListWithAttachments() ([]*TroubleReportWithAttach
 		// Load attachments for each report
 		attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
 		if err != nil {
-			return nil, WrapError(err, fmt.Sprintf("failed to load attachments for trouble report %d", tr.ID))
+			return nil, WrapError(err,
+				fmt.Sprintf("failed to load attachments for trouble report %d", tr.ID))
 		}
 
 		result = append(result, &TroubleReportWithAttachments{
@@ -78,7 +87,10 @@ func (s *TroubleReportService) ListWithAttachments() ([]*TroubleReportWithAttach
 }
 
 // AddWithAttachments creates a new trouble report and its attachments.
-func (s *TroubleReportService) AddWithAttachments(troubleReport *TroubleReport, attachments []*Attachment) error {
+func (s *TroubleReportService) AddWithAttachments(
+	troubleReport *TroubleReport,
+	attachments []*Attachment,
+) error {
 	logger.TroubleReport().Info("Adding trouble report with %d attachments", len(attachments))
 
 	if troubleReport == nil {
@@ -125,8 +137,13 @@ func (s *TroubleReportService) AddWithAttachments(troubleReport *TroubleReport, 
 }
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
-func (s *TroubleReportService) UpdateWithAttachments(id int64, troubleReport *TroubleReport, newAttachments []*Attachment) error {
-	logger.TroubleReport().Info("Updating trouble report %d with %d new attachments", id, len(newAttachments))
+func (s *TroubleReportService) UpdateWithAttachments(
+	id int64,
+	troubleReport *TroubleReport,
+	newAttachments []*Attachment,
+) error {
+	logger.TroubleReport().Info(
+		"Updating trouble report %d with %d new attachments", id, len(newAttachments))
 
 	if troubleReport == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -248,8 +265,11 @@ func findRemovedAttachments(oldIDs, newIDs []int64) []int64 {
 	return removed
 }
 
-// ConvertToLegacyFormat converts attachment IDs to legacy attachment objects for backward compatibility.
-func (s *TroubleReportService) ConvertToLegacyFormat(tr *TroubleReport) (*struct {
+// ConvertToLegacyFormat converts attachment IDs to legacy attachment objects
+// for backward compatibility.
+func (s *TroubleReportService) ConvertToLegacyFormat(
+	tr *TroubleReport,
+) (*struct {
 	*TroubleReport
 	LegacyAttachments []*Attachment `json:"linked_attachments"`
 }, error) {

@@ -103,7 +103,12 @@ func SanitizeInput(input string) string {
 	return sanitized
 }
 
-func HandleTemplate(c echo.Context, pageData any, templates fs.FS, patterns []string) *echo.HTTPError {
+func HandleTemplate(
+	c echo.Context,
+	pageData any,
+	templates fs.FS,
+	patterns []string,
+) *echo.HTTPError {
 	t, err := template.ParseFS(templates, patterns...)
 	if err != nil {
 		return echo.NewHTTPError(

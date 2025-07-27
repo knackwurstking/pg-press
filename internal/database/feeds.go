@@ -18,8 +18,9 @@ const (
 		);
 	`
 
-	selectAllFeedsQuery    = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
-	selectFeedsRangeQuery  = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC LIMIT ? OFFSET ?`
+	selectAllFeedsQuery   = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
+	selectFeedsRangeQuery = `SELECT id, time, data_type, data FROM feeds
+		ORDER BY id DESC LIMIT ? OFFSET ?`
 	selectFeedByIDQuery    = `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
 	insertFeedQuery        = `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
 	countFeedsQuery        = `SELECT COUNT(*) FROM feeds`

@@ -99,9 +99,13 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 					logger.TroubleReport().Debug("Report %d has empty attachments array", reportID)
 					continue
 				}
-				logger.TroubleReport().Error("Report %d has unexpected attachment format: %s", reportID, string(linkedAttachmentsJSON))
+				logger.TroubleReport().Error(
+					"Report %d has unexpected attachment format: %s",
+					reportID, string(linkedAttachmentsJSON))
 			} else {
-				logger.TroubleReport().Error("Failed to unmarshal attachments for report %d: %v, data: %s", reportID, err, string(linkedAttachmentsJSON))
+				logger.TroubleReport().Error(
+					"Failed to unmarshal attachments for report %d: %v, data: %s",
+					reportID, err, string(linkedAttachmentsJSON))
 			}
 			continue
 		}
@@ -134,7 +138,8 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 
 			// Validate attachment before migration
 			if attachment.MimeType == "" {
-				logger.TroubleReport().Warn("Attachment for report %d has empty MIME type, setting default", reportID)
+				logger.TroubleReport().Warn(
+					"Attachment for report %d has empty MIME type, setting default", reportID)
 				attachment.MimeType = "application/octet-stream"
 			}
 
@@ -165,7 +170,8 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 		// Update trouble report with attachment IDs
 		attachmentIDsJSON, err := json.Marshal(newAttachmentIDs)
 		if err != nil {
-			logger.TroubleReport().Error("Failed to marshal attachment IDs for report %d: %v", reportID, err)
+			logger.TroubleReport().Error(
+				"Failed to marshal attachment IDs for report %d: %v", reportID, err)
 			continue
 		}
 
@@ -198,7 +204,8 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 		}
 
 		migratedCount++
-		logger.TroubleReport().Debug("Migrated report %d with %d attachments", reportID, len(newAttachmentIDs))
+		logger.TroubleReport().Debug(
+			"Migrated report %d with %d attachments", reportID, len(newAttachmentIDs))
 	}
 
 	if err := rows.Err(); err != nil {
@@ -212,7 +219,8 @@ func (m *Migration) MigrateAttachmentsToSeparateTable() error {
 			"failed to commit migration transaction", err)
 	}
 
-	logger.TroubleReport().Info("Migration completed successfully. Migrated %d trouble reports", migratedCount)
+	logger.TroubleReport().Info(
+		"Migration completed successfully. Migrated %d trouble reports", migratedCount)
 	return nil
 }
 
@@ -423,7 +431,8 @@ func (m *Migration) DiagnoseAttachmentData() error {
 
 			var attachments []*Attachment
 			if err := json.Unmarshal(linkedAttachmentsJSON, &attachments); err == nil {
-				logger.TroubleReport().Info("✅ Successfully parsed as Attachment array: %d items", len(attachments))
+				logger.TroubleReport().Info(
+					"✅ Successfully parsed as Attachment array: %d items", len(attachments))
 				for i, att := range attachments {
 					if att == nil {
 						logger.TroubleReport().Info("  [%d] nil attachment", i)
@@ -433,7 +442,9 @@ func (m *Migration) DiagnoseAttachmentData() error {
 					if att.Data != nil {
 						dataSize = len(att.Data)
 					}
-					logger.TroubleReport().Info("  [%d] ID: %s, MimeType: %s, DataSize: %d", i, att.ID, att.MimeType, dataSize)
+					logger.TroubleReport().Info(
+						"  [%d] ID: %s, MimeType: %s, DataSize: %d",
+						i, att.ID, att.MimeType, dataSize)
 				}
 			} else {
 				logger.TroubleReport().Info("❌ Failed to parse as Attachment array: %v", err)

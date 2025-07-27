@@ -1,4 +1,5 @@
-// Package notifications provides real-time notification functionality for feeds and events in the pg-vis application.
+// Package wshandler provides real-time notification functionality for feeds
+// and events in the pg-vis application.
 package wshandler
 
 import (
@@ -81,7 +82,10 @@ func (fn *FeedHandler) Start(ctx context.Context) {
 }
 
 // RegisterConnection adds a new WebSocket connection to the manager
-func (fn *FeedHandler) RegisterConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
+func (fn *FeedHandler) RegisterConnection(
+	userID, lastFeed int64,
+	conn *websocket.Conn,
+) *FeedConnection {
 	feedConn := &FeedConnection{
 		UserID:   userID,
 		LastFeed: lastFeed,
@@ -277,7 +281,9 @@ func (conn *FeedConnection) ReadPump(notifier WSHandler) {
 			} else {
 				// Check if error is due to timeout or suspension-related issues
 				if isTemporaryError(err) {
-					logger.WebSocket().Warn("Temporary error for user %d (possibly suspended): %v", conn.UserID, err)
+					logger.WebSocket().Warn(
+						"Temporary error for user %d (possibly suspended): %v",
+						conn.UserID, err)
 					// Continue without breaking - browser might be suspended
 					continue
 				}

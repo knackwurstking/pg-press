@@ -63,7 +63,10 @@ type ModificationsTemplateData struct {
 	Mods              database.Mods[database.TroubleReportMod]
 }
 
-func (mtd *ModificationsTemplateData) FirstModified() *database.Modified[database.TroubleReportMod] {
+// TroubleReportModification is a type alias for better readability
+type TroubleReportModification = *database.Modified[database.TroubleReportMod]
+
+func (mtd *ModificationsTemplateData) FirstModified() TroubleReportModification {
 	if len(mtd.TroubleReport.Mods) == 0 {
 		return nil
 	}
@@ -78,11 +81,6 @@ type ModificationAttachmentsTemplateData struct {
 
 type TroubleReports struct {
 	*Base
-}
-
-// NewTroubleReports creates a new trouble reports handler.
-func NewTroubleReports(base *Base) *TroubleReports {
-	return &TroubleReports{base}
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
@@ -109,7 +107,8 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	// Modifications routes
 	modificationsPath := h.ServerPathPrefix + "/trouble-reports/modifications/:id"
-	modificationsAttachmentsPath := h.ServerPathPrefix + "/trouble-reports/modifications/attachments-preview/:id"
+	modificationsAttachmentsPath := h.ServerPathPrefix +
+		"/trouble-reports/modifications/attachments-preview/:id"
 	e.GET(modificationsPath, func(c echo.Context) error {
 		return h.handleGetModifications(c, nil)
 	})
@@ -133,7 +132,10 @@ func (h *TroubleReports) handleMainPage(c echo.Context) error {
 }
 
 // Dialog Edit handlers
-func (h *TroubleReports) handleGetDialogEdit(c echo.Context, pageData *DialogEditTemplateData) *echo.HTTPError {
+func (h *TroubleReports) handleGetDialogEdit(
+	c echo.Context,
+	pageData *DialogEditTemplateData,
+) *echo.HTTPError {
 	if pageData == nil {
 		pageData = &DialogEditTemplateData{}
 	}
@@ -280,7 +282,11 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, dialogEditData)
 }
 
-func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (title, content string, attachments []*database.Attachment, httpErr *echo.HTTPError) {
+func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
+	title, content string,
+	attachments []*database.Attachment,
+	httpErr *echo.HTTPError,
+) {
 	var err error
 
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
@@ -315,7 +321,8 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err == nil {
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
-				if loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(existingTR); err == nil {
+				if loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(
+					existingTR); err == nil {
 					attachments = make([]*database.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
 				}
@@ -379,9 +386,13 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 	return attachments, nil
 }
 
-func (h *TroubleReports) processFileUpload(fileHeader *multipart.FileHeader, index int) (*database.Attachment, error) {
+func (h *TroubleReports) processFileUpload(
+	fileHeader *multipart.FileHeader,
+	index int,
+) (*database.Attachment, error) {
 	if fileHeader.Size > database.MaxAttachmentDataSize {
-		return nil, fmt.Errorf("file %s is too large (max 10MB)", fileHeader.Filename)
+		return nil, fmt.Errorf("file %s is too large (max 10MB)",
+			fileHeader.Filename)
 	}
 
 	file, err := fileHeader.Open()
@@ -402,10 +413,12 @@ func (h *TroubleReports) processFileUpload(fileHeader *multipart.FileHeader, ind
 
 	// Ensure ID doesn't exceed maximum length
 	if len(attachmentID) > database.MaxAttachmentIDLength {
-		maxFilenameLen := database.MaxAttachmentIDLength - len(timestamp) - len(fmt.Sprintf("temp_%d", index)) - 2
+		maxFilenameLen := database.MaxAttachmentIDLength - len(timestamp) -
+			len(fmt.Sprintf("temp_%d", index)) - 2
 		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
 			sanitizedFilename = sanitizedFilename[:maxFilenameLen]
-			attachmentID = fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
+			attachmentID = fmt.Sprintf("temp_%s_%s_%d",
+				sanitizedFilename, timestamp, index)
 		} else {
 			attachmentID = fmt.Sprintf("temp_%s_%d", timestamp, index)
 		}
@@ -575,7 +588,8 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReportService.GetWithAttachments(id)
 	if err != nil {
-		logger.TroubleReport().Error("Failed to retrieve trouble report %d for PDF generation: %v", id, err)
+		logger.TroubleReport().Error(
+			"Failed to retrieve trouble report %d for PDF generation: %v", id, err)
 		return utils.HandlePgvisError(c, err)
 	}
 
@@ -648,7 +662,8 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 		if latestTime != earliestTime {
 			lastModifiedAt := time.Unix(0, latestTime*int64(time.Millisecond))
-			modifiedText := fmt.Sprintf("Zuletzt geändert: %s", lastModifiedAt.Format("02.01.2006 15:04:05"))
+			modifiedText := fmt.Sprintf("Zuletzt geändert: %s",
+				lastModifiedAt.Format("02.01.2006 15:04:05"))
 			if lastModifier != nil {
 				modifiedText += fmt.Sprintf(" von %s", lastModifier.UserName)
 			}
@@ -674,7 +689,9 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		if len(images) > 0 {
 			pdf.SetFont("Arial", "B", 14)
 			pdf.SetFillColor(240, 248, 255)
-			pdf.CellFormat(0, 10, translator(fmt.Sprintf("BILDER (%d)", len(images))), "1", 1, "L", true, 0, "")
+			pdf.CellFormat(0, 10,
+				translator(fmt.Sprintf("BILDER (%d)", len(images))),
+				"1", 1, "L", true, 0, "")
 
 			// Display images 2 per row
 			pageWidth, _ := pdf.GetPageSize()
@@ -706,12 +723,16 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 				// Left image caption
 				pdf.SetXY(leftMargin, captionY)
-				pdf.CellFormat(imageWidth, 4, translator(fmt.Sprintf("Anhang %d", i+1)), "0", 0, "C", false, 0, "")
+				pdf.CellFormat(imageWidth, 4,
+					translator(fmt.Sprintf("Anhang %d", i+1)),
+					"0", 0, "C", false, 0, "")
 
 				// Right image caption (if exists)
 				if i+1 < len(images) {
 					pdf.SetXY(rightX, captionY)
-					pdf.CellFormat(imageWidth, 4, translator(fmt.Sprintf("Anhang %d", i+2)), "0", 0, "C", false, 0, "")
+					pdf.CellFormat(imageWidth, 4,
+						translator(fmt.Sprintf("Anhang %d", i+2)),
+						"0", 0, "C", false, 0, "")
 				}
 
 				// Process left image
@@ -787,18 +808,26 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Fehler beim Erstellen der PDF")
 	}
 
-	logger.TroubleReport().Info("Successfully generated PDF for trouble report %d (size: %d bytes)", tr.ID, buf.Len())
+	logger.TroubleReport().Info(
+		"Successfully generated PDF for trouble report %d (size: %d bytes)",
+		tr.ID, buf.Len())
 
-	filename := fmt.Sprintf("fehlerbericht_%d_%s.pdf", tr.ID, time.Now().Format("2006-01-02"))
+	filename := fmt.Sprintf("fehlerbericht_%d_%s.pdf",
+		tr.ID, time.Now().Format("2006-01-02"))
 	c.Response().Header().Set("Content-Type", "application/pdf")
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
-	c.Response().Header().Set("Content-Length", fmt.Sprintf("%d", buf.Len()))
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s", filename))
+	c.Response().Header().Set("Content-Length",
+		fmt.Sprintf("%d", buf.Len()))
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
 }
 
 // Modifications handlers
-func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) *echo.HTTPError {
+func (h *TroubleReports) handleGetModifications(
+	c echo.Context,
+	tr *database.TroubleReport,
+) *echo.HTTPError {
 	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
@@ -864,7 +893,8 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	for _, m := range tr.Mods {
 		if m.Time == timeQuery {
 			if mod != nil {
-				logger.TroubleReport().Warn("Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
+				logger.TroubleReport().Warn(
+					"Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
 				newMods = append(newMods, m)
 			} else {
 				mod = m
@@ -1001,7 +1031,8 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	if ext := attachment.GetFileExtension(); ext != "" {
 		filename += ext
 	}
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
 	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
@@ -1149,7 +1180,11 @@ func (h *TroubleReports) handleDeleteAttachment(c echo.Context) error {
 }
 
 // renderAttachmentsSection renders only the attachments section HTML
-func (h *TroubleReports) renderAttachmentsSection(c echo.Context, reportID int, attachments []*database.Attachment) error {
+func (h *TroubleReports) renderAttachmentsSection(
+	c echo.Context,
+	reportID int,
+	attachments []*database.Attachment,
+) error {
 	data := struct {
 		ID                int                    `json:"id"`
 		LinkedAttachments []*database.Attachment `json:"linked_attachments"`

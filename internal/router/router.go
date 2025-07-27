@@ -30,17 +30,16 @@ func Serve(e *echo.Echo, o Options) {
 	// Serve static assets
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
-	// Initialize handlers
+	// Initialize base handler configuration
 	base := &handler.Base{
 		DB:               o.DB,
 		ServerPathPrefix: o.ServerPathPrefix,
 		Templates:        templates,
 	}
 
-	// Initialize feed notification system
+	// Initialize and configure feed notification system
 	wsFeedHandler := wshandler.NewFeedHandler(o.DB, templates)
-
-	{ // Initialize feed notification system
+	{
 		// Start the feed notification manager in a goroutine
 		ctx := context.Background()
 		go wsFeedHandler.Start(ctx)
@@ -49,11 +48,11 @@ func Serve(e *echo.Echo, o Options) {
 		o.DB.Feeds.SetBroadcaster(wsFeedHandler)
 	}
 
-	// Register routes
-	handler.NewAuth(base).RegisterRoutes(e)
-	handler.NewHome(base).RegisterRoutes(e)
-	handler.NewFeed(base).RegisterRoutes(e)
-	handler.NewProfile(base).RegisterRoutes(e)
-	handler.NewTroubleReports(base).RegisterRoutes(e)
+	// Register all application routes
+	(&handler.Auth{base}).RegisterRoutes(e)
+	(&handler.Home{base}).RegisterRoutes(e)
+	(&handler.Feed{base}).RegisterRoutes(e)
+	(&handler.Profile{base}).RegisterRoutes(e)
+	(&handler.TroubleReports{base}).RegisterRoutes(e)
 	handler.NewNav(base, wsFeedHandler).RegisterRoutes(e)
 }

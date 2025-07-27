@@ -19,12 +19,15 @@ const (
 		);
 	`
 
-	selectAllCookiesQuery        = `SELECT * FROM cookies ORDER BY last_login DESC`
-	selectCookiesByAPIKeyQuery   = `SELECT * FROM cookies WHERE api_key = ? ORDER BY last_login DESC`
-	selectCookieByValueQuery     = `SELECT * FROM cookies WHERE value = ?`
-	selectCookieExistsQuery      = `SELECT COUNT(*) FROM cookies WHERE value = ?`
-	insertCookieQuery            = `INSERT INTO cookies (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
-	updateCookieQuery            = `UPDATE cookies SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
+	selectAllCookiesQuery      = `SELECT * FROM cookies ORDER BY last_login DESC`
+	selectCookiesByAPIKeyQuery = `SELECT * FROM cookies
+		WHERE api_key = ? ORDER BY last_login DESC`
+	selectCookieByValueQuery = `SELECT * FROM cookies WHERE value = ?`
+	selectCookieExistsQuery  = `SELECT COUNT(*) FROM cookies WHERE value = ?`
+	insertCookieQuery        = `INSERT INTO cookies
+		(user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
+	updateCookieQuery = `UPDATE cookies
+		SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
 	deleteCookieByValueQuery     = `DELETE FROM cookies WHERE value = ?`
 	deleteCookiesByAPIKeyQuery   = `DELETE FROM cookies WHERE api_key = ?`
 	deleteCookiesBeforeTimeQuery = `DELETE FROM cookies WHERE last_login < ?`
@@ -135,7 +138,8 @@ func (c *Cookies) Add(cookie *Cookie) error {
 		return NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
 	}
 	if cookie.LastLogin <= 0 {
-		return NewValidationError("last_login", "last login timestamp must be positive", cookie.LastLogin)
+		return NewValidationError("last_login",
+			"last login timestamp must be positive", cookie.LastLogin)
 	}
 
 	var count int
@@ -147,7 +151,8 @@ func (c *Cookies) Add(cookie *Cookie) error {
 		return ErrAlreadyExists
 	}
 
-	_, err = c.db.Exec(insertCookieQuery, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
+	_, err = c.db.Exec(insertCookieQuery,
+		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
 		return NewDatabaseError("insert", "cookies", "failed to insert cookie", err)
 	}
@@ -172,10 +177,12 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 		return NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
 	}
 	if cookie.LastLogin <= 0 {
-		return NewValidationError("last_login", "last login timestamp must be positive", cookie.LastLogin)
+		return NewValidationError("last_login",
+			"last login timestamp must be positive", cookie.LastLogin)
 	}
 
-	result, err := c.db.Exec(updateCookieQuery, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
+	result, err := c.db.Exec(updateCookieQuery,
+		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
 		return NewDatabaseError("update", "cookies", "failed to update cookie", err)
 	}

@@ -25,7 +25,8 @@ func NewNav(base *Base, feedNotifier *wshandler.FeedHandler) *Nav {
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
 	// This approach keeps the WebSocket handler within Echo's middleware chain
 	// which is better for authentication that depends on Echo's context
-	e.GET(h.ServerPathPrefix+"/nav/feed-counter", h.handleFeedCounterWebSocketEcho)
+	e.GET(h.ServerPathPrefix+"/nav/feed-counter",
+		h.handleFeedCounterWebSocketEcho)
 }
 
 // handleFeedCounterWebSocketEcho creates an echo-compatible WebSocket handler
@@ -40,17 +41,21 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 			return
 		}
 
-		logger.WebSocket().Info("User authenticated: %s (LastFeed: %d)", user.UserName, user.LastFeed)
+		logger.WebSocket().Info("User authenticated: %s (LastFeed: %d)",
+			user.UserName, user.LastFeed)
 
 		// Register the connection with the feed notifier
-		feedConn := h.feedNotifier.RegisterConnection(user.TelegramID, user.LastFeed, ws)
+		feedConn := h.feedNotifier.RegisterConnection(
+			user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			logger.WebSocket().Error("Failed to register connection for user %s", user.UserName)
+			logger.WebSocket().Error(
+				"Failed to register connection for user %s", user.UserName)
 			ws.Close()
 			return
 		}
 
-		logger.WebSocket().Info("Connection registered for user %s", user.UserName)
+		logger.WebSocket().Info("Connection registered for user %s",
+			user.UserName)
 
 		// Start the write pump in a goroutine
 		go feedConn.WritePump()
@@ -58,7 +63,8 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		// Start the read pump (this will block until connection closes)
 		feedConn.ReadPump(h.feedNotifier)
 
-		logger.WebSocket().Info("Connection closed for user %s", user.UserName)
+		logger.WebSocket().Info("Connection closed for user %s",
+			user.UserName)
 	})
 
 	// Serve the WebSocket connection

@@ -17,8 +17,9 @@ func (m *Mods[T]) Current() *Modified[T] {
 // Modified represents a modification record that tracks changes made to any type T
 type Modified[T any] struct {
 	User *User `json:"user"`
-	Time int64 `json:"time"` // Time of modification in milliseconds since Unix epoch, should be unique
-	Data T     `json:"data"`
+	Time int64 `json:"time"` // Time of modification in milliseconds since Unix epoch,
+	// should be unique
+	Data T `json:"data"`
 }
 
 // NewModified creates a new modification record with the current timestamp

@@ -29,10 +29,13 @@ const (
 	selectAllUsersQuery         = `SELECT * FROM users`
 	selectUserByTelegramIDQuery = `SELECT * FROM users WHERE telegram_id = ?`
 	selectUserByAPIKeyQuery     = `SELECT * FROM users WHERE api_key = ?`
-	selectUserExistsQuery       = `SELECT COUNT(*) FROM users WHERE telegram_id = ? OR user_name = ?`
-	insertUserQuery             = `INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
-	updateUserQuery             = `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
-	deleteUserQuery             = `DELETE FROM users WHERE telegram_id = ?`
+	selectUserExistsQuery       = `SELECT COUNT(*) FROM users
+		WHERE telegram_id = ? OR user_name = ?`
+	insertUserQuery = `INSERT INTO users
+		(telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
+	updateUserQuery = `UPDATE users
+		SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
+	deleteUserQuery = `DELETE FROM users WHERE telegram_id = ?`
 )
 
 // Users provides database operations for managing user accounts.

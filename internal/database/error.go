@@ -31,7 +31,8 @@ type ValidationError struct {
 
 func (e *ValidationError) Error() string {
 	if e.Value != nil {
-		return fmt.Sprintf("validation error for field '%s': %s (value: %v)", e.Field, e.Message, e.Value)
+		return fmt.Sprintf("validation error for field '%s': %s (value: %v)",
+			e.Field, e.Message, e.Value)
 	}
 	return fmt.Sprintf("validation error for field '%s': %s", e.Field, e.Message)
 }
@@ -55,9 +56,11 @@ type DatabaseError struct {
 
 func (e *DatabaseError) Error() string {
 	if e.Table != "" {
-		return fmt.Sprintf("database error during %s on table '%s': %s: %s", e.Operation, e.Table, e.Message, e.Cause)
+		return fmt.Sprintf("database error during %s on table '%s': %s: %s",
+			e.Operation, e.Table, e.Message, e.Cause)
 	}
-	return fmt.Sprintf("database error during %s: %s: %s", e.Operation, e.Message, e.Cause)
+	return fmt.Sprintf("database error during %s: %s: %s",
+		e.Operation, e.Message, e.Cause)
 }
 
 // NewDatabaseError creates a new database error.

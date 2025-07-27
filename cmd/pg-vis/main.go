@@ -26,13 +26,13 @@ var (
 )
 
 func init() {
-	if p, err := os.UserConfigDir(); err != nil {
+	p, err := os.UserConfigDir()
+	if err != nil {
 		panic(err)
-	} else {
-		configPath = filepath.Join(p, appName)
-		if err := os.MkdirAll(configPath, 0700); err != nil {
-			panic(err)
-		}
+	}
+	configPath = filepath.Join(p, appName)
+	if err := os.MkdirAll(configPath, 0700); err != nil {
+		panic(err)
 	}
 }
 
@@ -41,9 +41,10 @@ func main() {
 	logger.Initialize()
 
 	// Configure logger based on environment
-	if os.Getenv("DEBUG") != "" {
+	switch {
+	case os.Getenv("DEBUG") != "":
 		logger.SetupDevelopment()
-	} else if os.Getenv("PRODUCTION") != "" {
+	case os.Getenv("PRODUCTION") != "":
 		logger.SetupProduction()
 	}
 
@@ -57,8 +58,9 @@ func main() {
 			apiKeyCommand(),
 
 			{
-				Name:  "user",
-				Usage: cli.Usage("Handle users database table, add, remove or modify user data"),
+				Name: "user",
+				Usage: cli.Usage(
+					"Handle users database table, add, remove or modify user data"),
 				Commands: []cli.Command{
 					listUserCommand(),
 					showUserCommand(),
@@ -69,8 +71,9 @@ func main() {
 			},
 
 			{
-				Name:  "cookies",
-				Usage: cli.Usage("Handle cookies database table, remove cookies data"),
+				Name: "cookies",
+				Usage: cli.Usage(
+					"Handle cookies database table, remove cookies data"),
 				Commands: []cli.Command{
 					removeCookiesCommand(),
 					autoCleanCookiesCommand(),

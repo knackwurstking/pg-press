@@ -99,7 +99,9 @@ func autoCleanCookiesCommand() cli.Command {
 						if isExpired(cookie) {
 							if err = db.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
-								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
+								fmt.Fprintf(os.Stderr,
+									"Removing cookie with value \"%s\" failed: %s",
+									cookie.Value, err.Error())
 							}
 						}
 					}
@@ -118,7 +120,9 @@ func autoCleanCookiesCommand() cli.Command {
 					if isExpired(cookie) {
 						if err = db.Cookies.Remove(cookie.Value); err != nil {
 							// Print out error and continue
-							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s", cookie.Value, err.Error())
+							fmt.Fprintf(os.Stderr,
+								"Removing cookie with value \"%s\" failed: %s",
+								cookie.Value, err.Error())
 						}
 					}
 				}

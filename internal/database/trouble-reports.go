@@ -23,9 +23,11 @@ const (
 
 	selectAllTroubleReportsQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	selectTroubleReportByIDQuery = `SELECT * FROM trouble_reports WHERE id = ?`
-	insertTroubleReportQuery     = `INSERT INTO trouble_reports (title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
-	updateTroubleReportQuery     = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, mods = ? WHERE id = ?`
-	deleteTroubleReportQuery     = `DELETE FROM trouble_reports WHERE id = ?`
+	insertTroubleReportQuery     = `INSERT INTO trouble_reports
+		(title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
+	updateTroubleReportQuery = `UPDATE trouble_reports
+		SET title = ?, content = ?, linked_attachments = ?, mods = ? WHERE id = ?`
+	deleteTroubleReportQuery = `DELETE FROM trouble_reports WHERE id = ?`
 )
 
 // TroubleReports provides database operations for managing trouble reports.
@@ -241,7 +243,8 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 	var linkedAttachments string
 	var mods []byte
 
-	if err := rows.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
+	if err := rows.Scan(&report.ID, &report.Title, &report.Content,
+		&linkedAttachments, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "trouble_reports",
 			"failed to scan row", err)
 	}
@@ -256,7 +259,8 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 			var oldAttachments []*Attachment
 			if err2 := json.Unmarshal([]byte(linkedAttachments), &oldAttachments); err2 == nil {
 				// Convert old format to new format (this shouldn't happen after migration)
-				logger.TroubleReport().Warn("Found old format attachments for report %d, converting to IDs", report.ID)
+				logger.TroubleReport().Warn(
+					"Found old format attachments for report %d, converting to IDs", report.ID)
 				report.LinkedAttachments = make([]int64, 0)
 				for _, att := range oldAttachments {
 					if att != nil && att.GetID() > 0 {
@@ -265,7 +269,9 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 				}
 			} else {
 				// Neither format worked, log and use empty array
-				logger.TroubleReport().Error("Failed to unmarshal linked attachments for report %d: %v, data: %s", report.ID, err, linkedAttachments)
+				logger.TroubleReport().Error(
+					"Failed to unmarshal linked attachments for report %d: %v, data: %s",
+					report.ID, err, linkedAttachments)
 				report.LinkedAttachments = make([]int64, 0)
 			}
 		}
@@ -283,7 +289,8 @@ func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, er
 	var linkedAttachments string
 	var mods []byte
 
-	if err := row.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &mods); err != nil {
+	if err := row.Scan(&report.ID, &report.Title, &report.Content,
+		&linkedAttachments, &mods); err != nil {
 		return nil, err
 	}
 
@@ -297,7 +304,8 @@ func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, er
 			var oldAttachments []*Attachment
 			if err2 := json.Unmarshal([]byte(linkedAttachments), &oldAttachments); err2 == nil {
 				// Convert old format to new format (this shouldn't happen after migration)
-				logger.TroubleReport().Warn("Found old format attachments for report %d, converting to IDs", report.ID)
+				logger.TroubleReport().Warn(
+					"Found old format attachments for report %d, converting to IDs", report.ID)
 				report.LinkedAttachments = make([]int64, 0)
 				for _, att := range oldAttachments {
 					if att != nil && att.GetID() > 0 {
@@ -306,7 +314,9 @@ func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, er
 				}
 			} else {
 				// Neither format worked, log and use empty array
-				logger.TroubleReport().Error("Failed to unmarshal linked attachments for report %d: %v, data: %s", report.ID, err, linkedAttachments)
+				logger.TroubleReport().Error(
+					"Failed to unmarshal linked attachments for report %d: %v, data: %s",
+					report.ID, err, linkedAttachments)
 				report.LinkedAttachments = make([]int64, 0)
 			}
 		}

@@ -21,24 +21,21 @@ import (
 var (
 	// FIXME: Do not use regexp for this
 	keyAuthSkipperRegExp = regexp.MustCompile(
-		`(.*/login.*|.*\.css|.*\.png|.*\.ico|.*\.woff|.*\.woff2|.*manifest.json|.*service-worker\.js|.*htmx.min.js|.*sw-register.js|.*pwa-manager.js)`,
-	)
+		`(.*/login.*|.*\.css|.*\.png|.*\.ico|.*\.woff|.*\.woff2|.*manifest.json|` +
+			`.*service-worker\.js|.*htmx.min.js|.*sw-register.js|.*pwa-manager.js)`)
 
-	pages []string
-)
-
-func init() {
 	pages = []string{
 		serverPathPrefix + "/",
 		serverPathPrefix + "/feed",
 		serverPathPrefix + "/profile",
 		serverPathPrefix + "/trouble-reports",
 	}
-}
+)
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${time_rfc3339} ${status} ${method} ${uri} (${remote_ip}) ${latency_human} ${custom}\n",
+		Format: "${time_rfc3339} ${status} ${method} ${uri} (${remote_ip}) " +
+			"${latency_human} ${custom}\n",
 		Output: os.Stderr,
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
 			if !slices.Contains(pages, c.Request().URL.Path) {
@@ -57,8 +54,9 @@ func middlewareLogger() echo.MiddlewareFunc {
 
 func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
-		Skipper:    keyAuthSkipper,
-		KeyLookup:  "header:" + echo.HeaderAuthorization + ",query:access_token,cookie:" + constants.CookieName,
+		Skipper: keyAuthSkipper,
+		KeyLookup: "header:" + echo.HeaderAuthorization +
+			",query:access_token,cookie:" + constants.CookieName,
 		AuthScheme: "Bearer",
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
 			return keyAuthValidator(auth, ctx, db)
@@ -78,9 +76,8 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
-		user, err = db.Users.GetUserFromApiKey(auth)
-		if err != nil {
-			return false, database.WrapError(err, "failed to validate user from cookie")
+		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
+			return false, err
 		}
 	}
 
@@ -91,33 +88,35 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
-		return nil, database.WrapError(err, "failed to get cookie")
+		return nil, err
 	}
 
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
-		return nil, database.WrapError(err, "failed to get cookie value")
+		return nil, err
 	}
 
 	// Check if cookie has expired
-	expirationThreshold := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
-	if c.LastLogin < expirationThreshold {
+	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
+	if c.LastLogin < expirationTime {
 		return nil, database.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
-		return nil, database.WrapError(err, "failed to get user from API key")
+		return nil, err
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {
-		logger.Middleware().Info("Updating cookies last login timestamp for user %s", user)
-
-		c.LastLogin = time.Now().UnixMilli()
-		cookie.Expires = time.Now().Add(constants.CookieExpirationDuration)
+		logger.Middleware().Info(
+			"Updating cookies last login timestamp for user %s", user)
+		now := time.Now()
+		c.LastLogin = now.UnixMilli()
+		cookie.Expires = now.Add(constants.CookieExpirationDuration)
 
 		if err := db.Cookies.Update(c.Value, c); err != nil {
-			logger.Middleware().Error("Failed to update cookie for user %s: %v", user, err)
+			logger.Middleware().Error(
+				"Failed to update cookie for user %s: %v", user, err)
 		}
 	}
 

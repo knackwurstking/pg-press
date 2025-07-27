@@ -26,13 +26,11 @@ func serverCommand() cli.Command {
 			customDBPath := cli.String(cmd, "db",
 				cli.WithShort("d"),
 				cli.Usage("Custom database file path (defaults to standard location)"),
-				cli.Optional,
-			)
+				cli.Optional)
 
 			addr := cli.String(cmd, "addr",
 				cli.WithShort("a"),
-				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"),
-			)
+				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
@@ -55,7 +53,8 @@ func serverCommand() cli.Command {
 				})
 
 				logger.Server().Info("Server listening on %s", *addr)
-				if err := e.Start(*addr); err != nil && err != http.ErrServerClosed {
+				if err := e.Start(*addr); err != nil &&
+					err != http.ErrServerClosed {
 					logger.Server().Error("Server startup failed: %v", err)
 					os.Exit(exitCodeServerStart)
 				}
@@ -74,25 +73,19 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		code := http.StatusInternalServerError
-		message := "Internal server error"
+		message := err.Error()
 
 		if herr, ok := err.(*echo.HTTPError); ok {
-			if herr == nil {
-				return
-			}
-
 			code = herr.Code
-			switch msg := herr.Message.(type) {
-			case string:
+			if msg, ok := herr.Message.(string); ok {
 				message = msg
-			case error:
-				message = msg.Error()
-			default:
+			} else if msgErr, ok := herr.Message.(error); ok {
+				message = msgErr.Error()
+			} else {
 				message = http.StatusText(code)
 			}
 		} else {
 			code = database.GetHTTPStatusCode(err)
-			message = err.Error()
 		}
 
 		if code >= 500 {
@@ -102,15 +95,15 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		if !c.Response().Committed {
+			response := message
 			if c.Request().Header.Get("Accept") == "application/json" {
-				c.JSON(code, map[string]any{
+				response = map[string]any{
 					"error":  message,
 					"code":   code,
 					"status": http.StatusText(code),
-				})
-			} else {
-				c.JSON(code, message)
+				}
 			}
+			c.JSON(code, response)
 		}
 	}
 }
