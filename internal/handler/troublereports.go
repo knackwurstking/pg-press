@@ -63,10 +63,7 @@ type ModificationsTemplateData struct {
 	Mods              database.Mods[database.TroubleReportMod]
 }
 
-// TroubleReportModification is a type alias for better readability
-type TroubleReportModification = *database.Modified[database.TroubleReportMod]
-
-func (mtd *ModificationsTemplateData) FirstModified() TroubleReportModification {
+func (mtd *ModificationsTemplateData) FirstModified() *database.Modified[database.TroubleReportMod] {
 	if len(mtd.TroubleReport.Mods) == 0 {
 		return nil
 	}
@@ -687,6 +684,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 		// Only proceed if there are images
 		if len(images) > 0 {
+			pdf.AddPage()
 			pdf.SetFont("Arial", "B", 14)
 			pdf.SetFillColor(240, 248, 255)
 			pdf.CellFormat(0, 10,
@@ -698,7 +696,6 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			leftMargin, _, rightMargin, _ := pdf.GetMargins()
 			usableWidth := pageWidth - leftMargin - rightMargin
 			imageWidth := (usableWidth - 10) / 2 // 10mm spacing between images
-			maxImageHeight := 60.0               // Maximum height for consistency
 
 			pdf.Ln(10)
 
@@ -707,10 +704,78 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			_, currentY = pdf.GetXY()
 
 			for i := 0; i < len(images); i += 2 {
-				// Check if we need a new page
-				if currentY+maxImageHeight+25 > 270 { // Leave space for footer
-					pdf.AddPage()
-					_, currentY = pdf.GetXY()
+				// First, determine the heights of both images in this row
+				var leftHeight, rightHeight float64
+				var leftTmpFile, rightTmpFile string
+				var leftImageType, rightImageType string
+
+				// Process left image to get height
+				leftImage := images[i]
+				tmpFile1, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", leftImage.ID))
+				if err == nil {
+					_, err = tmpFile1.Write(leftImage.Data)
+					tmpFile1.Close()
+					leftTmpFile = tmpFile1.Name()
+
+					if err == nil {
+						// Determine image type from mime type
+						switch leftImage.MimeType {
+						case "image/jpeg", "image/jpg":
+							leftImageType = "JPG"
+						case "image/png":
+							leftImageType = "PNG"
+						case "image/gif":
+							leftImageType = "GIF"
+						default:
+							leftImageType = "JPG" // Default fallback
+						}
+
+						// Get left image height by registering the image
+						info := pdf.RegisterImage(leftTmpFile, leftImageType)
+						if info != nil {
+							leftHeight = (imageWidth * info.Height()) / info.Width()
+						}
+					}
+				}
+
+				// Process right image to get height (if it exists)
+				if i+1 < len(images) {
+					rightImage := images[i+1]
+					tmpFile2, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", rightImage.ID))
+					if err == nil {
+						_, err = tmpFile2.Write(rightImage.Data)
+						tmpFile2.Close()
+						rightTmpFile = tmpFile2.Name()
+
+						if err == nil {
+							// Determine image type from mime type
+							switch rightImage.MimeType {
+							case "image/jpeg", "image/jpg":
+								rightImageType = "JPG"
+							case "image/png":
+								rightImageType = "PNG"
+							case "image/gif":
+								rightImageType = "GIF"
+							default:
+								rightImageType = "JPG" // Default fallback
+							}
+
+							// Get right image height by registering the image
+							info := pdf.RegisterImage(rightTmpFile, rightImageType)
+							if info != nil {
+								rightHeight = (imageWidth * info.Height()) / info.Width()
+							}
+						}
+					}
+				}
+
+				// Determine the actual row height (max of both images)
+				actualRowHeight := leftHeight
+				if rightHeight > actualRowHeight {
+					actualRowHeight = rightHeight
+				}
+				if actualRowHeight == 0 {
+					actualRowHeight = 60.0 // Fallback height if images couldn't be processed
 				}
 
 				// Calculate positions for this row
@@ -718,7 +783,15 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 				imageY := captionY + 6
 				rightX := leftMargin + imageWidth + 10
 
-				// Add captions first (both left and right if applicable)
+				// Check if we need a new page before adding the images
+				if imageY+actualRowHeight+25 > 270 {
+					pdf.AddPage()
+					_, currentY = pdf.GetXY()
+					captionY = currentY
+					imageY = captionY + 6
+				}
+
+				// Add captions for both images
 				pdf.SetFont("Arial", "", 9)
 
 				// Left image caption
@@ -735,66 +808,20 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 						"0", 0, "C", false, 0, "")
 				}
 
-				// Process left image
-				leftImage := images[i]
-				tmpFile1, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", leftImage.ID))
-				if err == nil {
-					_, err = tmpFile1.Write(leftImage.Data)
-					tmpFile1.Close()
-
-					if err == nil {
-						// Determine image type from mime type
-						var imageType string
-						switch leftImage.MimeType {
-						case "image/jpeg", "image/jpg":
-							imageType = "JPG"
-						case "image/png":
-							imageType = "PNG"
-						case "image/gif":
-							imageType = "GIF"
-						default:
-							imageType = "JPG" // Default fallback
-						}
-
-						// Add left image
-						pdf.ImageOptions(tmpFile1.Name(), leftMargin, imageY, imageWidth, 0, false,
-							gofpdf.ImageOptions{ImageType: imageType}, 0, "")
-					}
-					os.Remove(tmpFile1.Name())
+				// Add left image
+				if leftTmpFile != "" {
+					pdf.Image(leftTmpFile, leftMargin, imageY, imageWidth, 0, false, leftImageType, 0, "")
+					os.Remove(leftTmpFile)
 				}
 
-				// Process right image if it exists
-				if i+1 < len(images) {
-					rightImage := images[i+1]
-					tmpFile2, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", rightImage.ID))
-					if err == nil {
-						_, err = tmpFile2.Write(rightImage.Data)
-						tmpFile2.Close()
-
-						if err == nil {
-							// Determine image type from mime type
-							var imageType string
-							switch rightImage.MimeType {
-							case "image/jpeg", "image/jpg":
-								imageType = "JPG"
-							case "image/png":
-								imageType = "PNG"
-							case "image/gif":
-								imageType = "GIF"
-							default:
-								imageType = "JPG" // Default fallback
-							}
-
-							// Add right image
-							pdf.ImageOptions(tmpFile2.Name(), rightX, imageY, imageWidth, 0, false,
-								gofpdf.ImageOptions{ImageType: imageType}, 0, "")
-						}
-						os.Remove(tmpFile2.Name())
-					}
+				// Add right image (if it exists)
+				if rightTmpFile != "" {
+					pdf.Image(rightTmpFile, rightX, imageY, imageWidth, 0, false, rightImageType, 0, "")
+					os.Remove(rightTmpFile)
 				}
 
-				// Move to next row
-				currentY = imageY + maxImageHeight + 15
+				// Move to next row using actual row height
+				currentY = imageY + actualRowHeight + 15
 				pdf.SetXY(leftMargin, currentY)
 			}
 		}
@@ -824,10 +851,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 }
 
 // Modifications handlers
-func (h *TroubleReports) handleGetModifications(
-	c echo.Context,
-	tr *database.TroubleReport,
-) *echo.HTTPError {
+func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) *echo.HTTPError {
 	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
