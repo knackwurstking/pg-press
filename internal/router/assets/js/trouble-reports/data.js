@@ -51,11 +51,30 @@
         .forEach((details) => {
             details.addEventListener("toggle", function () {
                 if (this.open) {
+                    // Close all other details tags
+                    document
+                        .querySelectorAll('details[id^="trouble-report-"]')
+                        .forEach((otherDetails) => {
+                            if (otherDetails !== this && otherDetails.open) {
+                                otherDetails.open = false;
+                            }
+                        });
+
+                    // Update location hash
+                    history.replaceState(null, null, `#${this.id}`);
+
                     const troubleReportId = this.id.replace(
                         "trouble-report-",
                         "",
                     );
                     loadAttachmentsForTroubleReport(troubleReportId);
+                } else {
+                    // Clear hash when closing details
+                    history.replaceState(
+                        null,
+                        null,
+                        location.pathname + location.search,
+                    );
                 }
             });
         });
