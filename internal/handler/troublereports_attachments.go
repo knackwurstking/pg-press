@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -229,11 +230,8 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 
 	// Check if attachment ID is in the trouble report's linked attachments
 	var found bool
-	for _, linkedID := range tr.LinkedAttachments {
-		if linkedID == attachmentID {
-			found = true
-			break
-		}
+	if slices.Contains(tr.LinkedAttachments, attachmentID) {
+		found = true
 	}
 
 	if !found {
@@ -301,11 +299,8 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 		}
 
 		// Check if this ID exists in the current attachments
-		for _, existingID := range tr.LinkedAttachments {
-			if existingID == attachmentID {
-				reorderedAttachmentIDs = append(reorderedAttachmentIDs, attachmentID)
-				break
-			}
+		if slices.Contains(tr.LinkedAttachments, attachmentID) {
+			reorderedAttachmentIDs = append(reorderedAttachmentIDs, attachmentID)
 		}
 	}
 
@@ -337,90 +332,4 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	}
 
 	return h.handleGetDialogEdit(c, pageData)
-}
-
-func (h *TroubleReports) handleDeleteAttachment(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
-	}
-
-	attachmentIDStr := c.QueryParam("attachment_id")
-	if attachmentIDStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
-	}
-
-	attachmentID, err := strconv.ParseInt(attachmentIDStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid attachment_id parameter")
-	}
-
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
-	}
-
-	// Get existing trouble report
-	tr, err := h.DB.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Find and remove the attachment ID
-	newAttachmentIDs := make([]int64, 0, len(tr.LinkedAttachments))
-	found := false
-
-	for _, linkedID := range tr.LinkedAttachments {
-		if linkedID != attachmentID {
-			newAttachmentIDs = append(newAttachmentIDs, linkedID)
-		} else {
-			found = true
-		}
-	}
-
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound, "attachment not found")
-	}
-
-	// Update the trouble report
-	tr.LinkedAttachments = newAttachmentIDs
-	tr.Mods = append(tr.Mods, database.NewModified(user, database.TroubleReportMod{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}))
-
-	if err := h.DB.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Load attachments and return only the attachments section HTML
-	attachments, err := h.DB.TroubleReportService.LoadAttachments(tr)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	return h.renderAttachmentsSection(c, int(id), attachments)
-}
-
-// renderAttachmentsSection renders only the attachments section HTML
-func (h *TroubleReports) renderAttachmentsSection(
-	c echo.Context,
-	reportID int,
-	attachments []*database.Attachment,
-) error {
-	data := struct {
-		ID                int                    `json:"id"`
-		LinkedAttachments []*database.Attachment `json:"linked_attachments"`
-	}{
-		ID:                reportID,
-		LinkedAttachments: attachments,
-	}
-
-	return utils.HandleTemplate(
-		c,
-		data,
-		h.Templates,
-		[]string{constants.AttachmentsSectionComponentTemplatePath},
-	)
 }

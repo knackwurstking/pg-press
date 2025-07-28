@@ -49,7 +49,6 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	attachmentPath := h.ServerPathPrefix + "/trouble-reports/attachments"
 	e.GET(attachmentPath, h.handleGetAttachment)
-	e.DELETE(attachmentPath, h.handleDeleteAttachment)
 }
 
 func (h *TroubleReports) handleMainPage(c echo.Context) error {
