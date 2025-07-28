@@ -1,50 +1,86 @@
-<div class="attachments-label">Bilder (max. 10MB pro Datei, max. 10 Dateien)</div>
-
-{{if .LinkedAttachments}}
-<div class="attachments-section">
-	<div class="attachments-label">Vorhandene Bilder:</div>
-	<div id="existing-attachments">
-		{{range .LinkedAttachments}}
-		<div class="attachment-item flex row gap" data-id="{{.GetID}}">
-			<div class="attachment-info">
-				<i class="bi bi-grip-vertical"></i>
-				<i class="bi bi-image attachment-icon"></i>
-				<span class="ellipsis">Bild {{.GetID}}</span>
-				<span class="text-muted">({{.GetMimeType}})</span>
-			</div>
-			<div class="attachment-actions">
-				<button type="button" class="secondary small" onclick="viewAttachment({{$.ID}}, {{.GetID}})">
-					<i class="bi bi-eye"></i> Anzeigen
-				</button>
-				<button type="button" class="destructive small" onclick="deleteAttachment({{$.ID}}, {{.GetID}})">
-					<i class="bi bi-trash"></i> Löschen
-				</button>
-			</div>
-		</div>
-		{{end}}
-	</div>
+<div class="attachments-label">
+    Bilder (max. 10MB pro Datei, max. 10 Dateien)
 </div>
+
+<!-- Existing Attachments -->
+{{if and .LinkedAttachments (gt (len .LinkedAttachments) 0)}}
+<details class="attachments-section border">
+    <summary class="attachments-label flex row gap align-center">
+        <i class="bi bi-images"></i>
+        Vorhandene Bilder ({{len .LinkedAttachments}})
+    </summary>
+
+    <div id="existing-attachments" class="flex column gap">
+        {{range .LinkedAttachments}}
+        <div class="attachment-item flex row gap justify-between align-center border" data-id="{{.GetID}}">
+            <div class="attachment-info flex row gap align-center">
+                <i class="bi bi-grip-vertical"></i>
+
+                <i class="bi bi-image attachment-icon"></i>
+
+                <span class="ellipsis">Bild {{.ID}}</span>
+
+                <span class="muted text-sm">({{.GetMimeType}})</span>
+            </div>
+
+            <div class="attachment-actions flex row gap">
+                <button
+                    type="button"
+                    class="secondary flex row gap align-center"
+                    onclick="window.dialogEditFunctions.viewAttachment({{$.ID}}, {{.GetID}}, true)"
+                >
+                    <small class="flex row gap align-center">
+                        <i class="bi bi-eye"></i>
+                        Anzeigen
+                    </small>
+                </button>
+
+                <button
+                    type="button"
+                    class="destructive flex row gap align-center"
+                    onclick="window.dialogEditFunctions.deleteAttachment({{.GetID}});"
+                >
+                    <small class="flex row gap align-center">
+                        <i class="bi bi-trash"></i>
+                        Löschen
+                    </small>
+                </button>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</details>
 {{end}}
 
 <!-- File Upload Area -->
-<div class="file-input-area"
-	 onclick="document.getElementById('attachments').click()"
-	 ondrop="handleFileDrop(event)"
-	 ondragover="handleDragOver(event)"
-	 ondragleave="handleDragLeave(event)">
-	<i class="bi bi-cloud-upload" style="font-size: 2em; margin-bottom: 8px;"></i>
-	<div>Klicken Sie hier oder ziehen Sie Bilder hierher</div>
-	<div class="text-muted">Unterstützte Formate: JPG, PNG, GIF, BMP, SVG, WebP</div>
-	<input type="file"
-		   name="attachments"
-		   id="attachments"
-		   multiple
-		   accept="image/*"
-		   onchange="handleFileSelect(event)">
+<div
+    class="file-input-area flex column gap align-center justify-center text-center"
+    onclick="document.getElementById('attachments').click()"
+    ondrop="window.dialogEditFunctions.handleFileDrop(event)"
+    ondragover="window.dialogEditFunctions.handleDragOver(event)"
+    ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
+>
+    <i class="bi bi-cloud-upload" style="font-size: 2em;"></i>
+
+    <div class="text-center">Klicken Sie hier oder ziehen Sie Bilder hierher</div>
+
+    <div class="muted text-center text-sm">
+        Unterstützte Formate: JPG, PNG, GIF, BMP, SVG, WebP
+    </div>
+
+    <input
+        type="file"
+        name="attachments"
+        id="attachments"
+        multiple
+        accept="image/*"
+        onchange="window.dialogEditFunctions.handleFileSelect(event)"
+    />
 </div>
 
 <!-- File Preview Area -->
-<div id="file-preview" class="file-preview">
-	<div class="attachments-label">Neue Bilder:</div>
-	<div id="new-attachments"></div>
+<div id="file-preview" class="file-preview flex column gap border">
+    <div class="attachments-label">Neue Bilder:</div>
+
+    <div id="new-attachments" class="flex column gap"></div>
 </div>

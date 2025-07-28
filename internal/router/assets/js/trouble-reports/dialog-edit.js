@@ -34,12 +34,21 @@ document.querySelector("#dialogEdit").showModal();
             attachmentOrder.join(",");
     }
 
+    let sortableInstance = null;
+
     function initializeAttachmentOrder() {
-        if (
-            window.Sortable &&
-            document.getElementById("existing-attachments")
-        ) {
-            new Sortable(document.getElementById("existing-attachments"), {
+        const existingAttachmentsContainer = document.getElementById(
+            "existing-attachments",
+        );
+
+        // Destroy existing Sortable instance if it exists
+        if (sortableInstance) {
+            sortableInstance.destroy();
+            sortableInstance = null;
+        }
+
+        if (window.Sortable && existingAttachmentsContainer) {
+            sortableInstance = new Sortable(existingAttachmentsContainer, {
                 animation: 150,
                 ghostClass: "sortable-ghost",
                 handle: ".bi-grip-vertical",
@@ -202,20 +211,65 @@ document.querySelector("#dialogEdit").showModal();
             );
         },
 
-        deleteAttachment: function (reportId, attachmentId) {
+        deleteAttachment: function (attachmentId) {
             if (
                 confirm(
                     "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
                 )
             ) {
-                htmx.ajax(
-                    "DELETE",
-                    `./trouble-reports/attachments?id=${reportId}&attachment_id=${attachmentId}`,
-                    {
-                        target: "#attachments-section",
-                        swap: "innerHTML",
-                    },
+                // Find and remove the attachment item from DOM
+                const attachmentItem = document.querySelector(
+                    `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
                 );
+
+                if (attachmentItem) {
+                    // Remove from attachmentOrder array
+                    attachmentOrder = attachmentOrder.filter(
+                        (id) => id != attachmentId,
+                    );
+
+                    // Temporarily disable htmx processing during DOM manipulation
+                    if (window.htmx) {
+                        const container = document.getElementById(
+                            "existing-attachments",
+                        );
+                        const wasDisabled =
+                            container.hasAttribute("data-hx-disable");
+                        container.setAttribute("data-hx-disable", "true");
+
+                        // Remove the DOM element
+                        attachmentItem.remove();
+
+                        // Restore htmx state
+                        if (!wasDisabled) {
+                            container.removeAttribute("data-hx-disable");
+                        }
+                    } else {
+                        // Remove the DOM element
+                        attachmentItem.remove();
+                    }
+
+                    // Update the hidden input field
+                    updateAttachmentOrderInput();
+
+                    // Reinitialize Sortable instance after DOM changes
+                    initializeAttachmentOrder();
+
+                    // Check if no attachments left and hide the details section
+                    const existingAttachments = document.getElementById(
+                        "existing-attachments",
+                    );
+                    if (
+                        existingAttachments &&
+                        existingAttachments.children.length === 0
+                    ) {
+                        const detailsSection =
+                            existingAttachments.closest("details");
+                        if (detailsSection) {
+                            detailsSection.style.display = "none";
+                        }
+                    }
+                }
             }
         },
     };
