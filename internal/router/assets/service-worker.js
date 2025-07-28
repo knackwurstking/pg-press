@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.83";
+const VERSION = "v0.0.84";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -30,6 +30,7 @@ const CACHE_DURATION = {
     STATIC: 7 * 24 * 60 * 60 * 1000, // 7 days
     DYNAMIC: 1 * 60 * 60 * 1000, // 1 hour
     API: 5 * 60 * 1000, // 5 minutes
+    IMAGES: 2 * 60 * 60 * 1000, // 2 hours for attachment images
 };
 
 // Static assets to cache on install
@@ -72,6 +73,7 @@ const STATIC_ASSETS = [
     // Trouble Reports libraries
     "./js/trouble-reports/data.js",
     "./js/trouble-reports/dialog-edit.js",
+    "./js/trouble-reports/image-preloader.js",
     "./js/trouble-reports/main.js",
     "./js/trouble-reports/modifications.js",
 ];
@@ -86,6 +88,9 @@ const OFFLINE_FALLBACKS = {
 const URL_PATTERNS = {
     // Static assets that should be cached first
     static: /\.(css|js|woff|woff2|png|jpg|jpeg|gif|svg|ico)$/,
+
+    // Trouble report attachment images (session-based caching)
+    attachmentImages: /\/trouble-reports\/attachments\?/,
 
     // API endpoints that should use network-first
     api: /\/(data|dialog-edit|cookies|feed-counter)$/,
@@ -208,6 +213,15 @@ async function handleFetch(request) {
         // Static assets - cache first
         if (URL_PATTERNS.static.test(pathname)) {
             return await cacheFirst(request, STATIC_CACHE);
+        }
+
+        // Trouble report attachment images - cache first with longer duration
+        if (URL_PATTERNS.attachmentImages.test(url.pathname + url.search)) {
+            return await cacheFirstWithExpiration(
+                request,
+                DYNAMIC_CACHE,
+                CACHE_DURATION.IMAGES,
+            );
         }
 
         // API endpoints and HTMX partials - network first
@@ -458,6 +472,8 @@ self.addEventListener("message", (event) => {
         self.skipWaiting();
     } else if (event.data && event.data.type === "CACHE_URLS") {
         event.waitUntil(cacheUrls(event.data.urls));
+    } else if (event.data && event.data.type === "PRELOAD_IMAGES") {
+        event.waitUntil(preloadAttachmentImages(event.data.images));
     }
 });
 
@@ -477,6 +493,65 @@ async function syncProfileUpdates() {
 }
 
 /**
+ * Cache First Strategy with Expiration
+ *
+ * Tries cache first but checks expiration. If expired or not found,
+ * fetches from network. Ideal for images that should be cached during
+ * user sessions but refreshed periodically.
+ */
+async function cacheFirstWithExpiration(request, cacheName, maxAge) {
+    const cache = await caches.open(cacheName);
+    const cachedResponse = await cache.match(request);
+
+    if (cachedResponse) {
+        // Check if cache is still valid
+        const cachedAt = cachedResponse.headers.get("sw-cached-at");
+        if (cachedAt && Date.now() - parseInt(cachedAt) < maxAge) {
+            console.log(`[SW] Image cache hit (valid): ${request.url}`);
+            return cachedResponse;
+        } else {
+            console.log(`[SW] Image cache expired, refetching: ${request.url}`);
+            // Remove expired cache entry
+            cache.delete(request);
+        }
+    }
+
+    console.log(`[SW] Image cache miss, fetching: ${request.url}`);
+
+    try {
+        const networkResponse = await fetch(request);
+
+        if (networkResponse.ok) {
+            // Add timestamp for cache expiration
+            const responseToCache = networkResponse.clone();
+            const headers = new Headers(responseToCache.headers);
+            headers.set("sw-cached-at", Date.now().toString());
+
+            const modifiedResponse = new Response(responseToCache.body, {
+                status: responseToCache.status,
+                statusText: responseToCache.statusText,
+                headers: headers,
+            });
+
+            cache.put(request, modifiedResponse);
+            console.log(`[SW] Image cached: ${request.url}`);
+        }
+
+        return networkResponse;
+    } catch (error) {
+        console.error(`[SW] Failed to fetch image: ${request.url}`, error);
+
+        // Return cached version even if expired as fallback
+        if (cachedResponse) {
+            console.log(`[SW] Using expired cache as fallback: ${request.url}`);
+            return cachedResponse;
+        }
+
+        throw error;
+    }
+}
+
+/**
  * Cache additional URLs on demand
  */
 async function cacheUrls(urls) {
@@ -493,6 +568,84 @@ async function cacheUrls(urls) {
             console.error(`[SW] Failed to cache URL: ${url}`, error);
         }
     }
+}
+
+/**
+ * Preload attachment images for better user experience
+ *
+ * This function receives a list of image URLs (typically visible in the viewport)
+ * and proactively caches them to avoid loading delays when users interact with them.
+ */
+async function preloadAttachmentImages(imageUrls) {
+    if (!imageUrls || !Array.isArray(imageUrls)) {
+        console.warn("[SW] Invalid image URLs provided for preloading");
+        return;
+    }
+
+    console.log(`[SW] Preloading ${imageUrls.length} attachment images`);
+    const cache = await caches.open(DYNAMIC_CACHE);
+
+    // Process images in batches to avoid overwhelming the network
+    const batchSize = 5;
+    for (let i = 0; i < imageUrls.length; i += batchSize) {
+        const batch = imageUrls.slice(i, i + batchSize);
+
+        await Promise.allSettled(
+            batch.map(async (imageUrl) => {
+                try {
+                    // Check if already cached and still valid
+                    const cachedResponse = await cache.match(imageUrl);
+                    if (cachedResponse) {
+                        const cachedAt =
+                            cachedResponse.headers.get("sw-cached-at");
+                        if (
+                            cachedAt &&
+                            Date.now() - parseInt(cachedAt) <
+                                CACHE_DURATION.IMAGES
+                        ) {
+                            console.log(
+                                `[SW] Image already cached: ${imageUrl}`,
+                            );
+                            return;
+                        }
+                    }
+
+                    // Fetch and cache the image
+                    const response = await fetch(imageUrl);
+                    if (response.ok) {
+                        // Add timestamp for cache expiration
+                        const responseToCache = response.clone();
+                        const headers = new Headers(responseToCache.headers);
+                        headers.set("sw-cached-at", Date.now().toString());
+
+                        const modifiedResponse = new Response(
+                            responseToCache.body,
+                            {
+                                status: responseToCache.status,
+                                statusText: responseToCache.statusText,
+                                headers: headers,
+                            },
+                        );
+
+                        await cache.put(imageUrl, modifiedResponse);
+                        console.log(`[SW] Preloaded image: ${imageUrl}`);
+                    }
+                } catch (error) {
+                    console.warn(
+                        `[SW] Failed to preload image: ${imageUrl}`,
+                        error,
+                    );
+                }
+            }),
+        );
+
+        // Small delay between batches to be nice to the server
+        if (i + batchSize < imageUrls.length) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+    }
+
+    console.log(`[SW] Completed preloading attachment images`);
 }
 
 // Log service worker status
