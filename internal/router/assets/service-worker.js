@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.87";
+const VERSION = "v0.0.96";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;

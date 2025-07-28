@@ -2,23 +2,27 @@
 {{$troubleReport := $pageData.TroubleReport}}
 
 {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
-<div class="attachments-preview-container ">
-    <div class="attachments-preview-label">
+<div class="attachments-preview-container no-user-select">
+    <div class="attachments-preview-label flex align-center gap no-user-select">
         <i class="bi bi-paperclip"></i>
         Bilder ({{len $troubleReport.LoadedAttachments}})
     </div>
-    <div class="attachments-preview-scroll">
+    <div class="attachments-preview-scroll flex gap">
         {{range $troubleReport.LoadedAttachments}}
-        <div class="attachment-preview-item"
+        <div class="attachment-preview-item flex column align-center gap no-user-select ghost"
              data-report-id="{{$troubleReport.ID}}"
              data-attachment-id="{{.GetID}}"
              data-is-image="{{.IsImage}}"
-             onclick="viewAttachmentFromData(this.dataset.reportId, this.dataset.attachmentId, this.dataset.isImage)">
+             onclick="viewAttachmentFromData(this.dataset.reportId, this.dataset.attachmentId, this.dataset.isImage)"
+             tabindex="0"
+             role="button"
+             aria-label="Bild {{.ID}} anzeigen">
             <div class="attachment-preview-image">
                 <img
                     src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
                     alt="Bild {{.ID}}"
-                    class="preview-thumbnail"
+                    class="preview-thumbnail no-user-select"
+                    loading="lazy"
                 />
             </div>
         </div>

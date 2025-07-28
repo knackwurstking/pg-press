@@ -6,18 +6,18 @@ window.TroubleReportsImageViewer = {
         dialog.className = "image-viewer-dialog";
 
         dialog.innerHTML = `
-            <div class="image-viewer-content">
-                <div class="image-viewer-header">
-                    <button type="button" class="close-image-viewer" onclick="this.closest('dialog').close()">
+            <div class="image-viewer-content no-user-select">
+                <div class="image-viewer-header no-user-select">
+                    <button type="button" class="close-image-viewer no-user-select" onclick="this.closest('dialog').close()" title="Schließen">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
-                <div class="image-viewer-body">
-                    <div class="image-loading">
+                <div class="image-viewer-body no-user-select">
+                    <div class="image-loading no-user-select">
                         <i class="bi bi-hourglass-split"></i>
                         <span>Bild wird geladen...</span>
                     </div>
-                    <img src="${imageUrl}" alt="Attachment" class="fullscreen-image" style="display: none;" />
+                    <img src="${imageUrl}" alt="Attachment" class="fullscreen-image no-user-select" style="display: none;" />
                 </div>
             </div>
         `;
@@ -28,6 +28,8 @@ window.TroubleReportsImageViewer = {
         img.addEventListener("load", () => {
             loadingDiv.style.display = "none";
             img.style.display = "block";
+            // Ensure image fits viewport properly
+            fitImageToViewport(img);
         });
 
         img.addEventListener("error", () => {
@@ -37,7 +39,13 @@ window.TroubleReportsImageViewer = {
 
         img.addEventListener("click", (e) => {
             e.stopPropagation();
-            img.classList.toggle("zoomed");
+            toggleImageZoom(img);
+        });
+
+        // Double-click for zoom toggle
+        img.addEventListener("dblclick", (e) => {
+            e.stopPropagation();
+            toggleImageZoom(img);
         });
 
         dialog.addEventListener("click", (e) => {
@@ -50,12 +58,50 @@ window.TroubleReportsImageViewer = {
         });
 
         dialog.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") dialog.close();
+            switch (e.key) {
+                case "Escape":
+                    dialog.close();
+                    break;
+                case " ":
+                case "Enter":
+                    e.preventDefault();
+                    toggleImageZoom(img);
+                    break;
+                case "0":
+                    e.preventDefault();
+                    resetImageZoom(img);
+                    break;
+                case "+":
+                case "=":
+                    e.preventDefault();
+                    zoomImageIn(img);
+                    break;
+                case "-":
+                    e.preventDefault();
+                    zoomImageOut(img);
+                    break;
+            }
+        });
+
+        // Prevent context menu on right-click
+        dialog.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+
+        img.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
         });
 
         dialog.addEventListener("close", () =>
             document.body.removeChild(dialog),
         );
+
+        // Add no-user-select class to dialog
+        dialog.classList.add("no-user-select");
 
         document.body.appendChild(dialog);
         dialog.showModal();
@@ -159,6 +205,74 @@ window.shareTroubleReportPDF = async function (troubleReportId, title) {
         }
     }
 };
+
+// Image viewer utility functions
+function fitImageToViewport(img) {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const closeButtonSpace = 60; // Space for close button and padding
+
+    // Calculate available space
+    const maxWidth = viewportWidth - 40; // 20px padding on each side
+    const maxHeight = viewportHeight - closeButtonSpace;
+
+    // Get actual image dimensions
+    const naturalWidth = img.naturalWidth;
+    const naturalHeight = img.naturalHeight;
+
+    if (naturalWidth && naturalHeight) {
+        // Calculate scale to fit
+        const scaleX = maxWidth / naturalWidth;
+        const scaleY = maxHeight / naturalHeight;
+        const scale = Math.min(scaleX, scaleY, 1); // Don't scale up beyond natural size
+
+        // Apply calculated dimensions
+        img.style.width = Math.floor(naturalWidth * scale) + "px";
+        img.style.height = Math.floor(naturalHeight * scale) + "px";
+    }
+}
+
+function toggleImageZoom(img) {
+    if (img.classList.contains("zoomed")) {
+        resetImageZoom(img);
+    } else {
+        zoomImageIn(img);
+    }
+}
+
+function resetImageZoom(img) {
+    img.classList.remove("zoomed");
+    img.style.transform = "scale(1)";
+    fitImageToViewport(img);
+}
+
+function zoomImageIn(img) {
+    img.classList.add("zoomed");
+    const currentScale = getImageScale(img);
+    const newScale = Math.min(currentScale * 1.5, 3); // Max 3x zoom
+    img.style.transform = `scale(${newScale})`;
+}
+
+function zoomImageOut(img) {
+    const currentScale = getImageScale(img);
+    const newScale = Math.max(currentScale / 1.5, 0.5); // Min 0.5x zoom
+    img.style.transform = `scale(${newScale})`;
+
+    if (newScale <= 1) {
+        img.classList.remove("zoomed");
+        fitImageToViewport(img);
+    }
+}
+
+function getImageScale(img) {
+    const matrix = window.getComputedStyle(img).transform;
+    if (matrix === "none" || matrix === undefined) {
+        return 1;
+    }
+
+    const matrixValues = matrix.match(/matrix.*\((.+)\)/)[1].split(", ");
+    return parseFloat(matrixValues[0]) || 1;
+}
 
 // Global functions for backward compatibility
 window.viewAttachmentFromData = function (reportId, attachmentId, isImage) {

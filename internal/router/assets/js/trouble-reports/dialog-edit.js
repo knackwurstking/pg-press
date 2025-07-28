@@ -3,6 +3,7 @@ document.querySelector("#dialogEdit").showModal();
 (() => {
     let attachmentOrder = [];
     let selectedFiles = [];
+    let isDragging = false;
 
     // File state management
     function resetFileState() {
@@ -117,6 +118,23 @@ document.querySelector("#dialogEdit").showModal();
         }
     }
 
+    // Scroll prevention functions using CSS classes
+    function disableScroll() {
+        document.body.classList.add("drag-active", "no-user-select");
+        const dialog = document.querySelector("#dialogEdit");
+        if (dialog) {
+            dialog.classList.add("drag-active", "no-user-select");
+        }
+    }
+
+    function enableScroll() {
+        document.body.classList.remove("drag-active", "no-user-select");
+        const dialog = document.querySelector("#dialogEdit");
+        if (dialog) {
+            dialog.classList.remove("drag-active", "no-user-select");
+        }
+    }
+
     // Global functions for HTML event handlers
     window.dialogEditFunctions = {
         handleFileSelect: function (event) {
@@ -127,7 +145,10 @@ document.querySelector("#dialogEdit").showModal();
         handleFileDrop: function (event) {
             event.preventDefault();
             event.stopPropagation();
-            event.currentTarget.classList.remove("dragover");
+            const area = event.currentTarget;
+            area.classList.remove("dragover");
+            isDragging = false;
+            enableScroll();
             selectedFiles = Array.from(event.dataTransfer.files);
             updateFileInput();
             displayFilePreview();
@@ -135,11 +156,35 @@ document.querySelector("#dialogEdit").showModal();
 
         handleDragOver: function (event) {
             event.preventDefault();
-            event.currentTarget.classList.add("dragover");
+            event.stopPropagation();
+            const area = event.currentTarget;
+            area.classList.add("dragover");
+            if (!isDragging) {
+                isDragging = true;
+                disableScroll();
+            }
         },
 
         handleDragLeave: function (event) {
-            event.currentTarget.classList.remove("dragover");
+            event.preventDefault();
+            event.stopPropagation();
+            const area = event.currentTarget;
+
+            // Check if we're actually leaving the drag area
+            const rect = area.getBoundingClientRect();
+            const x = event.clientX;
+            const y = event.clientY;
+
+            if (
+                x < rect.left ||
+                x > rect.right ||
+                y < rect.top ||
+                y > rect.bottom
+            ) {
+                area.classList.remove("dragover");
+                isDragging = false;
+                enableScroll();
+            }
         },
 
         removeFileFromPreview: function (index) {
@@ -205,6 +250,25 @@ document.querySelector("#dialogEdit").showModal();
             e.preventDefault();
             alert("Zu viele Anhänge. Maximal 10 Anhänge sind erlaubt.");
             return false;
+        }
+    });
+
+    // Cleanup scroll prevention on dialog close
+    const dialog = document.querySelector("#dialogEdit");
+    if (dialog) {
+        dialog.addEventListener("close", function () {
+            if (isDragging) {
+                isDragging = false;
+                enableScroll();
+            }
+        });
+    }
+
+    // Add global drag end listener as fallback
+    document.addEventListener("dragend", function () {
+        if (isDragging) {
+            isDragging = false;
+            enableScroll();
         }
     });
 })();
