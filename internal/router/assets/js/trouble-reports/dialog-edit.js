@@ -91,23 +91,24 @@ document.querySelector("#dialogEdit").showModal();
                 const sizeClass =
                     file.size > 10 * 1024 * 1024
                         ? "attachment-error"
-                        : "text-muted";
+                        : "muted text-sm";
                 const sizeText =
                     file.size > 10 * 1024 * 1024
                         ? "ZU GROSS!"
                         : formatFileSize(file.size);
 
                 const item = document.createElement("div");
-                item.className = "attachment-item";
+                item.className =
+                    "attachment-item flex row gap justify-between align-center";
                 item.innerHTML = `
-                    <div class="attachment-info">
+                    <div class="attachment-info flex row gap align-center">
                         <i class="bi bi-file-earmark attachment-icon"></i>
                         <span class="ellipsis">${file.name}</span>
                         <span class="${sizeClass}">(${sizeText})</span>
                     </div>
-                    <div class="attachment-actions">
-                        <button type="button" class="destructive flex gap" onclick="window.dialogEditFunctions.removeFileFromPreview(${index})">
-                            <small><i class="bi bi-trash"></i> Entfernen</small>
+                    <div class="attachment-actions flex row gap">
+                        <button type="button" class="destructive flex row gap align-center" onclick="window.dialogEditFunctions.removeFileFromPreview(${index})">
+                            <small class="flex row gap align-center"><i class="bi bi-trash"></i> Entfernen</small>
                         </button>
                     </div>
                 `;
@@ -118,20 +119,20 @@ document.querySelector("#dialogEdit").showModal();
         }
     }
 
-    // Scroll prevention functions using CSS classes
+    // Scroll prevention functions using ui.min.css classes
     function disableScroll() {
-        document.body.classList.add("drag-active", "no-user-select");
+        document.body.classList.add("no-scrollbar", "no-user-select");
         const dialog = document.querySelector("#dialogEdit");
         if (dialog) {
-            dialog.classList.add("drag-active", "no-user-select");
+            dialog.classList.add("no-scrollbar", "no-user-select");
         }
     }
 
     function enableScroll() {
-        document.body.classList.remove("drag-active", "no-user-select");
+        document.body.classList.remove("no-scrollbar", "no-user-select");
         const dialog = document.querySelector("#dialogEdit");
         if (dialog) {
-            dialog.classList.remove("drag-active", "no-user-select");
+            dialog.classList.remove("no-scrollbar", "no-user-select");
         }
     }
 
