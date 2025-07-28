@@ -55,7 +55,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat einen neuen Problembericht mit dem Titel
-		<a href="./trouble-reports#trouble-report-%d">%s</a> hinzugefügt.
+		<a href="./trouble-reports#trouble-report-%d" class="info">%s</a> hinzugefügt.
 	</div>
 </div>
 `
@@ -67,7 +67,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat den Problembericht mit dem Titel
-		<a href="./trouble-reports#trouble-report-%d">%s</a> aktualisiert.
+		<a href="./trouble-reports#trouble-report-%d" class="info">%s</a> aktualisiert.
 	</div>
 </div>
 `
