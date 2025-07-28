@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.126";
+const VERSION = "v0.0.127";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -30,7 +30,7 @@ const CACHE_DURATION = {
     STATIC: 7 * 24 * 60 * 60 * 1000, // 7 days
     DYNAMIC: 1 * 60 * 60 * 1000, // 1 hour
     API: 5 * 60 * 1000, // 5 minutes
-    IMAGES: 2 * 60 * 60 * 1000, // 2 hours for attachment images
+    IMAGES: 30 * 24 * 60 * 60 * 1000, // 1 month for attachment images
 };
 
 // Static assets to cache on install
