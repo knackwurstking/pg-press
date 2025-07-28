@@ -1,5 +1,4 @@
 (() => {
-    // Function to handle attachment loading for modifications
     function loadAttachmentsForModification(troubleReportId, modificationTime) {
         const placeholder = document.querySelector(
             `[data-modification-id="${troubleReportId}-${modificationTime}"]`,
@@ -12,7 +11,6 @@
         }
     }
 
-    // Set up click event listeners for all attachment placeholders
     document
         .querySelectorAll(
             ".attachments-preview-placeholder[data-modification-id]",
@@ -34,12 +32,12 @@
                 );
             });
 
-            // Add hover effect for clickable placeholders
             placeholder.addEventListener("mouseenter", function () {
                 this.style.backgroundColor = "var(--ui-info)";
                 this.style.borderColor = "var(--ui-primary)";
                 this.style.color = "var(--ui-info-text)";
             });
+
             placeholder.addEventListener("mouseleave", function () {
                 this.style.backgroundColor = "";
                 this.style.borderColor = "var(--ui-border-color)";

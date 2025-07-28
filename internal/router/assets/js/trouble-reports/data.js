@@ -1,23 +1,19 @@
 (() => {
     // Update share button appearance based on HTTPS/HTTP
     const isHTTPS = location.protocol === "https:";
-    const canUseWebShare = isHTTPS;
 
     document.querySelectorAll('[id^="share-btn-"]').forEach((button) => {
-        if (!canUseWebShare) {
-            // HTTP connection - change to download appearance
+        if (!isHTTPS) {
             button.title = "PDF herunterladen (HTTPS erforderlich für Teilen)";
             const icon = button.querySelector("i");
             if (icon) {
                 icon.className = "bi bi-download";
             }
         } else {
-            // HTTPS connection - keep share appearance
             button.title = "Als PDF teilen";
         }
     });
 
-    // Function to handle attachment loading
     function loadAttachmentsForTroubleReport(troubleReportId) {
         const placeholder = document.querySelector(
             `[data-trouble-report-id="${troubleReportId}"]`,
@@ -27,7 +23,6 @@
         }
     }
 
-    // Handle hash-based navigation after HTMX has loaded
     function handleHashNavigation() {
         if (location.hash) {
             const el = document.querySelector(location.hash);
@@ -41,8 +36,6 @@
 
     // Run hash navigation after HTMX has finished processing
     document.addEventListener("htmx:load", handleHashNavigation);
-
-    // Also run immediately in case HTMX has already loaded
     handleHashNavigation();
 
     // Add event listeners for details toggle
@@ -60,16 +53,14 @@
                             }
                         });
 
-                    // Update location hash
+                    // Update location hash and load attachments
                     history.replaceState(null, null, `#${this.id}`);
-
                     const troubleReportId = this.id.replace(
                         "trouble-report-",
                         "",
                     );
                     loadAttachmentsForTroubleReport(troubleReportId);
                 } else {
-                    // Clear hash when closing details
                     history.replaceState(
                         null,
                         null,
@@ -78,6 +69,4 @@
                 }
             });
         });
-
-    // PDF sharing functionality is now in main.js
 })();
