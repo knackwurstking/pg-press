@@ -13,25 +13,26 @@ const (
 	ProfilePageTemplatePath        = "templates/pages/profile.html"
 	TroubleReportsPageTemplatePath = "templates/pages/trouble-reports.html"
 
+	// Component templates
+	NavFeedComponentTemplatePath = "templates/components/nav-feed.html"
+)
+
+const (
 	// Navigation component templates
-	NavFeedComponentTemplatePath     = "templates/components/nav/feed.html"
-	FeedCounterComponentTemplatePath = "templates/components/nav/feed-counter.html"
+	HTMXNavFeedCounterTemplatePath = "templates/htmx/nav/feed-counter.html"
 
 	// Feed component templates
-	FeedDataComponentTemplatePath = "templates/components/feed/data.html"
+	HTMXFeedDataTemplatePath = "templates/htmx/feed/data.html"
 
 	// Profile component templates
-	ProfileCookiesComponentTemplatePath = "templates/components/profile/cookies.html"
+	HTMXProfileCookiesTemplatePath = "templates/htmx/profile/cookies.html"
 
 	// Trouble Reports component templates
-	TroubleReportsDataComponentTemplatePath                           = "templates/components/trouble-reports/data.html"
-	TroubleReportsModificationsComponentTemplatePath                  = "templates/components/trouble-reports/modifications.html"
-	TroubleReportsDialogEditComponentTemplatePath                     = "templates/components/trouble-reports/dialog-edit.html"
-	TroubleReportsAttachmentsPreviewComponentTemplatePath             = "templates/components/trouble-reports/attachments-preview.html"
-	TroubleReportsModificationAttachmentsPreviewComponentTemplatePath = "templates/components/trouble-reports/modification-attachments-preview.html"
-
-	// Attachments component templates
-	AttachmentsSectionComponentTemplatePath = "templates/components/attachments/section.html"
+	HTMXTroubleReportsDataTemplatePath                           = "templates/htmx/trouble-reports/data.html"
+	HTMXTroubleReportsModificationsTemplatePath                  = "templates/htmx/trouble-reports/modifications.html"
+	HTMXTroubleReportsDialogEditTemplatePath                     = "templates/htmx/trouble-reports/dialog-edit.html"
+	HTMXTroubleReportsAttachmentsPreviewTemplatePath             = "templates/htmx/trouble-reports/attachments-preview.html"
+	HTMXTroubleReportsModificationAttachmentsPreviewTemplatePath = "templates/htmx/trouble-reports/modification-attachments-preview.html"
 )
 
 // Template sets for common page combinations

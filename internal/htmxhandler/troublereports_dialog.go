@@ -50,7 +50,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 	return utils.HandleTemplate(c, pageData,
 		h.Templates,
 		[]string{
-			constants.TroubleReportsDialogEditComponentTemplatePath,
+			constants.HTMXTroubleReportsDialogEditTemplatePath,
 		},
 	)
 }

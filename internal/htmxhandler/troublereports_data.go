@@ -33,7 +33,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 		},
 		h.Templates,
 		[]string{
-			constants.TroubleReportsDataComponentTemplatePath,
+			constants.HTMXTroubleReportsDataTemplatePath,
 		},
 	)
 }
@@ -84,7 +84,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		},
 		h.Templates,
 		[]string{
-			constants.TroubleReportsAttachmentsPreviewComponentTemplatePath,
+			constants.HTMXTroubleReportsAttachmentsPreviewTemplatePath,
 		},
 	)
 }
@@ -128,7 +128,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		data,
 		h.Templates,
 		[]string{
-			constants.TroubleReportsModificationsComponentTemplatePath,
+			constants.HTMXTroubleReportsModificationsTemplatePath,
 		},
 	)
 }
@@ -237,7 +237,7 @@ func (h *TroubleReports) handleGetModificationAttachmentsPreview(c echo.Context)
 		data,
 		h.Templates,
 		[]string{
-			constants.TroubleReportsModificationAttachmentsPreviewComponentTemplatePath,
+			constants.HTMXTroubleReportsModificationAttachmentsPreviewTemplatePath,
 		},
 	)
 }

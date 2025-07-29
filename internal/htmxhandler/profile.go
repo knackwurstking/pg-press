@@ -31,7 +31,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 	}
 
 	return utils.HandleTemplate(c, database.SortCookies(cookies), h.Templates,
-		[]string{constants.ProfileCookiesComponentTemplatePath})
+		[]string{constants.HTMXProfileCookiesTemplatePath})
 }
 
 func (h *Profile) handleDeleteCookies(c echo.Context) error {

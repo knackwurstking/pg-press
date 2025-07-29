@@ -187,7 +187,7 @@ func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 
 	html, err := utils.RenderTemplateToString(
 		fn.templates,
-		[]string{constants.FeedCounterComponentTemplatePath},
+		[]string{constants.HTMXNavFeedCounterTemplatePath},
 		data,
 	)
 	if err != nil {

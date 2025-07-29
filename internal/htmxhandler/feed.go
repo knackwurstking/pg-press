@@ -47,5 +47,5 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	}
 
 	return utils.HandleTemplate(c, data, h.Templates,
-		[]string{constants.FeedDataComponentTemplatePath})
+		[]string{constants.HTMXFeedDataTemplatePath})
 }

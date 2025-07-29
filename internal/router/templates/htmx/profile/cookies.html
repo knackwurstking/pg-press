@@ -1,0 +1,124 @@
+{{$cookies := .}} {{if ne (len $cookies) 0}}
+<details id="cookies" class="cookies-details" open>
+    <style>
+        .cookies-details {
+            border: none;
+            background: transparent;
+        }
+
+        .cookies-summary {
+            background: var(--ui-color-200);
+            color: var(--ui-text);
+            padding: var(--ui-spacing);
+            margin: 0;
+            border-radius: var(--ui-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .cookies-summary:hover {
+            background: var(--ui-color-300);
+        }
+
+        .cookies-table {
+            margin-top: var(--ui-spacing);
+            background: var(--ui-bg);
+            border-radius: var(--ui-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--ui-backdrop-color);
+        }
+
+        .cookies-table th {
+            background: var(--ui-color-200);
+            color: var(--ui-text);
+            font-weight: 600;
+            padding: calc(var(--ui-spacing) * 1.5);
+            border-bottom: var(--ui-border-width) var(--ui-border-style)
+                var(--ui-border-color);
+        }
+
+        .cookies-table td {
+            padding: var(--ui-spacing);
+            border-bottom: var(--ui-border-width) var(--ui-border-style)
+                var(--ui-color-200);
+            vertical-align: middle;
+        }
+
+        .cookies-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .cookies-table tr:hover {
+            background: var(--ui-color-100);
+        }
+
+        .time-cell {
+            font-family: "Courier New", monospace;
+            color: var(--ui-color-600);
+            font-size: 0.9rem;
+            min-width: 140px;
+        }
+
+        .user-agent-cell {
+            color: var(--ui-color-700);
+            font-size: 0.85rem;
+            max-width: 300px;
+            word-break: break-word;
+        }
+
+        .no-cookies {
+            text-align: center;
+            color: var(--ui-color-600);
+            padding: calc(var(--ui-spacing) * 2);
+            background: var(--ui-color-100);
+            border-radius: var(--ui-radius);
+            font-style: italic;
+        }
+    </style>
+
+    <summary class="cookies-summary">
+        <i class="bi bi-cookie"></i>
+        Aktive Sitzungen ({{len $cookies}})
+    </summary>
+
+    <table class="cookies-table">
+        <thead>
+            <tr>
+                <th style="width: fit-content;">Letzte Anmeldung</th>
+                <th style="width: 100%;" class="left">Benutzeragent</th>
+                <th style="width: fit-content;"></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{range $cookie := $cookies}}
+            <tr>
+                <td class="time-cell">{{$cookie.TimeString}}</td>
+                <td class="left user-agent-cell">{{$cookie.UserAgent}}</td>
+
+                <td class="right no-user-select">
+                    <a
+                        hx-delete="./profile/cookies?value={{$cookie.Value}}"
+                        hx-trigger="click"
+                        hx-target="#cookies"
+                        hx-swap="outerHTML"
+                        hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
+                        role="button"
+                        class="ghost destructive icon"
+                        title="Sitzung beenden"
+                    >
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+</details>
+{{else}}
+<div id="cookies" class="no-cookies">
+    <i class="bi bi-info-circle"></i>
+    Keine aktiven Sitzungen gefunden
+</div>
+{{end}}
