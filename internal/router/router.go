@@ -8,6 +8,7 @@ import (
 
 	"github.com/knackwurstking/pg-vis/internal/database"
 	"github.com/knackwurstking/pg-vis/internal/handler"
+	"github.com/knackwurstking/pg-vis/internal/htmxhandler"
 	"github.com/knackwurstking/pg-vis/internal/wshandler"
 )
 
@@ -49,10 +50,18 @@ func Serve(e *echo.Echo, o Options) {
 	}
 
 	// Register all application routes
-	(&handler.Auth{base}).RegisterRoutes(e)
-	(&handler.Home{base}).RegisterRoutes(e)
-	(&handler.Feed{base}).RegisterRoutes(e)
-	(&handler.Profile{base}).RegisterRoutes(e)
-	(&handler.TroubleReports{base}).RegisterRoutes(e)
-	handler.NewNav(base, wsFeedHandler).RegisterRoutes(e)
+	(&handler.Auth{Base: base}).RegisterRoutes(e)
+	(&handler.Home{Base: base}).RegisterRoutes(e)
+	(&handler.Feed{Base: base}).RegisterRoutes(e)
+	(&handler.Profile{Base: base}).RegisterRoutes(e)
+	(&handler.TroubleReports{Base: base}).RegisterRoutes(e)
+
+	(&htmxhandler.Nav{
+		Base: &htmxhandler.Base{
+			DB:               o.DB,
+			ServerPathPrefix: o.ServerPathPrefix + "/nav",
+			Templates:        templates,
+		},
+		FeedNotifier: wsFeedHandler,
+	}).RegisterRoutes(e)
 }

@@ -1,4 +1,4 @@
-package handler
+package htmxhandler
 
 import (
 	"net/http"
@@ -13,10 +13,10 @@ import (
 
 func (h *TroubleReports) handleGetDialogEdit(
 	c echo.Context,
-	pageData *DialogEditTemplateData,
+	pageData *dialogEditTemplateData,
 ) *echo.HTTPError {
 	if pageData == nil {
-		pageData = &DialogEditTemplateData{}
+		pageData = &dialogEditTemplateData{}
 	}
 
 	if c.QueryParam(constants.QueryParamCancel) == constants.TrueValue {
@@ -56,7 +56,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 }
 
 func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
-	dialogEditData := &DialogEditTemplateData{
+	dialogEditData := &dialogEditTemplateData{
 		Submitted: true,
 	}
 
@@ -110,7 +110,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	dialogEditData := &DialogEditTemplateData{
+	dialogEditData := &dialogEditTemplateData{
 		Submitted:      true,
 		ID:             int(id),
 		Title:          title,

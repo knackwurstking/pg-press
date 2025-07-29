@@ -1,4 +1,4 @@
-package handler
+package htmxhandler
 
 import (
 	"fmt"
@@ -323,7 +323,7 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	}
 
 	// Return updated dialog
-	pageData := &DialogEditTemplateData{
+	pageData := &dialogEditTemplateData{
 		Submitted:         true, // Prevent reloading from database
 		ID:                int(id),
 		Title:             tr.Title,

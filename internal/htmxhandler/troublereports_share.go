@@ -1,4 +1,4 @@
-package handler
+package htmxhandler
 
 import (
 	"bytes"
@@ -15,15 +15,15 @@ import (
 	"github.com/knackwurstking/pg-vis/internal/utils"
 )
 
-// PDFOptions contains common options for PDF generation
-type PDFOptions struct {
+// pdfOptions contains common options for PDF generation
+type pdfOptions struct {
 	PDF        *gofpdf.Fpdf
 	Translator func(string) string
 	Report     *database.TroubleReportWithAttachments
 }
 
-// ImageLayoutOptions contains layout options for image rendering
-type ImageLayoutOptions struct {
+// imageLayoutOptions contains layout options for image rendering
+type imageLayoutOptions struct {
 	PageWidth   float64
 	LeftMargin  float64
 	RightMargin float64
@@ -31,8 +31,8 @@ type ImageLayoutOptions struct {
 	ImageWidth  float64
 }
 
-// ImagePositionOptions contains positioning options for image rendering
-type ImagePositionOptions struct {
+// imagePositionOptions contains positioning options for image rendering
+type imagePositionOptions struct {
 	StartIndex  int
 	TotalImages int
 	ImageWidth  float64
@@ -85,7 +85,7 @@ func (h *TroubleReports) generateTroubleReportPDF(
 	pdf.AddPage()
 	pdf.SetMargins(20, 20, 20)
 
-	opts := &PDFOptions{
+	opts := &pdfOptions{
 		PDF:        pdf,
 		Translator: translator,
 		Report:     tr,
@@ -106,7 +106,7 @@ func (h *TroubleReports) generateTroubleReportPDF(
 	return &buf, nil
 }
 
-func (h *TroubleReports) addPDFHeader(opts *PDFOptions) {
+func (h *TroubleReports) addPDFHeader(opts *pdfOptions) {
 	opts.PDF.SetFont("Arial", "B", 20)
 	opts.PDF.SetTextColor(0, 51, 102)
 	opts.PDF.Cell(0, 15, opts.Translator("Fehlerbericht"))
@@ -120,7 +120,7 @@ func (h *TroubleReports) addPDFHeader(opts *PDFOptions) {
 	opts.PDF.SetTextColor(0, 0, 0)
 }
 
-func (h *TroubleReports) addPDFTitleSection(opts *PDFOptions) {
+func (h *TroubleReports) addPDFTitleSection(opts *pdfOptions) {
 	opts.PDF.SetFont("Arial", "B", 14)
 	opts.PDF.SetFillColor(240, 248, 255)
 	opts.PDF.CellFormat(0, 10, "TITEL", "1", 1, "L", true, 0, "")
@@ -130,7 +130,7 @@ func (h *TroubleReports) addPDFTitleSection(opts *PDFOptions) {
 	opts.PDF.Ln(8)
 }
 
-func (h *TroubleReports) addPDFContentSection(opts *PDFOptions) {
+func (h *TroubleReports) addPDFContentSection(opts *pdfOptions) {
 	opts.PDF.SetFont("Arial", "B", 14)
 	opts.PDF.SetFillColor(240, 248, 255)
 	opts.PDF.CellFormat(0, 10, "INHALT", "1", 1, "L", true, 0, "")
@@ -140,7 +140,7 @@ func (h *TroubleReports) addPDFContentSection(opts *PDFOptions) {
 	opts.PDF.Ln(8)
 }
 
-func (h *TroubleReports) addPDFMetadataSection(opts *PDFOptions) {
+func (h *TroubleReports) addPDFMetadataSection(opts *pdfOptions) {
 	if len(opts.Report.Mods) == 0 {
 		return
 	}
@@ -199,7 +199,7 @@ func (h *TroubleReports) getMetadataInfo(
 	return earliestTime, latestTime, creator, lastModifier
 }
 
-func (h *TroubleReports) addPDFImagesSection(opts *PDFOptions) {
+func (h *TroubleReports) addPDFImagesSection(opts *pdfOptions) {
 	if len(opts.Report.LoadedAttachments) == 0 {
 		return
 	}
@@ -232,7 +232,7 @@ func (h *TroubleReports) getImageAttachments(
 }
 
 func (h *TroubleReports) renderImagesInGrid(
-	opts *PDFOptions,
+	opts *pdfOptions,
 	images []*database.Attachment,
 ) {
 	pageWidth, _ := opts.PDF.GetPageSize()
@@ -240,7 +240,7 @@ func (h *TroubleReports) renderImagesInGrid(
 	usableWidth := pageWidth - leftMargin - rightMargin
 	imageWidth := (usableWidth - 10) / 2 // 10mm spacing between images
 
-	layout := &ImageLayoutOptions{
+	layout := &imageLayoutOptions{
 		PageWidth:   pageWidth,
 		LeftMargin:  leftMargin,
 		RightMargin: rightMargin,
@@ -255,7 +255,7 @@ func (h *TroubleReports) renderImagesInGrid(
 
 	// Process images in pairs (2 per row)
 	for i := 0; i < len(images); i += 2 {
-		position := &ImagePositionOptions{
+		position := &imagePositionOptions{
 			StartIndex:  i,
 			TotalImages: len(images),
 			ImageWidth:  imageWidth,
@@ -271,9 +271,9 @@ func (h *TroubleReports) renderImagesInGrid(
 }
 
 func (h *TroubleReports) processImageRow(
-	opts *PDFOptions,
-	layout *ImageLayoutOptions,
-	position *ImagePositionOptions,
+	opts *pdfOptions,
+	layout *imageLayoutOptions,
+	position *imagePositionOptions,
 	images []*database.Attachment,
 ) {
 	leftHeight, rightHeight := h.calculateImageHeights(opts.PDF, images, position.StartIndex, layout.ImageWidth)
@@ -340,8 +340,8 @@ func (h *TroubleReports) calculateSingleImageHeight(
 }
 
 func (h *TroubleReports) addImageCaptions(
-	opts *PDFOptions,
-	position *ImagePositionOptions,
+	opts *pdfOptions,
+	position *imagePositionOptions,
 	captionY float64,
 ) {
 	opts.PDF.SetFont("Arial", "", 9)
@@ -364,7 +364,7 @@ func (h *TroubleReports) addImageCaptions(
 func (h *TroubleReports) addImages(
 	pdf *gofpdf.Fpdf,
 	images []*database.Attachment,
-	position *ImagePositionOptions,
+	position *imagePositionOptions,
 	imageY float64,
 ) {
 	// Add left image

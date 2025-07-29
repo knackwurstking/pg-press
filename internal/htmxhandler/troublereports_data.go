@@ -1,4 +1,4 @@
-package handler
+package htmxhandler
 
 import (
 	"errors"
@@ -27,7 +27,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	return utils.HandleTemplate(
 		c,
-		TroubleReportsDataTemplateData{
+		troubleReportsDataTemplateData{
 			TroubleReports: trs,
 			User:           user,
 		},
@@ -79,7 +79,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	return utils.HandleTemplate(
 		c,
-		AttachmentsPreviewTemplateData{
+		attachmentsPreviewTemplateData{
 			TroubleReport: tr,
 		},
 		h.Templates,
@@ -116,7 +116,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
-	data := &ModificationsTemplateData{
+	data := &modificationsTemplateData{
 		User:              user,
 		TroubleReport:     tr,
 		LoadedAttachments: loadedAttachments,
@@ -226,7 +226,7 @@ func (h *TroubleReports) handleGetModificationAttachmentsPreview(c echo.Context)
 		}
 	}
 
-	data := &ModificationAttachmentsTemplateData{
+	data := &modificationAttachmentsTemplateData{
 		TroubleReport: tr,
 		Modification:  targetMod,
 		Attachments:   attachments,

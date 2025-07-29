@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-vis/internal/constants"
 	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pg-vis/internal/htmxhandler"
 	"github.com/knackwurstking/pg-vis/internal/utils"
 )
 
@@ -18,40 +19,15 @@ type Feed struct {
 }
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
-	e.GET(h.ServerPathPrefix+"/feed", h.handleFeed)
-	e.GET(h.ServerPathPrefix+"/feed/data", h.handleGetData)
+	prefix := "/feed"
+
+	e.GET(h.ServerPathPrefix+prefix, h.handleFeed)
+
+	htmxFeed := htmxhandler.Feed{Base: h.NewHTMX(prefix)}
+	htmxFeed.RegisterRoutes(e)
 }
 
 func (h *Feed) handleFeed(c echo.Context) error {
 	return utils.HandleTemplate(c, nil, h.Templates,
 		constants.FeedPageTemplates)
-}
-
-func (h *Feed) handleGetData(c echo.Context) error {
-	// Get feeds
-	feeds, err := h.DB.Feeds.ListRange(0, 100)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
-	// Update user's last feed
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
-	}
-
-	data := &FeedTemplateData{
-		Feeds:      feeds,
-		LastFeedID: user.LastFeed,
-	}
-
-	if len(feeds) > 0 {
-		user.LastFeed = feeds[0].ID
-		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
-			return utils.HandlePgvisError(c, err)
-		}
-	}
-
-	return utils.HandleTemplate(c, data, h.Templates,
-		[]string{constants.FeedDataComponentTemplatePath})
 }

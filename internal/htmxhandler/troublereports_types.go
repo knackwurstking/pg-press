@@ -1,4 +1,4 @@
-package handler
+package htmxhandler
 
 import (
 	"github.com/knackwurstking/pg-vis/internal/database"
@@ -17,12 +17,12 @@ const (
 )
 
 // Template data structures
-type TroubleReportsDataTemplateData struct {
+type troubleReportsDataTemplateData struct {
 	TroubleReports []*database.TroubleReportWithAttachments `json:"trouble_reports"`
 	User           *database.User                           `json:"user"`
 }
 
-type DialogEditTemplateData struct {
+type dialogEditTemplateData struct {
 	ID                int                    `json:"id"`
 	Submitted         bool                   `json:"submitted"`
 	Title             string                 `json:"title"`
@@ -33,25 +33,25 @@ type DialogEditTemplateData struct {
 	AttachmentError   string                 `json:"attachment_error,omitempty"`
 }
 
-type AttachmentsPreviewTemplateData struct {
+type attachmentsPreviewTemplateData struct {
 	TroubleReport *database.TroubleReportWithAttachments `json:"trouble_report"`
 }
 
-type ModificationsTemplateData struct {
+type modificationsTemplateData struct {
 	User              *database.User
 	TroubleReport     *database.TroubleReport
 	LoadedAttachments []*database.Attachment
 	Mods              database.Mods[database.TroubleReportMod]
 }
 
-func (mtd *ModificationsTemplateData) FirstModified() *database.Modified[database.TroubleReportMod] {
+func (mtd *modificationsTemplateData) FirstModified() *database.Modified[database.TroubleReportMod] {
 	if len(mtd.TroubleReport.Mods) == 0 {
 		return nil
 	}
 	return mtd.TroubleReport.Mods[0]
 }
 
-type ModificationAttachmentsTemplateData struct {
+type modificationAttachmentsTemplateData struct {
 	TroubleReport *database.TroubleReport
 	Modification  *database.Modified[database.TroubleReportMod]
 	Attachments   []*database.Attachment

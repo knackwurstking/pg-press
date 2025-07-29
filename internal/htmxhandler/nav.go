@@ -1,31 +1,22 @@
-package handler
+package htmxhandler
 
 import (
-	"github.com/labstack/echo/v4"
-	"golang.org/x/net/websocket"
-
 	"github.com/knackwurstking/pg-vis/internal/logger"
 	"github.com/knackwurstking/pg-vis/internal/utils"
 	"github.com/knackwurstking/pg-vis/internal/wshandler"
+	"github.com/labstack/echo/v4"
+	"golang.org/x/net/websocket"
 )
 
 type Nav struct {
 	*Base
-	feedNotifier *wshandler.FeedHandler
-}
-
-// NewNav creates a new nav handler.
-func NewNav(base *Base, feedNotifier *wshandler.FeedHandler) *Nav {
-	return &Nav{
-		Base:         base,
-		feedNotifier: feedNotifier,
-	}
+	FeedNotifier *wshandler.FeedHandler
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
 	// This approach keeps the WebSocket handler within Echo's middleware chain
 	// which is better for authentication that depends on Echo's context
-	e.GET(h.ServerPathPrefix+"/nav/feed-counter",
+	e.GET(h.ServerPathPrefix+"/feed-counter",
 		h.handleFeedCounterWebSocketEcho)
 }
 
@@ -45,7 +36,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 			user.UserName, user.LastFeed)
 
 		// Register the connection with the feed notifier
-		feedConn := h.feedNotifier.RegisterConnection(
+		feedConn := h.FeedNotifier.RegisterConnection(
 			user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
 			logger.WebSocket().Error(
@@ -61,7 +52,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		go feedConn.WritePump()
 
 		// Start the read pump (this will block until connection closes)
-		feedConn.ReadPump(h.feedNotifier)
+		feedConn.ReadPump(h.FeedNotifier)
 
 		logger.WebSocket().Info("Connection closed for user %s",
 			user.UserName)
