@@ -106,21 +106,24 @@ document.querySelector("#dialogEdit").showModal();
                         ? "ZU GROSS!"
                         : formatFileSize(file.size);
 
-                const item = document.createElement("div");
-                item.className =
-                    "attachment-item flex row gap justify-between align-center";
-                item.innerHTML = `
-                    <div class="attachment-info flex row gap align-center">
-                        <i class="bi bi-file-earmark attachment-icon"></i>
-                        <span class="ellipsis">${file.name}</span>
-                        <span class="${sizeClass}">(${sizeText})</span>
-                    </div>
-                    <div class="attachment-actions flex row gap">
-                        <button type="button" class="destructive flex row gap align-center" onclick="window.dialogEditFunctions.removeFileFromPreview(${index})">
-                            <small class="flex row gap align-center"><i class="bi bi-trash"></i> Entfernen</small>
-                        </button>
-                    </div>
+                /** @type {HTMLTemplateElement} */
+                const t = previewArea.querySelector(
+                    `template[name="attachment-item"]`,
+                );
+
+                /** @type {HTMLElement} */
+                const item = t.content.cloneNode(true);
+
+                item.querySelector(`.name`).innerText = file.name;
+
+                const sizeTextElement = item.querySelector(`.size-text`);
+                sizeTextElement.innerText = sizeText;
+                sizeTextElement.className += sizeClass;
+
+                item.querySelector(`button.delete`).onclick = `
+                    window.dialogEditFunctions.removeFileFromPreview(${index});
                 `;
+
                 container.appendChild(item);
             });
         } else {
