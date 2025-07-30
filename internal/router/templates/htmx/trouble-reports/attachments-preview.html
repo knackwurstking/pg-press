@@ -19,6 +19,7 @@
              aria-label="Bild {{.ID}} anzeigen">
             <div class="attachment-preview-image">
                 <img
+                    loading="lazy"
                     src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
                     alt="Bild {{.ID}}"
                     class="preview-thumbnail no-user-select"

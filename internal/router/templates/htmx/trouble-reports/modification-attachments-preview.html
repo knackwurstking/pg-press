@@ -17,6 +17,7 @@
              onclick="viewAttachmentFromData(this.dataset.reportId, this.dataset.attachmentId, this.dataset.isImage)">
             <div class="attachment-preview-image">
                 <img
+                    loading="lazy"
                     src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
                     alt="Bild {{.ID}}"
                     class="preview-thumbnail"
