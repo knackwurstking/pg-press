@@ -1,5 +1,3 @@
-<!-- TODO: Rename this file to something more descriptive -->
-
 <div id="data" class="flex column gap">
     <div class="flex gap justify-between align-center wrap">
         <button
@@ -102,25 +100,16 @@
                 <!-- Attachments for this modification -->
                 {{if and $mod.Data.LinkedAttachments (gt (len $mod.Data.LinkedAttachments) 0)}}
                 <div
+                    style="border-radius: var(--ui-radius);"
                     class="attachments-preview-placeholder"
-                    data-modification-id="{{$troubleReport.ID}}-{{$mod.Time}}"
-                    hx-get="./trouble-reports/modifications/attachments-preview/{{$troubleReport.ID}}?time={{$mod.Time}}"
-                    hx-trigger="load-mod-attachments-{{$troubleReport.ID}}-{{$mod.Time}} from:body"
+                    data-trouble-report-id="{{$troubleReport.ID}}"
+                    hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
+                    hx-trigger="load"
                     hx-swap="outerHTML"
-                    style="
-                        margin-top: var(--ui-spacing);
-                        border: 1px solid var(--ui-border-color);
-                        border-radius: var(--ui-radius);
-                        padding: var(--ui-spacing);
-                        transition: all 0.2s ease;
-                    "
                 >
-                    <div class="attachments-preview-label" style="margin: 0;">
+                    <div class="attachments-preview-label">
                         <i class="bi bi-paperclip"></i>
-                        <span class="attachment-placeholder-text">
-                            Anhänge ({{len $mod.Data.LinkedAttachments}}) - Klicken zum Laden
-                        </span>
-                        <i class="bi bi-mouse attachment-click-icon" style="opacity: 0.6; margin-left: 4px;"></i>
+                        Anhänge ({{len $troubleReport.LoadedAttachments}}) - Klicken Sie hier, um zu laden...
                     </div>
                 </div>
                 {{end}}

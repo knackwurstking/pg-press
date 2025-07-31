@@ -28,12 +28,9 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	// Modifications routes
 	modificationsPath := h.ServerPathPrefix + "/modifications/:id"
-	modificationsAttachmentsPath := h.ServerPathPrefix +
-		"/modifications/attachments-preview/:id"
 	e.GET(modificationsPath, func(c echo.Context) error {
 		return h.handleGetModifications(c, nil)
 	})
-	e.GET(modificationsAttachmentsPath, h.handleGetModificationAttachmentsPreview)
 	e.POST(modificationsPath, h.handlePostModifications)
 
 	// Attachment routes
