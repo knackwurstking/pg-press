@@ -1,10 +1,10 @@
-<!-- TODO: Rename this file to something more descriptive -->
+<!-- TODO: Currently, this is used only for the data.html, but the modifications using another html template, this needs to be changed -->
 
 {{$pageData := .}}
 {{$troubleReport := $pageData.TroubleReport}}
 
 {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
-<div class="attachments-preview-container no-user-select">
+<div class="attachments-preview-container no-user-select debug">
     <div class="attachments-preview-label flex align-center gap no-user-select">
         <i class="bi bi-paperclip"></i>
         Bilder ({{len $troubleReport.LoadedAttachments}})
