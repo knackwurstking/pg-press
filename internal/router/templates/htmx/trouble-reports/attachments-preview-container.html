@@ -2,7 +2,7 @@
 {{$troubleReport := $pageData.TroubleReport}}
 
 {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
-<div class="attachments-preview-container no-user-select debug">
+<div class="attachments-preview-container no-user-select">
     <div class="attachments-preview-label flex align-center gap no-user-select">
         <i class="bi bi-paperclip"></i>
         Bilder ({{len $troubleReport.LoadedAttachments}})
