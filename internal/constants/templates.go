@@ -31,7 +31,7 @@ const (
 	HTMXTroubleReportsDataTemplatePath                           = "templates/htmx/trouble-reports/data.html"
 	HTMXTroubleReportsModificationsTemplatePath                  = "templates/htmx/trouble-reports/modifications.html"
 	HTMXTroubleReportsDialogEditTemplatePath                     = "templates/htmx/trouble-reports/dialog-edit.html"
-	HTMXTroubleReportsAttachmentsPreviewTemplatePath             = "templates/htmx/trouble-reports/attachments-preview.html"
+	HTMXTroubleReportsAttachmentsPreviewTemplatePath             = "templates/htmx/trouble-reports/attachments-preview-container.html"
 	HTMXTroubleReportsModificationAttachmentsPreviewTemplatePath = "templates/htmx/trouble-reports/modification-attachments-preview.html"
 )
 
