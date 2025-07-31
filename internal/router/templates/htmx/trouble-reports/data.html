@@ -13,11 +13,18 @@
 
             <!-- Attachments Preview Container -->
             {{if and $troubleReport.LoadedAttachments (gt (len $troubleReport.LoadedAttachments) 0)}}
+            <br />
+
+            <!-- The "attachments-preview.html" will replace this placeholder -->
+            <!-- Changed hx-trigger to from
+                 "load-attachments-{{$troubleReport.ID}} from:body" to
+                 "load" for lazy loading everything -->
             <div
+                style="border-radius: var(--ui-radius);"
                 class="attachments-preview-placeholder"
                 data-trouble-report-id="{{$troubleReport.ID}}"
                 hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
-                hx-trigger="load-attachments-{{$troubleReport.ID}} from:body"
+                hx-trigger="load"
                 hx-swap="outerHTML"
             >
                 <div class="attachments-preview-label">
@@ -92,8 +99,6 @@
         <hr />
     </span>
     {{end}}
-
-    <script src="./js/trouble-reports/data.js"></script>
 </ul>
 {{else}}
 <span id="data"></span>
