@@ -1,5 +1,119 @@
 {{if not .Submitted}}
 <dialog id="dialogEdit" class="clean fullscreen" oncancel="event.preventDefault()">
+    <script>
+        // Globals
+
+        var attachmentOrder = [];
+        var sortableInstance = null;
+
+        // Helper Functions
+
+        function updateAttachmentOrderInput() {
+            document.getElementById("attachment-order").value =
+                attachmentOrder.join(",");
+        }
+
+        function initializeAttachmentOrder() {
+            const existingAttachmentsContainer = document.getElementById(
+                "existing-attachments",
+            );
+
+            // Destroy existing Sortable instance if it exists
+            if (sortableInstance) {
+                sortableInstance.destroy();
+                sortableInstance = null;
+            }
+
+            if (Sortable && existingAttachmentsContainer) {
+                sortableInstance = new Sortable(existingAttachmentsContainer, {
+                    animation: 150,
+                    ghostClass: "sortable-ghost",
+                    handle: ".bi-grip-vertical",
+                    onEnd: function () {
+                        const items = document.querySelectorAll(
+                            "#existing-attachments .attachment-item",
+                        );
+                        attachmentOrder = Array.from(items).map(
+                            (item) => item.dataset.id,
+                        );
+                        updateAttachmentOrderInput();
+                    },
+                });
+            }
+
+            const existingAttachments = document.querySelectorAll(
+                "#existing-attachments .attachment-item",
+            );
+            attachmentOrder = Array.from(existingAttachments).map(
+                (item) => item.dataset.id,
+            );
+            updateAttachmentOrderInput();
+        }
+
+        // Main Functions
+
+        function deleteAttachment(attachmentId) {
+            if (
+                confirm(
+                    "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
+                )
+            ) {
+                // FIXME: htmx: TypeError: null is not an object (evaluating 'e[t]')
+
+                // Find and remove the attachment item from DOM
+                const attachmentItem = document.querySelector(
+                    `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+                );
+
+                if (attachmentItem) {
+                    // Remove from attachmentOrder array
+                    attachmentOrder = attachmentOrder.filter(
+                        (id) => id != attachmentId,
+                    );
+
+                    // Temporarily disable htmx processing during DOM manipulation
+                    const container = document.getElementById(
+                        "existing-attachments",
+                    );
+                    const wasDisabled =
+                        container.hasAttribute("data-hx-disable");
+                    container.setAttribute("data-hx-disable", "true");
+
+                    // Remove the DOM element
+                    attachmentItem.remove();
+
+                    // Restore htmx state
+                    if (!wasDisabled) {
+                        container.removeAttribute("data-hx-disable");
+                    }
+
+                    // Update the hidden input field
+                    updateAttachmentOrderInput();
+
+                    // Reinitialize Sortable instance after DOM changes
+                    initializeAttachmentOrder();
+
+                    // Check if no attachments left and hide the details section
+                    const existingAttachments = document.getElementById(
+                        "existing-attachments",
+                    );
+                    if (
+                        existingAttachments &&
+                        existingAttachments.children.length === 0
+                    ) {
+                        const detailsSection =
+                            existingAttachments.closest("details");
+                        if (detailsSection) {
+                            detailsSection.style.display = "none";
+                        }
+                    }
+                }
+            }
+        }
+
+        // TODO: Show attachment handler
+    </script>
+
     <form
         class="flex column gap"
 
@@ -103,7 +217,7 @@
                                 <button
                                     type="button"
                                     class="destructive flex row gap align-center"
-                                    onclick="window.dialogEditFunctions.deleteAttachment({{.GetID}})"
+                                    onclick="deleteAttachment({{.GetID}})"
                                 >
                                     <small class="flex row gap align-center">
                                         <i class="bi bi-trash"></i>
@@ -198,10 +312,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         document.querySelector("#dialogEdit").showModal();
-    </script>
 
-    <!-- TODO: Try using htmx for everything possible -->
-    <!--script src="./js/trouble-reports/dialog-edit.js"></!!script-->
+        // TODO: Sortable stuff here for drag and drop
+    </script>
 </dialog>
 {{else}}
 <span
