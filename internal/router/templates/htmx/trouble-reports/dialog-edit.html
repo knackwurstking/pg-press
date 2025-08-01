@@ -4,112 +4,163 @@
         // Globals
 
         var attachmentOrder = [];
+        var selectedFiles = [];
         var sortableInstance = null;
 
-        // Helper Functions
-
-        function updateAttachmentOrderInput() {
-            document.getElementById("attachment-order").value =
-                attachmentOrder.join(",");
-        }
-
-        function initializeAttachmentOrder() {
-            const existingAttachmentsContainer = document.getElementById(
-                "existing-attachments",
-            );
-
-            // Destroy existing Sortable instance if it exists
-            if (sortableInstance) {
-                sortableInstance.destroy();
-                sortableInstance = null;
+        { // Helper Functions
+            function updateAttachmentOrderInput() {
+                document.getElementById("attachment-order").value =
+                    attachmentOrder.join(",");
             }
 
-            if (Sortable && existingAttachmentsContainer) {
-                sortableInstance = new Sortable(existingAttachmentsContainer, {
-                    animation: 150,
-                    ghostClass: "sortable-ghost",
-                    handle: ".bi-grip-vertical",
-                    onEnd: function () {
-                        const items = document.querySelectorAll(
-                            "#existing-attachments .attachment-item",
-                        );
-                        attachmentOrder = Array.from(items).map(
-                            (item) => item.dataset.id,
-                        );
-                        updateAttachmentOrderInput();
-                    },
-                });
-            }
-
-            const existingAttachments = document.querySelectorAll(
-                "#existing-attachments .attachment-item",
-            );
-            attachmentOrder = Array.from(existingAttachments).map(
-                (item) => item.dataset.id,
-            );
-            updateAttachmentOrderInput();
-        }
-
-        // Main Functions
-
-        function deleteAttachment(attachmentId) {
-            if (!confirm(
-                "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
-            )) return;
-
-            // FIXME: htmx: TypeError: null is not an object (evaluating 'e[t]')
-
-            // Find and remove the attachment item from DOM
-            const attachmentItem = document.querySelector(
-                `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
-            );
-
-            if (attachmentItem) {
-                // Remove from attachmentOrder array
-                attachmentOrder = attachmentOrder.filter(
-                    (id) => id != attachmentId,
-                );
-
-                // Temporarily disable htmx processing during DOM manipulation
-                const container = document.getElementById(
+            function initializeAttachmentOrder() {
+                const existingAttachmentsContainer = document.getElementById(
                     "existing-attachments",
                 );
-                const wasDisabled =
-                    container.hasAttribute("data-hx-disable");
-                container.setAttribute("data-hx-disable", "true");
 
-                // Remove the DOM element
-                attachmentItem.remove();
-
-                // Restore htmx state
-                if (!wasDisabled) {
-                    container.removeAttribute("data-hx-disable");
+                // Destroy existing Sortable instance if it exists
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
                 }
 
-                // Update the hidden input field
-                updateAttachmentOrderInput();
+                if (Sortable && existingAttachmentsContainer) {
+                    sortableInstance = new Sortable(existingAttachmentsContainer, {
+                        animation: 150,
+                        ghostClass: "sortable-ghost",
+                        handle: ".bi-grip-vertical",
+                        onEnd: function () {
+                            const items = document.querySelectorAll(
+                                "#existing-attachments .attachment-item",
+                            );
+                            attachmentOrder = Array.from(items).map(
+                                (item) => item.dataset.id,
+                            );
+                            updateAttachmentOrderInput();
+                        },
+                    });
+                }
 
-                // Reinitialize Sortable instance after DOM changes
-                initializeAttachmentOrder();
-
-                // Check if no attachments left and hide the details section
-                const existingAttachments = document.getElementById(
-                    "existing-attachments",
+                const existingAttachments = document.querySelectorAll(
+                    "#existing-attachments .attachment-item",
                 );
-                if (
-                    existingAttachments &&
-                    existingAttachments.children.length === 0
-                ) {
-                    const detailsSection =
-                        existingAttachments.closest("details");
-                    if (detailsSection) {
-                        detailsSection.style.display = "none";
+                attachmentOrder = Array.from(existingAttachments).map(
+                    (item) => item.dataset.id,
+                );
+                updateAttachmentOrderInput();
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return "0 Bytes";
+                const k = 1024;
+                const sizes = ["Bytes", "KB", "MB", "GB"];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+            }
+        }
+
+        { // Main Functions
+            function deleteAttachment(attachmentId) {
+                if (!confirm(
+                    "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
+                )) return;
+
+                // FIXME: htmx: TypeError: null is not an object (evaluating 'e[t]')
+
+                // Find and remove the attachment item from DOM
+                const attachmentItem = document.querySelector(
+                    `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+                );
+
+                if (attachmentItem) {
+                    // Remove from attachmentOrder array
+                    attachmentOrder = attachmentOrder.filter(
+                        (id) => id != attachmentId,
+                    );
+
+                    // Temporarily disable htmx processing during DOM manipulation
+                    const container = document.getElementById(
+                        "existing-attachments",
+                    );
+                    const wasDisabled =
+                        container.hasAttribute("data-hx-disable");
+                    container.setAttribute("data-hx-disable", "true");
+
+                    // Remove the DOM element
+                    attachmentItem.remove();
+
+                    // Restore htmx state
+                    if (!wasDisabled) {
+                        container.removeAttribute("data-hx-disable");
+                    }
+
+                    // Update the hidden input field
+                    updateAttachmentOrderInput();
+
+                    // Reinitialize Sortable instance after DOM changes
+                    initializeAttachmentOrder();
+
+                    // Check if no attachments left and hide the details section
+                    const existingAttachments = document.getElementById(
+                        "existing-attachments",
+                    );
+                    if (
+                        existingAttachments &&
+                        existingAttachments.children.length === 0
+                    ) {
+                        const detailsSection =
+                            existingAttachments.closest("details");
+                        if (detailsSection) {
+                            detailsSection.style.display = "none";
+                        }
                     }
                 }
             }
-        }
 
-        // TODO: Show attachment handler
+            // TODO: Continue here... Testing...
+            function displayFilePreview() {
+                const previewArea = document.getElementById("file-preview");
+                const container = document.getElementById("new-attachments");
+                container.innerHTML = "";
+
+                if (selectedFiles.length > 0) {
+                    previewArea.style.display = "block";
+
+                    selectedFiles.forEach((file, index) => {
+                        const sizeClass =
+                            file.size > 10 * 1024 * 1024
+                                ? "attachment-error"
+                                : "muted text-sm";
+                        const sizeText =
+                            file.size > 10 * 1024 * 1024
+                                ? "ZU GROSS!"
+                                : formatFileSize(file.size);
+
+                        /** @type {HTMLTemplateElement} */
+                        const t = previewArea.querySelector(
+                            `template[name="attachment-item"]`,
+                        );
+
+                        /** @type {HTMLElement} */
+                        const item = t.content.cloneNode(true);
+
+                        item.querySelector(`.name`).innerText = file.name;
+
+                        const sizeTextElement = item.querySelector(`.size-text`);
+                        sizeTextElement.innerText = sizeText;
+                        sizeTextElement.className += sizeClass;
+
+                        item.querySelector(`button.delete`).onclick = `
+                            window.dialogEditFunctions.removeFileFromPreview(${index});
+                        `;
+
+                        container.appendChild(item);
+                    });
+                } else {
+                    previewArea.style.display = "none";
+                }
+            }
+        }
     </script>
 
     <form
@@ -251,7 +302,10 @@
                         id="attachments"
                         multiple
                         accept="image/*"
-                        onchange="window.dialogEditFunctions.handleFileSelect(event)"
+                        onchange="
+                            selectedFiles = Array.from(event.target.files);
+                            displayFilePreview();
+                        "
                     />
                 </div>
 
