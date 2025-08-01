@@ -38,10 +38,9 @@ type attachmentsPreviewTemplateData struct {
 }
 
 type modificationsTemplateData struct {
-	User              *database.User
-	TroubleReport     *database.TroubleReport
-	LoadedAttachments []*database.Attachment
-	Mods              database.Mods[database.TroubleReportMod]
+	User          *database.User
+	TroubleReport *database.TroubleReport
+	Mods          database.Mods[database.TroubleReportMod]
 }
 
 func (mtd *modificationsTemplateData) FirstModified() *database.Modified[database.TroubleReportMod] {
