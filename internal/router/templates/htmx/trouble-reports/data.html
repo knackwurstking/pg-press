@@ -1,7 +1,6 @@
 {{$pageData := .}} {{if ne (len $pageData.TroubleReports) 0}}
 <ul id="data">
 
-
     {{range $troubleReport := $pageData.TroubleReports}}
     {{$id := print "trouble-report-" $troubleReport.ID}}
     <span class="trouble-report">

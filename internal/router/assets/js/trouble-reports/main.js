@@ -7,17 +7,22 @@ window.TroubleReportsImageViewer = {
 
         dialog.innerHTML = `
             <div class="image-viewer-content no-user-select">
-                <div class="image-viewer-header no-user-select">
-                    <button type="button" class="close-image-viewer no-user-select" onclick="this.closest('dialog').close()" title="Schließen">
+                <div class="image-viewer-header">
+                    <button
+                        type="button"
+                        class="icon secondary ghost"
+                        onclick="this.closest('dialog').close()"
+                        title="Schließen"
+                    >
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
-                <div class="image-viewer-body no-user-select">
-                    <div class="image-loading no-user-select">
+                <div class="image-viewer-body">
+                    <div class="image-loading">
                         <i class="bi bi-hourglass-split"></i>
                         <span>Bild wird geladen...</span>
                     </div>
-                    <img src="${imageUrl}" alt="Attachment" class="fullscreen-image no-user-select" style="display: none;" />
+                    <img src="${imageUrl}" alt="Attachment" class="fullscreen-image" style="display: none;" />
                 </div>
             </div>
         `;

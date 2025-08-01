@@ -53,59 +53,57 @@
         // Main Functions
 
         function deleteAttachment(attachmentId) {
-            if (
-                confirm(
-                    "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
-                )
-            ) {
-                // FIXME: htmx: TypeError: null is not an object (evaluating 'e[t]')
+            if (!confirm(
+                "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
+            )) return;
 
-                // Find and remove the attachment item from DOM
-                const attachmentItem = document.querySelector(
-                    `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+            // FIXME: htmx: TypeError: null is not an object (evaluating 'e[t]')
+
+            // Find and remove the attachment item from DOM
+            const attachmentItem = document.querySelector(
+                `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+            );
+
+            if (attachmentItem) {
+                // Remove from attachmentOrder array
+                attachmentOrder = attachmentOrder.filter(
+                    (id) => id != attachmentId,
                 );
 
-                if (attachmentItem) {
-                    // Remove from attachmentOrder array
-                    attachmentOrder = attachmentOrder.filter(
-                        (id) => id != attachmentId,
-                    );
+                // Temporarily disable htmx processing during DOM manipulation
+                const container = document.getElementById(
+                    "existing-attachments",
+                );
+                const wasDisabled =
+                    container.hasAttribute("data-hx-disable");
+                container.setAttribute("data-hx-disable", "true");
 
-                    // Temporarily disable htmx processing during DOM manipulation
-                    const container = document.getElementById(
-                        "existing-attachments",
-                    );
-                    const wasDisabled =
-                        container.hasAttribute("data-hx-disable");
-                    container.setAttribute("data-hx-disable", "true");
+                // Remove the DOM element
+                attachmentItem.remove();
 
-                    // Remove the DOM element
-                    attachmentItem.remove();
+                // Restore htmx state
+                if (!wasDisabled) {
+                    container.removeAttribute("data-hx-disable");
+                }
 
-                    // Restore htmx state
-                    if (!wasDisabled) {
-                        container.removeAttribute("data-hx-disable");
-                    }
+                // Update the hidden input field
+                updateAttachmentOrderInput();
 
-                    // Update the hidden input field
-                    updateAttachmentOrderInput();
+                // Reinitialize Sortable instance after DOM changes
+                initializeAttachmentOrder();
 
-                    // Reinitialize Sortable instance after DOM changes
-                    initializeAttachmentOrder();
-
-                    // Check if no attachments left and hide the details section
-                    const existingAttachments = document.getElementById(
-                        "existing-attachments",
-                    );
-                    if (
-                        existingAttachments &&
-                        existingAttachments.children.length === 0
-                    ) {
-                        const detailsSection =
-                            existingAttachments.closest("details");
-                        if (detailsSection) {
-                            detailsSection.style.display = "none";
-                        }
+                // Check if no attachments left and hide the details section
+                const existingAttachments = document.getElementById(
+                    "existing-attachments",
+                );
+                if (
+                    existingAttachments &&
+                    existingAttachments.children.length === 0
+                ) {
+                    const detailsSection =
+                        existingAttachments.closest("details");
+                    if (detailsSection) {
+                        detailsSection.style.display = "none";
                     }
                 }
             }
@@ -206,7 +204,7 @@
                                 <button
                                     type="button"
                                     class="secondary flex row gap align-center"
-                                    onclick="window.dialogEditFunctions.viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
+                                    onclick="window.TroubleReportsImageViewer.viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
                                 >
                                     <small class="flex row gap align-center">
                                         <i class="bi bi-eye"></i>

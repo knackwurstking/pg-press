@@ -19,7 +19,7 @@
  */
 
 // Version and cache configuration
-const VERSION = "v0.0.145";
+const VERSION = "v0.0.154";
 const CACHE_PREFIX = "pgvis";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
@@ -71,10 +71,10 @@ const STATIC_ASSETS = [
     "./js/websocket-manager.js",
 
     // Trouble Reports libraries
-    //"./js/trouble-reports/data.js",
-    //"./js/trouble-reports/dialog-edit.js",
-    //"./js/trouble-reports/main.js",
-    //"./js/trouble-reports/modifications.js",
+    //"./js/trouble-reports/data.js", // TODO: Remove
+    //"./js/trouble-reports/dialog-edit.js", // TODO: Remove
+    "./js/trouble-reports/main.js",
+    //"./js/trouble-reports/modifications.js", // TODO: Remove
 ];
 
 // Offline fallback pages
