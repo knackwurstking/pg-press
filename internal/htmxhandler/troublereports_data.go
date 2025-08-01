@@ -77,6 +77,33 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		return utils.HandlePgvisError(c, err)
 	}
 
+	// If "time" query is provided, return modified data attachments for "id"
+	timeQuery, herr := utils.ParseInt64Query(c, constants.QueryParamTime)
+	if herr == nil {
+		for _, mod := range tr.Mods {
+			if mod.Time == timeQuery {
+				// Create a temporary trouble report with the modified data
+				modifiedTr := &database.TroubleReport{
+					ID:                tr.ID,
+					Title:             mod.Data.Title,
+					Content:           mod.Data.Content,
+					LinkedAttachments: mod.Data.LinkedAttachments,
+				}
+
+				// Load attachments for the modified data
+				loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(modifiedTr)
+				if err != nil {
+					return utils.HandlePgvisError(c, err)
+				}
+
+				// Use the modified trouble report with loaded attachments
+				tr.TroubleReport = modifiedTr
+				tr.LoadedAttachments = loadedAttachments
+				break
+			}
+		}
+	}
+
 	return utils.HandleTemplate(
 		c,
 		attachmentsPreviewTemplateData{
@@ -108,19 +135,13 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		return herr
 	}
 
-	loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(tr)
-	if err != nil {
-		return utils.HandlePgvisError(c, err)
-	}
-
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
 	data := &modificationsTemplateData{
-		User:              user,
-		TroubleReport:     tr,
-		LoadedAttachments: loadedAttachments,
-		Mods:              mods,
+		User:          user,
+		TroubleReport: tr,
+		Mods:          mods,
 	}
 
 	return utils.HandleTemplate(

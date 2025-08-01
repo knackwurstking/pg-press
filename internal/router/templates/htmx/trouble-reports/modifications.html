@@ -102,14 +102,15 @@
                 <div
                     style="border-radius: var(--ui-radius);"
                     class="attachments-preview-placeholder"
-                    data-trouble-report-id="{{$troubleReport.ID}}"
-                    hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
+                    data-modification-id="{{$troubleReport.ID}}-{{$mod.Time}}"
+                    hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}&time={{$mod.Time}}"
+
                     hx-trigger="load"
                     hx-swap="outerHTML"
                 >
                     <div class="attachments-preview-label">
                         <i class="bi bi-paperclip"></i>
-                        Anhänge ({{len $troubleReport.LoadedAttachments}}) - Klicken Sie hier, um zu laden...
+                        Anhänge ({{len $mod.Data.LinkedAttachments}}) - Klicken Sie hier, um zu laden...
                     </div>
                 </div>
                 {{end}}
@@ -159,6 +160,4 @@
 
         {{end}}
     </div>
-
-    <script src="./js/trouble-reports/modifications.js" defer></script>
 </div>

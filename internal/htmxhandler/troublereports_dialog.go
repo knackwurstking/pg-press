@@ -94,22 +94,27 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, dialogEditData)
 }
 
+// FIXME: Attachment changes does not add a modified to mods it seems
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
+	// Get ID from query parameter
 	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
 	if herr != nil {
 		return herr
 	}
 
+	// Get user from context
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr
 	}
 
+	// Get Title, Content and Attachments from form data
 	title, content, attachments, herr := h.validateDialogEditFormData(c)
 	if herr != nil {
 		return herr
 	}
 
+	// Initialize dialog template data
 	dialogEditData := &dialogEditTemplateData{
 		Submitted:      true,
 		ID:             int(id),
@@ -119,43 +124,44 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		InvalidContent: content == "",
 	}
 
-	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
-		dialogEditData.LinkedAttachments = attachments
-		trOld, err := h.DB.TroubleReports.Get(id)
-		if err != nil {
-			return utils.HandlePgvisError(c, err)
-		}
-
-		tr := database.NewTroubleReport(title, content, trOld.Mods...)
-
-		// Convert existing attachments to IDs for reordering
-		var existingAttachmentIDs []int64
-		for _, att := range attachments {
-			if att.GetID() > 0 {
-				existingAttachmentIDs = append(existingAttachmentIDs, att.GetID())
-			}
-		}
-
-		// Filter out new attachments
-		var newAttachments []*database.Attachment
-		for _, att := range attachments {
-			if att.GetID() == 0 {
-				newAttachments = append(newAttachments, att)
-			}
-		}
-
-		tr.LinkedAttachments = existingAttachmentIDs
-		tr.Mods = append(tr.Mods, database.NewModified(user, database.TroubleReportMod{
-			Title:             tr.Title,
-			Content:           tr.Content,
-			LinkedAttachments: []int64{},
-		}))
-
-		if err := h.DB.TroubleReportService.UpdateWithAttachments(id, tr, newAttachments); err != nil {
-			return utils.HandlePgvisError(c, err)
-		}
-	} else {
+	// Abort if invalid title or content
+	if dialogEditData.InvalidTitle || dialogEditData.InvalidContent {
 		dialogEditData.Submitted = false
+		return h.handleGetDialogEdit(c, dialogEditData)
+	}
+
+	// Set attachments to handlePutDialogEdit
+	dialogEditData.LinkedAttachments = attachments
+
+	// Query previous trouble report
+	trOld, err := h.DB.TroubleReports.Get(id)
+	if err != nil {
+		return utils.HandlePgvisError(c, err)
+	}
+
+	// Create new trouble report
+	tr := database.NewTroubleReport(title, content, trOld.Mods...)
+
+	// Filter out existing and new attachments
+	var existingAttachmentIDs []int64
+	var newAttachments []*database.Attachment
+	for _, a := range dialogEditData.LinkedAttachments {
+		if a.GetID() > 0 {
+			existingAttachmentIDs = append(existingAttachmentIDs, a.GetID())
+		} else {
+			newAttachments = append(newAttachments, a)
+		}
+	}
+
+	// Update trouble report with existing and new attachments, title content and mods
+	tr.LinkedAttachments = existingAttachmentIDs
+	tr.Mods = append(tr.Mods, database.NewModified(user, database.TroubleReportMod{
+		Title:             tr.Title,
+		Content:           tr.Content,
+		LinkedAttachments: tr.LinkedAttachments,
+	}))
+	if err := h.DB.TroubleReportService.UpdateWithAttachments(id, tr, newAttachments); err != nil {
+		return utils.HandlePgvisError(c, err)
 	}
 
 	return h.handleGetDialogEdit(c, dialogEditData)
