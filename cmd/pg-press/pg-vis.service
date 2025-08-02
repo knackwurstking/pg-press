@@ -1,36 +1,14 @@
 [Unit]
-Description=PG Vis Server
+Description=PG Press Server
 After=network.target
-#Documentation=man:pgpress(1)
 
 [Service]
-Type=simple
+Environment="DEBUG=true"
+Environment="ADMINS="
+Environment="CLICOLOR_FORCE=1"
 Environment="SERVER_ADDR=:9020"
-Environment="SERVER_PATH_PREFIX=/pgpress"
-ExecStart=/usr/bin/pgpress server
-Restart=on-failure
-RestartSec=5
-User=pgpress
-Group=pgpress
-NoNewPrivileges=true
-ProtectSystem=strict
-ProtectHome=true
-PrivateTmp=true
+Environment="SERVER_PATH_PREFIX=/pg-press"
+ExecStart=pg-press server
 
 [Install]
-WantedBy=multi-user.target
-
-
-# NOTE: The following is a backup configuration for a systemd service file.
-#
-#[Unit]
-#Description=PG Vis Server
-#After=network.target
-#
-#[Service]
-#Environment="SERVER_ADDR=:9020"
-#Environment="SERVER_PATH_PREFIX=/pgpress"
-#ExecStart=pgpress server
-#
-#[Install]
-#WantedBy=default.target
+WantedBy=default.target
