@@ -41,15 +41,6 @@
         <script src="./js/htmx-v2.0.6.min.js"></script>
         <script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
 
-        <!-- WebSocket Manager for suspension handling -->
-        <script src="./js/websocket-manager.js"></script>
-
-        <!-- Service Worker Registration -->
-        <script src="./js/sw-register.js"></script>
-
-        <!-- PWA Manager -->
-        <script src="./js/pwa-manager.js"></script>
-
         {{block "head" .}}{{end}}
     </head>
 
@@ -67,63 +58,6 @@
         </header>
 
         <main>{{block "content" .}}{{end}}</main>
-
-        <!-- Additional PWA features -->
-
-        <script>
-            // Handle form submissions with offline support
-            document.addEventListener("submit", (event) => {
-                const form = event.target;
-
-                // Add loading state
-                const submitBtn = form.querySelector(
-                    'button[type="submit"], input[type="submit"]',
-                );
-                if (submitBtn) {
-                    submitBtn.classList.add("loading");
-                }
-
-                // If offline, queue the submission
-                if (!navigator.onLine && "serviceWorker" in navigator) {
-                    // This would integrate with the background sync feature
-                    console.log(
-                        "[PWA] Form submitted while offline - queuing for sync",
-                    );
-                }
-            });
-
-            // Add visual feedback for cached content
-            document.addEventListener("htmx:afterSwap", (event) => {
-                // Check if content was served from cache
-                const response = event.detail.xhr;
-                if (
-                    response &&
-                    response.getResponseHeader("X-Cache-Status") === "HIT"
-                ) {
-                    console.log("[PWA] Content loaded from cache");
-                }
-            });
-
-            // Performance monitoring for PWA
-            if ("performance" in window) {
-                window.addEventListener("load", () => {
-                    setTimeout(() => {
-                        const perfData =
-                            performance.getEntriesByType("navigation")[0];
-                        console.log("[PWA] Performance metrics:", {
-                            loadTime:
-                                perfData.loadEventEnd - perfData.loadEventStart,
-                            domContentLoaded:
-                                perfData.domContentLoadedEventEnd -
-                                perfData.domContentLoadedEventStart,
-                            firstPaint:
-                                performance.getEntriesByName("first-paint")[0]
-                                    ?.startTime || "N/A",
-                        });
-                    }, 0);
-                });
-            }
-        </script>
     </body>
 </html>
 
