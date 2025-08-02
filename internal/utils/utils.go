@@ -12,7 +12,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pgpress/internal/database"
 )
 
 const (
@@ -73,7 +73,7 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, *echo.HTTPError
 	return id, nil
 }
 
-func HandlePgvisError(ctx echo.Context, err error) *echo.HTTPError {
+func HandlepgpressError(ctx echo.Context, err error) *echo.HTTPError {
 	if err == nil {
 		return nil
 	}

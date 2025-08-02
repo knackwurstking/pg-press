@@ -3,8 +3,8 @@ package handler
 import (
 	"embed"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/htmxhandler"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 )
 
 type Base struct {

@@ -5,7 +5,7 @@ import "time"
 
 // Cookie configuration
 const (
-	CookieName               = "pgvis-api-key"
+	CookieName               = "pgpress-api-key"
 	CookieExpirationDuration = time.Hour * 24 * 31 * 6 // 6 months
 )
 

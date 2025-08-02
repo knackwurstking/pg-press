@@ -1,9 +1,9 @@
 package htmxhandler
 
 import (
-	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/utils"
-	"github.com/knackwurstking/pg-vis/internal/wshandler"
+	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/wshandler"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )

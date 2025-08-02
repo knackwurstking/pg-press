@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 // SQL queries for user operations

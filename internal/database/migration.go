@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 // Migration handles database schema and data migrations.

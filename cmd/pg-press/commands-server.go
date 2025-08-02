@@ -1,7 +1,7 @@
-// Package main command line interface for pg-vis server.
+// Package main command line interface for pgpress server.
 //
 // This file implements the server command which starts the HTTP server
-// for the pg-vis web application. It handles database initialization,
+// for the pgpress web application. It handles database initialization,
 // middleware setup, error handling, and route configuration.
 package main
 
@@ -12,16 +12,16 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/router"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/router"
 )
 
 // serverCommand creates the CLI command for starting the HTTP server.
 func serverCommand() cli.Command {
 	return cli.Command{
 		Name:  "server",
-		Usage: cli.Usage("Start the HTTP server for the pg-vis web application."),
+		Usage: cli.Usage("Start the HTTP server for the pgpress web application."),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := cli.String(cmd, "db",
 				cli.WithShort("d"),

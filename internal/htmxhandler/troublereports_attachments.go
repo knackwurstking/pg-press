@@ -12,9 +12,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attachment, error) {
@@ -225,7 +225,7 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	// Get trouble report to verify attachment belongs to it
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Check if attachment ID is in the trouble report's linked attachments
@@ -241,7 +241,7 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Set appropriate headers
@@ -282,7 +282,7 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	// Get existing trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Reorder attachment IDs based on the new order
@@ -313,13 +313,13 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	}))
 
 	if err := h.DB.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Load attachments for dialog
 	attachments, err := h.DB.TroubleReportService.LoadAttachments(tr)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Return updated dialog

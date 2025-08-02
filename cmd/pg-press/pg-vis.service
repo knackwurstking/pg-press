@@ -1,17 +1,17 @@
 [Unit]
 Description=PG Vis Server
 After=network.target
-#Documentation=man:pg-vis(1)
+#Documentation=man:pgpress(1)
 
 [Service]
 Type=simple
 Environment="SERVER_ADDR=:9020"
-Environment="SERVER_PATH_PREFIX=/pg-vis"
-ExecStart=/usr/bin/pg-vis server
+Environment="SERVER_PATH_PREFIX=/pgpress"
+ExecStart=/usr/bin/pgpress server
 Restart=on-failure
 RestartSec=5
-User=pg-vis
-Group=pg-vis
+User=pgpress
+Group=pgpress
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
@@ -29,8 +29,8 @@ WantedBy=multi-user.target
 #
 #[Service]
 #Environment="SERVER_ADDR=:9020"
-#Environment="SERVER_PATH_PREFIX=/pg-vis"
-#ExecStart=pg-vis server
+#Environment="SERVER_PATH_PREFIX=/pgpress"
+#ExecStart=pgpress server
 #
 #[Install]
 #WantedBy=default.target

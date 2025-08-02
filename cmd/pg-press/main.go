@@ -6,13 +6,13 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 
-	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 const (
-	appName      = "pg-vis"
+	appName      = "pg-press"
 	version      = "v0.0.1"
-	databaseFile = "pgvis.db"
+	databaseFile = "pg-press.db"
 
 	exitCodeGeneric     = 1
 	exitCodeNotFound    = 10

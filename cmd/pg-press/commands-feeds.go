@@ -11,19 +11,19 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pgpress/internal/database"
 )
 
 // listFeedsCommand creates a CLI command for listing feeds from the database.
 //
 // Usage examples:
 //
-//	pg-vis feeds list                                    # List all feeds
-//	pg-vis feeds list --limit 10                         # List first 10 feeds
-//	pg-vis feeds list --limit 5 --offset 20              # List 5 feeds starting from offset 20
-//	pg-vis feeds list --since "2025-07-25"               # List feeds since July 25, 2025
-//	pg-vis feeds list --before "2025-07-26 15:30:00"     # List feeds before specific date/time
-//	pg-vis feeds list --since "2025-07-25" --limit 10    # Combined filtering and pagination
+//	pgpress feeds list                                    # List all feeds
+//	pgpress feeds list --limit 10                         # List first 10 feeds
+//	pgpress feeds list --limit 5 --offset 20              # List 5 feeds starting from offset 20
+//	pgpress feeds list --since "2025-07-25"               # List feeds since July 25, 2025
+//	pgpress feeds list --before "2025-07-26 15:30:00"     # List feeds before specific date/time
+//	pgpress feeds list --since "2025-07-25" --limit 10    # Combined filtering and pagination
 func listFeedsCommand() cli.Command {
 	return cli.Command{
 		Name:  "list",
@@ -119,11 +119,11 @@ func listFeedsCommand() cli.Command {
 //
 // Usage examples:
 //
-//	pg-vis feeds remove 1,2,3                           # Remove feeds with specific IDs
-//	pg-vis feeds remove --older-than 7d                 # Remove feeds older than 7 days
-//	pg-vis feeds remove --older-than 24h                # Remove feeds older than 24 hours
-//	pg-vis feeds remove --before "2025-07-25"           # Remove feeds before July 25, 2025
-//	pg-vis feeds remove --before "2025-07-25 15:30:00"  # Remove feeds before specific date/time
+//	pgpress feeds remove 1,2,3                           # Remove feeds with specific IDs
+//	pgpress feeds remove --older-than 7d                 # Remove feeds older than 7 days
+//	pgpress feeds remove --older-than 24h                # Remove feeds older than 24 hours
+//	pgpress feeds remove --before "2025-07-25"           # Remove feeds before July 25, 2025
+//	pgpress feeds remove --before "2025-07-25 15:30:00"  # Remove feeds before specific date/time
 func removeFeedsCommand() cli.Command {
 	return cli.Command{
 		Name:  "remove",

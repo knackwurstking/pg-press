@@ -1,4 +1,4 @@
-module github.com/knackwurstking/pg-vis
+module github.com/knackwurstking/pgpress
 
 go 1.24
 

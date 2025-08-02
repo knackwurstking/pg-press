@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 type Home struct {

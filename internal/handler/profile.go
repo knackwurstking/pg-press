@@ -3,10 +3,10 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/htmxhandler"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/htmxhandler"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 // ProfilePageData contains the data structure passed to the profile page template.
@@ -45,7 +45,7 @@ func (h *Profile) handleMainPage(c echo.Context) error {
 	}
 
 	if err := h.handleUserNameChange(c, pageData); err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	if cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey); err == nil {

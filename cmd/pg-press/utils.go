@@ -6,11 +6,13 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 func openDB(customPath string) (*database.DB, error) {
 	path := filepath.Join(configPath, databaseFile)
+	logger.Server().Debug("Database path: %s", path)
 
 	if customPath != "" {
 		var err error

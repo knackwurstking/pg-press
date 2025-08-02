@@ -1,8 +1,8 @@
 /**
- * Service Worker Registration and Management for PG-VIS
+ * Service Worker Registration and Management for pgpress
  *
  * This script handles the registration, updates, and communication with the
- * service worker for the PG-VIS application. It provides user notifications
+ * service worker for the pgpress application. It provides user notifications
  * about offline capabilities and handles service worker lifecycle events.
  */
 
@@ -159,7 +159,7 @@ class ServiceWorkerManager {
             {
                 title: "App Ready for Offline Use",
                 message:
-                    "PG-VIS is now available offline! You can use core features even without an internet connection.",
+                    "pgpress is now available offline! You can use core features even without an internet connection.",
                 type: "success",
                 persistent: false,
                 actions: [
@@ -181,7 +181,7 @@ class ServiceWorkerManager {
             {
                 title: "App Update Available",
                 message:
-                    "A new version of PG-VIS is ready. Reload to get the latest features.",
+                    "A new version of pgpress is ready. Reload to get the latest features.",
                 type: "info",
                 persistent: true,
                 actions: [
@@ -402,12 +402,12 @@ class ServiceWorkerManager {
 
         try {
             const cacheNames = await caches.keys();
-            const pgvisCaches = cacheNames.filter((name) =>
-                name.includes("pgvis"),
+            const pgpressCaches = cacheNames.filter((name) =>
+                name.includes("pgpress"),
             );
 
             let totalSize = 0;
-            for (const cacheName of pgvisCaches) {
+            for (const cacheName of pgpressCaches) {
                 const cache = await caches.open(cacheName);
                 const keys = await cache.keys();
                 totalSize += keys.length;
@@ -415,9 +415,9 @@ class ServiceWorkerManager {
 
             return {
                 supported: true,
-                cacheCount: pgvisCaches.length,
+                cacheCount: pgpressCaches.length,
                 itemCount: totalSize,
-                cacheNames: pgvisCaches,
+                cacheNames: pgpressCaches,
             };
         } catch (error) {
             console.error("[SW Manager] Cache status check failed:", error);
@@ -435,12 +435,12 @@ class ServiceWorkerManager {
 
         try {
             const cacheNames = await caches.keys();
-            const pgvisCaches = cacheNames.filter((name) =>
-                name.includes("pgvis"),
+            const pgpressCaches = cacheNames.filter((name) =>
+                name.includes("pgpress"),
             );
 
             await Promise.all(
-                pgvisCaches.map((cacheName) => caches.delete(cacheName)),
+                pgpressCaches.map((cacheName) => caches.delete(cacheName)),
             );
 
             console.log("[SW Manager] All caches cleared");

@@ -1,6 +1,6 @@
 all: init build
 
-BINARY_NAME := pg-vis
+BINARY_NAME := pg-press
 
 SERVER_ADDR := :9020
 SERVER_PATH_PREFIX := /${BINARY_NAME}

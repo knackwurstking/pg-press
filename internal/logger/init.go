@@ -1,4 +1,4 @@
-// Package logger provides structured logging functionality for the pg-vis application.
+// Package logger provides structured logging functionality for the pgpress application.
 // It supports different log levels, colored output, and component-specific loggers.
 package logger
 

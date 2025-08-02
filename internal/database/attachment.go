@@ -1,4 +1,4 @@
-// Package pgvis attachment models.
+// Package pgpress attachment models.
 //
 // This file defines the Attachment data structure and its associated
 // validation and utility methods. Attachments represent files that can

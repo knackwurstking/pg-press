@@ -10,9 +10,9 @@ import (
 	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 // pdfOptions contains common options for PDF generation
@@ -55,7 +55,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			"Failed to retrieve trouble report %d for PDF generation: %v",
 			id, err,
 		)
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	pdfBuffer, err := h.generateTroubleReportPDF(tr)

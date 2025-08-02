@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"slices"
 
-	"github.com/knackwurstking/pg-vis/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 const (

@@ -47,7 +47,7 @@ class PWAInstallManager {
         prompt.innerHTML = `
             <div class="pwa-install-content">
                 <div class="pwa-install-text">
-                    <div class="pwa-install-title">PG-VIS installieren</div>
+                    <div class="pwa-install-title">pgpress installieren</div>
                     <div class="pwa-install-message">Zum Startbildschirm hinzufügen für schnellen Zugriff und Offline-Nutzung</div>
                 </div>
                 <div class="pwa-install-actions">

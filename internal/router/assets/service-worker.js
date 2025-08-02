@@ -1,7 +1,7 @@
 /**
- * Service Worker for PG-VIS
+ * Service Worker for pgpress
  *
- * This service worker provides offline functionality and caching for the PG-VIS
+ * This service worker provides offline functionality and caching for the pgpress
  * (Press Group - Press Visualization) web application. It implements a cache-first
  * strategy for static assets and a network-first strategy for dynamic content.
  *
@@ -20,7 +20,7 @@
 
 // Version and cache configuration
 const VERSION = "v0.0.155";
-const CACHE_PREFIX = "pgvis";
+const CACHE_PREFIX = "pgpress";
 const STATIC_CACHE = `${CACHE_PREFIX}-static-${VERSION}`;
 const DYNAMIC_CACHE = `${CACHE_PREFIX}-dynamic-${VERSION}`;
 const OFFLINE_CACHE = `${CACHE_PREFIX}-offline-${VERSION}`;
@@ -442,7 +442,7 @@ self.addEventListener("push", (event) => {
     };
 
     event.waitUntil(
-        self.registration.showNotification("PG-VIS Update", options),
+        self.registration.showNotification("pgpress Update", options),
     );
 });
 

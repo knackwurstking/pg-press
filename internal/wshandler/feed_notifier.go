@@ -1,5 +1,5 @@
 // Package wshandler provides real-time notification functionality for feeds
-// and events in the pg-vis application.
+// and events in the pgpress application.
 package wshandler
 
 import (
@@ -12,10 +12,10 @@ import (
 
 	"golang.org/x/net/websocket"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 // FeedCounterTemplateData represents the data for rendering feed counter template

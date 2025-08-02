@@ -6,10 +6,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/handler"
-	"github.com/knackwurstking/pg-vis/internal/htmxhandler"
-	"github.com/knackwurstking/pg-vis/internal/wshandler"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/handler"
+	"github.com/knackwurstking/pgpress/internal/htmxhandler"
+	"github.com/knackwurstking/pgpress/internal/wshandler"
 )
 
 var (

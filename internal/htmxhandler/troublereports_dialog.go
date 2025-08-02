@@ -6,9 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) handleGetDialogEdit(
@@ -34,7 +34,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 
 			tr, err := h.DB.TroubleReports.Get(id)
 			if err != nil {
-				return utils.HandlePgvisError(c, err)
+				return utils.HandlepgpressError(c, err)
 			}
 
 			pageData.Title = tr.Title
@@ -85,7 +85,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		tr := database.NewTroubleReport(title, content, modified)
 
 		if err := h.DB.TroubleReportService.AddWithAttachments(tr, attachments); err != nil {
-			return utils.HandlePgvisError(c, err)
+			return utils.HandlepgpressError(c, err)
 		}
 	} else {
 		dialogEditData.Submitted = false
@@ -136,7 +136,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Query previous trouble report
 	trOld, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Create new trouble report
@@ -161,7 +161,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		LinkedAttachments: tr.LinkedAttachments,
 	}))
 	if err := h.DB.TroubleReportService.UpdateWithAttachments(id, tr, newAttachments); err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	return h.handleGetDialogEdit(c, dialogEditData)

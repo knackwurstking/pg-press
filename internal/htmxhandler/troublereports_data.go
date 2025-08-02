@@ -8,10 +8,10 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/logger"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) handleGetData(c echo.Context) error {
@@ -22,7 +22,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	trs, err := h.DB.TroubleReportService.ListWithAttachments()
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	return utils.HandleTemplate(
@@ -60,7 +60,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 		user.UserName, user.TelegramID, id)
 
 	if err := h.DB.TroubleReportService.RemoveWithAttachments(id); err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	return h.handleGetData(c)
@@ -74,7 +74,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReportService.GetWithAttachments(id)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// If "time" query is provided, return modified data attachments for "id"
@@ -93,7 +93,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				// Load attachments for the modified data
 				loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(modifiedTr)
 				if err != nil {
-					return utils.HandlePgvisError(c, err)
+					return utils.HandlepgpressError(c, err)
 				}
 
 				// Use the modified trouble report with loaded attachments
@@ -126,7 +126,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		var err error
 		tr, err = h.DB.TroubleReports.Get(id)
 		if err != nil {
-			return utils.HandlePgvisError(c, err)
+			return utils.HandlepgpressError(c, err)
 		}
 	}
 
@@ -167,7 +167,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	// Move modification to the top
@@ -188,7 +188,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	}
 
 	if mod == nil {
-		return utils.HandlePgvisError(c, errors.New("modification not found"))
+		return utils.HandlepgpressError(c, errors.New("modification not found"))
 	}
 
 	mod.Time = time.Now().UnixMilli()
@@ -203,7 +203,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 
 	// Update database
 	if err = h.DB.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlePgvisError(c, database.WrapError(err, "failed to update trouble report"))
+		return utils.HandlepgpressError(c, database.WrapError(err, "failed to update trouble report"))
 	}
 
 	return h.handleGetModifications(c, tr)

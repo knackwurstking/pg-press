@@ -5,9 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pg-vis/internal/constants"
-	"github.com/knackwurstking/pg-vis/internal/database"
-	"github.com/knackwurstking/pg-vis/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 type Profile struct {
@@ -27,7 +27,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	return utils.HandleTemplate(c, database.SortCookies(cookies), h.Templates,
@@ -42,7 +42,7 @@ func (h *Profile) handleDeleteCookies(c echo.Context) error {
 	}
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
-		return utils.HandlePgvisError(c, err)
+		return utils.HandlepgpressError(c, err)
 	}
 
 	return h.handleGetCookies(c)

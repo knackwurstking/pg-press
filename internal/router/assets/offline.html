@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline - PG-VIS</title>
+    <title>Offline - pgpress</title>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         :root {
@@ -296,9 +296,9 @@
     <div class="container">
         <div class="icon">📡</div>
         <h1>Sie sind offline</h1>
-        <p class="subtitle">PG-VIS - Pressgruppen-Visualisierung</p>
+        <p class="subtitle">pgpress - Pressgruppen-Visualisierung</p>
         <p class="message">
-            Es sieht so aus, als wären Sie gerade nicht mit dem Internet verbunden. 
+            Es sieht so aus, als wären Sie gerade nicht mit dem Internet verbunden.
             Keine Sorge - wir haben einige Offline-Funktionen für Sie!
         </p>
 
@@ -316,7 +316,7 @@
         <div class="status">
             <div class="status-title">Verbindungsstatus</div>
             <div class="status-text" id="connectionDetails">
-                PG-VIS Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.
+                pgpress Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.
             </div>
         </div>
 
@@ -337,12 +337,12 @@
             const networkStatus = document.getElementById('networkStatus');
             const networkText = document.getElementById('networkText');
             const connectionDetails = document.getElementById('connectionDetails');
-            
+
             if (navigator.onLine) {
                 networkStatus.className = 'network-status network-online';
                 networkText.textContent = 'Online';
                 connectionDetails.textContent = 'Verbindung wiederhergestellt! Sie können jetzt alle Funktionen nutzen.';
-                
+
                 // Auto-redirect after a short delay when back online
                 setTimeout(() => {
                     window.location.href = './';
@@ -350,7 +350,7 @@
             } else {
                 networkStatus.className = 'network-status network-offline';
                 networkText.textContent = 'Offline';
-                connectionDetails.textContent = 'PG-VIS Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.';
+                connectionDetails.textContent = 'pgpress Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung.';
             }
         }
 
@@ -358,12 +358,12 @@
         function retryConnection() {
             const button = event.target.closest('.btn-primary');
             const originalContent = button.innerHTML;
-            
+
             button.innerHTML = '<span>⏳</span> Überprüfung...';
             button.disabled = true;
-            
+
             // Check if we can reach the server
-            fetch('./', { 
+            fetch('./', {
                 method: 'HEAD',
                 cache: 'no-cache'
             })
@@ -401,11 +401,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             updateNetworkStatus();
             checkServiceWorkerStatus();
-            
+
             // Listen for online/offline events
             window.addEventListener('online', updateNetworkStatus);
             window.addEventListener('offline', updateNetworkStatus);
-            
+
             // Periodically check connection
             setInterval(() => {
                 if (!navigator.onLine) {
