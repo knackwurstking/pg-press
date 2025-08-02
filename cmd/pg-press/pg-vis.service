@@ -9,6 +9,10 @@ Environment="CLICOLOR_FORCE=1"
 Environment="SERVER_ADDR=:9020"
 Environment="SERVER_PATH_PREFIX=/pg-press"
 ExecStart=pg-press server
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=3
+StartLimitIntervalSec=60
 
 [Install]
 WantedBy=default.target
