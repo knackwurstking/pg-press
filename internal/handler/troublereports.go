@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
@@ -17,7 +15,6 @@ type TroubleReports struct {
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	path := "/trouble-reports"
 
-	fmt.Println("Registering routes for trouble reports", h.ServerPathPrefix+path)
 	e.GET(h.ServerPathPrefix+path, h.handleMainPage)
 
 	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMX(path)}
