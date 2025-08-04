@@ -85,11 +85,10 @@
             <br />
 
             <div
-                style="border-radius: var(--ui-radius);"
                 class="attachments-preview-placeholder"
                 data-trouble-report-id="{{$troubleReport.ID}}"
                 hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}"
-                hx-trigger="load"
+                hx-trigger="click"
                 hx-swap="outerHTML"
             >
                 <div class="attachments-preview-label">

@@ -43,7 +43,10 @@ details[id^="trouble-report-"] {
 
 .attachments-preview-placeholder {
     background-color: var(--ui-info);
+    border-radius: var(--ui-radius);
     color: var(--ui-info-text);
+    cursor: pointer;
+    padding: var(--ui-spacing);
 }
 
 .attachments-preview-scroll {

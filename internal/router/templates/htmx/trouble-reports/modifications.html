@@ -100,12 +100,11 @@
                 <!-- Attachments for this modification -->
                 {{if and $mod.Data.LinkedAttachments (gt (len $mod.Data.LinkedAttachments) 0)}}
                 <div
-                    style="border-radius: var(--ui-radius);"
                     class="attachments-preview-placeholder"
                     data-modification-id="{{$troubleReport.ID}}-{{$mod.Time}}"
                     hx-get="./trouble-reports/attachments-preview?id={{$troubleReport.ID}}&time={{$mod.Time}}"
 
-                    hx-trigger="load"
+                    hx-trigger="click"
                     hx-swap="outerHTML"
                 >
                     <div class="attachments-preview-label">
