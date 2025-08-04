@@ -9,19 +9,17 @@
     </div>
     <div class="attachments-preview-scroll flex gap">
         {{range $troubleReport.LoadedAttachments}}
+        {{$attachmentID := .GetID}}
         <div class="attachment-preview-item flex column align-center gap no-user-select ghost"
-             data-report-id="{{$troubleReport.ID}}"
-             data-attachment-id="{{.GetID}}"
-             data-is-image="{{.IsImage}}"
-             onclick="viewAttachmentFromData(this.dataset.reportId, this.dataset.attachmentId, this.dataset.isImage)"
+             onclick='openImageViewer({{$attachmentID}})'
              tabindex="0"
              role="button"
-             aria-label="Bild {{.ID}} anzeigen">
+             aria-label="Bild {{$attachmentID}} anzeigen">
             <div class="attachment-preview-image">
                 <img
                     loading="lazy"
-                    src="./trouble-reports/attachments?id={{$troubleReport.ID}}&attachment_id={{.GetID}}"
-                    alt="Bild {{.ID}}"
+                    src="./trouble-reports/attachments?attachment_id={{$attachmentID}}"
+                    alt="Bild {{$attachmentID}}"
                     class="preview-thumbnail no-user-select"
                     loading="lazy"
                 />

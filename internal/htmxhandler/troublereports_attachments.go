@@ -207,35 +207,9 @@ func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
 }
 
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
+	attachmentID, herr := utils.ParseInt64Query(c, "attachment_id")
 	if herr != nil {
 		return herr
-	}
-
-	attachmentIDStr := c.QueryParam("attachment_id")
-	if attachmentIDStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "missing attachment_id parameter")
-	}
-
-	attachmentID, err := strconv.ParseInt(attachmentIDStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid attachment_id parameter")
-	}
-
-	// Get trouble report to verify attachment belongs to it
-	tr, err := h.DB.TroubleReports.Get(id)
-	if err != nil {
-		return utils.HandlepgpressError(c, err)
-	}
-
-	// Check if attachment ID is in the trouble report's linked attachments
-	var found bool
-	if slices.Contains(tr.LinkedAttachments, attachmentID) {
-		found = true
-	}
-
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound, "attachment not found in this trouble report")
 	}
 
 	// Get the attachment from the attachments table

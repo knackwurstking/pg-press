@@ -41,6 +41,38 @@
         <script src="./js/htmx-v2.0.6.min.js"></script>
         <script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
 
+        <script>
+        function openImageViewer(attachmentID) {
+            var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;
+            var imageViewer = document.querySelector('template[name="image-viewer"]');
+            var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
+            var img = dialog.querySelector('img.attachment');
+            var closeButton = dialog.querySelector('button.close');
+
+            console.debug(`Opening image viewer with image ${imageURL}`);
+
+            img.src = imageURL;
+            img.onclick = function(event) {
+                event.stopPropagation();
+            };
+
+            dialog.onclick = function() {
+                dialog.close();
+            };
+
+            closeButton.onclick = function() {
+                dialog.close();
+            };
+
+            dialog.onclose = function(event) {
+                document.body.removeChild(dialog);
+            };
+
+            document.body.appendChild(dialog);
+            dialog.showModal();
+        }
+        </script>
+
         {{block "head" .}}{{end}}
     </head>
 
@@ -58,6 +90,21 @@
         </header>
 
         <main>{{block "content" .}}{{end}}</main>
+
+        <template name="image-viewer">
+            <dialog class="image-viewer fullscreen clean">
+                <img alt="Attachment" class="attachment" />
+
+                <button
+                    type="button"
+                    class="close icon secondary ghost"
+                    onclick="this.closest('dialog').close()"
+                    title="Schließen"
+                >
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </dialog>
+        </template>
     </body>
 </html>
 

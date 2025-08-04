@@ -240,13 +240,14 @@
 
                     <div id="existing-attachments" class="flex column gap">
                         {{range .LinkedAttachments}}
-                        <div class="attachment-item flex row gap justify-between align-center border" data-id="{{.GetID}}">
+                        {{$attachmentID := .GetID}}
+                        <div class="attachment-item flex row gap justify-between align-center border" data-id="{{$attachmentID}}">
                             <div class="attachment-info flex row gap align-center">
                                 <i class="bi bi-grip-vertical"></i>
 
                                 <i class="bi bi-image attachment-icon"></i>
 
-                                <span class="ellipsis">Bild {{.ID}}</span>
+                                <span class="ellipsis">Bild {{$attachmentID}}</span>
 
                                 <span class="muted text-sm">({{.GetMimeType}})</span>
                             </div>
@@ -255,7 +256,7 @@
                                 <button
                                     type="button"
                                     class="secondary flex row gap align-center"
-                                    onclick="window.TroubleReportsImageViewer.viewAttachment({{$.ID}}, {{.GetID}}, '{{if .IsImage}}true{{else}}false{{end}}')"
+                                    onclick='openImageViewer({{$attachmentID}})'
                                 >
                                     <small class="flex row gap align-center">
                                         <i class="bi bi-eye"></i>
@@ -266,7 +267,7 @@
                                 <button
                                     type="button"
                                     class="destructive flex row gap align-center"
-                                    onclick="deleteAttachment({{.GetID}})"
+                                    onclick="deleteAttachment({{$attachmentID}})"
                                 >
                                     <small class="flex row gap align-center">
                                         <i class="bi bi-trash"></i>
