@@ -205,18 +205,18 @@ func (s *TroubleReportService) UpdateWithAttachments(
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
-func (s *TroubleReportService) RemoveWithAttachments(id int64) error {
+func (s *TroubleReportService) RemoveWithAttachments(id int64) (*TroubleReport, error) {
 	logger.TroubleReport().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments
 	tr, err := s.troubleReports.Get(id)
 	if err != nil {
-		return WrapError(err, "failed to get trouble report for removal")
+		return tr, WrapError(err, "failed to get trouble report for removal")
 	}
 
 	// Remove the trouble report first
 	if err := s.troubleReports.Remove(id); err != nil {
-		return WrapError(err, "failed to remove trouble report")
+		return tr, WrapError(err, "failed to remove trouble report")
 	}
 
 	// Remove associated attachments
@@ -226,7 +226,7 @@ func (s *TroubleReportService) RemoveWithAttachments(id int64) error {
 		}
 	}
 
-	return nil
+	return tr, nil
 }
 
 // LoadAttachments loads attachments for a trouble report.

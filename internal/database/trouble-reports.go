@@ -203,8 +203,6 @@ func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
 func (tr *TroubleReports) Remove(id int64) error {
 	logger.TroubleReport().Info("Removing trouble report, id: %d", id)
 
-	report, _ := tr.Get(id)
-
 	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
 	if err != nil {
 		return NewDatabaseError("delete", "trouble_reports",
@@ -219,20 +217,6 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 	if rowsAffected == 0 {
 		return ErrNotFound
-	}
-
-	if report != nil {
-		feed := NewFeed(
-			FeedTypeTroubleReportRemove,
-			&FeedTroubleReportRemove{
-				ID:         report.ID,
-				Title:      report.Title,
-				ModifiedBy: report.Mods.Current().User,
-			},
-		)
-		if err := tr.feeds.Add(feed); err != nil {
-			return WrapError(err, "failed to add feed entry")
-		}
 	}
 
 	return nil

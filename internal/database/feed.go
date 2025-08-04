@@ -78,8 +78,8 @@ const (
 		class="feed-item-content"
 		style="padding: var(--ui-spacing);"
 	>
-		Ein Admin hat den Problembericht mit dem Titel
-		<strong>%s</strong> entfernt.
+		User <strong>%s<strong> hat den Problembericht mit dem Titel
+		<strong style="color: var(--ui-secondary);">%s</strong> entfernt.
 	</div>
 </div>
 `
@@ -91,7 +91,7 @@ type FeedUserAdd struct {
 	Name string `json:"name"`
 }
 
-func newFeedUserAdd(data map[string]any) *FeedUserAdd {
+func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
 	return &FeedUserAdd{
 		ID:   int64(data["id"].(float64)),
 		Name: data["name"].(string),
@@ -108,7 +108,7 @@ type FeedUserRemove struct {
 	Name string `json:"name"`
 }
 
-func newFeedUserRemove(data map[string]any) *FeedUserRemove {
+func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
 	return &FeedUserRemove{
 		ID:   int64(data["id"].(float64)),
 		Name: data["name"].(string),
@@ -126,7 +126,7 @@ type FeedUserNameChange struct {
 	New string `json:"new"`
 }
 
-func newFeedUserNameChange(data map[string]any) *FeedUserNameChange {
+func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 	return &FeedUserNameChange{
 		ID:  int64(data["id"].(float64)),
 		Old: data["old"].(string),
@@ -145,7 +145,7 @@ type FeedTroubleReportAdd struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
-func newFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
+func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	return &FeedTroubleReportAdd{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
@@ -167,7 +167,7 @@ type FeedTroubleReportUpdate struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
-func newFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
+func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 	return &FeedTroubleReportUpdate{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
@@ -186,23 +186,25 @@ func (f *FeedTroubleReportUpdate) Render() template.HTML {
 
 // FeedTroubleReportRemove represents a trouble report removal event.
 type FeedTroubleReportRemove struct {
-	ID         int64  `json:"id"`
-	Title      string `json:"title"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID        int64  `json:"id"`
+	Title     string `json:"title"`
+	RemovedBy *User  `json:"removed_by"`
 }
 
-func newFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
+func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	return &FeedTroubleReportRemove{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
+		RemovedBy: NewUserFromInterfaceMap(
+			data["removed_by"].(map[string]any),
 		),
 	}
 }
 
 func (f *FeedTroubleReportRemove) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(RemoveTroubleReportRenderTemplate, f.Title))
+	return template.HTML(
+		fmt.Sprintf(RemoveTroubleReportRenderTemplate, f.RemovedBy.UserName, f.Title),
+	)
 }
 
 // Feed represents a feed entry in the system that tracks activity events.
@@ -234,20 +236,20 @@ func (f *Feed) Render() template.HTML {
 	// User Types
 
 	case FeedTypeUserAdd:
-		feedContent = newFeedUserAdd(data).Render()
+		feedContent = NewFeedUserAdd(data).Render()
 	case FeedTypeUserNameChange:
-		feedContent = newFeedUserNameChange(data).Render()
+		feedContent = NewFeedUserNameChange(data).Render()
 	case FeedTypeUserRemove:
-		feedContent = newFeedUserRemove(data).Render()
+		feedContent = NewFeedUserRemove(data).Render()
 
 	// Trouble Report Types
 
 	case FeedTypeTroubleReportAdd:
-		feedContent = newFeedTroubleReportAdd(data).Render()
+		feedContent = NewFeedTroubleReportAdd(data).Render()
 	case FeedTypeTroubleReportUpdate:
-		feedContent = newFeedTroubleReportUpdate(data).Render()
+		feedContent = NewFeedTroubleReportUpdate(data).Render()
 	case FeedTypeTroubleReportRemove:
-		feedContent = newFeedTroubleReportRemove(data).Render()
+		feedContent = NewFeedTroubleReportRemove(data).Render()
 
 	// Fallback
 

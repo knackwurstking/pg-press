@@ -59,8 +59,20 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	logger.TroubleReport().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
-	if err := h.DB.TroubleReportService.RemoveWithAttachments(id); err != nil {
+	if removedReport, err := h.DB.TroubleReportService.RemoveWithAttachments(id); err != nil {
 		return utils.HandlepgpressError(c, err)
+	} else {
+		feed := database.NewFeed(
+			database.FeedTypeTroubleReportRemove,
+			&database.FeedTroubleReportRemove{
+				ID:        removedReport.ID,
+				Title:     removedReport.Title,
+				RemovedBy: user,
+			},
+		)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			return database.WrapError(err, "failed to add feed entry")
+		}
 	}
 
 	return h.handleGetData(c)
