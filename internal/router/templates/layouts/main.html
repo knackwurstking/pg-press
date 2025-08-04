@@ -35,6 +35,23 @@
         <!-- Preconnect for performance -->
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
 
+        <style>
+            /* Prevent Safari zoom on input focus */
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="number"],
+            input[type="tel"],
+            input[type="url"],
+            input[type="search"],
+            textarea,
+            select {
+                font-size: 16px !important;
+                transform-origin: left top;
+                font-family: inherit;
+            }
+        </style>
+
         <title>{{block "title" .}}pgpress{{end}}</title>
 
         <!-- HTMX for dynamic content -->
