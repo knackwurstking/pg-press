@@ -40,13 +40,6 @@ func main() {
 	// Initialize colored logger
 	logger.Initialize()
 
-	// Configure logger based on environment
-	if os.Getenv("DEBUG") != "" {
-		logger.SetupDevelopment()
-	} else {
-		logger.SetupProduction()
-	}
-
 	a := cli.App{
 		Name: appName,
 		Usage: cli.Usage(`Exit Codes:
