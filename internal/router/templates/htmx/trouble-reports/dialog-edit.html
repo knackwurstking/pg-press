@@ -181,7 +181,7 @@
         <!-- Hidden field for attachment order -->
         <input type="hidden" name="attachment_order" id="attachment-order" value=""/>
 
-        <div class="form-content flex-item flex column gap auto-scroll-y">
+        <div class="form-content flex column gap auto-scroll-y no-scrollbar">
             <label for="title" class="flex column">
                 Titel
 
@@ -214,10 +214,10 @@
             </label>
 
             <!-- Attachments Section -->
-            <div id="attachments-section" class="attachments-container flex-item flex column gap">
-                <div class="attachments-label">
+            <div id="attachments-section" class="attachments-container flex column gap">
+                <small class="attachments-label">
                     Bilder (max. 10MB pro Datei, max. 10 Dateien)
-                </div>
+                </small>
 
                 {{if or .InvalidTitle .InvalidContent}}
                 <div class="attachment-error">
@@ -283,19 +283,15 @@
 
                 <!-- File Upload Area -->
                 <div
-                    class="file-input-area flex column gap align-center justify-center text-center"
+                    class="file-input-area flex column justify-center align-center"
                     onclick="document.getElementById('attachments').click()"
                     ondrop="window.dialogEditFunctions.handleFileDrop(event)"
                     ondragover="window.dialogEditFunctions.handleDragOver(event)"
                     ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
                 >
-                    <i class="bi bi-cloud-upload" style="font-size: 2em;"></i>
+                    <i class="bi bi-cloud-upload"></i>
 
-                    <div class="text-center">Klicken Sie hier oder ziehen Sie Bilder hierher</div>
-
-                    <div class="muted text-center text-sm">
-                        Unterstützte Formate: JPG, PNG, GIF, BMP, SVG, WebP
-                    </div>
+                    <div class="text-center">Bilder hochladen</div>
 
                     <input
                         type="file"
