@@ -6,7 +6,7 @@
         <!-- Viewport and responsive design -->
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+            content="width=device-width, initial-scale=1"
         />
 
         <!-- PWA and mobile optimization -->
@@ -92,7 +92,7 @@
         <main>{{block "content" .}}{{end}}</main>
 
         <template name="image-viewer">
-            <dialog class="image-viewer fullscreen clean">
+            <dialog class="image-viewer fullscreen clean flex justify-center align-center">
                 <img alt="Attachment" class="attachment" />
 
                 <button
