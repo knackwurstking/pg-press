@@ -41,10 +41,9 @@ func main() {
 	logger.Initialize()
 
 	// Configure logger based on environment
-	switch {
-	case os.Getenv("DEBUG") != "":
+	if os.Getenv("DEBUG") != "" {
 		logger.SetupDevelopment()
-	case os.Getenv("PRODUCTION") != "":
+	} else {
 		logger.SetupProduction()
 	}
 

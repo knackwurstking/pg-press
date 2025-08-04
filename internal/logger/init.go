@@ -62,7 +62,7 @@ func SetupDevelopment() {
 
 // SetupProduction configures logger for production environment
 func SetupProduction() {
-	AppLogger.SetLevel(INFO)
+	AppLogger.SetLevel(WARN)
 	AppLogger.SetColors(false)
 	AppLogger.SetPrefix("[PROD] ")
 }
