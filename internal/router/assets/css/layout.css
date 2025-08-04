@@ -8,6 +8,10 @@ body.debug * {
     border-color: var(--ui-border-color) !important;
 }
 
+body:has(dialog[open]) {
+    overflow: hidden;
+}
+
 details summary::after {
     font-family: "bootstrap-icons";
     content: "\f285";
@@ -36,6 +40,8 @@ details[open] summary::after {
 .htmx-request .loading::after {
     content: " ⏳";
 }
+
+/* Image viewer styles */
 
 .image-viewer button.close {
     position: fixed;
