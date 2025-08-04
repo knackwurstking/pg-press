@@ -30,7 +30,7 @@ const (
 	selectUserByTelegramIDQuery = `SELECT * FROM users WHERE telegram_id = ?`
 	selectUserByAPIKeyQuery     = `SELECT * FROM users WHERE api_key = ?`
 	selectUserExistsQuery       = `SELECT COUNT(*) FROM users
-		WHERE telegram_id = ? OR user_name = ?`
+		WHERE telegram_id = ?`
 	insertUserQuery = `INSERT INTO users
 		(telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
 	updateUserQuery = `UPDATE users
@@ -141,7 +141,7 @@ func (u *Users) Add(user *User) error {
 
 	// Check if user already exists
 	var count int
-	err := u.db.QueryRow(selectUserExistsQuery, user.TelegramID, user.UserName).Scan(&count)
+	err := u.db.QueryRow(selectUserExistsQuery, user.TelegramID).Scan(&count)
 	if err != nil {
 		return NewDatabaseError("select", "users",
 			"failed to check user existence", err)
