@@ -78,7 +78,7 @@ const (
 		class="feed-item-content"
 		style="padding: var(--ui-spacing);"
 	>
-		Benutzer <strong>%s</strong> hat den Problembericht mit dem Titel
+		Ein Admin hat den Problembericht mit dem Titel
 		<strong>%s</strong> entfernt.
 	</div>
 </div>
@@ -91,7 +91,7 @@ type FeedUserAdd struct {
 	Name string `json:"name"`
 }
 
-func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
+func newFeedUserAdd(data map[string]any) *FeedUserAdd {
 	return &FeedUserAdd{
 		ID:   int64(data["id"].(float64)),
 		Name: data["name"].(string),
@@ -108,7 +108,7 @@ type FeedUserRemove struct {
 	Name string `json:"name"`
 }
 
-func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
+func newFeedUserRemove(data map[string]any) *FeedUserRemove {
 	return &FeedUserRemove{
 		ID:   int64(data["id"].(float64)),
 		Name: data["name"].(string),
@@ -126,7 +126,7 @@ type FeedUserNameChange struct {
 	New string `json:"new"`
 }
 
-func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
+func newFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 	return &FeedUserNameChange{
 		ID:  int64(data["id"].(float64)),
 		Old: data["old"].(string),
@@ -145,7 +145,7 @@ type FeedTroubleReportAdd struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
-func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
+func newFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	return &FeedTroubleReportAdd{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
@@ -167,7 +167,7 @@ type FeedTroubleReportUpdate struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
-func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
+func newFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 	return &FeedTroubleReportUpdate{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
@@ -191,7 +191,7 @@ type FeedTroubleReportRemove struct {
 	ModifiedBy *User  `json:"modified_by"`
 }
 
-func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
+func newFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	return &FeedTroubleReportRemove{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
@@ -202,10 +202,7 @@ func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 }
 
 func (f *FeedTroubleReportRemove) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		RemoveTroubleReportRenderTemplate,
-		f.ModifiedBy.UserName, f.Title,
-	))
+	return template.HTML(fmt.Sprintf(RemoveTroubleReportRenderTemplate, f.Title))
 }
 
 // Feed represents a feed entry in the system that tracks activity events.
@@ -237,20 +234,20 @@ func (f *Feed) Render() template.HTML {
 	// User Types
 
 	case FeedTypeUserAdd:
-		feedContent = NewFeedUserAdd(data).Render()
+		feedContent = newFeedUserAdd(data).Render()
 	case FeedTypeUserNameChange:
-		feedContent = NewFeedUserNameChange(data).Render()
+		feedContent = newFeedUserNameChange(data).Render()
 	case FeedTypeUserRemove:
-		feedContent = NewFeedUserRemove(data).Render()
+		feedContent = newFeedUserRemove(data).Render()
 
 	// Trouble Report Types
 
 	case FeedTypeTroubleReportAdd:
-		feedContent = NewFeedTroubleReportAdd(data).Render()
+		feedContent = newFeedTroubleReportAdd(data).Render()
 	case FeedTypeTroubleReportUpdate:
-		feedContent = NewFeedTroubleReportUpdate(data).Render()
+		feedContent = newFeedTroubleReportUpdate(data).Render()
 	case FeedTypeTroubleReportRemove:
-		feedContent = NewFeedTroubleReportRemove(data).Render()
+		feedContent = newFeedTroubleReportRemove(data).Render()
 
 	// Fallback
 
