@@ -14,26 +14,26 @@ type TroubleReportWithAttachments struct {
 	LoadedAttachments []*Attachment `json:"loaded_attachments"`
 }
 
-// TroubleReportService provides high-level operations for trouble reports
+// TroubleReportsHelper provides high-level operations for trouble reports
 // with attachment management.
-type TroubleReportService struct {
+type TroubleReportsHelper struct {
 	troubleReports *TroubleReports
 	attachments    *Attachments
 }
 
-// NewTroubleReportService creates a new service instance.
-func NewTroubleReportService(
+// NewTroubleReportsHelper creates a new service instance.
+func NewTroubleReportsHelper(
 	troubleReports *TroubleReports,
 	attachments *Attachments,
-) *TroubleReportService {
-	return &TroubleReportService{
+) *TroubleReportsHelper {
+	return &TroubleReportsHelper{
 		troubleReports: troubleReports,
 		attachments:    attachments,
 	}
 }
 
 // GetWithAttachments retrieves a trouble report and loads its attachments.
-func (s *TroubleReportService) GetWithAttachments(
+func (s *TroubleReportsHelper) GetWithAttachments(
 	id int64,
 ) (*TroubleReportWithAttachments, error) {
 	logger.TroubleReport().Debug(
@@ -58,7 +58,7 @@ func (s *TroubleReportService) GetWithAttachments(
 }
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
-func (s *TroubleReportService) ListWithAttachments() ([]*TroubleReportWithAttachments, error) {
+func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttachments, error) {
 	logger.TroubleReport().Debug("Listing trouble reports with attachments")
 
 	// Get all trouble reports
@@ -87,7 +87,7 @@ func (s *TroubleReportService) ListWithAttachments() ([]*TroubleReportWithAttach
 }
 
 // AddWithAttachments creates a new trouble report and its attachments.
-func (s *TroubleReportService) AddWithAttachments(
+func (s *TroubleReportsHelper) AddWithAttachments(
 	troubleReport *TroubleReport,
 	attachments []*Attachment,
 ) error {
@@ -137,7 +137,7 @@ func (s *TroubleReportService) AddWithAttachments(
 }
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
-func (s *TroubleReportService) UpdateWithAttachments(
+func (s *TroubleReportsHelper) UpdateWithAttachments(
 	id int64,
 	troubleReport *TroubleReport,
 	newAttachments []*Attachment,
@@ -205,7 +205,7 @@ func (s *TroubleReportService) UpdateWithAttachments(
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
-func (s *TroubleReportService) RemoveWithAttachments(id int64) (*TroubleReport, error) {
+func (s *TroubleReportsHelper) RemoveWithAttachments(id int64) (*TroubleReport, error) {
 	logger.TroubleReport().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments
@@ -230,7 +230,7 @@ func (s *TroubleReportService) RemoveWithAttachments(id int64) (*TroubleReport, 
 }
 
 // LoadAttachments loads attachments for a trouble report.
-func (s *TroubleReportService) LoadAttachments(tr *TroubleReport) ([]*Attachment, error) {
+func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment, error) {
 	if tr == nil {
 		return nil, NewValidationError("report", "trouble report cannot be nil", nil)
 	}
@@ -239,12 +239,12 @@ func (s *TroubleReportService) LoadAttachments(tr *TroubleReport) ([]*Attachment
 }
 
 // GetAttachment retrieves a specific attachment by ID.
-func (s *TroubleReportService) GetAttachment(id int64) (*Attachment, error) {
+func (s *TroubleReportsHelper) GetAttachment(id int64) (*Attachment, error) {
 	return s.attachments.Get(id)
 }
 
 // CleanupOrphanedAttachments removes attachments not referenced by any trouble report.
-func (s *TroubleReportService) CleanupOrphanedAttachments() (int64, error) {
+func (s *TroubleReportsHelper) CleanupOrphanedAttachments() (int64, error) {
 	return s.attachments.CleanupOrphaned()
 }
 
@@ -267,7 +267,7 @@ func findRemovedAttachments(oldIDs, newIDs []int64) []int64 {
 
 // ConvertToLegacyFormat converts attachment IDs to legacy attachment objects
 // for backward compatibility.
-func (s *TroubleReportService) ConvertToLegacyFormat(
+func (s *TroubleReportsHelper) ConvertToLegacyFormat(
 	tr *TroubleReport,
 ) (*struct {
 	*TroubleReport

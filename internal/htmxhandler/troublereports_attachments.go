@@ -25,7 +25,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err == nil {
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
-				if loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(
+				if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(
 					existingTR); err == nil {
 					attachments = make([]*database.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
@@ -291,7 +291,7 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	}
 
 	// Load attachments for dialog
-	attachments, err := h.DB.TroubleReportService.LoadAttachments(tr)
+	attachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr)
 	if err != nil {
 		return utils.HandlepgpressError(c, err)
 	}

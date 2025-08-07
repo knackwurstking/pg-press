@@ -10,7 +10,7 @@ type DB struct {
 	Cookies              *Cookies
 	Attachments          *Attachments
 	TroubleReports       *TroubleReports
-	TroubleReportService *TroubleReportService
+	TroubleReportsHelper *TroubleReportsHelper
 	Feeds                *Feeds
 	Migration            *Migration
 	db                   *sql.DB
@@ -29,14 +29,14 @@ func New(db *sql.DB) *DB {
 	feeds := NewFeeds(db)
 	attachments := NewAttachments(db)
 	troubleReports := NewTroubleReports(db, feeds)
-	troubleReportService := NewTroubleReportService(troubleReports, attachments)
+	troubleReportsHelper := NewTroubleReportsHelper(troubleReports, attachments)
 
 	return &DB{
 		Users:                NewUsers(db, feeds),
 		Cookies:              NewCookies(db),
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,
-		TroubleReportService: troubleReportService,
+		TroubleReportsHelper: troubleReportsHelper,
 		Feeds:                feeds,
 		Migration:            migration,
 		db:                   db,

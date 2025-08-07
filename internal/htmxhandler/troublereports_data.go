@@ -20,7 +20,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 		return herr
 	}
 
-	trs, err := h.DB.TroubleReportService.ListWithAttachments()
+	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
 	if err != nil {
 		return utils.HandlepgpressError(c, err)
 	}
@@ -59,7 +59,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	logger.TroubleReport().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
-	if removedReport, err := h.DB.TroubleReportService.RemoveWithAttachments(id); err != nil {
+	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id); err != nil {
 		return utils.HandlepgpressError(c, err)
 	} else {
 		feed := database.NewFeed(
@@ -84,7 +84,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		return herr
 	}
 
-	tr, err := h.DB.TroubleReportService.GetWithAttachments(id)
+	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
 	if err != nil {
 		return utils.HandlepgpressError(c, err)
 	}
@@ -103,7 +103,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				}
 
 				// Load attachments for the modified data
-				loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(modifiedTr)
+				loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(modifiedTr)
 				if err != nil {
 					return utils.HandlepgpressError(c, err)
 				}

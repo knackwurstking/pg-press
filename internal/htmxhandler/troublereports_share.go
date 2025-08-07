@@ -49,7 +49,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 	logger.TroubleReport().Info("Generating PDF for trouble report %d", id)
 
-	tr, err := h.DB.TroubleReportService.GetWithAttachments(id)
+	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
 	if err != nil {
 		logger.TroubleReport().Error(
 			"Failed to retrieve trouble report %d for PDF generation: %v",

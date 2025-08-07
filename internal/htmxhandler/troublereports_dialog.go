@@ -41,7 +41,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 			pageData.Content = tr.Content
 
 			// Load attachments for display
-			if loadedAttachments, err := h.DB.TroubleReportService.LoadAttachments(tr); err == nil {
+			if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr); err == nil {
 				pageData.LinkedAttachments = loadedAttachments
 			}
 		}
@@ -84,7 +84,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		})
 		tr := database.NewTroubleReport(title, content, modified)
 
-		if err := h.DB.TroubleReportService.AddWithAttachments(tr, attachments); err != nil {
+		if err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments); err != nil {
 			return utils.HandlepgpressError(c, err)
 		}
 	} else {
@@ -160,7 +160,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		Content:           tr.Content,
 		LinkedAttachments: tr.LinkedAttachments,
 	}))
-	if err := h.DB.TroubleReportService.UpdateWithAttachments(id, tr, newAttachments); err != nil {
+	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
 		return utils.HandlepgpressError(c, err)
 	}
 
