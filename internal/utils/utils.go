@@ -1,4 +1,3 @@
-// TODO: Check what really matters here
 package utils
 
 import (
