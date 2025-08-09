@@ -7,7 +7,6 @@ const (
 	MainLayoutTemplatePath = "templates/layouts/main.html"
 
 	// Page templates
-	HomePageTemplatePath           = "templates/pages/home.html"
 	FeedPageTemplatePath           = "templates/pages/feed.html"
 	ProfilePageTemplatePath        = "templates/pages/profile.html"
 	TroubleReportsPageTemplatePath = "templates/pages/trouble-reports.html"
@@ -35,12 +34,6 @@ const (
 
 // Template sets for common page combinations
 var (
-	HomePageTemplates = []string{
-		MainLayoutTemplatePath,
-		NavFeedComponentTemplatePath,
-		HomePageTemplatePath,
-	}
-
 	FeedPageTemplates = []string{
 		MainLayoutTemplatePath,
 		NavFeedComponentTemplatePath,

@@ -26,7 +26,7 @@ func Serve(e *echo.Echo, o Options) {
 	}
 
 	(&handler.Auth{Base: base}).RegisterRoutes(e)
-	// TODO: Continue with the home page
+	(&handler.Home{Base: base}).RegisterRoutes(e)
 }
 
 type wsHandlers struct {
