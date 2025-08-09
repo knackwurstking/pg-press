@@ -30,7 +30,6 @@ func (h *Auth) RegisterRoutes(e *echo.Echo) {
 
 // handleLogin handles the login page and form submission.
 func (h *Auth) handleLogin(c echo.Context) error {
-
 	formParams, _ := c.FormParams()
 	apiKey := formParams.Get(constants.APIKeyFormField)
 
