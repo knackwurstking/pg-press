@@ -53,20 +53,6 @@ func configureFromEnvironment() {
 	AppLogger.SetPrefix("")
 }
 
-// SetupDevelopment configures logger for development environment
-func SetupDevelopment() {
-	AppLogger.SetLevel(DEBUG)
-	AppLogger.SetColors(true)
-	AppLogger.SetPrefix("[DEV] ")
-}
-
-// SetupProduction configures logger for production environment
-func SetupProduction() {
-	AppLogger.SetLevel(WARN)
-	AppLogger.SetColors(false)
-	AppLogger.SetPrefix("[PROD] ")
-}
-
 // Component-specific logger helpers
 
 // NewComponentLogger creates a new logger for a specific component
