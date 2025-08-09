@@ -8,6 +8,55 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+func mainScript() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_mainScript_7fc0`,
+		Function: `function __templ_mainScript_7fc0(){var dialog;
+
+    window.closeImageViewer = function() {
+        if (!dialog) return
+
+        dialog.close();
+    }
+
+    window.openImageViewer = function(attachmentID) {
+        if (dialog) closeImageViewer();
+
+        var imageURL = ` + "`" + `./trouble-reports/attachments?attachment_id=${attachmentID}` + "`" + `;
+        var imageViewer = document.querySelector('template[name="image-viewer"]');
+        dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
+        var img = dialog.querySelector('img.attachment');
+        var closeButton = dialog.querySelector('button.close');
+
+        console.debug(` + "`" + `Opening image viewer with image ${imageURL}` + "`" + `);
+
+        img.src = imageURL;
+        img.onclick = function(event) {
+            event.stopPropagation();
+        };
+
+        dialog.onclick = function() {
+            dialog.close();
+        };
+
+        closeButton.onclick = function() {
+            dialog.close();
+        };
+
+        dialog.onclose = function(event) {
+            document.body.removeChild(dialog);
+            dialog = undefined
+        };
+
+        document.body.appendChild(dialog);
+        dialog.showModal();
+    }
+}`,
+		Call:       templ.SafeScript(`__templ_mainScript_7fc0`),
+		CallInline: templ.SafeScriptInline(`__templ_mainScript_7fc0`),
+	}
+}
+
 type MainOptions struct {
 	PageTitle   string
 	AppBarTitle string
@@ -41,26 +90,34 @@ func Main(navContent templ.Component, options MainOptions) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(options.PageTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 37, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 80, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- HTMX for dynamic content --><script src=\"./js/htmx-v2.0.6.min.js\"></script><script src=\"./js/htmx-ext-ws-v2.0.3.min.js\"></script><script>\n                function openImageViewer(attachmentID) {\n                    var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;\n                    var imageViewer = document.querySelector('template[name=\"image-viewer\"]');\n                    var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');\n                    var img = dialog.querySelector('img.attachment');\n                    var closeButton = dialog.querySelector('button.close');\n\n                    console.debug(`Opening image viewer with image ${imageURL}`);\n\n                    img.src = imageURL;\n                    img.onclick = function(event) {\n                        event.stopPropagation();\n                    };\n\n                    dialog.onclick = function() {\n                        dialog.close();\n                    };\n\n                    closeButton.onclick = function() {\n                        dialog.close();\n                    };\n\n                    dialog.onclose = function(event) {\n                        document.body.removeChild(dialog);\n                    };\n\n                    document.body.appendChild(dialog);\n                    dialog.showModal();\n                }\n            </script></head><body hx-ext=\"ws\"><header class=\"container fluid\"><nav class=\"flex row gap justify-between\"><div class=\"flex row gap justify-start align-center\"><div><h5>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- HTMX for dynamic content --><script src=\"./js/htmx-v2.0.6.min.js\"></script><script src=\"./js/htmx-ext-ws-v2.0.3.min.js\"></script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = mainScript().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</head><body hx-ext=\"ws\"><header class=\"container fluid\"><nav class=\"flex row gap justify-between\"><div class=\"flex row gap justify-start align-center\"><div><h5>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 78, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 91, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h5></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h5></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +125,7 @@ func Main(navContent templ.Component, options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</nav></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</nav></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -76,7 +133,7 @@ func Main(navContent templ.Component, options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html><!--\n    {{define \"basic-nav-elements\"}}\n    <div class=\"flex row gap justify-end align-center\">\n        {{template \"nav-feed\"}}\n\n        <a\n            role=\"button\"\n            class=\"ghost contrast icon\"\n            href=\"./profile\"\n            title=\"Profil\"\n        >\n            <i class=\"bi bi-person-circle\"></i>\n        </a>\n\n        <a role=\"button\" class=\"ghost contrast icon\" href=\"./\" title=\"Startseite\">\n            <i class=\"bi bi-house\"></i>\n        </a>\n    </div>\n    {{end}}\n    -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html><!-- NOTE: Basic navigation elements to use for pages, can be removed\n    {{define \"basic-nav-elements\"}}\n    <div class=\"flex row gap justify-end align-center\">\n        {{template \"nav-feed\"}}\n\n        <a\n            role=\"button\"\n            class=\"ghost contrast icon\"\n            href=\"./profile\"\n            title=\"Profil\"\n        >\n            <i class=\"bi bi-person-circle\"></i>\n        </a>\n\n        <a role=\"button\" class=\"ghost contrast icon\" href=\"./\" title=\"Startseite\">\n            <i class=\"bi bi-house\"></i>\n        </a>\n    </div>\n    {{end}}\n    -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

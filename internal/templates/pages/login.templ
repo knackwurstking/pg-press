@@ -2,6 +2,26 @@ package pages
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
+script loginScript() {
+    document.querySelector("#dialogLogin").showModal();
+}
+
+templ loginTestNavContent() {
+	<div class="flex row gap justify-end align-center">
+		<a
+			role="button"
+			class="ghost contrast icon"
+			href="./profile"
+			title="Profil"
+		>
+			<i class="bi bi-person-circle"></i>
+		</a>
+		<a role="button" class="ghost contrast icon" href="./" title="Startseite">
+			<i class="bi bi-house"></i>
+		</a>
+	</div>
+}
+
 templ Login(apiKey string, invalidApiKey bool) {
 	@layouts.Main(
 		loginTestNavContent(),
@@ -31,25 +51,7 @@ templ Login(apiKey string, invalidApiKey bool) {
 					</footer>
 				</form>
 			</dialog>
-			<script>
-                document.querySelector("#dialogLogin").showModal();
-            </script>
+			@loginScript()
 		</main>
 	}
-}
-
-templ loginTestNavContent() {
-	<div class="flex row gap justify-end align-center">
-		<a
-			role="button"
-			class="ghost contrast icon"
-			href="./profile"
-			title="Profil"
-		>
-			<i class="bi bi-person-circle"></i>
-		</a>
-		<a role="button" class="ghost contrast icon" href="./" title="Startseite">
-			<i class="bi bi-house"></i>
-		</a>
-	</div>
 }
