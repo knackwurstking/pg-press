@@ -17,16 +17,7 @@ type Options struct {
 func Serve(e *echo.Echo, o Options) {
 	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
-	// Initialize and configure feed notification system
-	wsFeedHandler := wshandler.NewFeedHandler(o.DB, templates)
-	{
-		// Start the feed notification manager in a goroutine
-		ctx := context.Background()
-		go wsFeedHandler.Start(ctx)
-
-		// Set the notifier on the feeds for real-time updates
-		o.DB.Feeds.SetBroadcaster(wsFeedHandler)
-	}
+	startWebSocketHandlers(o.DB)
 
 	base := &handler.Base{
 		DB:               o.DB,
@@ -36,4 +27,22 @@ func Serve(e *echo.Echo, o Options) {
 
 	(&handler.Auth{Base: base}).RegisterRoutes(e)
 	// TODO: Continue with the home page
+}
+
+type wsHandlers struct {
+	feed *wshandler.FeedHandler
+}
+
+func startWebSocketHandlers(db *database.DB) {
+	wsh := wsHandlers{
+		// TOOD: The templates fs needs to be replaced with templ components
+		feed: wshandler.NewFeedHandler(db, templates),
+	}
+
+	// Start the feed notification manager in a goroutine
+	ctx := context.Background()
+	go wsh.feed.Start(ctx)
+
+	// Set the notifier on the feeds for real-time updates
+	db.Feeds.SetBroadcaster(wsh.feed)
 }
