@@ -18,6 +18,7 @@ generate:
 	templ generate
 
 run:
+	make generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
 		go run ./cmd/${BINARY_NAME} server -a ${SERVER_ADDR}
 
