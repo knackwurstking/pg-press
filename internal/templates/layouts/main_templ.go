@@ -13,7 +13,7 @@ type MainOptions struct {
 	AppBarTitle string
 }
 
-func Main(options MainOptions) templ.Component {
+func Main(navContent templ.Component, options MainOptions) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -34,33 +34,41 @@ func Main(options MainOptions) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><!-- Viewport and responsive design --><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover\"><!-- PWA and mobile optimization --><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\"><meta name=\"apple-mobile-web-app-title\" content=\"pgpress\"><meta name=\"application-name\" content=\"pgpress\"><meta name=\"msapplication-TileColor\" content=\"#3e3c49\"><meta name=\"theme-color\" content=\"#000000\"><!-- Icons and manifest --><link rel=\"icon\" href=\"./favicon.ico\" sizes=\"any\"><link rel=\"icon\" href=\"./icon.png\" type=\"image/png\"><link rel=\"apple-touch-icon\" href=\"./apple-touch-icon-180x180.png\"><link rel=\"mask-icon\" href=\"./icon.png\" color=\"#3e3c49\"><!-- PWA Manifest --><link rel=\"manifest\" href=\"./manifest.json\"><!-- Stylesheets --><link rel=\"stylesheet\" href=\"./css/bootstrap-icons.min.css\"><link rel=\"stylesheet\" href=\"./css/ui.min.css\"><link rel=\"stylesheet\" href=\"./css/layout.css\"><!-- Preconnect for performance --><link rel=\"dns-prefetch\" href=\"//fonts.googleapis.com\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><!-- Viewport and responsive design --><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover\"><!-- PWA and mobile optimization --><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\"><meta name=\"apple-mobile-web-app-title\" content=\"pgpress\"><meta name=\"application-name\" content=\"pgpress\"><meta name=\"msapplication-TileColor\" content=\"#3e3c49\"><meta name=\"theme-color\" content=\"#000000\"><!-- Icons and manifest --><link rel=\"icon\" href=\"./favicon.ico\" sizes=\"any\"><link rel=\"icon\" href=\"./icon.png\" type=\"image/png\"><link rel=\"apple-touch-icon\" href=\"./apple-touch-icon-180x180.png\"><link rel=\"mask-icon\" href=\"./icon.png\" color=\"#3e3c49\"><!-- PWA Manifest --><link rel=\"manifest\" href=\"./manifest.json\"><!-- Stylesheets --><link rel=\"stylesheet\" href=\"./css/bootstrap-icons.min.css\"><link rel=\"stylesheet\" href=\"./css/ui.min.css\"><link rel=\"stylesheet\" href=\"./css/layout.css\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(options.PageTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 39, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 37, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- HTMX for dynamic content --><script src=\"./js/htmx-v2.0.6.min.js\"></script><script src=\"./js/htmx-ext-ws-v2.0.3.min.js\"></script><script>\n        function openImageViewer(attachmentID) {\n            var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;\n            var imageViewer = document.querySelector('template[name=\"image-viewer\"]');\n            var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');\n            var img = dialog.querySelector('img.attachment');\n            var closeButton = dialog.querySelector('button.close');\n\n            console.debug(`Opening image viewer with image ${imageURL}`);\n\n            img.src = imageURL;\n            img.onclick = function(event) {\n                event.stopPropagation();\n            };\n\n            dialog.onclick = function() {\n                dialog.close();\n            };\n\n            closeButton.onclick = function() {\n                dialog.close();\n            };\n\n            dialog.onclose = function(event) {\n                document.body.removeChild(dialog);\n            };\n\n            document.body.appendChild(dialog);\n            dialog.showModal();\n        }\n        </script></head><body hx-ext=\"ws\"><header class=\"container fluid\"><nav class=\"flex row gap justify-between\"><div class=\"flex row gap justify-start align-center\"><div><h5>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- HTMX for dynamic content --><script src=\"./js/htmx-v2.0.6.min.js\"></script><script src=\"./js/htmx-ext-ws-v2.0.3.min.js\"></script><script>\n                function openImageViewer(attachmentID) {\n                    var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;\n                    var imageViewer = document.querySelector('template[name=\"image-viewer\"]');\n                    var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');\n                    var img = dialog.querySelector('img.attachment');\n                    var closeButton = dialog.querySelector('button.close');\n\n                    console.debug(`Opening image viewer with image ${imageURL}`);\n\n                    img.src = imageURL;\n                    img.onclick = function(event) {\n                        event.stopPropagation();\n                    };\n\n                    dialog.onclick = function() {\n                        dialog.close();\n                    };\n\n                    closeButton.onclick = function() {\n                        dialog.close();\n                    };\n\n                    dialog.onclose = function(event) {\n                        document.body.removeChild(dialog);\n                    };\n\n                    document.body.appendChild(dialog);\n                    dialog.showModal();\n                }\n            </script></head><body hx-ext=\"ws\"><header class=\"container fluid\"><nav class=\"flex row gap justify-between\"><div class=\"flex row gap justify-start align-center\"><div><h5>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 80, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 78, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h5></div></div><!-- TODO: Add optional nav items per page, taken from options --></nav></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h5></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = navContent.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</nav></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -68,7 +76,7 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html><!--\n    {{define \"basic-nav-elements\"}}\n    <div class=\"flex row gap justify-end align-center\">\n        {{template \"nav-feed\"}}\n\n        <a\n            role=\"button\"\n            class=\"ghost contrast icon\"\n            href=\"./profile\"\n            title=\"Profil\"\n        >\n            <i class=\"bi bi-person-circle\"></i>\n        </a>\n\n        <a role=\"button\" class=\"ghost contrast icon\" href=\"./\" title=\"Startseite\">\n            <i class=\"bi bi-house\"></i>\n        </a>\n    </div>\n    {{end}}\n    -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html><!--\n    {{define \"basic-nav-elements\"}}\n    <div class=\"flex row gap justify-end align-center\">\n        {{template \"nav-feed\"}}\n\n        <a\n            role=\"button\"\n            class=\"ghost contrast icon\"\n            href=\"./profile\"\n            title=\"Profil\"\n        >\n            <i class=\"bi bi-person-circle\"></i>\n        </a>\n\n        <a role=\"button\" class=\"ghost contrast icon\" href=\"./\" title=\"Startseite\">\n            <i class=\"bi bi-house\"></i>\n        </a>\n    </div>\n    {{end}}\n    -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

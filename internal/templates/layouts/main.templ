@@ -5,7 +5,7 @@ type MainOptions struct {
 	AppBarTitle string
 }
 
-templ Main(options MainOptions) {
+templ Main(navContent templ.Component, options MainOptions) {
 	<!DOCTYPE html>
 	<html lang="de">
 		<head>
@@ -34,43 +34,41 @@ templ Main(options MainOptions) {
 			<link rel="stylesheet" href="./css/bootstrap-icons.min.css"/>
 			<link rel="stylesheet" href="./css/ui.min.css"/>
 			<link rel="stylesheet" href="./css/layout.css"/>
-			<!-- Preconnect for performance -->
-			<link rel="dns-prefetch" href="//fonts.googleapis.com"/>
 			<title>{ options.PageTitle }</title>
 			<!-- HTMX for dynamic content -->
 			<script src="./js/htmx-v2.0.6.min.js"></script>
 			<script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
 			<script>
-        function openImageViewer(attachmentID) {
-            var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;
-            var imageViewer = document.querySelector('template[name="image-viewer"]');
-            var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
-            var img = dialog.querySelector('img.attachment');
-            var closeButton = dialog.querySelector('button.close');
+                function openImageViewer(attachmentID) {
+                    var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;
+                    var imageViewer = document.querySelector('template[name="image-viewer"]');
+                    var dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
+                    var img = dialog.querySelector('img.attachment');
+                    var closeButton = dialog.querySelector('button.close');
 
-            console.debug(`Opening image viewer with image ${imageURL}`);
+                    console.debug(`Opening image viewer with image ${imageURL}`);
 
-            img.src = imageURL;
-            img.onclick = function(event) {
-                event.stopPropagation();
-            };
+                    img.src = imageURL;
+                    img.onclick = function(event) {
+                        event.stopPropagation();
+                    };
 
-            dialog.onclick = function() {
-                dialog.close();
-            };
+                    dialog.onclick = function() {
+                        dialog.close();
+                    };
 
-            closeButton.onclick = function() {
-                dialog.close();
-            };
+                    closeButton.onclick = function() {
+                        dialog.close();
+                    };
 
-            dialog.onclose = function(event) {
-                document.body.removeChild(dialog);
-            };
+                    dialog.onclose = function(event) {
+                        document.body.removeChild(dialog);
+                    };
 
-            document.body.appendChild(dialog);
-            dialog.showModal();
-        }
-        </script>
+                    document.body.appendChild(dialog);
+                    dialog.showModal();
+                }
+            </script>
 		</head>
 		<body hx-ext="ws">
 			<header class="container fluid">
@@ -80,7 +78,7 @@ templ Main(options MainOptions) {
 							<h5>{ options.AppBarTitle }</h5>
 						</div>
 					</div>
-					<!-- TODO: Add optional nav items per page, taken from options -->
+					@navContent
 				</nav>
 			</header>
 			{ children... }
