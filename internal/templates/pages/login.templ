@@ -6,7 +6,7 @@ script loginScript() {
     document.querySelector("#dialogLogin").showModal();
 }
 
-templ loginTestNavContent() {
+templ loginNavContent() {
 	<div class="flex row gap justify-end align-center">
 		<a
 			role="button"
@@ -24,7 +24,7 @@ templ loginTestNavContent() {
 
 templ Login(apiKey string, invalidApiKey bool) {
 	@layouts.Main(
-		loginTestNavContent(),
+		loginNavContent(),
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Login",
 			AppBarTitle: "Login",

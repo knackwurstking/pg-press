@@ -20,7 +20,7 @@ func loginScript() templ.ComponentScript {
 	}
 }
 
-func loginTestNavContent() templ.Component {
+func loginNavContent() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -120,7 +120,7 @@ func Login(apiKey string, invalidApiKey bool) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Main(
-			loginTestNavContent(),
+			loginNavContent(),
 			layouts.MainOptions{
 				PageTitle:   "PG Presse | Login",
 				AppBarTitle: "Login",
