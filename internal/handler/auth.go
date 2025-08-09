@@ -30,34 +30,29 @@ func (h *Auth) RegisterRoutes(e *echo.Echo) {
 
 // handleLogin handles the login page and form submission.
 func (h *Auth) handleLogin(c echo.Context) error {
-	data := AuthTemplateData{
-		ApiKey:        "",
-		InvalidApiKey: false,
+
+	formParams, _ := c.FormParams()
+	apiKey := formParams.Get(constants.APIKeyFormField)
+
+	if apiKey != "" && h.processApiKeyLogin(apiKey, c) {
+		if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError,
+				constants.RedirectFailedMessage)
+		}
+		return nil
 	}
 
-	// TODO: Handle form params `constants.APIKeyFormField` and process if apiKey is not empty
+	data := AuthTemplateData{
+		ApiKey:        apiKey,
+		InvalidApiKey: apiKey != "",
+	}
 
 	page := pages.Login(data.ApiKey, data.InvalidApiKey)
-	return page.Render(c.Request().Context(), c.Response())
-
-	//formParams, _ := c.FormParams()
-	//apiKey := formParams.Get(constants.APIKeyFormField)
-
-	//if apiKey != "" && h.processApiKeyLogin(apiKey, c) {
-	//	if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
-	//		return echo.NewHTTPError(http.StatusInternalServerError,
-	//			constants.RedirectFailedMessage)
-	//	}
-	//	return nil
-	//}
-
-	//return utils.HandleTemplate(c,
-	//	AuthTemplateData{
-	//		ApiKey:        apiKey,
-	//		InvalidApiKey: apiKey != "",
-	//	},
-	//	h.Templates,
-	//	constants.LoginPageTemplates)
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render login page: "+err.Error())
+	}
+	return nil
 }
 
 // handleLogout handles user logout.
