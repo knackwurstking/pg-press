@@ -3,11 +3,6 @@
     --pwa-background-color: var(--ui-bg);
 }
 
-body.debug,
-body.debug * {
-    border-color: var(--ui-border-color) !important;
-}
-
 body:has(dialog[open]) {
     overflow: hidden;
 }
@@ -19,26 +14,6 @@ details summary::after {
 
 details[open] summary::after {
     content: "\f282";
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Loading states for offline content */
-.htmx-request .loading {
-    opacity: 0.6;
-}
-
-.htmx-request .loading::after {
-    content: " ⏳";
 }
 
 /* Image viewer styles */
