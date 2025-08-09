@@ -8,7 +8,6 @@ const (
 
 	// Page templates
 	HomePageTemplatePath           = "templates/pages/home.html"
-	LoginPageTemplatePath          = "templates/pages/login.html"
 	FeedPageTemplatePath           = "templates/pages/feed.html"
 	ProfilePageTemplatePath        = "templates/pages/profile.html"
 	TroubleReportsPageTemplatePath = "templates/pages/trouble-reports.html"
@@ -40,12 +39,6 @@ var (
 		MainLayoutTemplatePath,
 		NavFeedComponentTemplatePath,
 		HomePageTemplatePath,
-	}
-
-	LoginPageTemplates = []string{
-		MainLayoutTemplatePath,
-		NavFeedComponentTemplatePath,
-		LoginPageTemplatePath,
 	}
 
 	FeedPageTemplates = []string{
