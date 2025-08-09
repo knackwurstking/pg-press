@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
 type AuthTemplateData struct {
@@ -30,24 +30,34 @@ func (h *Auth) RegisterRoutes(e *echo.Echo) {
 
 // handleLogin handles the login page and form submission.
 func (h *Auth) handleLogin(c echo.Context) error {
-	formParams, _ := c.FormParams()
-	apiKey := formParams.Get(constants.APIKeyFormField)
-
-	if apiKey != "" && h.processApiKeyLogin(apiKey, c) {
-		if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				constants.RedirectFailedMessage)
-		}
-		return nil
+	data := AuthTemplateData{
+		ApiKey:        "",
+		InvalidApiKey: false,
 	}
 
-	return utils.HandleTemplate(c,
-		AuthTemplateData{
-			ApiKey:        apiKey,
-			InvalidApiKey: apiKey != "",
-		},
-		h.Templates,
-		constants.LoginPageTemplates)
+	// TODO: Handle form params `constants.APIKeyFormField` and process if apiKey is not empty
+
+	page := pages.Login(data.ApiKey, data.InvalidApiKey)
+	return page.Render(c.Request().Context(), c.Response())
+
+	//formParams, _ := c.FormParams()
+	//apiKey := formParams.Get(constants.APIKeyFormField)
+
+	//if apiKey != "" && h.processApiKeyLogin(apiKey, c) {
+	//	if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
+	//		return echo.NewHTTPError(http.StatusInternalServerError,
+	//			constants.RedirectFailedMessage)
+	//	}
+	//	return nil
+	//}
+
+	//return utils.HandleTemplate(c,
+	//	AuthTemplateData{
+	//		ApiKey:        apiKey,
+	//		InvalidApiKey: apiKey != "",
+	//	},
+	//	h.Templates,
+	//	constants.LoginPageTemplates)
 }
 
 // handleLogout handles user logout.

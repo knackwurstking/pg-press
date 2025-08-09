@@ -1,0 +1,36 @@
+package pages
+
+import "github.com/knackwurstking/pgpress/internal/templates/layouts"
+
+templ Login(apiKey string, invalidApiKey bool) {
+	@layouts.Main(layouts.MainOptions{
+		PageTitle:   "",
+		AppBarTitle: "",
+	}) {
+		<main class="container">
+			<dialog id="dialogLogin" class="clean">
+				<form>
+					<label class="flex column">
+						API-Schlüssel
+						<input
+							name="api-key"
+							type="text"
+							placeholder="API-Schlüssel"
+							value={ apiKey }
+							if invalidApiKey {
+								aria-invalid="true"
+							}
+							required
+						/>
+					</label>
+					<footer class="flex">
+						<button class="flex-item" type="submit">Anmelden</button>
+					</footer>
+				</form>
+			</dialog>
+			<script>
+            document.querySelector("#dialogLogin").showModal();
+        </script>
+		</main>
+	}
+}
