@@ -4,6 +4,7 @@ go 1.24
 
 require (
 	github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
+	github.com/a-h/templ v0.3.924
 	github.com/google/uuid v1.6.0
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
@@ -15,7 +16,6 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.3.924 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
