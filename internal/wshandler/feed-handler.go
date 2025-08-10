@@ -3,6 +3,7 @@
 package wshandler
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"io/fs"
@@ -12,10 +13,9 @@ import (
 
 	"golang.org/x/net/websocket"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
 // FeedCounterTemplateData represents the data for rendering feed counter template
@@ -170,31 +170,26 @@ func (fn *FeedHandler) sendFeedCounterUpdate(conn *FeedConnection) {
 
 // renderFeedCounter renders the feed counter template with current data
 func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
-	data := &FeedCounterTemplateData{}
-
 	feeds, err := fn.db.Feeds.ListRange(0, 100)
 	if err != nil {
 		return nil, err
 	}
 
+	count := int(0)
 	for _, feed := range feeds {
 		if feed.ID > userLastFeed {
-			data.Count++
+			count++
 		} else {
 			break
 		}
 	}
 
-	html, err := utils.RenderTemplateToString(
-		fn.templates,
-		[]string{constants.HTMXNavFeedCounterTemplatePath},
-		data,
-	)
-	if err != nil {
+	var buf bytes.Buffer
+	if err = pages.NavFeedCounter(count).Render(context.Background(), &buf); err != nil {
 		return nil, err
 	}
 
-	return []byte(html), nil
+	return buf.Bytes(), nil
 }
 
 // closeAllConnections gracefully closes all WebSocket connections

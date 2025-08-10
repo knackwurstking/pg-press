@@ -10,7 +10,7 @@ import (
 
 type Nav struct {
 	*Base
-	FeedNotifier *wshandler.FeedHandler
+	WSHandler *wshandler.WSHandlers
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
@@ -36,7 +36,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 			user.UserName, user.LastFeed)
 
 		// Register the connection with the feed notifier
-		feedConn := h.FeedNotifier.RegisterConnection(
+		feedConn := h.WSHandler.Feed.RegisterConnection(
 			user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
 			logger.WebSocket().Error(
@@ -52,7 +52,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		go feedConn.WritePump()
 
 		// Start the read pump (this will block until connection closes)
-		feedConn.ReadPump(h.FeedNotifier)
+		feedConn.ReadPump(h.WSHandler.Feed)
 
 		logger.WebSocket().Info("Connection closed for user %s",
 			user.UserName)

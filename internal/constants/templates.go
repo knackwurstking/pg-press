@@ -16,9 +16,6 @@ const (
 )
 
 const (
-	// Navigation component templates
-	HTMXNavFeedCounterTemplatePath = "templates/htmx/nav/feed-counter.html"
-
 	// Feed component templates
 	HTMXFeedDataTemplatePath = "templates/htmx/feed/data.html"
 

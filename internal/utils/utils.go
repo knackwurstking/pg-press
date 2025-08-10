@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bytes"
 	"errors"
 	"html/template"
 	"io/fs"
@@ -126,16 +125,17 @@ func HandleTemplate(
 	return nil
 }
 
-func RenderTemplateToString(templates fs.FS, patterns []string, pageData any) (string, error) {
-	t, err := template.ParseFS(templates, patterns...)
-	if err != nil {
-		return "", database.WrapError(err, templateParseErrorMessage)
-	}
-
-	var buf bytes.Buffer
-	if err := t.Execute(&buf, pageData); err != nil {
-		return "", database.WrapError(err, templateExecuteErrorMessage)
-	}
-
-	return buf.String(), nil
-}
+// TODO: Remove this and use templ
+//func RenderTemplateToString(templates fs.FS, patterns []string, pageData any) (string, error) {
+//	t, err := template.ParseFS(templates, patterns...)
+//	if err != nil {
+//		return "", database.WrapError(err, templateParseErrorMessage)
+//	}
+//
+//	var buf bytes.Buffer
+//	if err := t.Execute(&buf, pageData); err != nil {
+//		return "", database.WrapError(err, templateExecuteErrorMessage)
+//	}
+//
+//	return buf.String(), nil
+//}

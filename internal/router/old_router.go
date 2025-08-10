@@ -62,6 +62,6 @@ func OldServe(e *echo.Echo, o OldOptions) {
 			ServerPathPrefix: o.ServerPathPrefix + "/nav",
 			Templates:        templates,
 		},
-		FeedNotifier: wsFeedHandler,
+		//FeedNotifier: wsFeedHandler,
 	}).RegisterRoutes(e)
 }
