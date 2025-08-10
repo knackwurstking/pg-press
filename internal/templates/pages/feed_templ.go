@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
-func homeNavContent() templ.Component {
+func feedNavContent() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -55,7 +55,7 @@ func homeNavContent() templ.Component {
 	})
 }
 
-func Home() templ.Component {
+func Feed() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -88,17 +88,17 @@ func Home() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"container fluid\"><aside><nav><div class=\"flex column gap justify-center\"><a role=\"button\" class=\"ghost secondary flex row gap justify-between align-center\" style=\"width: 90%; margin: 0 auto;\" href=\"./trouble-reports\"><span class=\"flex row gap align-center\"><i style=\"margin: var(--ui-spacing);\" class=\"bi bi-exclamation-triangle\"></i> <span class=\"flex column\"><strong>Problemberichte</strong> <small>Verwalten Sie Problemberichte und Lösungen</small></span></span> <i class=\"bi bi-chevron-right\"></i></a></div></nav></aside></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"container fluid\"><span id=\"data\" hx-get=\"./feed/data\" hx-trigger=\"load\" hx-swap=\"outerHTML\"></span></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Main(
-			homeNavContent(),
+			feedNavContent(),
 			layouts.MainOptions{
-				PageTitle:   "PG Presse",
-				AppBarTitle: "Home",
+				PageTitle:   "PG Presse | Feed",
+				AppBarTitle: "Feed",
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

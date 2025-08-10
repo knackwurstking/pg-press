@@ -36,12 +36,11 @@ func Serve(e *echo.Echo, o Options) {
 
 	(&handler.Auth{Base: base}).RegisterRoutes(e)
 	(&handler.Home{Base: base}).RegisterRoutes(e)
-	// TODO: Continue here with the feed handler
+	(&handler.Feed{Base: base}).RegisterRoutes(e)
 }
 
 func startWebSocketHandlers(db *database.DB) *wshandler.WSHandlers {
 	wsh := &wshandler.WSHandlers{
-		// TODO: The templates fs needs to be replaced with templ components
 		Feed: wshandler.NewFeedHandler(db, templates),
 	}
 

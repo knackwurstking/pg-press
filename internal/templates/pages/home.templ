@@ -18,5 +18,28 @@ templ Home() {
 			AppBarTitle: "Home",
 		},
 	) {
+		<main class="container fluid">
+			<aside>
+				<nav>
+					<div class="flex column gap justify-center">
+						<a
+							role="button"
+							class="ghost secondary flex row gap justify-between align-center"
+							style="width: 90%; margin: 0 auto;"
+							href="./trouble-reports"
+						>
+							<span class="flex row gap align-center">
+								<i style="margin: var(--ui-spacing);" class="bi bi-exclamation-triangle"></i>
+								<span class="flex column">
+									<strong>Problemberichte</strong>
+									<small>Verwalten Sie Problemberichte und Lösungen</small>
+								</span>
+							</span>
+							<i class="bi bi-chevron-right"></i>
+						</a>
+					</div>
+				</nav>
+			</aside>
+		</main>
 	}
 }

@@ -46,6 +46,7 @@ func (h *Feed) handleGetData(c echo.Context) error {
 		}
 	}
 
+	// TODO: Migrate to templ components
 	return utils.HandleTemplate(c, data, h.Templates,
 		[]string{constants.HTMXFeedDataTemplatePath})
 }

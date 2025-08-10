@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
-	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
 type FeedTemplateData struct {
@@ -28,6 +29,10 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Feed) handleFeed(c echo.Context) error {
-	return utils.HandleTemplate(c, nil, h.Templates,
-		constants.FeedPageTemplates)
+	page := pages.Feed()
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render feed page: "+err.Error())
+	}
+	return nil
 }
