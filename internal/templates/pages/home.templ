@@ -4,18 +4,9 @@ import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
 templ homeNavContent() {
 	<div class="flex row gap justify-end align-center">
-		<!-- TODO: Add the (nav) feed button from the html templates here -->
-		<a
-			role="button"
-			class="ghost contrast icon"
-			href="./profile"
-			title="Profil"
-		>
-			<i class="bi bi-person-circle"></i>
-		</a>
-		<a role="button" class="ghost contrast icon" href="./" title="Startseite">
-			<i class="bi bi-house"></i>
-		</a>
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
 	</div>
 }
 

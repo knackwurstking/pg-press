@@ -1,0 +1,33 @@
+package pages
+
+templ navProfileButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href="./profile"
+		title="Profil"
+	>
+		<i class="bi bi-person-circle"></i>
+	</a>
+}
+
+templ navHomeButton() {
+	<a role="button" class="ghost contrast icon" href="./" title="Startseite">
+		<i class="bi bi-house"></i>
+	</a>
+}
+
+templ navFeedButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href="./feed"
+		style="position: relative; display: inline-block;"
+		hx-ws="connect:./nav/feed-counter"
+		hx-target="#feedCounter"
+		hx-swap="outerHTML"
+	>
+		<i class="bi bi-bell"></i>
+		<span id="feedCounter"></span>
+	</a>
+}
