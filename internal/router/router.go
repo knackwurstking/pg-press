@@ -36,6 +36,7 @@ func Serve(e *echo.Echo, o Options) {
 
 	(&handler.Auth{Base: base}).RegisterRoutes(e)
 	(&handler.Home{Base: base}).RegisterRoutes(e)
+	// TODO: Continue here with the feed handler
 }
 
 func startWebSocketHandlers(db *database.DB) *wshandler.WSHandlers {
