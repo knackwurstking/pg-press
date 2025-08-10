@@ -6,8 +6,6 @@ const (
 	// Layout templates
 	MainLayoutTemplatePath = "templates/layouts/main.html"
 
-	// Page templates
-	FeedPageTemplatePath           = "templates/pages/feed.html"
 	ProfilePageTemplatePath        = "templates/pages/profile.html"
 	TroubleReportsPageTemplatePath = "templates/pages/trouble-reports.html"
 
@@ -16,9 +14,6 @@ const (
 )
 
 const (
-	// Feed component templates
-	HTMXFeedDataTemplatePath = "templates/htmx/feed/data.html"
-
 	// Profile component templates
 	HTMXProfileCookiesTemplatePath = "templates/htmx/profile/cookies.html"
 
@@ -31,12 +26,6 @@ const (
 
 // Template sets for common page combinations
 var (
-	FeedPageTemplates = []string{
-		MainLayoutTemplatePath,
-		NavFeedComponentTemplatePath,
-		FeedPageTemplatePath,
-	}
-
 	ProfilePageTemplates = []string{
 		MainLayoutTemplatePath,
 		NavFeedComponentTemplatePath,
