@@ -1,10 +1,12 @@
 package htmxhandler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
@@ -25,7 +27,8 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	// Get feeds
 	feeds, err := h.DB.Feeds.ListRange(0, 100)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"error getting feeds: "+err.Error())
 	}
 
 	// Update user's last feed
@@ -42,11 +45,17 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	if len(feeds) > 0 {
 		user.LastFeed = feeds[0].ID
 		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
-			return utils.HandlepgpressError(c, err)
+			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+				"error updating user's last feed: "+err.Error())
 		}
 	}
 
-	// TODO: Migrate to templ components
-	return utils.HandleTemplate(c, data, h.Templates,
-		[]string{constants.HTMXFeedDataTemplatePath})
+	feedData := components.FeedData(data.Feeds, data.LastFeedID)
+	err = feedData.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"error rendering feed data: "+err.Error())
+	}
+
+	return nil
 }
