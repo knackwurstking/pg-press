@@ -15,7 +15,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 )
 
 // FeedCounterTemplateData represents the data for rendering feed counter template
@@ -185,7 +185,8 @@ func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	if err = pages.NavFeedCounter(count).Render(context.Background(), &buf); err != nil {
+	err = components.NavFeedCounter(count).Render(context.Background(), &buf)
+	if err != nil {
 		return nil, err
 	}
 
