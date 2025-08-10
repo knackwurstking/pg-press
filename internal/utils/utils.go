@@ -71,6 +71,7 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, *echo.HTTPError
 	return id, nil
 }
 
+// TODO: Remove this
 func HandlepgpressError(ctx echo.Context, err error) *echo.HTTPError {
 	if err == nil {
 		return nil
