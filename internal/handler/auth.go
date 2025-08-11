@@ -14,11 +14,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
-type AuthTemplateData struct {
-	ApiKey        string
-	InvalidApiKey bool
-}
-
 type Auth struct {
 	*Base
 }
@@ -41,12 +36,7 @@ func (h *Auth) handleLogin(c echo.Context) error {
 		return nil
 	}
 
-	data := AuthTemplateData{
-		ApiKey:        apiKey,
-		InvalidApiKey: apiKey != "",
-	}
-
-	page := pages.Login(data.ApiKey, data.InvalidApiKey)
+	page := pages.LoginPage(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render login page: "+err.Error())

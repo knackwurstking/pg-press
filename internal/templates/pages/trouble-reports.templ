@@ -1,0 +1,65 @@
+package pages
+
+import "github.com/knackwurstking/pgpress/internal/templates/layouts"
+
+templ troubleReportsAdditionalHead() {
+	<link rel="stylesheet" href="./css/trouble-reports/dialog-edit.css"/>
+	<link rel="stylesheet" href="./css/trouble-reports/data.css"/>
+}
+
+templ troubleReportsNavContent() {
+	<div class="flex row gap justify-end align-center">
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
+	</div>
+}
+
+templ TroubleReportsPage() {
+	@layouts.Main(
+		layouts.MainOptions{
+			PageTitle:      "",
+			AppBarTitle:    "",
+			AdditionalHead: troubleReportsAdditionalHead(),
+			NavContent:     troubleReportsNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<!-- Search Bar -->
+			<section style="margin-top: 0" class="flex gap justify-between">
+				<input
+					style="margin: auto 0; width: 100%"
+					type="search"
+					name="search"
+					placeholder="Suche"
+					aria-label="Suche"
+					oninput="search(event)"
+				/>
+			</section>
+			<!-- Page Actions: Create -->
+			<section style="margin-top: 0" class="flex gap justify-end">
+				<button
+					hx-get="./trouble-reports/dialog-edit"
+					hx-trigger="click"
+					hx-target="#dialogEdit"
+					hx-swap="outerHTML"
+					class="flex row gap justify-between align-center"
+				>
+					<i class="bi bi-plus-lg"></i>
+					Erstellen
+				</button>
+			</section>
+			<!-- Trouble Reports Entries -->
+			<section>
+				<span
+					hx-get="./trouble-reports/data"
+					hx-trigger="load"
+					hx-swap="outerHTML"
+					id="data"
+				></span>
+			</section>
+			<!-- Placeholder for the edit trouble report dialog -->
+			<span id="dialogEdit"></span>
+		</main>
+	}
+}

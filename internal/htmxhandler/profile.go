@@ -30,6 +30,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 		return utils.HandlepgpressError(c, err)
 	}
 
+	// TODO: Continue here...
 	return utils.HandleTemplate(c, database.SortCookies(cookies), h.Templates,
 		[]string{constants.HTMXProfileCookiesTemplatePath})
 }

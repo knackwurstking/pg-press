@@ -1,24 +1,16 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
+	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
-
-// ProfilePageData contains the data structure passed to the profile page template.
-type ProfileTemplateData struct {
-	User    *database.User     `json:"user"`
-	Cookies []*database.Cookie `json:"cookies"`
-}
-
-// CookiesSorted returns the user's cookies sorted by last login time.
-func (p *ProfileTemplateData) CookiesSorted() []*database.Cookie {
-	return database.SortCookies(p.Cookies)
-}
 
 type Profile struct {
 	*Base
@@ -29,7 +21,7 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(h.ServerPathPrefix+prefix, h.handleMainPage)
 
-	htmxProfile := htmxhandler.Profile{Base: h.NewHTMX(prefix)}
+	htmxProfile := htmxhandler.Profile{Base: h.NewHTMX(prefix)} // TODO: Migrate to templ
 	htmxProfile.RegisterRoutes(e)
 }
 
@@ -39,28 +31,26 @@ func (h *Profile) handleMainPage(c echo.Context) error {
 		return herr
 	}
 
-	pageData := &ProfileTemplateData{
-		User:    user,
-		Cookies: make([]*database.Cookie, 0),
+	if err := h.handleUserNameChange(c, user); err != nil {
+		return echo.NewHTTPError(
+			database.GetHTTPStatusCode(err),
+			"error updating username: "+err.Error(),
+		)
 	}
 
-	if err := h.handleUserNameChange(c, pageData); err != nil {
-		return utils.HandlepgpressError(c, err)
+	page := pages.ProfilePage(user)
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render profile page: "+err.Error())
 	}
-
-	if cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey); err == nil {
-		pageData.Cookies = cookies
-	}
-
-	return utils.HandleTemplate(c, pageData, h.Templates,
-		constants.ProfilePageTemplates)
+	return nil
 }
 
-func (h *Profile) handleUserNameChange(c echo.Context, pageData *ProfileTemplateData) error {
+func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) error {
 	formParams, _ := c.FormParams()
 	userName := utils.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
-	if userName == "" || userName == pageData.User.UserName {
+	if userName == "" || userName == user.UserName {
 		return nil
 	}
 
@@ -69,12 +59,11 @@ func (h *Profile) handleUserNameChange(c echo.Context, pageData *ProfileTemplate
 			"username must be between 1 and 100 characters", len(userName))
 	}
 
-	updatedUser := database.NewUser(pageData.User.TelegramID, userName,
-		pageData.User.ApiKey)
-	if err := h.DB.Users.Update(pageData.User.TelegramID, updatedUser); err != nil {
+	updatedUser := database.NewUser(user.TelegramID, userName, user.ApiKey)
+	if err := h.DB.Users.Update(user.TelegramID, updatedUser); err != nil {
 		return err
 	}
 
-	pageData.User.UserName = userName
+	user.UserName = userName
 	return nil
 }

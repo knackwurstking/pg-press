@@ -13,12 +13,12 @@ templ loginNavContent() {
 	</div>
 }
 
-templ Login(apiKey string, invalidApiKey bool) {
+templ LoginPage(apiKey string, invalidApiKey bool) {
 	@layouts.Main(
-		loginNavContent(),
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Login",
 			AppBarTitle: "Login",
+			NavContent:  loginNavContent(),
 		},
 	) {
 		<main class="container">

@@ -10,12 +10,12 @@ templ homeNavContent() {
 	</div>
 }
 
-templ Home() {
+templ HomePage() {
 	@layouts.Main(
-		homeNavContent(),
 		layouts.MainOptions{
 			PageTitle:   "PG Presse",
 			AppBarTitle: "Home",
+			NavContent:  homeNavContent(),
 		},
 	) {
 		<main class="container fluid">

@@ -44,11 +44,13 @@ script mainScript() {
 }
 
 type MainOptions struct {
-	PageTitle   string
-	AppBarTitle string
+	PageTitle      string
+	AppBarTitle    string
+	AdditionalHead templ.Component
+	NavContent     templ.Component
 }
 
-templ Main(navContent templ.Component, options MainOptions) {
+templ Main(options MainOptions) {
 	<!DOCTYPE html>
 	<html lang="de">
 		<head>
@@ -82,6 +84,7 @@ templ Main(navContent templ.Component, options MainOptions) {
 			<script src="./js/htmx-v2.0.6.min.js"></script>
 			<script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
 			@mainScript()
+			@options.AdditionalHead()
 		</head>
 		<body hx-ext="ws">
 			<header class="container fluid">
@@ -91,7 +94,7 @@ templ Main(navContent templ.Component, options MainOptions) {
 							<h5>{ options.AppBarTitle }</h5>
 						</div>
 					</div>
-					@navContent
+					@options.AdditionalHead()
 				</nav>
 			</header>
 			{ children... }

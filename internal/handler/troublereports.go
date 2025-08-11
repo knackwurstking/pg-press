@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
-	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
 type TroubleReports struct {
@@ -17,13 +18,15 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(h.ServerPathPrefix+path, h.handleMainPage)
 
-	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMX(path)}
+	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMX(path)} // TODO: Migrate to templ
 	htmxTroubleReports.RegisterRoutes(e)
 }
 
 func (h *TroubleReports) handleMainPage(c echo.Context) error {
-	return utils.HandleTemplate(c, nil,
-		h.Templates,
-		constants.TroubleReportsPageTemplates,
-	)
+	page := pages.TroubleReportsPage()
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render trouble reports page: "+err.Error())
+	}
+	return nil
 }
