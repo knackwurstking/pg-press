@@ -48,7 +48,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	if !user.IsAdmin() {
 		return echo.NewHTTPError(
 			http.StatusForbidden,
-			adminPrivilegesRequiredMessage,
+			"administrator privileges required",
 		)
 	}
 

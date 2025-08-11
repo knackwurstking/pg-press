@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"io/fs"
 	"strings"
 	"sync"
 	"time"
@@ -30,19 +29,17 @@ type FeedHandler struct {
 	unregister  chan *FeedConnection
 	broadcast   chan struct{}
 	db          *database.DB
-	templates   fs.FS
 	mu          sync.RWMutex
 }
 
 // NewFeedHandler creates a new feed notification manager
-func NewFeedHandler(db *database.DB, templates fs.FS) *FeedHandler {
+func NewFeedHandler(db *database.DB) *FeedHandler {
 	return &FeedHandler{
 		connections: make(map[*FeedConnection]bool),
 		register:    make(chan *FeedConnection),
 		unregister:  make(chan *FeedConnection),
 		broadcast:   make(chan struct{}, 100), // Buffered channel to prevent blocking
 		db:          db,
-		templates:   templates,
 	}
 }
 

@@ -177,14 +177,14 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			database.WrapError(err, invalidTitleFormFieldMessage))
+			database.WrapError(err, "invalid title form value"))
 	}
 	title = utils.SanitizeInput(title)
 
 	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
 	if err != nil {
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			database.WrapError(err, invalidContentFormFieldMessage))
+			database.WrapError(err, "invalid content form value"))
 	}
 	content = utils.SanitizeInput(content)
 

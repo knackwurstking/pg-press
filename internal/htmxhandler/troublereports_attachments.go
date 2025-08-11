@@ -142,7 +142,7 @@ func (h *TroubleReports) processFileUpload(
 
 	// Validate that the file is an image
 	if !strings.HasPrefix(mimeType, "image/") {
-		return nil, fmt.Errorf(nonImageFileMessage)
+		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
 	}
 
 	attachment := &database.Attachment{
