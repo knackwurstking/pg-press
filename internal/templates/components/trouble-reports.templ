@@ -16,6 +16,32 @@ script shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, ti
     button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
     button.disabled = true;
 
+    function resetButton() {
+        button.innerHTML = originalContent;
+        button.style.color = "blue";
+        button.disabled = false;
+    }
+
+    function showSuccess(icon) {
+        button.innerHTML = icon;
+        button.style.color = "green";
+        setTimeout(resetButton, 1500);
+    }
+
+    function downloadPDF(blob) {
+        var filename = `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf`;
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showSuccess('<i class="bi bi-download"></i>');
+    }
+
     fetch(`./trouble-reports/share-pdf?id=${troubleReportId}`)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,62 +61,16 @@ script shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, ti
 
                 if (navigator.canShare(shareData)) {
                     return navigator.share(shareData)
-                        .then(() => {
-                            button.innerHTML = '<i class="bi bi-check-circle"></i>';
-                            button.style.color = "green";
-                            setTimeout(() => {
-                                button.innerHTML = originalContent;
-                                button.style.color = "blue";
-                                button.disabled = false;
-                            }, 1500);
-                        })
-                        .catch(shareError => {
-                            // Fall through to download
-                            var url = URL.createObjectURL(blob);
-                            var a = document.createElement("a");
-                            a.href = url;
-                            a.download = filename;
-                            a.style.display = "none";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-
-                            button.innerHTML = '<i class="bi bi-download"></i>';
-                            button.style.color = "green";
-                            setTimeout(() => {
-                                button.innerHTML = originalContent;
-                                button.style.color = "blue";
-                                button.disabled = false;
-                            }, 1500);
-                        });
+                        .then(() => showSuccess('<i class="bi bi-check-circle"></i>'))
+                        .catch(() => downloadPDF(blob));
                 }
             }
-
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            button.innerHTML = '<i class="bi bi-download"></i>';
-            button.style.color = "green";
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.style.color = "blue";
-                button.disabled = false;
-            }, 1500);
+            downloadPDF(blob);
         })
         .catch(error => {
             console.error("Error sharing/downloading PDF:", error);
             alert("Fehler beim Erstellen oder Teilen der PDF. Bitte versuchen Sie es erneut.");
-            button.innerHTML = originalContent;
-            button.style.color = "blue";
-            button.disabled = false;
+            resetButton();
         });
 }
 

@@ -15,8 +15,8 @@ import (
 
 func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, title string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_shareTroubleReportPDF_fb74`,
-		Function: `function __templ_shareTroubleReportPDF_fb74(event, troubleReportId, title){var button = event.target.closest("button");
+		Name: `__templ_shareTroubleReportPDF_1fb7`,
+		Function: `function __templ_shareTroubleReportPDF_1fb7(event, troubleReportId, title){var button = event.target.closest("button");
     if (!button) {
         alert("Fehler: Share-Button nicht gefunden.");
         return;
@@ -25,6 +25,32 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
     var originalContent = button.innerHTML;
     button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
     button.disabled = true;
+
+    function resetButton() {
+        button.innerHTML = originalContent;
+        button.style.color = "blue";
+        button.disabled = false;
+    }
+
+    function showSuccess(icon) {
+        button.innerHTML = icon;
+        button.style.color = "green";
+        setTimeout(resetButton, 1500);
+    }
+
+    function downloadPDF(blob) {
+        var filename = ` + "`" + `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf` + "`" + `;
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showSuccess('<i class="bi bi-download"></i>');
+    }
 
     fetch(` + "`" + `./trouble-reports/share-pdf?id=${troubleReportId}` + "`" + `)
         .then(response => {
@@ -45,66 +71,20 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
 
                 if (navigator.canShare(shareData)) {
                     return navigator.share(shareData)
-                        .then(() => {
-                            button.innerHTML = '<i class="bi bi-check-circle"></i>';
-                            button.style.color = "green";
-                            setTimeout(() => {
-                                button.innerHTML = originalContent;
-                                button.style.color = "blue";
-                                button.disabled = false;
-                            }, 1500);
-                        })
-                        .catch(shareError => {
-                            // Fall through to download
-                            var url = URL.createObjectURL(blob);
-                            var a = document.createElement("a");
-                            a.href = url;
-                            a.download = filename;
-                            a.style.display = "none";
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-
-                            button.innerHTML = '<i class="bi bi-download"></i>';
-                            button.style.color = "green";
-                            setTimeout(() => {
-                                button.innerHTML = originalContent;
-                                button.style.color = "blue";
-                                button.disabled = false;
-                            }, 1500);
-                        });
+                        .then(() => showSuccess('<i class="bi bi-check-circle"></i>'))
+                        .catch(() => downloadPDF(blob));
                 }
             }
-
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            button.innerHTML = '<i class="bi bi-download"></i>';
-            button.style.color = "green";
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-                button.style.color = "blue";
-                button.disabled = false;
-            }, 1500);
+            downloadPDF(blob);
         })
         .catch(error => {
             console.error("Error sharing/downloading PDF:", error);
             alert("Fehler beim Erstellen oder Teilen der PDF. Bitte versuchen Sie es erneut.");
-            button.innerHTML = originalContent;
-            button.style.color = "blue";
-            button.disabled = false;
+            resetButton();
         });
 }`,
-		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_fb74`, event, troubleReportId, title),
-		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_fb74`, event, troubleReportId, title),
+		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_1fb7`, event, troubleReportId, title),
+		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_1fb7`, event, troubleReportId, title),
 	}
 }
 
@@ -142,7 +122,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("trouble-report-%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 103, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 83, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -155,7 +135,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 105, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 85, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -168,7 +148,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 106, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 86, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -186,7 +166,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 112, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 92, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -199,7 +179,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/attachments-preview?id=%d", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 113, Col: 82}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 93, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -212,7 +192,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(len(tr.LoadedAttachments))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 119, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 99, Col: 46}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -230,7 +210,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/modifications/%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 126, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 106, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -243,7 +223,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/dialog-edit?id=%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 135, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 115, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -264,7 +244,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("share-btn-%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 144, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 124, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -291,7 +271,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/data?id=%d", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 153, Col: 70}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 133, Col: 70}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -309,7 +289,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/vote?id=%d&mode=delete", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 166, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 146, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
