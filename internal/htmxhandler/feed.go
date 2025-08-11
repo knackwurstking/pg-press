@@ -10,11 +10,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
-type FeedTemplateData struct {
-	Feeds      []*database.Feed
-	LastFeedID int64
-}
-
 type Feed struct {
 	*Base
 }
@@ -37,11 +32,6 @@ func (h *Feed) handleGetData(c echo.Context) error {
 		return herr
 	}
 
-	data := &FeedTemplateData{
-		Feeds:      feeds,
-		LastFeedID: user.LastFeed,
-	}
-
 	if len(feeds) > 0 {
 		user.LastFeed = feeds[0].ID
 		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
@@ -50,7 +40,7 @@ func (h *Feed) handleGetData(c echo.Context) error {
 		}
 	}
 
-	feedData := components.FeedData(data.Feeds, data.LastFeedID)
+	feedData := components.FeedData(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
