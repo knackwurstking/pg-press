@@ -139,24 +139,28 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		return herr
 	}
 
+	var firstMod *database.Modified[database.TroubleReportMod]
+	if len(tr.Mods) > 0 {
+		firstMod = tr.Mods[0]
+	}
+
+	currentMod := tr.Mods.Current()
+
 	mods := slices.Clone(tr.Mods)
 	slices.Reverse(mods)
 
-	data := &modificationsTemplateData{
-		User:          user,
-		TroubleReport: tr,
-		Mods:          mods,
-	}
-
-	// TODO: Migrate to templ
-	return utils.HandleTemplate(
-		c,
-		data,
-		h.Templates,
-		[]string{
-			//constants.HTMXTroubleReportsModificationsTemplatePath,
-		},
+	trModifications := components.TroubleReportModifications(
+		user,
+		tr,
+		firstMod,
+		currentMod,
+		mods,
 	)
+	if err := trModifications.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render trouble report modifications component: "+err.Error())
+	}
+	return nil
 }
 
 func (h *TroubleReports) handlePostModifications(c echo.Context) error {
