@@ -8,55 +8,6 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func mainScript() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_mainScript_7fc0`,
-		Function: `function __templ_mainScript_7fc0(){var dialog;
-
-    window.closeImageViewer = function() {
-        if (!dialog) return
-
-        dialog.close();
-    }
-
-    window.openImageViewer = function(attachmentID) {
-        if (dialog) closeImageViewer();
-
-        var imageURL = ` + "`" + `./trouble-reports/attachments?attachment_id=${attachmentID}` + "`" + `;
-        var imageViewer = document.querySelector('template[name="image-viewer"]');
-        dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
-        var img = dialog.querySelector('img.attachment');
-        var closeButton = dialog.querySelector('button.close');
-
-        console.debug(` + "`" + `Opening image viewer with image ${imageURL}` + "`" + `);
-
-        img.src = imageURL;
-        img.onclick = function(event) {
-            event.stopPropagation();
-        };
-
-        dialog.onclick = function() {
-            dialog.close();
-        };
-
-        closeButton.onclick = function() {
-            dialog.close();
-        };
-
-        dialog.onclose = function(event) {
-            document.body.removeChild(dialog);
-            dialog = undefined
-        };
-
-        document.body.appendChild(dialog);
-        dialog.showModal();
-    }
-}`,
-		Call:       templ.SafeScript(`__templ_mainScript_7fc0`),
-		CallInline: templ.SafeScriptInline(`__templ_mainScript_7fc0`),
-	}
-}
-
 type MainOptions struct {
 	PageTitle      string
 	AppBarTitle    string
@@ -92,17 +43,13 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(options.PageTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 82, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 39, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><!-- HTMX for dynamic content --><script src=\"./js/htmx-v2.0.6.min.js\"></script><script src=\"./js/htmx-ext-ws-v2.0.3.min.js\"></script>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = mainScript().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,7 +66,7 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 96, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 52, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -143,7 +90,7 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<template name=\"image-viewer\"><dialog name=\"image-viewer\" class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

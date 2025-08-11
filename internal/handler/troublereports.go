@@ -18,7 +18,7 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(h.ServerPathPrefix+path, h.handleMainPage)
 
-	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMX(path)} // TODO: Migrate to templ
+	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMX(path)}
 	htmxTroubleReports.RegisterRoutes(e)
 }
 

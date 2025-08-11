@@ -112,17 +112,12 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		}
 	}
 
-	// TODO: Migrate to templ
-	return utils.HandleTemplate(
-		c,
-		attachmentsPreviewTemplateData{
-			TroubleReport: tr,
-		},
-		h.Templates,
-		[]string{
-			//constants.HTMXTroubleReportsAttachmentsPreviewTemplatePath,
-		},
-	)
+	attachmentsPreview := components.AttachmentsPreview(tr.LoadedAttachments)
+	if err := attachmentsPreview.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render attachments preview component: "+err.Error())
+	}
+	return nil
 }
 
 func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) *echo.HTTPError {
