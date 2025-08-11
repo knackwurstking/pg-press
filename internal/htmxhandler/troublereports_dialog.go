@@ -47,10 +47,11 @@ func (h *TroubleReports) handleGetDialogEdit(
 		}
 	}
 
+	// TODO: Migrate to templ
 	return utils.HandleTemplate(c, pageData,
 		h.Templates,
 		[]string{
-			constants.HTMXTroubleReportsDialogEditTemplatePath,
+			//constants.HTMXTroubleReportsDialogEditTemplatePath,
 		},
 	)
 }
