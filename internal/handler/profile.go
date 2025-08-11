@@ -21,7 +21,7 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(h.ServerPathPrefix+prefix, h.handleMainPage)
 
-	htmxProfile := htmxhandler.Profile{Base: h.NewHTMX(prefix)} // TODO: Migrate to templ
+	htmxProfile := htmxhandler.Profile{Base: h.NewHTMX(prefix)}
 	htmxProfile.RegisterRoutes(e)
 }
 
