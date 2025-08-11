@@ -1,0 +1,370 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/utils"
+)
+
+script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
+    function initializeAttachmentOrder() {
+        var existingAttachmentsContainer = document.getElementById(
+            "existing-attachments",
+        );
+
+        // Destroy existing Sortable instance if it exists
+        if (sortableInstance) {
+            sortableInstance.destroy();
+            sortableInstance = null;
+        }
+
+        if (Sortable && existingAttachmentsContainer) {
+            sortableInstance = new Sortable(existingAttachmentsContainer, {
+                animation: 150,
+                ghostClass: "sortable-ghost",
+                handle: ".bi-grip-vertical",
+                onEnd: function () {
+                    var items = document.querySelectorAll(
+                        "#existing-attachments .attachment-item",
+                    );
+                    attachmentOrder = Array.from(items).map(
+                        (item) => item.dataset.id,
+                    );
+                    updateAttachmentOrderInput();
+                },
+            });
+        }
+
+        var existingAttachments = document.querySelectorAll(
+            "#existing-attachments .attachment-item",
+        );
+        attachmentOrder = Array.from(existingAttachments).map(
+            (item) => item.dataset.id,
+        );
+        updateAttachmentOrderInput();
+    }
+
+    if (!confirm(
+        "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
+    )) return;
+
+    // Find and remove the attachment item from DOM
+    var attachmentItem = document.querySelector(
+        `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+    );
+
+    if (attachmentItem) {
+        // Remove from attachmentOrder array
+        attachmentOrder = attachmentOrder.filter(
+            (id) => id != attachmentId,
+        );
+
+        // Temporarily disable htmx processing during DOM manipulation
+        var container = document.getElementById(
+            "existing-attachments",
+        );
+        var wasDisabled =
+            container.hasAttribute("data-hx-disable");
+        container.setAttribute("data-hx-disable", "true");
+
+        // Remove the DOM element
+        attachmentItem.remove();
+
+        // Restore htmx state
+        if (!wasDisabled) {
+            container.removeAttribute("data-hx-disable");
+        }
+
+        // Update the hidden input field
+        updateAttachmentOrderInput();
+
+        // Reinitialize Sortable instance after DOM changes
+        initializeAttachmentOrder();
+
+        // Check if no attachments left and hide the details section
+        var existingAttachments = document.getElementById(
+            "existing-attachments",
+        );
+        if (
+            existingAttachments &&
+            existingAttachments.children.length === 0
+        ) {
+            var detailsSection =
+                existingAttachments.closest("details");
+            if (detailsSection) {
+                detailsSection.style.display = "none";
+            }
+        }
+    }
+}
+
+script displayFilePreview() {
+    selectedFiles = Array.from(event.target.files);
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        var k = 1024;
+        var sizes = ["Bytes", "KB", "MB", "GB"];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
+    var previewArea = document.getElementById("file-preview");
+    var container = document.getElementById("new-attachments");
+    container.innerHTML = "";
+
+    if (selectedFiles.length > 0) {
+        previewArea.style.display = "block";
+
+        selectedFiles.forEach((file, index) => {
+            var sizeClass =
+                file.size > 10 * 1024 * 1024
+                    ? "attachment-error"
+                    : "muted text-sm";
+            var sizeText =
+                file.size > 10 * 1024 * 1024
+                    ? "ZU GROSS!"
+                    : formatFileSize(file.size);
+
+            /** @type {HTMLTemplateElement} */
+            var t = previewArea.querySelector(
+                `template[name="attachment-item"]`,
+            );
+
+            /** @type {HTMLElement} */
+            var item = t.content.cloneNode(true);
+
+            item.querySelector(`.name`).innerText = file.name;
+
+            var sizeTextElement = item.querySelector(`.size-text`);
+            sizeTextElement.innerText = sizeText;
+            sizeTextElement.className += sizeClass;
+
+            item.querySelector(`button.delete`).onclick = () => {
+                selectedFiles.splice(index, 1);
+
+                // Update the file input
+                var fileInput = document.getElementById("attachments");
+                var dt = new DataTransfer();
+                selectedFiles.forEach((file) => dt.items.add(file));
+                fileInput.files = dt.files;
+
+                displayFilePreview();
+            };
+
+            container.appendChild(item);
+        });
+    } else {
+        previewArea.style.display = "none";
+    }
+}
+
+type TroubleReportsEditDialogProps struct {
+	ID              int64
+	Title           string
+	Content         string
+	InvalidTitle    bool
+	InvalidContent  bool
+	Submitted       bool
+	AttachmentError string
+	Attachments     []*database.Attachment
+}
+
+templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
+	if !props.Submitted {
+		<dialog id="dialogEdit" class="clean fullscreen" oncancel="event.preventDefault()">
+			<script>
+          		var attachmentOrder = [];
+                var selectedFiles = [];
+                var sortableInstance = null;
+
+                // Helper Functions
+                function updateAttachmentOrderInput() {
+                    document.getElementById("attachment-order").value =
+                        attachmentOrder.join(",");
+                }
+            </script>
+			<form
+				class="flex column gap"
+				if props.ID > 0 {
+					hx-put={ fmt.Sprintf("./trouble-reports/dialog-edit?id=%d", props.ID) }
+				} else {
+					hx-post="./trouble-reports/dialog-edit"
+				}
+				hx-trigger="submit"
+				hx-target="#dialogEdit"
+				hx-swap="outerHTML"
+				enctype="multipart/form-data"
+			>
+				<!-- Hidden field for attachment order -->
+				<input type="hidden" name="attachment_order" id="attachment-order" value=""/>
+				<div class="form-content flex column gap auto-scroll-y no-scrollbar">
+					<label for="title" class="flex column">
+						Titel
+						<input
+							name="title"
+							id="title"
+							placeholder="Titel"
+							value={ props.Title }
+							if props.InvalidTitle {
+								aria-invalid="true"
+							}
+						/>
+					</label>
+					<label for="content" class="flex column">
+						Bericht
+						<textarea
+							name="content"
+							id="content"
+							placeholder="Bericht"
+							if props.InvalidContent {
+								aria-invalid="true"
+							}
+						>{ props.Content }</textarea>
+					</label>
+					<!-- Attachments Section -->
+					<div id="attachments-section" class="attachments-container flex column gap">
+						<small class="attachments-label">
+							Bilder (max. 10MB pro Datei, max. 10 Dateien)
+						</small>
+						if props.InvalidTitle || props.InvalidContent {
+							<div class="attachment-error">
+								<i class="bi bi-exclamation-triangle"></i>
+								Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.
+							</div>
+						}
+						if props.AttachmentError != "" {
+							<div class="attachment-error">{ props.AttachmentError }</div>
+						}
+						<!-- Existing Attachments -->
+						if len(props.Attachments) > 0 {
+							<details class="attachments-section border">
+								<summary class="attachments-label flex row gap align-center">
+									<i class="bi bi-images"></i>
+									Vorhandene Bilder ({ len(props.Attachments) })
+								</summary>
+								<div id="existing-attachments" class="flex column gap">
+									for _, attachment := range props.Attachments {
+										<div
+											class="attachment-item flex row gap justify-between align-center border"
+											data-id={ fmt.Sprintf("%s", attachment.ID) }
+										>
+											<div class="attachment-info flex row gap align-center">
+												<i class="bi bi-grip-vertical"></i>
+												<i class="bi bi-image attachment-icon"></i>
+												<span class="ellipsis">Bild { attachment.ID }</span>
+												<span class="muted text-sm">({ attachment.GetMimeType() })</span>
+											</div>
+											<div class="attachment-actions flex row gap">
+												<button
+													type="button"
+													class="secondary flex row gap align-center"
+													onclick={ utils.OpenImageViewer(attachment.GetID()) }
+												>
+													<small class="flex row gap align-center">
+														<i class="bi bi-eye"></i>
+														Anzeigen
+													</small>
+												</button>
+												<button
+													type="button"
+													class="destructive flex row gap align-center"
+													onclick={ troubleReportsEditDialogDeleteAttachment(attachment.GetID()) }
+												>
+													<small class="flex row gap align-center">
+														<i class="bi bi-trash"></i>
+														Löschen
+													</small>
+												</button>
+											</div>
+										</div>
+									}
+								</div>
+							</details>
+						}
+						<!-- File Upload Area -->
+						<!-- TODO: Drag'n Drop stuff is missing -->
+						<div
+							class="file-input-area flex column justify-center align-center"
+							onclick="document.getElementById('attachments').click()"
+							ondrop="window.dialogEditFunctions.handleFileDrop(event)"
+							ondragover="window.dialogEditFunctions.handleDragOver(event)"
+							ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
+						>
+							<i class="bi bi-cloud-upload"></i>
+							<div class="text-center">Bilder hochladen</div>
+							<input
+								type="file"
+								name="attachments"
+								id="attachments"
+								multiple
+								accept="image/*"
+								onchange={ displayFilePreview() }
+							/>
+						</div>
+						<!-- File Preview Area -->
+						<div id="file-preview" class="file-preview flex column gap border">
+							<div class="attachments-label">Neue Bilder:</div>
+							<div id="new-attachments" class="flex column gap"></div>
+							<template name="attachment-item">
+								<div class="attachment-item flex row gap justify-between align-center">
+									<div class="attachment-info flex row gap align-center">
+										<i class="bi bi-file-earmark attachment-icon"></i>
+										<span class="name ellipsis"></span>
+										<span class="size-text"></span>
+									</div>
+									<div class="attachment-actions flex row gap">
+										<button
+											type="button"
+											class="delete destructive flex row gap align-center"
+										>
+											<small class="flex row gap align-center">
+												<i class="bi bi-trash"></i>
+												Entfernen
+											</small>
+										</button>
+									</div>
+								</div>
+							</template>
+						</div>
+					</div>
+				</div>
+				<footer class="flex row gap justify-end">
+					<button
+						hx-get="./trouble-reports/dialog-edit?cancel=true"
+						hx-trigger="click"
+						hx-target="#dialogEdit"
+						hx-swap="outerHTML"
+						type="button"
+						class="secondary flex gap"
+					>
+						<i class="bi bi-x-circle"></i>
+						Schließen
+					</button>
+					<!-- Set button text based on ID value -->
+					<button type="submit" class="flex row gap">
+						<i class="bi bi-check-circle"></i>
+						if props.ID > 0 {
+							Aktualisieren
+						} else {
+							Erstellen
+						}
+					</button>
+				</footer>
+			</form>
+			<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+			<script>
+                document.querySelector("#dialogEdit").showModal();
+                // TODO: Drag'n Drop missing for new and existing attachments
+            </script>
+		</dialog>
+	} else {
+		<span
+			hx-get="./trouble-reports/data"
+			hx-trigger="load"
+			hx-target="#data"
+			hx-swap="outerHTML"
+			id="dialogEdit"
+		></span>
+	}
+}

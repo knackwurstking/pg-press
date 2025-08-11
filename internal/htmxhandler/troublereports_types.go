@@ -23,7 +23,7 @@ type troubleReportsDataTemplateData struct {
 }
 
 type dialogEditTemplateData struct {
-	ID                int                    `json:"id"`
+	ID                int64                  `json:"id"`
 	Submitted         bool                   `json:"submitted"`
 	Title             string                 `json:"title"`
 	Content           string                 `json:"content"`

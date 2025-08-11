@@ -14,6 +14,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
@@ -296,14 +297,11 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 		return utils.HandlepgpressError(c, err)
 	}
 
-	// Return updated dialog
-	pageData := &dialogEditTemplateData{
-		Submitted:         true, // Prevent reloading from database
-		ID:                int(id),
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: attachments,
-	}
-
-	return h.handleGetDialogEdit(c, pageData)
+	return h.handleGetDialogEdit(c, &components.TroubleReportsEditDialogProps{
+		Submitted:   true,
+		ID:          id,
+		Title:       tr.Title,
+		Content:     tr.Content,
+		Attachments: attachments,
+	})
 }

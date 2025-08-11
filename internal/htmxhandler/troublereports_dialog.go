@@ -8,56 +8,56 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) handleGetDialogEdit(
 	c echo.Context,
-	pageData *dialogEditTemplateData,
+	props *components.TroubleReportsEditDialogProps,
 ) *echo.HTTPError {
-	if pageData == nil {
-		pageData = &dialogEditTemplateData{}
+	if props == nil {
+		props = &components.TroubleReportsEditDialogProps{}
 	}
 
 	if c.QueryParam(constants.QueryParamCancel) == constants.TrueValue {
-		pageData.Submitted = true
+		props.Submitted = true
 	}
 
-	if !pageData.Submitted && !pageData.InvalidTitle && !pageData.InvalidContent {
+	if !props.Submitted && !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
 			id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
 			if herr != nil {
 				return herr
 			}
 
-			pageData.ID = int(id)
+			props.ID = id
 
 			tr, err := h.DB.TroubleReports.Get(id)
 			if err != nil {
 				return utils.HandlepgpressError(c, err)
 			}
 
-			pageData.Title = tr.Title
-			pageData.Content = tr.Content
+			props.Title = tr.Title
+			props.Content = tr.Content
 
 			// Load attachments for display
 			if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr); err == nil {
-				pageData.LinkedAttachments = loadedAttachments
+				props.Attachments = loadedAttachments
 			}
 		}
 	}
 
-	// TODO: Migrate to templ
-	return utils.HandleTemplate(c, pageData,
-		h.Templates,
-		[]string{
-			//constants.HTMXTroubleReportsDialogEditTemplatePath,
-		},
-	)
+	dialog := components.TroubleReportsEditDialog(props)
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render Trouble Reports Edit Dialog: "+err.Error())
+	}
+	return nil
 }
 
 func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
-	dialogEditData := &dialogEditTemplateData{
+	props := &components.TroubleReportsEditDialogProps{
 		Submitted: true,
 	}
 
@@ -71,13 +71,13 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		return herr
 	}
 
-	dialogEditData.Title = title
-	dialogEditData.Content = content
-	dialogEditData.InvalidTitle = title == ""
-	dialogEditData.InvalidContent = content == ""
+	props.Title = title
+	props.Content = content
+	props.InvalidTitle = title == ""
+	props.InvalidContent = content == ""
 
-	if !dialogEditData.InvalidTitle && !dialogEditData.InvalidContent {
-		dialogEditData.LinkedAttachments = attachments
+	if !props.InvalidTitle && !props.InvalidContent {
+		props.Attachments = attachments
 		modified := database.NewModified[database.TroubleReportMod](user, database.TroubleReportMod{
 			Title:             title,
 			Content:           content,
@@ -89,13 +89,12 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 			return utils.HandlepgpressError(c, err)
 		}
 	} else {
-		dialogEditData.Submitted = false
+		props.Submitted = false
 	}
 
-	return h.handleGetDialogEdit(c, dialogEditData)
+	return h.handleGetDialogEdit(c, props)
 }
 
-// FIXME: Attachment changes does not add a modified to mods it seems
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get ID from query parameter
 	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
@@ -116,9 +115,9 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Initialize dialog template data
-	dialogEditData := &dialogEditTemplateData{
+	props := &components.TroubleReportsEditDialogProps{
 		Submitted:      true,
-		ID:             int(id),
+		ID:             id,
 		Title:          title,
 		Content:        content,
 		InvalidTitle:   title == "",
@@ -126,13 +125,13 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Abort if invalid title or content
-	if dialogEditData.InvalidTitle || dialogEditData.InvalidContent {
-		dialogEditData.Submitted = false
-		return h.handleGetDialogEdit(c, dialogEditData)
+	if props.InvalidTitle || props.InvalidContent {
+		props.Submitted = false
+		return h.handleGetDialogEdit(c, props)
 	}
 
 	// Set attachments to handlePutDialogEdit
-	dialogEditData.LinkedAttachments = attachments
+	props.Attachments = attachments
 
 	// Query previous trouble report
 	trOld, err := h.DB.TroubleReports.Get(id)
@@ -146,7 +145,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
 	var newAttachments []*database.Attachment
-	for _, a := range dialogEditData.LinkedAttachments {
+	for _, a := range props.Attachments {
 		if a.GetID() > 0 {
 			existingAttachmentIDs = append(existingAttachmentIDs, a.GetID())
 		} else {
@@ -165,7 +164,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		return utils.HandlepgpressError(c, err)
 	}
 
-	return h.handleGetDialogEdit(c, dialogEditData)
+	return h.handleGetDialogEdit(c, props)
 }
 
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
