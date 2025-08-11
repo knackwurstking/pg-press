@@ -84,7 +84,9 @@ templ Main(options MainOptions) {
 			<script src="./js/htmx-v2.0.6.min.js"></script>
 			<script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
 			@mainScript()
-			@options.AdditionalHead()
+			if options.AdditionalHead != nil {
+				@options.AdditionalHead
+			}
 		</head>
 		<body hx-ext="ws">
 			<header class="container fluid">
@@ -94,7 +96,9 @@ templ Main(options MainOptions) {
 							<h5>{ options.AppBarTitle }</h5>
 						</div>
 					</div>
-					@options.AdditionalHead()
+					if options.NavContent != nil {
+						@options.NavContent
+					}
 				</nav>
 			</header>
 			{ children... }
@@ -113,24 +117,4 @@ templ Main(options MainOptions) {
 			</template>
 		</body>
 	</html>
-	<!-- NOTE: Basic navigation elements to use for pages, can be removed
-    {{define "basic-nav-elements"}}
-    <div class="flex row gap justify-end align-center">
-        {{template "nav-feed"}}
-
-        <a
-            role="button"
-            class="ghost contrast icon"
-            href="./profile"
-            title="Profil"
-        >
-            <i class="bi bi-person-circle"></i>
-        </a>
-
-        <a role="button" class="ghost contrast icon" href="./" title="Startseite">
-            <i class="bi bi-house"></i>
-        </a>
-    </div>
-    {{end}}
-    -->
 }

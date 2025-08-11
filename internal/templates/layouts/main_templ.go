@@ -106,9 +106,11 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = options.AdditionalHead().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if options.AdditionalHead != nil {
+			templ_7745c5c3_Err = options.AdditionalHead.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</head><body hx-ext=\"ws\"><header class=\"container fluid\"><nav class=\"flex row gap justify-between\"><div class=\"flex row gap justify-start align-center\"><div><h5>")
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +119,7 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 94, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 96, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -127,9 +129,11 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = options.AdditionalHead().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if options.NavContent != nil {
+			templ_7745c5c3_Err = options.NavContent.Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</nav></header>")
 		if templ_7745c5c3_Err != nil {
@@ -139,7 +143,7 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html><!-- NOTE: Basic navigation elements to use for pages, can be removed\n    {{define \"basic-nav-elements\"}}\n    <div class=\"flex row gap justify-end align-center\">\n        {{template \"nav-feed\"}}\n\n        <a\n            role=\"button\"\n            class=\"ghost contrast icon\"\n            href=\"./profile\"\n            title=\"Profil\"\n        >\n            <i class=\"bi bi-person-circle\"></i>\n        </a>\n\n        <a role=\"button\" class=\"ghost contrast icon\" href=\"./\" title=\"Startseite\">\n            <i class=\"bi bi-house\"></i>\n        </a>\n    </div>\n    {{end}}\n    -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<template name=\"image-viewer\"><dialog class=\"image-viewer fullscreen clean flex justify-center align-center\"><img alt=\"Attachment\" class=\"attachment\"> <button type=\"button\" class=\"close icon secondary ghost\" onclick=\"this.closest('dialog').close()\" title=\"Schließen\"><i class=\"bi bi-x-lg\"></i></button></dialog></template></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
