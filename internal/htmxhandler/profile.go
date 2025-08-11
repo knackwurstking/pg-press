@@ -5,8 +5,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
@@ -30,9 +30,12 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 		return utils.HandlepgpressError(c, err)
 	}
 
-	// TODO: Continue here...
-	return utils.HandleTemplate(c, database.SortCookies(cookies), h.Templates,
-		[]string{constants.HTMXProfileCookiesTemplatePath})
+	cookiesTable := components.CookiesTable(database.SortCookies(cookies))
+	if err := cookiesTable.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render cookies table: "+err.Error())
+	}
+	return nil
 }
 
 func (h *Profile) handleDeleteCookies(c echo.Context) error {
