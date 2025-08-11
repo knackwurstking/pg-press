@@ -11,6 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
@@ -25,17 +26,12 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 		return utils.HandlepgpressError(c, err)
 	}
 
-	return utils.HandleTemplate(
-		c,
-		troubleReportsDataTemplateData{
-			TroubleReports: trs,
-			User:           user,
-		},
-		h.Templates,
-		[]string{
-			constants.HTMXTroubleReportsDataTemplatePath,
-		},
-	)
+	troubleReportsList := components.TroubleReportsList(user, trs)
+	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to render trouble reports list component: "+err.Error())
+	}
+	return nil
 }
 
 func (h *TroubleReports) handleDeleteData(c echo.Context) error {
@@ -116,6 +112,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		}
 	}
 
+	// TODO: Migrate to templ
 	return utils.HandleTemplate(
 		c,
 		attachmentsPreviewTemplateData{
@@ -123,7 +120,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		},
 		h.Templates,
 		[]string{
-			constants.HTMXTroubleReportsAttachmentsPreviewTemplatePath,
+			//constants.HTMXTroubleReportsAttachmentsPreviewTemplatePath,
 		},
 	)
 }
@@ -156,12 +153,13 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		Mods:          mods,
 	}
 
+	// TODO: Migrate to templ
 	return utils.HandleTemplate(
 		c,
 		data,
 		h.Templates,
 		[]string{
-			constants.HTMXTroubleReportsModificationsTemplatePath,
+			//constants.HTMXTroubleReportsModificationsTemplatePath,
 		},
 	)
 }
