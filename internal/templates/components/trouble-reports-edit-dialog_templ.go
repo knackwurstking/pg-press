@@ -284,7 +284,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				for _, attachment := range props.Attachments {
+				for attachmentIndex, attachment := range props.Attachments {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"attachment-item flex row gap justify-between align-center border\" data-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -298,14 +298,14 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><div class=\"attachment-info flex row gap align-center\"><span class=\"ellipsis\">Bild ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><div class=\"attachment-info flex row gap align-center\"><span class=\"ellipsis\">Anhang ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var8 string
-					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.ID)
+					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 204, Col: 55}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 204, Col: 61}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -324,7 +324,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ")</span></div><div class=\"attachment-actions flex row gap\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ")</span></div><div class=\"attachment-actions flex row gap\"><!-- TODO: Allow renaming attachments, need to check if this is supported by the backend -->")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -385,7 +385,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex column gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex column gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex row gap justify-between align-center border\"><div class=\"attachment-info flex row gap align-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex row gap\"><button type=\"button\" class=\"delete destructive flex row gap align-center\"><small class=\"flex row gap align-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit?cancel=true\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex row gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex column gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex column gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex row gap justify-between align-center border\"><div class=\"attachment-info flex row gap align-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex row gap\"><!-- TODO: Allow renaming attachments, need to check if this is supported by the backend --><button type=\"button\" class=\"delete destructive flex row gap align-center\"><small class=\"flex row gap align-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit?cancel=true\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex row gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

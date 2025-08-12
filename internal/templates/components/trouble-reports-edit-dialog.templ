@@ -195,13 +195,13 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 									Vorhandene Bilder ({ len(props.Attachments) })
 								</summary>
 								<div id="existing-attachments" class="flex column gap">
-									for _, attachment := range props.Attachments {
+									for attachmentIndex, attachment := range props.Attachments {
 										<div
 											class="attachment-item flex row gap justify-between align-center border"
 											data-id={ fmt.Sprintf("%s", attachment.ID) }
 										>
 											<div class="attachment-info flex row gap align-center">
-												<span class="ellipsis">Bild { attachment.ID }</span>
+												<span class="ellipsis">Anhang { attachmentIndex+1 }</span>
 												<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
 											</div>
 											<div class="attachment-actions flex row gap">
