@@ -7,43 +7,6 @@ import (
 )
 
 script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
-    function initializeAttachmentOrder() {
-        var existingAttachmentsContainer = document.getElementById(
-            "existing-attachments",
-        );
-
-        // Destroy existing Sortable instance if it exists
-        if (sortableInstance) {
-            sortableInstance.destroy();
-            sortableInstance = null;
-        }
-
-        if (Sortable && existingAttachmentsContainer) {
-            sortableInstance = new Sortable(existingAttachmentsContainer, {
-                animation: 150,
-                ghostClass: "sortable-ghost",
-                handle: ".bi-grip-vertical",
-                onEnd: function () {
-                    var items = document.querySelectorAll(
-                        "#existing-attachments .attachment-item",
-                    );
-                    attachmentOrder = Array.from(items).map(
-                        (item) => item.dataset.id,
-                    );
-                    updateAttachmentOrderInput();
-                },
-            });
-        }
-
-        var existingAttachments = document.querySelectorAll(
-            "#existing-attachments .attachment-item",
-        );
-        attachmentOrder = Array.from(existingAttachments).map(
-            (item) => item.dataset.id,
-        );
-        updateAttachmentOrderInput();
-    }
-
     if (!confirm(
         "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
     )) return;
@@ -59,27 +22,11 @@ script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
             (id) => id != attachmentId,
         );
 
-        // Temporarily disable htmx processing during DOM manipulation
-        var container = document.getElementById(
-            "existing-attachments",
-        );
-        var wasDisabled =
-            container.hasAttribute("data-hx-disable");
-        container.setAttribute("data-hx-disable", "true");
-
         // Remove the DOM element
         attachmentItem.remove();
 
-        // Restore htmx state
-        if (!wasDisabled) {
-            container.removeAttribute("data-hx-disable");
-        }
-
         // Update the hidden input field
         updateAttachmentOrderInput();
-
-        // Reinitialize Sortable instance after DOM changes
-        initializeAttachmentOrder();
 
         // Check if no attachments left and hide the details section
         var existingAttachments = document.getElementById(
@@ -98,7 +45,7 @@ script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
     }
 }
 
-script displayFilePreview() {
+script onFileInputChange() {
     selectedFiles = Array.from(event.target.files);
 
     function formatFileSize(bytes) {
@@ -149,7 +96,7 @@ script displayFilePreview() {
                 selectedFiles.forEach((file) => dt.items.add(file));
                 fileInput.files = dt.files;
 
-                displayFilePreview();
+                onFileInputChange();
             };
 
             container.appendChild(item);
@@ -175,8 +122,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 		<dialog id="dialogEdit" class="clean fullscreen" oncancel="event.preventDefault()">
 			<script>
           		var attachmentOrder = [];
-                var selectedFiles = [];
-                var sortableInstance = null;
+                var selectedFiles = []; // Used by the file input change event handler
 
                 // Helper Functions
                 function updateAttachmentOrderInput() {
@@ -298,7 +244,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 								id="attachments"
 								multiple
 								accept="image/*"
-								onchange={ displayFilePreview() }
+								onchange={ onFileInputChange() }
 							/>
 						</div>
 						<!-- File Preview Area -->
@@ -351,7 +297,6 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 					</button>
 				</footer>
 			</form>
-			<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 			<script>
                 document.querySelector("#dialogEdit").showModal();
             </script>
