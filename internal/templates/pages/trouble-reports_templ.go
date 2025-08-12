@@ -125,8 +125,8 @@ func TroubleReportsPage() templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
-				PageTitle:      "",
-				AppBarTitle:    "",
+				PageTitle:      "PG Presse | Problemberichte",
+				AppBarTitle:    "Problemberichte",
 				AdditionalHead: troubleReportsAdditionalHead(),
 				NavContent:     troubleReportsNavContent(),
 			},
