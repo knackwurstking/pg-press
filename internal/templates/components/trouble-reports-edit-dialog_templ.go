@@ -16,45 +16,8 @@ import (
 
 func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_troubleReportsEditDialogDeleteAttachment_4efd`,
-		Function: `function __templ_troubleReportsEditDialogDeleteAttachment_4efd(attachmentId){function initializeAttachmentOrder() {
-        var existingAttachmentsContainer = document.getElementById(
-            "existing-attachments",
-        );
-
-        // Destroy existing Sortable instance if it exists
-        if (sortableInstance) {
-            sortableInstance.destroy();
-            sortableInstance = null;
-        }
-
-        if (Sortable && existingAttachmentsContainer) {
-            sortableInstance = new Sortable(existingAttachmentsContainer, {
-                animation: 150,
-                ghostClass: "sortable-ghost",
-                handle: ".bi-grip-vertical",
-                onEnd: function () {
-                    var items = document.querySelectorAll(
-                        "#existing-attachments .attachment-item",
-                    );
-                    attachmentOrder = Array.from(items).map(
-                        (item) => item.dataset.id,
-                    );
-                    updateAttachmentOrderInput();
-                },
-            });
-        }
-
-        var existingAttachments = document.querySelectorAll(
-            "#existing-attachments .attachment-item",
-        );
-        attachmentOrder = Array.from(existingAttachments).map(
-            (item) => item.dataset.id,
-        );
-        updateAttachmentOrderInput();
-    }
-
-    if (!confirm(
+		Name: `__templ_troubleReportsEditDialogDeleteAttachment_3f21`,
+		Function: `function __templ_troubleReportsEditDialogDeleteAttachment_3f21(attachmentId){if (!confirm(
         "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
     )) return;
 
@@ -69,27 +32,11 @@ func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.Componen
             (id) => id != attachmentId,
         );
 
-        // Temporarily disable htmx processing during DOM manipulation
-        var container = document.getElementById(
-            "existing-attachments",
-        );
-        var wasDisabled =
-            container.hasAttribute("data-hx-disable");
-        container.setAttribute("data-hx-disable", "true");
-
         // Remove the DOM element
         attachmentItem.remove();
 
-        // Restore htmx state
-        if (!wasDisabled) {
-            container.removeAttribute("data-hx-disable");
-        }
-
         // Update the hidden input field
         updateAttachmentOrderInput();
-
-        // Reinitialize Sortable instance after DOM changes
-        initializeAttachmentOrder();
 
         // Check if no attachments left and hide the details section
         var existingAttachments = document.getElementById(
@@ -107,15 +54,15 @@ func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.Componen
         }
     }
 }`,
-		Call:       templ.SafeScript(`__templ_troubleReportsEditDialogDeleteAttachment_4efd`, attachmentId),
-		CallInline: templ.SafeScriptInline(`__templ_troubleReportsEditDialogDeleteAttachment_4efd`, attachmentId),
+		Call:       templ.SafeScript(`__templ_troubleReportsEditDialogDeleteAttachment_3f21`, attachmentId),
+		CallInline: templ.SafeScriptInline(`__templ_troubleReportsEditDialogDeleteAttachment_3f21`, attachmentId),
 	}
 }
 
-func displayFilePreview() templ.ComponentScript {
+func onFileInputChange() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_displayFilePreview_3991`,
-		Function: `function __templ_displayFilePreview_3991(){selectedFiles = Array.from(event.target.files);
+		Name: `__templ_onFileInputChange_46e4`,
+		Function: `function __templ_onFileInputChange_46e4(){selectedFiles = Array.from(event.target.files);
 
     function formatFileSize(bytes) {
         if (bytes === 0) return "0 Bytes";
@@ -165,7 +112,7 @@ func displayFilePreview() templ.ComponentScript {
                 selectedFiles.forEach((file) => dt.items.add(file));
                 fileInput.files = dt.files;
 
-                displayFilePreview();
+                onFileInputChange();
             };
 
             container.appendChild(item);
@@ -174,8 +121,8 @@ func displayFilePreview() templ.ComponentScript {
         previewArea.style.display = "none";
     }
 }`,
-		Call:       templ.SafeScript(`__templ_displayFilePreview_3991`),
-		CallInline: templ.SafeScriptInline(`__templ_displayFilePreview_3991`),
+		Call:       templ.SafeScript(`__templ_onFileInputChange_46e4`),
+		CallInline: templ.SafeScriptInline(`__templ_onFileInputChange_46e4`),
 	}
 }
 
@@ -212,7 +159,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 		}
 		ctx = templ.ClearChildren(ctx)
 		if !props.Submitted {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog id=\"dialogEdit\" class=\"clean fullscreen\" oncancel=\"event.preventDefault()\"><script>\n          \t\tvar attachmentOrder = [];\n                var selectedFiles = [];\n                var sortableInstance = null;\n\n                // Helper Functions\n                function updateAttachmentOrderInput() {\n                    document.getElementById(\"attachment-order\").value =\n                        attachmentOrder.join(\",\");\n                }\n            </script><form class=\"flex column gap\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog id=\"dialogEdit\" class=\"clean fullscreen\" oncancel=\"event.preventDefault()\"><script>\n          \t\tvar attachmentOrder = [];\n                var selectedFiles = []; // Used by the file input change event handler\n\n                // Helper Functions\n                function updateAttachmentOrderInput() {\n                    document.getElementById(\"attachment-order\").value =\n                        attachmentOrder.join(\",\");\n                }\n            </script><form class=\"flex column gap\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -224,7 +171,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/dialog-edit?id=%d", props.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 190, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 136, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -247,7 +194,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 208, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 154, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -280,7 +227,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 223, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 169, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -304,7 +251,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 237, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 183, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -320,14 +267,14 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			if len(props.Attachments) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<details class=\"attachments-section border\"><summary class=\"attachments-label flex row gap align-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\t\t\t\tif(this.open) this.parentElement.parentElement.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t\t\t'><summary class=\"attachments-label flex row gap align-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 244, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 195, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -345,33 +292,33 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 250, Col: 53}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 201, Col: 53}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><div class=\"attachment-info flex row gap align-center\"><i class=\"bi bi-grip-vertical\"></i> <i class=\"bi bi-image attachment-icon\"></i> <span class=\"ellipsis\">Bild ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><div class=\"attachment-info flex row gap align-center\"><span class=\"ellipsis\">Bild ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.ID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 255, Col: 55}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 204, Col: 55}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span> <span class=\"muted text-sm\">(")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</span> <span class=\"muted text-sm ellipsis\">(")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 256, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 205, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -421,11 +368,11 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- File Upload Area --><!-- TODO: Drag'n Drop stuff is missing --><div class=\"file-input-area flex column justify-center align-center\" onclick=\"document.getElementById('attachments').click()\" ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- File Upload Area --><div class=\"file-input-area flex column justify-center align-center\" onclick=\"document.getElementById('attachments').click()\" ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, displayFilePreview())
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, onFileInputChange())
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -433,12 +380,12 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 templ.ComponentScript = displayFilePreview()
+			var templ_7745c5c3_Var12 templ.ComponentScript = onFileInputChange()
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12.Call)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex column gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex column gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex row gap justify-between align-center\"><div class=\"attachment-info flex row gap align-center\"><i class=\"bi bi-file-earmark attachment-icon\"></i> <span class=\"name ellipsis\"></span> <span class=\"size-text\"></span></div><div class=\"attachment-actions flex row gap\"><button type=\"button\" class=\"delete destructive flex row gap align-center\"><small class=\"flex row gap align-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit?cancel=true\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex row gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex column gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex column gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex row gap justify-between align-center\"><div class=\"attachment-info flex row gap align-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text\"></span></div><div class=\"attachment-actions flex row gap\"><button type=\"button\" class=\"delete destructive flex row gap align-center\"><small class=\"flex row gap align-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit?cancel=true\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex row gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -453,7 +400,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</button></footer></form><script src=\"https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js\"></script><script>\n                document.querySelector(\"#dialogEdit\").showModal();\n                // TODO: Drag'n Drop missing for new and existing attachments\n            </script></dialog>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</button></footer></form><script>\n                document.querySelector(\"#dialogEdit\").showModal();\n            </script></dialog>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -184,7 +184,12 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 						}
 						<!-- Existing Attachments -->
 						if len(props.Attachments) > 0 {
-							<details class="attachments-section border">
+							<details
+								class="attachments-section border"
+								ontoggle='
+									if(this.open) this.scrollIntoView({behavior: "smooth", block: "start"});
+								'
+							>
 								<summary class="attachments-label flex row gap align-center">
 									<i class="bi bi-images"></i>
 									Vorhandene Bilder ({ len(props.Attachments) })
@@ -196,10 +201,8 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 											data-id={ fmt.Sprintf("%s", attachment.ID) }
 										>
 											<div class="attachment-info flex row gap align-center">
-												<i class="bi bi-grip-vertical"></i>
-												<i class="bi bi-image attachment-icon"></i>
 												<span class="ellipsis">Bild { attachment.ID }</span>
-												<span class="muted text-sm">({ attachment.GetMimeType() })</span>
+												<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
 											</div>
 											<div class="attachment-actions flex row gap">
 												<button
@@ -254,7 +257,6 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 							<template name="attachment-item">
 								<div class="attachment-item flex row gap justify-between align-center">
 									<div class="attachment-info flex row gap align-center">
-										<i class="bi bi-file-earmark attachment-icon"></i>
 										<span class="name ellipsis"></span>
 										<span class="size-text"></span>
 									</div>
