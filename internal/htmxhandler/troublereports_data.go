@@ -1,7 +1,6 @@
 package htmxhandler
 
 import (
-	"errors"
 	"net/http"
 	"slices"
 	"time"
@@ -23,7 +22,8 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to load trouble reports: "+err.Error())
 	}
 
 	troubleReportsList := components.TroubleReportsList(user, trs)
@@ -56,7 +56,8 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 		user.UserName, user.TelegramID, id)
 
 	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id); err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to delete trouble report: "+err.Error())
 	} else {
 		feed := database.NewFeed(
 			database.FeedTypeTroubleReportRemove,
@@ -82,7 +83,8 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to load trouble report: "+err.Error())
 	}
 
 	// If "time" query is provided, return modified data attachments for "id"
@@ -101,7 +103,8 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				// Load attachments for the modified data
 				loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(modifiedTr)
 				if err != nil {
-					return utils.HandlepgpressError(c, err)
+					return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+						"failed to load attachments for modified trouble report: "+err.Error())
 				}
 
 				// Use the modified trouble report with loaded attachments
@@ -130,7 +133,8 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		var err error
 		tr, err = h.DB.TroubleReports.Get(id)
 		if err != nil {
-			return utils.HandlepgpressError(c, err)
+			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+				"failed to load trouble report: "+err.Error())
 		}
 	}
 
@@ -176,7 +180,8 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to load trouble report: "+err.Error())
 	}
 
 	// Move modification to the top
@@ -197,7 +202,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	}
 
 	if mod == nil {
-		return utils.HandlepgpressError(c, errors.New("modification not found"))
+		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
 	}
 
 	mod.Time = time.Now().UnixMilli()
@@ -212,7 +217,8 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 
 	// Update database
 	if err = h.DB.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlepgpressError(c, database.WrapError(err, "failed to update trouble report"))
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to update trouble report: "+err.Error())
 	}
 
 	return h.handleGetModifications(c, tr)

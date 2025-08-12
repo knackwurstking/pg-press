@@ -55,7 +55,8 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			"Failed to retrieve trouble report %d for PDF generation: %v",
 			id, err,
 		)
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to retrieve trouble report: "+err.Error())
 	}
 
 	pdfBuffer, err := h.generateTroubleReportPDF(tr)

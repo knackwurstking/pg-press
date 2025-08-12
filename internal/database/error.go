@@ -12,14 +12,14 @@ var (
 	ErrNotFound      = errors.New("not found")
 	ErrAlreadyExists = errors.New("already exists")
 
-	ErrUnauthorized       = errors.New("unauthorized")
-	ErrForbidden          = errors.New("forbidden")
-	ErrInvalidToken       = errors.New("invalid token")
-	ErrTokenExpired       = errors.New("token expired")
+	//ErrUnauthorized = errors.New("unauthorized")
+	//ErrForbidden          = errors.New("forbidden")
+	//ErrInvalidToken       = errors.New("invalid token")
+	//ErrTokenExpired       = errors.New("token expired")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 
-	ErrRateLimited        = errors.New("rate limited")
-	ErrServiceUnavailable = errors.New("service unavailable")
+	//ErrRateLimited        = errors.New("rate limited")
+	//ErrServiceUnavailable = errors.New("service unavailable")
 )
 
 // ValidationError represents a field-specific validation error.
@@ -96,22 +96,22 @@ func GetHTTPStatusCode(err error) int {
 		return http.StatusNotFound
 	case IsValidationError(err):
 		return http.StatusBadRequest
-	case errors.Is(err, ErrUnauthorized):
-		return http.StatusUnauthorized
-	case errors.Is(err, ErrForbidden):
-		return http.StatusForbidden
-	case errors.Is(err, ErrInvalidToken):
-		return http.StatusUnauthorized
-	case errors.Is(err, ErrTokenExpired):
-		return http.StatusUnauthorized
+	//case errors.Is(err, ErrUnauthorized):
+	//	return http.StatusUnauthorized
+	//case errors.Is(err, ErrForbidden):
+	//	return http.StatusForbidden
+	//case errors.Is(err, ErrInvalidToken):
+	//	return http.StatusUnauthorized
+	//case errors.Is(err, ErrTokenExpired):
+	//	return http.StatusUnauthorized
 	case errors.Is(err, ErrInvalidCredentials):
 		return http.StatusUnauthorized
 	case errors.Is(err, ErrAlreadyExists):
 		return http.StatusConflict
-	case errors.Is(err, ErrRateLimited):
-		return http.StatusTooManyRequests
-	case errors.Is(err, ErrServiceUnavailable):
-		return http.StatusServiceUnavailable
+	//case errors.Is(err, ErrRateLimited):
+	//	return http.StatusTooManyRequests
+	//case errors.Is(err, ErrServiceUnavailable):
+	//	return http.StatusServiceUnavailable
 	case IsDatabaseError(err):
 		return http.StatusInternalServerError
 	default:

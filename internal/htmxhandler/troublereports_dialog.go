@@ -35,7 +35,8 @@ func (h *TroubleReports) handleGetDialogEdit(
 
 			tr, err := h.DB.TroubleReports.Get(id)
 			if err != nil {
-				return utils.HandlepgpressError(c, err)
+				return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+					"failed to get trouble report: "+err.Error())
 			}
 
 			props.Title = tr.Title
@@ -86,7 +87,8 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		tr := database.NewTroubleReport(title, content, modified)
 
 		if err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments); err != nil {
-			return utils.HandlepgpressError(c, err)
+			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+				"failed to add trouble report: "+err.Error())
 		}
 	} else {
 		props.Submitted = false
@@ -136,7 +138,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Query previous trouble report
 	trOld, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get trouble report: "+err.Error())
 	}
 
 	// Create new trouble report
@@ -161,7 +164,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		LinkedAttachments: tr.LinkedAttachments,
 	}))
 	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to update trouble report: "+err.Error())
 	}
 
 	return h.handleGetDialogEdit(c, props)

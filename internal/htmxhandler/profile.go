@@ -27,7 +27,8 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to list cookies: "+err.Error())
 	}
 
 	cookiesTable := components.CookiesTable(database.SortCookies(cookies))
@@ -46,7 +47,8 @@ func (h *Profile) handleDeleteCookies(c echo.Context) error {
 	}
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to delete cookie: "+err.Error())
 	}
 
 	return h.handleGetCookies(c)

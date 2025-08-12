@@ -3,6 +3,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"os"
 	"regexp"
@@ -72,12 +73,14 @@ func keyAuthSkipper(ctx echo.Context) bool {
 	return keyAuthSkipperRegExp.MatchString(url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
+func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, *echo.HTTPError) {
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			return false, err
+			return false, echo.NewHTTPError(
+				database.GetHTTPStatusCode(database.ErrInvalidCredentials),
+				"failed to validate user from API key: "+err.Error())
 		}
 	}
 
@@ -88,12 +91,12 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
 	// Check if cookie has expired
@@ -104,12 +107,13 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, 
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {
 		logger.Middleware().Info(
 			"Updating cookies last login timestamp for user %s", user)
+
 		now := time.Now()
 		c.LastLogin = now.UnixMilli()
 		cookie.Expires = now.Add(constants.CookieExpirationDuration)

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -13,27 +12,18 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 )
 
-const (
-	userContextKey = "user"
-
-	authenticationRequiredMessage = "authentication required"
-	invalidUserSessionMessage     = "invalid user session"
-	templateParseErrorMessage     = "failed to parse templates"
-	templateExecuteErrorMessage   = "failed to render page"
-)
-
 func GetUserFromContext(ctx echo.Context) (*database.User, *echo.HTTPError) {
-	user, ok := ctx.Get(userContextKey).(*database.User)
+	user, ok := ctx.Get("user").(*database.User)
 	if !ok {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
-			authenticationRequiredMessage,
+			"authentication required",
 		)
 	}
 	if user == nil {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
-			invalidUserSessionMessage,
+			"invalid user session",
 		)
 	}
 	return user, nil
@@ -71,31 +61,6 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, *echo.HTTPError
 	return id, nil
 }
 
-// TODO: Remove this
-func HandlepgpressError(ctx echo.Context, err error) *echo.HTTPError {
-	if err == nil {
-		return nil
-	}
-
-	code := database.GetHTTPStatusCode(err)
-	message := err.Error()
-
-	if database.IsValidationError(err) {
-		return echo.NewHTTPError(code, map[string]any{
-			"error":   "Validation failed",
-			"code":    code,
-			"status":  http.StatusText(code),
-			"details": err,
-		})
-	}
-
-	if errors.Is(err, database.ErrNotFound) {
-		return echo.NewHTTPError(code, "Resource not found")
-	}
-
-	return echo.NewHTTPError(code, message)
-}
-
 func SanitizeInput(input string) string {
 	sanitized := strings.TrimSpace(input)
 	sanitized = strings.ReplaceAll(sanitized, "\x00", "")
@@ -112,14 +77,14 @@ func HandleTemplate(
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			database.WrapError(err, templateParseErrorMessage),
+			database.WrapError(err, "failed to parse templates"),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			database.WrapError(err, templateExecuteErrorMessage),
+			database.WrapError(err, "failed to render page"),
 		)
 	}
 

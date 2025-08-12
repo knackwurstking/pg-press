@@ -216,7 +216,8 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get attachment: "+err.Error())
 	}
 
 	// Set appropriate headers
@@ -257,7 +258,8 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	// Get existing trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get trouble report: "+err.Error())
 	}
 
 	// Reorder attachment IDs based on the new order
@@ -288,13 +290,15 @@ func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
 	}))
 
 	if err := h.DB.TroubleReports.Update(id, tr); err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to update trouble report: "+err.Error())
 	}
 
 	// Load attachments for dialog
 	attachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr)
 	if err != nil {
-		return utils.HandlepgpressError(c, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to load attachments: "+err.Error())
 	}
 
 	return h.handleGetDialogEdit(c, &components.TroubleReportsEditDialogProps{
