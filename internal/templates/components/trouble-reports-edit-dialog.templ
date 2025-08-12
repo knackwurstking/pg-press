@@ -283,7 +283,6 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 							</details>
 						}
 						<!-- File Upload Area -->
-						<!-- TODO: Drag'n Drop stuff is missing -->
 						<div
 							class="file-input-area flex column justify-center align-center"
 							onclick="document.getElementById('attachments').click()"
@@ -355,7 +354,6 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 			<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 			<script>
                 document.querySelector("#dialogEdit").showModal();
-                // TODO: Drag'n Drop missing for new and existing attachments
             </script>
 		</dialog>
 	} else {
