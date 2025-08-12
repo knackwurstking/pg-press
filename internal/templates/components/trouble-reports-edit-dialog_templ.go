@@ -267,7 +267,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			if len(props.Attachments) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\t\t\t\tif(this.open) this.parentElement.parentElement.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t\t\t'><summary class=\"attachments-label flex row gap align-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\t\t\t\tif(this.open) this.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t\t\t'><summary class=\"attachments-label flex row gap align-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

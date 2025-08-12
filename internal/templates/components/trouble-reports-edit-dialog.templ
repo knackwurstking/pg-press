@@ -187,7 +187,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 							<details
 								class="attachments-section border"
 								ontoggle='
-									if(this.open) this.scrollIntoView({behavior: "smooth", block: "start"});
+									if(this.open) this.parentElement.scrollIntoView({behavior: "smooth", block: "start"});
 								'
 							>
 								<summary class="attachments-label flex row gap align-center">
