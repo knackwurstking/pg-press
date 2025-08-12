@@ -255,10 +255,12 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 							<div class="attachments-label">Neue Bilder:</div>
 							<div id="new-attachments" class="flex column gap"></div>
 							<template name="attachment-item">
-								<div class="attachment-item flex row gap justify-between align-center">
+								<div
+									class="attachment-item flex row gap justify-between align-center border"
+								>
 									<div class="attachment-info flex row gap align-center">
 										<span class="name ellipsis"></span>
-										<span class="size-text"></span>
+										<span class="size-text ellipsis"></span>
 									</div>
 									<div class="attachment-actions flex row gap">
 										<button

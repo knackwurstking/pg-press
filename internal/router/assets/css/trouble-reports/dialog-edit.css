@@ -143,7 +143,6 @@ textarea[name="content"] {
 }
 
 .attachment-item {
-    width: 100%;
     padding: var(--ui-spacing);
     transition: all 0.2s ease;
 }
