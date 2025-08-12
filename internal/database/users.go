@@ -9,7 +9,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -89,8 +88,6 @@ func (u *Users) List() ([]*User, error) {
 
 // Get retrieves a specific user by Telegram ID.
 func (u *Users) Get(telegramID int64) (*User, error) {
-	log.Printf("[Users] Getting user by Telegram ID: %d", telegramID)
-
 	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
 
 	user, err := u.scanUserRow(row)
@@ -210,8 +207,6 @@ func (u *Users) Remove(telegramID int64) error {
 
 // Update modifies an existing user and generates activity feed entries for changes.
 func (u *Users) Update(telegramID int64, user *User) error {
-	log.Printf("[Users] Update user: %+v, telegramID: %d", user, telegramID)
-
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}

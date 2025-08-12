@@ -14,7 +14,7 @@ var AppLogger *Logger
 // Initialize sets up the application logger with appropriate defaults
 func Initialize() {
 	// Create logger with sensible defaults
-	AppLogger = New(os.Stderr, INFO, true)
+	AppLogger = New(os.Stderr, WARN, true)
 
 	// Configure based on environment
 	configureFromEnvironment()

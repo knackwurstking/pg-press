@@ -119,7 +119,7 @@ func (l *Logger) levelToColor(level LogLevel) string {
 
 	switch level {
 	case DEBUG:
-		return Green
+		return Green + Italic
 	case INFO:
 		return Blue
 	case WARN:
@@ -168,27 +168,19 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 
 	var logLine string
 	if caller != "" {
-		italic := ""
-		italicReset := ""
-
-		if level == DEBUG {
-			italic = Italic
-			italicReset = Reset
-		}
-
-		logLine = fmt.Sprintf("%s%s[%s]%s %s %s [%s] %s\n",
-			color, Bold, levelStr, reset,
-			timestamp,
+		logLine = fmt.Sprintf("%s[%s]%s %s %s [%s] %s\n",
+			color+Bold, levelStr, reset,
+			color+timestamp,
 			l.prefix,
 			caller,
-			italic+message+italicReset)
+			message+reset)
 
 	} else {
-		logLine = fmt.Sprintf("%s%s[%s]%s %s %s %s\n",
-			color, Bold, levelStr, reset,
-			timestamp,
+		logLine = fmt.Sprintf("%s[%s]%s %s %s %s\n",
+			color+Bold, levelStr, reset,
+			color+timestamp,
 			l.prefix,
-			message)
+			message+reset)
 	}
 
 	l.output.Write([]byte(logLine))
@@ -212,12 +204,6 @@ func (l *Logger) Warn(format string, args ...any) {
 // Error logs an error message
 func (l *Logger) Error(format string, args ...any) {
 	l.log(ERROR, format, args...)
-}
-
-// Printf provides compatibility with standard log.Printf
-// It logs at INFO level by default
-func (l *Logger) Printf(format string, args ...any) {
-	l.log(INFO, format, args...)
 }
 
 // InitializeFromStandardLog configures the logger to replace standard log package
