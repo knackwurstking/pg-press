@@ -63,6 +63,10 @@ textarea[name="content"] {
  * ATTACHMENTS CONTAINER - FIXED LAYOUT TO PREVENT OVERLAPPING
  * ================================================================= */
 
+#attachments-section {
+    padding: var(--ui-spacing);
+}
+
 .attachments-container {
     /* Reduced flex to give more space to textarea */
     flex: 0 0 auto;
