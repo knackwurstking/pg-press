@@ -1,4 +1,3 @@
-// TODO: Move middleware to internal/middleware
 package main
 
 import (
