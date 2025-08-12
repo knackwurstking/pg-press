@@ -205,6 +205,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 												<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
 											</div>
 											<div class="attachment-actions flex row gap">
+												<!-- TODO: Allow renaming attachments, need to check if this is supported by the backend -->
 												<button
 													type="button"
 													class="secondary flex row gap align-center"
@@ -263,6 +264,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 										<span class="size-text ellipsis"></span>
 									</div>
 									<div class="attachment-actions flex row gap">
+										<!-- TODO: Allow renaming attachments, need to check if this is supported by the backend -->
 										<button
 											type="button"
 											class="delete destructive flex row gap align-center"

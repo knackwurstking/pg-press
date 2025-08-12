@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	// TODO: Add a name field to attachments "name TEXT NOT NULL" and do a database table migration
 	createAttachmentsTableQuery = `
 		CREATE TABLE IF NOT EXISTS attachments (
 			id INTEGER NOT NULL,
