@@ -42,9 +42,9 @@ type imagePositionOptions struct {
 }
 
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, "id")
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Query(c, "id")
+	if err != nil {
+		return err
 	}
 
 	logger.TroubleReport().Info("Generating PDF for trouble report %d", id)

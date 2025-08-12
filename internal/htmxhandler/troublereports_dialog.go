@@ -15,7 +15,7 @@ import (
 func (h *TroubleReports) handleGetDialogEdit(
 	c echo.Context,
 	props *components.TroubleReportsEditDialogProps,
-) *echo.HTTPError {
+) error {
 	if props == nil {
 		props = &components.TroubleReportsEditDialogProps{}
 	}
@@ -26,9 +26,9 @@ func (h *TroubleReports) handleGetDialogEdit(
 
 	if !props.Submitted && !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
-			id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-			if herr != nil {
-				return herr
+			id, err := utils.ParseInt64Query(c, constants.QueryParamID)
+			if err != nil {
+				return err
 			}
 
 			props.ID = id
@@ -62,14 +62,14 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		Submitted: true,
 	}
 
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
-	title, content, attachments, herr := h.validateDialogEditFormData(c)
-	if herr != nil {
-		return herr
+	title, content, attachments, err := h.validateDialogEditFormData(c)
+	if err != nil {
+		return err
 	}
 
 	props.Title = title
@@ -79,7 +79,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-		modified := database.NewModified[database.TroubleReportMod](user, database.TroubleReportMod{
+		modified := database.NewModified(user, database.TroubleReportMod{
 			Title:             title,
 			Content:           content,
 			LinkedAttachments: []int64{}, // Will be set by the service
@@ -99,21 +99,21 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get ID from query parameter
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		return err
 	}
 
 	// Get user from context
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	// Get Title, Content and Attachments from form data
-	title, content, attachments, herr := h.validateDialogEditFormData(c)
-	if herr != nil {
-		return herr
+	title, content, attachments, err := h.validateDialogEditFormData(c)
+	if err != nil {
+		return err
 	}
 
 	// Initialize dialog template data
@@ -174,10 +174,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
 	attachments []*database.Attachment,
-	httpErr *echo.HTTPError,
+	err error,
 ) {
-	var err error
-
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,

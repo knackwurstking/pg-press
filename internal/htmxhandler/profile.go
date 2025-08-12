@@ -20,9 +20,9 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)

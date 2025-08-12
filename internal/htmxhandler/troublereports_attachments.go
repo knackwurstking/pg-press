@@ -208,9 +208,9 @@ func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
 }
 
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	attachmentID, herr := utils.ParseInt64Query(c, "attachment_id")
-	if herr != nil {
-		return herr
+	attachmentID, err := utils.ParseInt64Query(c, "attachment_id")
+	if err != nil {
+		return err
 	}
 
 	// Get the attachment from the attachments table
@@ -236,14 +236,14 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 }
 
 func (h *TroubleReports) handlePostAttachmentReorder(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		return err
 	}
 
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	// Get the new order from form data

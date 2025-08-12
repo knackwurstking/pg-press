@@ -25,9 +25,9 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 	// Create a WebSocket handler that can work with Echo
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 		// Get user from echo context
-		user, herr := utils.GetUserFromContext(c)
-		if herr != nil {
-			logger.WebSocket().Error("User authentication failed: %v", herr)
+		user, err := utils.GetUserFromContext(c)
+		if err != nil {
+			logger.WebSocket().Error("User authentication failed: %#v", err)
 			ws.Close()
 			return
 		}

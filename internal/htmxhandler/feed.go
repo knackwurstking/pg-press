@@ -27,9 +27,9 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	}
 
 	// Update user's last feed
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	if len(feeds) > 0 {

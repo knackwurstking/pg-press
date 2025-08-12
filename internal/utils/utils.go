@@ -12,7 +12,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 )
 
-func GetUserFromContext(ctx echo.Context) (*database.User, *echo.HTTPError) {
+func GetUserFromContext(ctx echo.Context) (*database.User, error) {
 	user, ok := ctx.Get("user").(*database.User)
 	if !ok {
 		return nil, echo.NewHTTPError(
@@ -29,7 +29,7 @@ func GetUserFromContext(ctx echo.Context) (*database.User, *echo.HTTPError) {
 	return user, nil
 }
 
-func ParseInt64Param(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
+func ParseInt64Param(ctx echo.Context, paramName string) (int64, error) {
 	idStr := ctx.Param(paramName)
 	if idStr == "" {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" parameter")
@@ -45,7 +45,7 @@ func ParseInt64Param(ctx echo.Context, paramName string) (int64, *echo.HTTPError
 	return id, nil
 }
 
-func ParseInt64Query(ctx echo.Context, paramName string) (int64, *echo.HTTPError) {
+func ParseInt64Query(ctx echo.Context, paramName string) (int64, error) {
 	idStr := ctx.QueryParam(paramName)
 	if idStr == "" {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" query parameter")
@@ -72,7 +72,7 @@ func HandleTemplate(
 	pageData any,
 	templates fs.FS,
 	patterns []string,
-) *echo.HTTPError {
+) error {
 	t, err := template.ParseFS(templates, patterns...)
 	if err != nil {
 		return echo.NewHTTPError(

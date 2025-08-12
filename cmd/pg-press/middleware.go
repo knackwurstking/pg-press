@@ -64,6 +64,7 @@ func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
+			logger.Middleware().Debug("Handling error, redirect user to the login page: %#v", err)
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
 	})
@@ -74,8 +75,9 @@ func keyAuthSkipper(ctx echo.Context) bool {
 	return keyAuthSkipperRegExp.MatchString(url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, *echo.HTTPError) {
+func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
 	user, err := validateUserFromCookie(ctx, db)
+	logger.Middleware().Debug("Received login request, apiKey: %#v, user: %#v, err: %v", auth, user, err)
 	if err != nil {
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {

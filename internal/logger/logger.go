@@ -32,6 +32,7 @@ const (
 	Cyan   = "\033[36m"
 	Gray   = "\033[37m"
 	Bold   = "\033[1m"
+	Italic = "\033[3m"
 )
 
 // Logger represents a colored logger instance
@@ -118,7 +119,7 @@ func (l *Logger) levelToColor(level LogLevel) string {
 
 	switch level {
 	case DEBUG:
-		return Gray
+		return Green
 	case INFO:
 		return Blue
 	case WARN:
@@ -131,7 +132,7 @@ func (l *Logger) levelToColor(level LogLevel) string {
 }
 
 // log is the internal logging function
-func (l *Logger) log(level LogLevel, format string, args ...interface{}) {
+func (l *Logger) log(level LogLevel, format string, args ...any) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -167,12 +168,21 @@ func (l *Logger) log(level LogLevel, format string, args ...interface{}) {
 
 	var logLine string
 	if caller != "" {
+		italic := ""
+		italicReset := ""
+
+		if level == DEBUG {
+			italic = Italic
+			italicReset = Reset
+		}
+
 		logLine = fmt.Sprintf("%s%s[%s]%s %s %s [%s] %s\n",
 			color, Bold, levelStr, reset,
 			timestamp,
 			l.prefix,
 			caller,
-			message)
+			italic+message+italicReset)
+
 	} else {
 		logLine = fmt.Sprintf("%s%s[%s]%s %s %s %s\n",
 			color, Bold, levelStr, reset,
@@ -185,28 +195,28 @@ func (l *Logger) log(level LogLevel, format string, args ...interface{}) {
 }
 
 // Debug logs a debug message
-func (l *Logger) Debug(format string, args ...interface{}) {
+func (l *Logger) Debug(format string, args ...any) {
 	l.log(DEBUG, format, args...)
 }
 
 // Info logs an info message
-func (l *Logger) Info(format string, args ...interface{}) {
+func (l *Logger) Info(format string, args ...any) {
 	l.log(INFO, format, args...)
 }
 
 // Warn logs a warning message
-func (l *Logger) Warn(format string, args ...interface{}) {
+func (l *Logger) Warn(format string, args ...any) {
 	l.log(WARN, format, args...)
 }
 
 // Error logs an error message
-func (l *Logger) Error(format string, args ...interface{}) {
+func (l *Logger) Error(format string, args ...any) {
 	l.log(ERROR, format, args...)
 }
 
 // Printf provides compatibility with standard log.Printf
 // It logs at INFO level by default
-func (l *Logger) Printf(format string, args ...interface{}) {
+func (l *Logger) Printf(format string, args ...any) {
 	l.log(INFO, format, args...)
 }
 

@@ -26,12 +26,12 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Profile) handleMainPage(c echo.Context) error {
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
-	if err := h.handleUserNameChange(c, user); err != nil {
+	if err = h.handleUserNameChange(c, user); err != nil {
 		return echo.NewHTTPError(
 			database.GetHTTPStatusCode(err),
 			"error updating username: "+err.Error(),

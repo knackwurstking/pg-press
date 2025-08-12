@@ -15,9 +15,9 @@ import (
 )
 
 func (h *TroubleReports) handleGetData(c echo.Context) error {
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
@@ -35,14 +35,14 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleDeleteData(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, "id")
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Query(c, "id")
+	if err != nil {
+		return err
 	}
 
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	if !user.IsAdmin() {
@@ -76,9 +76,9 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
-	id, herr := utils.ParseInt64Query(c, "id")
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Query(c, "id")
+	if err != nil {
+		return err
 	}
 
 	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
@@ -88,8 +88,8 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	}
 
 	// If "time" query is provided, return modified data attachments for "id"
-	timeQuery, herr := utils.ParseInt64Query(c, constants.QueryParamTime)
-	if herr == nil {
+	timeQuery, err := utils.ParseInt64Query(c, constants.QueryParamTime)
+	if err == nil {
 		for _, mod := range tr.Mods {
 			if mod.Time == timeQuery {
 				// Create a temporary trouble report with the modified data
@@ -123,10 +123,10 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) *echo.HTTPError {
-	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
+func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) error {
+	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
+	if err != nil {
+		return err
 	}
 
 	if tr == nil {
@@ -138,9 +138,9 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		}
 	}
 
-	user, herr := utils.GetUserFromContext(c)
-	if herr != nil {
-		return herr
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
 	}
 
 	var firstMod *database.Modified[database.TroubleReportMod]
@@ -168,14 +168,14 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 }
 
 func (h *TroubleReports) handlePostModifications(c echo.Context) error {
-	id, herr := utils.ParseInt64Param(c, constants.QueryParamID)
-	if herr != nil {
-		return herr
+	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
+	if err != nil {
+		return err
 	}
 
-	timeQuery, herr := utils.ParseInt64Query(c, constants.QueryParamTime)
-	if herr != nil {
-		return herr
+	timeQuery, err := utils.ParseInt64Query(c, constants.QueryParamTime)
+	if err != nil {
+		return err
 	}
 
 	tr, err := h.DB.TroubleReports.Get(id)

@@ -6,6 +6,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"os"
 
@@ -68,18 +69,15 @@ func serverCommand() cli.Command {
 // createHTTPErrorHandler creates a custom HTTP error handler.
 func createHTTPErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
+		// NOTE: I hope there will never be a nil error again, but if it does, we'll handle it gracefully
 		if err == nil {
-			return
+			err = errors.New("unexpected nil error")
 		}
 
 		code := http.StatusInternalServerError
 		var message string
 
 		if herr, ok := err.(*echo.HTTPError); ok {
-			if herr == nil {
-				return
-			}
-
 			code = herr.Code
 			switch m := herr.Message.(type) {
 			case string:
