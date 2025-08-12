@@ -20,19 +20,48 @@ import (
 )
 
 var (
-	// FIXME: Do not use regexp for this
-	keyAuthSkipperRegExp = regexp.MustCompile(
-		`(.*/login.*|.*\.css|.*\.png|.*\.ico|.*\.woff|.*\.woff2|.*manifest.json|` +
-			`.*service-worker\.js|.*htmx.min.js|.*sw-register.js|.*pwa-manager.js|` +
-			`.*htmx.*\.js)`)
+	keyAuthFilesToSkip       []string
+	keyAuthFilesToSkipRegExp *regexp.Regexp
+	pages                    []string
+)
 
+func init() {
 	pages = []string{
 		serverPathPrefix + "/",
 		serverPathPrefix + "/feed",
 		serverPathPrefix + "/profile",
 		serverPathPrefix + "/trouble-reports",
 	}
-)
+
+	keyAuthFilesToSkip = []string{
+		// Pages
+		serverPathPrefix + "/login",
+
+		// CSS
+		serverPathPrefix + "/css/bootstrap-icons.min.css",
+		serverPathPrefix + "/css/ui.min.css",
+		serverPathPrefix + "/css/layout.css",
+
+		// Libraries
+		serverPathPrefix + "/js/htmx-v2.0.6.min.js",
+		serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
+
+		// Fonts
+		serverPathPrefix + "/bootstrap-icons.woff",
+		serverPathPrefix + "/bootstrap-icons.woff2",
+
+		// Icons
+		serverPathPrefix + "/apple-touch-icon-180x180.png",
+		serverPathPrefix + "/favicon.ico",
+		serverPathPrefix + "/icon.png",
+		serverPathPrefix + "/manifest.json",
+		serverPathPrefix + "/pwa-192x192.png",
+		serverPathPrefix + "/pwa-512x512.png",
+		serverPathPrefix + "/pwa-64x64.png",
+	}
+
+	keyAuthFilesToSkipRegExp = regexp.MustCompile(`.*woff[2]`)
+}
 
 func middlewareLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -72,7 +101,11 @@ func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 
 func keyAuthSkipper(ctx echo.Context) bool {
 	url := ctx.Request().URL.String()
-	return keyAuthSkipperRegExp.MatchString(url)
+	path := ctx.Request().URL.Path
+	if slices.Contains(keyAuthFilesToSkip, path) || slices.Contains(keyAuthFilesToSkip, url) {
+		return true
+	}
+	return keyAuthFilesToSkipRegExp.MatchString(url)
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
