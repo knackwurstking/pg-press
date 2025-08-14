@@ -1,4 +1,3 @@
-// TODO: Clenup and fix ui class names (flex, ...)
 package pages
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
@@ -8,7 +7,7 @@ script loginScript() {
 }
 
 templ loginNavContent() {
-	<div class="flex row gap justify-end align-center">
+	<div class="flex flex-row gap justify-end items-center">
 		@navProfileButton()
 		@navHomeButton()
 	</div>
@@ -25,7 +24,7 @@ templ LoginPage(apiKey string, invalidApiKey bool) {
 		<main class="container">
 			<dialog id="dialogLogin" class="clean" oncancel="event.preventDefault();">
 				<form>
-					<label class="flex column">
+					<label class="flex flex-col">
 						API-Schlüssel
 						<input
 							name="api-key"
@@ -39,7 +38,7 @@ templ LoginPage(apiKey string, invalidApiKey bool) {
 						/>
 					</label>
 					<footer class="flex">
-						<button class="flex-item" type="submit">Anmelden</button>
+						<button class="flex-1" type="submit">Anmelden</button>
 					</footer>
 				</form>
 			</dialog>
