@@ -34,9 +34,6 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	e.POST(modificationsPath, h.handlePostModifications)
 
 	// Attachment routes
-	attachmentReorderPath := h.ServerPathPrefix + "/attachments/reorder"
-	e.POST(attachmentReorderPath, h.handlePostAttachmentReorder)
-
 	attachmentPath := h.ServerPathPrefix + "/attachments"
 	e.GET(attachmentPath, h.handleGetAttachment)
 }
