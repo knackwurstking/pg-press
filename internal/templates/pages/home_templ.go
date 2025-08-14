@@ -104,15 +104,15 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- TODO: Anchor Button => ??? Page -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Anchor Button => Tools Page -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = homePageNavItem(
-				"./???",
-				"question-circle",
-				"???",
-				"Description...",
+				"./tools",
+				"tools",
+				"Werkzeuglisten",
+				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
