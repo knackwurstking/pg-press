@@ -32,14 +32,14 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(cookies) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<details id=\"cookies\" class=\"cookies-details\" open><style>\n            .cookies-details {\n                border: none;\n                background: transparent;\n            }\n\n            .cookies-summary {\n                background: var(--ui-color-200);\n                color: var(--ui-text);\n                padding: var(--ui-spacing);\n                margin: 0;\n                border-radius: var(--ui-radius);\n                font-size: 1.1rem;\n                font-weight: 600;\n                transition: background-color 0.2s ease;\n            }\n\n            .cookies-summary:hover {\n                background: var(--ui-color-300);\n            }\n\n            .cookies-table {\n                margin-top: var(--ui-spacing);\n                background: var(--ui-bg);\n                border-radius: var(--ui-radius);\n                box-shadow: 0 2px 8px var(--ui-backdrop-color);\n            }\n\n            .cookies-table th {\n                background: var(--ui-color-200);\n                color: var(--ui-text);\n                font-weight: 600;\n                padding: calc(var(--ui-spacing) * 1.5);\n                border-bottom: var(--ui-border-width) var(--ui-border-style)\n                    var(--ui-border-color);\n            }\n\n            .cookies-table td {\n                padding: var(--ui-spacing);\n                border-bottom: var(--ui-border-width) var(--ui-border-style)\n                    var(--ui-color-200);\n                vertical-align: middle;\n            }\n\n            .cookies-table tr:last-child td {\n                border-bottom: none;\n            }\n\n            .cookies-table tr:hover {\n                background: var(--ui-color-100);\n            }\n\n            .time-cell {\n                font-family: \"Courier New\", monospace;\n                color: var(--ui-color-600);\n                font-size: 0.9rem;\n                min-width: 140px;\n            }\n\n            .user-agent-cell {\n                color: var(--ui-color-700);\n                font-size: 0.85rem;\n                max-width: 300px;\n                word-break: break-word;\n            }\n\n            .no-cookies {\n                text-align: center;\n                color: var(--ui-color-600);\n                padding: calc(var(--ui-spacing) * 2);\n                background: var(--ui-color-100);\n                border-radius: var(--ui-radius);\n                font-style: italic;\n            }\n        </style><summary class=\"cookies-summary\"><i class=\"bi bi-cookie\"></i> Aktive Sitzungen ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<details id=\"cookies\" class=\"cookies-details\" open><style>\n\t            .no-cookies {\n\t                text-align: center;\n\t                color: var(--ui-color-600);\n\t                padding: calc(var(--ui-spacing) * 2);\n\t                background: var(--ui-color-100);\n\t                border-radius: var(--ui-radius);\n\t                font-style: italic;\n\t            }\n            </style><summary class=\"cookies-summary\"><i class=\"bi bi-cookie\"></i> Aktive Sitzungen ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(len(cookies))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 85, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 20, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -57,7 +57,7 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.TimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 99, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 34, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -70,7 +70,7 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.UserAgent)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 100, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 35, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
