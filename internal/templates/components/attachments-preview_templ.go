@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/templates/utils"
+	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
 func AttachmentsPreview(attachments []*database.Attachment) templ.Component {
@@ -54,7 +54,7 @@ func AttachmentsPreview(attachments []*database.Attachment) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, attachment := range attachments {
-				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, utils.OpenImageViewer(attachment.GetID()))
+				templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, layouts.OpenImageViewer(attachment.GetID()))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -62,7 +62,7 @@ func AttachmentsPreview(attachments []*database.Attachment) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var3 templ.ComponentScript = utils.OpenImageViewer(attachment.GetID())
+				var templ_7745c5c3_Var3 templ.ComponentScript = layouts.OpenImageViewer(attachment.GetID())
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3.Call)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

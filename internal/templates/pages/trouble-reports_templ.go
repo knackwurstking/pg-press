@@ -10,7 +10,76 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
-func troubleReportsAdditionalHead() templ.Component {
+func troubleReportsPageScript() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_troubleReportsPageScript_8083`,
+		Function: `function __templ_troubleReportsPageScript_8083(){// Initialize search timer variable
+	var searchTimer;
+
+	// Search function with debouncing and client-side filtering
+	function search(event) {
+		var searchValue = event.target.value.toLowerCase().trim();
+
+		// Clear existing timer
+		clearTimeout(searchTimer);
+
+		// Set new timer for lazy search (300ms delay)
+		searchTimer = setTimeout(function() {
+			// Split search value on spaces to get individual search terms
+			var searchTerms = searchValue.split(/\s+/).filter(function(term) {
+				return term.length > 0;
+			});
+
+			// Get all trouble report elements
+			var troubleReports = document.querySelectorAll('span.trouble-report');
+
+			for (var i = 0; i < troubleReports.length; i++) {
+				var report = troubleReports[i];
+				if (searchTerms.length === 0) {
+					// Show all if search is empty
+					report.style.display = '';
+				} else {
+					// Get the text content from the summary and pre elements
+					var summary = report.querySelector('summary');
+					var content = report.querySelector('pre');
+
+					var summaryText = summary ? summary.textContent.toLowerCase() : '';
+					var contentText = content ? content.textContent.toLowerCase() : '';
+					var combinedText = summaryText + ' ' + contentText;
+
+					// Check if ALL search terms are found in either summary or content
+					var allTermsFound = true;
+					for (var j = 0; j < searchTerms.length; j++) {
+						if (!combinedText.includes(searchTerms[j])) {
+							allTermsFound = false;
+							break;
+						}
+					}
+
+					if (allTermsFound) {
+						report.style.display = '';
+					} else {
+						report.style.display = 'none';
+					}
+				}
+			}
+		}, 300);
+	}
+
+	// Clear timer on page unload to prevent memory leaks
+	window.addEventListener('beforeunload', function() {
+		clearTimeout(searchTimer);
+	});
+
+	// Make search function available globally
+	window.search = search;
+}`,
+		Call:       templ.SafeScript(`__templ_troubleReportsPageScript_8083`),
+		CallInline: templ.SafeScriptInline(`__templ_troubleReportsPageScript_8083`),
+	}
+}
+
+func troubleReportsPageAdditionalHead() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,11 +104,15 @@ func troubleReportsAdditionalHead() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = troubleReportsPageScript().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		return nil
 	})
 }
 
-func troubleReportsNavContent() templ.Component {
+func troubleReportsPageNavContent() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -117,7 +190,7 @@ func TroubleReportsPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"container fluid\"><!-- Search Bar --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-between\"><input style=\"margin: auto 0; width: 100%\" type=\"search\" name=\"search\" placeholder=\"Suche\" aria-label=\"Suche\" oninput=\"search(event)\"></section><!-- Page Actions: Create --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"./trouble-reports/data\" hx-trigger=\"load\" hx-swap=\"outerHTML\" id=\"data\"></span></section><!-- Placeholder for the edit trouble report dialog --><span id=\"dialogEdit\"></span></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"container fluid\"><!-- Search Bar --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-between\"><input style=\"margin: auto 0; width: 100%\" type=\"search\" name=\"search\" placeholder=\"Suche\" aria-label=\"Suche\" oninput=\"window.search(event)\"></section><!-- Page Actions: Create --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-end\"><button hx-get=\"./trouble-reports/dialog-edit\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"./trouble-reports/data\" hx-trigger=\"load\" hx-swap=\"outerHTML\" id=\"data\"></span></section><!-- Placeholder for the edit trouble report dialog --><span id=\"dialogEdit\"></span></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -127,8 +200,8 @@ func TroubleReportsPage() templ.Component {
 			layouts.MainOptions{
 				PageTitle:      "PG Presse | Problemberichte",
 				AppBarTitle:    "Problemberichte",
-				AdditionalHead: troubleReportsAdditionalHead(),
-				NavContent:     troubleReportsNavContent(),
+				AdditionalHead: troubleReportsPageAdditionalHead(),
+				NavContent:     troubleReportsPageNavContent(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

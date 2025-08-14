@@ -2,12 +2,76 @@ package pages
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
-templ troubleReportsAdditionalHead() {
-	<link rel="stylesheet" href="./css/trouble-reports/dialog-edit.css"/>
-	<link rel="stylesheet" href="./css/trouble-reports/data.css"/>
+script troubleReportsPageScript() {
+	// Initialize search timer variable
+	var searchTimer;
+
+	// Search function with debouncing and client-side filtering
+	function search(event) {
+		var searchValue = event.target.value.toLowerCase().trim();
+
+		// Clear existing timer
+		clearTimeout(searchTimer);
+
+		// Set new timer for lazy search (300ms delay)
+		searchTimer = setTimeout(function() {
+			// Split search value on spaces to get individual search terms
+			var searchTerms = searchValue.split(/\s+/).filter(function(term) {
+				return term.length > 0;
+			});
+
+			// Get all trouble report elements
+			var troubleReports = document.querySelectorAll('span.trouble-report');
+
+			for (var i = 0; i < troubleReports.length; i++) {
+				var report = troubleReports[i];
+				if (searchTerms.length === 0) {
+					// Show all if search is empty
+					report.style.display = '';
+				} else {
+					// Get the text content from the summary and pre elements
+					var summary = report.querySelector('summary');
+					var content = report.querySelector('pre');
+
+					var summaryText = summary ? summary.textContent.toLowerCase() : '';
+					var contentText = content ? content.textContent.toLowerCase() : '';
+					var combinedText = summaryText + ' ' + contentText;
+
+					// Check if ALL search terms are found in either summary or content
+					var allTermsFound = true;
+					for (var j = 0; j < searchTerms.length; j++) {
+						if (!combinedText.includes(searchTerms[j])) {
+							allTermsFound = false;
+							break;
+						}
+					}
+
+					if (allTermsFound) {
+						report.style.display = '';
+					} else {
+						report.style.display = 'none';
+					}
+				}
+			}
+		}, 300);
+	}
+
+	// Clear timer on page unload to prevent memory leaks
+	window.addEventListener('beforeunload', function() {
+		clearTimeout(searchTimer);
+	});
+
+	// Make search function available globally
+	window.search = search;
 }
 
-templ troubleReportsNavContent() {
+templ troubleReportsPageAdditionalHead() {
+	<link rel="stylesheet" href="./css/trouble-reports/dialog-edit.css"/>
+	<link rel="stylesheet" href="./css/trouble-reports/data.css"/>
+	@troubleReportsPageScript()
+}
+
+templ troubleReportsPageNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
 		@navFeedButton()
 		@navProfileButton()
@@ -20,8 +84,8 @@ templ TroubleReportsPage() {
 		layouts.MainOptions{
 			PageTitle:      "PG Presse | Problemberichte",
 			AppBarTitle:    "Problemberichte",
-			AdditionalHead: troubleReportsAdditionalHead(),
-			NavContent:     troubleReportsNavContent(),
+			AdditionalHead: troubleReportsPageAdditionalHead(),
+			NavContent:     troubleReportsPageNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -33,7 +97,7 @@ templ TroubleReportsPage() {
 					name="search"
 					placeholder="Suche"
 					aria-label="Suche"
-					oninput="search(event)"
+					oninput="window.search(event)"
 				/>
 			</section>
 			<!-- Page Actions: Create -->
