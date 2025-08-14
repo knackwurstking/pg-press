@@ -25,14 +25,14 @@ templ HomePage() {
 			<nav>
 				<div class="flex flex-col gap justify-center">
 					<!-- Anchor Button => Trouble Reports Page -->
-					@homePageNavItem(
+					@homePageItem(
 						"./trouble-reports",
 						"exclamation-triangle",
 						"Problemberichte",
 						"Verwalten Sie Problemberichte und Lösungen",
 					)
 					<!-- Anchor Button => Tools Page -->
-					@homePageNavItem(
+					@homePageItem(
 						"./tools",
 						"tools",
 						"Werkzeuglisten",
@@ -44,7 +44,7 @@ templ HomePage() {
 	}
 }
 
-templ homePageNavItem(href, icon, title, description string) {
+templ homePageItem(href, icon, title, description string) {
 	<a
 		role="button"
 		class="ghost secondary flex flex-row gap justify-between items-center"
