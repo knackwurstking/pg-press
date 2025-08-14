@@ -45,7 +45,7 @@ script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
     }
 }
 
-script onFileInputChange() {
+script onFileInputChange(event templ.JSExpression) {
     selectedFiles = Array.from(event.target.files);
 
     function formatFileSize(bytes) {
@@ -101,6 +101,10 @@ script onFileInputChange() {
 
             container.appendChild(item);
         });
+
+        setTimeout(() => {
+            previewArea.scrollIntoView({behavior: "smooth", block: "start"});
+        }, 100);
     } else {
         previewArea.style.display = "none";
     }
@@ -250,7 +254,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 								id="attachments"
 								multiple
 								accept="image/*"
-								onchange={ onFileInputChange() }
+								onchange={ onFileInputChange(templ.JSExpression("event")) }
 							/>
 						</div>
 						<!-- File Preview Area -->
