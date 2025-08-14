@@ -1,4 +1,3 @@
-// TODO: Clenup and fix ui class names (flex, ...)
 package pages
 
 import (
@@ -7,7 +6,7 @@ import (
 )
 
 templ profileNavContent() {
-	<div class="flex row gap justify-end align-center">
+	<div class="flex flex-row gap justify-end items-center">
 		@navFeedButton()
 		@navProfileButton()
 		@navHomeButton()
@@ -60,7 +59,7 @@ templ ProfilePage(user *database.User) {
 				<!-- Profile user name with an edit button to the right -->
 				<div
 					style="margin-bottom: var(--ui-spacing);"
-					class="flex justify-between align-center"
+					class="flex flex-row justify-between items-center"
 				>
 					<h1 style="margin: 0; color: var(--ui-text); font-size: 2.25rem;">
 						{ user.UserName }
@@ -74,12 +73,12 @@ templ ProfilePage(user *database.User) {
 					</button>
 				</div>
 				<!-- Profile Telegram ID and a Logout button -->
-				<div class="flex gap wrap justify-between align-center">
+				<div class="flex flex-row gap flex-wrap justify-between items-center">
 					<div class="telegram-id">
 						<i class="bi bi-telegram"></i>
 						Telegram ID: { user.TelegramID }
 					</div>
-					<a role="button" href="./logout" class="ghost destructive flex row gap">
+					<a role="button" href="./logout" class="ghost destructive flex flex-row gap">
 						<i class="bi bi-box-arrow-right"></i>
 						Abmelden
 					</a>
@@ -102,7 +101,7 @@ templ ProfilePage(user *database.User) {
 			>
 				<form action="./profile">
 					<!-- User name -->
-					<label class="flex column">
+					<label class="flex flex-col">
 						<strong>Benutzername ändern</strong>
 						<input
 							name="user-name"
@@ -112,14 +111,14 @@ templ ProfilePage(user *database.User) {
 							required
 						/>
 					</label>
-					<footer style="margin-top: calc(var(--ui-spacing) * 2);" class="flex row gap justify-end">
+					<footer style="margin-top: calc(var(--ui-spacing) * 2);" class="flex flex-row gap justify-end">
 						<!-- Cancel button -->
-						<a role="button" href="./profile" class="secondary flex row gap">
+						<a role="button" href="./profile" class="secondary flex flex-row gap">
 							<i class="bi bi-x-circle"></i>
 							Schließen
 						</a>
 						<!-- Submit button -->
-						<button type="submit" class="primary flex row gap">
+						<button type="submit" class="primary flex flex-row gap">
 							<i class="bi bi-check-circle"></i>
 							Ändern
 						</button>

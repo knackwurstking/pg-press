@@ -20,8 +20,8 @@ details[open] summary::after {
 
 .image-viewer button.close {
     position: fixed;
-    top: 0;
-    right: 0;
+    top: var(--ui-spacing);
+    right: var(--ui-spacing);
 }
 
 .image-viewer img {

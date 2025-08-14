@@ -1,4 +1,3 @@
-// TODO: Clenup and fix ui class names (flex, ...)
 package components
 
 import (
@@ -117,7 +116,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 							</div>
 						}
 					</details>
-					<div class="actions flex row gap justify-end align-center">
+					<div class="actions flex gap justify-end items-center">
 						<button
 							hx-get={ fmt.Sprintf("./trouble-reports/modifications/%d", tr.ID) }
 							hx-trigger="click"
@@ -162,7 +161,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 								hx-post={ fmt.Sprintf("./trouble-reports/vote?id=%d&mode=delete", tr.ID) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
-								class="ghost destructive flex column justify-between align-center"
+								class="ghost destructive flex flex-col justify-between items-center"
 								disabled
 							>
 								<i class="bi bi-trash"></i>

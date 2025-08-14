@@ -1,4 +1,3 @@
-// TODO: Clenup and fix ui class names (flex, ...)
 package components
 
 import "github.com/knackwurstking/pgpress/internal/database"
@@ -99,7 +98,7 @@ templ CookiesTable(cookies []*database.Cookie) {
 						<tr>
 							<td class="time-cell">{ cookie.TimeString() }</td>
 							<td class="left user-agent-cell">{ cookie.UserAgent }</td>
-							<td class="right no-user-select">
+							<td class="right select-none">
 								<a
 									hx-delete="./profile/cookies?value={{$cookie.Value}}"
 									hx-trigger="click"

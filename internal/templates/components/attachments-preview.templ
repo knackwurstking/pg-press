@@ -1,4 +1,3 @@
-// TODO: Clenup and fix ui class names (flex, ...)
 package components
 
 import (
@@ -9,15 +8,15 @@ import (
 
 templ AttachmentsPreview(attachments []*database.Attachment) {
 	if len(attachments) > 0 {
-		<div class="attachments-preview-container no-user-select">
-			<div class="attachments-preview-label flex align-center gap no-user-select">
+		<div class="attachments-preview-container">
+			<div class="attachments-preview-label flex gap items-center select-none">
 				<i class="bi bi-paperclip"></i>
 				Bilder ({ len(attachments) })
 			</div>
 			<div class="attachments-preview-scroll flex gap">
 				for _, attachment := range attachments {
 					<div
-						class="attachment-preview-item flex column align-center gap no-user-select ghost"
+						class="attachment-preview-item flex flex-col gap items-center select-none ghost"
 						onclick={ utils.OpenImageViewer(attachment.GetID()) }
 						tabindex="0"
 						role="button"
@@ -28,7 +27,7 @@ templ AttachmentsPreview(attachments []*database.Attachment) {
 								loading="lazy"
 								src={ fmt.Sprintf("./trouble-reports/attachments?attachment_id=%s", attachment.ID) }
 								alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
-								class="preview-thumbnail no-user-select"
+								class="preview-thumbnail select-none"
 								loading="lazy"
 							/>
 						</div>
