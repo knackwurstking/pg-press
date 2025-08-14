@@ -45,7 +45,7 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</summary><figure class=\"overflow-auto\"><table class=\"cookies-table\"><thead><tr><th style=\"width: fit-content;\">Letzte Anmeldung</th><th style=\"width: 100%;\" class=\"left\">Benutzeragent</th><th style=\"width: fit-content;\"></th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</summary><figure class=\"overflow-auto\"><table class=\"cookies-table borderless\"><thead><tr><th style=\"width: fit-content;\">Letzte Anmeldung</th><th style=\"width: 100%;\" class=\"left\">Benutzeragent</th><th style=\"width: fit-content;\"></th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
