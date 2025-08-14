@@ -1,9 +1,12 @@
 package pages
 
-import "github.com/knackwurstking/pgpress/internal/templates/layouts"
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/templates/layouts"
+)
 
 templ homeNavContent() {
-	<div class="flex row gap justify-end align-center">
+	<div class="flex flex-row gap justify-end items-center">
 		@navFeedButton()
 		@navProfileButton()
 		@navHomeButton()
@@ -20,42 +23,43 @@ templ HomePage() {
 	) {
 		<main class="container fluid">
 			<nav>
-				<div class="flex column gap justify-center">
+				<div class="flex flex-col gap justify-center">
 					<!-- Anchor Button => Trouble Reports Page -->
-					<a
-						role="button"
-						class="ghost secondary flex row gap justify-between align-center"
-						style="width: 90%; margin: 0 auto;"
-						href="./trouble-reports"
-					>
-						<span class="flex row gap align-center">
-							<i style="margin: var(--ui-spacing);" class="bi bi-exclamation-triangle"></i>
-							<span class="flex column">
-								<strong>Problemberichte</strong>
-								<small>Verwalten Sie Problemberichte und Lösungen</small>
-							</span>
-						</span>
-						<i class="bi bi-chevron-right"></i>
-					</a>
-					<!-- Anchor Button => ??? Page -->
-					<a
-						role="button"
-						class="ghost secondary flex row gap justify-between align-center"
-						style="width: 90%; margin: 0 auto;"
-						href="./???"
-						disabled
-					>
-						<span class="flex row gap align-center">
-							<i style="margin: var(--ui-spacing);" class="bi bi-exclamation-???"></i>
-							<span class="flex column">
-								<strong>???</strong>
-								<small>Description...</small>
-							</span>
-						</span>
-						<i class="bi bi-chevron-right"></i>
-					</a>
+					@homePageNavItem(
+						"./trouble-reports",
+						"exclamation-triangle",
+						"Problemberichte",
+						"Verwalten Sie Problemberichte und Lösungen",
+					)
+					<!-- TODO: Anchor Button => ??? Page -->
+					@homePageNavItem(
+						"./???",
+						"question-circle",
+						"???",
+						"Description...",
+					)
 				</div>
 			</nav>
 		</main>
 	}
+}
+
+templ homePageNavItem(href, icon, title, description string) {
+	<a
+		role="button"
+		class="ghost secondary flex flex-row gap justify-between items-center"
+		style="width: 90%; margin: 0 auto;"
+		href={ href }
+	>
+		<span style="width: 100%;" class="flex flex-row gap items-center">
+			if icon != "" {
+				<i style="margin: var(--ui-spacing);" class={ fmt.Sprintf("bi bi-%s", icon) }></i>
+			}
+			<span class="flex flex-col">
+				<strong>{ title }</strong>
+				<small>{ description }</small>
+			</span>
+		</span>
+		<i class="bi bi-chevron-right"></i>
+	</a>
 }
