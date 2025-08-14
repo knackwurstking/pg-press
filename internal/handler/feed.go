@@ -18,7 +18,7 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(h.ServerPathPrefix+prefix, h.handleFeed)
 
-	htmxFeed := htmxhandler.Feed{Base: h.NewHTMX(prefix)}
+	htmxFeed := htmxhandler.Feed{Base: h.NewHTMXHandlerBase(prefix)}
 	htmxFeed.RegisterRoutes(e)
 }
 

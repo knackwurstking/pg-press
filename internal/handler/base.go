@@ -10,7 +10,7 @@ type Base struct {
 	ServerPathPrefix string
 }
 
-func (b *Base) NewHTMX(prefix string) *htmxhandler.Base {
+func (b *Base) NewHTMXHandlerBase(prefix string) *htmxhandler.Base {
 	return &htmxhandler.Base{
 		DB:               b.DB,
 		ServerPathPrefix: b.ServerPathPrefix + prefix,

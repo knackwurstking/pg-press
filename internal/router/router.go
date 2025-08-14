@@ -43,6 +43,7 @@ func Serve(e *echo.Echo, o Options) {
 	(&handler.Feed{Base: base}).RegisterRoutes(e)
 	(&handler.Profile{Base: base}).RegisterRoutes(e)
 	(&handler.TroubleReports{Base: base}).RegisterRoutes(e)
+	(&handler.Tools{Base: base}).RegisterRoutes(e)
 }
 
 func startWebSocketHandlers(db *database.DB) *wshandler.WSHandlers {
