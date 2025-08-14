@@ -6,6 +6,10 @@ import (
 )
 
 script troubleReportsListScript() {
+	if (location.hash === "") {
+		return;
+	}
+
 	var details = document.querySelector(location.hash);
 	console.debug(location.hash, details)
 	if (details) {
