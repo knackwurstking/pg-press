@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -27,7 +28,13 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Tools) handleToolsPage(c echo.Context) error {
-	page := pages.ToolsPage()
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tools: "+err.Error())
+	}
+
+	page := pages.ToolsPage(tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools page: "+err.Error())
@@ -42,9 +49,13 @@ func (h *Tools) handleToolsAllPage(c echo.Context) error {
 			"failed to parse id: "+err.Error())
 	}
 
-	// TODO: Get tools data from the database
+	tool, err := h.DB.Tools.Get(id)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
+	}
 
-	page := pages.ToolsAllPage(id)
+	page := pages.ToolsAllPage(tool)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools all page: "+err.Error())
