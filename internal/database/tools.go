@@ -6,6 +6,7 @@ const (
 	createToolsTableQuery = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
+			format TEXT NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
