@@ -30,23 +30,33 @@ templ ToolsPage() {
 					   format + ID, link to sub page showing all information
 					   about the tool (/tools/:id) -->
 			<!-- NOTE: Just some things i have in mind
-				...
-					<select: Upper Tool ID> <select: Lower Tool ID>
-					100x100 G01 	 		100x100 G02
 
-					Showing notes for selected tools
+				action buttons
+					add a new tool
+					add/edit a new metal sheet entry
+					 	edit dialog, or a sub page
+						while typing, do background checks for existing data and display below
 
-					Table with known metal sheets
-						Thickness in mm, with a belonging mass humidity (Optimal: 6%)
-						Marke height in mm
-						Stempelfall ("current", "max"), (types: "SACMI", "SITI")
+			 	list tools
 
-					Calculator based on existing table data (Experimental)
+				if a tool was clicked
+			     	action buttons
+					    share to pdf button, only enabled if a tool is selected
 
-				...
-					100x100 G01
-					100x100 G02
-					...
+					selection
+						<select: Upper Tool ID> <select: Lower Tool ID>
+						100x100 G01 	 		100x100 G02
+
+					output
+						Showing notes for upper and lower tools
+
+						Metal sheets table
+							Thickness in mm, with a belonging mass humidity (Optimal: 6%)
+							Marke height in mm
+							Stempelfall ("current", "max"), (types: "SACMI", "SITI")
+
+						Calculator based on existing table data (Experimental)
+
 			-->
 		</main>
 	}
