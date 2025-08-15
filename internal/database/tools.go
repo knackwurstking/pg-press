@@ -96,6 +96,19 @@ func (t *Tools) List() ([]*Tool, error) {
 	return tools, nil
 }
 
+func (t *Tools) Get(id int64) (*Tool, error) {
+	logger.Tools().Info("Getting tool, id: %d", id)
+
+	row := t.db.QueryRow(selectToolByIDQuery, id)
+
+	tool, err := t.scanToolFromRow(row)
+	if err != nil {
+		return nil, WrapError(err, "failed to scan tool")
+	}
+
+	return tool, nil
+}
+
 func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 
@@ -105,6 +118,33 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	)
 
 	if err := rows.Scan(&tool.ID, &format, &tool.Type,
+		&tool.Code, &notes); err != nil {
+		return nil, NewDatabaseError("scan", "tools",
+			"failed to scan row", err)
+	}
+
+	if err := json.Unmarshal(format, &tool.Format); err != nil {
+		return nil, NewDatabaseError("scan", "tools",
+			"failed to unmarshal format", err)
+	}
+
+	if err := json.Unmarshal(notes, &tool.Notes); err != nil {
+		return nil, NewDatabaseError("scan", "tools",
+			"failed to unmarshal notes", err)
+	}
+
+	return tool, nil
+}
+
+func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
+	tool := &Tool{}
+
+	var (
+		format []byte
+		notes  []byte
+	)
+
+	if err := row.Scan(&tool.ID, &format, &tool.Type,
 		&tool.Code, &notes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
