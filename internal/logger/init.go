@@ -92,6 +92,10 @@ func TroubleReport() *Logger {
 	return NewComponentLogger("TroubleReport")
 }
 
+func Tools() *Logger {
+	return NewComponentLogger("Tools")
+}
+
 // User returns a logger configured for user operations
 func User() *Logger {
 	return NewComponentLogger("User")
