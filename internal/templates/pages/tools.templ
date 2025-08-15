@@ -38,26 +38,105 @@ templ ToolsPage() {
 						while typing, do background checks for existing data and display below
 
 			 	list tools
+					if a tool was clicked
+				     	action buttons
+						    share to pdf button, only enabled if a tool is selected
 
-				if a tool was clicked
-			     	action buttons
-					    share to pdf button, only enabled if a tool is selected
+						selection
+							<select: Upper Tool ID> <select: Lower Tool ID>
+							100x100 G01 	 		100x100 G02
 
-					selection
-						<select: Upper Tool ID> <select: Lower Tool ID>
-						100x100 G01 	 		100x100 G02
+						output
+							Showing notes for upper and lower tools
 
-					output
-						Showing notes for upper and lower tools
+							Metal sheets table
+								Thickness in mm, with a belonging mass humidity (Optimal: 6%)
+								Marke height in mm
+								Stempelfall ("current", "max"), (types: "SACMI", "SITI")
 
-						Metal sheets table
-							Thickness in mm, with a belonging mass humidity (Optimal: 6%)
-							Marke height in mm
-							Stempelfall ("current", "max"), (types: "SACMI", "SITI")
-
-						Calculator based on existing table data (Experimental)
+							Calculator based on existing table data (Experimental)
 
 			-->
+			<!--div class="actions"></div-->
+			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
+				<div class="active-tools p">
+					<h3 class="mb">
+						<i class="bi bi-gear-fill mr"></i>
+						Eingebaute Werkzeuge
+					</h3>
+					<ul
+						class="flex flex-col gap m-0 p-0"
+						style="list-style: none;"
+					>
+						<li>
+							<a
+								role="button"
+								href="#"
+								class="ghost contrast flex justify-between items-center"
+							>
+								<span class="flex gap-lg items-center">
+									<!-- Upper Tool -->
+									<small
+										style="border-radius: var(--ui-radius);"
+										class="primary py-sm px"
+									>Oben</small>
+									<span>100x100 G01</span>
+									<!-- Separator -->
+									<span class="muted ghost">|</span>
+									<!-- Lower Tool -->
+									<small
+										style="border-radius: var(--ui-radius);"
+										class="primary py-sm px"
+									>Unten</small>
+									<span>100x100 G01</span>
+								</span>
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="all-tools p">
+					<h3 class="mb">
+						<i class="bi bi-archive mr"></i>
+						Alle Werkzeuge
+					</h3>
+					<ul
+						class="flex flex-col gap m-0 p-0"
+						style="list-style: none;"
+					>
+						<li>
+							<a
+								role="button"
+								href="#"
+								class="ghost contrast flex justify-between items-center py px-lg"
+							>
+								<span>150x75 XXL01</span>
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+						<li>
+							<a
+								role="button"
+								href="#"
+								class="ghost contrast flex justify-between items-center py px-lg"
+							>
+								<span>100x100 G01</span>
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+						<li>
+							<a
+								role="button"
+								href="#"
+								class="ghost contrast flex justify-between items-center py px-lg"
+							>
+								<span>100x100 G02</span>
+								<i class="bi bi-chevron-right"></i>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
 		</main>
 	}
 }
