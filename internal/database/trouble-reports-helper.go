@@ -1,4 +1,4 @@
-// Package database provides service layer for trouble report operations
+// Package database provides helper layer for trouble report operations
 // with attachment lazy loading.
 package database
 
@@ -21,7 +21,7 @@ type TroubleReportsHelper struct {
 	attachments    *Attachments
 }
 
-// NewTroubleReportsHelper creates a new service instance.
+// NewTroubleReportsHelper creates a new helper instance.
 func NewTroubleReportsHelper(
 	troubleReports *TroubleReports,
 	attachments *Attachments,
