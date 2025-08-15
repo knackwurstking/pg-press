@@ -3,6 +3,7 @@ package database
 const (
 	INFO NoteLevel = iota
 	ATTENTION
+	BROKEN
 )
 
 type NoteLevel int
