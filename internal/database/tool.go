@@ -19,3 +19,7 @@ type Tool struct {
 	Code   string     `json:"code"`
 	Notes  []Note     `json:"notes"`
 }
+
+func (t *Tool) String() string {
+	return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
+}
