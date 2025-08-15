@@ -55,7 +55,7 @@ func (h *Tools) handleToolsAllPage(c echo.Context) error {
 			"failed to get tool: "+err.Error())
 	}
 
-	page := pages.ToolsAllPage(tool)
+	page := pages.ToolPage(tool)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools all page: "+err.Error())

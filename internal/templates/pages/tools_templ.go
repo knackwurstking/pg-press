@@ -100,7 +100,7 @@ func ToolsPage(tools []*database.Tool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = allTools().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = allTools(tools).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,6 +125,7 @@ func ToolsPage(tools []*database.Tool) templ.Component {
 	})
 }
 
+// TODO: Take database data from the database for this press (prop: press *database.Press)
 func ToolsActivePage(press int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -179,7 +180,7 @@ func ToolsActivePage(press int64) templ.Component {
 	})
 }
 
-func ToolsAllPage(tool *database.Tool) templ.Component {
+func ToolPage(tool *database.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -212,7 +213,7 @@ func ToolsAllPage(tool *database.Tool) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Work in Progress</span></h4></div><div class=\"card-body\"><ul><!-- TODO: ... --><li>...</li></ul></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Work in Progress</span></h4></div><div class=\"card-body\"><ul><li>...</li></ul></div></div><!-- TODO: Print out notes and all available data in `tool` --><!-- TODO: Request metalsheets for this tool id (htmx) --></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -221,8 +222,8 @@ func ToolsAllPage(tool *database.Tool) templ.Component {
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
 				RelPath:     "../../",
-				PageTitle:   fmt.Sprintf("PG Presse | Werkzeug %s", tool.Format.String()), // TODO: Use tool name as title here
-				AppBarTitle: fmt.Sprintf("Werkzeug %s", tool.Format.String()),             // TODO: Use tool name as title here
+				PageTitle:   fmt.Sprintf("PG Presse | Werkzeug %s", tool.String()),
+				AppBarTitle: fmt.Sprintf("Werkzeug %s", tool.String()),
 				NavContent:  toolsPageNavContent("../../"),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
@@ -298,7 +299,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 149, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 151, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -311,7 +312,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 152, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 154, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -324,7 +325,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 156, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 158, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -337,7 +338,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(lower)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 164, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 166, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -350,7 +351,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(upper)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 174, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 176, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -364,7 +365,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 	})
 }
 
-func allTools() templ.Component {
+func allTools(tools []*database.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -385,7 +386,7 @@ func allTools() templ.Component {
 			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"all-tools p\"><h3 class=\"mb\"><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h3><ul class=\"flex flex-col gap m-0 p-0\" style=\"list-style: none;\"><!-- Tools ordered from biggest to smallest --><!-- TODO: For these items here i need an icon which marks a tool is gone\n\t\t\tfor regeneration, another icon for broken and an icon for attention --><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"all-tools p\"><h3 class=\"mb\"><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h3><ul class=\"flex flex-col gap m-0 p-0\" style=\"list-style: none;\"><!-- Tools ordered from biggest to smallest --><!-- TODO: For these items here i need an icon which marks a tool is gone\n\t\t\tfor regeneration, another icon for broken and an icon for attention --><!-- TODO: List all tools here --><li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -445,7 +446,7 @@ func tool(title, href string) templ.Component {
 		var templ_7745c5c3_Var17 templ.SafeURL
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 213, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 216, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -458,7 +459,7 @@ func tool(title, href string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 216, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 219, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

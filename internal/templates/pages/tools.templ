@@ -66,7 +66,7 @@ templ ToolsPage(tools []*database.Tool) {
 			<!--div class="actions"></div-->
 			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
 				@activeTools()
-				@allTools()
+				@allTools(tools)
 			</div>
 		</main>
 	}
@@ -103,7 +103,7 @@ templ ToolsActivePage(press int64) {
 	}
 }
 
-templ ToolsAllPage(tool *database.Tool) {
+templ ToolPage(tool *database.Tool) {
 	@layouts.Main(
 		layouts.MainOptions{
 			RelPath:     "../../",
@@ -182,7 +182,7 @@ templ activeTool(title, upper, lower, href string) {
 	</li>
 }
 
-templ allTools() {
+templ allTools(tools []*database.Tool) {
 	<div class="all-tools p">
 		<h3 class="mb">
 			<i class="bi bi-archive mr"></i>
@@ -195,6 +195,7 @@ templ allTools() {
 			<!-- Tools ordered from biggest to smallest -->
 			<!-- TODO: For these items here i need an icon which marks a tool is gone
 			for regeneration, another icon for broken and an icon for attention -->
+			<!-- TODO: List all tools here -->
 			<li>
 				@tool("150x75 XXL01", "./tools/all/0")
 			</li>
