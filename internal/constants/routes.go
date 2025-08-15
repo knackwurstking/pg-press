@@ -22,9 +22,11 @@ const (
 
 // Query parameter names
 const (
-	QueryParamID     = "id"
-	QueryParamCancel = "cancel"
-	QueryParamTime   = "time"
+	QueryParamID           = "id"
+	QueryParamCancel       = "cancel"
+	QueryParamTime         = "time"
+	QueryParamPress        = "press"
+	QueryParamAttachmentID = "attachment_id"
 )
 
 // Validation constants

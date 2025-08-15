@@ -10,6 +10,7 @@ import (
 	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -42,7 +43,7 @@ type imagePositionOptions struct {
 }
 
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
-	id, err := utils.ParseInt64Query(c, "id")
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}

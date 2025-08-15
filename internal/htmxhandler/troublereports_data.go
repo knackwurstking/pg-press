@@ -35,7 +35,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleDeleteData(c echo.Context) error {
-	id, err := utils.ParseInt64Query(c, "id")
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
-	id, err := utils.ParseInt64Query(c, "id")
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}

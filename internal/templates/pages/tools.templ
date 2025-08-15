@@ -1,34 +1,28 @@
 package pages
 
-import "github.com/knackwurstking/pgpress/internal/templates/layouts"
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/templates/layouts"
+)
 
-templ toolsPageAdditionalHead() {
-	<link rel="stylesheet" href="./css/trouble-reports/dialog-edit.css"/>
-	<link rel="stylesheet" href="./css/trouble-reports/data.css"/>
-	@troubleReportsPageScript()
-}
-
-templ toolsPageNavContent() {
+templ toolsPageNavContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton()
-		@navProfileButton()
-		@navHomeButton()
+		@navFeedButton(relPath)
+		@navProfileButton(relPath)
+		@navHomeButton(relPath)
 	</div>
 }
 
 templ ToolsPage() {
 	@layouts.Main(
 		layouts.MainOptions{
-			PageTitle:      "PG Presse | Werkzeuge",
-			AppBarTitle:    "Werkzeuge",
-			AdditionalHead: toolsPageAdditionalHead(),
-			NavContent:     toolsPageNavContent(),
+			RelPath:     "./",
+			PageTitle:   "PG Presse | Werkzeuge",
+			AppBarTitle: "Werkzeuge",
+			NavContent:  toolsPageNavContent("./"),
 		},
 	) {
 		<main class="container fluid">
-			<!-- TODO: List tools (upper and lower tools),
-					   format + ID, link to sub page showing all information
-					   about the tool (/tools/:id) -->
 			<!-- NOTE: Just some things i have in mind
 
 				action buttons
@@ -72,6 +66,64 @@ templ ToolsPage() {
 			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
 				@activeTools()
 				@allTools()
+			</div>
+		</main>
+	}
+}
+
+templ ToolsActivePage(press int64) {
+	@layouts.Main(
+		layouts.MainOptions{
+			RelPath:     "../../",
+			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
+			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
+			NavContent:  toolsPageNavContent("../../"),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Work in Progress</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<ul>
+						<!-- TODO: ... -->
+						<li>Display the metal sheets table for the lower and upper tool.</li>
+						<li>Show notes with levels (INFO, WARNING, ERROR) or something like this.</li>
+						<li>Show Zyklen made with these tools, allow editing, reset after regeneration but keep the data.</li>
+					</ul>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ ToolsAllPage(id int64) {
+	@layouts.Main(
+		layouts.MainOptions{
+			RelPath:     "../../",
+			PageTitle:   fmt.Sprintf("PG Presse | Werkzeug (id: %d)", id), // TODO: Use tool name as title here
+			AppBarTitle: fmt.Sprintf("Werkzeug (id: %d)", id),             // TODO: Use tool name as title here
+			NavContent:  toolsPageNavContent("../../"),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Work in Progress</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<ul>
+						<!-- TODO: ... -->
+						<li>...</li>
+					</ul>
+				</div>
 			</div>
 		</main>
 	}
@@ -138,7 +190,7 @@ templ allTools() {
 			style="list-style: none;"
 		>
 			<!-- Tools ordered from biggest to smallest -->
-			<!-- TODO: For theese items here i need an icon which marks a tool is gone
+			<!-- TODO: For these items here i need an icon which marks a tool is gone
 			for regeneration, another icon for broken and an icon for attention -->
 			<li>
 				@tool("150x75 XXL01", "./tools/all/0")

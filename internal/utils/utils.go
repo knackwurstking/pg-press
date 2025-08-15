@@ -39,9 +39,6 @@ func ParseInt64Param(ctx echo.Context, paramName string) (int64, error) {
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be a number")
 	}
-	if id <= 0 {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be positive")
-	}
 	return id, nil
 }
 
@@ -54,9 +51,6 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, error) {
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be a number")
-	}
-	if id <= 0 {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be positive")
 	}
 	return id, nil
 }

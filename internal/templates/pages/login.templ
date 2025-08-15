@@ -6,19 +6,20 @@ script loginScript() {
     document.querySelector("#dialogLogin").showModal();
 }
 
-templ loginNavContent() {
+templ loginNavContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
-		@navProfileButton()
-		@navHomeButton()
+		@navProfileButton(relPath)
+		@navHomeButton(relPath)
 	</div>
 }
 
 templ LoginPage(apiKey string, invalidApiKey bool) {
 	@layouts.Main(
 		layouts.MainOptions{
+			RelPath:     "./",
 			PageTitle:   "PG Presse | Login",
 			AppBarTitle: "Login",
-			NavContent:  loginNavContent(),
+			NavContent:  loginNavContent("./"),
 		},
 	) {
 		<main class="container">

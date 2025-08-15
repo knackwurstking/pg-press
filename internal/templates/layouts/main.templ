@@ -1,6 +1,7 @@
 package layouts
 
 type MainOptions struct {
+	RelPath        string // Relative path, Ex.: /tools="./", /tools/active/0="../../"
 	PageTitle      string
 	AppBarTitle    string
 	AdditionalHead templ.Component
@@ -28,18 +29,18 @@ templ Main(options MainOptions) {
 			<!-- Icons and manifest -->
 			<link rel="icon" href="./favicon.ico" sizes="any"/>
 			<link rel="icon" href="./icon.png" type="image/png"/>
-			<link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png"/>
-			<link rel="mask-icon" href="./icon.png" color="#3e3c49"/>
+			<link rel="apple-touch-icon" href={ options.RelPath + "apple-touch-icon-180x180.png" }/>
+			<link rel="mask-icon" href={ options.RelPath + "icon.png" } color="#3e3c49"/>
 			<!-- PWA Manifest -->
-			<link rel="manifest" href="./manifest.json"/>
+			<link rel="manifest" href={ options.RelPath + "manifest.json" }/>
 			<!-- Stylesheets -->
-			<link rel="stylesheet" href="./css/bootstrap-icons.min.css"/>
-			<link rel="stylesheet" href="./css/ui.min.css"/>
-			<link rel="stylesheet" href="./css/layout.css"/>
+			<link rel="stylesheet" href={ options.RelPath + "css/bootstrap-icons.min.css" }/>
+			<link rel="stylesheet" href={ options.RelPath + "css/ui.min.css" }/>
+			<link rel="stylesheet" href={ options.RelPath + "css/layout.css" }/>
 			<title>{ options.PageTitle }</title>
 			<!-- HTMX for dynamic content -->
-			<script src="./js/htmx-v2.0.6.min.js"></script>
-			<script src="./js/htmx-ext-ws-v2.0.3.min.js"></script>
+			<script src={ options.RelPath + "js/htmx-v2.0.6.min.js" }></script>
+			<script src={ options.RelPath + "js/htmx-ext-ws-v2.0.3.min.js" }></script>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}

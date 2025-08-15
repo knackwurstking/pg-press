@@ -7,12 +7,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	attachmentID, err := utils.ParseInt64Query(c, "attachment_id")
+	attachmentID, err := utils.ParseInt64Query(c, constants.QueryParamAttachmentID)
 	if err != nil {
 		return err
 	}

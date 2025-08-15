@@ -20,7 +20,7 @@ func loginScript() templ.ComponentScript {
 	}
 }
 
-func loginNavContent() templ.Component {
+func loginNavContent(relPath string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -45,11 +45,11 @@ func loginNavContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navProfileButton().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navProfileButton(relPath).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navHomeButton().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navHomeButton(relPath).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,7 +101,7 @@ func LoginPage(apiKey string, invalidApiKey bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(apiKey)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/login.templ`, Line: 33, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/login.templ`, Line: 34, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -133,9 +133,10 @@ func LoginPage(apiKey string, invalidApiKey bool) templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
+				RelPath:     "./",
 				PageTitle:   "PG Presse | Login",
 				AppBarTitle: "Login",
-				NavContent:  loginNavContent(),
+				NavContent:  loginNavContent("./"),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

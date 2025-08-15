@@ -13,7 +13,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-func profileNavContent() templ.Component {
+func profileNavContent(relPath string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,15 +38,15 @@ func profileNavContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navFeedButton().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navFeedButton(relPath).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navProfileButton().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navProfileButton(relPath).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navHomeButton().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navHomeButton(relPath).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -98,7 +98,7 @@ func ProfilePage(user *database.User) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.UserName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 65, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 66, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func ProfilePage(user *database.User) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(user.TelegramID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 79, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 80, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -124,7 +124,7 @@ func ProfilePage(user *database.User) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(user.UserName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 109, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 110, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -138,9 +138,10 @@ func ProfilePage(user *database.User) templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
+				RelPath:     "./",
 				PageTitle:   "PG Presse | Profil",
 				AppBarTitle: "Profil",
-				NavContent:  profileNavContent(),
+				NavContent:  profileNavContent("./"),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
