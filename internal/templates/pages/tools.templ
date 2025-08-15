@@ -58,6 +58,7 @@ templ ToolsPage() {
 
 			-->
 			<!--div class="actions"></div-->
+			<!-- Active Tools for press 0-5 -->
 			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
 				<div class="active-tools p">
 					<h3 class="mb">
@@ -68,6 +69,7 @@ templ ToolsPage() {
 						class="flex flex-col gap m-0 p-0"
 						style="list-style: none;"
 					>
+						<!-- Press 0 -->
 						<li>
 							<a
 								role="button"
@@ -95,6 +97,7 @@ templ ToolsPage() {
 						</li>
 					</ul>
 				</div>
+				<!-- All Tools -->
 				<div class="all-tools p">
 					<h3 class="mb">
 						<i class="bi bi-archive mr"></i>
@@ -104,6 +107,9 @@ templ ToolsPage() {
 						class="flex flex-col gap m-0 p-0"
 						style="list-style: none;"
 					>
+						<!-- Tools ordered from biggest to smallest -->
+						<!-- TODO: For theese items here i need an icon which marks a tool is gone
+						for regeneration, another icon for broken and an icon for attention -->
 						<li>
 							<a
 								role="button"
