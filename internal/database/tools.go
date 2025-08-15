@@ -7,6 +7,9 @@ const (
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			format TEXT NOT NULL,
+			type TEXT NOT NULL,
+			code TEXT NOT NULL,
+			notes TEXT NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`

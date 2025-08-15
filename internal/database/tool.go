@@ -15,5 +15,7 @@ func (tf ToolFormat) String() string {
 type Tool struct {
 	ID     int64      `json:"id"`
 	Format ToolFormat `json:"format"`
-	// TODO: Implement the Tool struct.
+	Type   string     `json:"type"` // Ex: FC, GTC, MASS
+	Code   string     `json:"code"`
+	Notes  []Note     `json:"notes"`
 }
