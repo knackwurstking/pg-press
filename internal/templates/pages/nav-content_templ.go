@@ -87,7 +87,7 @@ func navFeedButton() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a role=\"button\" class=\"ghost contrast icon\" href=\"./feed\" style=\"position: relative; display: inline-block;\" hx-ws=\"connect:./nav/feed-counter\" hx-target=\"#feedCounter\" hx-swap=\"outerHTML\"><i class=\"bi bi-bell\"></i> <span id=\"feedCounter\"></span></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a role=\"button\" class=\"ghost contrast icon\" href=\"./feed\" hx-ws=\"connect:./nav/feed-counter\" hx-target=\"#feedCounter\" hx-swap=\"outerHTML\"><i class=\"bi bi-bell\"></i> <span id=\"feedCounter\"></span></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
