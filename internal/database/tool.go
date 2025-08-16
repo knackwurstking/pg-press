@@ -2,6 +2,13 @@ package database
 
 import "fmt"
 
+const (
+	PositionTop    = "top"
+	PositionBottom = "bottom"
+)
+
+type Position string
+
 type ToolFormat struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
@@ -13,11 +20,12 @@ func (tf ToolFormat) String() string {
 
 // Tool represents a tool in the database.
 type Tool struct {
-	ID     int64      `json:"id"`
-	Format ToolFormat `json:"format"`
-	Type   string     `json:"type"` // Ex: FC, GTC, MASS
-	Code   string     `json:"code"`
-	Notes  []Note     `json:"notes"`
+	ID       int64      `json:"id"`
+	Position Position   `json:"position"`
+	Format   ToolFormat `json:"format"`
+	Type     string     `json:"type"` // Ex: FC, GTC, MASS
+	Code     string     `json:"code"` // Ex: G01, G02, ...
+	Notes    []Note     `json:"notes"`
 }
 
 func (t *Tool) String() string {
