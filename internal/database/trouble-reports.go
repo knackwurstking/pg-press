@@ -235,30 +235,12 @@ func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, err
 
 	// Try to unmarshal as new format (array of int64 IDs) first
 	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		// If that fails, try to handle as old format or empty/invalid data
-		if linkedAttachments == "" || linkedAttachments == "[]" {
-			report.LinkedAttachments = make([]int64, 0)
-		} else {
-			// Try to unmarshal as old format (full attachment objects) and extract IDs
-			var oldAttachments []*Attachment
-			if err2 := json.Unmarshal([]byte(linkedAttachments), &oldAttachments); err2 == nil {
-				// Convert old format to new format (this shouldn't happen after migration)
-				logger.TroubleReport().Warn(
-					"Found old format attachments for report %d, converting to IDs", report.ID)
-				report.LinkedAttachments = make([]int64, 0)
-				for _, att := range oldAttachments {
-					if att != nil && att.GetID() > 0 {
-						report.LinkedAttachments = append(report.LinkedAttachments, att.GetID())
-					}
-				}
-			} else {
-				// Neither format worked, log and use empty array
-				logger.TroubleReport().Error(
-					"Failed to unmarshal linked attachments for report %d: %v, data: %s",
-					report.ID, err, linkedAttachments)
-				report.LinkedAttachments = make([]int64, 0)
-			}
-		}
+		// TODO: If this still works on my current database, just return a wrapped error
+		logger.TroubleReport().Error(
+			"Failed to unmarshal linked attachments for report %d: %#v, data: %s",
+			report.ID, err, linkedAttachments)
+
+		report.LinkedAttachments = make([]int64, 0)
 	}
 
 	if err := json.Unmarshal(mods, &report.Mods); err != nil {
