@@ -27,8 +27,8 @@ templ Main(options MainOptions) {
 			<meta name="msapplication-TileColor" content="#3e3c49"/>
 			<meta name="theme-color" content="#000000"/>
 			<!-- Icons and manifest -->
-			<link rel="icon" href="./favicon.ico" sizes="any"/>
-			<link rel="icon" href="./icon.png" type="image/png"/>
+			<link rel="icon" href={ options.RelPath + "favicon.ico" } sizes="any"/>
+			<link rel="icon" href={ options.RelPath + "icon.png" } type="image/png"/>
 			<link rel="apple-touch-icon" href={ options.RelPath + "apple-touch-icon-180x180.png" }/>
 			<link rel="mask-icon" href={ options.RelPath + "icon.png" } color="#3e3c49"/>
 			<!-- PWA Manifest -->
