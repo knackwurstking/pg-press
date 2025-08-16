@@ -192,19 +192,13 @@ templ allTools(tools []*database.ToolWithNotes) {
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
 		>
-			<!-- Tools ordered from biggest to smallest -->
 			<!-- TODO: For these items here i need an icon which marks a tool is gone
 			for regeneration, another icon for broken and an icon for attention -->
-			<!-- TODO: List all tools here -->
-			<li>
-				@tool("150x75 XXL01", "./tools/all/0")
-			</li>
-			<li>
-				@tool("100x100 G01", "./tools/all/1")
-			</li>
-			<li>
-				@tool("100x100 G02", "./tools/all/2")
-			</li>
+			for _, t := range tools {
+				<li>
+					@tool(t.String(), fmt.Sprintf("./tools/all/%d", t.ID))
+				</li>
+			}
 		</ul>
 	</div>
 }
