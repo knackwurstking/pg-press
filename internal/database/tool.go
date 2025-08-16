@@ -29,5 +29,12 @@ type Tool struct {
 }
 
 func (t *Tool) String() string {
-	return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
+	switch t.Position {
+	case PositionTop:
+		return fmt.Sprintf("%s %s (%s, ↑)", t.Format, t.Code, t.Type)
+	case PositionBottom:
+		return fmt.Sprintf("%s %s (%s, ↓)", t.Format, t.Code, t.Type)
+	default:
+		return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
+	}
 }
