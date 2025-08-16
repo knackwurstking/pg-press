@@ -107,8 +107,8 @@ templ ToolPage(tool *database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
 			RelPath:     "../../",
-			PageTitle:   fmt.Sprintf("PG Presse | Werkzeug %s", tool.String()),
-			AppBarTitle: fmt.Sprintf("Werkzeug %s", tool.String()),
+			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
+			AppBarTitle: tool.String(),
 			NavContent:  toolsPageNavContent("../../"),
 		},
 	) {
