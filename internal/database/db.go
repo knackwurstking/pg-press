@@ -11,6 +11,7 @@ type DB struct {
 	Attachments          *Attachments
 	TroubleReports       *TroubleReports
 	TroubleReportsHelper *TroubleReportsHelper
+	Notes                *Notes
 	Tools                *Tools
 	Feeds                *Feeds
 	db                   *sql.DB
@@ -31,6 +32,7 @@ func New(db *sql.DB) *DB {
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,
 		TroubleReportsHelper: troubleReportsHelper,
+		Notes:                NewNotes(db, feeds),
 		Tools:                NewTools(db, feeds),
 		Feeds:                feeds,
 		db:                   db,

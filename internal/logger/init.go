@@ -96,6 +96,10 @@ func Tools() *Logger {
 	return NewComponentLogger("Tools")
 }
 
+func Notes() *Logger {
+	return NewComponentLogger("Notes")
+}
+
 // User returns a logger configured for user operations
 func User() *Logger {
 	return NewComponentLogger("User")
