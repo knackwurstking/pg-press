@@ -32,9 +32,9 @@ type Tool struct {
 func (t *Tool) String() string {
 	switch t.Position {
 	case PositionTop:
-		return fmt.Sprintf("%s %s (%s, ↑)", t.Format, t.Code, t.Type)
+		return fmt.Sprintf("%s %s (%s, Oberteil)", t.Format, t.Code, t.Type)
 	case PositionBottom:
-		return fmt.Sprintf("%s %s (%s, ↓)", t.Format, t.Code, t.Type)
+		return fmt.Sprintf("%s %s (%s, Unterteil)", t.Format, t.Code, t.Type)
 	default:
 		return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
 	}
