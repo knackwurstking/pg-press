@@ -222,8 +222,8 @@ func ToolPage(tool *database.ToolWithNotes) templ.Component {
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
 				RelPath:     "../../",
-				PageTitle:   fmt.Sprintf("PG Presse | Werkzeug %s", tool.String()),
-				AppBarTitle: fmt.Sprintf("Werkzeug %s", tool.String()),
+				PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
+				AppBarTitle: tool.String(),
 				NavContent:  toolsPageNavContent("../../"),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
