@@ -92,7 +92,7 @@ func ToolsPage(tools []*database.ToolWithNotes) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"container fluid\"><!-- NOTE: Just some things i have in mind\n\n\t\t\t\taction buttons\n\t\t\t\t\tadd a new tool\n\t\t\t\t\tadd/edit a new metal sheet entry\n\t\t\t\t\t \tedit dialog, or a sub page\n\t\t\t\t\t\twhile typing, do background checks for existing data and display below\n\n\t\t\t \tlist tools\n\t\t\t\t\tif a tool was clicked\n\t\t\t\t     \taction buttons\n\t\t\t\t\t\t    share to pdf button, only enabled if a tool is selected\n\n\t\t\t\t\t\tselection\n\t\t\t\t\t\t\t<select: Upper Tool ID> <select: Lower Tool ID>\n\t\t\t\t\t\t\t100x100 G01 \t \t\t100x100 G02\n\n\t\t\t\t\t\toutput\n\t\t\t\t\t\t\tShowing notes for upper and lower tools\n\n\t\t\t\t\t\t\tMetal sheets table\n\t\t\t\t\t\t\t\tThickness in mm, with a belonging mass humidity (Optimal: 6%)\n\t\t\t\t\t\t\t\tMarke height in mm\n\t\t\t\t\t\t\t\tStempelfall (\"current\", \"max\"), (types: \"SACMI\", \"SITI\")\n\n\t\t\t\t\t\t\tCalculator based on existing table data (Experimental)\n\n\t\t\t--><div class=\"card warning\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Work in Progress</span></h4></div><div class=\"card-body\">Just developing an idea here</div></div><!--div class=\"actions\"></div--><div class=\"tools\" style=\"display: flex; flex-direction: column; gap: 1.5rem;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"container fluid\"><!-- NOTE: Just some things i have in mind\n\n\t\t\t\taction buttons\n\t\t\t\t\tadd a new tool\n\t\t\t\t\tadd/edit a new metal sheet entry\n\t\t\t\t\t \tedit dialog, or a sub page\n\t\t\t\t\t\twhile typing, do background checks for existing data and display below\n\n\t\t\t \tlist tools\n\t\t\t\t\tif a tool was clicked\n\t\t\t\t     \taction buttons\n\t\t\t\t\t\t    share to pdf button, only enabled if a tool is selected\n\n\t\t\t\t\t\tselection\n\t\t\t\t\t\t\t<select: Upper Tool ID> <select: Lower Tool ID>\n\t\t\t\t\t\t\t100x100 G01 \t \t\t100x100 G02\n\n\t\t\t\t\t\toutput\n\t\t\t\t\t\t\tShowing notes for upper and lower tools\n\n\t\t\t\t\t\t\tMetal sheets table\n\t\t\t\t\t\t\t\tThickness in mm, with a belonging mass humidity (Optimal: 6%)\n\t\t\t\t\t\t\t\tMarke height in mm\n\t\t\t\t\t\t\t\tStempelfall (\"current\", \"max\"), (types: \"SACMI\", \"SITI\")\n\n\t\t\t\t\t\t\tCalculator based on existing table data (Experimental)\n\n\t\t\t--><div class=\"card warning\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Work in Progress</span></h4></div><div class=\"card-body\">Just developing an idea here</div></div><div class=\"tools\" style=\"display: flex; flex-direction: column; gap: 1.5rem;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -299,7 +299,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 151, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 150, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 154, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 153, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -325,7 +325,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 158, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 157, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -338,7 +338,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(lower)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 166, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 165, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -351,7 +351,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(upper)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 176, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 175, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -440,7 +440,7 @@ func tool(title, href string) templ.Component {
 		var templ_7745c5c3_Var17 templ.SafeURL
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 210, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 209, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -453,7 +453,7 @@ func tool(title, href string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 213, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tools.templ`, Line: 212, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
