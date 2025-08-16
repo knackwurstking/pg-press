@@ -264,25 +264,3 @@ func findRemovedAttachments(oldIDs, newIDs []int64) []int64 {
 
 	return removed
 }
-
-// ConvertToLegacyFormat converts attachment IDs to legacy attachment objects
-// for backward compatibility.
-func (s *TroubleReportsHelper) ConvertToLegacyFormat(
-	tr *TroubleReport,
-) (*struct {
-	*TroubleReport
-	LegacyAttachments []*Attachment `json:"linked_attachments"`
-}, error) {
-	attachments, err := s.LoadAttachments(tr)
-	if err != nil {
-		return nil, WrapError(err, "failed to load attachments for legacy format")
-	}
-
-	return &struct {
-		*TroubleReport
-		LegacyAttachments []*Attachment `json:"linked_attachments"`
-	}{
-		TroubleReport:     tr,
-		LegacyAttachments: attachments,
-	}, nil
-}

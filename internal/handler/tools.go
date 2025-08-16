@@ -28,7 +28,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Tools) handleToolsPage(c echo.Context) error {
-	tools, err := h.DB.Tools.List()
+	tools, err := h.DB.ToolsHelper.ListWithNotes()
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get tools: "+err.Error())
@@ -49,7 +49,7 @@ func (h *Tools) handleToolsAllPage(c echo.Context) error {
 			"failed to parse id: "+err.Error())
 	}
 
-	tool, err := h.DB.Tools.Get(id)
+	tool, err := h.DB.ToolsHelper.GetWithNotes(id)
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())

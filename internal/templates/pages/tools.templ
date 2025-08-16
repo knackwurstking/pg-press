@@ -14,7 +14,7 @@ templ toolsPageNavContent(relPath string) {
 	</div>
 }
 
-templ ToolsPage(tools []*database.Tool) {
+templ ToolsPage(tools []*database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
 			RelPath:     "./",
@@ -103,7 +103,7 @@ templ ToolsActivePage(press int64) {
 	}
 }
 
-templ ToolPage(tool *database.Tool) {
+templ ToolPage(tool *database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
 			RelPath:     "../../",
@@ -182,7 +182,7 @@ templ activeTool(title, upper, lower, href string) {
 	</li>
 }
 
-templ allTools(tools []*database.Tool) {
+templ allTools(tools []*database.ToolWithNotes) {
 	<div class="all-tools p">
 		<h3 class="mb">
 			<i class="bi bi-archive mr"></i>

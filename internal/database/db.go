@@ -13,6 +13,7 @@ type DB struct {
 	TroubleReportsHelper *TroubleReportsHelper
 	Notes                *Notes
 	Tools                *Tools
+	ToolsHelper          *ToolsHelper
 	Feeds                *Feeds
 	db                   *sql.DB
 }
@@ -21,10 +22,14 @@ type DB struct {
 // Feeds must be created before Users and TroubleReports as they generate feed entries.
 func New(db *sql.DB) *DB {
 	feeds := NewFeeds(db)
-	troubleReports := NewTroubleReports(db, feeds)
 
 	attachments := NewAttachments(db)
+	troubleReports := NewTroubleReports(db, feeds)
 	troubleReportsHelper := NewTroubleReportsHelper(troubleReports, attachments)
+
+	notes := NewNotes(db)
+	tools := NewTools(db, feeds)
+	toolsHelper := NewToolsHelper(tools, notes)
 
 	return &DB{
 		Users:                NewUsers(db, feeds),
@@ -32,8 +37,9 @@ func New(db *sql.DB) *DB {
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,
 		TroubleReportsHelper: troubleReportsHelper,
-		Notes:                NewNotes(db, feeds),
-		Tools:                NewTools(db, feeds),
+		Notes:                notes,
+		Tools:                tools,
+		ToolsHelper:          toolsHelper,
 		Feeds:                feeds,
 		db:                   db,
 	}

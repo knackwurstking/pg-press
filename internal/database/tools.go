@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -23,7 +24,6 @@ const (
 		SELECT id, format, type, code, notes FROM tools;
 	`
 
-	// TODO: Implement the Tools struct.
 	selectToolByIDQuery = `
 		SELECT id, format, type, code, notes FROM tools WHERE id = $1;
 	`
@@ -103,7 +103,11 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 
 	tool, err := t.scanToolFromRow(row)
 	if err != nil {
-		return nil, WrapError(err, "failed to scan tool")
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, NewDatabaseError("select", "tools",
+			fmt.Sprintf("failed to get tool with ID %d", id), err)
 	}
 
 	return tool, nil
@@ -128,7 +132,7 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 			"failed to unmarshal format", err)
 	}
 
-	if err := json.Unmarshal(notes, &tool.Notes); err != nil {
+	if err := json.Unmarshal(notes, &tool.LinkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to unmarshal notes", err)
 	}
@@ -155,7 +159,7 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 			"failed to unmarshal format", err)
 	}
 
-	if err := json.Unmarshal(notes, &tool.Notes); err != nil {
+	if err := json.Unmarshal(notes, &tool.LinkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to unmarshal notes", err)
 	}
