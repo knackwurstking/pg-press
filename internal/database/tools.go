@@ -16,6 +16,7 @@ const (
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
 			notes BLOB NOT NULL,
+			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -117,12 +118,13 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 
 	var (
-		format []byte
-		notes  []byte
+		format      []byte
+		linkedNotes []byte
+		mods        []byte
 	)
 
 	if err := rows.Scan(&tool.ID, &format, &tool.Type,
-		&tool.Code, &notes); err != nil {
+		&tool.Code, &linkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
@@ -132,9 +134,13 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 			"failed to unmarshal format", err)
 	}
 
-	if err := json.Unmarshal(notes, &tool.LinkedNotes); err != nil {
+	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to unmarshal notes", err)
+	}
+
+	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
+		return nil, WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return tool, nil
@@ -144,12 +150,13 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 	tool := &Tool{}
 
 	var (
-		format []byte
-		notes  []byte
+		format      []byte
+		linkedNotes []byte
+		mods        []byte
 	)
 
 	if err := row.Scan(&tool.ID, &format, &tool.Type,
-		&tool.Code, &notes); err != nil {
+		&tool.Code, &linkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
@@ -159,9 +166,13 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 			"failed to unmarshal format", err)
 	}
 
-	if err := json.Unmarshal(notes, &tool.LinkedNotes); err != nil {
+	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to unmarshal notes", err)
+	}
+
+	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
+		return nil, WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return tool, nil

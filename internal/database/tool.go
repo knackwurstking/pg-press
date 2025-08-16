@@ -20,12 +20,13 @@ func (tf ToolFormat) String() string {
 
 // Tool represents a tool in the database.
 type Tool struct {
-	ID          int64      `json:"id"`
-	Position    Position   `json:"position"`
-	Format      ToolFormat `json:"format"`
-	Type        string     `json:"type"`  // Ex: FC, GTC, MASS
-	Code        string     `json:"code"`  // Ex: G01, G02, ...
-	LinkedNotes []int64    `json:"notes"` // Contains note ids from the "notes" table
+	ID          int64         `json:"id"`
+	Position    Position      `json:"position"`
+	Format      ToolFormat    `json:"format"`
+	Type        string        `json:"type"`  // Ex: FC, GTC, MASS
+	Code        string        `json:"code"`  // Ex: G01, G02, ...
+	LinkedNotes []int64       `json:"notes"` // Contains note ids from the "notes" table
+	Mods        Mods[ToolMod] `json:"mods"`
 }
 
 func (t *Tool) String() string {
@@ -37,4 +38,12 @@ func (t *Tool) String() string {
 	default:
 		return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
 	}
+}
+
+type ToolMod struct {
+	Position    Position   `json:"position"`
+	Format      ToolFormat `json:"format"`
+	Type        string     `json:"type"`
+	Code        string     `json:"code"`
+	LinkedNotes []int64    `json:"notes"`
 }
