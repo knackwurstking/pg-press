@@ -6,33 +6,20 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-const (
-	relPathToolsPage       = "./"
-	relPathToolsActivePage = "../../"
-	relPathToolPage        = "../../"
-)
-
-// ****************
-// Global Functions
-// ****************
-templ toolsPageNavContent(relPath string) {
+templ toolsPageNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton(relPath)
-		@navProfileButton(relPath)
-		@navHomeButton(relPath)
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
 	</div>
 }
 
-// **********************
-// Tools Main Page: tools
-// **********************
 templ ToolsPage(tools []*database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:     relPathToolsPage,
 			PageTitle:   "PG Presse | Werkzeuge",
 			AppBarTitle: "Werkzeuge",
-			NavContent:  toolsPageNavContent(relPathToolsPage),
+			NavContent:  toolsPageNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -93,7 +80,7 @@ templ activeTools() {
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
 		>
-			@activeTool("Presse 0", "100x100 G01", "100x100 G01", "./tools/active/0")
+			@activeTool("Presse 0", "100x100 G01", "100x100 G01", serverPathPrefix+"/tools/active/0")
 		</ul>
 	</div>
 }
@@ -142,13 +129,13 @@ templ allTools(tools []*database.ToolWithNotes) {
 		<div class="actions-bar flex gap justify-end items-center">
 			<!-- TODO: ./tools/edit without and id will render a new tool edit page or dialog -->
 			<!-- TODO: Leaves the question if i should use an dialog or a new page here, a dialog would work via HTMX and data should also be requested via HTMX, just like the trouble reports page works -->
-			<a role="button" class="primary flex gap" href={ relPathToolsPage + "tools/edit" } disabled>
+			<a role="button" class="primary flex gap" href={ serverPathPrefix + "/tools/edit" } disabled>
 				<i class="bi bi-plus-lg"></i>
 				<span>Erstellen</span>
 			</a>
 		</div>
 		<ul
-			hx-get={ fmt.Sprintf(relPathToolsPage + "htmx/tools/list-all") }
+			hx-get={ serverPathPrefix + "/htmx/tools/list-all" }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 			class="flex flex-col gap m-0 p-0"
@@ -157,18 +144,13 @@ templ allTools(tools []*database.ToolWithNotes) {
 	</div>
 }
 
-// *****************************
-// Tools Sub Page: tools/all/:id
-// *****************************
-
 // TODO: Take database data from the database for this press (prop: press *database.Press)
 templ ToolsActivePage(press int64) {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:     relPathToolsActivePage,
 			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
 			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
-			NavContent:  toolsPageNavContent(relPathToolsActivePage),
+			NavContent:  toolsPageNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -199,10 +181,9 @@ templ ToolsActivePage(press int64) {
 templ ToolPage(tool *database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:     relPathToolPage,
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
 			AppBarTitle: tool.String(),
-			NavContent:  toolsPageNavContent(relPathToolPage),
+			NavContent:  toolsPageNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -214,9 +195,7 @@ templ ToolPage(tool *database.ToolWithNotes) {
 					</h4>
 				</div>
 				<div class="card-body">
-					<ul>
-						<li>...</li>
-					</ul>
+					<li>...</li>
 				</div>
 			</div>
 			<!-- TODO: Print out notes and all available data in `tool` -->

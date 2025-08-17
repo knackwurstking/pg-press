@@ -13,7 +13,7 @@ templ TroubleReportModifications(
 	<div id="data" class="flex flex-col gap">
 		<div class="flex flex-wrap gap justify-between items-center">
 			<button
-				hx-get="./trouble-reports/data"
+				hx-get={ serverPathPrefix + "/trouble-reports/data" }
 				hx-trigger="click"
 				hx-target="#data"
 				hx-swap="outerHTML"
@@ -96,7 +96,10 @@ templ TroubleReportModifications(
 							<div
 								class="attachments-preview-placeholder"
 								data-modification-id={ fmt.Sprintf("%d-%d", troubleReport.ID, mod.Time) }
-								hx-get={ fmt.Sprintf("./trouble-reports/attachments-preview?id=%d&time=%d", troubleReport.ID, mod.Time) }
+								hx-get={ fmt.Sprintf(
+									"%s/trouble-reports/attachments-preview?id=%d&time=%d",
+									serverPathPrefix, troubleReport.ID, mod.Time,
+								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
 							>
@@ -119,7 +122,10 @@ templ TroubleReportModifications(
 							if user.IsAdmin() {
 								<!-- Rollback Button -->
 								<button
-									hx-post={ fmt.Sprintf("./trouble-reports/modifications/%d?time=%d", troubleReport.ID, mod.Time) }
+									hx-post={ fmt.Sprintf(
+										"%s/trouble-reports/modifications/%d?time=%d",
+										serverPathPrefix, troubleReport.ID, mod.Time,
+									) }
 									hx-trigger="click"
 									hx-target="#data"
 									hx-swap="outerHTML"
@@ -133,7 +139,10 @@ templ TroubleReportModifications(
 							} else {
 								<!-- Rollback Button (Vote) -->
 								<button
-									hx-post={ fmt.Sprintf("./trouble-reports/modifications/vote/%d?time=%d", troubleReport.ID, mod.Time) }
+									hx-post={ fmt.Sprintf(
+										"%s/trouble-reports/modifications/vote/%d?time=%d",
+										serverPathPrefix, troubleReport.ID, mod.Time,
+									) }
 									hx-trigger="click"
 									hx-target="#data"
 									hx-swap="outerHTML"

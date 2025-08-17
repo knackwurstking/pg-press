@@ -1,28 +1,28 @@
 package pages
 
-templ navProfileButton(relPath string) {
+templ navProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ relPath + "profile" }
+		href={ serverPathPrefix + "/profile" }
 		title="Profil"
 	>
 		<i class="bi bi-person-circle"></i>
 	</a>
 }
 
-templ navHomeButton(relPath string) {
-	<a role="button" class="ghost contrast icon" href={ relPath } title="Startseite">
+templ navHomeButton() {
+	<a role="button" class="ghost contrast icon" href={ serverPathPrefix } title="Startseite">
 		<i class="bi bi-house"></i>
 	</a>
 }
 
-templ navFeedButton(relPath string) {
+templ navFeedButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ relPath + "feed" }
-		hx-ws={ "connect:" + relPath + "nav/feed-counter" }
+		href={ serverPathPrefix + "/feed" }
+		hx-ws={ "connect:" + serverPathPrefix + "/nav/feed-counter" }
 		hx-target="#feedCounter"
 		hx-swap="outerHTML"
 	>

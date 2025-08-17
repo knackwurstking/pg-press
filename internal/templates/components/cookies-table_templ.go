@@ -76,17 +76,30 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"right select-none\"><a hx-delete=\"./profile/cookies?value={{$cookie.Value}}\" hx-trigger=\"click\" hx-target=\"#cookies\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"right select-none\"><a hx-delete=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/profile/cookies?value=" + cookie.Value)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 28, Col: 81}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"click\" hx-target=\"#cookies\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</tbody></table></figure></details>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</tbody></table></figure></details>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<style>\n            .no-cookies {\n                text-align: center;\n                color: var(--ui-color-600);\n                padding: calc(var(--ui-spacing) * 2);\n                background: var(--ui-color-100);\n                border-radius: var(--ui-radius);\n                font-style: italic;\n            }\n        </style> <div id=\"cookies\" class=\"no-cookies\"><i class=\"bi bi-info-circle\"></i> Keine aktiven Sitzungen gefunden</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<style>\n            .no-cookies {\n                text-align: center;\n                color: var(--ui-color-600);\n                padding: calc(var(--ui-spacing) * 2);\n                background: var(--ui-color-100);\n                border-radius: var(--ui-radius);\n                font-style: italic;\n            }\n        </style> <div id=\"cookies\" class=\"no-cookies\"><i class=\"bi bi-info-circle\"></i> Keine aktiven Sitzungen gefunden</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

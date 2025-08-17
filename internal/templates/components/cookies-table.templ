@@ -25,7 +25,7 @@ templ CookiesTable(cookies []*database.Cookie) {
 								<td class="left user-agent-cell">{ cookie.UserAgent }</td>
 								<td class="right select-none">
 									<a
-										hx-delete="./profile/cookies?value={{$cookie.Value}}"
+										hx-delete={ serverPathPrefix + "/profile/cookies?value=" + cookie.Value }
 										hx-trigger="click"
 										hx-target="#cookies"
 										hx-swap="outerHTML"

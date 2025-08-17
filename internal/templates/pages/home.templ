@@ -7,16 +7,15 @@ import (
 
 templ homeNavContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton(relPath)
-		@navProfileButton(relPath)
-		@navHomeButton(relPath)
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
 	</div>
 }
 
 templ HomePage() {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:     "./",
 			PageTitle:   "PG Presse",
 			AppBarTitle: "Home",
 			NavContent:  homeNavContent("./"),
@@ -27,14 +26,14 @@ templ HomePage() {
 				<div class="flex flex-col gap justify-center">
 					<!-- Anchor Button => Trouble Reports Page -->
 					@homePageItem(
-						"./trouble-reports",
+						serverPathPrefix+"/trouble-reports",
 						"exclamation-triangle",
 						"Problemberichte",
 						"Verwalten Sie Problemberichte und Lösungen",
 					)
 					<!-- Anchor Button => Tools Page -->
 					@homePageItem(
-						"./tools",
+						serverPathPrefix+"/tools",
 						"tools",
 						"Werkzeuglisten",
 						"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",

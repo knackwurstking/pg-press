@@ -1,7 +1,6 @@
 package layouts
 
 type MainOptions struct {
-	RelPath        string // Relative path, Ex.: /tools="./", /tools/active/0="../../"
 	PageTitle      string
 	AppBarTitle    string
 	AdditionalHead templ.Component
@@ -27,20 +26,20 @@ templ Main(options MainOptions) {
 			<meta name="msapplication-TileColor" content="#3e3c49"/>
 			<meta name="theme-color" content="#000000"/>
 			<!-- Icons and manifest -->
-			<link rel="icon" href={ options.RelPath + "favicon.ico" } sizes="any"/>
-			<link rel="icon" href={ options.RelPath + "icon.png" } type="image/png"/>
-			<link rel="apple-touch-icon" href={ options.RelPath + "apple-touch-icon-180x180.png" }/>
-			<link rel="mask-icon" href={ options.RelPath + "icon.png" } color="#3e3c49"/>
+			<link rel="icon" href={ serverPathPrefix + "/favicon.ico" } sizes="any"/>
+			<link rel="icon" href={ serverPathPrefix + "/icon.png" } type="image/png"/>
+			<link rel="apple-touch-icon" href={ serverPathPrefix + "/apple-touch-icon-180x180.png" }/>
+			<link rel="mask-icon" href={ serverPathPrefix + "/icon.png" } color="#3e3c49"/>
 			<!-- PWA Manifest -->
-			<link rel="manifest" href={ options.RelPath + "manifest.json" }/>
+			<link rel="manifest" href={ serverPathPrefix + "/manifest.json" }/>
 			<!-- Stylesheets -->
-			<link rel="stylesheet" href={ options.RelPath + "css/bootstrap-icons.min.css" }/>
-			<link rel="stylesheet" href={ options.RelPath + "css/ui.min.css" }/>
-			<link rel="stylesheet" href={ options.RelPath + "css/layout.css" }/>
+			<link rel="stylesheet" href={ serverPathPrefix + "/css/bootstrap-icons.min.css" }/>
+			<link rel="stylesheet" href={ serverPathPrefix + "/css/ui.min.css" }/>
+			<link rel="stylesheet" href={ serverPathPrefix + "/css/layout.css" }/>
 			<title>{ options.PageTitle }</title>
 			<!-- HTMX for dynamic content -->
-			<script src={ options.RelPath + "js/htmx-v2.0.6.min.js" }></script>
-			<script src={ options.RelPath + "js/htmx-ext-ws-v2.0.3.min.js" }></script>
+			<script src={ serverPathPrefix + "/js/htmx-v2.0.6.min.js" }></script>
+			<script src={ serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js" }></script>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}

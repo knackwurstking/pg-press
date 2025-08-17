@@ -137,9 +137,12 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 			<form
 				class="flex flex-col gap"
 				if props.ID > 0 {
-					hx-put={ fmt.Sprintf("./trouble-reports/dialog-edit?id=%d", props.ID) }
+					hx-put={ fmt.Sprintf(
+						"%s/trouble-reports/dialog-edit?id=%d",
+						serverPathPrefix, props.ID,
+					) }
 				} else {
-					hx-post="./trouble-reports/dialog-edit"
+					hx-post={ serverPathPrefix + "/trouble-reports/dialog-edit" }
 				}
 				hx-trigger="submit"
 				hx-target="#dialogEdit"
@@ -288,7 +291,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				</div>
 				<footer class="flex gap justify-end">
 					<button
-						hx-get="./trouble-reports/dialog-edit?cancel=true"
+						hx-get={ serverPathPrefix + "/trouble-reports/dialog-edit?cancel=true" }
 						hx-trigger="click"
 						hx-target="#dialogEdit"
 						hx-swap="outerHTML"
@@ -315,7 +318,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 		</dialog>
 	} else {
 		<span
-			hx-get="./trouble-reports/data"
+			hx-get={ serverPathPrefix + "/trouble-reports/data" }
 			hx-trigger="load"
 			hx-target="#data"
 			hx-swap="outerHTML"

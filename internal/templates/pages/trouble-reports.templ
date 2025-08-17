@@ -2,11 +2,11 @@ package pages
 
 import "github.com/knackwurstking/pgpress/internal/templates/layouts"
 
-templ troubleReportsPageNavContent(relPath string) {
+templ troubleReportsPageNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton(relPath)
-		@navProfileButton(relPath)
-		@navHomeButton(relPath)
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
 	</div>
 }
 
@@ -74,19 +74,18 @@ script troubleReportsPageScript() {
 }
 
 templ troubleReportsPageAdditionalHead() {
-	<link rel="stylesheet" href="./css/trouble-reports/dialog-edit.css"/>
-	<link rel="stylesheet" href="./css/trouble-reports/data.css"/>
+	<link rel="stylesheet" href={ serverPathPrefix + "/css/trouble-reports/dialog-edit.css" }/>
+	<link rel="stylesheet" href={ serverPathPrefix + "/css/trouble-reports/data.css" }/>
 	@troubleReportsPageScript()
 }
 
 templ TroubleReportsPage() {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:        "./",
 			PageTitle:      "PG Presse | Problemberichte",
 			AppBarTitle:    "Problemberichte",
 			AdditionalHead: troubleReportsPageAdditionalHead(),
-			NavContent:     troubleReportsPageNavContent("./"),
+			NavContent:     troubleReportsPageNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -104,7 +103,7 @@ templ TroubleReportsPage() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<button
-					hx-get="./trouble-reports/dialog-edit"
+					hx-get={ serverPathPrefix + "/trouble-reports/dialog-edit" }
 					hx-trigger="click"
 					hx-target="#dialogEdit"
 					hx-swap="outerHTML"
@@ -117,7 +116,7 @@ templ TroubleReportsPage() {
 			<!-- Trouble Reports Entries -->
 			<section>
 				<span
-					hx-get="./trouble-reports/data"
+					hx-get={ serverPathPrefix + "/trouble-reports/data" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 					id="data"
