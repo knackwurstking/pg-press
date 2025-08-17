@@ -1,6 +1,7 @@
 package htmxhandler
 
 import (
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/internal/wshandler"
@@ -9,14 +10,14 @@ import (
 )
 
 type Nav struct {
-	*Base
+	DB        *database.DB
 	WSHandler *wshandler.WSHandlers
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
 	// This approach keeps the WebSocket handler within Echo's middleware chain
 	// which is better for authentication that depends on Echo's context
-	e.GET(h.ServerPathPrefix+"/feed-counter",
+	e.GET(serverPathPrefix+"/htmx/nav/feed-counter",
 		h.handleFeedCounterWebSocketEcho)
 }
 

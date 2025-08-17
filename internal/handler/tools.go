@@ -12,18 +12,18 @@ import (
 )
 
 type Tools struct {
-	*Base
+	DB *database.DB
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	path := "/tools"
 
-	e.GET(h.ServerPathPrefix+path, h.handleToolsPage)
+	e.GET(serverPathPrefix+path, h.handleToolsPage)
 
-	e.GET(h.ServerPathPrefix+path+"/active/:press", h.handleToolsActivePage)
-	e.GET(h.ServerPathPrefix+path+"/all/:id", h.handleToolsAllPage)
+	e.GET(serverPathPrefix+path+"/active/:press", h.handleToolsActivePage)
+	e.GET(serverPathPrefix+path+"/all/:id", h.handleToolsAllPage)
 
-	htmxTroubleReports := htmxhandler.Tools{Base: h.NewHTMXHandlerBase(path)}
+	htmxTroubleReports := htmxhandler.Tools{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
 }
 

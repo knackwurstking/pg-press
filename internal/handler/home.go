@@ -7,12 +7,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Home struct {
-	*Base
-}
+type Home struct{}
 
 func (h *Home) RegisterRoutes(e *echo.Echo) {
-	e.GET(h.ServerPathPrefix+"/", h.handleHome)
+	e.GET(serverPathPrefix+"/", h.handleHome)
 }
 
 // handleHome handles the home page request.

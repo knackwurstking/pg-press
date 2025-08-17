@@ -13,15 +13,15 @@ import (
 )
 
 type Profile struct {
-	*Base
+	DB *database.DB
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
 	prefix := "/profile"
 
-	e.GET(h.ServerPathPrefix+prefix, h.handleMainPage)
+	e.GET(serverPathPrefix+prefix, h.handleMainPage)
 
-	htmxProfile := htmxhandler.Profile{Base: h.NewHTMXHandlerBase(prefix)}
+	htmxProfile := htmxhandler.Profile{DB: h.DB}
 	htmxProfile.RegisterRoutes(e)
 }
 

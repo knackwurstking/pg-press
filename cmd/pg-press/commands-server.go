@@ -48,10 +48,7 @@ func serverCommand() cli.Command {
 				e.Use(middlewareKeyAuth(db))
 				e.HTTPErrorHandler = createHTTPErrorHandler()
 
-				router.Serve(e, router.Options{
-					ServerPathPrefix: serverPathPrefix,
-					DB:               db,
-				})
+				router.Serve(e, db)
 
 				logger.Server().Info("Server listening on %s", *addr)
 				if err := e.Start(*addr); err != nil &&

@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"embed"
+	"os"
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/handler"
@@ -14,36 +15,23 @@ import (
 var (
 	//go:embed assets
 	assets embed.FS
+
+	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
 )
 
-type Options struct {
-	ServerPathPrefix string
-	DB               *database.DB
-}
+func Serve(e *echo.Echo, db *database.DB) {
+	e.StaticFS(serverPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
-func Serve(e *echo.Echo, o Options) {
-	e.StaticFS(o.ServerPathPrefix+"/", echo.MustSubFS(assets, "assets"))
+	wsh := startWebSocketHandlers(db)
 
-	wsh := startWebSocketHandlers(o.DB)
+	(&htmxhandler.Nav{DB: db, WSHandler: wsh}).RegisterRoutes(e)
 
-	base := &handler.Base{
-		DB:               o.DB,
-		ServerPathPrefix: o.ServerPathPrefix,
-	}
-
-	htmxBase := &htmxhandler.Base{
-		DB:               base.DB,
-		ServerPathPrefix: base.ServerPathPrefix + "/nav",
-	}
-
-	(&htmxhandler.Nav{Base: htmxBase, WSHandler: wsh}).RegisterRoutes(e)
-
-	(&handler.Auth{Base: base}).RegisterRoutes(e)
-	(&handler.Home{Base: base}).RegisterRoutes(e)
-	(&handler.Feed{Base: base}).RegisterRoutes(e)
-	(&handler.Profile{Base: base}).RegisterRoutes(e)
-	(&handler.TroubleReports{Base: base}).RegisterRoutes(e)
-	(&handler.Tools{Base: base}).RegisterRoutes(e)
+	(&handler.Auth{DB: db}).RegisterRoutes(e)
+	(&handler.Home{}).RegisterRoutes(e)
+	(&handler.Feed{DB: db}).RegisterRoutes(e)
+	(&handler.Profile{DB: db}).RegisterRoutes(e)
+	(&handler.TroubleReports{DB: db}).RegisterRoutes(e)
+	(&handler.Tools{DB: db}).RegisterRoutes(e)
 }
 
 func startWebSocketHandlers(db *database.DB) *wshandler.WSHandlers {

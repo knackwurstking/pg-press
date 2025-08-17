@@ -11,12 +11,12 @@ import (
 )
 
 type Profile struct {
-	*Base
+	DB *database.DB
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	e.GET(h.ServerPathPrefix+"/cookies", h.handleGetCookies)
-	e.DELETE(h.ServerPathPrefix+"/cookies", h.handleDeleteCookies)
+	e.GET(serverPathPrefix+"/cookies", h.handleGetCookies)
+	e.DELETE(serverPathPrefix+"/cookies", h.handleDeleteCookies)
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {

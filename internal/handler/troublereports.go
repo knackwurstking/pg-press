@@ -5,20 +5,21 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 )
 
 type TroubleReports struct {
-	*Base
+	DB *database.DB
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	path := "/trouble-reports"
 
-	e.GET(h.ServerPathPrefix+path, h.handleMainPage)
+	e.GET(serverPathPrefix+path, h.handleMainPage)
 
-	htmxTroubleReports := htmxhandler.TroubleReports{Base: h.NewHTMXHandlerBase(path)}
+	htmxTroubleReports := htmxhandler.TroubleReports{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
 }
 
