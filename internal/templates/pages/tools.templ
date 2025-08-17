@@ -12,11 +12,10 @@ const (
 	relPathToolPage        = "../../"
 )
 
-/******************
- * Global Functions
- ******************/
-
- templ toolsPageNavContent(relPath string) {
+// ****************
+// Global Functions
+// ****************
+templ toolsPageNavContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
 		@navFeedButton(relPath)
 		@navProfileButton(relPath)
@@ -24,10 +23,9 @@ const (
 	</div>
 }
 
-/************************
- * Tools Main Page: tools
- ************************/
-
+// **********************
+// Tools Main Page: tools
+// **********************
 templ ToolsPage(tools []*database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -159,9 +157,9 @@ templ allTools(tools []*database.ToolWithNotes) {
 	</div>
 }
 
-/*******************************
- * Tools Sub Page: tools/all/:id
- *******************************/
+// *****************************
+// Tools Sub Page: tools/all/:id
+// *****************************
 
 // TODO: Take database data from the database for this press (prop: press *database.Press)
 templ ToolsActivePage(press int64) {
