@@ -138,7 +138,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				class="flex flex-col gap"
 				if props.ID > 0 {
 					hx-put={ fmt.Sprintf(
-						"%s/trouble-reports/dialog-edit?id=%d",
+						"%s/htmx/trouble-reports/dialog-edit?id=%d",
 						serverPathPrefix, props.ID,
 					) }
 				} else {
@@ -291,7 +291,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				</div>
 				<footer class="flex gap justify-end">
 					<button
-						hx-get={ serverPathPrefix + "/trouble-reports/dialog-edit?cancel=true" }
+						hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true" }
 						hx-trigger="click"
 						hx-target="#dialogEdit"
 						hx-swap="outerHTML"
@@ -318,7 +318,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 		</dialog>
 	} else {
 		<span
-			hx-get={ serverPathPrefix + "/trouble-reports/data" }
+			hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
 			hx-trigger="load"
 			hx-target="#data"
 			hx-swap="outerHTML"

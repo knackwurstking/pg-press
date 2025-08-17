@@ -106,7 +106,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 								class="attachments-preview-placeholder"
 								data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
 								hx-get={ fmt.Sprintf(
-									"%s/trouble-reports/attachments-preview?id=%d", serverPathPrefix, tr.ID,
+									"%s/htmx/trouble-reports/attachments-preview?id=%d", serverPathPrefix, tr.ID,
 								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
@@ -121,7 +121,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 					<div class="actions flex gap justify-end items-center">
 						<button
 							hx-get={ fmt.Sprintf(
-								"%s/trouble-reports/modifications/%d",
+								"%s/htmx/trouble-reports/modifications/%d",
 								serverPathPrefix, tr.ID,
 							) }
 							hx-trigger="click"
@@ -133,7 +133,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 						</button>
 						<button
 							hx-get={ fmt.Sprintf(
-								"%s/trouble-reports/dialog-edit?id=%d", serverPathPrefix, tr.ID) }
+								"%s/htmx/trouble-reports/dialog-edit?id=%d", serverPathPrefix, tr.ID) }
 							hx-trigger="click"
 							hx-target="#dialogEdit"
 							hx-swap="outerHTML"
@@ -151,7 +151,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 						</button>
 						if user.IsAdmin() {
 							<button
-								hx-delete={ fmt.Sprintf("./trouble-reports/data?id=%d", tr.ID) }
+								hx-delete={ fmt.Sprintf("%s/htmx/trouble-reports/data?id=%d", serverPathPrefix, tr.ID) }
 								hx-trigger="click"
 								hx-target="#data"
 								hx-swap="outerHTML"
@@ -164,7 +164,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 							<!-- TODO: Benutzer ist kein Administrator, Abstimmungssystem zum Löschen von Problemberichten hinzufügen, noch nicht implementiert -->
 							<button
 								id="voteForDelete"
-								hx-post={ fmt.Sprintf("./trouble-reports/vote?id=%d&mode=delete", tr.ID) }
+								hx-post={ fmt.Sprintf("%s/htmx/trouble-reports/vote?id=%d&mode=delete", serverPathPrefix, tr.ID) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
 								class="ghost destructive flex flex-col justify-between items-center"

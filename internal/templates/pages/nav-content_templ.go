@@ -131,9 +131,9 @@ func navFeedButton() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("connect:" + serverPathPrefix + "/nav/feed-counter")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("connect:" + serverPathPrefix + "/htmx/nav/feed-counter")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/nav-content.templ`, Line: 25, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/nav-content.templ`, Line: 25, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {

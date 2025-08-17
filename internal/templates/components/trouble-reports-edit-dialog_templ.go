@@ -174,7 +174,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				}
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-					"%s/trouble-reports/dialog-edit?id=%d",
+					"%s/htmx/trouble-reports/dialog-edit?id=%d",
 					serverPathPrefix, props.ID,
 				))
 				if templ_7745c5c3_Err != nil {
@@ -410,9 +410,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/trouble-reports/dialog-edit?cancel=true")
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 294, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 294, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -443,9 +443,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/trouble-reports/data")
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 321, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 321, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

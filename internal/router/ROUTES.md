@@ -20,15 +20,18 @@
 
 ## HTMX
 
-| Method | Path                                          | Description                                 |
-| ------ | --------------------------------------------- | ------------------------------------------- |
-| GET    | /htmx/cookies                                 | Get cookies table                           |
-| DELETE | /htmx/cookies                                 | Delete cookie from table                    |
-| GET    | /htmx/trouble-reports/dialog-edit             | Edit dialog                                 |
-| POST   | /htmx/trouble-reports/dialog-edit             | Submit new data, close dialog or error      |
-| PUT    | /htmx/trouble-reports/dialog-edit             | Update existing data, close dialog or error |
-| GET    | /htmx/trouble-reports/data                    | Render trouble reports list                 |
-| DELETE | /htmx/trouble-reports/data                    | Delete a trouble report from list           |
-| GET    | /htmx/trouble-reports/attachments-preview     | Get the attachments preview                 |
-| GET    | /htmx/trouble-reports/modifications/:id       | Render trouble report modifications list    |
-| POST   | /htmx/trouble-reports/modifications/:id?time= | Reset trouble report to modified time       |
+| Method | Path                                                | Description                                     |
+| ------ | --------------------------------------------------- | ----------------------------------------------- |
+| GET    | /htmx/nav/feed-counter                              | Render the feed counter (span for the nav item) |
+| GET    | /htmx/feed/data                                     | Get feeds table                                 |
+| GET    | /htmx/profile/cookies                               | Get cookies table                               |
+| DELETE | /htmx/profile/cookies?value=                        | Delete cookie from table                        |
+| GET    | /htmx/trouble-reports/dialog-edit?id=&cancel=       | Edit dialog                                     |
+| POST   | /htmx/trouble-reports/dialog-edit                   | Submit new data, close dialog or error          |
+| PUT    | /htmx/trouble-reports/dialog-edit?id=               | Update existing data, close dialog or error     |
+| GET    | /htmx/trouble-reports/data                          | Render trouble reports list                     |
+| DELETE | /htmx/trouble-reports/data                          | Delete a trouble report from list               |
+| GET    | /htmx/trouble-reports/attachments-preview?id=&time= | Get the attachments preview                     |
+| GET    | /htmx/trouble-reports/modifications/:id             | Render trouble report modifications list        |
+| POST   | /htmx/trouble-reports/modifications/:id?time=       | Reset trouble report to modified time           |
+| GET    | /htmx/tools/list-all                                | List all tools                                  |

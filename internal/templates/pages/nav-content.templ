@@ -22,7 +22,7 @@ templ navFeedButton() {
 		role="button"
 		class="ghost contrast icon"
 		href={ serverPathPrefix + "/feed" }
-		hx-ws={ "connect:" + serverPathPrefix + "/nav/feed-counter" }
+		hx-ws={ "connect:" + serverPathPrefix + "/htmx/nav/feed-counter" }
 		hx-target="#feedCounter"
 		hx-swap="outerHTML"
 	>

@@ -88,7 +88,7 @@ templ ProfilePage(user *database.User) {
 			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
 				<span
 					id="cookies"
-					hx-get={ serverPathPrefix + "/profile/cookies" }
+					hx-get={ serverPathPrefix + "/htmx/profile/cookies" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 				></span>

@@ -103,7 +103,7 @@ templ TroubleReportsPage() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<button
-					hx-get={ serverPathPrefix + "/trouble-reports/dialog-edit" }
+					hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 					hx-trigger="click"
 					hx-target="#dialogEdit"
 					hx-swap="outerHTML"
@@ -116,7 +116,7 @@ templ TroubleReportsPage() {
 			<!-- Trouble Reports Entries -->
 			<section>
 				<span
-					hx-get={ serverPathPrefix + "/trouble-reports/data" }
+					hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 					id="data"
