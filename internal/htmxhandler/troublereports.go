@@ -11,7 +11,7 @@ type TroubleReports struct {
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	// Dialog edit routes
-	editDialogPath := serverPathPrefix + "/dialog-edit"
+	editDialogPath := serverPathPrefix + "/htmx/trouble-reports/dialog-edit"
 	e.GET(editDialogPath, func(c echo.Context) error {
 		return h.handleGetDialogEdit(c, nil)
 	})
@@ -19,24 +19,26 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	e.PUT(editDialogPath, h.handlePutDialogEdit)
 
 	// Data routes
-	dataPath := serverPathPrefix + "/data"
+	dataPath := serverPathPrefix + "/htmx/trouble-reports/data"
 	e.GET(dataPath, h.handleGetData)
 	e.DELETE(dataPath, h.handleDeleteData)
 
-	attachmentsPreviewPath := serverPathPrefix + "/attachments-preview"
+	attachmentsPreviewPath := serverPathPrefix + "/htmx/trouble-reports/attachments-preview"
 	e.GET(attachmentsPreviewPath, h.handleGetAttachmentsPreview)
 
-	sharePdfPath := serverPathPrefix + "/share-pdf"
+	// TODO: Move to (HTML) handler
+	sharePdfPath := serverPathPrefix + "/htmx/trouble-reports/share-pdf"
 	e.GET(sharePdfPath, h.handleGetSharePdf)
 
 	// Modifications routes
-	modificationsPath := serverPathPrefix + "/modifications/:id"
+	modificationsPath := serverPathPrefix + "/htmx/trouble-reports/modifications/:id"
 	e.GET(modificationsPath, func(c echo.Context) error {
 		return h.handleGetModifications(c, nil)
 	})
 	e.POST(modificationsPath, h.handlePostModifications)
 
+	// TODO: Move to (HTML) handler
 	// Attachment routes
-	attachmentPath := serverPathPrefix + "/attachments"
+	attachmentPath := serverPathPrefix + "/htmx/trouble-reports/attachments"
 	e.GET(attachmentPath, h.handleGetAttachment)
 }
