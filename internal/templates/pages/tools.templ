@@ -6,7 +6,17 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-templ toolsPageNavContent(relPath string) {
+const (
+	relPathToolsPage       = "./"
+	relPathToolsActivePage = "../../"
+	relPathToolPage        = "../../"
+)
+
+/******************
+ * Global Functions
+ ******************/
+
+ templ toolsPageNavContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
 		@navFeedButton(relPath)
 		@navProfileButton(relPath)
@@ -14,13 +24,17 @@ templ toolsPageNavContent(relPath string) {
 	</div>
 }
 
+/************************
+ * Tools Main Page: tools
+ ************************/
+
 templ ToolsPage(tools []*database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
-			RelPath:     "./",
+			RelPath:     relPathToolsPage,
 			PageTitle:   "PG Presse | Werkzeuge",
 			AppBarTitle: "Werkzeuge",
-			NavContent:  toolsPageNavContent("./"),
+			NavContent:  toolsPageNavContent(relPathToolsPage),
 		},
 	) {
 		<main class="container fluid">
@@ -67,66 +81,6 @@ templ ToolsPage(tools []*database.ToolWithNotes) {
 				@activeTools()
 				@allTools(tools)
 			</div>
-		</main>
-	}
-}
-
-// TODO: Take database data from the database for this press (prop: press *database.Press)
-templ ToolsActivePage(press int64) {
-	@layouts.Main(
-		layouts.MainOptions{
-			RelPath:     "../../",
-			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
-			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
-			NavContent:  toolsPageNavContent("../../"),
-		},
-	) {
-		<main class="container fluid">
-			<div class="card warning">
-				<div class="card-header">
-					<h4>
-						<i class="bi bi-exclamation-triangle mr"></i>
-						<span>Work in Progress</span>
-					</h4>
-				</div>
-				<div class="card-body">
-					<ul>
-						<!-- TODO: ... -->
-						<li>Display the metal sheets table for the lower and upper tool.</li>
-						<li>Show notes with levels (INFO, WARNING, ERROR) or something like this.</li>
-						<li>Show Zyklen made with these tools, allow editing, reset after regeneration but keep the data.</li>
-					</ul>
-				</div>
-			</div>
-		</main>
-	}
-}
-
-templ ToolPage(tool *database.ToolWithNotes) {
-	@layouts.Main(
-		layouts.MainOptions{
-			RelPath:     "../../",
-			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
-			AppBarTitle: tool.String(),
-			NavContent:  toolsPageNavContent("../../"),
-		},
-	) {
-		<main class="container fluid">
-			<div class="card warning">
-				<div class="card-header">
-					<h4>
-						<i class="bi bi-exclamation-triangle mr"></i>
-						<span>Work in Progress</span>
-					</h4>
-				</div>
-				<div class="card-body">
-					<ul>
-						<li>...</li>
-					</ul>
-				</div>
-			</div>
-			<!-- TODO: Print out notes and all available data in `tool` -->
-			<!-- TODO: Request metalsheets for this tool id (htmx) -->
 		</main>
 	}
 }
@@ -190,35 +144,85 @@ templ allTools(tools []*database.ToolWithNotes) {
 		<div class="actions-bar flex gap justify-end items-center">
 			<!-- TODO: ./tools/edit without and id will render a new tool edit page or dialog -->
 			<!-- TODO: Leaves the question if i should use an dialog or a new page here, a dialog would work via HTMX and data should also be requested via HTMX, just like the trouble reports page works -->
-			<a role="button" class="primary flex gap" href="./tools/edit" disabled>
+			<a role="button" class="primary flex gap" href={ relPathToolsPage + "tools/edit" } disabled>
 				<i class="bi bi-plus-lg"></i>
 				<span>Erstellen</span>
 			</a>
 		</div>
 		<ul
+			hx-get={ fmt.Sprintf(relPathToolsPage + "htmx/tools/list-all") }
+			hx-trigger="load"
+			hx-swap="outerHTML"
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
-		>
-			<!-- TODO: For these items here i need an icon which marks a tool is gone
-			for regeneration, another icon for broken and an icon for attention -->
-			for _, t := range tools {
-				<li>
-					@tool(t.String(), fmt.Sprintf("./tools/all/%d", t.ID))
-				</li>
-			}
-		</ul>
+		></ul>
 	</div>
 }
 
-templ tool(title, href string) {
-	<li>
-		<a
-			role="button"
-			href={ href }
-			class="ghost contrast flex justify-between items-center py px-lg"
-		>
-			<span>{ title }</span>
-			<i class="bi bi-chevron-right"></i>
-		</a>
-	</li>
+/*******************************
+ * Tools Sub Page: tools/all/:id
+ *******************************/
+
+// TODO: Take database data from the database for this press (prop: press *database.Press)
+templ ToolsActivePage(press int64) {
+	@layouts.Main(
+		layouts.MainOptions{
+			RelPath:     relPathToolsActivePage,
+			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
+			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
+			NavContent:  toolsPageNavContent(relPathToolsActivePage),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Work in Progress</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<ul>
+						<!-- TODO: ... -->
+						<li>Display the metal sheets table for the lower and upper tool.</li>
+						<li>Show notes with levels (INFO, WARNING, ERROR) or something like this.</li>
+						<li>Show Zyklen made with these tools, allow editing, reset after regeneration but keep the data.</li>
+					</ul>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+/*******************************
+ * Tools Sub Page: tools/all/:id
+ *******************************/
+
+templ ToolPage(tool *database.ToolWithNotes) {
+	@layouts.Main(
+		layouts.MainOptions{
+			RelPath:     relPathToolPage,
+			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
+			AppBarTitle: tool.String(),
+			NavContent:  toolsPageNavContent(relPathToolPage),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Work in Progress</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<ul>
+						<li>...</li>
+					</ul>
+				</div>
+			</div>
+			<!-- TODO: Print out notes and all available data in `tool` -->
+			<!-- TODO: Request metalsheets for this tool id (htmx) -->
+		</main>
+	}
 }

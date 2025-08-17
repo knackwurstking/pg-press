@@ -13,6 +13,6 @@ type Base struct {
 func (b *Base) NewHTMXHandlerBase(prefix string) *htmxhandler.Base {
 	return &htmxhandler.Base{
 		DB:               b.DB,
-		ServerPathPrefix: b.ServerPathPrefix + prefix,
+		ServerPathPrefix: b.ServerPathPrefix + "/htmx" + prefix,
 	}
 }
