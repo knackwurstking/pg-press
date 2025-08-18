@@ -32,9 +32,4 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 		return h.handleGetModifications(c, nil)
 	})
 	e.POST(modificationsPath, h.handlePostModifications)
-
-	// TODO: Move to (HTML) handler
-	// Attachment routes
-	attachmentPath := serverPathPrefix + "/htmx/trouble-reports/attachments"
-	e.GET(attachmentPath, h.handleGetAttachment)
 }

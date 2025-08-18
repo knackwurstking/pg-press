@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -27,6 +28,10 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 	sharePdfPath := serverPathPrefix + path + "/share-pdf"
 	e.GET(sharePdfPath, h.handleGetSharePdf)
+
+	// Attachment routes
+	attachmentsPath := serverPathPrefix + "/trouble-reports/attachments"
+	e.GET(attachmentsPath, h.handleGetAttachment)
 
 	htmxTroubleReports := htmxhandler.TroubleReports{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
@@ -92,4 +97,32 @@ func (h *TroubleReports) shareResponse(
 		fmt.Sprintf("%d", buf.Len()))
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
+}
+
+func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
+	attachmentID, err := utils.ParseInt64Query(c, constants.QueryParamAttachmentID)
+	if err != nil {
+		return err
+	}
+
+	// Get the attachment from the attachments table
+	attachment, err := h.DB.Attachments.Get(attachmentID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get attachment: "+err.Error())
+	}
+
+	// Set appropriate headers
+	c.Response().Header().Set("Content-Type", attachment.MimeType)
+	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
+
+	// Try to determine filename from attachment ID
+	filename := fmt.Sprintf("attachment_%d", attachmentID)
+	if ext := attachment.GetFileExtension(); ext != "" {
+		filename += ext
+	}
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
