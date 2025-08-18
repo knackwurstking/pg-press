@@ -149,12 +149,6 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 		return NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
-	// Get existing trouble report to find old attachments
-	oldTR, err := s.troubleReports.Get(id)
-	if err != nil {
-		return WrapError(err, "failed to get existing trouble report")
-	}
-
 	// Add new attachments
 	var newAttachmentIDs []int64
 	for _, attachment := range newAttachments {
@@ -190,15 +184,6 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 			s.attachments.Remove(attachmentID)
 		}
 		return WrapError(err, "failed to update trouble report")
-	}
-
-	// Clean up orphaned attachments from the old report
-	// (attachments that were removed from the report)
-	orphanedIDs := findRemovedAttachments(oldTR.LinkedAttachments, allAttachmentIDs)
-	for _, orphanedID := range orphanedIDs {
-		if err := s.attachments.Remove(orphanedID); err != nil {
-			logger.TroubleReport().Warn("Failed to remove orphaned attachment %d: %v", orphanedID, err)
-		}
 	}
 
 	return nil
@@ -241,26 +226,4 @@ func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment
 // GetAttachment retrieves a specific attachment by ID.
 func (s *TroubleReportsHelper) GetAttachment(id int64) (*Attachment, error) {
 	return s.attachments.Get(id)
-}
-
-// CleanupOrphanedAttachments removes attachments not referenced by any trouble report.
-func (s *TroubleReportsHelper) CleanupOrphanedAttachments() (int64, error) {
-	return s.attachments.CleanupOrphaned()
-}
-
-// Helper function to find attachments that were removed
-func findRemovedAttachments(oldIDs, newIDs []int64) []int64 {
-	newIDMap := make(map[int64]bool)
-	for _, id := range newIDs {
-		newIDMap[id] = true
-	}
-
-	var removed []int64
-	for _, id := range oldIDs {
-		if !newIDMap[id] {
-			removed = append(removed, id)
-		}
-	}
-
-	return removed
 }

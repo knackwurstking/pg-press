@@ -25,12 +25,7 @@ const (
 	insertAttachmentQuery = `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	updateAttachmentQuery = `UPDATE attachments
 		SET mime_type = ?, data = ? WHERE id = ?`
-	deleteAttachmentQuery          = `DELETE FROM attachments WHERE id = ?`
-	deleteOrphanedAttachmentsQuery = `DELETE FROM attachments WHERE id NOT IN (
-		SELECT DISTINCT json_extract(value, '$')
-		FROM trouble_reports, json_each(linked_attachments)
-		WHERE json_valid(linked_attachments)
-	)`
+	deleteAttachmentQuery = `DELETE FROM attachments WHERE id = ?`
 )
 
 // Attachments provides database operations for managing attachments with lazy loading.
@@ -233,26 +228,6 @@ func (a *Attachments) Remove(id int64) error {
 	}
 
 	return nil
-}
-
-// CleanupOrphaned removes attachments that are not referenced by any trouble report.
-func (a *Attachments) CleanupOrphaned() (int64, error) {
-	logger.Attachments().Info("Cleaning up orphaned attachments")
-
-	result, err := a.db.Exec(deleteOrphanedAttachmentsQuery)
-	if err != nil {
-		return 0, NewDatabaseError("delete", "attachments",
-			"failed to cleanup orphaned attachments", err)
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, NewDatabaseError("delete", "attachments",
-			"failed to get rows affected", err)
-	}
-
-	logger.Attachments().Info("Cleaned up %d orphaned attachments", rowsAffected)
-	return rowsAffected, nil
 }
 
 func (a *Attachments) scanAttachment(rows *sql.Rows) (*Attachment, error) {
