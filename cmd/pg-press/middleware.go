@@ -92,7 +92,7 @@ func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			logger.Middleware().Debug("Handling error, redirect user to the login page: %#v", err)
+			logger.Middleware().Warn("Handling error, redirect user to the login page: %#v", err)
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
 	})
