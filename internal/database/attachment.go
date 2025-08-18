@@ -20,7 +20,6 @@ const (
 )
 
 // Attachment represents a file attachment with its data and metadata.
-// TODO: Add support for renaming attachments "Name string `name`"
 type Attachment struct {
 	ID       string `json:"id"`
 	MimeType string `json:"mime_type"`
