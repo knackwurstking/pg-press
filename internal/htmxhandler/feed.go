@@ -32,19 +32,19 @@ func (h *Feed) handleGetData(c echo.Context) error {
 		return err
 	}
 
+	feedData := components.FeedData(feeds, user.LastFeed)
+	err = feedData.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"error rendering feed data: "+err.Error())
+	}
+
 	if len(feeds) > 0 {
 		user.UpdateLastFeed(feeds[0].ID)
 		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())
 		}
-	}
-
-	feedData := components.FeedData(feeds, user.LastFeed)
-	err = feedData.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"error rendering feed data: "+err.Error())
 	}
 
 	return nil
