@@ -137,7 +137,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 						serverPathPrefix, props.ID,
 					) }
 				} else {
-					hx-post={ serverPathPrefix + "/trouble-reports/dialog-edit" }
+					hx-post={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 				}
 				hx-trigger="submit"
 				hx-target="#dialogEdit"
