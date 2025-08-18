@@ -230,12 +230,11 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		return attachments, nil
 	}
 
-	existingAttachmentsToRemove := strings.Split(
+	existingAttachmentsToRemove := strings.SplitSeq(
 		form.Value[constants.ExistingAttachmentsRemoval][0],
 		",",
 	)
-
-	for _, a := range existingAttachmentsToRemove {
+	for a := range existingAttachmentsToRemove {
 		for i, a2 := range attachments {
 			if a2.ID == a {
 				attachments = slices.Delete(attachments, i, 1)
