@@ -340,7 +340,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, ")</span></div><div class=\"attachment-actions flex gap\"><!-- TODO: Allow renaming attachments, need to check if this is supported by the backend -->")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, ")</span></div><div class=\"attachment-actions flex gap\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -401,14 +401,14 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><!-- TODO: Allow renaming attachments, need to check if this is supported by the backend --><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex gap justify-end\"><button hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex gap justify-end\"><button hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 289, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 287, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -441,7 +441,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 316, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 314, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
