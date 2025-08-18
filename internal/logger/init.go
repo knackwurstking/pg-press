@@ -87,7 +87,10 @@ func Feed() *Logger {
 	return NewComponentLogger("Feed")
 }
 
-// TroubleReport returns a logger configured for trouble report operations
+func Attachments() *Logger {
+	return NewComponentLogger("Attachments")
+}
+
 func TroubleReport() *Logger {
 	return NewComponentLogger("TroubleReport")
 }

@@ -56,7 +56,7 @@ func NewAttachments(db *sql.DB) *Attachments {
 
 // List retrieves all attachments ordered by ID ascending.
 func (a *Attachments) List() ([]*Attachment, error) {
-	logger.TroubleReport().Debug("Listing all attachments")
+	logger.Attachments().Debug("Listing all attachments")
 
 	rows, err := a.db.Query(selectAllAttachmentsQuery)
 	if err != nil {
@@ -85,7 +85,7 @@ func (a *Attachments) List() ([]*Attachment, error) {
 
 // Get retrieves a specific attachment by ID.
 func (a *Attachments) Get(id int64) (*Attachment, error) {
-	logger.TroubleReport().Debug("Getting attachment, id: %d", id)
+	logger.Attachments().Debug("Getting attachment, id: %d", id)
 
 	row := a.db.QueryRow(selectAttachmentByIDQuery, id)
 
@@ -107,7 +107,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 		return []*Attachment{}, nil
 	}
 
-	logger.TroubleReport().Debug("Getting attachments by IDs: %v", ids)
+	logger.Attachments().Debug("Getting attachments by IDs: %v", ids)
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -156,7 +156,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 
 // Add creates a new attachment and returns its generated ID.
 func (a *Attachments) Add(attachment *Attachment) (int64, error) {
-	logger.TroubleReport().Debug("Adding attachment: %s", attachment.String())
+	logger.Attachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
 		return 0, NewValidationError("attachment", "attachment cannot be nil", nil)
@@ -183,7 +183,7 @@ func (a *Attachments) Add(attachment *Attachment) (int64, error) {
 
 // Update modifies an existing attachment.
 func (a *Attachments) Update(id int64, attachment *Attachment) error {
-	logger.TroubleReport().Debug("Updating attachment, id: %d", id)
+	logger.Attachments().Debug("Updating attachment, id: %d", id)
 
 	if attachment == nil {
 		return NewValidationError("attachment", "attachment cannot be nil", nil)
@@ -214,7 +214,7 @@ func (a *Attachments) Update(id int64, attachment *Attachment) error {
 
 // Remove deletes an attachment by ID.
 func (a *Attachments) Remove(id int64) error {
-	logger.TroubleReport().Debug("Removing attachment, id: %d", id)
+	logger.Attachments().Debug("Removing attachment, id: %d", id)
 
 	result, err := a.db.Exec(deleteAttachmentQuery, id)
 	if err != nil {
@@ -237,7 +237,7 @@ func (a *Attachments) Remove(id int64) error {
 
 // CleanupOrphaned removes attachments that are not referenced by any trouble report.
 func (a *Attachments) CleanupOrphaned() (int64, error) {
-	logger.TroubleReport().Info("Cleaning up orphaned attachments")
+	logger.Attachments().Info("Cleaning up orphaned attachments")
 
 	result, err := a.db.Exec(deleteOrphanedAttachmentsQuery)
 	if err != nil {
@@ -251,7 +251,7 @@ func (a *Attachments) CleanupOrphaned() (int64, error) {
 			"failed to get rows affected", err)
 	}
 
-	logger.TroubleReport().Info("Cleaned up %d orphaned attachments", rowsAffected)
+	logger.Attachments().Info("Cleaned up %d orphaned attachments", rowsAffected)
 	return rowsAffected, nil
 }
 
