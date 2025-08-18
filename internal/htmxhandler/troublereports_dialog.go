@@ -6,6 +6,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
@@ -119,7 +119,6 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Get Title, Content and Attachments from form data
 	title, content, attachments, err := h.validateDialogEditFormData(c)
-	logger.TroubleReport().Debug("%s: %#v", title, attachments) // TODO: Remove this line
 	if err != nil {
 		return err
 	}
@@ -225,37 +224,24 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		}
 	}
 
-	// Handle attachment reordering
-	if existingOrder := ctx.FormValue(constants.AttachmentOrderField); existingOrder != "" {
-		orderParts := strings.Split(existingOrder, ",")
-		reorderedAttachments := make([]*database.Attachment, 0, len(attachments))
-
-		for _, idStr := range orderParts {
-			idStr = strings.TrimSpace(idStr)
-			if idStr == "" {
-				continue
-			}
-
-			attachmentID, err := strconv.ParseInt(idStr, 10, 64)
-			if err != nil {
-				continue
-			}
-
-			for _, att := range attachments {
-				if att.GetID() == attachmentID {
-					reorderedAttachments = append(reorderedAttachments, att)
-					break
-				}
-			}
-		}
-
-		attachments = reorderedAttachments
-	}
-
 	// Handle new file uploads
 	form, err := ctx.MultipartForm()
 	if err != nil {
 		return attachments, nil
+	}
+
+	existingAttachmentsToRemove := strings.Split(
+		form.Value[constants.ExistingAttachmentsRemoval][0],
+		",",
+	)
+
+	for _, a := range existingAttachmentsToRemove {
+		for i, a2 := range attachments {
+			if a2.ID == a {
+				attachments = slices.Delete(attachments, i, 1)
+				break
+			}
+		}
 	}
 
 	files := form.File[constants.AttachmentsFormField]

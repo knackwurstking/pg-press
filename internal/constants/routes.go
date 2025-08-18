@@ -11,13 +11,12 @@ const (
 
 // Form field names
 const (
-	APIKeyFormField          = "api-key"
-	UserNameFormField        = "user-name"
-	TitleFormField           = "title"
-	ContentFormField         = "content"
-	AttachmentsFormField     = "attachments"
-	AttachmentOrderField     = "attachment_order"
-	ExistingAttachmentPrefix = "existing_attachment_"
+	APIKeyFormField            = "api-key"
+	UserNameFormField          = "user-name"
+	TitleFormField             = "title"
+	ContentFormField           = "content"
+	AttachmentsFormField       = "attachments"
+	ExistingAttachmentsRemoval = "existing_attachments_removal"
 )
 
 // Query parameter names
