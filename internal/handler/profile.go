@@ -60,6 +60,8 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) erro
 	}
 
 	updatedUser := database.NewUser(user.TelegramID, userName, user.ApiKey)
+	updatedUser.LastFeed = user.LastFeed
+
 	if err := h.DB.Users.Update(user.TelegramID, updatedUser); err != nil {
 		return err
 	}

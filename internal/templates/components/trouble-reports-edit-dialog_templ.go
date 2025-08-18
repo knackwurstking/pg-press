@@ -16,8 +16,8 @@ import (
 
 func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_troubleReportsEditDialogDeleteAttachment_3f21`,
-		Function: `function __templ_troubleReportsEditDialogDeleteAttachment_3f21(attachmentId){if (!confirm(
+		Name: `__templ_troubleReportsEditDialogDeleteAttachment_796a`,
+		Function: `function __templ_troubleReportsEditDialogDeleteAttachment_796a(attachmentId){if (!confirm(
         "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
     )) return;
 
@@ -27,6 +27,7 @@ func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.Componen
     );
 
     if (attachmentItem) {
+        console.log(` + "`" + `Removing attachment with ID ${attachmentId}` + "`" + `, [...attachmentOrder]);
         // Remove from attachmentOrder array
         attachmentOrder = attachmentOrder.filter(
             (id) => id != attachmentId,
@@ -54,8 +55,8 @@ func troubleReportsEditDialogDeleteAttachment(attachmentId int64) templ.Componen
         }
     }
 }`,
-		Call:       templ.SafeScript(`__templ_troubleReportsEditDialogDeleteAttachment_3f21`, attachmentId),
-		CallInline: templ.SafeScriptInline(`__templ_troubleReportsEditDialogDeleteAttachment_3f21`, attachmentId),
+		Call:       templ.SafeScript(`__templ_troubleReportsEditDialogDeleteAttachment_796a`, attachmentId),
+		CallInline: templ.SafeScriptInline(`__templ_troubleReportsEditDialogDeleteAttachment_796a`, attachmentId),
 	}
 }
 
@@ -163,7 +164,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 		}
 		ctx = templ.ClearChildren(ctx)
 		if !props.Submitted {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog id=\"dialogEdit\" class=\"clean fullscreen\" oncancel=\"event.preventDefault()\"><script>\n          \t\tvar attachmentOrder = [];\n                var selectedFiles = []; // Used by the file input change event handler\n\n                // Helper Functions\n                function updateAttachmentOrderInput() {\n                    document.getElementById(\"attachment-order\").value =\n                        attachmentOrder.join(\",\");\n                }\n            </script><form class=\"flex flex-col gap\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog id=\"dialogEdit\" class=\"clean fullscreen\" oncancel=\"event.preventDefault()\"><script>\n          \t\tvar attachmentOrder = [];\n                var selectedFiles = []; // Used by the file input change event handler\n\n                // Helper Functions\n                function updateAttachmentOrderInput() {\n                    console.debug(\"Updating attachment order input with:\", [...attachmentOrder]);\n                    document.getElementById(\"attachment-order\").value =\n                        attachmentOrder.join(\",\");\n                }\n            </script><form class=\"flex flex-col gap\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -178,7 +179,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					serverPathPrefix, props.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 143, Col: 6}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 145, Col: 6}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -196,7 +197,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/trouble-reports/dialog-edit")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 145, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 147, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -214,7 +215,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 161, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 163, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -247,7 +248,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 176, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 178, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -271,7 +272,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 190, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 192, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -294,7 +295,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 204, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 206, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -312,7 +313,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 210, Col: 53}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 212, Col: 53}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -325,7 +326,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 213, Col: 61}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 215, Col: 61}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -338,7 +339,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 214, Col: 76}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 216, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -412,7 +413,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 294, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 296, Col: 81}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -445,7 +446,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 321, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 323, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

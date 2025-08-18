@@ -26,10 +26,6 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	attachmentsPreviewPath := serverPathPrefix + "/htmx/trouble-reports/attachments-preview"
 	e.GET(attachmentsPreviewPath, h.handleGetAttachmentsPreview)
 
-	// TODO: Move to (HTML) handler
-	sharePdfPath := serverPathPrefix + "/htmx/trouble-reports/share-pdf"
-	e.GET(sharePdfPath, h.handleGetSharePdf)
-
 	// Modifications routes
 	modificationsPath := serverPathPrefix + "/htmx/trouble-reports/modifications/:id"
 	e.GET(modificationsPath, func(c echo.Context) error {

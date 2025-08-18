@@ -17,6 +17,9 @@ script troubleReportsEditDialogDeleteAttachment(attachmentId int64) {
     );
 
     if (attachmentItem) {
+        // FIXME: The whole attachment order array is fucking empty
+        console.debug(`Removing attachment with ID ${attachmentId}`, [...attachmentOrder]);
+
         // Remove from attachmentOrder array
         attachmentOrder = attachmentOrder.filter(
             (id) => id != attachmentId,

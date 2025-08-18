@@ -174,11 +174,10 @@ func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 
 	count := int(0)
 	for _, feed := range feeds {
-		if feed.ID > userLastFeed {
-			count++
-		} else {
+		if feed.ID <= userLastFeed {
 			break
 		}
+		count++
 	}
 
 	var buf bytes.Buffer

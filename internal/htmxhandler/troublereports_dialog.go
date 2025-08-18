@@ -14,6 +14,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
@@ -118,6 +119,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Get Title, Content and Attachments from form data
 	title, content, attachments, err := h.validateDialogEditFormData(c)
+	logger.TroubleReport().Debug("%s: %#v", title, attachments) // TODO: Remove this line
 	if err != nil {
 		return err
 	}

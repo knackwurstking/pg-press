@@ -36,8 +36,8 @@ func troubleReportsListScript() templ.ComponentScript {
 
 func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, title string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_shareTroubleReportPDF_1fb7`,
-		Function: `function __templ_shareTroubleReportPDF_1fb7(event, troubleReportId, title){var button = event.target.closest("button");
+		Name: `__templ_shareTroubleReportPDF_23e9`,
+		Function: `function __templ_shareTroubleReportPDF_23e9(event, troubleReportId, title){var button = event.target.closest("button");
     if (!button) {
         alert("Fehler: Share-Button nicht gefunden.");
         return;
@@ -73,6 +73,7 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
         showSuccess('<i class="bi bi-download"></i>');
     }
 
+    // FIXME: I need to use the serverPathPrefix variable to construct the URL
     fetch(` + "`" + `./trouble-reports/share-pdf?id=${troubleReportId}` + "`" + `)
         .then(response => {
             if (!response.ok) throw new Error(` + "`" + `HTTP error! status: ${response.status}` + "`" + `);
@@ -104,8 +105,8 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
             resetButton();
         });
 }`,
-		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_1fb7`, event, troubleReportId, title),
-		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_1fb7`, event, troubleReportId, title),
+		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_23e9`, event, troubleReportId, title),
+		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_23e9`, event, troubleReportId, title),
 	}
 }
 
@@ -143,7 +144,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("trouble-report-%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 98, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 99, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -156,7 +157,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 100, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 101, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -169,7 +170,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 101, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 102, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -187,7 +188,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 107, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 108, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -202,7 +203,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 						"%s/htmx/trouble-reports/attachments-preview?id=%d", serverPathPrefix, tr.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 110, Col: 9}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 111, Col: 9}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -215,7 +216,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(len(tr.LoadedAttachments))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 116, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 117, Col: 46}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -236,7 +237,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					serverPathPrefix, tr.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 126, Col: 8}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 127, Col: 8}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -250,7 +251,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 					"%s/htmx/trouble-reports/dialog-edit?id=%d", serverPathPrefix, tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 136, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 137, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -271,7 +272,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("share-btn-%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 145, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 146, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -298,7 +299,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/trouble-reports/data?id=%d", serverPathPrefix, tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 154, Col: 94}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 155, Col: 94}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -316,7 +317,7 @@ func TroubleReportsList(user *database.User, troubleReports []*database.TroubleR
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/trouble-reports/vote?id=%d&mode=delete", serverPathPrefix, tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 167, Col: 104}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports.templ`, Line: 168, Col: 104}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
