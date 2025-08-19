@@ -34,11 +34,6 @@ const (
 	UserNameMaxLength = 100
 )
 
-// Form values
-const (
-	TrueValue = "true"
-)
-
 // Error messages
 const (
 	RedirectFailedMessage = "failed to redirect"

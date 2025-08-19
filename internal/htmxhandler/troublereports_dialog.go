@@ -27,11 +27,12 @@ func (h *TroubleReports) handleGetDialogEdit(
 		props = &components.TroubleReportsEditDialogProps{}
 	}
 
-	if c.QueryParam(constants.QueryParamCancel) == constants.TrueValue {
+	cancel := utils.ParseBoolQuery(c, constants.QueryParamCancel)
+	if cancel {
 		props.Submitted = true
 	}
 
-	if !props.Submitted && !props.InvalidTitle && !props.InvalidContent {
+	if !cancel && !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
 			id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 			if err != nil {

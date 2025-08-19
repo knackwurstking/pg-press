@@ -136,7 +136,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 							hx-get={ fmt.Sprintf(
 								"%s/htmx/trouble-reports/dialog-edit?id=%d", serverPathPrefix, tr.ID) }
 							hx-trigger="click"
-							hx-target="#dialogEdit"
+							hx-target="#troubleReportEditDialog"
 							hx-swap="outerHTML"
 							class="ghost icon"
 						>
