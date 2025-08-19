@@ -55,6 +55,19 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, error) {
 	return id, nil
 }
 
+func ParseBoolQuery(ctx echo.Context, paramName string) bool {
+	value := ctx.QueryParam(paramName)
+	if value == "" {
+		return false
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		return false
+	}
+	return boolValue
+}
+
 func SanitizeInput(input string) string {
 	sanitized := strings.TrimSpace(input)
 	sanitized = strings.ReplaceAll(sanitized, "\x00", "")

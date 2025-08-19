@@ -1,40 +1,54 @@
 package components
 
 type ToolEditDialogProps struct {
-	ID int64
+	ID     int64
+	Cancel bool
 }
 
 // TODO: Dialog for adding or updating a tool
 templ ToolEditDialog(props *ToolEditDialogProps) {
-	<dialog name="tool-edit-dialog" class="fullscreen clean">
-		<form onsubmit="event.preventDefault(); closeToolEditDialog()">
-			<footer class="flex gap justify-end">
-				<button
-					type="button"
-					class="secondary flex gap"
-					onclick="closeToolEditDialog()"
-				>
-					<i class="bi bi-x-circle"></i>
-					Schließen
-				</button>
-				<button type="submit flex gap">
-					<i class="bi bi-check-circle"></i>
-					if props.ID > 0 {
-						Aktualisieren
-					} else {
-						Erstellen
-					}
-				</button>
-			</footer>
-		</form>
-		<script>
-			function closeToolEditDialog() {
-				var dialog = document.querySelector(`dialog[name="tool-edit-dialog"]`);
-				dialog.close();
-				dialog.parentElement.removeChild(dialog);
-			}
+	if props.Cancel {
+		<span id="toolEditDialog"></span>
+	} else {
+		<dialog name="tool-edit-dialog" class="fullscreen clean">
+			<form
+				hx-trigger="submit"
+				hx-target="#toolsEditDialog"
+				hx-swap="outerHTML"
+				enctype="multipart/form-data"
+			>
+				<footer class="flex gap justify-end">
+					<button
+						type="button"
+						class="secondary flex gap"
+						onclick="closeToolEditDialog()"
+						hx-get={ serverPathPrefix + "/htmx/tools/edit?cancel=true" }
+						hx-trigger="click"
+						hx-target="#toolsEditDialog"
+						hx-swap="outerHTML"
+					>
+						<i class="bi bi-x-circle"></i>
+						Schließen
+					</button>
+					<button type="submit flex gap">
+						<i class="bi bi-check-circle"></i>
+						if props.ID > 0 {
+							Aktualisieren
+						} else {
+							Erstellen
+						}
+					</button>
+				</footer>
+			</form>
+			<script>
+    			function closeToolEditDialog() {
+    				var dialog = document.querySelector(`dialog[name="tool-edit-dialog"]`);
+    				dialog.close();
+    				dialog.parentElement.removeChild(dialog);
+    			}
 
-			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
-		</script>
-	</dialog>
+    			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
+    		</script>
+		</dialog>
+	}
 }
