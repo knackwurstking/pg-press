@@ -7,13 +7,13 @@ type ToolEditDialogProps struct {
 	Close bool
 }
 
-// TODO: Dialog for adding or updating a tool
 templ ToolEditDialog(props *ToolEditDialogProps) {
 	if props.Close {
 		<span id="toolEditDialog"></span>
 	} else {
 		<dialog name="tool-edit-dialog" class="fullscreen clean">
 			<form
+				class="flex flex-col gap"
 				if props.ID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/edit?id=%d",
@@ -27,6 +27,9 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
+				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar">
+					<!-- TODO: Continue here ... -->
+				</div>
 				<footer class="flex gap justify-end">
 					<button
 						type="button"
