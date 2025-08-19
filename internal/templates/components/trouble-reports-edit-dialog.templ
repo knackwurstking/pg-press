@@ -118,8 +118,16 @@ type TroubleReportsEditDialogProps struct {
 }
 
 templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
-	if !props.Submitted {
-		<dialog id="dialogEdit" class="clean fullscreen" oncancel="event.preventDefault()">
+	if props.Submitted {
+		<span
+			hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
+			hx-trigger="load"
+			hx-target="#data"
+			hx-swap="outerHTML"
+			id="troubleReportEditDialog"
+		></span>
+	} else {
+		<dialog id="troubleReportEditDialog" class="clean fullscreen" oncancel="event.preventDefault()">
 			<script>
                 var selectedFiles = []; // Used by the file input change event handler
                 var existingAttachmentsRemoval = [];
@@ -140,7 +148,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 					hx-post={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 				}
 				hx-trigger="submit"
-				hx-target="#dialogEdit"
+				hx-target="#troubleReportEditDialog"
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
@@ -286,7 +294,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 					<button
 						hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true" }
 						hx-trigger="click"
-						hx-target="#dialogEdit"
+						hx-target="#troubleReportEditDialog"
 						hx-swap="outerHTML"
 						type="button"
 						class="secondary flex gap"
@@ -306,16 +314,8 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				</footer>
 			</form>
 			<script>
-                document.querySelector("#dialogEdit").showModal();
+                document.querySelector("#troubleReportEditDialog").showModal();
             </script>
 		</dialog>
-	} else {
-		<span
-			hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
-			hx-trigger="load"
-			hx-target="#data"
-			hx-swap="outerHTML"
-			id="dialogEdit"
-		></span>
 	}
 }

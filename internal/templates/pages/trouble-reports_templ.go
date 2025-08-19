@@ -229,7 +229,7 @@ func TroubleReportsPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"click\" hx-target=\"#dialogEdit\" hx-swap=\"outerHTML\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"click\" hx-target=\"#troubleReportEditDialog\" hx-swap=\"outerHTML\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -242,7 +242,7 @@ func TroubleReportsPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" id=\"data\"></span></section><!-- Placeholder for the edit trouble report dialog --><span id=\"dialogEdit\"></span></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" id=\"data\"></span></section><!-- Placeholder for the edit trouble report dialog --><span id=\"troubleReportEditDialog\"></span></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

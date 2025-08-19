@@ -105,7 +105,7 @@ templ TroubleReportsPage() {
 				<button
 					hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 					hx-trigger="click"
-					hx-target="#dialogEdit"
+					hx-target="#troubleReportEditDialog"
 					hx-swap="outerHTML"
 					class="flex flex-row gap justify-between items-center"
 				>
@@ -123,7 +123,7 @@ templ TroubleReportsPage() {
 				></span>
 			</section>
 			<!-- Placeholder for the edit trouble report dialog -->
-			<span id="dialogEdit"></span>
+			<span id="troubleReportEditDialog"></span>
 		</main>
 	}
 }
