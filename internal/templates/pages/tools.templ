@@ -129,7 +129,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 		<div class="actions-bar flex gap justify-end items-center">
 			<!-- TODO: ./tools/edit without and id will render a new tool edit page or dialog -->
 			<!-- TODO: Leaves the question if i should use an dialog or a new page here, a dialog would work via HTMX and data should also be requested via HTMX, just like the trouble reports page works -->
-			<a role="button" class="primary flex gap" href={ serverPathPrefix + "/tools/edit" } disabled>
+			<a role="button" class="primary flex gap" href={ serverPathPrefix + "/tools/edit" }>
 				<i class="bi bi-plus-lg"></i>
 				<span>Erstellen</span>
 			</a>
