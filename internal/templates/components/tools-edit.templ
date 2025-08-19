@@ -1,5 +1,34 @@
 package components
 
+type ToolEditDialogProps struct {
+	ID int64
+}
+
 // TODO: Dialog for adding or updating a tool
-templ ToolsEdit() {
+templ ToolEditDialog(props *ToolEditDialogProps) {
+	<dialog name="tool-edit-dialog" class="fullscreen clean">
+		<form onsubmit="event.preventDefault(); this.closest('dialog').close()">
+			<footer class="flex gap justify-end">
+				<button
+					type="button"
+					class="secondary flex gap"
+					onclick="this.closest('dialog').close()"
+				>
+					<i class="bi bi-x-circle"></i>
+					Schließen
+				</button>
+				<button type="submit flex gap">
+					<i class="bi bi-check-circle"></i>
+					if props.ID > 0 {
+						Aktualisieren
+					} else {
+						Erstellen
+					}
+				</button>
+			</footer>
+		</form>
+		<script>
+			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
+		</script>
+	</dialog>
 }

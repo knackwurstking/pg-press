@@ -2,8 +2,12 @@ package htmxhandler
 
 import (
 	"errors"
+	"net/http"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/components"
+	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,8 +26,16 @@ func (h *Tools) handleListAll(c echo.Context) error {
 	return errors.New("under construction")
 }
 
+// handleEdit renders a dialog for editing or creating a tool
 func (h *Tools) handleEdit(c echo.Context) error {
-	// TODO: Implement edit handler
+	id, _ := utils.ParseInt64Query(c, constants.QueryParamID)
 
-	return errors.New("under construction")
+	toolEdit := components.ToolEditDialog(&components.ToolEditDialogProps{
+		ID: id,
+	})
+	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render tool edit dialog: "+err.Error())
+	}
+	return nil
 }
