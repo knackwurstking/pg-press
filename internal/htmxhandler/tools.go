@@ -29,11 +29,11 @@ func (h *Tools) handleListAll(c echo.Context) error {
 // handleEdit renders a dialog for editing or creating a tool
 func (h *Tools) handleEdit(c echo.Context) error {
 	id, _ := utils.ParseInt64Query(c, constants.QueryParamID)
-	cancel := utils.ParseBoolQuery(c, constants.QueryParamCancel)
+	close := utils.ParseBoolQuery(c, constants.QueryParamClose)
 
 	toolEdit := components.ToolEditDialog(&components.ToolEditDialogProps{
-		ID:     id,
-		Cancel: cancel,
+		ID:    id,
+		Close: close,
 	})
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,

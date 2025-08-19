@@ -112,13 +112,13 @@ type TroubleReportsEditDialogProps struct {
 	Content         string
 	InvalidTitle    bool
 	InvalidContent  bool
-	Submitted       bool
+	Close           bool
 	AttachmentError string
 	Attachments     []*database.Attachment
 }
 
 templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
-	if props.Submitted {
+	if props.Close {
 		<span
 			hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
 			hx-trigger="load"
@@ -292,7 +292,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				</div>
 				<footer class="flex gap justify-end">
 					<button
-						hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true" }
+						hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true" }
 						hx-trigger="click"
 						hx-target="#troubleReportEditDialog"
 						hx-swap="outerHTML"

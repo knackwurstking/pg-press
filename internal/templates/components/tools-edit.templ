@@ -1,13 +1,13 @@
 package components
 
 type ToolEditDialogProps struct {
-	ID     int64
-	Cancel bool
+	ID    int64
+	Close bool
 }
 
 // TODO: Dialog for adding or updating a tool
 templ ToolEditDialog(props *ToolEditDialogProps) {
-	if props.Cancel {
+	if props.Close {
 		<span id="toolEditDialog"></span>
 	} else {
 		<dialog name="tool-edit-dialog" class="fullscreen clean">
@@ -22,7 +22,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						type="button"
 						class="secondary flex gap"
 						onclick="closeToolEditDialog()"
-						hx-get={ serverPathPrefix + "/htmx/tools/edit?cancel=true" }
+						hx-get={ serverPathPrefix + "/htmx/tools/edit?close=true" }
 						hx-trigger="click"
 						hx-target="#toolsEditDialog"
 						hx-swap="outerHTML"

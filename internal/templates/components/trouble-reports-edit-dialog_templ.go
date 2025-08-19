@@ -132,7 +132,7 @@ type TroubleReportsEditDialogProps struct {
 	Content         string
 	InvalidTitle    bool
 	InvalidContent  bool
-	Submitted       bool
+	Close           bool
 	AttachmentError string
 	Attachments     []*database.Attachment
 }
@@ -158,7 +158,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Submitted {
+		if props.Close {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<span hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -424,9 +424,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?cancel=true")
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 295, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 295, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

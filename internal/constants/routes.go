@@ -22,7 +22,7 @@ const (
 // Query parameter names
 const (
 	QueryParamID           = "id"
-	QueryParamCancel       = "cancel"
+	QueryParamClose        = "close"
 	QueryParamTime         = "time"
 	QueryParamPress        = "press"
 	QueryParamAttachmentID = "attachment_id"

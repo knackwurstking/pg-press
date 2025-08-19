@@ -27,12 +27,11 @@ func (h *TroubleReports) handleGetDialogEdit(
 		props = &components.TroubleReportsEditDialogProps{}
 	}
 
-	cancel := utils.ParseBoolQuery(c, constants.QueryParamCancel)
-	if cancel {
-		props.Submitted = true
+	if !props.Close {
+		props.Close = utils.ParseBoolQuery(c, constants.QueryParamClose)
 	}
 
-	if !cancel && !props.InvalidTitle && !props.InvalidContent {
+	if !props.Close && !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
 			id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 			if err != nil {
@@ -67,7 +66,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 
 func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 	props := &components.TroubleReportsEditDialogProps{
-		Submitted: true,
+		Close: true,
 	}
 
 	user, err := utils.GetUserFromContext(c)
@@ -99,7 +98,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 				"failed to add trouble report: "+err.Error())
 		}
 	} else {
-		props.Submitted = false
+		props.Close = false
 	}
 
 	return h.handleGetDialogEdit(c, props)
@@ -126,7 +125,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Initialize dialog template data
 	props := &components.TroubleReportsEditDialogProps{
-		Submitted:      true,
+		Close:          true,
 		ID:             id,
 		Title:          title,
 		Content:        content,
@@ -136,7 +135,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Abort if invalid title or content
 	if props.InvalidTitle || props.InvalidContent {
-		props.Submitted = false
+		props.Close = false
 		return h.handleGetDialogEdit(c, props)
 	}
 

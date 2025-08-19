@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 type ToolEditDialogProps struct {
-	ID     int64
-	Cancel bool
+	ID    int64
+	Close bool
 }
 
 // TODO: Dialog for adding or updating a tool
@@ -35,7 +35,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if props.Cancel {
+		if props.Close {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<span id=\"toolEditDialog\"></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -46,9 +46,9 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/tools/edit?cancel=true")
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/tools/edit?close=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 25, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 25, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
