@@ -99,7 +99,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-trigger=\"click\" hx-target=\"#toolsEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit flex gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-trigger=\"click\" hx-target=\"#toolsEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
