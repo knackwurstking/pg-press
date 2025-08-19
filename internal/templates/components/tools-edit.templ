@@ -7,12 +7,12 @@ type ToolEditDialogProps struct {
 // TODO: Dialog for adding or updating a tool
 templ ToolEditDialog(props *ToolEditDialogProps) {
 	<dialog name="tool-edit-dialog" class="fullscreen clean">
-		<form onsubmit="event.preventDefault(); this.closest('dialog').close()">
+		<form onsubmit="event.preventDefault(); closeToolEditDialog()">
 			<footer class="flex gap justify-end">
 				<button
 					type="button"
 					class="secondary flex gap"
-					onclick="this.closest('dialog').close()"
+					onclick="closeToolEditDialog()"
 				>
 					<i class="bi bi-x-circle"></i>
 					Schließen
@@ -28,6 +28,12 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 			</footer>
 		</form>
 		<script>
+			function closeToolEditDialog() {
+				var dialog = document.querySelector(`dialog[name="tool-edit-dialog"]`);
+				dialog.close();
+				dialog.parentElement.removeChild(dialog);
+			}
+
 			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
 		</script>
 	</dialog>

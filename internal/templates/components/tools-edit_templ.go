@@ -34,7 +34,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog name=\"tool-edit-dialog\" class=\"fullscreen clean\"><form onsubmit=\"event.preventDefault(); this.closest('dialog').close()\"><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" onclick=\"this.closest('dialog').close()\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit flex gap\"><i class=\"bi bi-check-circle\"></i> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<dialog name=\"tool-edit-dialog\" class=\"fullscreen clean\"><form onsubmit=\"event.preventDefault(); closeToolEditDialog()\"><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" onclick=\"closeToolEditDialog()\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit flex gap\"><i class=\"bi bi-check-circle\"></i> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -49,7 +49,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</button></footer></form><script>\n\t\t\tdocument.querySelector(`dialog[name=\"tool-edit-dialog\"]`).showModal();\n\t\t</script></dialog>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</button></footer></form><script>\n\t\t\tfunction closeToolEditDialog() {\n\t\t\t\tvar dialog = document.querySelector(`dialog[name=\"tool-edit-dialog\"]`);\n\t\t\t\tdialog.close();\n\t\t\t\tdialog.parentElement.removeChild(dialog);\n\t\t\t}\n\n\t\t\tdocument.querySelector(`dialog[name=\"tool-edit-dialog\"]`).showModal();\n\t\t</script></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
