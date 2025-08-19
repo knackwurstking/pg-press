@@ -9,12 +9,12 @@
 | GET    | /logout                      | Logout and redirect to login |
 | GET    | /feed                        | Feed page                    |
 | GET    | /profile                     | User profile page            |
-| GET    | /tools                       | Tools page                   |
-| GET    | /tools/active/:press         | Active tools by press        |
-| GET    | /tools/all/:id               | Tool details by ID           |
 | GET    | /trouble-reports             | Trouble reports page         |
 | GET    | /trouble-reports/share-pdf   | Share PDF export             |
 | GET    | /trouble-reports/attachments | Get attachment data          |
+| GET    | /tools                       | Tools page                   |
+| GET    | /tools/active/:press         | Active tools by press        |
+| GET    | /tools/all/:id               | Tool details by ID           |
 
 ## HTMX
 
@@ -32,3 +32,4 @@
 | GET    | /htmx/trouble-reports/attachments-preview | Get attachments preview              |
 | GET    | /htmx/trouble-reports/modifications/:id   | Render trouble report modifications  |
 | POST   | /htmx/trouble-reports/modifications/:id   | Reset trouble report to modification |
+| GET    | /htmx/tools/edit                          | Tools edit dialog                    |
