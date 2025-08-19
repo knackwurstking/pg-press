@@ -1,5 +1,7 @@
 package components
 
+import "fmt"
+
 type ToolEditDialogProps struct {
 	ID    int64
 	Close bool
@@ -12,6 +14,14 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 	} else {
 		<dialog name="tool-edit-dialog" class="fullscreen clean">
 			<form
+				if props.ID > 0 {
+					hx-put={ fmt.Sprintf(
+						"%s/htmx/tools/edit?id=%d",
+						serverPathPrefix, props.ID,
+					) }
+				} else {
+					hx-post={ serverPathPrefix + "/htmx/tools/edit" }
+				}
 				hx-trigger="submit"
 				hx-target="#toolsEditDialog"
 				hx-swap="outerHTML"
