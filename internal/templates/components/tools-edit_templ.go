@@ -100,7 +100,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><option value=\"\">Position auswählen</option> <option value=\"top\">Oberteil</option> <option value=\"bottom\">Untenterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"number\" id=\"width\" name=\"width\" class=\"w-full\" placeholder=\"z.B. 120\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><option value=\"\">Position auswählen</option> <option value=\"top\">Oberteil</option> <option value=\"bottom\">Unterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"number\" id=\"width\" name=\"width\" class=\"w-full\" placeholder=\"z.B. 120\" required")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
