@@ -15,6 +15,10 @@ templ toolsPageNavContent() {
 	</div>
 }
 
+/*************************
+ * Tools Main Page: tools/
+ *************************/
+
 templ ToolsPage(tools []*database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -158,6 +162,15 @@ templ ToolsActivePage(press int64) {
  * Tools Sub Page: tools/all/:id
  *******************************/
 
+// TODO: ...
+// 	- Action bar (top position)
+// 	 	- Delete button for tool removal, redirect back to tools/ page after deletion
+//  	- Edit button for tool editing
+// 	- Show all notes in order of importance
+// 	- Metal Sheet table for this tool (top or bottom table)
+// 	- Show where this tool is currently used, in which press
+//  - Also show a history for last used presses, this should be a part of the zyklen table.
+// 	- Zyklen table for this tool, should be reset after regeneration but keep the data in history, so just set a mark with a timestamp of regeneration.
 templ ToolPage(tool *database.ToolWithNotes) {
 	@layouts.Main(
 		layouts.MainOptions{
