@@ -14,6 +14,7 @@ const (
 	FeedTypeTroubleReportAdd    = "trouble_report_add"
 	FeedTypeTroubleReportUpdate = "trouble_report_update"
 	FeedTypeTroubleReportRemove = "trouble_report_remove"
+	FeedTypeToolAdd             = "tool_add"
 
 	AddUserRenderTemplate = `
 <div class="feed-item">
@@ -80,6 +81,19 @@ const (
 	>
 		User <strong>%s<strong> hat den Problembericht mit dem Titel
 		<strong style="color: var(--ui-secondary);">%s</strong> entfernt.
+	</div>
+</div>
+`
+
+	// FIXME: The href link is wrong
+	AddToolRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat ein neues Werkzeug
+		<a href="./tools#tool-%d" class="info">%s</a> hinzugefügt.
 	</div>
 </div>
 `
@@ -207,6 +221,28 @@ func (f *FeedTroubleReportRemove) Render() template.HTML {
 	)
 }
 
+// FeedToolAdd represents a tool addition event.
+type FeedToolAdd struct {
+	ID         int64  `json:"id"`
+	Tool       string `json:"tool"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
+	return &FeedToolAdd{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedToolAdd) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(AddToolRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.Tool))
+}
+
 // Feed represents a feed entry in the system that tracks activity events.
 type Feed struct {
 	ID       int64  `json:"id"`
@@ -250,6 +286,11 @@ func (f *Feed) Render() template.HTML {
 		feedContent = NewFeedTroubleReportUpdate(data).Render()
 	case FeedTypeTroubleReportRemove:
 		feedContent = NewFeedTroubleReportRemove(data).Render()
+
+	// Tool Types
+
+	case FeedTypeToolAdd:
+		feedContent = NewFeedToolAdd(data).Render()
 
 	// Fallback
 

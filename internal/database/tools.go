@@ -9,7 +9,9 @@ import (
 )
 
 const (
+	// TODO: Remove at a later time the drop table query
 	createToolsTableQuery = `
+		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
@@ -113,7 +115,7 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) Add(tool *Tool) (int64, error) {
+func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.Tools().Info("Adding tool: %s", tool.String())
 
 	// Marshal JSON fields
@@ -148,10 +150,19 @@ func (t *Tools) Add(tool *Tool) (int64, error) {
 			"failed to get last insert ID", err)
 	}
 
-	// FIXME: Just add a new feed, need to create a new feed object first for tools
+	// Set tool ID for return
+	tool.ID = id
+
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.NotifyUpdate("tools", "add", id)
+		t.feeds.Add(NewFeed(
+			FeedTypeToolAdd,
+			&FeedToolAdd{
+				ID:         id,
+				Tool:       tool.String(),
+				ModifiedBy: user,
+			},
+		))
 	}
 
 	return id, nil
