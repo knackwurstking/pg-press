@@ -68,10 +68,6 @@ func middlewareLogger() echo.MiddlewareFunc {
 			"${latency_human} ${custom}\n",
 		Output: os.Stderr,
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-			if !slices.Contains(pages, c.Request().URL.Path) {
-				return 0, nil
-			}
-
 			user, ok := c.Get("user").(*database.User)
 			if !ok {
 				return 0, nil
