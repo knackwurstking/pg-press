@@ -92,7 +92,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat ein neues Werkzeug
-		<a href="./tools/#tool-%d" class="info">%s</a> hinzugefügt.
+		<a href="./tools/all/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
 	</div>
 </div>
 `
@@ -239,7 +239,7 @@ func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
 
 func (f *FeedToolAdd) Render() template.HTML {
 	return template.HTML(fmt.Sprintf(AddToolRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.Tool))
+		f.ModifiedBy.UserName, f.ID, f.Tool, f.ID))
 }
 
 // Feed represents a feed entry in the system that tracks activity events.
