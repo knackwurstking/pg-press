@@ -58,7 +58,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	}
 	logger.Tools().Debug("Received tool data: %#v", tool)
 
-	return errors.New("under construction")
+	return errors.New("under construction") // TODO: render edit with props
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
@@ -69,7 +69,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 	logger.Tools().Debug("Received tool data: %#v", tool)
 
-	return errors.New("under construction")
+	return errors.New("under construction") // TODO: render edit with props
 }
 
 func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
