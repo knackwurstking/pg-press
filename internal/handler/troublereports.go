@@ -25,13 +25,16 @@ type TroubleReports struct {
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	path := "/trouble-reports"
 	e.GET(serverPathPrefix+path, h.handleMainPage)
+	e.GET(serverPathPrefix+path+"/", h.handleMainPage)
 
 	sharePdfPath := serverPathPrefix + path + "/share-pdf"
 	e.GET(sharePdfPath, h.handleGetSharePdf)
+	e.GET(sharePdfPath+"/", h.handleGetSharePdf)
 
 	// Attachment routes
 	attachmentsPath := serverPathPrefix + "/trouble-reports/attachments"
 	e.GET(attachmentsPath, h.handleGetAttachment)
+	e.GET(attachmentsPath+"/", h.handleGetAttachment)
 
 	htmxTroubleReports := htmxhandler.TroubleReports{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)

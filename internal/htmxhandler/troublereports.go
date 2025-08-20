@@ -15,8 +15,13 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	e.GET(editDialogPath, func(c echo.Context) error {
 		return h.handleGetDialogEdit(c, nil)
 	})
+	e.GET(editDialogPath+"/", func(c echo.Context) error {
+		return h.handleGetDialogEdit(c, nil)
+	})
 	e.POST(editDialogPath, h.handlePostDialogEdit)
+	e.POST(editDialogPath+"/", h.handlePostDialogEdit)
 	e.PUT(editDialogPath, h.handlePutDialogEdit)
+	e.PUT(editDialogPath+"/", h.handlePutDialogEdit)
 
 	// Data routes
 	dataPath := serverPathPrefix + "/htmx/trouble-reports/data"

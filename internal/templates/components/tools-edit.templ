@@ -45,7 +45,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 					<div class="flex flex-col gap-sm">
 						<label for="position">Position</label>
 						<select
-							id="position"
+							id={ constants.IDPosition }
 							name="position"
 							required
 						>
@@ -74,7 +74,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						<div class="flex gap-sm">
 							<input
 								type="number"
-								id="width"
+								id={ constants.IDWidth }
 								name="width"
 								class="w-full"
 								placeholder="z.B. 120"
@@ -86,7 +86,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 							<span style="margin: auto 0;" class="text-xl">x</span>
 							<input
 								type="number"
-								id="height"
+								id={ constants.IDHeight }
 								name="height"
 								class="w-full"
 								placeholder="z.B. 60"
@@ -101,7 +101,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						<label for="type">Typ</label>
 						<input
 							type="text"
-							id="type"
+							id={ constants.IDType }
 							name="type"
 							placeholder="z.B. MASS, FC, GTC"
 							value={ props.Type }
@@ -112,7 +112,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						<label for="code">Code</label>
 						<input
 							type="text"
-							id="code"
+							id={ constants.IDCode }
 							name="code"
 							placeholder="z.B. G01, G02, XXL01"
 							value={ props.Code }

@@ -19,9 +19,12 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	path := "/tools"
 
 	e.GET(serverPathPrefix+path, h.handleToolsPage)
+	e.GET(serverPathPrefix+path+"/", h.handleToolsPage)
 
 	e.GET(serverPathPrefix+path+"/active/:press", h.handleToolsActivePage)
+	e.GET(serverPathPrefix+path+"/active/:press/", h.handleToolsActivePage)
 	e.GET(serverPathPrefix+path+"/all/:id", h.handleToolsAllPage)
+	e.GET(serverPathPrefix+path+"/all/:id/", h.handleToolsAllPage)
 
 	htmxTroubleReports := htmxhandler.Tools{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)

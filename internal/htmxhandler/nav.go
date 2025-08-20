@@ -17,8 +17,8 @@ type Nav struct {
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
 	// This approach keeps the WebSocket handler within Echo's middleware chain
 	// which is better for authentication that depends on Echo's context
-	e.GET(serverPathPrefix+"/htmx/nav/feed-counter",
-		h.handleFeedCounterWebSocketEcho)
+	e.GET(serverPathPrefix+"/htmx/nav/feed-counter", h.handleFeedCounterWebSocketEcho)
+	e.GET(serverPathPrefix+"/htmx/nav/feed-counter/", h.handleFeedCounterWebSocketEcho)
 }
 
 // handleFeedCounterWebSocketEcho creates an echo-compatible WebSocket handler

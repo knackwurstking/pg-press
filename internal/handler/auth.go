@@ -20,7 +20,9 @@ type Auth struct {
 
 func (h *Auth) RegisterRoutes(e *echo.Echo) {
 	e.GET(serverPathPrefix+"/login", h.handleLogin)
+	e.GET(serverPathPrefix+"/login/", h.handleLogin)
 	e.GET(serverPathPrefix+"/logout", h.handleLogout)
+	e.GET(serverPathPrefix+"/logout/", h.handleLogout)
 }
 
 // handleLogin handles the login page and form submission.

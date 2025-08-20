@@ -1,10 +1,14 @@
 package components
 
-import "github.com/knackwurstking/pgpress/internal/database"
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/constants"
+)
 
 templ CookiesTable(cookies []*database.Cookie) {
 	if len(cookies) > 0 {
-		<details id="cookies" class="cookies-details" open>
+		<details id={ constants.IDCookies } class="cookies-details" open>
 			<summary class="cookies-summary">
 				<i class="bi bi-cookie"></i>
 				Aktive Sitzungen { len(cookies) }
@@ -27,7 +31,7 @@ templ CookiesTable(cookies []*database.Cookie) {
 									<a
 										hx-delete={ serverPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value }
 										hx-trigger="click"
-										hx-target="#cookies"
+										hx-target={ fmt.Sprintf("#%s", constants.IDCookies) }
 										hx-swap="outerHTML"
 										hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
 										role="button"
@@ -54,7 +58,7 @@ templ CookiesTable(cookies []*database.Cookie) {
                 font-style: italic;
             }
         </style>
-		<div id="cookies" class="no-cookies">
+		<div id={ constants.IDCookies } class="no-cookies">
 			<i class="bi bi-info-circle"></i>
 			Keine aktiven Sitzungen gefunden
 		</div>

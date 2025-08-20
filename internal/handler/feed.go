@@ -18,6 +18,7 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 	prefix := "/feed"
 
 	e.GET(serverPathPrefix+prefix, h.handleFeed)
+	e.GET(serverPathPrefix+prefix+"/", h.handleFeed)
 
 	htmxFeed := htmxhandler.Feed{DB: h.DB}
 	htmxFeed.RegisterRoutes(e)

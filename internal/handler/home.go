@@ -10,6 +10,7 @@ import (
 type Home struct{}
 
 func (h *Home) RegisterRoutes(e *echo.Echo) {
+	e.GET(serverPathPrefix, h.handleHome)
 	e.GET(serverPathPrefix+"/", h.handleHome)
 }
 

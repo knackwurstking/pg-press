@@ -2,8 +2,13 @@ package pages
 
 import (
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/constants"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
+
+script showEditUserNameDialog() {
+	document.querySelector("#dialogEditUserName").showModal();
+}
 
 templ profileNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
@@ -66,7 +71,7 @@ templ ProfilePage(user *database.User) {
 					</h1>
 					<button
 						class="secondary icon"
-						onclick='document.querySelector("#dialogEditUserName").showModal();'
+						onclick={ showEditUserNameDialog() }
 						title="Benutzername bearbeiten"
 					>
 						<i class="bi bi-pen"></i>
@@ -87,7 +92,7 @@ templ ProfilePage(user *database.User) {
 			<!-- User cookies table, requested via HTMX -->
 			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
 				<span
-					id="cookies"
+					id={ constants.IDCookies }
 					hx-get={ serverPathPrefix + "/htmx/profile/cookies" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
@@ -95,7 +100,7 @@ templ ProfilePage(user *database.User) {
 			</div>
 			<!-- Dialog for changing the user name -->
 			<dialog
-				id="dialogEditUserName"
+				id={ constants.IDDialogEditUserName }
 				class="profile-dialog border clean"
 				oncancel="event.preventDefault()"
 			>

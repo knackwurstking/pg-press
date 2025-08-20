@@ -16,6 +16,7 @@ type Feed struct {
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
 	e.GET(serverPathPrefix+"/htmx/feed/data", h.handleGetData)
+	e.GET(serverPathPrefix+"/htmx/feed/data/", h.handleGetData)
 }
 
 func (h *Feed) handleGetData(c echo.Context) error {

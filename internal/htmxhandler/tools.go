@@ -19,12 +19,18 @@ type Tools struct {
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.GET(serverPathPrefix+"/htmx/tools/list-all", h.handleListAll)
+	e.GET(serverPathPrefix+"/htmx/tools/list-all/", h.handleListAll)
 
 	e.GET(serverPathPrefix+"/htmx/tools/edit", func(c echo.Context) error {
-		return h.handleEdit(nil, c)
+		return h.handleEdit(c, nil)
+	})
+	e.GET(serverPathPrefix+"/htmx/tools/edit/", func(c echo.Context) error {
+		return h.handleEdit(c, nil)
 	})
 	e.POST(serverPathPrefix+"/htmx/tools/edit", h.handleEditPOST)
+	e.POST(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPOST)
 	e.PUT(serverPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
+	e.PUT(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
 }
 
 func (h *Tools) handleListAll(c echo.Context) error {
@@ -44,7 +50,7 @@ func (h *Tools) handleListAll(c echo.Context) error {
 }
 
 // handleEdit renders a dialog for editing or creating a tool
-func (h *Tools) handleEdit(props *components.ToolEditDialogProps, c echo.Context) error {
+func (h *Tools) handleEdit(c echo.Context, props *components.ToolEditDialogProps) error {
 	if props == nil {
 		props = &components.ToolEditDialogProps{}
 		props.ID, _ = utils.ParseInt64Query(c, constants.QueryParamID)
@@ -81,10 +87,10 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 			"failed to add tool: "+err.Error())
 	}
 
-	return h.handleEdit(&components.ToolEditDialogProps{
+	return h.handleEdit(c, &components.ToolEditDialogProps{
 		ID:    tool.ID,
 		Close: true,
-	}, c)
+	})
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
@@ -102,10 +108,10 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	// TODO: Update tool in database tools
 
-	return h.handleEdit(&components.ToolEditDialogProps{
+	return h.handleEdit(c, &components.ToolEditDialogProps{
 		ID:    id,
 		Close: true,
-	}, c)
+	})
 }
 
 func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {

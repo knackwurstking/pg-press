@@ -1,5 +1,10 @@
 package pages
 
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/templates/constants"
+)
+
 templ navProfileButton() {
 	<a
 		role="button"
@@ -23,10 +28,10 @@ templ navFeedButton() {
 		class="ghost contrast icon"
 		href={ serverPathPrefix + "/feed" }
 		hx-ws={ "connect:" + serverPathPrefix + "/htmx/nav/feed-counter" }
-		hx-target="#feedCounter"
+		hx-target={ fmt.Sprintf("#%s", constants.IDFeedCounter) }
 		hx-swap="outerHTML"
 	>
 		<i class="bi bi-bell"></i>
-		<span id="feedCounter"></span>
+		<span id={ constants.IDFeedCounter }></span>
 	</a>
 }

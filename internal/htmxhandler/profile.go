@@ -16,7 +16,9 @@ type Profile struct {
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
 	e.GET(serverPathPrefix+"/htmx/profile/cookies", h.handleGetCookies)
+	e.GET(serverPathPrefix+"/htmx/profile/cookies/", h.handleGetCookies)
 	e.DELETE(serverPathPrefix+"/htmx/profile/cookies", h.handleDeleteCookies)
+	e.DELETE(serverPathPrefix+"/htmx/profile/cookies/", h.handleDeleteCookies)
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {
