@@ -93,6 +93,7 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes) {
 	<section class="metalsheets-section">
 		<h3>Bleche</h3>
 		<div class="table-container">
+			<!-- TODO: Create templ function for the following three tables -->
 			if tool.Position == database.PositionBottom {
 				<table class="table">
 					<thead>
@@ -131,13 +132,13 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes) {
 				<table class="table">
 					<thead>
 						<tr>
-							<th>Blech Dicke</th>
+							<th>???</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
-							<td colspan="1" class="text-center">
-								Bleche werden geladen...
+							<td colspan="1" class="center">
+								Unbekannte Position - keine Tabelle verfügbar
 							</td>
 						</tr>
 					</tbody>
