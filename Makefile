@@ -31,4 +31,4 @@ build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
 
 count:
-	find . | grep -e '\.go$$' -e '\.html$$' -e '\.css$$' -e '\.js$$' | xargs cat | wc -l
+	find . | grep -e '\.go$$' -e '\.html$$' -e '\.css$$' -e '\.js$$' -e '\.templ$$' | grep --invert-match '_templ\.go$$' | xargs cat | wc -l
