@@ -11,7 +11,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 	if props.Close {
 		<span id="toolEditDialog"></span>
 	} else {
-		<dialog name="tool-edit-dialog" class="fullscreen clean">
+		<dialog name="tool-edit-dialog" class="fullscreen clean flex flex-col justify-center items-center">
 			<form
 				class="flex flex-col gap"
 				if props.ID > 0 {
@@ -27,8 +27,46 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
-				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar">
-					<!-- TODO: Continue here ... -->
+				<!-- TODO: Check for invalid inputs, update props for this -->
+				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+					<div class="flex flex-col gap-sm">
+						<label for="position">Position</label>
+						<select id="position" name="position" required>
+							<option value="">Position auswählen</option>
+							<option value="up">Oberteil</option>
+							<option value="down">Untenterteil</option>
+						</select>
+					</div>
+					<div class="flex flex-col gap-sm">
+						<label for="format">Format</label>
+						<input
+							type="text"
+							id="format"
+							name="format"
+							placeholder="z.B. 120x60"
+							required
+						/>
+					</div>
+					<div class="flex flex-col gap-sm">
+						<label for="type">Typ</label>
+						<input
+							type="text"
+							id="type"
+							name="type"
+							placeholder="z.B. MASS, FC, GTC"
+							required
+						/>
+					</div>
+					<div class="flex flex-col gap-sm">
+						<label for="code">Code</label>
+						<input
+							type="text"
+							id="code"
+							name="code"
+							placeholder="z.B. G01, G02, XXL01"
+							required
+						/>
+					</div>
 				</div>
 				<footer class="flex gap justify-end">
 					<button
