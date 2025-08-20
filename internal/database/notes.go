@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	// TODO: Remove this
 	createNotesTableQuery = `
 		DROP TABLE IF EXISTS notes;
 		CREATE TABLE IF NOT EXISTS notes (
