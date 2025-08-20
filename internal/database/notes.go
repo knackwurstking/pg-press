@@ -22,7 +22,15 @@ const (
 	`
 
 	selectNoteByIDQuery = `
-		SELECT id, format, type, code, notes FROM notes WHERE id = $1;
+		SELECT id, level, content FROM notes WHERE id = $1;
+	`
+
+	insertNoteQuery = `
+		INSERT INTO notes (level, content) VALUES ($1, $2);
+	`
+
+	selectNotesByIDsQuery = `
+		SELECT id, level, content FROM notes WHERE id IN (%s);
 	`
 )
 
@@ -107,7 +115,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 		args[i] = id
 	}
 
-	query := fmt.Sprintf(selectAttachmentsByIDsQuery,
+	query := fmt.Sprintf(selectNotesByIDsQuery,
 		joinStrings(placeholders, ","))
 
 	rows, err := n.db.Query(query, args...)
@@ -142,6 +150,24 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	}
 
 	return notes, nil
+}
+
+func (n *Notes) Add(note *Note) (int64, error) {
+	logger.Notes().Info("Adding note: level=%d", note.Level)
+
+	result, err := n.db.Exec(insertNoteQuery, note.Level, note.Content)
+	if err != nil {
+		return 0, NewDatabaseError("insert", "notes",
+			"failed to insert note", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, NewDatabaseError("insert", "notes",
+			"failed to get last insert ID", err)
+	}
+
+	return id, nil
 }
 
 func (n *Notes) scanNoteFromRows(rows *sql.Rows) (*Note, error) {

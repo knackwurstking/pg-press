@@ -12,6 +12,7 @@ const (
 	createToolsTableQuery = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
+			position TEXT NOT NULL,
 			format BLOB NOT NULL,
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
@@ -22,21 +23,19 @@ const (
 	`
 
 	selectAllToolsQuery = `
-		SELECT id, format, type, code, notes FROM tools;
+		SELECT id, position, format, type, code, notes, mods FROM tools;
 	`
 
 	selectToolByIDQuery = `
-		SELECT id, format, type, code, notes FROM tools WHERE id = $1;
+		SELECT id, position, format, type, code, notes, mods FROM tools WHERE id = $1;
 	`
 
-	// TODO: Implement the Tools struct.
 	insertToolQuery = `
-		INSERT INTO tools (format, type, code, notes) VALUES ($1, $2, $3, $4);
+		INSERT INTO tools (position, format, type, code, notes, mods) VALUES ($1, $2, $3, $4, $5, $6);
 	`
 
-	// TODO: Implement the Tools struct.
 	updateToolQuery = `
-		UPDATE tools SET format = $1, type = $2, code = $3, notes = $4 WHERE id = $5;
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, notes = $5, mods = $6 WHERE id = $7;
 	`
 
 	// TODO: Implement the Tools struct.
@@ -114,6 +113,50 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
+func (t *Tools) Add(tool *Tool) (int64, error) {
+	logger.Tools().Info("Adding tool: %s", tool.String())
+
+	// Marshal JSON fields
+	formatBytes, err := json.Marshal(tool.Format)
+	if err != nil {
+		return 0, NewDatabaseError("insert", "tools",
+			"failed to marshal format", err)
+	}
+
+	notesBytes, err := json.Marshal(tool.LinkedNotes)
+	if err != nil {
+		return 0, NewDatabaseError("insert", "tools",
+			"failed to marshal notes", err)
+	}
+
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		return 0, NewDatabaseError("insert", "tools",
+			"failed to marshal mods", err)
+	}
+
+	result, err := t.db.Exec(insertToolQuery,
+		tool.Position, formatBytes, tool.Type, tool.Code, notesBytes, modsBytes)
+	if err != nil {
+		return 0, NewDatabaseError("insert", "tools",
+			"failed to insert tool", err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, NewDatabaseError("insert", "tools",
+			"failed to get last insert ID", err)
+	}
+
+	// FIXME: Just add a new feed, need to create a new feed object first for tools
+	// Trigger feed update
+	if t.feeds != nil {
+		t.feeds.NotifyUpdate("tools", "add", id)
+	}
+
+	return id, nil
+}
+
 func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 
@@ -123,8 +166,8 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 		mods        []byte
 	)
 
-	if err := rows.Scan(&tool.ID, &format, &tool.Type,
-		&tool.Code, &linkedNotes); err != nil {
+	if err := rows.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
+		&tool.Code, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
@@ -155,8 +198,8 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 		mods        []byte
 	)
 
-	if err := row.Scan(&tool.ID, &format, &tool.Type,
-		&tool.Code, &linkedNotes); err != nil {
+	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
+		&tool.Code, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
