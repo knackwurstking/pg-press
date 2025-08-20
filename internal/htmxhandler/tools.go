@@ -3,9 +3,11 @@ package htmxhandler
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -49,13 +51,69 @@ func (h *Tools) handleEdit(props *components.ToolEditDialogProps, c echo.Context
 }
 
 func (h *Tools) handleEditPOST(c echo.Context) error {
-	// TODO: Implement edit POST handler
+	tool, err := h.getToolFromForm(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get tool from form: "+err.Error())
+	}
+	logger.Tools().Debug("Received tool data: %#v", tool)
 
 	return errors.New("under construction")
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
-	// TODO: Implement edit PUT handler
+	tool, err := h.getToolFromForm(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get tool from form: "+err.Error())
+	}
+	logger.Tools().Debug("Received tool data: %#v", tool)
 
 	return errors.New("under construction")
+}
+
+func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
+	tool := database.NewTool()
+
+	switch position := c.FormValue("position"); position {
+	case database.PositionTop:
+		tool.Position = database.PositionTop
+	case database.PositionBottom:
+		tool.Position = database.PositionBottom
+	default:
+		return nil, errors.New("invalid position")
+	}
+
+	// Parse width and height
+	widthStr := c.FormValue("width")
+	if widthStr != "" {
+		width, err := strconv.Atoi(widthStr)
+		if err != nil {
+			return nil, errors.New("invalid width: " + err.Error())
+		}
+		tool.Format.Width = width
+	}
+
+	heightStr := c.FormValue("height")
+	if heightStr != "" {
+		height, err := strconv.Atoi(heightStr)
+		if err != nil {
+			return nil, errors.New("invalid height: " + err.Error())
+		}
+		tool.Format.Height = height
+	}
+
+	// Parse type
+	tool.Type = c.FormValue("type")
+	if tool.Type == "" {
+		return nil, errors.New("type is required")
+	}
+
+	// Parse code
+	tool.Code = c.FormValue("code")
+	if tool.Code == "" {
+		return nil, errors.New("code is required")
+	}
+
+	return tool, nil
 }

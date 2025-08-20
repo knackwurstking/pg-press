@@ -132,7 +132,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 				class="primary flex gap"
 				hx-get={ serverPathPrefix + "/htmx/tools/edit" }
 				hx-trigger="click"
-				hx-target="#toolsEditDialog"
+				hx-target="#toolEditDialog"
 				hx-swap="beforeend"
 			>
 				<i class="bi bi-plus-lg"></i>
@@ -146,7 +146,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
 		></ul>
-		<span id="toolsEditDialog"></span>
+		<span id="toolEditDialog"></span>
 	</div>
 }
 

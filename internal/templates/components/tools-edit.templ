@@ -27,7 +27,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 					hx-post={ serverPathPrefix + "/htmx/tools/edit" }
 				}
 				hx-trigger="submit"
-				hx-target="#toolsEditDialog"
+				hx-target="#toolEditDialog"
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
@@ -43,15 +43,15 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 							}
 						>
 							<option value="">Position auswählen</option>
-							<option value="up">Oberteil</option>
-							<option value="down">Untenterteil</option>
+							<option value="top">Oberteil</option>
+							<option value="bottom">Untenterteil</option>
 						</select>
 					</div>
 					<div class="flex flex-col gap-sm">
 						<label>Format</label>
 						<div class="flex gap-sm">
 							<input
-								type="text"
+								type="number"
 								id="width"
 								name="width"
 								placeholder="Breite (z.B. 120)"
@@ -62,7 +62,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 							/>
 							<span style="margin: auto 0;" class="text-xl">x</span>
 							<input
-								type="text"
+								type="number"
 								id="height"
 								name="height"
 								placeholder="Höhe (z.B. 60)"
@@ -107,7 +107,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						onclick="closeToolEditDialog()"
 						hx-get={ serverPathPrefix + "/htmx/tools/edit?close=true" }
 						hx-trigger="click"
-						hx-target="#toolsEditDialog"
+						hx-target="#toolEditDialog"
 						hx-swap="outerHTML"
 					>
 						<i class="bi bi-x-circle"></i>

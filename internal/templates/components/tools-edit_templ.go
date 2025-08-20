@@ -90,7 +90,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " hx-trigger=\"submit\" hx-target=\"#toolsEditDialog\" hx-swap=\"outerHTML\" enctype=\"multipart/form-data\"><div class=\"form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p\"><div class=\"flex flex-col gap-sm\"><label for=\"position\">Position</label> <select id=\"position\" name=\"position\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " hx-trigger=\"submit\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\" enctype=\"multipart/form-data\"><div class=\"form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p\"><div class=\"flex flex-col gap-sm\"><label for=\"position\">Position</label> <select id=\"position\" name=\"position\" required")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -100,7 +100,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><option value=\"\">Position auswählen</option> <option value=\"up\">Oberteil</option> <option value=\"down\">Untenterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"text\" id=\"width\" name=\"width\" placeholder=\"Breite (z.B. 120)\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><option value=\"\">Position auswählen</option> <option value=\"top\">Oberteil</option> <option value=\"bottom\">Untenterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"number\" id=\"width\" name=\"width\" placeholder=\"Breite (z.B. 120)\" required")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -110,7 +110,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "> <span style=\"margin: auto 0;\" class=\"text-xl\">x</span> <input type=\"text\" id=\"height\" name=\"height\" placeholder=\"Höhe (z.B. 60)\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "> <span style=\"margin: auto 0;\" class=\"text-xl\">x</span> <input type=\"number\" id=\"height\" name=\"height\" placeholder=\"Höhe (z.B. 60)\" required")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -153,7 +153,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-trigger=\"click\" hx-target=\"#toolsEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-trigger=\"click\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

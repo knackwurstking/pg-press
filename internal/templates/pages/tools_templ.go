@@ -289,7 +289,7 @@ func allTools(tools []*database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-trigger=\"click\" hx-target=\"#toolsEditDialog\" hx-swap=\"beforeend\"><i class=\"bi bi-plus-lg\"></i> <span>Erstellen</span></button></div><ul hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-trigger=\"click\" hx-target=\"#toolEditDialog\" hx-swap=\"beforeend\"><i class=\"bi bi-plus-lg\"></i> <span>Erstellen</span></button></div><ul hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -302,7 +302,7 @@ func allTools(tools []*database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" class=\"flex flex-col gap m-0 p-0\" style=\"list-style: none;\"></ul><span id=\"toolsEditDialog\"></span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" class=\"flex flex-col gap m-0 p-0\" style=\"list-style: none;\"></ul><span id=\"toolEditDialog\"></span></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

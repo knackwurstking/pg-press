@@ -29,6 +29,14 @@ type Tool struct {
 	Mods        Mods[ToolMod] `json:"mods"`
 }
 
+func NewTool(m ...*Modified[ToolMod]) *Tool {
+	return &Tool{
+		Format:      ToolFormat{},
+		LinkedNotes: make([]int64, 0),
+		Mods:        m,
+	}
+}
+
 func (t *Tool) String() string {
 	switch t.Position {
 	case PositionTop:
