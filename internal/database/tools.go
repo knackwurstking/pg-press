@@ -9,9 +9,7 @@ import (
 )
 
 const (
-	// TODO: Remove at a later time the drop table query
 	createToolsTableQuery = `
-		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
