@@ -3,6 +3,7 @@
     --pwa-background-color: var(--ui-bg);
 }
 
+html:has(dialog[open]),
 body:has(dialog[open]) {
     overflow: hidden;
 }
