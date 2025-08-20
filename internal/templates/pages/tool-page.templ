@@ -1,0 +1,216 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/templates/layouts"
+)
+
+templ ToolPage(tool *database.ToolWithNotes) {
+	@layouts.Main(
+		layouts.MainOptions{
+			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
+			AppBarTitle: tool.String(),
+			NavContent:  toolsPageNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning mb">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>In Bearbeitung</span>
+					</h4>
+				</div>
+			</div>
+			<!-- TODO: Print out notes and all available data in `tool` -->
+			<!-- TODO: Request metalsheets for this tool id (htmx) -->
+			@toolPageActions(tool)
+			@toolPageNotes(tool)
+			@toolPageMetalSheets(tool)
+			@toolPageCylesList(tool)
+		</main>
+	}
+}
+
+// TODO: ...
+// 	- Action bar (top position)
+// 	 	- Delete button for tool removal, redirect back to tools/ page after deletion
+//  	- Edit button for tool editing
+templ toolPageActions(tool *database.ToolWithNotes) {
+	<div class="action-bar flex gap justify-end items-center mb">
+		<button class="btn primary">
+			<i class="bi bi-pencil"></i>
+			Werkzeug bearbeiten
+		</button>
+		<button class="btn danger">
+			<i class="bi bi-trash"></i>
+			Werkzeug löschen
+		</button>
+	</div>
+}
+
+// TODO: ...
+// 	- Show all notes in order of importance
+templ toolPageNotes(tool *database.ToolWithNotes) {
+	if len(tool.LoadedNotes) >= 0 {
+		<section class="notes-section">
+			<h3>Notizen</h3>
+			<div class="notes-list">
+				for _, note := range tool.LoadedNotes {
+					<div class="card">
+						<div class="card-header">
+							<span class="note-importance">
+								switch note.Level {
+									case database.INFO:
+										<i class="bi bi-info-circle"></i>
+										Info
+									case database.ATTENTION:
+										<i class="bi bi-exclamation-triangle text-warning"></i>
+										<strong>Achtung</strong>
+									case database.BROKEN:
+										<i class="bi bi-x-circle text-danger"></i>
+										<strong>Defekt</strong>
+								}
+							</span>
+							<span class="note-date">
+								{ note.CreatedAt.Format("2006-01-02 15:04") }
+							</span>
+						</div>
+						<div class="card-body">
+							<p>{ note.Content }</p>
+						</div>
+					</div>
+				}
+			</div>
+		</section>
+	}
+}
+
+// TODO: ...
+// 	- Metal Sheet table for this tool (top or bottom table)
+templ toolPageMetalSheets(tool *database.ToolWithNotes) {
+	<section class="metalsheets-section">
+		<h3>Bleche</h3>
+		<div class="table-container">
+			if tool.Position == database.PositionBottom {
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Stärke (mm)</th>
+							<th>Blech Dicke (mm)</th>
+							<th>Marke Dicke (mm)</th>
+							<th>Stempelfall</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="4" class="center">
+								Bleche werden geladen...
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			} else if tool.Position == database.PositionTop {
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Stärke (mm)</th>
+							<th>Blech Dicke (mm)</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="2" class="center">
+								Bleche werden geladen...
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			} else {
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Blech Dicke</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="1" class="text-center">
+								Bleche werden geladen...
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			}
+		</div>
+	</section>
+}
+
+// TODO: ...
+// 	- Show where this tool is currently used, in which press
+//  - Also show a history for last used presses, this should all be a part of the cykles table.
+// 	- Cycles table for this tool, should be reset after regeneration but keep the data in
+// 	  history, so just set a mark with a timestamp of regeneration.
+templ toolPageCylesList(tool *database.ToolWithNotes) {
+	<section class="cycles-section">
+		<h3>Werkzeugnutzung & Zyklen</h3>
+		<div class="current-usage card">
+			<div class="card-header">
+				<h4>Aktueller Standort</h4>
+			</div>
+			<div class="card-body">
+				<p>
+					<strong>Presse:</strong> <span>Derzeit nicht in Verwendung</span>
+				</p>
+				<p>
+					<strong>Position:</strong> <span>-</span>
+				</p>
+				<p>
+					<strong>Seit:</strong> <span>-</span>
+				</p>
+			</div>
+		</div>
+		<div class="cycles-history">
+			<h4>Zyklusverlauf</h4>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Datum</th>
+						<th>Presse</th>
+						<th>Zyklen</th>
+						<th>Status</th>
+						<th>Regenerierung</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="5" class="text-center">
+							Kein Zyklusverlauf verfügbar
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="press-history">
+			<h4>Pressennutzungsverlauf</h4>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Von</th>
+						<th>Bis</th>
+						<th>Presse</th>
+						<th>Gesamtzyklen</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td colspan="4" class="text-center">
+							Kein Pressenverlauf verfügbar
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+}

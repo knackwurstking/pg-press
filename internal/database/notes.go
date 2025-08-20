@@ -9,20 +9,22 @@ import (
 
 const (
 	createNotesTableQuery = `
+		DROP TABLE IF EXISTS notes;
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
 			level INTEGER NOT NULL,
 			content TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
 	selectAllNotesQuery = `
-		SELECT id, level, content FROM notes;
+		SELECT id, level, content, created_at FROM notes;
 	`
 
 	selectNoteByIDQuery = `
-		SELECT id, level, content FROM notes WHERE id = $1;
+		SELECT id, level, content, created_at FROM notes WHERE id = $1;
 	`
 
 	insertNoteQuery = `
@@ -30,7 +32,7 @@ const (
 	`
 
 	selectNotesByIDsQuery = `
-		SELECT id, level, content FROM notes WHERE id IN (%s);
+		SELECT id, level, content, created_at FROM notes WHERE id IN (%s);
 	`
 )
 
@@ -173,7 +175,7 @@ func (n *Notes) Add(note *Note) (int64, error) {
 func (n *Notes) scanNoteFromRows(rows *sql.Rows) (*Note, error) {
 	note := &Note{}
 
-	if err := rows.Scan(&note.ID, &note.Level, &note.Content); err != nil {
+	if err := rows.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
 		return nil, NewDatabaseError("scan", "notes",
 			"failed to scan row", err)
 	}
@@ -184,7 +186,7 @@ func (n *Notes) scanNoteFromRows(rows *sql.Rows) (*Note, error) {
 func (n *Notes) scanNoteFromRow(row *sql.Row) (*Note, error) {
 	note := &Note{}
 
-	if err := row.Scan(&note.ID, &note.Level, &note.Content); err != nil {
+	if err := row.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
 		return nil, NewDatabaseError("scan", "notes",
 			"failed to scan row", err)
 	}
