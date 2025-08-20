@@ -17,14 +17,13 @@ templ ToolsListAll(tools []*database.ToolWithNotes) {
 	}
 	<!-- TODO: For these items here i need an icon which marks a tool is gone
 			for regeneration, another icon for broken and an icon for attention -->
-	<ul id={ constants.IDAllToolsList } class="p-0">
+	<ul id={ constants.IDAllToolsList } class="p-0 py mt">
 		for _, t := range tools {
 			@toolListItem(t.ID, t.String())
 		}
 	</ul>
 }
 
-// TODO: Beautify this list item a bit
 templ toolListItem(id int64, title string) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
@@ -32,8 +31,8 @@ templ toolListItem(id int64, title string) {
 			href={ fmt.Sprintf(serverPathPrefix+"/tools/all/%d", id) }
 			class="ghost contrast flex justify-between items-center"
 		>
-			<span>{ title }</span>
-			<i class="bi bi-chevron-right"></i>
+			<span class="text-sm">{ title }</span>
+			<i class="bi bi-chevron-right text-muted"></i>
 		</a>
 	</li>
 }
