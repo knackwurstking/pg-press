@@ -85,7 +85,6 @@ const (
 </div>
 `
 
-	// FIXME: The href link is wrong
 	AddToolRenderTemplate = `
 <div class="feed-item">
 	<div
@@ -93,7 +92,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat ein neues Werkzeug
-		<a href="./tools#tool-%d" class="info">%s</a> hinzugefügt.
+		<a href="./tools/#tool-%d" class="info">%s</a> hinzugefügt.
 	</div>
 </div>
 `

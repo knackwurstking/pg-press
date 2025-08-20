@@ -76,7 +76,7 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 	return result, nil
 }
 
-func (th *ToolsHelper) AddWithNotes(tool *Tool, notes []*Note, user *User) (*ToolWithNotes, error) {
+func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*ToolWithNotes, error) {
 	logger.Tools().Debug("Adding tool with notes")
 
 	// First, add all notes and collect their IDs

@@ -71,7 +71,15 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	}
 	logger.Tools().Debug("Received tool data: %#v", tool)
 
-	// TODO: Add tool to database tools
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to add tool: "+err.Error())
+	}
 
 	return h.handleEdit(&components.ToolEditDialogProps{
 		ID:    tool.ID,

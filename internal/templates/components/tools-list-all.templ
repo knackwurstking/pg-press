@@ -18,16 +18,16 @@ templ ToolsListAll(tools []*database.ToolWithNotes) {
 			for regeneration, another icon for broken and an icon for attention -->
 	<ul>
 		for _, t := range tools {
-			@toolListItem(t.String(), fmt.Sprintf(serverPathPrefix+"/tools/all/%d", t.ID))
+			@toolListItem(t.ID, t.String())
 		}
 	</ul>
 }
 
-templ toolListItem(title, href string) {
-	<li>
+templ toolListItem(id int64, title string) {
+	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
 			role="button"
-			href={ href }
+			href={ fmt.Sprintf(serverPathPrefix+"/tools/all/%d", id) }
 			class="ghost contrast flex justify-between items-center py px-lg"
 		>
 			<span>{ title }</span>
