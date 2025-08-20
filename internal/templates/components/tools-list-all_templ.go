@@ -45,7 +45,7 @@ func ToolsListAll(tools []*database.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, t := range tools {
-			templ_7745c5c3_Err = toolListItem(t.String(), fmt.Sprintf(serverPathPrefix+"/tools/all/%d", t.ID)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = toolListItem(t.ID, t.String()).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -58,7 +58,7 @@ func ToolsListAll(tools []*database.ToolWithNotes) templ.Component {
 	})
 }
 
-func toolListItem(title, href string) templ.Component {
+func toolListItem(id int64, title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -79,33 +79,46 @@ func toolListItem(title, href string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li><a role=\"button\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 templ.SafeURL
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(href)
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tool-%d", id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 30, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 27, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"ghost contrast flex justify-between items-center py px-lg\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><a role=\"button\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var4 templ.SafeURL
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(serverPathPrefix+"/tools/all/%d", id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 33, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 30, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span> <i class=\"bi bi-chevron-right\"></i></a></li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"ghost contrast flex justify-between items-center py px-lg\"><span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 33, Col: 16}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <i class=\"bi bi-chevron-right\"></i></a></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

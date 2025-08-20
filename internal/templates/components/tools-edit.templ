@@ -1,6 +1,9 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/templates/constants"
+)
 
 type ToolEditDialogProps struct {
 	ID       int64
@@ -14,7 +17,13 @@ type ToolEditDialogProps struct {
 
 templ ToolEditDialog(props *ToolEditDialogProps) {
 	if props.Close {
-		<span id="toolEditDialog"></span>
+		<span
+			id={ constants.IDToolEditDialog }
+			hx-get={ serverPathPrefix + "/htmx/tools/list-all" }
+			hx-trigger="load"
+			hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
+			hx-swap="outerHTML"
+		></span>
 	} else {
 		<dialog name="tool-edit-dialog" class="fullscreen clean flex flex-col justify-center items-center">
 			<form
@@ -28,7 +37,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 					hx-post={ serverPathPrefix + "/htmx/tools/edit" }
 				}
 				hx-trigger="submit"
-				hx-target="#toolEditDialog"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
@@ -118,7 +127,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						onclick="closeToolEditDialog()"
 						hx-get={ serverPathPrefix + "/htmx/tools/edit?close=true" }
 						hx-trigger="click"
-						hx-target="#toolEditDialog"
+						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 						hx-swap="outerHTML"
 					>
 						<i class="bi bi-x-circle"></i>
