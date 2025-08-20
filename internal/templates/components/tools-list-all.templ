@@ -7,7 +7,12 @@ import (
 
 templ ToolsListAll(tools []*database.ToolWithNotes) {
 	if len(tools) == 0 {
-		<li>Keine Werkzeuge gefunden.</li>
+		<div class="flex justify-center items-center mt">
+			<div class="text-center muted ghost">
+				<i class="bi bi-inbox mb text-4xl"></i>
+				<p class="m-0">Keine Werkzeuge gefunden.</p>
+			</div>
+		</div>
 	}
 	<!-- TODO: For these items here i need an icon which marks a tool is gone
 			for regeneration, another icon for broken and an icon for attention -->

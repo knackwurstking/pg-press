@@ -28,9 +28,19 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Tools) handleListAll(c echo.Context) error {
-	// TODO: Implement list all handler
+	// Get tools from database
+	tools, err := h.DB.ToolsHelper.ListWithNotes()
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tools from database: "+err.Error())
+	}
 
-	return errors.New("under construction")
+	toolsListAll := components.ToolsListAll(tools)
+	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render tools list all: "+err.Error())
+	}
+	return nil
 }
 
 // handleEdit renders a dialog for editing or creating a tool
