@@ -24,6 +24,7 @@ templ ToolsListAll(tools []*database.ToolWithNotes) {
 	</ul>
 }
 
+// TODO: Beautify this list item a bit
 templ toolListItem(id int64, title string) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
