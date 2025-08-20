@@ -11,12 +11,13 @@ import templruntime "github.com/a-h/templ/runtime"
 import "fmt"
 
 type ToolEditDialogProps struct {
-	ID              int64
-	Close           bool
-	InvalidPosition bool
-	InvalidFormat   bool
-	InvalidType     bool
-	InvalidCode     bool
+	ID       int64
+	Close    bool
+	Position string
+	Width    int
+	Height   int
+	Type     string
+	Code     string
 }
 
 func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
@@ -61,7 +62,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					serverPathPrefix, props.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 25, Col: 6}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 26, Col: 6}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
@@ -79,7 +80,7 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/tools/edit")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 27, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 28, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -90,85 +91,137 @@ func ToolEditDialog(props *ToolEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " hx-trigger=\"submit\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\" enctype=\"multipart/form-data\"><div class=\"form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p\"><div class=\"flex flex-col gap-sm\"><label for=\"position\">Position</label> <select id=\"position\" name=\"position\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " hx-trigger=\"submit\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\" enctype=\"multipart/form-data\"><div class=\"form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p\"><div class=\"flex flex-col gap-sm\"><label for=\"position\">Position</label> <select id=\"position\" name=\"position\" required><option value=\"\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidPosition {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " aria-invalid=\"true\"")
+			if props.Position == "" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><option value=\"\">Position auswählen</option> <option value=\"top\">Oberteil</option> <option value=\"bottom\">Unterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"number\" id=\"width\" name=\"width\" class=\"w-full\" placeholder=\"z.B. 120\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, ">Position auswählen</option> <option value=\"top\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidFormat {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " aria-invalid=\"true\"")
+			if props.Position == "top" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "> <span style=\"margin: auto 0;\" class=\"text-xl\">x</span> <input type=\"number\" id=\"height\" name=\"height\" class=\"w-full\" placeholder=\"z.B. 60\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">Oberteil</option> <option value=\"bottom\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidFormat {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " aria-invalid=\"true\"")
+			if props.Position == "bottom" {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "></div></div><div class=\"flex flex-col gap-sm\"><label for=\"type\">Typ</label> <input type=\"text\" id=\"type\" name=\"type\" placeholder=\"z.B. MASS, FC, GTC\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">Unterteil</option></select></div><div class=\"flex flex-col gap-sm\"><label>Format</label><div class=\"flex gap-sm\"><input type=\"number\" id=\"width\" name=\"width\" class=\"w-full\" placeholder=\"z.B. 120\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidType {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " aria-invalid=\"true\"")
+			if props.Width != 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Width)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 73, Col: 28}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "></div><div class=\"flex flex-col gap-sm\"><label for=\"code\">Code</label> <input type=\"text\" id=\"code\" name=\"code\" placeholder=\"z.B. G01, G02, XXL01\" required")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " required> <span style=\"margin: auto 0;\" class=\"text-xl\">x</span> <input type=\"number\" id=\"height\" name=\"height\" class=\"w-full\" placeholder=\"z.B. 60\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidCode {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " aria-invalid=\"true\"")
+			if props.Height != 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Height)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 85, Col: 29}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "></div></div><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" onclick=\"closeToolEditDialog()\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " required></div></div><div class=\"flex flex-col gap-sm\"><label for=\"type\">Typ</label> <input type=\"text\" id=\"type\" name=\"type\" placeholder=\"z.B. MASS, FC, GTC\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/tools/edit?close=true")
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Type)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 110, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 98, Col: 25}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-trigger=\"click\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" required></div><div class=\"flex flex-col gap-sm\"><label for=\"code\">Code</label> <input type=\"text\" id=\"code\" name=\"code\" placeholder=\"z.B. G01, G02, XXL01\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Code)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 109, Col: 25}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" required></div></div><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" onclick=\"closeToolEditDialog()\" hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/tools/edit?close=true")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-edit.templ`, Line: 119, Col: 63}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-trigger=\"click\" hx-target=\"#toolEditDialog\" hx-swap=\"outerHTML\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.ID > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "Aktualisieren")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "Aktualisieren")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "Erstellen")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "Erstellen")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</button></footer></form><script>\n    \t\t\tfunction closeToolEditDialog() {\n    \t\t\t\tvar dialog = document.querySelector(`dialog[name=\"tool-edit-dialog\"]`);\n    \t\t\t\tdialog.close();\n    \t\t\t\tdialog.parentElement.removeChild(dialog);\n    \t\t\t}\n\n    \t\t\tdocument.querySelector(`dialog[name=\"tool-edit-dialog\"]`).showModal();\n    \t\t</script></dialog>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</button></footer></form><script>\n    \t\t\tfunction closeToolEditDialog() {\n    \t\t\t\tvar dialog = document.querySelector(`dialog[name=\"tool-edit-dialog\"]`);\n    \t\t\t\tdialog.close();\n    \t\t\t\tdialog.parentElement.removeChild(dialog);\n    \t\t\t}\n\n    \t\t\tdocument.querySelector(`dialog[name=\"tool-edit-dialog\"]`).showModal();\n    \t\t</script></dialog>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

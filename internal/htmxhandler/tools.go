@@ -47,10 +47,13 @@ func (h *Tools) handleListAll(c echo.Context) error {
 func (h *Tools) handleEdit(props *components.ToolEditDialogProps, c echo.Context) error {
 	if props == nil {
 		props = &components.ToolEditDialogProps{}
-	}
+		props.ID, _ = utils.ParseInt64Query(c, constants.QueryParamID)
+		props.Close = utils.ParseBoolQuery(c, constants.QueryParamClose)
 
-	props.ID, _ = utils.ParseInt64Query(c, constants.QueryParamID)
-	props.Close = utils.ParseBoolQuery(c, constants.QueryParamClose)
+		if props.ID > 0 {
+			// TODO: Get tool from database tools
+		}
+	}
 
 	toolEdit := components.ToolEditDialog(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
@@ -68,7 +71,12 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	}
 	logger.Tools().Debug("Received tool data: %#v", tool)
 
-	return errors.New("under construction") // TODO: render edit with props
+	// TODO: Add tool to database tools
+
+	return h.handleEdit(&components.ToolEditDialogProps{
+		ID:    tool.ID,
+		Close: true,
+	}, c)
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
@@ -79,7 +87,17 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 	logger.Tools().Debug("Received tool data: %#v", tool)
 
-	return errors.New("under construction") // TODO: render edit with props
+	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		return err
+	}
+
+	// TODO: Update tool in database tools
+
+	return h.handleEdit(&components.ToolEditDialogProps{
+		ID:    id,
+		Close: true,
+	}, c)
 }
 
 func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
