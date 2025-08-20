@@ -3,8 +3,12 @@ package components
 import "fmt"
 
 type ToolEditDialogProps struct {
-	ID    int64
-	Close bool
+	ID              int64
+	Close           bool
+	InvalidPosition bool
+	InvalidFormat   bool
+	InvalidType     bool
+	InvalidCode     bool
 }
 
 templ ToolEditDialog(props *ToolEditDialogProps) {
@@ -27,25 +31,47 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
-				<!-- TODO: Check for invalid inputs, update props for this -->
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
 					<div class="flex flex-col gap-sm">
 						<label for="position">Position</label>
-						<select id="position" name="position" required>
+						<select
+							id="position"
+							name="position"
+							required
+							if props.InvalidPosition {
+								aria-invalid="true"
+							}
+						>
 							<option value="">Position auswählen</option>
 							<option value="up">Oberteil</option>
 							<option value="down">Untenterteil</option>
 						</select>
 					</div>
 					<div class="flex flex-col gap-sm">
-						<label for="format">Format</label>
-						<input
-							type="text"
-							id="format"
-							name="format"
-							placeholder="z.B. 120x60"
-							required
-						/>
+						<label>Format</label>
+						<div class="flex gap-sm">
+							<input
+								type="text"
+								id="width"
+								name="width"
+								placeholder="Breite (z.B. 120)"
+								required
+								if props.InvalidFormat {
+									aria-invalid="true"
+								}
+							/>
+							<span style="margin: auto 0;" class="text-xl">x</span>
+							<input
+								type="text"
+								id="height"
+								name="height"
+								placeholder="Höhe (z.B. 60)"
+								required
+								if props.InvalidFormat {
+									aria-invalid="true"
+								}
+							/>
+						</div>
 					</div>
 					<div class="flex flex-col gap-sm">
 						<label for="type">Typ</label>
@@ -55,6 +81,9 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 							name="type"
 							placeholder="z.B. MASS, FC, GTC"
 							required
+							if props.InvalidType {
+								aria-invalid="true"
+							}
 						/>
 					</div>
 					<div class="flex flex-col gap-sm">
@@ -65,6 +94,9 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 							name="code"
 							placeholder="z.B. G01, G02, XXL01"
 							required
+							if props.InvalidCode {
+								aria-invalid="true"
+							}
 						/>
 					</div>
 				</div>
