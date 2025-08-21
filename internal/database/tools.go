@@ -18,30 +18,35 @@ const (
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
 			status TEXT NOT NULL DEFAULT 'active',
+			press INTEGER,
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO tools (position, format, type, code, status, notes, mods)
+		INSERT INTO tools (position, format, type, code, status, press, notes, mods)
 		VALUES
-			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", '[]', '[]'),
-			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", '[]', '[]');
+			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]'),
+			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]');
 	`
 
 	selectAllToolsQuery = `
-		SELECT id, position, format, type, code, status, notes, mods FROM tools;
+		SELECT id, position, format, type, code, status, press, notes, mods FROM tools;
 	`
 
 	selectToolByIDQuery = `
-		SELECT id, position, format, type, code, status, notes, mods FROM tools WHERE id = $1;
+		SELECT id, position, format, type, code, status, press, notes, mods FROM tools WHERE id = $1;
+	`
+
+	selectToolsByPressQuery = `
+		SELECT id, position, format, type, code, status, press, notes, mods FROM tools WHERE press = $1 AND status = 'active';
 	`
 
 	insertToolQuery = `
-		INSERT INTO tools (position, format, type, code, status, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7);
+		INSERT INTO tools (position, format, type, code, status, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
 
 	updateToolQuery = `
-		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, status = $5, notes = $6, mods = $7 WHERE id = $8;
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, status = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
 	`
 
 	// TODO: Implement the Tools struct.
@@ -119,6 +124,39 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
+// GetByPress returns all active tools for a specific press (0-5)
+func (t *Tools) GetByPress(press int) ([]*Tool, error) {
+	if press < 0 || press > 5 {
+		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", press)
+	}
+
+	logger.Tools().Info("Getting active tools for press: %d", press)
+
+	rows, err := t.db.Query(selectToolsByPressQuery, press)
+	if err != nil {
+		return nil, NewDatabaseError("select", "tools",
+			fmt.Sprintf("failed to query tools for press %d", press), err)
+	}
+	defer rows.Close()
+
+	var tools []*Tool
+
+	for rows.Next() {
+		tool, err := t.scanToolFromRows(rows)
+		if err != nil {
+			return nil, WrapError(err, "failed to scan tool")
+		}
+		tools = append(tools, tool)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, NewDatabaseError("select", "tools",
+			"error iterating over rows", err)
+	}
+
+	return tools, nil
+}
+
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.Tools().Info("Adding tool: %s", tool.String())
 
@@ -142,7 +180,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	}
 
 	result, err := t.db.Exec(insertToolQuery,
-		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), notesBytes, modsBytes)
+		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
 			"failed to insert tool", err)
@@ -195,7 +233,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	}
 
 	_, err = t.db.Exec(updateToolQuery,
-		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), notesBytes, modsBytes, tool.ID)
+		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
@@ -253,16 +291,23 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 		format      []byte
 		linkedNotes []byte
 		mods        []byte
+		press       sql.NullInt64
 	)
 
 	var status string
 	if err := rows.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &press, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
 
 	tool.Status = ToolStatus(status)
+
+	// Handle nullable press
+	if press.Valid {
+		pressInt := int(press.Int64)
+		tool.Press = &pressInt
+	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
@@ -288,16 +333,23 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 		format      []byte
 		linkedNotes []byte
 		mods        []byte
+		press       sql.NullInt64
 	)
 
 	var status string
 	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &press, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
 
 	tool.Status = ToolStatus(status)
+
+	// Handle nullable press
+	if press.Valid {
+		pressInt := int(press.Int64)
+		tool.Press = &pressInt
+	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",

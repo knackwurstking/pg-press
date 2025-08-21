@@ -234,13 +234,25 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<h3>Werkzeugnutzung & Zyklen</h3>
 		<section class="current-usage">
 			<h4>Aktueller Status</h4>
-			<div class="card">
+			<div class="card muted w-fit">
 				<div class="card-body">
-					<div class="status-info">
-						<p><strong>Presse:</strong> Nicht zugewiesen</p>
-						<p><strong>Zyklen:</strong> 0</p>
-						<p><strong>Letzte Regenerierung:</strong> -</p>
-						<p><strong>Status:</strong> <span class="badge success">Verfügbar</span></p>
+					<div class="status-info flex flex-col gap">
+						<span>
+							<strong>Status:</strong>
+							switch tool.Status {
+								case database.ToolStatusActive:
+									<span class="primary ghost">Presse{ fmt.Sprintf("%d", *tool.Press) }</span>
+								case database.ToolStatusAvailable:
+									<span class="info ghost">Verfügbar</span>
+								case database.ToolStatusRegenerating:
+									<span class="warning ghost">Regenerierung</span>
+								default:
+									<span class="ghost">{ string(tool.Status) }</span>
+							}
+						</span>
+						<span>
+							<strong>Letzte Regenerierung:</strong> -
+						</span>
 					</div>
 				</div>
 			</div>

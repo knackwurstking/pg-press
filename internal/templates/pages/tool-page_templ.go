@@ -555,7 +555,59 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section flex flex-col gap\"><h3>Werkzeugnutzung & Zyklen</h3><section class=\"current-usage\"><h4>Aktueller Status</h4><div class=\"card\"><div class=\"card-body\"><div class=\"status-info\"><p><strong>Presse:</strong> Nicht zugewiesen</p><p><strong>Zyklen:</strong> 0</p><p><strong>Letzte Regenerierung:</strong> -</p><p><strong>Status:</strong> <span class=\"badge success\">Verfügbar</span></p></div></div></div></section><section class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table borderless\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></section><section class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></section></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section flex flex-col gap\"><h3>Werkzeugnutzung & Zyklen</h3><section class=\"current-usage\"><h4>Aktueller Status</h4><div class=\"card muted w-fit\"><div class=\"card-body\"><div class=\"status-info flex flex-col gap\"><span><strong>Status:</strong> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		switch tool.Status {
+		case database.ToolStatusActive:
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<span class=\"primary ghost\">Presse")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var22 string
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 244, Col: 75}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		case database.ToolStatusAvailable:
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<span class=\"info ghost\">Verfügbar</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		case database.ToolStatusRegenerating:
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"warning ghost\">Regenerierung</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		default:
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"ghost\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 string
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(tool.Status))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 250, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</span> <span><strong>Letzte Regenerierung:</strong> -</span></div></div></div></section><section class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table borderless\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></section><section class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

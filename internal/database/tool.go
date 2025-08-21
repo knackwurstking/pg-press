@@ -32,6 +32,7 @@ type Tool struct {
 	Type        string        `json:"type"` // Ex: FC, GTC, MASS
 	Code        string        `json:"code"` // Ex: G01, G02, ...
 	Status      ToolStatus    `json:"status"`
+	Press       *int          `json:"press"` // Press number (0-5) when status is active
 	LinkedNotes []int64       `json:"notes"` // Contains note ids from the "notes" table
 	Mods        Mods[ToolMod] `json:"mods"`
 }
@@ -46,14 +47,49 @@ func NewTool(m ...*Modified[ToolMod]) *Tool {
 }
 
 func (t *Tool) String() string {
+	var base string
 	switch t.Position {
 	case PositionTop:
-		return fmt.Sprintf("%s %s (%s, Oberteil)", t.Format, t.Code, t.Type)
+		base = fmt.Sprintf("%s %s (%s, Oberteil)", t.Format, t.Code, t.Type)
 	case PositionBottom:
-		return fmt.Sprintf("%s %s (%s, Unterteil)", t.Format, t.Code, t.Type)
+		base = fmt.Sprintf("%s %s (%s, Unterteil)", t.Format, t.Code, t.Type)
 	default:
-		return fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
+		base = fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
 	}
+
+	// Add press information if tool is active
+	if t.Status == ToolStatusActive && t.Press != nil {
+		base = fmt.Sprintf("%s - Presse %d", base, *t.Press)
+	}
+
+	return base
+}
+
+// SetPress sets the press for the tool with validation (0-5)
+func (t *Tool) SetPress(press int) error {
+	if press < 0 || press > 5 {
+		return fmt.Errorf("invalid press number: %d (must be 0-5)", press)
+	}
+	t.Press = &press
+	return nil
+}
+
+// ClearPress removes the press assignment
+func (t *Tool) ClearPress() {
+	t.Press = nil
+}
+
+// IsActive checks if the tool is active on a press
+func (t *Tool) IsActive() bool {
+	return t.Status == ToolStatusActive && t.Press != nil
+}
+
+// GetPressString returns a formatted string of the press assignment
+func (t *Tool) GetPressString() string {
+	if t.Press == nil {
+		return "Nicht zugewiesen"
+	}
+	return fmt.Sprintf("Presse %d", *t.Press)
 }
 
 type ToolMod struct {
@@ -62,5 +98,6 @@ type ToolMod struct {
 	Type        string     `json:"type"`
 	Code        string     `json:"code"`
 	Status      ToolStatus `json:"status"`
+	Press       *int       `json:"press"`
 	LinkedNotes []int64    `json:"notes"`
 }
