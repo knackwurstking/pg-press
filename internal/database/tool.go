@@ -3,9 +3,15 @@ package database
 import "fmt"
 
 const (
-	PositionTop    = "top"
-	PositionBottom = "bottom"
+	PositionTop    = Position("top")
+	PositionBottom = Position("bottom")
+
+	ToolStatusActive       = ToolStatus("active")
+	ToolStatusAvailable    = ToolStatus("available")
+	ToolStatusRegenerating = ToolStatus("regenerating")
 )
+
+type ToolStatus string
 
 type Position string
 
@@ -23,8 +29,9 @@ type Tool struct {
 	ID          int64         `json:"id"`
 	Position    Position      `json:"position"`
 	Format      ToolFormat    `json:"format"`
-	Type        string        `json:"type"`  // Ex: FC, GTC, MASS
-	Code        string        `json:"code"`  // Ex: G01, G02, ...
+	Type        string        `json:"type"` // Ex: FC, GTC, MASS
+	Code        string        `json:"code"` // Ex: G01, G02, ...
+	Status      ToolStatus    `json:"status"`
 	LinkedNotes []int64       `json:"notes"` // Contains note ids from the "notes" table
 	Mods        Mods[ToolMod] `json:"mods"`
 }
@@ -32,6 +39,7 @@ type Tool struct {
 func NewTool(m ...*Modified[ToolMod]) *Tool {
 	return &Tool{
 		Format:      ToolFormat{},
+		Status:      ToolStatusActive,
 		LinkedNotes: make([]int64, 0),
 		Mods:        m,
 	}
@@ -53,5 +61,6 @@ type ToolMod struct {
 	Format      ToolFormat `json:"format"`
 	Type        string     `json:"type"`
 	Code        string     `json:"code"`
+	Status      ToolStatus `json:"status"`
 	LinkedNotes []int64    `json:"notes"`
 }

@@ -13,12 +13,10 @@ const (
 		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
-			material TEXT NOT NULL,
-			thickness REAL NOT NULL,
-			width REAL NOT NULL,
-			height REAL NOT NULL,
-			position TEXT NOT NULL,
-			status TEXT NOT NULL,
+			tile_height REAL NOT NULL,
+			value REAL NOT NULL,
+			marke_height INTEGER NOT NULL,
+			stf REAL NOT NULL,
 			tool_id INTEGER,
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
@@ -27,70 +25,56 @@ const (
 			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO metal_sheets (material, thickness, width, height, position, status, tool_id, notes, mods)
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, tool_id, notes, mods)
 		VALUES
-			('Aluminum', 2.0, 1000.0, 2000.0, 'A1', 'in_use', 1, '[]', '[]'),
-			('Steel', 3.5, 1200.0, 2400.0, 'B2', 'in_use', 1, '[]', '[]'),
-			('Stainless Steel', 1.5, 800.0, 1600.0, 'C3', 'in_use', 2, '[]', '[]'),
-			('Aluminum', 2.5, 1000.0, 2000.0, 'A2', 'in_use', 2, '[]', '[]'),
-			('Copper', 1.0, 600.0, 1200.0, 'D4', 'available', NULL, '[]', '[]');
+			(8, 4, -1, -1, 1, '[]', '[]'),
+			(8, 14, 50, 5.0, 2, '[]', '[]');
 	`
 
 	selectAllMetalSheetsQuery = `
-		SELECT id, material, thickness, width, height, position, status, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
 		FROM metal_sheets
 		ORDER BY id DESC;
 	`
 
 	selectMetalSheetByIDQuery = `
-		SELECT id, material, thickness, width, height, position, status, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE id = $1;
 	`
 
 	selectMetalSheetsByToolIDQuery = `
-		SELECT id, material, thickness, width, height, position, status, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE tool_id = $1
-		ORDER BY position, id DESC;
-	`
-
-	selectAvailableMetalSheetsQuery = `
-		SELECT id, material, thickness, width, height, position, status, tool_id, notes, mods
-		FROM metal_sheets
-		WHERE status = 'available'
 		ORDER BY id DESC;
 	`
 
-	selectMetalSheetsByPositionQuery = `
-		SELECT id, material, thickness, width, height, position, status, tool_id, notes, mods
+	selectAvailableMetalSheetsQuery = `
+		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
 		FROM metal_sheets
-		WHERE position = $1
+		WHERE tool_id IS NULL
 		ORDER BY id DESC;
 	`
 
 	insertMetalSheetQuery = `
-		INSERT INTO metal_sheets (material, thickness, width, height, position, status, tool_id, notes, mods)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, tool_id, notes, mods)
+		VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
 	updateMetalSheetQuery = `
 		UPDATE metal_sheets
-		SET material = $1, thickness = $2, width = $3, height = $4, position = $5,
-		    status = $6, tool_id = $7, notes = $8, mods = $9, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $10;
+		SET tile_height = $1, value = $2, marke_height = $3, stf = $4,
+		    tool_id = $5, notes = $6, mods = $7, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $8;
 	`
 
-	updateMetalSheetStatusQuery = `
-		UPDATE metal_sheets
-		SET status = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2;
-	`
+	// Status query removed - no longer have status column
 
 	updateMetalSheetToolQuery = `
 		UPDATE metal_sheets
-		SET tool_id = $1, status = $2, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $3;
+		SET tool_id = $1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $2;
 	`
 
 	deleteMetalSheetQuery = `
@@ -258,35 +242,6 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 	return sheets, nil
 }
 
-// GetByPosition returns all metal sheets for a specific position
-func (ms *MetalSheets) GetByPosition(position Position) ([]*MetalSheet, error) {
-	logger.MetalSheets().Info("Getting metal sheets for position: %s", position)
-
-	rows, err := ms.db.Query(selectMetalSheetsByPositionQuery, position)
-	if err != nil {
-		return nil, NewDatabaseError("select", "metal_sheets",
-			fmt.Sprintf("failed to query metal sheets for position %s", position), err)
-	}
-	defer rows.Close()
-
-	var sheets []*MetalSheet
-
-	for rows.Next() {
-		sheet, err := ms.scanMetalSheetFromRows(rows)
-		if err != nil {
-			return nil, WrapError(err, "failed to scan metal sheet")
-		}
-		sheets = append(sheets, sheet)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "metal_sheets",
-			"error iterating over rows", err)
-	}
-
-	return sheets, nil
-}
-
 // Add inserts a new metal sheet
 func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 	logger.MetalSheets().Info("Adding metal sheet: %s", sheet.String())
@@ -305,8 +260,8 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 	}
 
 	result, err := ms.db.Exec(insertMetalSheetQuery,
-		sheet.Material, sheet.Thickness, sheet.Width, sheet.Height,
-		sheet.Position, sheet.Status, sheet.ToolID, notesBytes, modsBytes)
+		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF,
+		sheet.ToolID, notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "metal_sheets",
 			"failed to insert metal sheet", err)
@@ -354,8 +309,8 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 	}
 
 	_, err = ms.db.Exec(updateMetalSheetQuery,
-		sheet.Material, sheet.Thickness, sheet.Width, sheet.Height,
-		sheet.Position, sheet.Status, sheet.ToolID, notesBytes, modsBytes, sheet.ID)
+		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF,
+		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
 	if err != nil {
 		return NewDatabaseError("update", "metal_sheets",
 			fmt.Sprintf("failed to update metal sheet with ID %d", sheet.ID), err)
@@ -376,41 +331,11 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 	return nil
 }
 
-// UpdateStatus updates the status of a metal sheet
-func (ms *MetalSheets) UpdateStatus(id int64, status MetalSheetStatus, user *User) error {
-	logger.MetalSheets().Info("Updating metal sheet status: id=%d, status=%s", id, status)
-
-	_, err := ms.db.Exec(updateMetalSheetStatusQuery, status, id)
-	if err != nil {
-		return NewDatabaseError("update", "metal_sheets",
-			fmt.Sprintf("failed to update status for metal sheet ID %d", id), err)
-	}
-
-	// Trigger feed update
-	if ms.feeds != nil {
-		ms.feeds.Add(NewFeed(
-			FeedTypeMetalSheetStatusChange,
-			&FeedMetalSheetStatusChange{
-				ID:         id,
-				NewStatus:  string(status),
-				ModifiedBy: user,
-			},
-		))
-	}
-
-	return nil
-}
-
 // AssignTool assigns a metal sheet to a tool
 func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) error {
 	logger.MetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
-	status := MetalSheetStatusInUse
-	if toolID == nil {
-		status = MetalSheetStatusAvailable
-	}
-
-	_, err := ms.db.Exec(updateMetalSheetToolQuery, toolID, status, sheetID)
+	_, err := ms.db.Exec(updateMetalSheetToolQuery, toolID, sheetID)
 	if err != nil {
 		return NewDatabaseError("update", "metal_sheets",
 			fmt.Sprintf("failed to assign tool to metal sheet ID %d", sheetID), err)
@@ -462,12 +387,18 @@ func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, erro
 	var (
 		linkedNotes []byte
 		mods        []byte
+		toolID      sql.NullInt64
 	)
 
-	if err := rows.Scan(&sheet.ID, &sheet.Material, &sheet.Thickness, &sheet.Width, &sheet.Height,
-		&sheet.Position, &sheet.Status, &sheet.ToolID, &linkedNotes, &mods); err != nil {
+	if err := rows.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF,
+		&toolID, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "metal_sheets",
 			"failed to scan row", err)
+	}
+
+	// Handle nullable tool_id
+	if toolID.Valid {
+		sheet.ToolID = &toolID.Int64
 	}
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
@@ -489,12 +420,18 @@ func (ms *MetalSheets) scanMetalSheetFromRow(row *sql.Row) (*MetalSheet, error) 
 	var (
 		linkedNotes []byte
 		mods        []byte
+		toolID      sql.NullInt64
 	)
 
-	if err := row.Scan(&sheet.ID, &sheet.Material, &sheet.Thickness, &sheet.Width, &sheet.Height,
-		&sheet.Position, &sheet.Status, &sheet.ToolID, &linkedNotes, &mods); err != nil {
+	if err := row.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF,
+		&toolID, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "metal_sheets",
 			"failed to scan row", err)
+	}
+
+	// Handle nullable tool_id
+	if toolID.Valid {
+		sheet.ToolID = &toolID.Int64
 	}
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {

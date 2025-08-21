@@ -16,21 +16,18 @@ const (
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
 	ID          int64               `json:"id"`
-	Material    string              `json:"material"`  // Ex: Steel, Aluminum, Stainless Steel
-	Thickness   float64             `json:"thickness"` // Thickness in mm
-	Width       float64             `json:"width"`     // Width in mm
-	Height      float64             `json:"height"`    // Height in mm
-	Position    Position            `json:"position"`  // Top or Bottom (reusing from tool.go)
-	Status      MetalSheetStatus    `json:"status"`
-	ToolID      *int64              `json:"tool_id"` // Currently assigned tool (nullable)
-	LinkedNotes []int64             `json:"notes"`   // Contains note ids from the "notes" table
+	TileHeight  float64             `json:"tile_height"`  // Tile height in mm
+	Value       float64             `json:"value"`        // Value
+	MarkeHeight int                 `json:"marke_height"` // Marke height
+	STF         float64             `json:"stf"`          // STF value
+	ToolID      *int64              `json:"tool_id"`      // Currently assigned tool (nullable)
+	LinkedNotes []int64             `json:"notes"`        // Contains note ids from the "notes" table
 	Mods        Mods[MetalSheetMod] `json:"mods"`
 }
 
 // NewMetalSheet creates a new MetalSheet with default values
 func NewMetalSheet(m ...*Modified[MetalSheetMod]) *MetalSheet {
 	return &MetalSheet{
-		Status:      MetalSheetStatusAvailable,
 		LinkedNotes: make([]int64, 0),
 		Mods:        m,
 	}
@@ -38,32 +35,23 @@ func NewMetalSheet(m ...*Modified[MetalSheetMod]) *MetalSheet {
 
 // String returns a string representation of the metal sheet
 func (ms *MetalSheet) String() string {
-	dimensions := fmt.Sprintf("%.1fx%.1fx%.1f", ms.Width, ms.Height, ms.Thickness)
-	positionStr := ""
-	switch ms.Position {
-	case PositionTop:
-		positionStr = ", Oberteil"
-	case PositionBottom:
-		positionStr = ", Unterteil"
-	}
-	return fmt.Sprintf("%s %smm (%s%s)", ms.Material, dimensions, ms.Status, positionStr)
+	return fmt.Sprintf("Blech #%d (TH: %.1f, V: %.1f, MH: %d, STF: %.1f)",
+		ms.ID, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF)
 }
 
-// IsAvailable checks if the metal sheet is available for use
-func (ms *MetalSheet) IsAvailable() bool {
-	return ms.Status == MetalSheetStatusAvailable
+// IsAssigned checks if the metal sheet is assigned to a tool
+func (ms *MetalSheet) IsAssigned() bool {
+	return ms.ToolID != nil
 }
 
 // MetalSheetMod represents modifications to a metal sheet
 type MetalSheetMod struct {
-	Material    string           `json:"material"`
-	Thickness   float64          `json:"thickness"`
-	Width       float64          `json:"width"`
-	Height      float64          `json:"height"`
-	Position    Position         `json:"position"`
-	Status      MetalSheetStatus `json:"status"`
-	ToolID      *int64           `json:"tool_id"`
-	LinkedNotes []int64          `json:"notes"`
+	TileHeight  float64 `json:"tile_height"`
+	Value       float64 `json:"value"`
+	MarkeHeight int     `json:"marke_height"`
+	STF         float64 `json:"stf"`
+	ToolID      *int64  `json:"tool_id"`
+	LinkedNotes []int64 `json:"notes"`
 }
 
 // MetalSheetWithNotes represents a metal sheet with its related notes loaded

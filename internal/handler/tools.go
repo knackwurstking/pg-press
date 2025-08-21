@@ -82,8 +82,6 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 		metalSheets = []*database.MetalSheet{}
 	}
 
-	logger.Tools().Debug("MetalSheets: %#v", metalSheets)
-
 	page := pages.ToolPage(tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,

@@ -15,6 +15,8 @@ const (
 	FeedTypeTroubleReportUpdate      = "trouble_report_update"
 	FeedTypeTroubleReportRemove      = "trouble_report_remove"
 	FeedTypeToolAdd                  = "tool_add"
+	FeedTypeToolUpdate               = "tool_update"
+	FeedTypeToolDelete               = "tool_delete"
 	FeedTypeMetalSheetAdd            = "metal_sheet_add"
 	FeedTypeMetalSheetUpdate         = "metal_sheet_update"
 	FeedTypeMetalSheetDelete         = "metal_sheet_delete"
@@ -98,6 +100,30 @@ const (
 	>
 		Benutzer <strong>%s</strong> hat ein neues Werkzeug
 		<a href="./tools/all/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
+	</div>
+</div>
+`
+
+	UpdateToolRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat das Werkzeug
+		<a href="./tools/all/%d" class="info">%s</a> aktualisiert.
+	</div>
+</div>
+`
+
+	DeleteToolRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat das Werkzeug
+		<strong style="color: var(--ui-secondary);">%s</strong> entfernt.
 	</div>
 </div>
 `
@@ -307,6 +333,50 @@ func (f *FeedToolAdd) Render() template.HTML {
 		f.ModifiedBy.UserName, f.ID, f.Tool, f.ID))
 }
 
+// FeedToolUpdate represents a tool update event.
+type FeedToolUpdate struct {
+	ID         int64  `json:"id"`
+	Tool       string `json:"tool"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedToolUpdate(data map[string]any) *FeedToolUpdate {
+	return &FeedToolUpdate{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedToolUpdate) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(UpdateToolRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.Tool))
+}
+
+// FeedToolDelete represents a tool deletion event.
+type FeedToolDelete struct {
+	ID         int64  `json:"id"`
+	Tool       string `json:"tool"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedToolDelete(data map[string]any) *FeedToolDelete {
+	return &FeedToolDelete{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedToolDelete) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(DeleteToolRenderTemplate,
+		f.ModifiedBy.UserName, f.Tool))
+}
+
 // FeedMetalSheetAdd represents a metal sheet addition event.
 type FeedMetalSheetAdd struct {
 	ID         int64  `json:"id"`
@@ -482,6 +552,10 @@ func (f *Feed) Render() template.HTML {
 
 	case FeedTypeToolAdd:
 		feedContent = NewFeedToolAdd(data).Render()
+	case FeedTypeToolUpdate:
+		feedContent = NewFeedToolUpdate(data).Render()
+	case FeedTypeToolDelete:
+		feedContent = NewFeedToolDelete(data).Render()
 
 	// Metal Sheet Types
 

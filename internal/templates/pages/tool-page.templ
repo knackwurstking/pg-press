@@ -95,17 +95,17 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.
 		<div class="table-container">
 			<!-- TODO: Create templ function for the following three tables -->
 			if tool.Position == database.PositionBottom {
-				@toolPageMetalSheetsTablePositionBottom(tool)
+				@toolPageMetalSheetsTablePositionBottom(metalSheets)
 			} else if tool.Position == database.PositionTop {
 				@toolPageMetalSheetsTablePositionTop(metalSheets)
 			} else {
-				@toolPageMetalSheetsTablePositionUnknown()
+				@toolPageMetalSheetsTablePositionUnknown(metalSheets)
 			}
 		</div>
 	</section>
 }
 
-templ toolPageMetalSheetsTablePositionBottom(tool *database.ToolWithNotes) {
+templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) {
 	<table class="table">
 		<thead>
 			<tr>
@@ -113,66 +113,25 @@ templ toolPageMetalSheetsTablePositionBottom(tool *database.ToolWithNotes) {
 				<th>Blech (mm)</th>
 				<th>Marke (mm)</th>
 				<th>Stempelfall</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td colspan="4" class="center">
-					Bleche werden geladen...
-				</td>
-			</tr>
-		</tbody>
-	</table>
-}
-
-templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Stärke (mm)</th>
-				<th>Blech (mm)</th>
+				<th>Aktionen</th>
 			</tr>
 		</thead>
 		<tbody>
 			if len(metalSheets) == 0 {
 				<tr>
-					<td colspan="6" class="text-center">
+					<td colspan="5" class="text-center">
 						Keine Bleche für dieses Werkzeug gefunden
 					</td>
 				</tr>
 			} else {
 				for _, sheet := range metalSheets {
 					<tr>
-						<td>{ fmt.Sprintf("%d", sheet.ID) }</td>
-						<td>{ sheet.Material }</td>
-						<td>{ fmt.Sprintf("%.1f mm", sheet.Thickness) }</td>
-						<td>
-							switch sheet.Position {
-								case database.PositionTop:
-									Oberteil
-								case database.PositionBottom:
-									Unterteil
-								default:
-									Unbekannt
-							}
-						</td>
-						<td>
-							switch sheet.Status {
-								case database.MetalSheetStatusAvailable:
-									<span class="badge success">Verfügbar</span>
-								case database.MetalSheetStatusInUse:
-									<span class="badge primary">In Verwendung</span>
-								case database.MetalSheetStatusMaintenance:
-									<span class="badge warning">Wartung</span>
-								case database.MetalSheetStatusReserved:
-									<span class="badge info">Reserviert</span>
-								case database.MetalSheetStatusDamaged:
-									<span class="badge danger">Beschädigt</span>
-								default:
-									<span class="badge">{ string(sheet.Status) }</span>
-							}
-						</td>
-						<td>
+						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
+						<td class="flex gap justify-center items-center">
+							<!-- TODO: Action button here: "delete", "modify" -->
 							<button class="btn btn-sm primary">
 								<i class="bi bi-eye"></i>
 							</button>
@@ -187,19 +146,80 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 	</table>
 }
 
-templ toolPageMetalSheetsTablePositionUnknown() {
+templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 	<table class="table">
 		<thead>
 			<tr>
-				<th>???</th>
+				<th>Stärke (mm)</th>
+				<th>Blech (mm)</th>
+				<th>Aktionen</th>
 			</tr>
 		</thead>
 		<tbody>
+			if len(metalSheets) == 0 {
+				<tr>
+					<td colspan="3" class="text-center">
+						Keine Bleche für dieses Werkzeug gefunden
+					</td>
+				</tr>
+			} else {
+				for _, sheet := range metalSheets {
+					<tr>
+						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+						<td class="flex gap justify-center items-center">
+							<!-- TODO: Action button here: "delete", "modify" -->
+							<button class="btn btn-sm primary">
+								<i class="bi bi-eye"></i>
+							</button>
+							<button class="btn btn-sm warning">
+								<i class="bi bi-pencil"></i>
+							</button>
+						</td>
+					</tr>
+				}
+			}
+		</tbody>
+	</table>
+}
+
+templ toolPageMetalSheetsTablePositionUnknown(metalSheets []*database.MetalSheet) {
+	<table class="table">
+		<thead>
 			<tr>
-				<td colspan="1" class="center">
-					Unbekannte Position - keine Tabelle verfügbar
-				</td>
+				<th>Stärke (mm)</th>
+				<th>Blech (mm)</th>
+				<th>Marke (mm)</th>
+				<th>Stempelfall</th>
+				<th>Aktionen</th>
 			</tr>
+		</thead>
+		<tbody>
+			if len(metalSheets) == 0 {
+				<tr>
+					<td colspan="5" class="text-center">
+						Keine Bleche für dieses Werkzeug gefunden
+					</td>
+				</tr>
+			} else {
+				for _, sheet := range metalSheets {
+					<tr>
+						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
+						<td class="flex justify-center items-center">
+							<!-- TODO: Action button here: "delete", "modify" -->
+							<button class="btn btn-sm primary">
+								<i class="bi bi-eye"></i>
+							</button>
+							<button class="btn btn-sm warning">
+								<i class="bi bi-pencil"></i>
+							</button>
+						</td>
+					</tr>
+				}
+			}
 		</tbody>
 	</table>
 }

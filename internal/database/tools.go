@@ -10,32 +10,38 @@ import (
 
 const (
 	createToolsTableQuery = `
+		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
 			format BLOB NOT NULL,
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'active',
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
+		INSERT INTO tools (position, format, type, code, status, notes, mods)
+		VALUES
+			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", '[]', '[]'),
+			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", '[]', '[]');
 	`
 
 	selectAllToolsQuery = `
-		SELECT id, position, format, type, code, notes, mods FROM tools;
+		SELECT id, position, format, type, code, status, notes, mods FROM tools;
 	`
 
 	selectToolByIDQuery = `
-		SELECT id, position, format, type, code, notes, mods FROM tools WHERE id = $1;
+		SELECT id, position, format, type, code, status, notes, mods FROM tools WHERE id = $1;
 	`
 
 	insertToolQuery = `
-		INSERT INTO tools (position, format, type, code, notes, mods) VALUES ($1, $2, $3, $4, $5, $6);
+		INSERT INTO tools (position, format, type, code, status, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
 	updateToolQuery = `
-		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, notes = $5, mods = $6 WHERE id = $7;
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, status = $5, notes = $6, mods = $7 WHERE id = $8;
 	`
 
 	// TODO: Implement the Tools struct.
@@ -136,7 +142,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	}
 
 	result, err := t.db.Exec(insertToolQuery,
-		tool.Position, formatBytes, tool.Type, tool.Code, notesBytes, modsBytes)
+		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
 			"failed to insert tool", err)
@@ -166,6 +172,80 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	return id, nil
 }
 
+func (t *Tools) Update(tool *Tool, user *User) error {
+	logger.Tools().Info("Updating tool: %d", tool.ID)
+
+	// Marshal JSON fields
+	formatBytes, err := json.Marshal(tool.Format)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			"failed to marshal format", err)
+	}
+
+	notesBytes, err := json.Marshal(tool.LinkedNotes)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			"failed to marshal notes", err)
+	}
+
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			"failed to marshal mods", err)
+	}
+
+	_, err = t.db.Exec(updateToolQuery,
+		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), notesBytes, modsBytes, tool.ID)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
+	}
+
+	// Trigger feed update
+	if t.feeds != nil {
+		t.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         tool.ID,
+				Tool:       tool.String(),
+				ModifiedBy: user,
+			},
+		))
+	}
+
+	return nil
+}
+
+func (t *Tools) Delete(id int64, user *User) error {
+	logger.Tools().Info("Deleting tool: %d", id)
+
+	// Get tool info before deletion for feed
+	tool, err := t.Get(id)
+	if err != nil {
+		return WrapError(err, "failed to get tool before deletion")
+	}
+
+	_, err = t.db.Exec(deleteToolQuery, id)
+	if err != nil {
+		return NewDatabaseError("delete", "tools",
+			fmt.Sprintf("failed to delete tool with ID %d", id), err)
+	}
+
+	// Trigger feed update
+	if t.feeds != nil {
+		t.feeds.Add(NewFeed(
+			FeedTypeToolDelete,
+			&FeedToolDelete{
+				ID:         id,
+				Tool:       tool.String(),
+				ModifiedBy: user,
+			},
+		))
+	}
+
+	return nil
+}
+
 func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 
@@ -175,11 +255,14 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 		mods        []byte
 	)
 
+	var status string
 	if err := rows.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
+
+	tool.Status = ToolStatus(status)
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
@@ -207,11 +290,14 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 		mods        []byte
 	)
 
+	var status string
 	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
+
+	tool.Status = ToolStatus(status)
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",

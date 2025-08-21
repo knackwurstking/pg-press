@@ -117,7 +117,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
 	tool := database.NewTool()
 
-	switch position := c.FormValue("position"); position {
+	switch position := c.FormValue("position"); database.Position(position) {
 	case database.PositionTop:
 		tool.Position = database.PositionTop
 	case database.PositionBottom:
