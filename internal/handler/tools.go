@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -23,8 +24,8 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 
 	e.GET(serverPathPrefix+path+"/active/:press", h.handleToolsActivePage)
 	e.GET(serverPathPrefix+path+"/active/:press/", h.handleToolsActivePage)
-	e.GET(serverPathPrefix+path+"/all/:id", h.handleToolsAllPage)
-	e.GET(serverPathPrefix+path+"/all/:id/", h.handleToolsAllPage)
+	e.GET(serverPathPrefix+path+"/all/:id", h.handleToolPage)
+	e.GET(serverPathPrefix+path+"/all/:id/", h.handleToolPage)
 
 	htmxTroubleReports := htmxhandler.Tools{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
@@ -60,7 +61,7 @@ func (h *Tools) handleToolsActivePage(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleToolsAllPage(c echo.Context) error {
+func (h *Tools) handleToolPage(c echo.Context) error {
 	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
@@ -73,7 +74,17 @@ func (h *Tools) handleToolsAllPage(c echo.Context) error {
 			"failed to get tool: "+err.Error())
 	}
 
-	page := pages.ToolPage(tool)
+	// Fetch metal sheets assigned to this tool
+	metalSheets, err := h.DB.MetalSheets.GetByToolID(id)
+	if err != nil {
+		// Log error but don't fail - metal sheets are supplementary data
+		logger.Tools().Error("Failed to fetch metal sheets: " + err.Error())
+		metalSheets = []*database.MetalSheet{}
+	}
+
+	logger.Tools().Debug("MetalSheets: %#v", metalSheets)
+
+	page := pages.ToolPage(tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools all page: "+err.Error())

@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-templ ToolPage(tool *database.ToolWithNotes) {
+templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -27,7 +27,7 @@ templ ToolPage(tool *database.ToolWithNotes) {
 			<!-- TODO: Request metalsheets for this tool id (htmx) -->
 			@toolPageActions(tool)
 			@toolPageNotes(tool)
-			@toolPageMetalSheets(tool)
+			@toolPageMetalSheets(tool, metalSheets)
 			@toolPageCylesList(tool)
 		</main>
 	}
@@ -89,7 +89,7 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 
 // TODO: ...
 // 	- Metal Sheet table for this tool (top or bottom table)
-templ toolPageMetalSheets(tool *database.ToolWithNotes) {
+templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	<section class="metalsheets-section">
 		<h3>Bleche</h3>
 		<div class="table-container">
@@ -97,7 +97,7 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes) {
 			if tool.Position == database.PositionBottom {
 				@toolPageMetalSheetsTablePositionBottom(tool)
 			} else if tool.Position == database.PositionTop {
-				@toolPageMetalSheetsTablePositionTop(tool)
+				@toolPageMetalSheetsTablePositionTop(metalSheets)
 			} else {
 				@toolPageMetalSheetsTablePositionUnknown()
 			}
@@ -125,7 +125,7 @@ templ toolPageMetalSheetsTablePositionBottom(tool *database.ToolWithNotes) {
 	</table>
 }
 
-templ toolPageMetalSheetsTablePositionTop(tool *database.ToolWithNotes) {
+templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 	<table class="table">
 		<thead>
 			<tr>
@@ -134,11 +134,55 @@ templ toolPageMetalSheetsTablePositionTop(tool *database.ToolWithNotes) {
 			</tr>
 		</thead>
 		<tbody>
-			<tr>
-				<td colspan="2" class="center">
-					Bleche werden geladen...
-				</td>
-			</tr>
+			if len(metalSheets) == 0 {
+				<tr>
+					<td colspan="6" class="text-center">
+						Keine Bleche für dieses Werkzeug gefunden
+					</td>
+				</tr>
+			} else {
+				for _, sheet := range metalSheets {
+					<tr>
+						<td>{ fmt.Sprintf("%d", sheet.ID) }</td>
+						<td>{ sheet.Material }</td>
+						<td>{ fmt.Sprintf("%.1f mm", sheet.Thickness) }</td>
+						<td>
+							switch sheet.Position {
+								case database.PositionTop:
+									Oberteil
+								case database.PositionBottom:
+									Unterteil
+								default:
+									Unbekannt
+							}
+						</td>
+						<td>
+							switch sheet.Status {
+								case database.MetalSheetStatusAvailable:
+									<span class="badge success">Verfügbar</span>
+								case database.MetalSheetStatusInUse:
+									<span class="badge primary">In Verwendung</span>
+								case database.MetalSheetStatusMaintenance:
+									<span class="badge warning">Wartung</span>
+								case database.MetalSheetStatusReserved:
+									<span class="badge info">Reserviert</span>
+								case database.MetalSheetStatusDamaged:
+									<span class="badge danger">Beschädigt</span>
+								default:
+									<span class="badge">{ string(sheet.Status) }</span>
+							}
+						</td>
+						<td>
+							<button class="btn btn-sm primary">
+								<i class="bi bi-eye"></i>
+							</button>
+							<button class="btn btn-sm warning">
+								<i class="bi bi-pencil"></i>
+							</button>
+						</td>
+					</tr>
+				}
+			}
 		</tbody>
 	</table>
 }

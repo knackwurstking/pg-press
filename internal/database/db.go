@@ -14,6 +14,7 @@ type DB struct {
 	Notes                *Notes
 	Tools                *Tools
 	ToolsHelper          *ToolsHelper
+	MetalSheets          *MetalSheets
 	Feeds                *Feeds
 	db                   *sql.DB
 }
@@ -31,6 +32,8 @@ func New(db *sql.DB) *DB {
 	tools := NewTools(db, feeds)
 	toolsHelper := NewToolsHelper(tools, notes)
 
+	metalSheets := NewMetalSheets(db, feeds, notes)
+
 	return &DB{
 		Users:                NewUsers(db, feeds),
 		Cookies:              NewCookies(db),
@@ -40,6 +43,7 @@ func New(db *sql.DB) *DB {
 		Notes:                notes,
 		Tools:                tools,
 		ToolsHelper:          toolsHelper,
+		MetalSheets:          metalSheets,
 		Feeds:                feeds,
 		db:                   db,
 	}

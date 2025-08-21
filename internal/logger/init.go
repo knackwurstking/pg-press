@@ -103,6 +103,10 @@ func Notes() *Logger {
 	return NewComponentLogger("Notes")
 }
 
+func MetalSheets() *Logger {
+	return NewComponentLogger("MetalSheets")
+}
+
 // User returns a logger configured for user operations
 func User() *Logger {
 	return NewComponentLogger("User")

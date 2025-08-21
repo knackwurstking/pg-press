@@ -14,7 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-func ToolPage(tool *database.ToolWithNotes) templ.Component {
+func ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -59,7 +59,7 @@ func ToolPage(tool *database.ToolWithNotes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = toolPageMetalSheets(tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = toolPageMetalSheets(tool, metalSheets).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -212,7 +212,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 
 // TODO: ...
 //   - Metal Sheet table for this tool (top or bottom table)
-func toolPageMetalSheets(tool *database.ToolWithNotes) templ.Component {
+func toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -243,7 +243,7 @@ func toolPageMetalSheets(tool *database.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else if tool.Position == database.PositionTop {
-			templ_7745c5c3_Err = toolPageMetalSheetsTablePositionTop(tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = toolPageMetalSheetsTablePositionTop(metalSheets).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -290,7 +290,7 @@ func toolPageMetalSheetsTablePositionBottom(tool *database.ToolWithNotes) templ.
 	})
 }
 
-func toolPageMetalSheetsTablePositionTop(tool *database.ToolWithNotes) templ.Component {
+func toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -311,7 +311,133 @@ func toolPageMetalSheetsTablePositionTop(tool *database.ToolWithNotes) templ.Com
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<table class=\"table\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th></tr></thead> <tbody><tr><td colspan=\"2\" class=\"center\">Bleche werden geladen...</td></tr></tbody></table>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<table class=\"table\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th></tr></thead> <tbody>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if len(metalSheets) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<tr><td colspan=\"6\" class=\"text-center\">Keine Bleche für dieses Werkzeug gefunden</td></tr>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			for _, sheet := range metalSheets {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<tr><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", sheet.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 146, Col: 39}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var11 string
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(sheet.Material)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 147, Col: 26}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var12 string
+				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f mm", sheet.Thickness))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 148, Col: 51}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				switch sheet.Position {
+				case database.PositionTop:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "Oberteil")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case database.PositionBottom:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "Unterteil")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				default:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "Unbekannt")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				switch sheet.Status {
+				case database.MetalSheetStatusAvailable:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span class=\"badge success\">Verfügbar</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case database.MetalSheetStatusInUse:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<span class=\"badge primary\">In Verwendung</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case database.MetalSheetStatusMaintenance:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<span class=\"badge warning\">Wartung</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case database.MetalSheetStatusReserved:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<span class=\"badge info\">Reserviert</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				case database.MetalSheetStatusDamaged:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<span class=\"badge danger\">Beschädigt</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				default:
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<span class=\"badge\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var13 string
+					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(string(sheet.Status))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 172, Col: 51}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</td><td><button class=\"btn btn-sm primary\"><i class=\"bi bi-eye\"></i></button> <button class=\"btn btn-sm warning\"><i class=\"bi bi-pencil\"></i></button></td></tr>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -335,12 +461,12 @@ func toolPageMetalSheetsTablePositionUnknown() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<table class=\"table\"><thead><tr><th>???</th></tr></thead> <tbody><tr><td colspan=\"1\" class=\"center\">Unbekannte Position - keine Tabelle verfügbar</td></tr></tbody></table>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<table class=\"table\"><thead><tr><th>???</th></tr></thead> <tbody><tr><td colspan=\"1\" class=\"center\">Unbekannte Position - keine Tabelle verfügbar</td></tr></tbody></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -369,12 +495,12 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<section class=\"cycles-section\"><h3>Werkzeugnutzung & Zyklen</h3><div class=\"current-usage card\"><div class=\"card-header\"><h4>Aktueller Standort</h4></div><div class=\"card-body\"><p><strong>Presse:</strong> <span>Derzeit nicht in Verwendung</span></p><p><strong>Position:</strong> <span>-</span></p><p><strong>Seit:</strong> <span>-</span></p></div></div><div class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></div><div class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<section class=\"cycles-section\"><h3>Werkzeugnutzung & Zyklen</h3><div class=\"current-usage card\"><div class=\"card-header\"><h4>Aktueller Standort</h4></div><div class=\"card-body\"><p><strong>Presse:</strong> <span>Derzeit nicht in Verwendung</span></p><p><strong>Position:</strong> <span>-</span></p><p><strong>Seit:</strong> <span>-</span></p></div></div><div class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></div><div class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

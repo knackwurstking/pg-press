@@ -8,9 +8,7 @@ import (
 )
 
 const (
-	// TODO: Remove this
 	createNotesTableQuery = `
-		DROP TABLE IF EXISTS notes;
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
 			level INTEGER NOT NULL,

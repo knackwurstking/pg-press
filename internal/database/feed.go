@@ -8,13 +8,18 @@ import (
 )
 
 const (
-	FeedTypeUserAdd             = "user_add"
-	FeedTypeUserRemove          = "user_remove"
-	FeedTypeUserNameChange      = "user_name_change"
-	FeedTypeTroubleReportAdd    = "trouble_report_add"
-	FeedTypeTroubleReportUpdate = "trouble_report_update"
-	FeedTypeTroubleReportRemove = "trouble_report_remove"
-	FeedTypeToolAdd             = "tool_add"
+	FeedTypeUserAdd                  = "user_add"
+	FeedTypeUserRemove               = "user_remove"
+	FeedTypeUserNameChange           = "user_name_change"
+	FeedTypeTroubleReportAdd         = "trouble_report_add"
+	FeedTypeTroubleReportUpdate      = "trouble_report_update"
+	FeedTypeTroubleReportRemove      = "trouble_report_remove"
+	FeedTypeToolAdd                  = "tool_add"
+	FeedTypeMetalSheetAdd            = "metal_sheet_add"
+	FeedTypeMetalSheetUpdate         = "metal_sheet_update"
+	FeedTypeMetalSheetDelete         = "metal_sheet_delete"
+	FeedTypeMetalSheetStatusChange   = "metal_sheet_status_change"
+	FeedTypeMetalSheetToolAssignment = "metal_sheet_tool_assignment"
 
 	AddUserRenderTemplate = `
 <div class="feed-item">
@@ -93,6 +98,66 @@ const (
 	>
 		Benutzer <strong>%s</strong> hat ein neues Werkzeug
 		<a href="./tools/all/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
+	</div>
+</div>
+`
+
+	AddMetalSheetRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat ein neues Blech
+		<a href="./metal-sheets/%d" class="info">%s</a> hinzugefügt.
+	</div>
+</div>
+`
+
+	UpdateMetalSheetRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat das Blech
+		<a href="./metal-sheets/%d" class="info">%s</a> aktualisiert.
+	</div>
+</div>
+`
+
+	DeleteMetalSheetRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat das Blech mit ID
+		<strong style="color: var(--ui-secondary);">%d</strong> entfernt.
+	</div>
+</div>
+`
+
+	MetalSheetStatusChangeRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat den Status von Blech
+		<a href="./metal-sheets/%d" class="info">#%d</a> zu <strong>%s</strong> geändert.
+	</div>
+</div>
+`
+
+	MetalSheetToolAssignmentRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat Blech
+		<a href="./metal-sheets/%d" class="info">#%d</a> %s.
 	</div>
 </div>
 `
@@ -242,6 +307,133 @@ func (f *FeedToolAdd) Render() template.HTML {
 		f.ModifiedBy.UserName, f.ID, f.Tool, f.ID))
 }
 
+// FeedMetalSheetAdd represents a metal sheet addition event.
+type FeedMetalSheetAdd struct {
+	ID         int64  `json:"id"`
+	MetalSheet string `json:"metal_sheet"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedMetalSheetAdd(data map[string]any) *FeedMetalSheetAdd {
+	return &FeedMetalSheetAdd{
+		ID:         int64(data["id"].(float64)),
+		MetalSheet: data["metal_sheet"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedMetalSheetAdd) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(AddMetalSheetRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.MetalSheet))
+}
+
+// FeedMetalSheetUpdate represents a metal sheet update event.
+type FeedMetalSheetUpdate struct {
+	ID         int64  `json:"id"`
+	MetalSheet string `json:"metal_sheet"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedMetalSheetUpdate(data map[string]any) *FeedMetalSheetUpdate {
+	return &FeedMetalSheetUpdate{
+		ID:         int64(data["id"].(float64)),
+		MetalSheet: data["metal_sheet"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedMetalSheetUpdate) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(UpdateMetalSheetRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.MetalSheet))
+}
+
+// FeedMetalSheetDelete represents a metal sheet deletion event.
+type FeedMetalSheetDelete struct {
+	ID         int64 `json:"id"`
+	ModifiedBy *User `json:"modified_by"`
+}
+
+func NewFeedMetalSheetDelete(data map[string]any) *FeedMetalSheetDelete {
+	return &FeedMetalSheetDelete{
+		ID: int64(data["id"].(float64)),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedMetalSheetDelete) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(DeleteMetalSheetRenderTemplate,
+		f.ModifiedBy.UserName, f.ID))
+}
+
+// FeedMetalSheetStatusChange represents a metal sheet status change event.
+type FeedMetalSheetStatusChange struct {
+	ID         int64  `json:"id"`
+	NewStatus  string `json:"new_status"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedMetalSheetStatusChange(data map[string]any) *FeedMetalSheetStatusChange {
+	return &FeedMetalSheetStatusChange{
+		ID:        int64(data["id"].(float64)),
+		NewStatus: data["new_status"].(string),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedMetalSheetStatusChange) Render() template.HTML {
+	statusTranslation := map[string]string{
+		"available":   "Verfügbar",
+		"in_use":      "In Verwendung",
+		"maintenance": "Wartung",
+		"reserved":    "Reserviert",
+		"damaged":     "Beschädigt",
+	}
+	status := statusTranslation[f.NewStatus]
+	if status == "" {
+		status = f.NewStatus
+	}
+	return template.HTML(fmt.Sprintf(MetalSheetStatusChangeRenderTemplate,
+		f.ModifiedBy.UserName, f.ID, f.ID, status))
+}
+
+// FeedMetalSheetToolAssignment represents a metal sheet tool assignment event.
+type FeedMetalSheetToolAssignment struct {
+	SheetID    int64  `json:"sheet_id"`
+	ToolID     *int64 `json:"tool_id"`
+	ModifiedBy *User  `json:"modified_by"`
+}
+
+func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAssignment {
+	assignment := &FeedMetalSheetToolAssignment{
+		SheetID: int64(data["sheet_id"].(float64)),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+	if toolID, ok := data["tool_id"]; ok && toolID != nil {
+		id := int64(toolID.(float64))
+		assignment.ToolID = &id
+	}
+	return assignment
+}
+
+func (f *FeedMetalSheetToolAssignment) Render() template.HTML {
+	action := "vom Werkzeug getrennt"
+	if f.ToolID != nil {
+		action = fmt.Sprintf("dem Werkzeug <a href=\"./tools/all/%d\" class=\"info\">#%d</a> zugewiesen", *f.ToolID, *f.ToolID)
+	}
+	return template.HTML(fmt.Sprintf(MetalSheetToolAssignmentRenderTemplate,
+		f.ModifiedBy.UserName, f.SheetID, f.SheetID, action))
+}
+
 // Feed represents a feed entry in the system that tracks activity events.
 type Feed struct {
 	ID       int64  `json:"id"`
@@ -290,6 +482,19 @@ func (f *Feed) Render() template.HTML {
 
 	case FeedTypeToolAdd:
 		feedContent = NewFeedToolAdd(data).Render()
+
+	// Metal Sheet Types
+
+	case FeedTypeMetalSheetAdd:
+		feedContent = NewFeedMetalSheetAdd(data).Render()
+	case FeedTypeMetalSheetUpdate:
+		feedContent = NewFeedMetalSheetUpdate(data).Render()
+	case FeedTypeMetalSheetDelete:
+		feedContent = NewFeedMetalSheetDelete(data).Render()
+	case FeedTypeMetalSheetStatusChange:
+		feedContent = NewFeedMetalSheetStatusChange(data).Render()
+	case FeedTypeMetalSheetToolAssignment:
+		feedContent = NewFeedMetalSheetToolAssignment(data).Render()
 
 	// Fallback
 
