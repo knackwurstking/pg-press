@@ -14,7 +14,7 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 			NavContent:  toolsPageNavContent(),
 		},
 	) {
-		<main class="container fluid">
+		<main class="container fluid flex flex-col gap">
 			<div class="card warning mb">
 				<div class="card-header">
 					<h4>
@@ -38,7 +38,7 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 // 	 	- Delete button for tool removal, redirect back to tools/ page after deletion
 //  	- Edit button for tool editing
 templ toolPageActions(tool *database.ToolWithNotes) {
-	<div class="action-bar flex gap justify-end items-center mb">
+	<div class="action-bar flex gap justify-end items-center">
 		<button class="btn primary">
 			<i class="bi bi-pencil"></i>
 			Werkzeug bearbeiten
@@ -53,7 +53,7 @@ templ toolPageActions(tool *database.ToolWithNotes) {
 // TODO: ...
 // 	- Show all notes in order of importance
 templ toolPageNotes(tool *database.ToolWithNotes) {
-	if len(tool.LoadedNotes) >= 0 {
+	if len(tool.LoadedNotes) > 0 {
 		<section class="notes-section">
 			<h3>Notizen</h3>
 			<div class="notes-list">
@@ -106,7 +106,7 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.
 }
 
 templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) {
-	<table class="table">
+	<table class="table borderless">
 		<thead>
 			<tr>
 				<th>Stärke (mm)</th>
@@ -147,7 +147,7 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 }
 
 templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
-	<table class="table">
+	<table class="table borderless">
 		<thead>
 			<tr>
 				<th>Stärke (mm)</th>
@@ -184,7 +184,7 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 }
 
 templ toolPageMetalSheetsTablePositionUnknown(metalSheets []*database.MetalSheet) {
-	<table class="table">
+	<table class="table borderless">
 		<thead>
 			<tr>
 				<th>Stärke (mm)</th>
@@ -230,27 +230,24 @@ templ toolPageMetalSheetsTablePositionUnknown(metalSheets []*database.MetalSheet
 // 	- Cycles table for this tool, should be reset after regeneration but keep the data in
 // 	  history, so just set a mark with a timestamp of regeneration.
 templ toolPageCylesList(tool *database.ToolWithNotes) {
-	<section class="cycles-section">
+	<section class="cycles-section flex flex-col gap">
 		<h3>Werkzeugnutzung & Zyklen</h3>
-		<div class="current-usage card">
-			<div class="card-header">
-				<h4>Aktueller Standort</h4>
+		<section class="current-usage">
+			<h4>Aktueller Status</h4>
+			<div class="card">
+				<div class="card-body">
+					<div class="status-info">
+						<p><strong>Presse:</strong> Nicht zugewiesen</p>
+						<p><strong>Zyklen:</strong> 0</p>
+						<p><strong>Letzte Regenerierung:</strong> -</p>
+						<p><strong>Status:</strong> <span class="badge success">Verfügbar</span></p>
+					</div>
+				</div>
 			</div>
-			<div class="card-body">
-				<p>
-					<strong>Presse:</strong> <span>Derzeit nicht in Verwendung</span>
-				</p>
-				<p>
-					<strong>Position:</strong> <span>-</span>
-				</p>
-				<p>
-					<strong>Seit:</strong> <span>-</span>
-				</p>
-			</div>
-		</div>
-		<div class="cycles-history">
+		</section>
+		<section class="cycles-history">
 			<h4>Zyklusverlauf</h4>
-			<table class="table">
+			<table class="table borderless">
 				<thead>
 					<tr>
 						<th>Datum</th>
@@ -268,10 +265,10 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					</tr>
 				</tbody>
 			</table>
-		</div>
-		<div class="press-history">
+		</section>
+		<section class="press-history">
 			<h4>Pressennutzungsverlauf</h4>
-			<table class="table">
+			<table class="table borderless">
 				<thead>
 					<tr>
 						<th>Von</th>
@@ -288,6 +285,6 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					</tr>
 				</tbody>
 			</table>
-		</div>
+		</section>
 	</section>
 }

@@ -47,7 +47,7 @@ func ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) 
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"card warning mb\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>In Bearbeitung</span></h4></div></div><!-- TODO: Print out notes and all available data in `tool` --><!-- TODO: Request metalsheets for this tool id (htmx) -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid flex flex-col gap\"><div class=\"card warning mb\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>In Bearbeitung</span></h4></div></div><!-- TODO: Print out notes and all available data in `tool` --><!-- TODO: Request metalsheets for this tool id (htmx) -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -112,7 +112,7 @@ func toolPageActions(tool *database.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"action-bar flex gap justify-end items-center mb\"><button class=\"btn primary\"><i class=\"bi bi-pencil\"></i> Werkzeug bearbeiten</button> <button class=\"btn danger\"><i class=\"bi bi-trash\"></i> Werkzeug löschen</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"action-bar flex gap justify-end items-center\"><button class=\"btn primary\"><i class=\"bi bi-pencil\"></i> Werkzeug bearbeiten</button> <button class=\"btn danger\"><i class=\"bi bi-trash\"></i> Werkzeug löschen</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,7 +143,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(tool.LoadedNotes) >= 0 {
+		if len(tool.LoadedNotes) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<section class=\"notes-section\"><h3>Notizen</h3><div class=\"notes-list\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -282,7 +282,7 @@ func toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) 
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<table class=\"table\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stempelfall</th><th>Aktionen</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<table class=\"table borderless\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stempelfall</th><th>Aktionen</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -380,7 +380,7 @@ func toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) tem
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<table class=\"table\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Aktionen</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<table class=\"table borderless\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Aktionen</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -452,7 +452,7 @@ func toolPageMetalSheetsTablePositionUnknown(metalSheets []*database.MetalSheet)
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<table class=\"table\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stempelfall</th><th>Aktionen</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<table class=\"table borderless\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stempelfall</th><th>Aktionen</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -555,7 +555,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section\"><h3>Werkzeugnutzung & Zyklen</h3><div class=\"current-usage card\"><div class=\"card-header\"><h4>Aktueller Standort</h4></div><div class=\"card-body\"><p><strong>Presse:</strong> <span>Derzeit nicht in Verwendung</span></p><p><strong>Position:</strong> <span>-</span></p><p><strong>Seit:</strong> <span>-</span></p></div></div><div class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></div><div class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section flex flex-col gap\"><h3>Werkzeugnutzung & Zyklen</h3><section class=\"current-usage\"><h4>Aktueller Status</h4><div class=\"card\"><div class=\"card-body\"><div class=\"status-info\"><p><strong>Presse:</strong> Nicht zugewiesen</p><p><strong>Zyklen:</strong> 0</p><p><strong>Letzte Regenerierung:</strong> -</p><p><strong>Status:</strong> <span class=\"badge success\">Verfügbar</span></p></div></div></div></section><section class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table borderless\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></section><section class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
