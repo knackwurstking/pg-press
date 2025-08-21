@@ -95,57 +95,69 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes) {
 		<div class="table-container">
 			<!-- TODO: Create templ function for the following three tables -->
 			if tool.Position == database.PositionBottom {
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Stärke (mm)</th>
-							<th>Blech Dicke (mm)</th>
-							<th>Marke Dicke (mm)</th>
-							<th>Stempelfall</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td colspan="4" class="center">
-								Bleche werden geladen...
-							</td>
-						</tr>
-					</tbody>
-				</table>
+				@toolPageMetalSheetsTablePositionBottom(tool)
 			} else if tool.Position == database.PositionTop {
-				<table class="table">
-					<thead>
-						<tr>
-							<th>Stärke (mm)</th>
-							<th>Blech Dicke (mm)</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td colspan="2" class="center">
-								Bleche werden geladen...
-							</td>
-						</tr>
-					</tbody>
-				</table>
+				@toolPageMetalSheetsTablePositionTop(tool)
 			} else {
-				<table class="table">
-					<thead>
-						<tr>
-							<th>???</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td colspan="1" class="center">
-								Unbekannte Position - keine Tabelle verfügbar
-							</td>
-						</tr>
-					</tbody>
-				</table>
+				@toolPageMetalSheetsTablePositionUnknown()
 			}
 		</div>
 	</section>
+}
+
+templ toolPageMetalSheetsTablePositionBottom(tool *database.ToolWithNotes) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Stärke (mm)</th>
+				<th>Blech (mm)</th>
+				<th>Marke (mm)</th>
+				<th>Stempelfall</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td colspan="4" class="center">
+					Bleche werden geladen...
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}
+
+templ toolPageMetalSheetsTablePositionTop(tool *database.ToolWithNotes) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Stärke (mm)</th>
+				<th>Blech (mm)</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td colspan="2" class="center">
+					Bleche werden geladen...
+				</td>
+			</tr>
+		</tbody>
+	</table>
+}
+
+templ toolPageMetalSheetsTablePositionUnknown() {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>???</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td colspan="1" class="center">
+					Unbekannte Position - keine Tabelle verfügbar
+				</td>
+			</tr>
+		</tbody>
+	</table>
 }
 
 // TODO: ...
