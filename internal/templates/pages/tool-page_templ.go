@@ -47,7 +47,7 @@ func ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) 
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid flex flex-col gap\"><div class=\"card warning mb\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>In Bearbeitung</span></h4></div></div><!-- TODO: Print out notes and all available data in `tool` --><!-- TODO: Request metalsheets for this tool id (htmx) -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid flex flex-col gap\"><div class=\"dev-note card warning mb\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>In Bearbeitung</span></h4></div></div><!-- TODO: Print out notes and all available data in `tool` --><!-- TODO: Request metalsheets for this tool id (htmx) -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -555,7 +555,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section flex flex-col gap\"><h3>Werkzeugnutzung & Zyklen</h3><section class=\"current-usage\"><h4>Aktueller Status</h4><div class=\"card muted w-fit\"><div class=\"card-body\"><div class=\"status-info flex flex-col gap\"><span><strong>Status:</strong> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<section class=\"cycles-section flex flex-col gap\"><h3>Werkzeugnutzung & Zyklen</h3><section class=\"current-usage\"><h4>Aktueller Status</h4><div class=\"card muted w-fit\"><div class=\"card-body status-info\"><strong>Status:</strong> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -568,7 +568,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 244, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 242, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -596,7 +596,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(string(tool.Status))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 250, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 248, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -607,7 +607,20 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</span> <span><strong>Letzte Regenerierung:</strong> -</span></div></div></div></section><section class=\"cycles-history\"><h4>Zyklusverlauf</h4><table class=\"table borderless\"><thead><tr><th>Datum</th><th>Presse</th><th>Zyklen</th><th>Status</th><th>Regenerierung</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Zyklusverlauf verfügbar</td></tr></tbody></table></section><section class=\"press-history\"><h4>Pressennutzungsverlauf</h4><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th></tr></thead> <tbody><tr><td colspan=\"4\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></section></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</div></div></section><section class=\"press-history\"><h4>Pressennutzungsverlauf</h4><div class=\"dev-note card warning my\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Dev Note</span></h4></div><div class=\"card-body\"><p>Wenn das Werkzeug regeneriert wird, wird die Tabelle unterbrochen und eine neue hinzugefügt (Reihenfolge: Neu zu Alt).</p></div></div><div><h5>Gesamtzyklen seit der letzten Regenerierung:</h5><div class=\"card compact muted w-fit\"><div class=\"card-body\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", 0))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 276, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div></div></div><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th><th>Teilzyklen</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

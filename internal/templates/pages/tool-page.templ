@@ -15,7 +15,7 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			<div class="card warning mb">
+			<div class="dev-note card warning mb">
 				<div class="card-header">
 					<h4>
 						<i class="bi bi-exclamation-triangle mr"></i>
@@ -235,51 +235,48 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<section class="current-usage">
 			<h4>Aktueller Status</h4>
 			<div class="card muted w-fit">
-				<div class="card-body">
-					<div class="status-info flex flex-col gap">
-						<span>
-							<strong>Status:</strong>
-							switch tool.Status {
-								case database.ToolStatusActive:
-									<span class="primary ghost">Presse{ fmt.Sprintf("%d", *tool.Press) }</span>
-								case database.ToolStatusAvailable:
-									<span class="info ghost">Verfügbar</span>
-								case database.ToolStatusRegenerating:
-									<span class="warning ghost">Regenerierung</span>
-								default:
-									<span class="ghost">{ string(tool.Status) }</span>
-							}
-						</span>
-						<span>
-							<strong>Letzte Regenerierung:</strong> -
-						</span>
-					</div>
+				<div class="card-body status-info">
+					<strong>Status:</strong>
+					switch tool.Status {
+						case database.ToolStatusActive:
+							<span class="primary ghost">Presse{ fmt.Sprintf("%d", *tool.Press) }</span>
+						case database.ToolStatusAvailable:
+							<span class="info ghost">Verfügbar</span>
+						case database.ToolStatusRegenerating:
+							<span class="warning ghost">Regenerierung</span>
+						default:
+							<span class="ghost">{ string(tool.Status) }</span>
+					}
 				</div>
 			</div>
 		</section>
-		<section class="cycles-history">
-			<h4>Zyklusverlauf</h4>
-			<table class="table borderless">
-				<thead>
-					<tr>
-						<th>Datum</th>
-						<th>Presse</th>
-						<th>Zyklen</th>
-						<th>Status</th>
-						<th>Regenerierung</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td colspan="5" class="text-center">
-							Kein Zyklusverlauf verfügbar
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</section>
 		<section class="press-history">
 			<h4>Pressennutzungsverlauf</h4>
+			<div class="dev-note card warning my">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Dev Note</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<p>
+						Wenn das Werkzeug regeneriert wird, wird die Tabelle
+						unterbrochen und eine neue hinzugefügt (Reihenfolge:
+						Neu zu Alt).
+					</p>
+				</div>
+			</div>
+			<div>
+				<h5>
+					Gesamtzyklen seit der letzten Regenerierung:
+				</h5>
+				<div class="card compact muted w-fit">
+					<div class="card-body">
+						{ fmt.Sprintf("%d", 0) }
+					</div>
+				</div>
+			</div>
 			<table class="table borderless">
 				<thead>
 					<tr>
@@ -287,11 +284,12 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 						<th>Bis</th>
 						<th>Presse</th>
 						<th>Gesamtzyklen</th>
+						<th>Teilzyklen</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
-						<td colspan="4" class="text-center">
+						<td colspan="5" class="text-center">
 							Kein Pressenverlauf verfügbar
 						</td>
 					</tr>
