@@ -24,30 +24,90 @@ const (
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
 	`
+
+	insertPressCycleQuery = `
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles, mods)
+		VALUES (?, ?, ?, 0, 0, ?)
+		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+	`
+
+	endToolUsageQuery = `
+		UPDATE press_cycles
+		SET to_date = ?
+		WHERE tool_id = ? AND to_date IS NULL
+	`
+
+	updatePressCyclesQuery = `
+		UPDATE press_cycles
+		SET total_cycles = ?, partial_cycles = ?, mods = ?
+		WHERE tool_id = ? AND to_date IS NULL
+	`
+
+	selectCurrentToolUsageQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE tool_id = ? AND to_date IS NULL
+		LIMIT 1
+	`
+
+	selectToolHistoryQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY from_date DESC
+	`
+
+	selectToolHistorySinceRegenerationQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE tool_id = ? AND from_date >= ?
+		ORDER BY from_date DESC
+	`
+
+	selectAllToolHistoryQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY from_date DESC
+	`
+
+	selectTotalCyclesSinceRegenerationQuery = `
+		SELECT COALESCE(SUM(total_cycles), 0)
+		FROM press_cycles
+		WHERE tool_id = ? AND from_date >= ?
+	`
+
+	selectTotalCyclesAllTimeQuery = `
+		SELECT COALESCE(SUM(total_cycles), 0)
+		FROM press_cycles
+		WHERE tool_id = ?
+	`
+
+	selectCurrentToolsOnPressQuery = `
+		SELECT tool_id
+		FROM press_cycles
+		WHERE press_number = ? AND to_date IS NULL
+	`
+
+	selectPressUtilizationQuery = `
+		SELECT press_number, tool_id
+		FROM press_cycles
+		WHERE to_date IS NULL
+		ORDER BY press_number, tool_id
+	`
+
+	selectPressCycleStatsQuery = `
+		SELECT
+			press_number,
+			SUM(total_cycles) as total_cycles,
+			COUNT(DISTINCT tool_id) as total_tools_used,
+			SUM(CASE WHEN to_date IS NULL THEN 1 ELSE 0 END) as active_tools
+		FROM press_cycles
+		GROUP BY press_number
+	`
 )
 
-type PressNumber int8
-
-func (pn *PressNumber) IsValid() bool {
-	return pn == nil
-}
-
-type PressCycle struct {
-	ID            int64                      `json:"id"`
-	PressNumber   PressNumber                `json:"press_number"`
-	ToolID        int64                      `json:"tool_id"`
-	FromDate      time.Time                  `json:"from_date"`
-	ToDate        *time.Time                 `json:"to_date"`
-	TotalCycles   int64                      `json:"total_cycles"`
-	PartialCycles int64                      `json:"partial_cycles"`
-	Mods          []*Modified[PressCycleMod] `json:"mods"`
-}
-
-type PressCycleMod struct {
-	TotalCycles   int64 `json:"total_cycles"`
-	PartialCycles int64 `json:"partial_cycles"`
-}
-
+// Presses manages press cycle data and operations
 type Presses struct {
 	db    *sql.DB
 	feeds *Feeds
@@ -82,11 +142,6 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 	}
 
 	// Create new press cycle entry
-	query := `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles, mods)
-		VALUES (?, ?, ?, 0, 0, ?)
-		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
-	`
 
 	var cycle PressCycle
 	var toDate sql.NullTime
@@ -95,7 +150,7 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 	// Initialize empty mods array
 	modsJSON, _ := json.Marshal([]*Modified[PressCycleMod]{})
 
-	err := p.db.QueryRow(query, pressNumber, toolID, time.Now(), modsJSON).Scan(
+	err := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), modsJSON).Scan(
 		&cycle.ID,
 		&cycle.PressNumber,
 		&cycle.ToolID,
@@ -136,13 +191,7 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 
 // EndToolUsage ends the current usage of a tool on any press
 func (p *Presses) EndToolUsage(toolID int64) error {
-	query := `
-		UPDATE press_cycles
-		SET to_date = ?
-		WHERE tool_id = ? AND to_date IS NULL
-	`
-
-	_, err := p.db.Exec(query, time.Now(), toolID)
+	_, err := p.db.Exec(endToolUsageQuery, time.Now(), toolID)
 	if err != nil {
 		return fmt.Errorf("failed to end tool usage: %w", err)
 	}
@@ -163,7 +212,11 @@ func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) e
 
 	// Add modification record if values changed
 	if current.TotalCycles != totalCycles || current.PartialCycles != partialCycles {
-		mod := NewModified[PressCycleMod](nil, PressCycleMod{
+		mod := NewModified(nil, PressCycleMod{
+			PressNumber:   current.PressNumber,
+			ToolID:        current.ToolID,
+			FromDate:      current.FromDate,
+			ToDate:        current.ToDate,
 			TotalCycles:   current.TotalCycles,
 			PartialCycles: current.PartialCycles,
 		})
@@ -176,13 +229,7 @@ func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) e
 		return fmt.Errorf("failed to marshal mods: %w", err)
 	}
 
-	query := `
-		UPDATE press_cycles
-		SET total_cycles = ?, partial_cycles = ?, mods = ?
-		WHERE tool_id = ? AND to_date IS NULL
-	`
-
-	result, err := p.db.Exec(query, totalCycles, partialCycles, modsJSON, toolID)
+	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, modsJSON, toolID)
 	if err != nil {
 		return fmt.Errorf("failed to update cycles: %w", err)
 	}
@@ -201,18 +248,11 @@ func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) e
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
 func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
-	query := `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
-		FROM press_cycles
-		WHERE tool_id = ? AND to_date IS NULL
-		LIMIT 1
-	`
-
 	var cycle PressCycle
 	var toDate sql.NullTime
 	var modsData []byte
 
-	err := p.db.QueryRow(query, toolID).Scan(
+	err := p.db.QueryRow(selectCurrentToolUsageQuery, toolID).Scan(
 		&cycle.ID,
 		&cycle.PressNumber,
 		&cycle.ToolID,
@@ -244,14 +284,7 @@ func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 
 // GetToolHistory gets the press usage history for a tool
 func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
-	query := `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
-		FROM press_cycles
-		WHERE tool_id = ?
-		ORDER BY from_date DESC
-	`
-
-	rows, err := p.db.Query(query, toolID)
+	rows, err := p.db.Query(selectToolHistoryQuery, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool history: %w", err)
 	}
@@ -295,25 +328,15 @@ func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 // GetToolHistorySinceRegeneration gets press cycles since the last tool regeneration
 func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
 	var query string
-	var args []interface{}
+	var args []any
 
 	if lastRegenerationDate != nil {
-		query = `
-			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
-			FROM press_cycles
-			WHERE tool_id = ? AND from_date >= ?
-			ORDER BY from_date DESC
-		`
-		args = []interface{}{toolID, *lastRegenerationDate}
+		query = selectToolHistorySinceRegenerationQuery
+		args = []any{toolID, *lastRegenerationDate}
 	} else {
 		// If no regeneration date, get all history
-		query = `
-			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
-			FROM press_cycles
-			WHERE tool_id = ?
-			ORDER BY from_date DESC
-		`
-		args = []interface{}{toolID}
+		query = selectAllToolHistoryQuery
+		args = []any{toolID}
 	}
 
 	rows, err := p.db.Query(query, args...)
@@ -360,22 +383,14 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 // GetTotalCyclesSinceRegeneration calculates total cycles since last regeneration
 func (p *Presses) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenerationDate *time.Time) (int64, error) {
 	var query string
-	var args []interface{}
+	var args []any
 
 	if lastRegenerationDate != nil {
-		query = `
-			SELECT COALESCE(SUM(total_cycles), 0)
-			FROM press_cycles
-			WHERE tool_id = ? AND from_date >= ?
-		`
-		args = []interface{}{toolID, *lastRegenerationDate}
+		query = selectTotalCyclesSinceRegenerationQuery
+		args = []any{toolID, *lastRegenerationDate}
 	} else {
-		query = `
-			SELECT COALESCE(SUM(total_cycles), 0)
-			FROM press_cycles
-			WHERE tool_id = ?
-		`
-		args = []interface{}{toolID}
+		query = selectTotalCyclesAllTimeQuery
+		args = []any{toolID}
 	}
 
 	var totalCycles int64
@@ -394,13 +409,7 @@ func (p *Presses) GetCurrentToolsOnPress(pressNumber int) ([]int64, error) {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
-	query := `
-		SELECT tool_id
-		FROM press_cycles
-		WHERE press_number = ? AND to_date IS NULL
-	`
-
-	rows, err := p.db.Query(query, pressNumber)
+	rows, err := p.db.Query(selectCurrentToolsOnPressQuery, pressNumber)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current tools on press: %w", err)
 	}
@@ -428,14 +437,7 @@ func (p *Presses) GetPressUtilization() (map[int][]int64, error) {
 	}
 
 	// Get all currently active tool assignments
-	query := `
-		SELECT press_number, tool_id
-		FROM press_cycles
-		WHERE to_date IS NULL
-		ORDER BY press_number, tool_id
-	`
-
-	rows, err := p.db.Query(query)
+	rows, err := p.db.Query(selectPressUtilizationQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press utilization: %w", err)
 	}
@@ -497,17 +499,7 @@ func (p *Presses) GetPressCycleStats() (map[int]struct {
 	}
 
 	// Get statistics per press
-	query := `
-		SELECT
-			press_number,
-			SUM(total_cycles) as total_cycles,
-			COUNT(DISTINCT tool_id) as total_tools_used,
-			SUM(CASE WHEN to_date IS NULL THEN 1 ELSE 0 END) as active_tools
-		FROM press_cycles
-		GROUP BY press_number
-	`
-
-	rows, err := p.db.Query(query)
+	rows, err := p.db.Query(selectPressCycleStatsQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycle stats: %w", err)
 	}
