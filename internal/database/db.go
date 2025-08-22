@@ -15,6 +15,9 @@ type DB struct {
 	Tools                *Tools
 	ToolsHelper          *ToolsHelper
 	MetalSheets          *MetalSheets
+	Presses              *Presses
+	ToolRegenerations    *ToolRegenerations
+	ToolCyclesHelper     *ToolCyclesHelper
 	Feeds                *Feeds
 	db                   *sql.DB
 }
@@ -33,8 +36,10 @@ func New(db *sql.DB) *DB {
 	toolsHelper := NewToolsHelper(tools, notes)
 
 	metalSheets := NewMetalSheets(db, feeds, notes)
+	presses := NewPresses(db, feeds)
+	toolRegenerations := NewToolRegenerations(db, feeds, presses)
 
-	return &DB{
+	dbInstance := &DB{
 		Users:                NewUsers(db, feeds),
 		Cookies:              NewCookies(db),
 		Attachments:          attachments,
@@ -44,7 +49,14 @@ func New(db *sql.DB) *DB {
 		Tools:                tools,
 		ToolsHelper:          toolsHelper,
 		MetalSheets:          metalSheets,
+		Presses:              presses,
+		ToolRegenerations:    toolRegenerations,
 		Feeds:                feeds,
 		db:                   db,
 	}
+
+	// Initialize ToolCyclesHelper after DB instance is created
+	dbInstance.ToolCyclesHelper = NewToolCyclesHelper(dbInstance)
+
+	return dbInstance
 }

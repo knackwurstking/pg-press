@@ -284,6 +284,69 @@ func (t *Tools) Delete(id int64, user *User) error {
 	return nil
 }
 
+// UpdateStatus updates only the status field of a tool
+func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
+	logger.Tools().Info("Updating tool status: %d to %s", toolID, status)
+
+	query := `UPDATE tools SET status = ? WHERE id = ?`
+	_, err := t.db.Exec(query, string(status), toolID)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			fmt.Sprintf("failed to update status for tool %d", toolID), err)
+	}
+
+	// Trigger feed update
+	if t.feeds != nil {
+		tool, _ := t.Get(toolID)
+		if tool != nil {
+			t.feeds.Add(NewFeed(
+				FeedTypeToolUpdate,
+				&FeedToolUpdate{
+					ID:         toolID,
+					Tool:       tool.String(),
+					ModifiedBy: nil, // System update
+				},
+			))
+		}
+	}
+
+	return nil
+}
+
+// UpdatePress updates only the press field of a tool
+func (t *Tools) UpdatePress(toolID int64, press *int) error {
+	logger.Tools().Info("Updating tool press: %d", toolID)
+
+	query := `UPDATE tools SET press = ? WHERE id = ?`
+	_, err := t.db.Exec(query, press, toolID)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			fmt.Sprintf("failed to update press for tool %d", toolID), err)
+	}
+
+	// Trigger feed update
+	if t.feeds != nil {
+		tool, _ := t.Get(toolID)
+		if tool != nil {
+			t.feeds.Add(NewFeed(
+				FeedTypeToolUpdate,
+				&FeedToolUpdate{
+					ID:         toolID,
+					Tool:       tool.String(),
+					ModifiedBy: nil, // System update
+				},
+			))
+		}
+	}
+
+	return nil
+}
+
+// GetByID retrieves a tool by its ID (alias for Get)
+func (t *Tools) GetByID(id int64) (*Tool, error) {
+	return t.Get(id)
+}
+
 func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 
