@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS press_cycles (
     to_date DATETIME,                      -- When tool was removed (NULL = still active)
     total_cycles INTEGER NOT NULL DEFAULT 0,
     partial_cycles INTEGER NOT NULL DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    mods BLOB,                             -- JSON: modifications history
     FOREIGN KEY (tool_id) REFERENCES tools(id)
 );
 CREATE INDEX idx_press_cycles_tool_id ON press_cycles(tool_id);

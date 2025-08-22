@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -16,7 +17,7 @@ const (
 			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			partial_cycles INTEGER NOT NULL DEFAULT 0,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			mods BLOB,
 			FOREIGN KEY (tool_id) REFERENCES tools(id)
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
@@ -26,14 +27,19 @@ const (
 )
 
 type PressCycle struct {
-	ID            int64      `json:"id"`
-	PressNumber   int        `json:"press_number"`
-	ToolID        int64      `json:"tool_id"`
-	FromDate      time.Time  `json:"from_date"`
-	ToDate        *time.Time `json:"to_date"`
-	TotalCycles   int64      `json:"total_cycles"`
-	PartialCycles int64      `json:"partial_cycles"`
-	CreatedAt     time.Time  `json:"created_at"`
+	ID            int64                      `json:"id"`
+	PressNumber   int                        `json:"press_number"`
+	ToolID        int64                      `json:"tool_id"`
+	FromDate      time.Time                  `json:"from_date"`
+	ToDate        *time.Time                 `json:"to_date"`
+	TotalCycles   int64                      `json:"total_cycles"`
+	PartialCycles int64                      `json:"partial_cycles"`
+	Mods          []*Modified[PressCycleMod] `json:"mods"`
+}
+
+type PressCycleMod struct {
+	TotalCycles   int64 `json:"total_cycles"`
+	PartialCycles int64 `json:"partial_cycles"`
 }
 
 type Presses struct {
@@ -71,15 +77,19 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 
 	// Create new press cycle entry
 	query := `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles)
-		VALUES (?, ?, ?, 0, 0)
-		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, created_at
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles, mods)
+		VALUES (?, ?, ?, 0, 0, ?)
+		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
 	`
 
 	var cycle PressCycle
 	var toDate sql.NullTime
+	var modsData []byte
 
-	err := p.db.QueryRow(query, pressNumber, toolID, time.Now()).Scan(
+	// Initialize empty mods array
+	modsJSON, _ := json.Marshal([]*Modified[PressCycleMod]{})
+
+	err := p.db.QueryRow(query, pressNumber, toolID, time.Now(), modsJSON).Scan(
 		&cycle.ID,
 		&cycle.PressNumber,
 		&cycle.ToolID,
@@ -87,7 +97,7 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 		&toDate,
 		&cycle.TotalCycles,
 		&cycle.PartialCycles,
-		&cycle.CreatedAt,
+		&modsData,
 	)
 
 	if err != nil {
@@ -96,6 +106,11 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 
 	if toDate.Valid {
 		cycle.ToDate = &toDate.Time
+	}
+
+	// Unmarshal mods
+	if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+		cycle.Mods = []*Modified[PressCycleMod]{}
 	}
 
 	// Create feed entry
@@ -122,13 +137,37 @@ func (p *Presses) EndToolUsage(toolID int64) error {
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press
 func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
+	// First get the current cycle to preserve and update mods
+	current, err := p.GetCurrentToolUsage(toolID)
+	if err != nil {
+		return fmt.Errorf("failed to get current usage: %w", err)
+	}
+	if current == nil {
+		return fmt.Errorf("no active press cycle found for tool %d", toolID)
+	}
+
+	// Add modification record if values changed
+	if current.TotalCycles != totalCycles || current.PartialCycles != partialCycles {
+		mod := NewModified[PressCycleMod](nil, PressCycleMod{
+			TotalCycles:   current.TotalCycles,
+			PartialCycles: current.PartialCycles,
+		})
+		current.Mods = append(current.Mods, mod)
+	}
+
+	// Marshal mods
+	modsJSON, err := json.Marshal(current.Mods)
+	if err != nil {
+		return fmt.Errorf("failed to marshal mods: %w", err)
+	}
+
 	query := `
 		UPDATE press_cycles
-		SET total_cycles = ?, partial_cycles = ?
+		SET total_cycles = ?, partial_cycles = ?, mods = ?
 		WHERE tool_id = ? AND to_date IS NULL
 	`
 
-	result, err := p.db.Exec(query, totalCycles, partialCycles, toolID)
+	result, err := p.db.Exec(query, totalCycles, partialCycles, modsJSON, toolID)
 	if err != nil {
 		return fmt.Errorf("failed to update cycles: %w", err)
 	}
@@ -148,7 +187,7 @@ func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) e
 // GetCurrentToolUsage gets the current active press cycle for a tool
 func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 	query := `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, created_at
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
 		FROM press_cycles
 		WHERE tool_id = ? AND to_date IS NULL
 		LIMIT 1
@@ -156,6 +195,7 @@ func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 
 	var cycle PressCycle
 	var toDate sql.NullTime
+	var modsData []byte
 
 	err := p.db.QueryRow(query, toolID).Scan(
 		&cycle.ID,
@@ -165,7 +205,7 @@ func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 		&toDate,
 		&cycle.TotalCycles,
 		&cycle.PartialCycles,
-		&cycle.CreatedAt,
+		&modsData,
 	)
 
 	if err == sql.ErrNoRows {
@@ -179,13 +219,18 @@ func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 		cycle.ToDate = &toDate.Time
 	}
 
+	// Unmarshal mods
+	if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+		cycle.Mods = []*Modified[PressCycleMod]{}
+	}
+
 	return &cycle, nil
 }
 
 // GetToolHistory gets the press usage history for a tool
 func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	query := `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, created_at
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
@@ -201,6 +246,7 @@ func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	for rows.Next() {
 		var cycle PressCycle
 		var toDate sql.NullTime
+		var modsData []byte
 
 		err := rows.Scan(
 			&cycle.ID,
@@ -210,7 +256,7 @@ func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 			&toDate,
 			&cycle.TotalCycles,
 			&cycle.PartialCycles,
-			&cycle.CreatedAt,
+			&modsData,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
@@ -218,6 +264,11 @@ func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 
 		if toDate.Valid {
 			cycle.ToDate = &toDate.Time
+		}
+
+		// Unmarshal mods
+		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+			cycle.Mods = []*Modified[PressCycleMod]{}
 		}
 
 		cycles = append(cycles, &cycle)
@@ -233,7 +284,7 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 
 	if lastRegenerationDate != nil {
 		query = `
-			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, created_at
+			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
 			FROM press_cycles
 			WHERE tool_id = ? AND from_date >= ?
 			ORDER BY from_date DESC
@@ -242,7 +293,7 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 	} else {
 		// If no regeneration date, get all history
 		query = `
-			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, created_at
+			SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
 			FROM press_cycles
 			WHERE tool_id = ?
 			ORDER BY from_date DESC
@@ -260,6 +311,7 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 	for rows.Next() {
 		var cycle PressCycle
 		var toDate sql.NullTime
+		var modsData []byte
 
 		err := rows.Scan(
 			&cycle.ID,
@@ -269,7 +321,7 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 			&toDate,
 			&cycle.TotalCycles,
 			&cycle.PartialCycles,
-			&cycle.CreatedAt,
+			&modsData,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
@@ -277,6 +329,11 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 
 		if toDate.Valid {
 			cycle.ToDate = &toDate.Time
+		}
+
+		// Unmarshal mods
+		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+			cycle.Mods = []*Modified[PressCycleMod]{}
 		}
 
 		cycles = append(cycles, &cycle)
