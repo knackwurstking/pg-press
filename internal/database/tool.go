@@ -69,14 +69,10 @@ func (t *Tool) String() string {
 
 // SetPress sets the press for the tool with validation (0-5)
 func (t *Tool) SetPress(press *PressNumber) error {
-	if press == nil {
-		t.Press = nil
-		return nil
+	if press.IsValid() && *press < 0 || *press > 5 {
+		return NewValidationError("press", "invalid press number", press)
 	}
 
-	if *press < 0 || *press > 5 {
-		return fmt.Errorf("invalid press number: %d (must be 0-5)", press)
-	}
 	t.Press = press
 	return nil
 }

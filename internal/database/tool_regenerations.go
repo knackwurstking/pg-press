@@ -98,7 +98,16 @@ func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes stri
 	}
 
 	// Create feed entry
-	t.feeds.Create(FeedUser, fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s, Durchgeführt von: %s)", toolID, reason, performedBy))
+	if t.feeds != nil {
+		t.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         toolID,
+				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s, Durchgeführt von: %s)", toolID, reason, performedBy),
+				ModifiedBy: nil, // System update
+			},
+		))
+	}
 
 	return &regen, nil
 }

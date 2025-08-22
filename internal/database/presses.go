@@ -26,9 +26,15 @@ const (
 	`
 )
 
+type PressNumber int8
+
+func (pn *PressNumber) IsValid() bool {
+	return pn == nil
+}
+
 type PressCycle struct {
 	ID            int64                      `json:"id"`
-	PressNumber   int                        `json:"press_number"`
+	PressNumber   PressNumber                `json:"press_number"`
 	ToolID        int64                      `json:"tool_id"`
 	FromDate      time.Time                  `json:"from_date"`
 	ToDate        *time.Time                 `json:"to_date"`
@@ -114,7 +120,16 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 	}
 
 	// Create feed entry
-	p.feeds.Create(FeedUser, fmt.Sprintf("Werkzeug #%d wurde an Presse %d angebracht", toolID, pressNumber))
+	if p.feeds != nil {
+		p.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         toolID,
+				Tool:       fmt.Sprintf("Werkzeug #%d wurde an Presse %d angebracht", toolID, pressNumber),
+				ModifiedBy: nil, // System update
+			},
+		))
+	}
 
 	return &cycle, nil
 }
@@ -446,7 +461,16 @@ func (p *Presses) MarkToolRegeneration(toolID int64) error {
 	}
 
 	// Create feed entry
-	p.feeds.Create(FeedUser, fmt.Sprintf("Werkzeug #%d wurde regeneriert", toolID))
+	if p.feeds != nil {
+		p.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         toolID,
+				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert", toolID),
+				ModifiedBy: nil, // System update
+			},
+		))
+	}
 
 	return nil
 }

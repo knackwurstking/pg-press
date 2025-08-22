@@ -17,7 +17,7 @@ type ToolCyclesSummary struct {
 // ToolPressHistory represents the complete press usage history for a tool
 type ToolPressHistory struct {
 	ToolID              int64                         `json:"tool_id"`
-	CurrentPress        *int                          `json:"current_press"`
+	CurrentPress        *PressNumber                  `json:"current_press"`
 	CurrentStatus       ToolStatus                    `json:"current_status"`
 	TotalAllTimeCycles  int64                         `json:"total_all_time_cycles"`
 	CyclesBetweenRegens []*CyclesBetweenRegenerations `json:"cycles_between_regenerations"`
