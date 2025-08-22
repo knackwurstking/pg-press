@@ -27,7 +27,9 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 			<!-- TODO: Request metalsheets for this tool id (htmx) -->
 			@toolPageActions(tool)
 			@toolPageNotes(tool)
-			@toolPageMetalSheets(tool, metalSheets)
+			if tool.Position == database.PositionTop || tool.Position == database.PositionBottom {
+				@toolPageMetalSheets(tool, metalSheets)
+			}
 			@toolPageCylesList(tool)
 		</main>
 	}
@@ -39,13 +41,13 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 //  	- Edit button for tool editing
 templ toolPageActions(tool *database.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
-		<button class="btn primary">
+		<button class="primary flex gap">
 			<i class="bi bi-pencil"></i>
-			Werkzeug bearbeiten
+			Bearbeiten
 		</button>
-		<button class="btn danger">
+		<button class="destructive flex gap">
 			<i class="bi bi-trash"></i>
-			Werkzeug löschen
+			Löschen
 		</button>
 	</div>
 }
@@ -93,135 +95,104 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.
 	<section class="metalsheets-section">
 		<h3>Bleche</h3>
 		<div class="table-container">
-			<!-- TODO: Create templ function for the following three tables -->
-			if tool.Position == database.PositionBottom {
-				@toolPageMetalSheetsTablePositionBottom(metalSheets)
-			} else if tool.Position == database.PositionTop {
-				@toolPageMetalSheetsTablePositionTop(metalSheets)
-			} else {
-				@toolPageMetalSheetsTablePositionUnknown(metalSheets)
+			switch tool.Position {
+				case database.PositionBottom:
+					@toolPageMetalSheetsTablePositionBottom(metalSheets)
+				case database.PositionTop:
+					@toolPageMetalSheetsTablePositionTop(metalSheets)
 			}
 		</div>
 	</section>
 }
 
 templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) {
-	<table class="table borderless">
-		<thead>
-			<tr>
-				<th>Stärke (mm)</th>
-				<th>Blech (mm)</th>
-				<th>Marke (mm)</th>
-				<th>Stempelfall</th>
-				<th>Aktionen</th>
-			</tr>
-		</thead>
-		<tbody>
-			if len(metalSheets) == 0 {
+	<figure class="w-full overflow-x-scroll">
+		<table class="table compact">
+			<thead>
 				<tr>
-					<td colspan="5" class="text-center">
-						Keine Bleche für dieses Werkzeug gefunden
-					</td>
+					<th>Stärke (mm)</th>
+					<th>Blech (mm)</th>
+					<th>Marke (mm)</th>
+					<th>Stf.</th>
+					<th>Stf. Max</th>
+					<th>Aktionen</th>
 				</tr>
-			} else {
-				for _, sheet := range metalSheets {
+			</thead>
+			<tbody>
+				if len(metalSheets) == 0 {
 					<tr>
-						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
-						<td class="flex gap justify-center items-center">
-							<!-- TODO: Action button here: "delete", "modify" -->
-							<button class="btn btn-sm primary">
-								<i class="bi bi-eye"></i>
-							</button>
-							<button class="btn btn-sm warning">
-								<i class="bi bi-pencil"></i>
-							</button>
+						<td colspan="6" class="text-center">
+							Keine Bleche für dieses Werkzeug gefunden
 						</td>
 					</tr>
+				} else {
+					for _, sheet := range metalSheets {
+						<tr>
+							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
+							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
+							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
+							<td class="flex gap justify-center items-center">
+								<!-- TODO: Action button here: "delete", "modify" -->
+								<button class="info icon ghost text-sm">
+									<i class="bi bi-eye"></i>
+								</button>
+								<button class="primary icon ghost text-sm">
+									<i class="bi bi-pencil"></i>
+								</button>
+								<button class="destructive icon ghost text-sm">
+									<i class="bi bi-trash"></i>
+								</button>
+							</td>
+						</tr>
+					}
 				}
-			}
-		</tbody>
-	</table>
+			</tbody>
+		</table>
+	</figure>
 }
 
 templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
-	<table class="table borderless">
-		<thead>
-			<tr>
-				<th>Stärke (mm)</th>
-				<th>Blech (mm)</th>
-				<th>Aktionen</th>
-			</tr>
-		</thead>
-		<tbody>
-			if len(metalSheets) == 0 {
+	<figure class="w-full overflow-x-scroll">
+		<table class="table compact">
+			<thead>
 				<tr>
-					<td colspan="3" class="text-center">
-						Keine Bleche für dieses Werkzeug gefunden
-					</td>
+					<th>Stärke (mm)</th>
+					<th>Blech (mm)</th>
+					<th>Aktionen</th>
 				</tr>
-			} else {
-				for _, sheet := range metalSheets {
+			</thead>
+			<tbody>
+				if len(metalSheets) == 0 {
 					<tr>
-						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td class="flex gap justify-center items-center">
-							<!-- TODO: Action button here: "delete", "modify" -->
-							<button class="btn btn-sm primary">
-								<i class="bi bi-eye"></i>
-							</button>
-							<button class="btn btn-sm warning">
-								<i class="bi bi-pencil"></i>
-							</button>
+						<td colspan="3" class="text-center">
+							Keine Bleche für dieses Werkzeug gefunden
 						</td>
 					</tr>
+				} else {
+					for _, sheet := range metalSheets {
+						<tr>
+							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+							<td class="flex justify-center items-center">
+								<!-- TODO: Action button here: "delete", "modify" -->
+								<button class="info icon ghost text-sm">
+									<i class="bi bi-eye"></i>
+								</button>
+								<button class="primary icon ghost text-sm">
+									<i class="bi bi-pencil"></i>
+								</button>
+								<button class="destructive icon ghost text-sm">
+									<i class="bi bi-trash"></i>
+								</button>
+							</td>
+						</tr>
+					}
 				}
-			}
-		</tbody>
-	</table>
-}
-
-templ toolPageMetalSheetsTablePositionUnknown(metalSheets []*database.MetalSheet) {
-	<table class="table borderless">
-		<thead>
-			<tr>
-				<th>Stärke (mm)</th>
-				<th>Blech (mm)</th>
-				<th>Marke (mm)</th>
-				<th>Stempelfall</th>
-				<th>Aktionen</th>
-			</tr>
-		</thead>
-		<tbody>
-			if len(metalSheets) == 0 {
-				<tr>
-					<td colspan="5" class="text-center">
-						Keine Bleche für dieses Werkzeug gefunden
-					</td>
-				</tr>
-			} else {
-				for _, sheet := range metalSheets {
-					<tr>
-						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
-						<td class="flex justify-center items-center">
-							<!-- TODO: Action button here: "delete", "modify" -->
-							<button class="btn btn-sm primary">
-								<i class="bi bi-eye"></i>
-							</button>
-							<button class="btn btn-sm warning">
-								<i class="bi bi-pencil"></i>
-							</button>
-						</td>
-					</tr>
-				}
-			}
-		</tbody>
-	</table>
+			</tbody>
+		</table>
+	</figure>
 }
 
 // TODO: ...
@@ -234,21 +205,26 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<h3>Werkzeugnutzung & Zyklen</h3>
 		<section class="current-usage">
 			<h4>Aktueller Status</h4>
-			<div class="card muted w-fit">
-				<div class="card-body status-info">
-					<strong>Status:</strong>
-					switch tool.Status {
-						case database.ToolStatusActive:
-							<span class="primary ghost">Presse{ fmt.Sprintf("%d", *tool.Press) }</span>
-						case database.ToolStatusAvailable:
-							<span class="info ghost">Verfügbar</span>
-						case database.ToolStatusRegenerating:
-							<span class="warning ghost">Regenerierung</span>
-						default:
-							<span class="ghost">{ string(tool.Status) }</span>
-					}
-				</div>
-			</div>
+			switch tool.Status {
+				case database.ToolStatusActive:
+					<a
+						role="button"
+						class="secondary ghost flex gap justify-between w-full"
+						href={ fmt.Sprintf(serverPathPrefix+"/tools/active/%d", *tool.Press) }
+					>
+						<span class="flex gap items-center  text-sm">
+							<span class="contrast ghost">Presse { fmt.Sprintf("%d", *tool.Press) }</span>
+							<span class="primary ghost">Aktiv</span>
+						</span>
+						<i class="bi bi-chevron-right text-muted"></i>
+					</a>
+				case database.ToolStatusAvailable:
+					<span class="info ghost">Verfügbar</span>
+				case database.ToolStatusRegenerating:
+					<span class="warning ghost">Regenerierung</span>
+				default:
+					<span>{ string(tool.Status) }</span>
+			}
 		</section>
 		<section class="press-history">
 			<h4>Pressennutzungsverlauf</h4>
@@ -277,24 +253,26 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					</div>
 				</div>
 			</div>
-			<table class="table borderless">
-				<thead>
-					<tr>
-						<th>Von</th>
-						<th>Bis</th>
-						<th>Presse</th>
-						<th>Gesamtzyklen</th>
-						<th>Teilzyklen</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td colspan="5" class="text-center">
-							Kein Pressenverlauf verfügbar
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<figure class="w-full overflow-x-scroll">
+				<table class="table borderless">
+					<thead>
+						<tr>
+							<th>Von</th>
+							<th>Bis</th>
+							<th>Presse</th>
+							<th>Gesamtzyklen</th>
+							<th>Teilzyklen</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colspan="5" class="text-center">
+								Kein Pressenverlauf verfügbar
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</figure>
 		</section>
 	</section>
 }

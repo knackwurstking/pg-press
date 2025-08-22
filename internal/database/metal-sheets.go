@@ -17,6 +17,7 @@ const (
 			value REAL NOT NULL,
 			marke_height INTEGER NOT NULL,
 			stf REAL NOT NULL,
+			stf_max REAL NOT NULL,
 			tool_id INTEGER,
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
@@ -25,48 +26,48 @@ const (
 			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, tool_id, notes, mods)
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
 		VALUES
-			(8, 4, -1, -1, 1, '[]', '[]'),
-			(8, 14, 50, 5.0, 2, '[]', '[]');
+			(6, 4, -1, -1, -1, 1, '[]', '[]'),
+			(6, 25, 45, 12.8, 19.8, 2, '[]', '[]');
 	`
 
 	selectAllMetalSheetsQuery = `
-		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
 		FROM metal_sheets
 		ORDER BY id DESC;
 	`
 
 	selectMetalSheetByIDQuery = `
-		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE id = $1;
 	`
 
 	selectMetalSheetsByToolIDQuery = `
-		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE tool_id = $1
 		ORDER BY id DESC;
 	`
 
 	selectAvailableMetalSheetsQuery = `
-		SELECT id, tile_height, value, marke_height, stf, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE tool_id IS NULL
 		ORDER BY id DESC;
 	`
 
 	insertMetalSheetQuery = `
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, tool_id, notes, mods)
-		VALUES ($1, $2, $3, $4, $5, $6, $7);
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
 
 	updateMetalSheetQuery = `
 		UPDATE metal_sheets
-		SET tile_height = $1, value = $2, marke_height = $3, stf = $4,
-		    tool_id = $5, notes = $6, mods = $7, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $8;
+		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
+		    tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $9;
 	`
 
 	// Status query removed - no longer have status column
@@ -260,7 +261,7 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 	}
 
 	result, err := ms.db.Exec(insertMetalSheetQuery,
-		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF,
+		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "metal_sheets",
@@ -309,7 +310,7 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 	}
 
 	_, err = ms.db.Exec(updateMetalSheetQuery,
-		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF,
+		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
 	if err != nil {
 		return NewDatabaseError("update", "metal_sheets",
@@ -390,7 +391,7 @@ func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, erro
 		toolID      sql.NullInt64
 	)
 
-	if err := rows.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF,
+	if err := rows.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
 		&toolID, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "metal_sheets",
 			"failed to scan row", err)
@@ -423,7 +424,7 @@ func (ms *MetalSheets) scanMetalSheetFromRow(row *sql.Row) (*MetalSheet, error) 
 		toolID      sql.NullInt64
 	)
 
-	if err := row.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF,
+	if err := row.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
 		&toolID, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "metal_sheets",
 			"failed to scan row", err)

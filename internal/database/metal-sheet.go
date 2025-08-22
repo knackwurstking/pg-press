@@ -20,6 +20,7 @@ type MetalSheet struct {
 	Value       float64             `json:"value"`        // Value
 	MarkeHeight int                 `json:"marke_height"` // Marke height
 	STF         float64             `json:"stf"`          // STF value
+	STFMax      float64             `json:"stf_max"`      // STF max value
 	ToolID      *int64              `json:"tool_id"`      // Currently assigned tool (nullable)
 	LinkedNotes []int64             `json:"notes"`        // Contains note ids from the "notes" table
 	Mods        Mods[MetalSheetMod] `json:"mods"`
@@ -35,8 +36,8 @@ func NewMetalSheet(m ...*Modified[MetalSheetMod]) *MetalSheet {
 
 // String returns a string representation of the metal sheet
 func (ms *MetalSheet) String() string {
-	return fmt.Sprintf("Blech #%d (TH: %.1f, V: %.1f, MH: %d, STF: %.1f)",
-		ms.ID, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF)
+	return fmt.Sprintf("Blech #%d (TH: %.1f, V: %.1f, MH: %d, STF: %.1f/%.1f)",
+		ms.ID, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
 }
 
 // IsAssigned checks if the metal sheet is assigned to a tool
@@ -50,6 +51,7 @@ type MetalSheetMod struct {
 	Value       float64 `json:"value"`
 	MarkeHeight int     `json:"marke_height"`
 	STF         float64 `json:"stf"`
+	STFMax      float64 `json:"stf_max"`
 	ToolID      *int64  `json:"tool_id"`
 	LinkedNotes []int64 `json:"notes"`
 }
