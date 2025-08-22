@@ -107,7 +107,7 @@ templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.
 
 templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
-		<table class="table compact">
+		<table class="table borderless compact">
 			<thead>
 				<tr>
 					<th>Stärke (mm)</th>
@@ -133,7 +133,7 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-							<td class="flex gap justify-center items-center">
+							<td class="flex gap-sm justify-center items-center">
 								<!-- TODO: Action button here: "delete", "modify" -->
 								<button class="info icon ghost text-sm">
 									<i class="bi bi-eye"></i>
@@ -155,7 +155,7 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 
 templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
-		<table class="table compact">
+		<table class="table borderless compact">
 			<thead>
 				<tr>
 					<th>Stärke (mm)</th>
@@ -175,7 +175,7 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 						<tr>
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td class="flex justify-center items-center">
+							<td class="flex gap-sm justify-center items-center">
 								<!-- TODO: Action button here: "delete", "modify" -->
 								<button class="info icon ghost text-sm">
 									<i class="bi bi-eye"></i>
@@ -254,7 +254,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				</div>
 			</div>
 			<figure class="w-full overflow-x-scroll">
-				<table class="table borderless">
+				<table class="table borderless compact">
 					<thead>
 						<tr>
 							<th>Von</th>

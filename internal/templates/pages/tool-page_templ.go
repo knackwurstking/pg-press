@@ -280,7 +280,7 @@ func toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) 
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<figure class=\"w-full overflow-x-scroll\"><table class=\"table compact\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stf.</th><th>Stf. Max</th><th>Aktionen</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<figure class=\"w-full overflow-x-scroll\"><table class=\"table borderless compact\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Marke (mm)</th><th>Stf.</th><th>Stf. Max</th><th>Aktionen</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -356,7 +356,7 @@ func toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) 
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</td><td class=\"flex gap justify-center items-center\"><!-- TODO: Action button here: \"delete\", \"modify\" --><button class=\"info icon ghost text-sm\"><i class=\"bi bi-eye\"></i></button> <button class=\"primary icon ghost text-sm\"><i class=\"bi bi-pencil\"></i></button> <button class=\"destructive icon ghost text-sm\"><i class=\"bi bi-trash\"></i></button></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</td><td class=\"flex gap-sm justify-center items-center\"><!-- TODO: Action button here: \"delete\", \"modify\" --><button class=\"info icon ghost text-sm\"><i class=\"bi bi-eye\"></i></button> <button class=\"primary icon ghost text-sm\"><i class=\"bi bi-pencil\"></i></button> <button class=\"destructive icon ghost text-sm\"><i class=\"bi bi-trash\"></i></button></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -391,7 +391,7 @@ func toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) tem
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<figure class=\"w-full overflow-x-scroll\"><table class=\"table compact\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Aktionen</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<figure class=\"w-full overflow-x-scroll\"><table class=\"table borderless compact\"><thead><tr><th>Stärke (mm)</th><th>Blech (mm)</th><th>Aktionen</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -428,7 +428,7 @@ func toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) tem
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</td><td class=\"flex justify-center items-center\"><!-- TODO: Action button here: \"delete\", \"modify\" --><button class=\"info icon ghost text-sm\"><i class=\"bi bi-eye\"></i></button> <button class=\"primary icon ghost text-sm\"><i class=\"bi bi-pencil\"></i></button> <button class=\"destructive icon ghost text-sm\"><i class=\"bi bi-trash\"></i></button></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</td><td class=\"flex gap-sm justify-center items-center\"><!-- TODO: Action button here: \"delete\", \"modify\" --><button class=\"info icon ghost text-sm\"><i class=\"bi bi-eye\"></i></button> <button class=\"primary icon ghost text-sm\"><i class=\"bi bi-pencil\"></i></button> <button class=\"destructive icon ghost text-sm\"><i class=\"bi bi-trash\"></i></button></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -546,7 +546,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div></div></div><figure class=\"w-full overflow-x-scroll\"><table class=\"table borderless\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th><th>Teilzyklen</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></figure></section></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div></div></div><figure class=\"w-full overflow-x-scroll\"><table class=\"table borderless compact\"><thead><tr><th>Von</th><th>Bis</th><th>Presse</th><th>Gesamtzyklen</th><th>Teilzyklen</th></tr></thead> <tbody><tr><td colspan=\"5\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr></tbody></table></figure></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
