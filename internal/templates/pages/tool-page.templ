@@ -23,8 +23,6 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 					</h4>
 				</div>
 			</div>
-			<!-- TODO: Print out notes and all available data in `tool` -->
-			<!-- TODO: Request metalsheets for this tool id (htmx) -->
 			@toolPageActions(tool)
 			@toolPageNotes(tool)
 			if tool.Position == database.PositionTop || tool.Position == database.PositionBottom {
@@ -89,8 +87,6 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 	}
 }
 
-// TODO: ...
-// 	- Metal Sheet table for this tool (top or bottom table)
 templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	<section class="metalsheets-section">
 		<h3>Bleche</h3>
@@ -195,7 +191,7 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 	</figure>
 }
 
-// TODO: ...
+// TODO: Continue here...
 // 	- Show where this tool is currently used, in which press
 //  - Also show a history for last used presses, this should all be a part of the cykles table.
 // 	- Cycles table for this tool, should be reset after regeneration but keep the data in
@@ -228,7 +224,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		</section>
 		<section class="press-history">
 			<h4>Pressennutzungsverlauf</h4>
-			<div class="dev-note card warning my">
+			<section class="dev-note card warning">
 				<div class="card-header">
 					<h4>
 						<i class="bi bi-exclamation-triangle mr"></i>
@@ -242,17 +238,15 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 						Neu zu Alt).
 					</p>
 				</div>
-			</div>
-			<div>
-				<h5>
+			</section>
+			<section>
+				<h5 class="mb">
 					Gesamtzyklen seit der letzten Regenerierung:
 				</h5>
-				<div class="card compact muted w-fit">
-					<div class="card-body">
-						{ fmt.Sprintf("%d", 0) }
-					</div>
-				</div>
-			</div>
+				<span>
+					<input value={ fmt.Sprintf("%d", 0) } readonly/>
+				</span>
+			</section>
 			<figure class="w-full overflow-x-scroll">
 				<table class="table borderless compact">
 					<thead>
