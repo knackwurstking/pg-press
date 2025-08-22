@@ -34,7 +34,7 @@ type CyclesBetweenRegenerations struct {
 // ToolCyclesHelper provides helper methods for tool cycles management
 type ToolCyclesHelper struct {
 	db            *DB
-	presses       *Presses
+	pressCycles   *PressCycles
 	tools         *Tools
 	regenerations *ToolRegenerations
 }
@@ -43,7 +43,7 @@ type ToolCyclesHelper struct {
 func NewToolCyclesHelper(db *DB) *ToolCyclesHelper {
 	return &ToolCyclesHelper{
 		db:            db,
-		presses:       db.Presses,
+		pressCycles:   db.PressCycles,
 		tools:         db.Tools,
 		regenerations: db.ToolRegenerations,
 	}
@@ -65,21 +65,21 @@ func (h *ToolCyclesHelper) GetToolCyclesSummary(toolID int64) (*ToolCyclesSummar
 	}
 
 	// Get current usage
-	currentUsage, err := h.presses.GetCurrentToolUsage(toolID)
+	currentUsage, err := h.pressCycles.GetCurrentToolUsage(toolID)
 	if err != nil {
 		return nil, err
 	}
 	summary.CurrentUsage = currentUsage
 
 	// Get history since last regeneration
-	history, err := h.presses.GetToolHistorySinceRegeneration(toolID, summary.LastRegenerationDate)
+	history, err := h.pressCycles.GetToolHistorySinceRegeneration(toolID, summary.LastRegenerationDate)
 	if err != nil {
 		return nil, err
 	}
 	summary.History = history
 
 	// Calculate total cycles
-	totalCycles, err := h.presses.GetTotalCyclesSinceRegeneration(toolID, summary.LastRegenerationDate)
+	totalCycles, err := h.pressCycles.GetTotalCyclesSinceRegeneration(toolID, summary.LastRegenerationDate)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (h *ToolCyclesHelper) GetToolPressHistory(toolID int64) (*ToolPressHistory,
 	history.CurrentPress = tool.Press
 
 	// Get all press cycles
-	allCycles, err := h.presses.GetToolHistory(toolID)
+	allCycles, err := h.pressCycles.GetToolHistory(toolID)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (h *ToolCyclesHelper) groupCyclesByRegenerations(cycles []*PressCycle, rege
 }
 
 // StartToolOnPress starts a tool on a specific press
-func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber int) error {
+func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumber) error {
 	// Update tool status to active and set press number
 	err := h.tools.UpdateStatus(toolID, ToolStatusActive)
 	if err != nil {
@@ -220,7 +220,7 @@ func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber int) error
 	}
 
 	// Start press cycle tracking
-	_, err = h.presses.StartToolUsage(toolID, pressNumber)
+	_, err = h.pressCycles.StartToolUsage(toolID, pressNumber)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber int) error
 // RemoveToolFromPress removes a tool from its current press
 func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64) error {
 	// End press cycle
-	err := h.presses.EndToolUsage(toolID)
+	err := h.pressCycles.EndToolUsage(toolID)
 	if err != nil {
 		return err
 	}
@@ -265,7 +265,7 @@ func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, performed
 	}
 
 	// Mark regeneration in press cycles (ends current usage)
-	err = h.presses.MarkToolRegeneration(toolID)
+	err = h.pressCycles.MarkToolRegeneration(toolID)
 	if err != nil {
 		return err
 	}
@@ -292,16 +292,16 @@ func (h *ToolCyclesHelper) CompleteToolRegeneration(toolID int64) error {
 
 // UpdateToolCycles updates the cycle counts for a tool currently on a press
 func (h *ToolCyclesHelper) UpdateToolCycles(toolID int64, totalCycles, partialCycles int64) error {
-	return h.presses.UpdateCycles(toolID, totalCycles, partialCycles)
+	return h.pressCycles.UpdateCycles(toolID, totalCycles, partialCycles)
 }
 
 // GetPressUtilization gets current tool utilization for all presses
-func (h *ToolCyclesHelper) GetPressUtilization() (map[int][]int64, error) {
-	utilization := make(map[int][]int64)
+func (h *ToolCyclesHelper) GetPressUtilization() (map[PressNumber][]int64, error) {
+	utilization := make(map[PressNumber][]int64)
 
 	// Iterate through all press numbers (0-5)
-	for pressNumber := 0; pressNumber <= 5; pressNumber++ {
-		toolIDs, err := h.presses.GetCurrentToolsOnPress(pressNumber)
+	for pressNumber := PressNumber(0); pressNumber <= 5; pressNumber++ {
+		toolIDs, err := h.pressCycles.GetCurrentToolsOnPress(pressNumber)
 		if err != nil {
 			return nil, err
 		}

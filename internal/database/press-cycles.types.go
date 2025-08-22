@@ -2,11 +2,12 @@ package database
 
 import "time"
 
-type PressNumber int8
+const (
+	MinPressNumber = 0
+	MaxPressNumber = 5
+)
 
-func (pn *PressNumber) IsValid() bool {
-	return pn == nil || (*pn >= 0 && *pn <= 5)
-}
+type PressNumber int8
 
 type PressCycle struct {
 	ID            int64                      `json:"id"`

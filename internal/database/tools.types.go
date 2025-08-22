@@ -68,12 +68,18 @@ func (t *Tool) String() string {
 }
 
 // SetPress sets the press for the tool with validation (0-5)
-func (t *Tool) SetPress(press *PressNumber) error {
-	if press.IsValid() && *press < 0 || *press > 5 {
-		return NewValidationError("press", "invalid press number", press)
+func (t *Tool) SetPress(pressNumber *PressNumber) error {
+	if pressNumber == nil {
+		t.Press = nil
+		return nil
 	}
 
-	t.Press = press
+	if *pressNumber < MinPressNumber || *pressNumber > MaxPressNumber {
+		return NewValidationError("press", "invalid press number", pressNumber)
+	}
+
+	t.Press = pressNumber
+
 	return nil
 }
 
@@ -96,11 +102,11 @@ func (t *Tool) GetPressString() string {
 }
 
 type ToolMod struct {
-	Position    Position   `json:"position"`
-	Format      ToolFormat `json:"format"`
-	Type        string     `json:"type"`
-	Code        string     `json:"code"`
-	Status      ToolStatus `json:"status"`
-	Press       *int       `json:"press"`
-	LinkedNotes []int64    `json:"notes"`
+	Position    Position     `json:"position"`
+	Format      ToolFormat   `json:"format"`
+	Type        string       `json:"type"`
+	Code        string       `json:"code"`
+	Status      ToolStatus   `json:"status"`
+	Press       *PressNumber `json:"press"`
+	LinkedNotes []int64      `json:"notes"`
 }

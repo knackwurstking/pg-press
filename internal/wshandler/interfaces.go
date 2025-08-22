@@ -4,6 +4,7 @@ package wshandler
 import (
 	"context"
 
+	"github.com/knackwurstking/pgpress/internal/database"
 	"golang.org/x/net/websocket"
 )
 
@@ -97,6 +98,7 @@ type Connection interface {
 
 // Compile-time interface compliance checks
 var (
-	_ WSHandler  = (*FeedHandler)(nil)
-	_ Connection = (*FeedConnection)(nil)
+	_ WSHandler            = (*FeedHandler)(nil)
+	_ database.Broadcaster = (*FeedHandler)(nil)
+	_ Connection           = (*FeedConnection)(nil)
 )

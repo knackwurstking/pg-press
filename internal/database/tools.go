@@ -125,17 +125,21 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 }
 
 // GetByPress returns all active tools for a specific press (0-5)
-func (t *Tools) GetByPress(press int) ([]*Tool, error) {
-	if press < 0 || press > 5 {
-		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", press)
+func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
+	if pressNumber != nil && (*pressNumber < MinPressNumber || *pressNumber > MaxPressNumber) {
+		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
-	logger.Tools().Info("Getting active tools for press: %d", press)
+	if pressNumber == nil {
+		logger.Tools().Info("Getting inactive tools")
+	} else {
+		logger.Tools().Info("Getting active tools for press: %d", *pressNumber)
+	}
 
-	rows, err := t.db.Query(selectToolsByPressQuery, press)
+	rows, err := t.db.Query(selectToolsByPressQuery, pressNumber)
 	if err != nil {
 		return nil, NewDatabaseError("select", "tools",
-			fmt.Sprintf("failed to query tools for press %d", press), err)
+			fmt.Sprintf("failed to query tools for press %d", pressNumber), err)
 	}
 	defer rows.Close()
 
@@ -314,7 +318,7 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 }
 
 // UpdatePress updates only the press field of a tool
-func (t *Tools) UpdatePress(toolID int64, press *int) error {
+func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
 	logger.Tools().Info("Updating tool press: %d", toolID)
 
 	query := `UPDATE tools SET press = ? WHERE id = ?`

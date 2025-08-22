@@ -15,7 +15,7 @@ type DB struct {
 	Tools                *Tools
 	ToolsHelper          *ToolsHelper
 	MetalSheets          *MetalSheets
-	Presses              *Presses
+	PressCycles          *PressCycles
 	ToolRegenerations    *ToolRegenerations
 	ToolCyclesHelper     *ToolCyclesHelper
 	Feeds                *Feeds
@@ -36,8 +36,8 @@ func New(db *sql.DB) *DB {
 	toolsHelper := NewToolsHelper(tools, notes)
 
 	metalSheets := NewMetalSheets(db, feeds, notes)
-	presses := NewPresses(db, feeds)
-	toolRegenerations := NewToolRegenerations(db, feeds, presses)
+	pressCycles := NewPressCycles(db, feeds)
+	toolRegenerations := NewToolRegenerations(db, feeds, pressCycles)
 
 	dbInstance := &DB{
 		Users:                NewUsers(db, feeds),
@@ -49,7 +49,7 @@ func New(db *sql.DB) *DB {
 		Tools:                tools,
 		ToolsHelper:          toolsHelper,
 		MetalSheets:          metalSheets,
-		Presses:              presses,
+		PressCycles:          pressCycles,
 		ToolRegenerations:    toolRegenerations,
 		Feeds:                feeds,
 		db:                   db,

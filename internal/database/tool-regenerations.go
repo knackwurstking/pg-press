@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	// TODO: Mods missing
 	createToolRegenerationsTableQuery = `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,31 +25,19 @@ const (
 	`
 )
 
-// ToolRegeneration represents a tool regeneration event
-type ToolRegeneration struct {
-	ID                   int64     `json:"id"`
-	ToolID               int64     `json:"tool_id"`
-	RegeneratedAt        time.Time `json:"regenerated_at"`
-	CyclesAtRegeneration int64     `json:"cycles_at_regeneration"`
-	Reason               string    `json:"reason"`
-	PerformedBy          string    `json:"performed_by"`
-	Notes                string    `json:"notes"`
-	CreatedAt            time.Time `json:"created_at"`
-}
-
 // ToolRegenerations handles tool regeneration tracking
 type ToolRegenerations struct {
-	db      *sql.DB
-	feeds   *Feeds
-	presses *Presses
+	db          *sql.DB
+	feeds       *Feeds
+	pressCycles *PressCycles
 }
 
 // NewToolRegenerations creates a new ToolRegenerations instance
-func NewToolRegenerations(db *sql.DB, feeds *Feeds, presses *Presses) *ToolRegenerations {
+func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCycles *PressCycles) *ToolRegenerations {
 	t := &ToolRegenerations{
-		db:      db,
-		feeds:   feeds,
-		presses: presses,
+		db:          db,
+		feeds:       feeds,
+		pressCycles: pressCycles,
 	}
 	t.init()
 	return t
@@ -63,7 +52,7 @@ func (t *ToolRegenerations) init() {
 // Create records a new tool regeneration event
 func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes string) (*ToolRegeneration, error) {
 	// Get current total cycles for the tool before regeneration
-	totalCycles, err := t.presses.GetTotalCyclesSinceRegeneration(toolID, nil)
+	totalCycles, err := t.pressCycles.GetTotalCyclesSinceRegeneration(toolID, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get total cycles: %w", err)
 	}

@@ -107,14 +107,14 @@ const (
 	`
 )
 
-// Presses manages press cycle data and operations
-type Presses struct {
+// PressCycles manages press cycle data and operations
+type PressCycles struct {
 	db    *sql.DB
 	feeds *Feeds
 }
 
-func NewPresses(db *sql.DB, feeds *Feeds) *Presses {
-	p := &Presses{
+func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
+	p := &PressCycles{
 		db:    db,
 		feeds: feeds,
 	}
@@ -122,7 +122,7 @@ func NewPresses(db *sql.DB, feeds *Feeds) *Presses {
 	return p
 }
 
-func (p *Presses) init() {
+func (p *PressCycles) init() {
 	// Create press_cycles table
 	if _, err := p.db.Exec(createPressCyclesTableQuery); err != nil {
 		panic(fmt.Errorf("failed to create press_cycles table: %w", err))
@@ -130,9 +130,9 @@ func (p *Presses) init() {
 }
 
 // StartToolUsage records when a tool starts being used on a press
-func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, error) {
+func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*PressCycle, error) {
 	// Validate press number
-	if pressNumber < 0 || pressNumber > 5 {
+	if pressNumber < MinPressNumber || pressNumber > MaxPressNumber {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
@@ -190,7 +190,7 @@ func (p *Presses) StartToolUsage(toolID int64, pressNumber int) (*PressCycle, er
 }
 
 // EndToolUsage ends the current usage of a tool on any press
-func (p *Presses) EndToolUsage(toolID int64) error {
+func (p *PressCycles) EndToolUsage(toolID int64) error {
 	_, err := p.db.Exec(endToolUsageQuery, time.Now(), toolID)
 	if err != nil {
 		return fmt.Errorf("failed to end tool usage: %w", err)
@@ -200,7 +200,7 @@ func (p *Presses) EndToolUsage(toolID int64) error {
 }
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press
-func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
+func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
 	// First get the current cycle to preserve and update mods
 	current, err := p.GetCurrentToolUsage(toolID)
 	if err != nil {
@@ -247,7 +247,7 @@ func (p *Presses) UpdateCycles(toolID int64, totalCycles, partialCycles int64) e
 }
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
-func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
+func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 	var cycle PressCycle
 	var toDate sql.NullTime
 	var modsData []byte
@@ -283,7 +283,7 @@ func (p *Presses) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 }
 
 // GetToolHistory gets the press usage history for a tool
-func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
+func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	rows, err := p.db.Query(selectToolHistoryQuery, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool history: %w", err)
@@ -326,7 +326,7 @@ func (p *Presses) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 }
 
 // GetToolHistorySinceRegeneration gets press cycles since the last tool regeneration
-func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
+func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
 	var query string
 	var args []any
 
@@ -381,7 +381,7 @@ func (p *Presses) GetToolHistorySinceRegeneration(toolID int64, lastRegeneration
 }
 
 // GetTotalCyclesSinceRegeneration calculates total cycles since last regeneration
-func (p *Presses) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenerationDate *time.Time) (int64, error) {
+func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenerationDate *time.Time) (int64, error) {
 	var query string
 	var args []any
 
@@ -403,9 +403,9 @@ func (p *Presses) GetTotalCyclesSinceRegeneration(toolID int64, lastRegeneration
 }
 
 // GetCurrentToolsOnPress gets all tools currently active on a specific press
-func (p *Presses) GetCurrentToolsOnPress(pressNumber int) ([]int64, error) {
+func (p *PressCycles) GetCurrentToolsOnPress(pressNumber PressNumber) ([]int64, error) {
 	// Validate press number
-	if pressNumber < 0 || pressNumber > 5 {
+	if pressNumber < MinPressNumber || pressNumber > MaxPressNumber {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
@@ -428,11 +428,11 @@ func (p *Presses) GetCurrentToolsOnPress(pressNumber int) ([]int64, error) {
 }
 
 // GetPressUtilization gets current tool count for each press (0-5)
-func (p *Presses) GetPressUtilization() (map[int][]int64, error) {
-	utilization := make(map[int][]int64)
+func (p *PressCycles) GetPressUtilization() (map[PressNumber][]int64, error) {
+	utilization := make(map[PressNumber][]int64)
 
 	// Initialize all presses (0-5) with empty slices
-	for i := 0; i <= 5; i++ {
+	for i := PressNumber(0); i <= 5; i++ {
 		utilization[i] = []int64{}
 	}
 
@@ -444,7 +444,7 @@ func (p *Presses) GetPressUtilization() (map[int][]int64, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var pressNumber int
+		var pressNumber PressNumber
 		var toolID int64
 		if err := rows.Scan(&pressNumber, &toolID); err != nil {
 			return nil, fmt.Errorf("failed to scan utilization data: %w", err)
@@ -456,7 +456,7 @@ func (p *Presses) GetPressUtilization() (map[int][]int64, error) {
 }
 
 // MarkToolRegeneration marks when a tool has been regenerated (resets cycles)
-func (p *Presses) MarkToolRegeneration(toolID int64) error {
+func (p *PressCycles) MarkToolRegeneration(toolID int64) error {
 	// End any current usage
 	if err := p.EndToolUsage(toolID); err != nil {
 		return fmt.Errorf("failed to end tool usage for regeneration: %w", err)
@@ -478,19 +478,19 @@ func (p *Presses) MarkToolRegeneration(toolID int64) error {
 }
 
 // GetPressCycleStats gets statistics for all presses
-func (p *Presses) GetPressCycleStats() (map[int]struct {
+func (p *PressCycles) GetPressCycleStats() (map[PressNumber]struct {
 	TotalCycles    int64
 	ActiveTools    int
 	TotalToolsUsed int
 }, error) {
-	stats := make(map[int]struct {
+	stats := make(map[PressNumber]struct {
 		TotalCycles    int64
 		ActiveTools    int
 		TotalToolsUsed int
 	})
 
 	// Initialize stats for all presses (0-5)
-	for i := 0; i <= 5; i++ {
+	for i := PressNumber(0); i <= 5; i++ {
 		stats[i] = struct {
 			TotalCycles    int64
 			ActiveTools    int
@@ -506,7 +506,7 @@ func (p *Presses) GetPressCycleStats() (map[int]struct {
 	defer rows.Close()
 
 	for rows.Next() {
-		var pressNumber int
+		var pressNumber PressNumber
 		var totalCycles sql.NullInt64
 		var totalToolsUsed, activeTools int
 
