@@ -251,16 +251,15 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				<table class="table borderless compact">
 					<thead>
 						<tr>
-							<th>Von</th>
-							<th>Bis</th>
-							<th>Presse</th>
-							<th>Gesamtzyklen</th>
-							<th>Teilzyklen</th>
+							<th name="from">Von</th>
+							<th name="to">Bis</th>
+							<th name="total">Gesamtzyklen</th>
+							<th name="partial">Teilzyklen</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr>
-							<td colspan="5" class="text-center">
+							<td colspan="4" class="text-center">
 								Kein Pressenverlauf verfügbar
 							</td>
 						</tr>

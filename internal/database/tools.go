@@ -291,23 +291,16 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 		format      []byte
 		linkedNotes []byte
 		mods        []byte
-		press       sql.NullInt64
 	)
 
 	var status string
 	if err := rows.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &press, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
 
 	tool.Status = ToolStatus(status)
-
-	// Handle nullable press
-	if press.Valid {
-		pressInt := int(press.Int64)
-		tool.Press = &pressInt
-	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
@@ -333,23 +326,16 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 		format      []byte
 		linkedNotes []byte
 		mods        []byte
-		press       sql.NullInt64
 	)
 
 	var status string
 	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &press, &linkedNotes, &mods); err != nil {
+		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
 
 	tool.Status = ToolStatus(status)
-
-	// Handle nullable press
-	if press.Valid {
-		pressInt := int(press.Int64)
-		tool.Press = &pressInt
-	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",

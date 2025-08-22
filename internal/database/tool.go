@@ -25,6 +25,8 @@ func (tf ToolFormat) String() string {
 }
 
 // Tool represents a tool in the database.
+//
+// TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
 	ID          int64         `json:"id"`
 	Position    Position      `json:"position"`
@@ -32,7 +34,7 @@ type Tool struct {
 	Type        string        `json:"type"` // Ex: FC, GTC, MASS
 	Code        string        `json:"code"` // Ex: G01, G02, ...
 	Status      ToolStatus    `json:"status"`
-	Press       *int          `json:"press"` // Press number (0-5) when status is active
+	Press       *PressNumber  `json:"press"` // Press number (0-5) when status is active
 	LinkedNotes []int64       `json:"notes"` // Contains note ids from the "notes" table
 	Mods        Mods[ToolMod] `json:"mods"`
 }
@@ -66,11 +68,16 @@ func (t *Tool) String() string {
 }
 
 // SetPress sets the press for the tool with validation (0-5)
-func (t *Tool) SetPress(press int) error {
-	if press < 0 || press > 5 {
+func (t *Tool) SetPress(press *PressNumber) error {
+	if press == nil {
+		t.Press = nil
+		return nil
+	}
+
+	if *press < 0 || *press > 5 {
 		return fmt.Errorf("invalid press number: %d (must be 0-5)", press)
 	}
-	t.Press = &press
+	t.Press = press
 	return nil
 }
 
