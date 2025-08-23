@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS tool_regenerations (
     reason TEXT,
     performed_by TEXT,
     notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    mods BLOB,                             -- JSON: modifications history
     FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE
 );
 CREATE INDEX idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
