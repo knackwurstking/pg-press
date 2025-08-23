@@ -86,14 +86,12 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-		modified := database.NewModified(user, database.TroubleReportMod{
-			Title:             title,
-			Content:           content,
-			LinkedAttachments: []int64{}, // Will be set by the service
-		})
-		tr := database.NewTroubleReport(title, content, modified)
 
-		if err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments); err != nil {
+		err := h.DB.TroubleReportsHelper.AddWithAttachments(
+			database.NewTroubleReport(title, content, user),
+			attachments,
+		)
+		if err != nil {
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"failed to add trouble report: "+err.Error())
 		}
@@ -143,14 +141,14 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	props.Attachments = attachments
 
 	// Query previous trouble report
-	trOld, err := h.DB.TroubleReports.Get(id)
+	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get trouble report: "+err.Error())
 	}
 
 	// Create new trouble report
-	tr := database.NewTroubleReport(title, content, trOld.Mods...)
+	//tr := database.NewTroubleReportWithMods(title, content, trOld.Mods...)
 
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
@@ -164,12 +162,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	tr.LinkedAttachments = existingAttachmentIDs
-	tr.Mods = append(tr.Mods, database.NewModified(user, database.TroubleReportMod{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}))
+	tr.Update(user, title, content, existingAttachmentIDs...)
+
 	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())

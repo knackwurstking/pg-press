@@ -272,10 +272,10 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					<a
 						role="button"
 						class="secondary ghost flex gap justify-between w-full"
-						href={ fmt.Sprintf(serverPathPrefix+"/tools/active/%d", tool.Press) }
+						href={ fmt.Sprintf(serverPathPrefix+"/tools/active/%d", *tool.Press) }
 					>
 						<span class="flex gap items-center  text-sm">
-							<span class="contrast ghost">Presse { fmt.Sprintf("%d", tool.Press) }</span>
+							<span class="contrast ghost">Presse { fmt.Sprintf("%d", *tool.Press) }</span>
 							<span class="primary ghost">Aktiv</span>
 						</span>
 						<i class="bi bi-chevron-right text-muted"></i>

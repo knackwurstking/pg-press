@@ -126,16 +126,17 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 }
 
 func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
-	tool := database.NewTool()
-
-	switch position := c.FormValue("position"); database.Position(position) {
+	var position database.Position
+	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
 	case database.PositionTop:
-		tool.Position = database.PositionTop
+		position = database.PositionTop
 	case database.PositionBottom:
-		tool.Position = database.PositionBottom
+		position = database.PositionBottom
 	default:
 		return nil, errors.New("invalid position")
 	}
+
+	tool := database.NewTool(position)
 
 	// Parse width and height
 	widthStr := c.FormValue("width")

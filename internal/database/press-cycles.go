@@ -9,6 +9,7 @@ import (
 
 const (
 	createPressCyclesTableQuery = `
+		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
@@ -17,12 +18,16 @@ const (
 			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			partial_cycles INTEGER NOT NULL DEFAULT 0,
-			mods BLOB,
+			mods BLOB NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id)
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
+		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods)
+		VALUES
+			(0, 0, '2023-01-01', NULL, 0, 0, '[]'),
+			(0, 1, '2023-01-01', NULL, 0, 0, '[]');
 	`
 
 	insertPressCycleQuery = `
@@ -234,7 +239,7 @@ func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int6
 			TotalCycles:   current.TotalCycles,
 			PartialCycles: current.PartialCycles,
 		})
-		current.Mods = append(current.Mods, mod)
+		current.Mods = append([]*Modified[PressCycleMod]{mod}, current.Mods...)
 	}
 
 	// Marshal mods

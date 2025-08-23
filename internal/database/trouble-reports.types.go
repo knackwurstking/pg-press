@@ -29,12 +29,22 @@ type TroubleReport struct {
 }
 
 // NewTroubleReport creates a new trouble report with the provided details.
-func NewTroubleReport(title, content string, m ...*Modified[TroubleReportMod]) *TroubleReport {
+func NewTroubleReport(title, content string, user *User) *TroubleReport {
+	if user == nil {
+		panic("user cannot be nil")
+	}
+
+	mod := NewModified(user, TroubleReportMod{
+		Title:             title,
+		Content:           content,
+		LinkedAttachments: []int64{}, // Will be set by the service
+	})
+
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              m,
+		Mods:              Mods[TroubleReportMod]{mod},
 	}
 }
 
@@ -89,23 +99,27 @@ func (tr *TroubleReport) validateAttachments() error {
 	return nil
 }
 
-// UpdateTitle updates the trouble report title with validation.
-func (tr *TroubleReport) UpdateTitle(newTitle string) error {
-	newTitle = strings.TrimSpace(newTitle)
-	if err := tr.validateTitle(newTitle); err != nil {
+func (tr *TroubleReport) Update(user *User, title, content string, attachments ...int64) error {
+	if err := tr.validateTitle(title); err != nil {
 		return err
 	}
-	tr.Title = newTitle
-	return nil
-}
+	if err := tr.validateContent(content); err != nil {
+		return err
+	}
+	if err := tr.validateAttachments(); err != nil {
+		return err
+	}
 
-// UpdateContent updates the trouble report content with validation.
-func (tr *TroubleReport) UpdateContent(newContent string) error {
-	newContent = strings.TrimSpace(newContent)
-	if err := tr.validateContent(newContent); err != nil {
-		return err
-	}
-	tr.Content = newContent
+	tr.Mods = append(tr.Mods, NewModified(user, TroubleReportMod{
+		Title:             tr.Title,
+		Content:           tr.Content,
+		LinkedAttachments: tr.LinkedAttachments,
+	}))
+
+	tr.Title = title
+	tr.Content = content
+	tr.LinkedAttachments = attachments
+
 	return nil
 }
 

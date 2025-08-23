@@ -39,10 +39,11 @@ type Tool struct {
 	Mods        Mods[ToolMod] `json:"mods"`
 }
 
-func NewTool(m ...*Modified[ToolMod]) *Tool {
+func NewTool(position Position, m ...*Modified[ToolMod]) *Tool {
 	return &Tool{
 		Format:      ToolFormat{},
-		Status:      ToolStatusActive,
+		Position:    position,
+		Status:      ToolStatusAvailable,
 		LinkedNotes: make([]int64, 0),
 		Mods:        m,
 	}
@@ -91,6 +92,14 @@ func (t *Tool) ClearPress() {
 // IsActive checks if the tool is active on a press
 func (t *Tool) IsActive() bool {
 	return t.Status == ToolStatusActive && t.Press != nil
+}
+
+// GetPressString returns a formatted string of the press assignment
+func (t *Tool) GetPress() PressNumber {
+	if t.Press == nil {
+		return -1
+	}
+	return *t.Press
 }
 
 // GetPressString returns a formatted string of the press assignment
