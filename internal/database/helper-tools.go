@@ -81,7 +81,7 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 
 	// Ensure tool has initial mod entry if it doesn't have one
 	if len(tool.Mods) == 0 {
-		initialMod := NewModified(user, ToolMod{
+		tool.Mods.Add(user, ToolMod{
 			Position:    tool.Position,
 			Format:      tool.Format,
 			Type:        tool.Type,
@@ -90,7 +90,6 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 			Press:       tool.Press,
 			LinkedNotes: tool.LinkedNotes,
 		})
-		tool.Mods = []*Modified[ToolMod]{initialMod}
 	}
 
 	// First, add all notes and collect their IDs
