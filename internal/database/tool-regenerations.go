@@ -313,6 +313,11 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 	return regenerations, nil
 }
 
+// GetByToolID gets all regenerations for a specific tool (alias for GetRegenerationHistory)
+func (t *ToolRegenerations) GetByToolID(toolID int64) ([]*ToolRegeneration, error) {
+	return t.GetRegenerationHistory(toolID)
+}
+
 // GetRegenerationCount gets the total number of regenerations for a tool
 func (t *ToolRegenerations) GetRegenerationCount(toolID int64) (int, error) {
 	var count int

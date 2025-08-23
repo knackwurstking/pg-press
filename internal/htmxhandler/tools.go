@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"time"
+
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -31,6 +33,15 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.POST(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPOST)
 	e.PUT(serverPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
 	e.PUT(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
+
+	e.GET(serverPathPrefix+"/htmx/tools/cycles", h.handleCycles)
+	e.GET(serverPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
+
+	e.GET(serverPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
+	e.GET(serverPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
+
+	e.DELETE(serverPathPrefix+"/htmx/tools/delete", h.handleDelete)
+	e.DELETE(serverPathPrefix+"/htmx/tools/delete/", h.handleDelete)
 }
 
 func (h *Tools) handleListAll(c echo.Context) error {
@@ -158,4 +169,98 @@ func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
 	}
 
 	return tool, nil
+}
+
+func (h *Tools) handleCycles(c echo.Context) error {
+	// Get tool ID from query parameter
+	toolID, err := utils.ParseInt64Query(c, "tool_id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid or missing tool_id parameter: "+err.Error())
+	}
+
+	// Get press cycles for this tool
+	cycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get press cycles: "+err.Error())
+	}
+
+	// Get regenerations for this tool
+	regenerations, err := h.DB.ToolRegenerations.GetByToolID(toolID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool regenerations: "+err.Error())
+	}
+
+	// Render the component
+	cyclesRows := components.ToolCyclesTableRows(cycles, regenerations)
+	if err := cyclesRows.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render tool cycles: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Tools) handleTotalCycles(c echo.Context) error {
+	// Get tool ID from query parameter
+	toolID, err := utils.ParseInt64Query(c, "tool_id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid or missing tool_id parameter: "+err.Error())
+	}
+
+	// Get the last regeneration for this tool
+	lastRegeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get last regeneration: "+err.Error())
+	}
+
+	// Calculate total cycles since last regeneration
+	var lastRegenerationDate *time.Time
+	if lastRegeneration != nil {
+		lastRegenerationDate = &lastRegeneration.RegeneratedAt
+	}
+
+	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID, lastRegenerationDate)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get total cycles: "+err.Error())
+	}
+
+	// Render the component
+	totalCyclesComponent := components.ToolTotalCycles(totalCycles)
+	if err := totalCyclesComponent.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render total cycles: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Tools) handleDelete(c echo.Context) error {
+	// Get tool ID from query parameter
+	toolID, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid or missing id parameter: "+err.Error())
+	}
+
+	// Get user from context for audit trail
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	// Delete the tool from database
+	if err := h.DB.Tools.Delete(toolID, user); err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to delete tool: "+err.Error())
+	}
+
+	// Set redirect header to tools page
+	c.Response().Header().Set("HX-Redirect", serverPathPrefix+"/tools")
+	return c.NoContent(http.StatusOK)
 }

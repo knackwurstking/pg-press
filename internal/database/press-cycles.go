@@ -339,6 +339,49 @@ func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	return cycles, nil
 }
 
+// GetPressCyclesForTool gets all press cycles for a specific tool
+func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error) {
+	rows, err := p.db.Query(selectToolHistoryQuery, toolID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get press cycles for tool: %w", err)
+	}
+	defer rows.Close()
+
+	var cycles []*PressCycle
+	for rows.Next() {
+		var cycle PressCycle
+		var toDate sql.NullTime
+		var modsData []byte
+
+		err := rows.Scan(
+			&cycle.ID,
+			&cycle.PressNumber,
+			&cycle.ToolID,
+			&cycle.FromDate,
+			&toDate,
+			&cycle.TotalCycles,
+			&cycle.PartialCycles,
+			&modsData,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
+		}
+
+		if toDate.Valid {
+			cycle.ToDate = &toDate.Time
+		}
+
+		// Unmarshal mods
+		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+			cycle.Mods = []*Modified[PressCycleMod]{}
+		}
+
+		cycles = append(cycles, &cycle)
+	}
+
+	return cycles, nil
+}
+
 // GetToolHistorySinceRegeneration gets press cycles since the last tool regeneration
 func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
 	var query string

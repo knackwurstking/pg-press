@@ -39,11 +39,22 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 //  	- Edit button for tool editing
 templ toolPageActions(tool *database.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
-		<button class="primary flex gap">
+		<button
+			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d", serverPathPrefix, tool.ID) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			class="primary flex gap"
+		>
 			<i class="bi bi-pencil"></i>
 			Bearbeiten
 		</button>
-		<button class="destructive flex gap">
+		<button
+			hx-delete={ fmt.Sprintf("%s/htmx/tools/delete?id=%d", serverPathPrefix, tool.ID) }
+			hx-trigger="click"
+			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
+			class="destructive flex gap"
+		>
 			<i class="bi bi-trash"></i>
 			Löschen
 		</button>
@@ -89,7 +100,20 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 
 templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	<section class="metalsheets-section">
-		<h3>Bleche</h3>
+		<div class="flex justify-between items-center mb">
+			<h3>Bleche</h3>
+			<button
+				hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/add?tool_id=%d", serverPathPrefix, tool.ID) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				class="primary flex gap"
+				title="Neues Blech hinzufügen"
+			>
+				<i class="bi bi-plus"></i>
+				Blech hinzufügen
+			</button>
+		</div>
 		<div class="table-container">
 			switch tool.Position {
 				case database.PositionBottom:
@@ -130,14 +154,35 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
 							<td class="flex gap-sm justify-center items-center">
-								<!-- TODO: Action button here: "delete", "modify" -->
-								<button class="info icon ghost text-sm">
+								<button
+									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									class="info icon ghost text-sm"
+									title="Details anzeigen"
+								>
 									<i class="bi bi-eye"></i>
 								</button>
-								<button class="primary icon ghost text-sm">
+								<button
+									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/edit?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									class="primary icon ghost text-sm"
+									title="Bearbeiten"
+								>
 									<i class="bi bi-pencil"></i>
 								</button>
-								<button class="destructive icon ghost text-sm">
+								<button
+									hx-delete={ fmt.Sprintf("%s/htmx/metal-sheets/delete?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
+									hx-target="closest tr"
+									hx-swap="outerHTML"
+									class="destructive icon ghost text-sm"
+									title="Löschen"
+								>
 									<i class="bi bi-trash"></i>
 								</button>
 							</td>
@@ -172,14 +217,35 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
 							<td class="flex gap-sm justify-center items-center">
-								<!-- TODO: Action button here: "delete", "modify" -->
-								<button class="info icon ghost text-sm">
+								<button
+									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									class="info icon ghost text-sm"
+									title="Details anzeigen"
+								>
 									<i class="bi bi-eye"></i>
 								</button>
-								<button class="primary icon ghost text-sm">
+								<button
+									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/edit?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									class="primary icon ghost text-sm"
+									title="Bearbeiten"
+								>
 									<i class="bi bi-pencil"></i>
 								</button>
-								<button class="destructive icon ghost text-sm">
+								<button
+									hx-delete={ fmt.Sprintf("%s/htmx/metal-sheets/delete?id=%d", serverPathPrefix, sheet.ID) }
+									hx-trigger="click"
+									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
+									hx-target="closest tr"
+									hx-swap="outerHTML"
+									class="destructive icon ghost text-sm"
+									title="Löschen"
+								>
 									<i class="bi bi-trash"></i>
 								</button>
 							</td>
@@ -223,7 +289,19 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 			}
 		</section>
 		<section class="press-history">
-			<h4>Pressennutzungsverlauf</h4>
+			<div class="flex justify-between items-center mb">
+				<h4>Pressennutzungsverlauf</h4>
+				<button
+					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles?tool_id=%d", serverPathPrefix, tool.ID) }
+					hx-trigger="click"
+					hx-target={ fmt.Sprintf("[name='tool-cycles-table'] tbody") }
+					hx-swap="innerHTML"
+					class="secondary icon ghost"
+					title="Tabelle aktualisieren"
+				>
+					<i class="bi bi-arrow-clockwise"></i>
+				</button>
+			</div>
 			<section class="dev-note card warning">
 				<div class="card-header">
 					<h4>
@@ -243,24 +321,33 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				<h5 class="mb">
 					Gesamtzyklen seit der letzten Regenerierung:
 				</h5>
-				<span>
-					<input value={ fmt.Sprintf("%d", 0) } readonly/>
+				<span
+					hx-get={ fmt.Sprintf("%s/htmx/tools/total-cycles?tool_id=%d", serverPathPrefix, tool.ID) }
+					hx-trigger="load"
+					hx-swap="innerHTML"
+				>
+					<input value="..." readonly/>
 				</span>
 			</section>
 			<figure class="w-full overflow-x-scroll">
-				<table class="table borderless compact">
+				<table name="tool-cycles-table" class="table borderless compact">
 					<thead>
 						<tr>
+							<th name="press">Presse</th>
 							<th name="from">Von</th>
 							<th name="to">Bis</th>
 							<th name="total">Gesamtzyklen</th>
 							<th name="partial">Teilzyklen</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody
+						hx-get={ fmt.Sprintf("%s/htmx/tools/cycles?tool_id=%d", serverPathPrefix, tool.ID) }
+						hx-trigger="load"
+						hx-swap="innerHTML"
+					>
 						<tr>
-							<td colspan="4" class="text-center">
-								Kein Pressenverlauf verfügbar
+							<td colspan="5" class="text-center">
+								<span class="spinner"></span> Lade Pressenverlauf...
 							</td>
 						</tr>
 					</tbody>

@@ -1,0 +1,133 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/database"
+	"time"
+)
+
+// Helper function to check if a cycle is within a time period
+func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
+	if startTime != nil && cycle.FromDate.Before(*startTime) {
+		return false
+	}
+	if endTime != nil && cycle.FromDate.After(*endTime) {
+		return false
+	}
+	return true
+}
+
+// ToolCyclesTableRows renders the tbody content for tool cycles history
+templ ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
+	if len(cycles) == 0 && len(regenerations) == 0 {
+		<tr>
+			<td colspan="5" class="text-center">
+				Kein Pressenverlauf verfügbar
+			</td>
+		</tr>
+	} else {
+		// Group cycles by regeneration periods
+		// Show most recent regeneration period first
+		for i := len(regenerations) - 1; i >= 0; i-- {
+			@renderRegenerationMarker(regenerations[i])
+			@renderCyclesForPeriod(cycles, regenerations, i)
+		}
+		// Show cycles before first regeneration (if any)
+		if len(regenerations) > 0 {
+			@renderCyclesBeforeFirstRegeneration(cycles, regenerations[0])
+		} else {
+			// No regenerations, show all cycles
+			for _, cycle := range cycles {
+				@renderCycleRow(cycle)
+			}
+		}
+	}
+}
+
+templ renderRegenerationMarker(regeneration *database.ToolRegeneration) {
+	<tr class="regeneration-marker">
+		<td colspan="5" class="text-center">
+			<div class="flex gap items-center justify-center">
+				<i class="bi bi-arrow-repeat text-warning"></i>
+				<span class="text-muted">
+					Regenerierung am { regeneration.RegeneratedAt.Format("02.01.2006 15:04") }
+				</span>
+			</div>
+		</td>
+	</tr>
+}
+
+templ renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration, regenerationIndex int) {
+	// Determine the time window for this regeneration period
+	if regenerationIndex < len(regenerations)-1 {
+		// Period between two regenerations
+		@renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, &regenerations[regenerationIndex+1].RegeneratedAt)
+	} else {
+		// Period after the last regeneration
+		@renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, nil)
+	}
+}
+
+templ renderCyclesInWindow(cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time) {
+	{{ hasCycles := false }}
+	for _, cycle := range cycles {
+		if cycleInPeriod(cycle, startTime, endTime) {
+			{{ hasCycles = true }}
+			@renderCycleRow(cycle)
+		}
+	}
+	if !hasCycles {
+		<tr>
+			<td colspan="5" class="text-center text-muted">
+				Keine Zyklen in diesem Zeitraum
+			</td>
+		</tr>
+	}
+}
+
+templ renderCyclesBeforeFirstRegeneration(cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
+	{{ hasCycles := false }}
+	for _, cycle := range cycles {
+		if cycle.FromDate.Before(firstRegeneration.RegeneratedAt) {
+			{{ hasCycles = true }}
+			@renderCycleRow(cycle)
+		}
+	}
+	if hasCycles {
+		<tr class="regeneration-marker">
+			<td colspan="5" class="text-center">
+				<span class="text-muted">Zyklen vor erster Regenerierung</span>
+			</td>
+		</tr>
+	}
+}
+
+templ renderCycleRow(cycle *database.PressCycle) {
+	<tr>
+		<td>
+			<span>Presse { fmt.Sprintf("%d", cycle.PressNumber) }</span>
+		</td>
+		<td>
+			<div class="flex flex-col">
+				<span>{ cycle.FromDate.Format("02.01.2006") }</span>
+				<span class="text-muted text-sm">{ cycle.FromDate.Format("15:04") }</span>
+			</div>
+		</td>
+		<td>
+			if cycle.ToDate != nil {
+				<div class="flex flex-col">
+					<span>{ cycle.ToDate.Format("02.01.2006") }</span>
+					<span class="text-muted text-sm">{ cycle.ToDate.Format("15:04") }</span>
+				</div>
+			} else {
+				<span class="primary ghost">Aktiv</span>
+			}
+		</td>
+		<td class="text-right">
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+		<td class="text-right">
+			{ fmt.Sprintf("%d", cycle.PartialCycles) }
+		</td>
+	</tr>
+}
