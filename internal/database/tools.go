@@ -164,6 +164,20 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.Tools().Info("Adding tool: %s", tool.String())
 
+	// Ensure initial mod entry exists
+	if len(tool.Mods) == 0 {
+		initialMod := NewModified(user, ToolMod{
+			Position:    tool.Position,
+			Format:      tool.Format,
+			Type:        tool.Type,
+			Code:        tool.Code,
+			Status:      tool.Status,
+			Press:       tool.Press,
+			LinkedNotes: tool.LinkedNotes,
+		})
+		tool.Mods = []*Modified[ToolMod]{initialMod}
+	}
+
 	// Marshal JSON fields
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
@@ -216,6 +230,34 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 
 func (t *Tools) Update(tool *Tool, user *User) error {
 	logger.Tools().Info("Updating tool: %d", tool.ID)
+
+	// Get current tool to compare for changes
+	current, err := t.Get(tool.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get current tool: %w", err)
+	}
+
+	// Add modification record if values changed
+	if current.Position != tool.Position ||
+		current.Format != tool.Format ||
+		current.Type != tool.Type ||
+		current.Code != tool.Code ||
+		current.Status != tool.Status ||
+		!equalPressNumbers(current.Press, tool.Press) ||
+		len(current.LinkedNotes) != len(tool.LinkedNotes) {
+
+		mod := NewModified(user, ToolMod{
+			Position:    current.Position,
+			Format:      current.Format,
+			Type:        current.Type,
+			Code:        current.Code,
+			Status:      current.Status,
+			Press:       current.Press,
+			LinkedNotes: current.LinkedNotes,
+		})
+		// Prepend new mod to keep most recent first
+		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
+	}
 
 	// Marshal JSON fields
 	formatBytes, err := json.Marshal(tool.Format)
@@ -292,8 +334,36 @@ func (t *Tools) Delete(id int64, user *User) error {
 func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 	logger.Tools().Info("Updating tool status: %d to %s", toolID, status)
 
-	query := `UPDATE tools SET status = ? WHERE id = ?`
-	_, err := t.db.Exec(query, string(status), toolID)
+	// Get current tool to track changes
+	tool, err := t.Get(toolID)
+	if err != nil {
+		return fmt.Errorf("failed to get tool for status update: %w", err)
+	}
+
+	// Add modification record if status changed
+	if tool.Status != status {
+		mod := NewModified(nil, ToolMod{ // nil user for system update
+			Position:    tool.Position,
+			Format:      tool.Format,
+			Type:        tool.Type,
+			Code:        tool.Code,
+			Status:      tool.Status,
+			Press:       tool.Press,
+			LinkedNotes: tool.LinkedNotes,
+		})
+		// Prepend new mod to keep most recent first
+		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
+	}
+
+	// Marshal mods for database update
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			"failed to marshal mods", err)
+	}
+
+	query := `UPDATE tools SET status = ?, mods = ? WHERE id = ?`
+	_, err = t.db.Exec(query, string(status), modsBytes, toolID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update status for tool %d", toolID), err)
@@ -301,17 +371,15 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		tool, _ := t.Get(toolID)
-		if tool != nil {
-			t.feeds.Add(NewFeed(
-				FeedTypeToolUpdate,
-				&FeedToolUpdate{
-					ID:         toolID,
-					Tool:       tool.String(),
-					ModifiedBy: nil, // System update
-				},
-			))
-		}
+		tool.Status = status // Update status for correct display
+		t.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         toolID,
+				Tool:       tool.String(),
+				ModifiedBy: nil, // System update
+			},
+		))
 	}
 
 	return nil
@@ -321,8 +389,36 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
 	logger.Tools().Info("Updating tool press: %d", toolID)
 
-	query := `UPDATE tools SET press = ? WHERE id = ?`
-	_, err := t.db.Exec(query, press, toolID)
+	// Get current tool to track changes
+	tool, err := t.Get(toolID)
+	if err != nil {
+		return fmt.Errorf("failed to get tool for press update: %w", err)
+	}
+
+	// Add modification record if press changed
+	if !equalPressNumbers(tool.Press, press) {
+		mod := NewModified(nil, ToolMod{ // nil user for system update
+			Position:    tool.Position,
+			Format:      tool.Format,
+			Type:        tool.Type,
+			Code:        tool.Code,
+			Status:      tool.Status,
+			Press:       tool.Press,
+			LinkedNotes: tool.LinkedNotes,
+		})
+		// Prepend new mod to keep most recent first
+		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
+	}
+
+	// Marshal mods for database update
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		return NewDatabaseError("update", "tools",
+			"failed to marshal mods", err)
+	}
+
+	query := `UPDATE tools SET press = ?, mods = ? WHERE id = ?`
+	_, err = t.db.Exec(query, press, modsBytes, toolID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update press for tool %d", toolID), err)
@@ -330,17 +426,15 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		tool, _ := t.Get(toolID)
-		if tool != nil {
-			t.feeds.Add(NewFeed(
-				FeedTypeToolUpdate,
-				&FeedToolUpdate{
-					ID:         toolID,
-					Tool:       tool.String(),
-					ModifiedBy: nil, // System update
-				},
-			))
-		}
+		tool.Press = press // Update press for correct display
+		t.feeds.Add(NewFeed(
+			FeedTypeToolUpdate,
+			&FeedToolUpdate{
+				ID:         toolID,
+				Tool:       tool.String(),
+				ModifiedBy: nil, // System update
+			},
+		))
 	}
 
 	return nil
@@ -419,4 +513,15 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 	}
 
 	return tool, nil
+}
+
+// equalPressNumbers compares two press number pointers for equality
+func equalPressNumbers(a, b *PressNumber) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
 }

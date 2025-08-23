@@ -39,14 +39,31 @@ type Tool struct {
 	Mods        Mods[ToolMod] `json:"mods"`
 }
 
-func NewTool(position Position, m ...*Modified[ToolMod]) *Tool {
-	return &Tool{
+func NewTool(position Position, user *User) *Tool {
+	tool := &Tool{
 		Format:      ToolFormat{},
 		Position:    position,
+		Type:        "",
+		Code:        "",
 		Status:      ToolStatusAvailable,
+		Press:       nil,
 		LinkedNotes: make([]int64, 0),
-		Mods:        m,
+		Mods:        make([]*Modified[ToolMod], 0),
 	}
+
+	// Create initial mod entry
+	initialMod := NewModified(user, ToolMod{
+		Position:    tool.Position,
+		Format:      tool.Format,
+		Type:        tool.Type,
+		Code:        tool.Code,
+		Status:      tool.Status,
+		Press:       tool.Press,
+		LinkedNotes: tool.LinkedNotes,
+	})
+	tool.Mods = append(tool.Mods, initialMod)
+
+	return tool
 }
 
 func (t *Tool) String() string {

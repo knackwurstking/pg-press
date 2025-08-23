@@ -79,6 +79,20 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*ToolWithNotes, error) {
 	logger.Tools().Debug("Adding tool with notes")
 
+	// Ensure tool has initial mod entry if it doesn't have one
+	if len(tool.Mods) == 0 {
+		initialMod := NewModified(user, ToolMod{
+			Position:    tool.Position,
+			Format:      tool.Format,
+			Type:        tool.Type,
+			Code:        tool.Code,
+			Status:      tool.Status,
+			Press:       tool.Press,
+			LinkedNotes: tool.LinkedNotes,
+		})
+		tool.Mods = []*Modified[ToolMod]{initialMod}
+	}
+
 	// First, add all notes and collect their IDs
 	var noteIDs []int64
 	for _, note := range notes {

@@ -165,6 +165,32 @@ func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
 		return err
 	}
 
+	// Get current trouble report to compare for changes
+	current, err := tr.Get(id)
+	if err != nil {
+		return fmt.Errorf("failed to get current trouble report: %w", err)
+	}
+
+	// Get the user from the most recent mod (if available)
+	var user *User
+	if len(troubleReport.Mods) > 0 {
+		user = troubleReport.Mods[0].User
+	}
+
+	// Add modification record if values changed
+	if current.Title != troubleReport.Title ||
+		current.Content != troubleReport.Content ||
+		len(current.LinkedAttachments) != len(troubleReport.LinkedAttachments) {
+
+		mod := NewModified(user, TroubleReportMod{
+			Title:             current.Title,
+			Content:           current.Content,
+			LinkedAttachments: current.LinkedAttachments,
+		})
+		// Prepend new mod to keep most recent first
+		troubleReport.Mods = append([]*Modified[TroubleReportMod]{mod}, current.Mods...)
+	}
+
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
 		return WrapError(err, "failed to marshal linked attachments")

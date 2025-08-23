@@ -27,11 +27,31 @@ type MetalSheet struct {
 }
 
 // NewMetalSheet creates a new MetalSheet with default values
-func NewMetalSheet(m ...*Modified[MetalSheetMod]) *MetalSheet {
-	return &MetalSheet{
+func NewMetalSheet(user *User) *MetalSheet {
+	sheet := &MetalSheet{
+		TileHeight:  0,
+		Value:       0,
+		MarkeHeight: 0,
+		STF:         0,
+		STFMax:      0,
+		ToolID:      nil,
 		LinkedNotes: make([]int64, 0),
-		Mods:        m,
+		Mods:        make([]*Modified[MetalSheetMod], 0),
 	}
+
+	// Create initial mod entry
+	initialMod := NewModified(user, MetalSheetMod{
+		TileHeight:  sheet.TileHeight,
+		Value:       sheet.Value,
+		MarkeHeight: sheet.MarkeHeight,
+		STF:         sheet.STF,
+		STFMax:      sheet.STFMax,
+		ToolID:      sheet.ToolID,
+		LinkedNotes: sheet.LinkedNotes,
+	})
+	sheet.Mods = append(sheet.Mods, initialMod)
+
+	return sheet
 }
 
 // String returns a string representation of the metal sheet

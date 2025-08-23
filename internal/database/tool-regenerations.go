@@ -186,7 +186,8 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
 			PerformedBy:          existingRegen.PerformedBy,
 			Notes:                existingRegen.Notes,
 		})
-		regen.Mods = append(regen.Mods, mod)
+		// Prepend new mod to keep most recent first
+		regen.Mods = append([]*Modified[ToolRegenerationMod]{mod}, regen.Mods...)
 	}
 
 	// Marshal mods

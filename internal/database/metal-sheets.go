@@ -247,6 +247,20 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 	logger.MetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
+	// Ensure initial mod entry exists
+	if len(sheet.Mods) == 0 {
+		initialMod := NewModified(user, MetalSheetMod{
+			TileHeight:  sheet.TileHeight,
+			Value:       sheet.Value,
+			MarkeHeight: sheet.MarkeHeight,
+			STF:         sheet.STF,
+			STFMax:      sheet.STFMax,
+			ToolID:      sheet.ToolID,
+			LinkedNotes: sheet.LinkedNotes,
+		})
+		sheet.Mods = []*Modified[MetalSheetMod]{initialMod}
+	}
+
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
@@ -296,6 +310,34 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 	logger.MetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
+	// Get current sheet to compare for changes
+	current, err := ms.Get(sheet.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get current sheet: %w", err)
+	}
+
+	// Add modification record if values changed
+	if current.TileHeight != sheet.TileHeight ||
+		current.Value != sheet.Value ||
+		current.MarkeHeight != sheet.MarkeHeight ||
+		current.STF != sheet.STF ||
+		current.STFMax != sheet.STFMax ||
+		!equalToolIDs(current.ToolID, sheet.ToolID) ||
+		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
+
+		mod := NewModified(user, MetalSheetMod{
+			TileHeight:  current.TileHeight,
+			Value:       current.Value,
+			MarkeHeight: current.MarkeHeight,
+			STF:         current.STF,
+			STFMax:      current.STFMax,
+			ToolID:      current.ToolID,
+			LinkedNotes: current.LinkedNotes,
+		})
+		// Prepend new mod to keep most recent first
+		sheet.Mods = append([]*Modified[MetalSheetMod]{mod}, sheet.Mods...)
+	}
+
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
@@ -336,7 +378,42 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) error {
 	logger.MetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
-	_, err := ms.db.Exec(updateMetalSheetToolQuery, toolID, sheetID)
+	// Get current sheet to track changes
+	sheet, err := ms.Get(sheetID)
+	if err != nil {
+		return fmt.Errorf("failed to get sheet for tool assignment: %w", err)
+	}
+
+	// Add modification record before changing
+	mod := NewModified(user, MetalSheetMod{
+		TileHeight:  sheet.TileHeight,
+		Value:       sheet.Value,
+		MarkeHeight: sheet.MarkeHeight,
+		STF:         sheet.STF,
+		STFMax:      sheet.STFMax,
+		ToolID:      sheet.ToolID,
+		LinkedNotes: sheet.LinkedNotes,
+	})
+	// Prepend new mod to keep most recent first
+	sheet.Mods = append([]*Modified[MetalSheetMod]{mod}, sheet.Mods...)
+
+	// Update the tool assignment
+	sheet.ToolID = toolID
+
+	// Marshal mods for database update
+	modsBytes, err := json.Marshal(sheet.Mods)
+	if err != nil {
+		return NewDatabaseError("update", "metal_sheets",
+			"failed to marshal mods", err)
+	}
+
+	// Update both tool_id and mods in database
+	_, err = ms.db.Exec(
+		`UPDATE metal_sheets
+		SET tool_id = $1, mods = $2, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $3`,
+		toolID, modsBytes, sheetID,
+	)
 	if err != nil {
 		return NewDatabaseError("update", "metal_sheets",
 			fmt.Sprintf("failed to assign tool to metal sheet ID %d", sheetID), err)
@@ -445,4 +522,15 @@ func (ms *MetalSheets) scanMetalSheetFromRow(row *sql.Row) (*MetalSheet, error) 
 	}
 
 	return sheet, nil
+}
+
+// equalToolIDs compares two tool ID pointers for equality
+func equalToolIDs(a, b *int64) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
 }
