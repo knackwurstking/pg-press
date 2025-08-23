@@ -95,8 +95,20 @@ func TroubleReport() *Logger {
 	return NewComponentLogger("TroubleReport")
 }
 
+func TroubleReportsHelper() *Logger {
+	return NewComponentLogger("TroubleReportsHelper")
+}
+
 func Tools() *Logger {
 	return NewComponentLogger("Tools")
+}
+
+func ToolsHelper() *Logger {
+	return NewComponentLogger("ToolsHelper")
+}
+
+func ToolCyclesHelper() *Logger {
+	return NewComponentLogger("ToolCyclesHelper")
 }
 
 func Notes() *Logger {

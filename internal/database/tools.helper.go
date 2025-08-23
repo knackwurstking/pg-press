@@ -27,7 +27,7 @@ func NewToolsHelper(
 }
 
 func (th *ToolsHelper) GetWithNotes(id int64) (*ToolWithNotes, error) {
-	logger.Tools().Debug(
+	logger.ToolsHelper().Debug(
 		"Getting tools with notes, id: %d", id)
 
 	// Get the trouble report
@@ -49,7 +49,7 @@ func (th *ToolsHelper) GetWithNotes(id int64) (*ToolWithNotes, error) {
 }
 
 func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
-	logger.Tools().Debug("Listing tools with notes")
+	logger.ToolsHelper().Debug("Listing tools with notes")
 
 	// Get all trouble reports
 	tools, err := th.tools.List()
@@ -77,7 +77,7 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 }
 
 func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*ToolWithNotes, error) {
-	logger.Tools().Debug("Adding tool with notes")
+	logger.ToolsHelper().Debug("Adding tool with notes")
 
 	// Ensure tool has initial mod entry if it doesn't have one
 	if len(tool.Mods) == 0 {

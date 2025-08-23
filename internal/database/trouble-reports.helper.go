@@ -36,7 +36,7 @@ func NewTroubleReportsHelper(
 func (s *TroubleReportsHelper) GetWithAttachments(
 	id int64,
 ) (*TroubleReportWithAttachments, error) {
-	logger.TroubleReport().Debug(
+	logger.TroubleReportsHelper().Debug(
 		"Getting trouble report with attachments, id: %d", id)
 
 	// Get the trouble report
@@ -59,7 +59,7 @@ func (s *TroubleReportsHelper) GetWithAttachments(
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
 func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttachments, error) {
-	logger.TroubleReport().Debug("Listing trouble reports with attachments")
+	logger.TroubleReportsHelper().Debug("Listing trouble reports with attachments")
 
 	// Get all trouble reports
 	reports, err := s.troubleReports.List()
@@ -91,7 +91,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 	troubleReport *TroubleReport,
 	attachments []*Attachment,
 ) error {
-	logger.TroubleReport().Info("Adding trouble report with %d attachments", len(attachments))
+	logger.TroubleReportsHelper().Info("Adding trouble report with %d attachments", len(attachments))
 
 	if troubleReport == nil {
 		return NewValidationError("report", "trouble report cannot be nil", nil)
@@ -142,7 +142,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 	troubleReport *TroubleReport,
 	newAttachments []*Attachment,
 ) error {
-	logger.TroubleReport().Info(
+	logger.TroubleReportsHelper().Info(
 		"Updating trouble report %d with %d new attachments", id, len(newAttachments))
 
 	if troubleReport == nil {
@@ -191,7 +191,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 
 // RemoveWithAttachments removes a trouble report and its attachments.
 func (s *TroubleReportsHelper) RemoveWithAttachments(id int64) (*TroubleReport, error) {
-	logger.TroubleReport().Info("Removing trouble report %d with attachments", id)
+	logger.TroubleReportsHelper().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments
 	tr, err := s.troubleReports.Get(id)
@@ -207,7 +207,7 @@ func (s *TroubleReportsHelper) RemoveWithAttachments(id int64) (*TroubleReport, 
 	// Remove associated attachments
 	for _, attachmentID := range tr.LinkedAttachments {
 		if err := s.attachments.Remove(attachmentID); err != nil {
-			logger.TroubleReport().Warn("Failed to remove attachment %d: %v", attachmentID, err)
+			logger.TroubleReportsHelper().Warn("Failed to remove attachment %d: %v", attachmentID, err)
 		}
 	}
 
@@ -216,6 +216,8 @@ func (s *TroubleReportsHelper) RemoveWithAttachments(id int64) (*TroubleReport, 
 
 // LoadAttachments loads attachments for a trouble report.
 func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment, error) {
+	logger.TroubleReportsHelper().Debug("Loading attachments for trouble report")
+
 	if tr == nil {
 		return nil, NewValidationError("report", "trouble report cannot be nil", nil)
 	}
@@ -225,5 +227,6 @@ func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment
 
 // GetAttachment retrieves a specific attachment by ID.
 func (s *TroubleReportsHelper) GetAttachment(id int64) (*Attachment, error) {
+	logger.TroubleReportsHelper().Debug("Getting attachment with ID %d", id)
 	return s.attachments.Get(id)
 }
