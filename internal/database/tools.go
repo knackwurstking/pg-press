@@ -126,7 +126,7 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 
 // GetByPress returns all active tools for a specific press (0-5)
 func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
-	if pressNumber != nil && (*pressNumber < MinPressNumber || *pressNumber > MaxPressNumber) {
+	if pressNumber != nil && !(*pressNumber).IsValid() {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 

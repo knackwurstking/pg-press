@@ -89,6 +89,20 @@ const (
 		WHERE press_number = ? AND to_date IS NULL
 	`
 
+	selectPressCyclesForPressQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE press_number = ?
+		ORDER BY from_date DESC
+	`
+
+	selectActivePressCyclesForPressQuery = `
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		FROM press_cycles
+		WHERE press_number = ? AND to_date IS NULL
+		ORDER BY from_date DESC
+	`
+
 	selectPressUtilizationQuery = `
 		SELECT press_number, tool_id
 		FROM press_cycles
@@ -400,6 +414,102 @@ func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenera
 	}
 
 	return totalCycles, nil
+}
+
+// GetPressCycles gets all press cycles (current and historical) for a specific press
+func (p *PressCycles) GetPressCycles(pressNumber PressNumber) ([]*PressCycle, error) {
+	// Validate press number
+	if !pressNumber.IsValid() {
+		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
+	}
+
+	rows, err := p.db.Query(selectPressCyclesForPressQuery, pressNumber)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get press cycles for press %d: %w", pressNumber, err)
+	}
+	defer rows.Close()
+
+	var cycles []*PressCycle
+	for rows.Next() {
+		var cycle PressCycle
+		var toDate sql.NullTime
+		var modsData []byte
+
+		err := rows.Scan(
+			&cycle.ID,
+			&cycle.PressNumber,
+			&cycle.ToolID,
+			&cycle.FromDate,
+			&toDate,
+			&cycle.TotalCycles,
+			&cycle.PartialCycles,
+			&modsData,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
+		}
+
+		if toDate.Valid {
+			cycle.ToDate = &toDate.Time
+		}
+
+		// Unmarshal mods
+		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+			cycle.Mods = []*Modified[PressCycleMod]{}
+		}
+
+		cycles = append(cycles, &cycle)
+	}
+
+	return cycles, nil
+}
+
+// GetActivePressCycles gets only the currently active press cycles for a specific press
+func (p *PressCycles) GetActivePressCycles(pressNumber PressNumber) ([]*PressCycle, error) {
+	// Validate press number
+	if !pressNumber.IsValid() {
+		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
+	}
+
+	rows, err := p.db.Query(selectActivePressCyclesForPressQuery, pressNumber)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get active press cycles for press %d: %w", pressNumber, err)
+	}
+	defer rows.Close()
+
+	var cycles []*PressCycle
+	for rows.Next() {
+		var cycle PressCycle
+		var toDate sql.NullTime
+		var modsData []byte
+
+		err := rows.Scan(
+			&cycle.ID,
+			&cycle.PressNumber,
+			&cycle.ToolID,
+			&cycle.FromDate,
+			&toDate,
+			&cycle.TotalCycles,
+			&cycle.PartialCycles,
+			&modsData,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
+		}
+
+		if toDate.Valid {
+			cycle.ToDate = &toDate.Time
+		}
+
+		// Unmarshal mods
+		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
+			cycle.Mods = []*Modified[PressCycleMod]{}
+		}
+
+		cycles = append(cycles, &cycle)
+	}
+
+	return cycles, nil
 }
 
 // GetCurrentToolsOnPress gets all tools currently active on a specific press

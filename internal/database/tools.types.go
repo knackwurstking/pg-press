@@ -74,7 +74,7 @@ func (t *Tool) SetPress(pressNumber *PressNumber) error {
 		return nil
 	}
 
-	if *pressNumber < MinPressNumber || *pressNumber > MaxPressNumber {
+	if !(*pressNumber).IsValid() {
 		return NewValidationError("press", "invalid press number", pressNumber)
 	}
 

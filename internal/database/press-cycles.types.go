@@ -9,6 +9,11 @@ const (
 
 type PressNumber int8
 
+// IsValid checks if the press number is within the valid range (0-5)
+func (pn PressNumber) IsValid() bool {
+	return pn >= MinPressNumber && pn <= MaxPressNumber
+}
+
 type PressCycle struct {
 	ID            int64                      `json:"id"`
 	PressNumber   PressNumber                `json:"press_number"`
