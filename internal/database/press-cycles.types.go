@@ -25,6 +25,18 @@ type PressCycle struct {
 	Mods          []*Modified[PressCycleMod] `json:"mods"`
 }
 
+// NewPressCycle creates a new PressCycle instance
+func NewPressCycle(pressNumber PressNumber, toolID int64, fromDate time.Time) *PressCycle {
+	return &PressCycle{
+		PressNumber:   pressNumber,
+		ToolID:        toolID,
+		FromDate:      fromDate,
+		TotalCycles:   0,
+		PartialCycles: 0,
+		Mods:          []*Modified[PressCycleMod]{},
+	}
+}
+
 // PressCycleMod represents the modifiable fields of a PressCycle for history tracking
 type PressCycleMod struct {
 	PressNumber   PressNumber `json:"press_number"`

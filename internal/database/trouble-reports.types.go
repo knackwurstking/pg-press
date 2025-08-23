@@ -29,22 +29,12 @@ type TroubleReport struct {
 }
 
 // NewTroubleReport creates a new trouble report with the provided details.
-func NewTroubleReport(title, content string, user *User) *TroubleReport {
-	if user == nil {
-		panic("user cannot be nil")
-	}
-
-	mod := NewModified(user, TroubleReportMod{
-		Title:             title,
-		Content:           content,
-		LinkedAttachments: []int64{}, // Will be set by the service
-	})
-
+func NewTroubleReport(title, content string) *TroubleReport {
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              Mods[TroubleReportMod]{mod},
+		Mods:              Mods[TroubleReportMod]{},
 	}
 }
 
@@ -96,30 +86,6 @@ func (tr *TroubleReport) validateAttachments() error {
 			return NewValidationError("linked_attachments", "attachment ID must be positive", i)
 		}
 	}
-	return nil
-}
-
-func (tr *TroubleReport) Update(user *User, title, content string, attachments ...int64) error {
-	if err := tr.validateTitle(title); err != nil {
-		return err
-	}
-	if err := tr.validateContent(content); err != nil {
-		return err
-	}
-	if err := tr.validateAttachments(); err != nil {
-		return err
-	}
-
-	tr.Mods = append(tr.Mods, NewModified(user, TroubleReportMod{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}))
-
-	tr.Title = title
-	tr.Content = content
-	tr.LinkedAttachments = attachments
-
 	return nil
 }
 

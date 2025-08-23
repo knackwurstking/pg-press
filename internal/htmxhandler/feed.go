@@ -41,7 +41,7 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	}
 
 	if len(feeds) > 0 {
-		user.UpdateLastFeed(feeds[0].ID)
+		user.LastFeed = feeds[0].ID
 		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())

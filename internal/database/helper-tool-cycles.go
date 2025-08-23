@@ -259,7 +259,7 @@ func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, performed
 	}
 
 	// Save regeneration event to tracking table
-	_, err = h.regenerations.Create(toolID, reason, performedBy, "")
+	_, err = h.regenerations.Create(toolID, reason)
 	if err != nil {
 		return err
 	}

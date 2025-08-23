@@ -81,16 +81,15 @@ func (h *Tools) handleEdit(c echo.Context, props *components.ToolEditDialogProps
 }
 
 func (h *Tools) handleEditPOST(c echo.Context) error {
-	tool, err := h.getToolFromForm(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to get tool from form: "+err.Error())
-	}
-	logger.Tools().Debug("Received tool data: %#v", tool)
-
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
 		return err
+	}
+
+	tool, err := h.getToolFromForm(c, user)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get tool from form: "+err.Error())
 	}
 
 	if _, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
@@ -105,7 +104,12 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
-	tool, err := h.getToolFromForm(c)
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	tool, err := h.getToolFromForm(c, user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool from form: "+err.Error())
@@ -125,12 +129,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	})
 }
 
-func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return nil, err
-	}
-
+func (h *Tools) getToolFromForm(c echo.Context, user *database.User) (*database.Tool, error) {
 	var position database.Position
 	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
 	case database.PositionTop:
@@ -141,7 +140,7 @@ func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
 		return nil, errors.New("invalid position")
 	}
 
-	tool := database.NewTool(position, user)
+	tool := database.NewTool(position)
 
 	// Parse width and height
 	widthStr := c.FormValue("width")
@@ -173,6 +172,8 @@ func (h *Tools) getToolFromForm(c echo.Context) (*database.Tool, error) {
 	if tool.Code == "" {
 		return nil, errors.New("code is required")
 	}
+
+	tool.Mods.Add(user, database.ToolMod{})
 
 	return tool, nil
 }

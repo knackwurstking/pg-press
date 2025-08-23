@@ -87,10 +87,14 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
 
-		err := h.DB.TroubleReportsHelper.AddWithAttachments(
-			database.NewTroubleReport(title, content, user),
-			attachments,
-		)
+		tr := database.NewTroubleReport(title, content)
+		tr.Mods.Add(user, database.TroubleReportMod{
+			Title:             tr.Title,
+			Content:           tr.Content,
+			LinkedAttachments: tr.LinkedAttachments,
+		})
+
+		err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments)
 		if err != nil {
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"failed to add trouble report: "+err.Error())
@@ -162,7 +166,14 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	tr.Update(user, title, content, existingAttachmentIDs...)
+	tr.Mods.Add(user, database.TroubleReportMod{
+		Title:             title,
+		Content:           content,
+		LinkedAttachments: existingAttachmentIDs,
+	})
+	tr.Title = title
+	tr.Content = content
+	tr.LinkedAttachments = existingAttachmentIDs
 
 	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),

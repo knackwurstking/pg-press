@@ -94,49 +94,6 @@ func (u *User) IsValidAPIKey(apiKey string) bool {
 	return u.ApiKey == apiKey
 }
 
-// UpdateUserName updates the user's display name
-func (u *User) UpdateUserName(newUserName string) error {
-	newUserName = strings.TrimSpace(newUserName)
-
-	if newUserName == "" {
-		return NewValidationError("user_name", "cannot be empty", newUserName)
-	}
-	if len(newUserName) < MinUserNameLength {
-		return NewValidationError("user_name", "too short", len(newUserName))
-	}
-	if len(newUserName) > MaxUserNameLength {
-		return NewValidationError("user_name", "too long", len(newUserName))
-	}
-
-	u.UserName = newUserName
-	return nil
-}
-
-// UpdateAPIKey updates the user's API key
-func (u *User) UpdateAPIKey(newAPIKey string) error {
-	newAPIKey = strings.TrimSpace(newAPIKey)
-
-	if newAPIKey == "" {
-		return NewValidationError("api_key", "cannot be empty", newAPIKey)
-	}
-	if len(newAPIKey) < MinAPIKeyLength {
-		return NewValidationError("api_key", "too short for security", len(newAPIKey))
-	}
-
-	u.ApiKey = newAPIKey
-	return nil
-}
-
-// UpdateLastFeed updates the last viewed feed ID
-func (u *User) UpdateLastFeed(feedID int64) error {
-	if feedID < 0 {
-		return NewValidationError("feed_id", "cannot be negative", feedID)
-	}
-
-	u.LastFeed = feedID
-	return nil
-}
-
 // GetDisplayInfo returns safe user information for display (without API key)
 func (u *User) GetDisplayInfo() map[string]any {
 	return map[string]any{

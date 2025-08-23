@@ -15,8 +15,6 @@ const (
 			regenerated_at DATETIME NOT NULL,
 			cycles_at_regeneration INTEGER NOT NULL DEFAULT 0,
 			reason TEXT,
-			performed_by TEXT,
-			notes TEXT,
 			mods BLOB,
 			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE
 		);
@@ -25,13 +23,13 @@ const (
 	`
 
 	insertToolRegenerationQuery = `
-		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
-		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason, mods)
+		VALUES (?, ?, ?, ?, ?)
+		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 	`
 
 	selectLastRegenerationQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -39,7 +37,7 @@ const (
 	`
 
 	selectRegenerationHistoryQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -50,14 +48,14 @@ const (
 	`
 
 	selectRegenerationsBetweenQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 		FROM tool_regenerations
 		WHERE tool_id = ? AND regenerated_at BETWEEN ? AND ?
 		ORDER BY regenerated_at DESC
 	`
 
 	selectAllRegenerationsQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 		FROM tool_regenerations
 		ORDER BY regenerated_at DESC
 		LIMIT ? OFFSET ?
@@ -80,7 +78,7 @@ const (
 
 	updateToolRegenerationQuery = `
 		UPDATE tool_regenerations
-		SET cycles_at_regeneration = ?, reason = ?, performed_by = ?, notes = ?, mods = ?
+		SET cycles_at_regeneration = ?, reason = ?, mods = ?
 		WHERE id = ?
 	`
 )
@@ -110,7 +108,7 @@ func (t *ToolRegenerations) init() {
 }
 
 // Create records a new tool regeneration event
-func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes string) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) Create(toolID int64, reason string) (*ToolRegeneration, error) {
 	// Get current total cycles for the tool before regeneration
 	totalCycles, err := t.pressCycles.GetTotalCyclesSinceRegeneration(toolID, nil)
 	if err != nil {
@@ -128,8 +126,6 @@ func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes stri
 		time.Now(),
 		totalCycles,
 		reason,
-		performedBy,
-		notes,
 		modsJSON,
 	).Scan(
 		&regen.ID,
@@ -137,8 +133,6 @@ func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes stri
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
-		&regen.PerformedBy,
-		&regen.Notes,
 		&modsData,
 	)
 
@@ -157,7 +151,7 @@ func (t *ToolRegenerations) Create(toolID int64, reason, performedBy, notes stri
 			FeedTypeToolUpdate,
 			&FeedToolUpdate{
 				ID:         toolID,
-				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s, Durchgeführt von: %s)", toolID, reason, performedBy),
+				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s)", toolID, reason),
 				ModifiedBy: nil, // System update
 			},
 		))
@@ -175,16 +169,12 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
 	}
 
 	if existingRegen.CyclesAtRegeneration != regen.CyclesAtRegeneration ||
-		existingRegen.Reason != regen.Reason ||
-		existingRegen.PerformedBy != regen.PerformedBy ||
-		existingRegen.Notes != regen.Notes {
+		existingRegen.Reason != regen.Reason {
 		mod := NewModified(nil, ToolRegenerationMod{
 			ToolID:               existingRegen.ToolID,
 			RegeneratedAt:        existingRegen.RegeneratedAt,
 			CyclesAtRegeneration: existingRegen.CyclesAtRegeneration,
 			Reason:               existingRegen.Reason,
-			PerformedBy:          existingRegen.PerformedBy,
-			Notes:                existingRegen.Notes,
 		})
 		// Prepend new mod to keep most recent first
 		regen.Mods = append([]*Modified[ToolRegenerationMod]{mod}, regen.Mods...)
@@ -199,8 +189,6 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
 	_, err = t.db.Exec(updateToolRegenerationQuery,
 		regen.CyclesAtRegeneration,
 		regen.Reason,
-		regen.PerformedBy,
-		regen.Notes,
 		modsJSON,
 		regen.ID,
 	)
@@ -214,7 +202,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
 // getByID is an internal helper to get a regeneration by ID
 func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 	query := `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by, notes, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
 		FROM tool_regenerations
 		WHERE id = ?
 	`
@@ -228,8 +216,6 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
-		&regen.PerformedBy,
-		&regen.Notes,
 		&modsData,
 	)
 
@@ -256,8 +242,6 @@ func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
-		&regen.PerformedBy,
-		&regen.Notes,
 		&modsData,
 	)
 
@@ -295,8 +279,6 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 			&regen.RegeneratedAt,
 			&regen.CyclesAtRegeneration,
 			&regen.Reason,
-			&regen.PerformedBy,
-			&regen.Notes,
 			&modsData,
 		)
 		if err != nil {
@@ -349,8 +331,6 @@ func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.
 			&regen.RegeneratedAt,
 			&regen.CyclesAtRegeneration,
 			&regen.Reason,
-			&regen.PerformedBy,
-			&regen.Notes,
 			&modsData,
 		)
 		if err != nil {
@@ -387,8 +367,6 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 			&regen.RegeneratedAt,
 			&regen.CyclesAtRegeneration,
 			&regen.Reason,
-			&regen.PerformedBy,
-			&regen.Notes,
 			&modsData,
 		)
 		if err != nil {

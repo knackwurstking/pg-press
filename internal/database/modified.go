@@ -7,6 +7,10 @@ import (
 
 type Mods[T any] []*Modified[T]
 
+func (m *Mods[T]) Add(user *User, data T) {
+ *m = append(*m, NewModified(user, data))
+}
+
 func (m *Mods[T]) Current() *Modified[T] {
 	if len(*m) == 0 {
 		return nil
