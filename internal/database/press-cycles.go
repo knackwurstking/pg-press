@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 const (
@@ -171,6 +173,8 @@ func (p *PressCycles) init() {
 
 // StartToolUsage records when a tool starts being used on a press
 func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*PressCycle, error) {
+	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
+
 	// Validate press number
 	if pressNumber < MinPressNumber || pressNumber > MaxPressNumber {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
@@ -231,6 +235,8 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*Pr
 
 // EndToolUsage ends the current usage of a tool on any press
 func (p *PressCycles) EndToolUsage(toolID int64) error {
+	logger.DBPressCycles().Info("Ending tool usage: tool_id=%d", toolID)
+
 	_, err := p.db.Exec(endToolUsageQuery, time.Now(), toolID)
 	if err != nil {
 		return fmt.Errorf("failed to end tool usage: %w", err)
@@ -241,6 +247,8 @@ func (p *PressCycles) EndToolUsage(toolID int64) error {
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press
 func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
+	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d, partial=%d", toolID, totalCycles, partialCycles)
+
 	// First get the current cycle to preserve and update mods
 	current, err := p.GetCurrentToolUsage(toolID)
 	if err != nil {
@@ -288,6 +296,8 @@ func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int6
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
 func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
+
 	var cycle PressCycle
 	var toDate sql.NullTime
 	var modsData []byte
@@ -324,6 +334,8 @@ func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 
 // GetToolHistory gets the press usage history for a tool
 func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting tool history: tool_id=%d", toolID)
+
 	rows, err := p.db.Query(selectToolHistoryQuery, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool history: %w", err)
@@ -367,6 +379,8 @@ func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
 func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
+
 	rows, err := p.db.Query(selectToolHistoryQuery, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycles for tool: %w", err)
@@ -410,6 +424,8 @@ func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error)
 
 // GetToolHistorySinceRegeneration gets press cycles since the last tool regeneration
 func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting tool history since regeneration: tool_id=%d", toolID)
+
 	var query string
 	var args []any
 
@@ -465,6 +481,8 @@ func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenera
 
 // GetTotalCyclesSinceRegeneration calculates total cycles since last regeneration
 func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenerationDate *time.Time) (int64, error) {
+	logger.DBPressCycles().Debug("Getting total cycles since regeneration: tool_id=%d", toolID)
+
 	var query string
 	var args []any
 
@@ -487,6 +505,8 @@ func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenera
 
 // GetPressCycles gets all press cycles (current and historical) for a specific press
 func (p *PressCycles) GetPressCycles(pressNumber PressNumber) ([]*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d", pressNumber)
+
 	// Validate press number
 	if !pressNumber.IsValid() {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
@@ -535,6 +555,8 @@ func (p *PressCycles) GetPressCycles(pressNumber PressNumber) ([]*PressCycle, er
 
 // GetActivePressCycles gets only the currently active press cycles for a specific press
 func (p *PressCycles) GetActivePressCycles(pressNumber PressNumber) ([]*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting active press cycles: press_number=%d", pressNumber)
+
 	// Validate press number
 	if !pressNumber.IsValid() {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
@@ -583,6 +605,8 @@ func (p *PressCycles) GetActivePressCycles(pressNumber PressNumber) ([]*PressCyc
 
 // GetCurrentToolsOnPress gets all tools currently active on a specific press
 func (p *PressCycles) GetCurrentToolsOnPress(pressNumber PressNumber) ([]int64, error) {
+	logger.DBPressCycles().Debug("Getting current tools on press: press_number=%d", pressNumber)
+
 	// Validate press number
 	if pressNumber < MinPressNumber || pressNumber > MaxPressNumber {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
@@ -608,6 +632,8 @@ func (p *PressCycles) GetCurrentToolsOnPress(pressNumber PressNumber) ([]int64, 
 
 // GetPressUtilization gets current tool count for each press (0-5)
 func (p *PressCycles) GetPressUtilization() (map[PressNumber][]int64, error) {
+	logger.DBPressCycles().Debug("Getting press utilization for all presses")
+
 	utilization := make(map[PressNumber][]int64)
 
 	// Initialize all presses (0-5) with empty slices
@@ -636,6 +662,8 @@ func (p *PressCycles) GetPressUtilization() (map[PressNumber][]int64, error) {
 
 // MarkToolRegeneration marks when a tool has been regenerated (resets cycles)
 func (p *PressCycles) MarkToolRegeneration(toolID int64) error {
+	logger.DBPressCycles().Info("Marking tool regeneration: tool_id=%d", toolID)
+
 	// End any current usage
 	if err := p.EndToolUsage(toolID); err != nil {
 		return fmt.Errorf("failed to end tool usage for regeneration: %w", err)
@@ -662,6 +690,8 @@ func (p *PressCycles) GetPressCycleStats() (map[PressNumber]struct {
 	ActiveTools    int
 	TotalToolsUsed int
 }, error) {
+	logger.DBPressCycles().Debug("Getting press cycle statistics for all presses")
+
 	stats := make(map[PressNumber]struct {
 		TotalCycles    int64
 		ActiveTools    int

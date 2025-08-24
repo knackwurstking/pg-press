@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 const (
@@ -109,6 +111,8 @@ func (t *ToolRegenerations) init() {
 
 // Create records a new tool regeneration event
 func (t *ToolRegenerations) Create(toolID int64, reason string) (*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Info("Creating tool regeneration: tool_id=%d, reason=%s", toolID, reason)
+
 	// Get current total cycles for the tool before regeneration
 	totalCycles, err := t.pressCycles.GetTotalCyclesSinceRegeneration(toolID, nil)
 	if err != nil {
@@ -162,6 +166,8 @@ func (t *ToolRegenerations) Create(toolID int64, reason string) (*ToolRegenerati
 
 // Update updates an existing regeneration record (mainly for mods)
 func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
+	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
+
 	// Add modification record if values changed
 	existingRegen, err := t.getByID(regen.ID)
 	if err != nil {
@@ -233,6 +239,8 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 
 // GetLastRegeneration gets the most recent regeneration for a tool
 func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Debug("Getting last regeneration for tool: tool_id=%d", toolID)
+
 	var regen ToolRegeneration
 	var modsData []byte
 
@@ -262,6 +270,8 @@ func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration
 
 // GetRegenerationHistory gets all regenerations for a tool
 func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Debug("Getting regeneration history for tool: tool_id=%d", toolID)
+
 	rows, err := t.db.Query(selectRegenerationHistoryQuery, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get regeneration history: %w", err)
@@ -303,6 +313,8 @@ func (t *ToolRegenerations) GetByToolID(toolID int64) ([]*ToolRegeneration, erro
 
 // GetRegenerationCount gets the total number of regenerations for a tool
 func (t *ToolRegenerations) GetRegenerationCount(toolID int64) (int, error) {
+	logger.DBToolRegenerations().Debug("Getting regeneration count for tool: tool_id=%d", toolID)
+
 	var count int
 	err := t.db.QueryRow(selectRegenerationCountQuery, toolID).Scan(&count)
 	if err != nil {
@@ -314,6 +326,9 @@ func (t *ToolRegenerations) GetRegenerationCount(toolID int64) (int, error) {
 
 // GetRegenerationsBetween gets regenerations for a tool within a time period
 func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.Time) ([]*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Debug("Getting regenerations between dates for tool: tool_id=%d, from=%s, to=%s",
+		toolID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+
 	rows, err := t.db.Query(selectRegenerationsBetweenQuery, toolID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get regenerations between dates: %w", err)
@@ -350,6 +365,8 @@ func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.
 
 // GetAllRegenerations gets all regenerations across all tools
 func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Debug("Getting all regenerations: limit=%d, offset=%d", limit, offset)
+
 	rows, err := t.db.Query(selectAllRegenerationsQuery, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all regenerations: %w", err)
@@ -386,6 +403,8 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 
 // Delete removes a regeneration record (should be used carefully)
 func (t *ToolRegenerations) Delete(id int64) error {
+	logger.DBToolRegenerations().Info("Deleting regeneration record: id=%d", id)
+
 	_, err := t.db.Exec(deleteRegenerationQuery, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete regeneration record: %w", err)
@@ -400,6 +419,8 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 	RegCount    int
 	LastRegenAt *time.Time
 }, error) {
+	logger.DBToolRegenerations().Debug("Getting tools with most regenerations: limit=%d", limit)
+
 	rows, err := t.db.Query(selectToolsWithMostRegenerationsQuery, limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tools with most regenerations: %w", err)

@@ -136,6 +136,7 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 			"error iterating over rows", err)
 	}
 
+	logger.DBMetalSheets().Debug("Listed %d metal sheets", len(sheets))
 	return sheets, nil
 }
 
@@ -173,6 +174,7 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 
 	// Load notes if there are any linked
 	if len(sheet.LinkedNotes) > 0 && ms.notes != nil {
+		logger.DBMetalSheets().Debug("Loading %d notes for metal sheet %d", len(sheet.LinkedNotes), id)
 		notes, err := ms.notes.GetByIDs(sheet.LinkedNotes)
 		if err != nil {
 			logger.DBMetalSheets().Error("Failed to load notes for metal sheet %d: %v", id, err)
@@ -211,6 +213,7 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 			"error iterating over rows", err)
 	}
 
+	logger.DBMetalSheets().Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
 	return sheets, nil
 }
 
@@ -240,6 +243,7 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 			"error iterating over rows", err)
 	}
 
+	logger.DBMetalSheets().Debug("Found %d available metal sheets", len(sheets))
 	return sheets, nil
 }
 
@@ -290,6 +294,8 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 
 	// Set sheet ID for return
 	sheet.ID = id
+
+	logger.DBMetalSheets().Debug("Added metal sheet with ID %d", id)
 
 	// Trigger feed update
 	if ms.feeds != nil {
@@ -359,6 +365,8 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 			fmt.Sprintf("failed to update metal sheet with ID %d", sheet.ID), err)
 	}
 
+	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
+
 	// Trigger feed update
 	if ms.feeds != nil {
 		ms.feeds.Add(NewFeed(
@@ -419,6 +427,8 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) erro
 			fmt.Sprintf("failed to assign tool to metal sheet ID %d", sheetID), err)
 	}
 
+	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
+
 	// Trigger feed update
 	if ms.feeds != nil {
 		ms.feeds.Add(NewFeed(
@@ -444,6 +454,8 @@ func (ms *MetalSheets) Delete(id int64, user *User) error {
 			fmt.Sprintf("failed to delete metal sheet with ID %d", id), err)
 	}
 
+	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
+
 	// Trigger feed update
 	if ms.feeds != nil {
 		ms.feeds.Add(NewFeed(
@@ -460,6 +472,7 @@ func (ms *MetalSheets) Delete(id int64, user *User) error {
 
 // scanMetalSheetFromRows scans a metal sheet from database rows
 func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, error) {
+	logger.DBMetalSheets().Debug("Scanning metal sheet from rows")
 	sheet := &MetalSheet{}
 
 	var (
@@ -493,6 +506,7 @@ func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, erro
 
 // scanMetalSheetFromRow scans a metal sheet from a database row
 func (ms *MetalSheets) scanMetalSheetFromRow(row *sql.Row) (*MetalSheet, error) {
+	logger.DBMetalSheets().Debug("Scanning metal sheet from row")
 	sheet := &MetalSheet{}
 
 	var (

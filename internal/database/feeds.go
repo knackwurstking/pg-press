@@ -44,12 +44,13 @@ func NewFeeds(db *sql.DB) *Feeds {
 
 // SetNotifier sets the feed notifier for real-time updates
 func (f *Feeds) SetBroadcaster(notifier Broadcaster) {
+	logger.DBFeeds().Debug("Setting broadcaster for real-time updates")
 	f.broadcaster = notifier
 }
 
 // List retrieves all feeds ordered by ID in descending order
 func (f *Feeds) List() ([]*Feed, error) {
-	logger.Feed().Info("Listing all feeds")
+	logger.DBFeeds().Info("Listing all feeds")
 
 	rows, err := f.db.Query(selectAllFeedsQuery)
 	if err != nil {
@@ -62,7 +63,7 @@ func (f *Feeds) List() ([]*Feed, error) {
 
 // ListRange retrieves a specific range of feeds with pagination support
 func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
-	logger.Feed().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
+	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
 		return nil, NewValidationError("offset", "must be non-negative", offset)
@@ -85,36 +86,42 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 
 // Add creates a new feed entry in the database
 func (f *Feeds) Add(feed *Feed) error {
-	logger.Feed().Info("Adding feed: %+v", feed)
+	logger.DBFeeds().Info("Adding feed: %+v", feed)
 
 	if feed == nil {
+		logger.DBFeeds().Debug("Validation failed: feed is nil")
 		return NewValidationError("feed", "cannot be nil", nil)
 	}
 	if err := feed.Validate(); err != nil {
+		logger.DBFeeds().Debug("Feed validation failed: %v", err)
 		return err
 	}
 
 	data, err := json.Marshal(feed.Data)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to marshal feed data: %v", err)
 		return WrapError(err, "failed to marshal feed data")
 	}
 
 	_, err = f.db.Exec(insertFeedQuery, feed.Time, feed.DataType, data)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to insert feed: %v", err)
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
 
 	// Notify about new feed if notifier is set
 	if f.broadcaster != nil {
+		logger.DBFeeds().Debug("Broadcasting new feed notification")
 		f.broadcaster.Broadcast()
 	}
 
+	logger.DBFeeds().Debug("Successfully added feed with data type: %s", feed.DataType)
 	return nil
 }
 
 // Count returns the total number of feeds in the database
 func (f *Feeds) Count() (int, error) {
-	logger.Feed().Debug("Counting feeds")
+	logger.DBFeeds().Debug("Counting feeds")
 
 	var count int
 	err := f.db.QueryRow(countFeedsQuery).Scan(&count)
@@ -126,27 +133,32 @@ func (f *Feeds) Count() (int, error) {
 
 // DeleteBefore removes all feeds created before the specified timestamp
 func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
-	logger.Feed().Info("Deleting feeds before timestamp: %d", timestamp)
+	logger.DBFeeds().Info("Deleting feeds before timestamp: %d", timestamp)
 
 	if timestamp <= 0 {
+		logger.DBFeeds().Debug("Validation failed: timestamp must be positive, got %d", timestamp)
 		return 0, NewValidationError("timestamp", "must be positive", timestamp)
 	}
 
 	result, err := f.db.Exec(deleteFeedsByTimeQuery, timestamp)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to delete feeds by timestamp: %v", err)
 		return 0, NewDatabaseError("delete", "feeds", "failed to delete feeds by timestamp", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		logger.DBFeeds().Error("Failed to get rows affected: %v", err)
 		return 0, NewDatabaseError("delete", "feeds", "failed to get rows affected", err)
 	}
+
+	logger.DBFeeds().Debug("Deleted %d feeds before timestamp %d", rowsAffected, timestamp)
 	return rowsAffected, nil
 }
 
 // Get retrieves a specific feed by ID
 func (f *Feeds) Get(id int) (*Feed, error) {
-	logger.Feed().Debug("Getting feed by ID: %d", id)
+	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
 		return nil, NewValidationError("id", "must be positive", id)
@@ -165,25 +177,31 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 
 // Delete removes a specific feed by ID
 func (f *Feeds) Delete(id int) error {
-	logger.Feed().Info("Deleting feed by ID: %d", id)
+	logger.DBFeeds().Info("Deleting feed by ID: %d", id)
 
 	if id <= 0 {
+		logger.DBFeeds().Debug("Validation failed: id must be positive, got %d", id)
 		return NewValidationError("id", "must be positive", id)
 	}
 
 	result, err := f.db.Exec(deleteFeedByIDQuery, id)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to delete feed with ID %d: %v", id, err)
 		return NewDatabaseError("delete", "feeds", "failed to delete feed", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		logger.DBFeeds().Error("Failed to get rows affected: %v", err)
 		return NewDatabaseError("delete", "feeds", "failed to get rows affected", err)
 	}
 
 	if rowsAffected == 0 {
+		logger.DBFeeds().Debug("No feed found with ID %d", id)
 		return ErrNotFound
 	}
+
+	logger.DBFeeds().Debug("Successfully deleted feed with ID %d", id)
 	return nil
 }
 
@@ -193,14 +211,18 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 	for rows.Next() {
 		feed, err := f.scanFeed(rows)
 		if err != nil {
+			logger.DBFeeds().Error("Failed to scan feed row: %v", err)
 			return nil, NewDatabaseError("scan", "feeds", "failed to scan feed row", err)
 		}
 		feeds = append(feeds, feed)
 	}
 
 	if err := rows.Err(); err != nil {
+		logger.DBFeeds().Error("Error iterating over feed rows: %v", err)
 		return nil, NewDatabaseError("scan", "feeds", "error iterating over rows", err)
 	}
+
+	logger.DBFeeds().Debug("Scanned %d feeds from query result", len(feeds))
 	return feeds, nil
 }
 
@@ -225,8 +247,11 @@ func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
 
 	if len(data) > 0 {
 		if err := json.Unmarshal(data, &feed.Data); err != nil {
+			logger.DBFeeds().Error("Failed to unmarshal feed data for ID %d: %v", feed.ID, err)
 			return nil, WrapError(err, "failed to unmarshal feed data")
 		}
 	}
+
+	logger.DBFeeds().Debug("Successfully scanned feed ID %d with type %s", feed.ID, feed.DataType)
 	return feed, nil
 }

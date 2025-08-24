@@ -92,6 +92,14 @@ func DBToolsHelper() *Logger {
 	return NewComponentLogger("DB ToolsHelper")
 }
 
+func DBPressCycles() *Logger {
+	return NewComponentLogger("DB PressCycles")
+}
+
+func DBToolRegenerations() *Logger {
+	return NewComponentLogger("DB ToolRegenerations")
+}
+
 func HandlerAuth() *Logger {
 	return NewComponentLogger("Handler Auth")
 }

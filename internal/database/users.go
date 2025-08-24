@@ -88,6 +88,8 @@ func (u *Users) List() ([]*User, error) {
 
 // Get retrieves a specific user by Telegram ID.
 func (u *Users) Get(telegramID int64) (*User, error) {
+	logger.DBUsers().Debug("Getting user by Telegram ID: %d", telegramID)
+
 	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
 
 	user, err := u.scanUserRow(row)
@@ -207,19 +209,24 @@ func (u *Users) Remove(telegramID int64) error {
 
 // Update modifies an existing user and generates activity feed entries for changes.
 func (u *Users) Update(telegramID int64, user *User) error {
+	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
+
 	if user == nil {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
 
 	if user.UserName == "" {
+		logger.DBUsers().Debug("Validation failed: empty username")
 		return NewValidationError("user_name", "username cannot be empty", user.UserName)
 	}
 
 	if user.ApiKey == "" {
+		logger.DBUsers().Debug("Validation failed: empty API key")
 		return NewValidationError("api_key", "API key cannot be empty", user.ApiKey)
 	}
 
 	if len(user.ApiKey) < MinAPIKeyLength {
+		logger.DBUsers().Debug("Validation failed: API key too short (length=%d, required=%d)", len(user.ApiKey), MinAPIKeyLength)
 		return NewValidationError("api_key",
 			fmt.Sprintf("API key must be at least %d characters", MinAPIKeyLength),
 			len(user.ApiKey))
@@ -241,6 +248,7 @@ func (u *Users) Update(telegramID int64, user *User) error {
 
 	// Create feed entry if username changed
 	if prevUser.UserName != user.UserName {
+		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.UserName, user.UserName)
 		feed := NewFeed(
 			FeedTypeUserNameChange,
 			&FeedUserNameChange{
