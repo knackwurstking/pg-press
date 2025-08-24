@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -17,7 +16,6 @@ const (
 			regenerated_at DATETIME NOT NULL,
 			cycles_at_regeneration INTEGER NOT NULL DEFAULT 0,
 			reason TEXT,
-			mods BLOB,
 			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE
 		);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
@@ -25,13 +23,13 @@ const (
 	`
 
 	insertToolRegenerationQuery = `
-		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason, mods)
-		VALUES (?, ?, ?, ?, ?)
-		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason)
+		VALUES (?, ?, ?, ?)
+		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason
 	`
 
 	selectLastRegenerationQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -39,7 +37,7 @@ const (
 	`
 
 	selectRegenerationHistoryQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -50,14 +48,14 @@ const (
 	`
 
 	selectRegenerationsBetweenQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
 		FROM tool_regenerations
 		WHERE tool_id = ? AND regenerated_at BETWEEN ? AND ?
 		ORDER BY regenerated_at DESC
 	`
 
 	selectAllRegenerationsQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
 		FROM tool_regenerations
 		ORDER BY regenerated_at DESC
 		LIMIT ? OFFSET ?
@@ -80,7 +78,7 @@ const (
 
 	updateToolRegenerationQuery = `
 		UPDATE tool_regenerations
-		SET cycles_at_regeneration = ?, reason = ?, mods = ?
+		SET cycles_at_regeneration = ?, reason = ?
 		WHERE id = ?
 	`
 )
@@ -127,21 +125,12 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 	}
 
 	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason)
-	t.updateMods(user, regen)
-
-	// Initialize empty mods array
-	modsJSON, err := json.Marshal(regen.Mods)
-	if err != nil {
-		return nil, NewDatabaseError("insert", "tool_regenerations",
-			"failed to marshal mods", err)
-	}
 
 	regen, err = t.scanFromRow(t.db.QueryRow(insertToolRegenerationQuery,
 		regen.ToolID,
 		regen.RegeneratedAt,
 		regen.CyclesAtRegeneration,
 		regen.Reason,
-		modsJSON,
 	))
 	if err != nil {
 		return nil, NewDatabaseError("insert", "tool_regenerations",
@@ -163,22 +152,13 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 	return regen, nil
 }
 
-// Update updates an existing regeneration record (mainly for mods)
+// Update updates an existing regeneration record
 func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
-	t.updateMods(user, regen)
-
-	// Marshal mods
-	modsJSON, err := json.Marshal(regen.Mods)
-	if err != nil {
-		return fmt.Errorf("failed to marshal mods: %w", err)
-	}
-
-	_, err = t.db.Exec(updateToolRegenerationQuery,
+	_, err := t.db.Exec(updateToolRegenerationQuery,
 		regen.CyclesAtRegeneration,
 		regen.Reason,
-		modsJSON,
 		regen.ID,
 	)
 	if err != nil {
@@ -191,7 +171,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 // getByID is an internal helper to get a regeneration by ID
 func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 	query := `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, mods
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
 		FROM tool_regenerations
 		WHERE id = ?
 	`
@@ -361,7 +341,6 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 
 func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
 	var regen ToolRegeneration
-	var modsData []byte
 
 	err := row.Scan(
 		&regen.ID,
@@ -369,14 +348,9 @@ func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error)
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
-		&modsData,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
-	}
-
-	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal mods data: %w", err)
 	}
 
 	return &regen, nil
@@ -384,7 +358,6 @@ func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error)
 
 func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, error) {
 	var regen ToolRegeneration
-	var modsData []byte
 
 	err := rows.Scan(
 		&regen.ID,
@@ -392,28 +365,10 @@ func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, err
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
-		&modsData,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan from rows: %w", err)
 	}
 
-	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal mods data: %w", err)
-	}
-
 	return &regen, nil
-}
-
-func (t *ToolRegenerations) updateMods(user *User, regen *ToolRegeneration) {
-	if user == nil {
-		return
-	}
-
-	regen.Mods.Add(user, ToolRegenerationMod{
-		ToolID:               regen.ToolID,
-		RegeneratedAt:        regen.RegeneratedAt,
-		CyclesAtRegeneration: regen.CyclesAtRegeneration,
-		Reason:               regen.Reason,
-	})
 }
