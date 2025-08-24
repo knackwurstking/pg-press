@@ -57,7 +57,7 @@ func NewNotes(db *sql.DB) *Notes {
 }
 
 func (n *Notes) List() ([]*Note, error) {
-	logger.Notes().Info("Listing notes")
+	logger.DBNotes().Info("Listing notes")
 
 	rows, err := n.db.Query(selectAllNotesQuery)
 	if err != nil {
@@ -85,7 +85,7 @@ func (n *Notes) List() ([]*Note, error) {
 }
 
 func (n *Notes) Get(id int64) (*Note, error) {
-	logger.Notes().Info("Getting note, id: %d", id)
+	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	row := n.db.QueryRow(selectNoteByIDQuery, id)
 
@@ -106,7 +106,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 		return []*Note{}, nil
 	}
 
-	logger.Notes().Debug("Getting notes by IDs: %v", ids)
+	logger.DBNotes().Debug("Getting notes by IDs: %v", ids)
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -154,7 +154,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 }
 
 func (n *Notes) Add(note *Note) (int64, error) {
-	logger.Notes().Info("Adding note: level=%d", note.Level)
+	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	result, err := n.db.Exec(insertNoteQuery, note.Level, note.Content)
 	if err != nil {

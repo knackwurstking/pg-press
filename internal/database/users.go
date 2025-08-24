@@ -60,7 +60,7 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 
 // List retrieves all users from the database.
 func (u *Users) List() ([]*User, error) {
-	logger.User().Info("Listing all users")
+	logger.DBUsers().Info("Listing all users")
 
 	rows, err := u.db.Query(selectAllUsersQuery)
 	if err != nil {
@@ -104,7 +104,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 
 // GetUserFromApiKey retrieves a user by their API key.
 func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
-	logger.User().Debug("Getting user by API key")
+	logger.DBUsers().Debug("Getting user by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -130,7 +130,7 @@ func (u *Users) Add(user *User) error {
 		return NewValidationError("user", "user cannot be nil", nil)
 	}
 
-	logger.User().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
+	logger.DBUsers().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
 
 	if err := user.Validate(); err != nil {
 		return err
@@ -170,7 +170,7 @@ func (u *Users) Add(user *User) error {
 
 // Remove deletes a user by Telegram ID and generates an activity feed entry.
 func (u *Users) Remove(telegramID int64) error {
-	logger.User().Info("Removing user: %d", telegramID)
+	logger.DBUsers().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
 	user, _ := u.Get(telegramID)

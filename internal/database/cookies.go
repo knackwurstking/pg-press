@@ -50,7 +50,7 @@ func NewCookies(db *sql.DB) *Cookies {
 
 // List retrieves all cookies ordered by last login time (most recent first).
 func (c *Cookies) List() ([]*Cookie, error) {
-	logger.Cookie().Info("Listing all cookies")
+	logger.DBCookies().Info("Listing all cookies")
 
 	rows, err := c.db.Query(selectAllCookiesQuery)
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *Cookies) List() ([]*Cookie, error) {
 
 // ListApiKey retrieves all cookies associated with a specific API key.
 func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
-	logger.Cookie().Info("Listing cookies by API key")
+	logger.DBCookies().Info("Listing cookies by API key")
 
 	if apiKey == "" {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -106,7 +106,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 
 // Get retrieves a specific cookie by its value.
 func (c *Cookies) Get(value string) (*Cookie, error) {
-	logger.Cookie().Debug("Getting cookie by value")
+	logger.DBCookies().Debug("Getting cookie by value")
 
 	if value == "" {
 		return nil, NewValidationError("value", "cookie value cannot be empty", value)
@@ -126,7 +126,7 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 
 // Add creates a new cookie session in the database.
 func (c *Cookies) Add(cookie *Cookie) error {
-	logger.Cookie().Info("Adding cookie: %+v", cookie)
+	logger.DBCookies().Info("Adding cookie: %+v", cookie)
 
 	if cookie == nil {
 		return NewValidationError("cookie", "cookie cannot be nil", nil)
@@ -162,7 +162,7 @@ func (c *Cookies) Add(cookie *Cookie) error {
 
 // Update modifies an existing cookie session.
 func (c *Cookies) Update(value string, cookie *Cookie) error {
-	logger.Cookie().Info("Updating cookie: %+v, value: %s", cookie, value)
+	logger.DBCookies().Info("Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
 		return NewValidationError("value", "current cookie value cannot be empty", value)
@@ -200,7 +200,7 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 
 // Remove deletes a cookie session by its value.
 func (c *Cookies) Remove(value string) error {
-	logger.Cookie().Info("Removing cookie, value: %s", value)
+	logger.DBCookies().Info("Removing cookie, value: %s", value)
 
 	if value == "" {
 		return NewValidationError("value", "cookie value cannot be empty", value)
@@ -216,7 +216,7 @@ func (c *Cookies) Remove(value string) error {
 
 // RemoveApiKey removes all cookie sessions associated with a specific API key.
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	logger.Cookie().Info("Removing cookies by API key")
+	logger.DBCookies().Info("Removing cookies by API key")
 
 	if apiKey == "" {
 		return NewValidationError("api_key", "API key cannot be empty", apiKey)
@@ -232,7 +232,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 
 // RemoveExpired removes all cookie sessions that are older than the specified timestamp.
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
-	logger.Cookie().Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
+	logger.DBCookies().Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	if beforeTimestamp <= 0 {
 		return 0, NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)

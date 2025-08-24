@@ -1,5 +1,4 @@
-// Package wshandler provides WebSocket handling functionality for real-time notifications
-package wshandler
+package ws
 
 import (
 	"context"

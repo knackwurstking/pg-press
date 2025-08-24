@@ -41,8 +41,11 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *TroubleReports) handleMainPage(c echo.Context) error {
+	logger.HandlerTroubleReports().Debug("Rendering trouble reports page")
+
 	page := pages.TroubleReportsPage()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		logger.HandlerTroubleReports().Error("Failed to render trouble reports page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render trouble reports page: "+err.Error())
 	}
@@ -52,14 +55,15 @@ func (h *TroubleReports) handleMainPage(c echo.Context) error {
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
+		logger.HandlerTroubleReports().Error("Invalid trouble report ID parameter: %v", err)
 		return err
 	}
 
-	logger.TroubleReport().Info("Generating PDF for trouble report %d", id)
+	logger.HandlerTroubleReports().Info("Generating PDF for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
 	if err != nil {
-		logger.TroubleReport().Error(
+		logger.HandlerTroubleReports().Error(
 			"Failed to retrieve trouble report %d for PDF generation: %v",
 			id, err,
 		)
@@ -69,7 +73,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		logger.TroubleReport().Error(
+		logger.HandlerTroubleReports().Error(
 			"Failed to generate PDF for trouble report %d: %v", tr.ID, err,
 		)
 		return echo.NewHTTPError(
@@ -78,7 +82,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		)
 	}
 
-	logger.TroubleReport().Info(
+	logger.HandlerTroubleReports().Info(
 		"Successfully generated PDF for trouble report %d (size: %d bytes)",
 		tr.ID, pdfBuffer.Len())
 
@@ -105,12 +109,16 @@ func (h *TroubleReports) shareResponse(
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	attachmentID, err := utils.ParseInt64Query(c, constants.QueryParamAttachmentID)
 	if err != nil {
+		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
 		return err
 	}
+
+	logger.HandlerTroubleReports().Debug("Fetching attachment %d", attachmentID)
 
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
+		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get attachment: "+err.Error())
 	}
@@ -126,6 +134,9 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	}
 	c.Response().Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	logger.HandlerTroubleReports().Info("Serving attachment %d (size: %d bytes, type: %s)",
+		attachmentID, len(attachment.Data), attachment.MimeType)
 
 	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }

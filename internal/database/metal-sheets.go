@@ -112,7 +112,7 @@ func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 
 // List returns all metal sheets
 func (ms *MetalSheets) List() ([]*MetalSheet, error) {
-	logger.MetalSheets().Info("Listing metal sheets")
+	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	rows, err := ms.db.Query(selectAllMetalSheetsQuery)
 	if err != nil {
@@ -141,7 +141,7 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 
 // Get returns a metal sheet by ID
 func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
-	logger.MetalSheets().Info("Getting metal sheet, id: %d", id)
+	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	row := ms.db.QueryRow(selectMetalSheetByIDQuery, id)
 
@@ -159,7 +159,7 @@ func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
 
 // GetWithNotes returns a metal sheet with its related notes loaded
 func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
-	logger.MetalSheets().Info("Getting metal sheet with notes, id: %d", id)
+	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := ms.Get(id)
 	if err != nil {
@@ -175,7 +175,7 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 	if len(sheet.LinkedNotes) > 0 && ms.notes != nil {
 		notes, err := ms.notes.GetByIDs(sheet.LinkedNotes)
 		if err != nil {
-			logger.MetalSheets().Error("Failed to load notes for metal sheet %d: %v", id, err)
+			logger.DBMetalSheets().Error("Failed to load notes for metal sheet %d: %v", id, err)
 			// Don't fail the entire operation if notes can't be loaded
 		} else {
 			result.LoadedNotes = notes
@@ -187,7 +187,7 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 
 // GetByToolID returns all metal sheets assigned to a specific tool
 func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
-	logger.MetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
+	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	rows, err := ms.db.Query(selectMetalSheetsByToolIDQuery, toolID)
 	if err != nil {
@@ -216,7 +216,7 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 
 // GetAvailable returns all available metal sheets
 func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
-	logger.MetalSheets().Info("Getting available metal sheets")
+	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	rows, err := ms.db.Query(selectAvailableMetalSheetsQuery)
 	if err != nil {
@@ -245,7 +245,7 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 
 // Add inserts a new metal sheet
 func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
-	logger.MetalSheets().Info("Adding metal sheet: %s", sheet.String())
+	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
@@ -308,7 +308,7 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 
 // Update updates an existing metal sheet
 func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
-	logger.MetalSheets().Info("Updating metal sheet: %d", sheet.ID)
+	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
 	current, err := ms.Get(sheet.ID)
@@ -376,7 +376,7 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 
 // AssignTool assigns a metal sheet to a tool
 func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) error {
-	logger.MetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
+	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
 	sheet, err := ms.Get(sheetID)
@@ -436,7 +436,7 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) erro
 
 // Delete deletes a metal sheet
 func (ms *MetalSheets) Delete(id int64, user *User) error {
-	logger.MetalSheets().Info("Deleting metal sheet: %d", id)
+	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	_, err := ms.db.Exec(deleteMetalSheetQuery, id)
 	if err != nil {

@@ -50,7 +50,7 @@ func (h *Auth) handleLogin(c echo.Context) error {
 func (h *Auth) handleLogout(c echo.Context) error {
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
 		if err := h.DB.Cookies.Remove(cookie.Value); err != nil {
-			logger.Auth().Error("Failed to remove cookie from database: %v", err)
+			logger.HandlerAuth().Error("Failed to remove cookie from database: %v", err)
 		}
 	}
 
@@ -67,19 +67,19 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	user, err := h.DB.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
 		if !errors.Is(err, database.ErrNotFound) {
-			logger.Auth().Error("Failed to get user from API key: %v", err)
+			logger.HandlerAuth().Error("Failed to get user from API key: %v", err)
 		}
 		return false
 	}
 
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
-		logger.Auth().Info("Removing existing authentication cookie")
+		logger.HandlerAuth().Info("Removing existing authentication cookie")
 		if err := h.DB.Cookies.Remove(existingCookie.Value); err != nil {
-			logger.Auth().Error("Failed to remove existing cookie: %v", err)
+			logger.HandlerAuth().Error("Failed to remove existing cookie: %v", err)
 		}
 	}
 
-	logger.Auth().Info("Creating new session for user %s (Telegram ID: %d)",
+	logger.HandlerAuth().Info("Creating new session for user %s (Telegram ID: %d)",
 		user.UserName, user.TelegramID)
 
 	cookieValue := uuid.New().String()
@@ -93,7 +93,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	sessionCookie := database.NewCookie(
 		ctx.Request().UserAgent(), cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
-		logger.Auth().Error("Failed to create session: %v", err)
+		logger.HandlerAuth().Error("Failed to create session: %v", err)
 		return false
 	}
 

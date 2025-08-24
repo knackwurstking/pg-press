@@ -80,7 +80,7 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 }
 
 func (t *Tools) List() ([]*Tool, error) {
-	logger.Tools().Info("Listing tools")
+	logger.DBTools().Info("Listing tools")
 
 	rows, err := t.db.Query(selectAllToolsQuery)
 	if err != nil {
@@ -108,7 +108,7 @@ func (t *Tools) List() ([]*Tool, error) {
 }
 
 func (t *Tools) Get(id int64) (*Tool, error) {
-	logger.Tools().Info("Getting tool, id: %d", id)
+	logger.DBTools().Info("Getting tool, id: %d", id)
 
 	row := t.db.QueryRow(selectToolByIDQuery, id)
 
@@ -131,9 +131,9 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 	}
 
 	if pressNumber == nil {
-		logger.Tools().Info("Getting inactive tools")
+		logger.DBTools().Info("Getting inactive tools")
 	} else {
-		logger.Tools().Info("Getting active tools for press: %d", *pressNumber)
+		logger.DBTools().Info("Getting active tools for press: %d", *pressNumber)
 	}
 
 	rows, err := t.db.Query(selectToolsByPressQuery, pressNumber)
@@ -162,7 +162,7 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 }
 
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
-	logger.Tools().Info("Adding tool: %s", tool.String())
+	logger.DBTools().Info("Adding tool: %s", tool.String())
 
 	// Ensure initial mod entry exists
 	if len(tool.Mods) == 0 {
@@ -229,7 +229,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 }
 
 func (t *Tools) Update(tool *Tool, user *User) error {
-	logger.Tools().Info("Updating tool: %d", tool.ID)
+	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
 	// Get current tool to compare for changes
 	current, err := t.Get(tool.ID)
@@ -301,7 +301,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 }
 
 func (t *Tools) Delete(id int64, user *User) error {
-	logger.Tools().Info("Deleting tool: %d", id)
+	logger.DBTools().Info("Deleting tool: %d", id)
 
 	// Get tool info before deletion for feed
 	tool, err := t.Get(id)
@@ -332,7 +332,7 @@ func (t *Tools) Delete(id int64, user *User) error {
 
 // UpdateStatus updates only the status field of a tool
 func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
-	logger.Tools().Info("Updating tool status: %d to %s", toolID, status)
+	logger.DBTools().Info("Updating tool status: %d to %s", toolID, status)
 
 	// Get current tool to track changes
 	tool, err := t.Get(toolID)
@@ -387,7 +387,7 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 
 // UpdatePress updates only the press field of a tool
 func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
-	logger.Tools().Info("Updating tool press: %d", toolID)
+	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
 	tool, err := t.Get(toolID)

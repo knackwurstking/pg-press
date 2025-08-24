@@ -4,14 +4,14 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
-	"github.com/knackwurstking/pgpress/internal/wshandler"
+	"github.com/knackwurstking/pgpress/internal/ws"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )
 
 type Nav struct {
 	DB        *database.DB
-	WSHandler *wshandler.WSHandlers
+	WSHandler *ws.WSHandlers
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
@@ -28,25 +28,25 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		// Get user from echo context
 		user, err := utils.GetUserFromContext(c)
 		if err != nil {
-			logger.WebSocket().Error("User authentication failed: %#v", err)
+			logger.HTMXHandlerNav().Error("User authentication failed: %#v", err)
 			ws.Close()
 			return
 		}
 
-		logger.WebSocket().Info("User authenticated: %s (LastFeed: %d)",
+		logger.HTMXHandlerNav().Info("User authenticated: %s (LastFeed: %d)",
 			user.UserName, user.LastFeed)
 
 		// Register the connection with the feed notifier
 		feedConn := h.WSHandler.Feed.RegisterConnection(
 			user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			logger.WebSocket().Error(
+			logger.HTMXHandlerNav().Error(
 				"Failed to register connection for user %s", user.UserName)
 			ws.Close()
 			return
 		}
 
-		logger.WebSocket().Info("Connection registered for user %s",
+		logger.HTMXHandlerNav().Info("Connection registered for user %s",
 			user.UserName)
 
 		// Start the write pump in a goroutine
@@ -55,7 +55,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		// Start the read pump (this will block until connection closes)
 		feedConn.ReadPump(h.WSHandler.Feed)
 
-		logger.WebSocket().Info("Connection closed for user %s",
+		logger.HTMXHandlerNav().Info("Connection closed for user %s",
 			user.UserName)
 	})
 

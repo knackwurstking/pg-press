@@ -23,6 +23,124 @@ func Initialize() {
 	InitializeFromStandardLog()
 }
 
+// NewComponentLogger creates a new logger for a specific component
+func NewComponentLogger(component string) *Logger {
+	logger := New(os.Stderr, AppLogger.level, AppLogger.enableColors)
+	logger.SetPrefix(fmt.Sprintf("[%s] ", component))
+	return logger
+}
+
+// Middleware returns a logger configured for middleware operations
+func Middleware() *Logger {
+	return NewComponentLogger("Middleware")
+}
+
+// Server returns a logger configured for server operations
+func Server() *Logger {
+	return NewComponentLogger("Server")
+}
+
+func WSFeedHandler() *Logger {
+	return NewComponentLogger("WS Feed Handler")
+}
+
+func WSFeedConnection() *Logger {
+	return NewComponentLogger("WS Feed Connection")
+}
+
+func DBAttachments() *Logger {
+	return NewComponentLogger("DB Attachments")
+}
+
+func DBCookies() *Logger {
+	return NewComponentLogger("DB Cookies")
+}
+
+func DBFeeds() *Logger {
+	return NewComponentLogger("DB Feeds")
+}
+
+func DBTools() *Logger {
+	return NewComponentLogger("DB Tools")
+}
+
+func DBToolCyclesHelper() *Logger {
+	return NewComponentLogger("DB ToolCyclesHelper")
+}
+
+func DBUsers() *Logger {
+	return NewComponentLogger("DB Users")
+}
+
+func DBTroubleReportsHelper() *Logger {
+	return NewComponentLogger("DB TroubleReportsHelper")
+}
+
+func DBMetalSheets() *Logger {
+	return NewComponentLogger("DB MetalSheets")
+}
+
+func DBNotes() *Logger {
+	return NewComponentLogger("DB Notes")
+}
+
+func DBTroubleReports() *Logger {
+	return NewComponentLogger("DB TroubleReports")
+}
+
+func DBToolsHelper() *Logger {
+	return NewComponentLogger("DB ToolsHelper")
+}
+
+func HandlerAuth() *Logger {
+	return NewComponentLogger("Handler Auth")
+}
+
+func HandlerFeed() *Logger {
+	return NewComponentLogger("Handler Feed")
+}
+
+func HandlerHome() *Logger {
+	return NewComponentLogger("Handler Home")
+}
+
+func HandlerProfile() *Logger {
+	return NewComponentLogger("Handler Profile")
+}
+
+func HandlerTools() *Logger {
+	return NewComponentLogger("Handler Tools")
+}
+
+func HandlerTroubleReports() *Logger {
+	return NewComponentLogger("Handler TroubleReports")
+}
+
+func HTMXHandlerFeed() *Logger {
+	return NewComponentLogger("HTMX Handler Feed")
+}
+
+func HTMXHandlerNav() *Logger {
+	return NewComponentLogger("HTMX Handler Nav")
+}
+
+func HTMXHandlerProfile() *Logger {
+	return NewComponentLogger("HTMX Handler Profile")
+}
+
+func HTMXHandlerTools() *Logger {
+	return NewComponentLogger("HTMX Handler Tools")
+}
+
+func HTMXHandlerTroubleReports() *Logger {
+	return NewComponentLogger("HTMX Handler TroubleReports")
+}
+
+// init function to automatically initialize the logger when the package is imported
+func init() {
+	Initialize()
+}
+
 // configureFromEnvironment sets logger configuration based on environment variables
 func configureFromEnvironment() {
 	// Check LOG_LEVEL environment variable
@@ -51,89 +169,4 @@ func configureFromEnvironment() {
 
 	// Set application prefix
 	AppLogger.SetPrefix("")
-}
-
-// Component-specific logger helpers
-
-// NewComponentLogger creates a new logger for a specific component
-func NewComponentLogger(component string) *Logger {
-	logger := New(os.Stderr, AppLogger.level, AppLogger.enableColors)
-	logger.SetPrefix(fmt.Sprintf("[%s] ", component))
-	return logger
-}
-
-// Server returns a logger configured for server operations
-func Server() *Logger {
-	return NewComponentLogger("Server")
-}
-
-// WebSocket returns a logger configured for WebSocket operations
-func WebSocket() *Logger {
-	return NewComponentLogger("WebSocket")
-}
-
-// Middleware returns a logger configured for middleware operations
-func Middleware() *Logger {
-	return NewComponentLogger("Middleware")
-}
-
-// Auth returns a logger configured for authentication operations
-func Auth() *Logger {
-	return NewComponentLogger("Auth")
-}
-
-// Feed returns a logger configured for feed operations
-func Feed() *Logger {
-	return NewComponentLogger("Feed")
-}
-
-func Attachments() *Logger {
-	return NewComponentLogger("Attachments")
-}
-
-func TroubleReport() *Logger {
-	return NewComponentLogger("TroubleReport")
-}
-
-func HTMXHandlerTroubleReports() *Logger {
-	return NewComponentLogger("HTMX Handler TroubleReports")
-}
-
-func TroubleReportsHelper() *Logger {
-	return NewComponentLogger("TroubleReportsHelper")
-}
-
-func Tools() *Logger {
-	return NewComponentLogger("Tools")
-}
-
-func ToolsHelper() *Logger {
-	return NewComponentLogger("ToolsHelper")
-}
-
-func ToolCyclesHelper() *Logger {
-	return NewComponentLogger("ToolCyclesHelper")
-}
-
-func Notes() *Logger {
-	return NewComponentLogger("Notes")
-}
-
-func MetalSheets() *Logger {
-	return NewComponentLogger("MetalSheets")
-}
-
-// User returns a logger configured for user operations
-func User() *Logger {
-	return NewComponentLogger("User")
-}
-
-// Cookie returns a logger configured for cookie operations
-func Cookie() *Logger {
-	return NewComponentLogger("Cookie")
-}
-
-// init function to automatically initialize the logger when the package is imported
-func init() {
-	Initialize()
 }

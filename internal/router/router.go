@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/handler"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
-	"github.com/knackwurstking/pgpress/internal/wshandler"
+	"github.com/knackwurstking/pgpress/internal/ws"
 	"github.com/labstack/echo/v4"
 )
 
@@ -34,9 +34,9 @@ func Serve(e *echo.Echo, db *database.DB) {
 	(&handler.Tools{DB: db}).RegisterRoutes(e)
 }
 
-func startWebSocketHandlers(db *database.DB) *wshandler.WSHandlers {
-	wsh := &wshandler.WSHandlers{
-		Feed: wshandler.NewFeedHandler(db),
+func startWebSocketHandlers(db *database.DB) *ws.WSHandlers {
+	wsh := &ws.WSHandlers{
+		Feed: ws.NewFeedHandler(db),
 	}
 
 	// Start the feed notification manager in a goroutine

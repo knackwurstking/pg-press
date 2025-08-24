@@ -15,6 +15,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
@@ -40,8 +41,10 @@ func (h *TroubleReports) handleGetDialogEdit(
 
 			props.ID = id
 
+			logger.HTMXHandlerTroubleReports().Debug("Loading trouble report %d for editing", id)
 			tr, err := h.DB.TroubleReports.Get(id)
 			if err != nil {
+				logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
 				return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 					"failed to get trouble report: "+err.Error())
 			}
@@ -52,12 +55,16 @@ func (h *TroubleReports) handleGetDialogEdit(
 			// Load attachments for display
 			if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr); err == nil {
 				props.Attachments = loadedAttachments
+				logger.HTMXHandlerTroubleReports().Debug("Loaded %d attachments for trouble report %d", len(loadedAttachments), id)
+			} else {
+				logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for trouble report %d: %v", id, err)
 			}
 		}
 	}
 
 	dialog := components.TroubleReportsEditDialog(props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to render edit dialog: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render Trouble Reports Edit Dialog: "+err.Error())
 	}
@@ -71,8 +78,11 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
 	}
+
+	logger.HTMXHandlerTroubleReports().Info("User %s is creating a new trouble report", user.UserName)
 
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
@@ -94,11 +104,14 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 			LinkedAttachments: tr.LinkedAttachments,
 		})
 
+		logger.HTMXHandlerTroubleReports().Debug("Creating trouble report: title='%s', attachments=%d", title, len(attachments))
 		err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments)
 		if err != nil {
+			logger.HTMXHandlerTroubleReports().Error("Failed to add trouble report: %v", err)
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"failed to add trouble report: "+err.Error())
 		}
+		logger.HTMXHandlerTroubleReports().Info("Successfully created trouble report %d", tr.ID)
 	} else {
 		props.Close = false
 	}
@@ -113,6 +126,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		return err
 	}
 
+	logger.HTMXHandlerTroubleReports().Info("Updating trouble report %d", id)
+
 	// Get user from context
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
@@ -122,6 +137,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get Title, Content and Attachments from form data
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
 	}
 
@@ -147,6 +163,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Query previous trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get trouble report: "+err.Error())
 	}
@@ -175,11 +192,16 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	tr.Content = content
 	tr.LinkedAttachments = existingAttachmentIDs
 
+	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d: title='%s', existing attachments=%d, new attachments=%d",
+		id, title, len(existingAttachmentIDs), len(newAttachments))
+
 	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to update trouble report %d: %v", id, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 
+	logger.HTMXHandlerTroubleReports().Info("Successfully updated trouble report %d", id)
 	return h.handleGetDialogEdit(c, props)
 }
 
@@ -188,8 +210,11 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	attachments []*database.Attachment,
 	err error,
 ) {
+	logger.HTMXHandlerTroubleReports().Debug("Validating dialog edit form data")
+
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Invalid title form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			database.WrapError(err, "invalid title form value"))
 	}
@@ -197,6 +222,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 
 	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Invalid content form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			database.WrapError(err, "invalid content form value"))
 	}
@@ -205,14 +231,17 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	// Process existing attachments and their order
 	attachments, err = h.processAttachments(ctx)
 	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to process attachments: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			database.WrapError(err, "failed to process attachments"))
 	}
 
+	logger.HTMXHandlerTroubleReports().Debug("Form validation successful: title='%s', attachments=%d", title, len(attachments))
 	return title, content, attachments, nil
 }
 
 func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attachment, error) {
+	logger.HTMXHandlerTroubleReports().Debug("Processing attachments")
 	var attachments []*database.Attachment
 
 	// Get existing attachments if editing
@@ -224,6 +253,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 					existingTR); err == nil {
 					attachments = make([]*database.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
+					logger.HTMXHandlerTroubleReports().Debug("Loaded %d existing attachments for trouble report %d", len(loadedAttachments), id)
 				}
 			}
 		}
@@ -235,11 +265,12 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		return attachments, nil
 	}
 
-	existingAttachmentsToRemove := strings.SplitSeq(
+	existingAttachmentsToRemove := strings.Split(
 		form.Value[constants.ExistingAttachmentsRemoval][0],
 		",",
 	)
-	for a := range existingAttachmentsToRemove {
+	logger.HTMXHandlerTroubleReports().Debug("Removing %d existing attachments", len(existingAttachmentsToRemove))
+	for _, a := range existingAttachmentsToRemove {
 		for i, a2 := range attachments {
 			if a2.ID == a {
 				attachments = slices.Delete(attachments, i, 1)
@@ -249,6 +280,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 	}
 
 	files := form.File[constants.AttachmentsFormField]
+	logger.HTMXHandlerTroubleReports().Debug("Processing %d new file uploads", len(files))
 	for i, fileHeader := range files {
 		if len(attachments) >= 10 {
 			break
@@ -260,6 +292,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 
 		attachment, err := h.processFileUpload(fileHeader, i+len(attachments))
 		if err != nil {
+			logger.HTMXHandlerTroubleReports().Error("Failed to process file %s: %v", fileHeader.Filename, err)
 			return nil, fmt.Errorf("failed to process file %s: %w", fileHeader.Filename, err)
 		}
 
@@ -268,6 +301,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 		}
 	}
 
+	logger.HTMXHandlerTroubleReports().Debug("Successfully processed %d total attachments", len(attachments))
 	return attachments, nil
 }
 
@@ -275,7 +309,10 @@ func (h *TroubleReports) processFileUpload(
 	fileHeader *multipart.FileHeader,
 	index int,
 ) (*database.Attachment, error) {
+	logger.HTMXHandlerTroubleReports().Debug("Processing file upload: %s (size: %d bytes)", fileHeader.Filename, fileHeader.Size)
+
 	if fileHeader.Size > database.MaxAttachmentDataSize {
+		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, database.MaxAttachmentDataSize)
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
 	}
@@ -322,6 +359,7 @@ func (h *TroubleReports) processFileUpload(
 
 	// Validate that the file is an image
 	if !strings.HasPrefix(mimeType, "image/") {
+		logger.HTMXHandlerTroubleReports().Error("File %s is not an image: %s", fileHeader.Filename, mimeType)
 		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
 	}
 
@@ -332,9 +370,11 @@ func (h *TroubleReports) processFileUpload(
 	}
 
 	if err := attachment.Validate(); err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Invalid attachment: %v", err)
 		return nil, fmt.Errorf("invalid attachment: %w", err)
 	}
 
+	logger.HTMXHandlerTroubleReports().Debug("Successfully processed file upload: %s", sanitizedFilename)
 	return attachment, nil
 }
 
