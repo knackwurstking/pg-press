@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/templates/constants"
+	"github.com/knackwurstking/pgpress/internal/constants"
 )
 
 type ToolEditDialogProps struct {
