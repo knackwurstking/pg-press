@@ -2,7 +2,6 @@ package htmxhandler
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -158,21 +157,18 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		return err
 	}
 
-	var firstMod *database.Modified[database.TroubleReportMod]
-	if len(tr.Mods) > 0 {
-		firstMod = tr.Mods[len(tr.Mods)-1]
-	}
-
 	// FIXME: Mods needs to be fixed...
 	logger.HTMXHandlerTroubleReports().Debug("Trouble report %d has %d modifications", id, len(tr.Mods))
 	for i, mod := range tr.Mods {
-		logger.HTMXHandlerTroubleReports().Debug("Mod %d: Time=%d, Title=%s", i, mod.Time, mod.Data.Title)
+		logger.HTMXHandlerTroubleReports().Debug("Mod %d: Time=%d, Title=%#v", i, mod.Time, mod.Data)
 	}
 
+	// Create a reversed copy of tr.Mods
 	trModifications := components.TroubleReportModifications(
 		user,
-		tr,
-		firstMod,
+		tr.ID,
+		tr.Mods.First(),
+		tr.Mods.Current(),
 		tr.Mods,
 	)
 	if err := trModifications.Render(c.Request().Context(), c.Response()); err != nil {
@@ -205,47 +201,42 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	}
 
 	// Move modification to the top
-	newMods := []*database.Modified[database.TroubleReportMod]{}
-	var mod *database.Modified[database.TroubleReportMod]
-	for _, m := range tr.Mods {
-		if m.Time == timeQuery {
-			if mod != nil {
-				logger.HTMXHandlerTroubleReports().Warn(
-					"Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
-				newMods = append(newMods, m)
-			} else {
-				mod = m
-			}
-		} else {
-			newMods = append(newMods, m)
-		}
+	if err := tr.Mods.Rollback(timeQuery); err != nil {
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to rollback modification at time %d for trouble report %d: %v",
+			timeQuery, id, err,
+		)
+
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to rollback modification: "+err.Error())
 	}
-
-	if mod == nil {
-		logger.HTMXHandlerTroubleReports().Error("Modification at time %d not found for trouble report %d", timeQuery, id)
-		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
-	}
-
-	logger.HTMXHandlerTroubleReports().Info("Restoring modification: title='%s' for trouble report %d", mod.Data.Title, id)
-
-	mod.Time = time.Now().UnixMilli()
-
-	// Update mods with new order
-	tr.Mods = append(newMods, mod)
 
 	// Update trouble reports data
-	tr.Title = mod.Data.Title
-	tr.Content = mod.Data.Content
-	tr.LinkedAttachments = mod.Data.LinkedAttachments
+	current := tr.Mods.Current()
+	tr.Title = current.Data.Title
+	tr.Content = current.Data.Content
+	tr.LinkedAttachments = current.Data.LinkedAttachments
 
 	// Update database
-	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d with restored modification", id)
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Updating trouble report %d with restored modification",
+		id,
+	)
+
 	if err = h.DB.TroubleReports.Update(id, tr); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to update trouble report %d with restored modification: %v", id, err)
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to update trouble report %d with restored modification: %v",
+			id, err,
+		)
+
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("Successfully restored modification for trouble report %d", id)
+	logger.HTMXHandlerTroubleReports().Info(
+		"Successfully restored modification for trouble report %d",
+		id,
+	)
+
 	return h.handleGetModifications(c, tr)
 }

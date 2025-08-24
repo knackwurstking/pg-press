@@ -2,20 +2,47 @@ package database
 
 import (
 	"fmt"
+	"slices"
 	"time"
 )
 
 type Mods[T any] []*Modified[T]
 
+func (m *Mods[T]) Reversed() []*Modified[T] {
+	reversed := make([]*Modified[T], len(*m))
+	copy(reversed, *m)
+	slices.Reverse(reversed)
+	return reversed
+}
+
 func (m *Mods[T]) Add(user *User, data T) {
 	*m = append(*m, NewModified(user, data))
+}
+
+func (m *Mods[T]) First() *Modified[T] {
+	return (*m)[0]
 }
 
 func (m *Mods[T]) Current() *Modified[T] {
 	if len(*m) == 0 {
 		return nil
 	}
-	return (*m)[0]
+	return (*m)[len(*m)-1]
+}
+
+func (m *Mods[T]) Rollback(time int64) error {
+	for i := len(*m) - 1; i >= 0; i-- {
+		if (*m)[i].Time == time {
+			// Move the found modification to index 0
+			c := (*m)[i]
+			r := (*m)[0 : i+1]
+			r = append(r, (*m)[i+1:]...)
+			*m = append(*m, c)
+			*m = append(*m, r...)
+			return nil
+		}
+	}
+	return ErrNotFound
 }
 
 // Modified represents a modification record that tracks changes made to any type T

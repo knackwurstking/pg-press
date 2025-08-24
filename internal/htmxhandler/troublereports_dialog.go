@@ -96,22 +96,28 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-
 		tr := database.NewTroubleReport(title, content)
-		tr.Mods.Add(user, database.TroubleReportMod{
-			Title:             tr.Title,
-			Content:           tr.Content,
-			LinkedAttachments: tr.LinkedAttachments,
-		})
 
-		logger.HTMXHandlerTroubleReports().Debug("Creating trouble report: title='%s', attachments=%d", title, len(attachments))
-		err := h.DB.TroubleReportsHelper.AddWithAttachments(tr, attachments)
+		logger.HTMXHandlerTroubleReports().Debug(
+			"Creating trouble report: title='%s', attachments=%d",
+			title, len(attachments),
+		)
+
+		err := h.DB.TroubleReportsHelper.AddWithAttachments(user, tr, attachments)
 		if err != nil {
-			logger.HTMXHandlerTroubleReports().Error("Failed to add trouble report: %v", err)
+			logger.HTMXHandlerTroubleReports().Error(
+				"Failed to add trouble report: %v",
+				err,
+			)
+
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"failed to add trouble report: "+err.Error())
 		}
-		logger.HTMXHandlerTroubleReports().Info("Successfully created trouble report %d", tr.ID)
+
+		logger.HTMXHandlerTroubleReports().Info(
+			"Successfully created trouble report %d",
+			tr.ID,
+		)
 	} else {
 		props.Close = false
 	}
@@ -168,9 +174,6 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 			"failed to get trouble report: "+err.Error())
 	}
 
-	// Create new trouble report
-	//tr := database.NewTroubleReportWithMods(title, content, trOld.Mods...)
-
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
 	var newAttachments []*database.Attachment
@@ -183,25 +186,31 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	tr.Mods.Add(user, database.TroubleReportMod{
-		Title:             title,
-		Content:           content,
-		LinkedAttachments: existingAttachmentIDs,
-	})
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Updating trouble report %d: title='%s', existing attachments=%d, new attachments=%d",
+		id, title, len(existingAttachmentIDs), len(newAttachments),
+	)
+
 	tr.Title = title
 	tr.Content = content
 	tr.LinkedAttachments = existingAttachmentIDs
 
-	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d: title='%s', existing attachments=%d, new attachments=%d",
-		id, title, len(existingAttachmentIDs), len(newAttachments))
+	err = h.DB.TroubleReportsHelper.UpdateWithAttachments(user, id, tr, newAttachments)
+	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to update trouble report %d: %v",
+			id, err,
+		)
 
-	if err := h.DB.TroubleReportsHelper.UpdateWithAttachments(id, tr, newAttachments); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to update trouble report %d: %v", id, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("Successfully updated trouble report %d", id)
+	logger.HTMXHandlerTroubleReports().Info(
+		"Successfully updated trouble report %d",
+		id,
+	)
+
 	return h.handleGetDialogEdit(c, props)
 }
 

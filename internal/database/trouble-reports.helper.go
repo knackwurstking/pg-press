@@ -88,6 +88,7 @@ func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttach
 
 // AddWithAttachments creates a new trouble report and its attachments.
 func (s *TroubleReportsHelper) AddWithAttachments(
+	user *User,
 	troubleReport *TroubleReport,
 	attachments []*Attachment,
 ) error {
@@ -118,11 +119,12 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 	// Set the attachment IDs in the trouble report
 	troubleReport.LinkedAttachments = attachmentIDs
 
-	// Update the mods to include the attachment IDs
-	if len(troubleReport.Mods) > 0 {
-		currentMod := troubleReport.Mods[len(troubleReport.Mods)-1]
-		currentMod.Data.LinkedAttachments = attachmentIDs
-	}
+	// Add to mods
+	troubleReport.Mods.Add(user, TroubleReportMod{
+		Title:             troubleReport.Title,
+		Content:           troubleReport.Content,
+		LinkedAttachments: troubleReport.LinkedAttachments,
+	})
 
 	// Add the trouble report
 	if err := s.troubleReports.Add(troubleReport); err != nil {
@@ -138,6 +140,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
 func (s *TroubleReportsHelper) UpdateWithAttachments(
+	user *User,
 	id int64,
 	troubleReport *TroubleReport,
 	newAttachments []*Attachment,
@@ -171,11 +174,12 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 	allAttachmentIDs := append(troubleReport.LinkedAttachments, newAttachmentIDs...)
 	troubleReport.LinkedAttachments = allAttachmentIDs
 
-	// Update the mods to include the attachment IDs
-	if len(troubleReport.Mods) > 0 {
-		currentMod := troubleReport.Mods[len(troubleReport.Mods)-1]
-		currentMod.Data.LinkedAttachments = allAttachmentIDs
-	}
+	// Update mods
+	troubleReport.Mods.Add(user, TroubleReportMod{
+		Title:             troubleReport.Title,
+		Content:           troubleReport.Content,
+		LinkedAttachments: troubleReport.LinkedAttachments,
+	})
 
 	// Update the trouble report
 	if err := s.troubleReports.Update(id, troubleReport); err != nil {

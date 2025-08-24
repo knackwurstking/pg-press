@@ -8,8 +8,9 @@ import (
 
 templ TroubleReportModifications(
 	user *database.User,
-	troubleReport *database.TroubleReport,
-	firstMod *database.Modified[database.TroubleReportMod],
+	id int64,
+	first *database.Modified[database.TroubleReportMod],
+	current *database.Modified[database.TroubleReportMod],
 	mods database.Mods[database.TroubleReportMod],
 ) {
 	<div id={ constants.IDData } class="flex flex-col gap">
@@ -26,10 +27,10 @@ templ TroubleReportModifications(
 			<h4>Änderungsverlauf</h4>
 		</div>
 		<div id={ constants.IDModificationsList } class="flex flex-col gap">
-			for _, mod := range mods {
+			for _, mod := range mods.Reversed() {
 				<!-- Modification Container -->
 				<article
-					if mods.Current().Time == mod.Time {
+					if current.Time == mod.Time {
 						style="
                             border: 2px solid var(--ui-primary);
                             border-radius: var(--ui-radius);
@@ -43,7 +44,7 @@ templ TroubleReportModifications(
 					}
 					class="border"
 				>
-					if mods.Current().Time == mod.Time {
+					if current.Time == mod.Time {
 						<!-- Mark the current modification -->
 						<div
 							style="
@@ -64,7 +65,7 @@ templ TroubleReportModifications(
 							style="color: var(--ui-muted-text); font-size: 0.9em;"
 							class="flex gap items-center"
 						>
-							if firstMod.Time == mod.Time {
+							if first.Time == mod.Time {
 								<i class="bi bi-plus-circle" style="color: var(--ui-success);"></i>
 								<span>
 									Erstellt von <strong>{ mod.User.UserName }</strong> am { mod.GetTimeString() }
@@ -97,10 +98,10 @@ templ TroubleReportModifications(
 						if len(mod.Data.LinkedAttachments) > 0 {
 							<div
 								class="attachments-preview-placeholder"
-								data-modification-id={ fmt.Sprintf("%d-%d", troubleReport.ID, mod.Time) }
+								data-modification-id={ fmt.Sprintf("%d-%d", id, mod.Time) }
 								hx-get={ fmt.Sprintf(
 									"%s/htmx/trouble-reports/attachments-preview?id=%d&time=%d",
-									serverPathPrefix, troubleReport.ID, mod.Time,
+									serverPathPrefix, id, mod.Time,
 								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
@@ -112,7 +113,7 @@ templ TroubleReportModifications(
 							</div>
 						}
 					</div>
-					if mods.Current().Time != mod.Time {
+					if current.Time != mod.Time {
 						<div
 							style="
 		                        justify-content: flex-end;
@@ -126,7 +127,7 @@ templ TroubleReportModifications(
 								<button
 									hx-post={ fmt.Sprintf(
 										"%s/htmx/trouble-reports/modifications/%d?time=%d",
-										serverPathPrefix, troubleReport.ID, mod.Time,
+										serverPathPrefix, id, mod.Time,
 									) }
 									hx-trigger="click"
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
@@ -143,7 +144,7 @@ templ TroubleReportModifications(
 								<button
 									hx-post={ fmt.Sprintf(
 										"%s/htmx/trouble-reports/modifications/vote/%d?time=%d",
-										serverPathPrefix, troubleReport.ID, mod.Time,
+										serverPathPrefix, id, mod.Time,
 									) }
 									hx-trigger="click"
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
