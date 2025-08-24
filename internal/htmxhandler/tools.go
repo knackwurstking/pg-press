@@ -261,8 +261,12 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 
 	// Get the last regeneration for this tool
 	lastRegeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
-	if err != nil {
-		logger.HTMXHandlerTools().Error("Failed to get last regeneration for tool %d: %v", toolID, err)
+	if err != nil && err != database.ErrNotFound {
+		logger.HTMXHandlerTools().Error(
+			"Failed to get last regeneration for tool %d: %v",
+			toolID, err,
+		)
+
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get last regeneration: "+err.Error())
 	}

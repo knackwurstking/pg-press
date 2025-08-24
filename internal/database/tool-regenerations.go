@@ -205,6 +205,9 @@ func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration
 
 	regen, err := t.scanFromRow(t.db.QueryRow(selectLastRegenerationQuery, toolID))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
 		return nil, NewDatabaseError("scan", "tool_regenerations",
 			"failed to get last regeneration", err)
 	}
@@ -366,7 +369,7 @@ func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error)
 		&performedBy,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan row: %w", err)
+		return nil, err
 	}
 
 	if performedBy.Valid {
@@ -389,7 +392,7 @@ func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, err
 		&performedBy,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan from rows: %w", err)
+		return nil, err
 	}
 
 	if performedBy.Valid {
