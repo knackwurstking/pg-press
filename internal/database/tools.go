@@ -445,8 +445,7 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 	var status string
 	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
 		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
-		return nil, NewDatabaseError("scan", "tools",
-			"failed to scan row", err)
+		return nil, err
 	}
 
 	tool.Status = ToolStatus(status)

@@ -141,6 +141,9 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 		performedBy,
 	))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
 		return nil, NewDatabaseError("insert", "tool_regenerations",
 			"failed to create regeneration record", err)
 	}
@@ -192,6 +195,9 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 
 	regen, err := t.scanFromRow(t.db.QueryRow(query, id))
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
 		return nil, NewDatabaseError("scan", "tool_regenerations",
 			"failed to get regeneration by ID", err)
 	}
@@ -356,31 +362,8 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 	return results, nil
 }
 
-func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
-	var regen ToolRegeneration
-	var performedBy sql.NullInt64
-
-	err := row.Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
-		&regen.Reason,
-		&performedBy,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	if performedBy.Valid {
-		regen.PerformedBy = &performedBy.Int64
-	}
-
-	return &regen, nil
-}
-
 func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, error) {
-	var regen ToolRegeneration
+	regen := &ToolRegeneration{}
 	var performedBy sql.NullInt64
 
 	err := rows.Scan(
@@ -399,5 +382,28 @@ func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, err
 		regen.PerformedBy = &performedBy.Int64
 	}
 
-	return &regen, nil
+	return regen, nil
+}
+
+func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
+	regen := &ToolRegeneration{}
+	var performedBy sql.NullInt64
+
+	err := row.Scan(
+		&regen.ID,
+		&regen.ToolID,
+		&regen.RegeneratedAt,
+		&regen.CyclesAtRegeneration,
+		&regen.Reason,
+		&performedBy,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if performedBy.Valid {
+		regen.PerformedBy = &performedBy.Int64
+	}
+
+	return regen, nil
 }

@@ -191,7 +191,7 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user
 	}
 
 	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), performedBy)
-	cycle, err := p.scanPressCycle(row)
+	cycle, err := p.scanPressCyclesRow(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -259,7 +259,7 @@ func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
 
 	row := p.db.QueryRow(selectCurrentToolUsageQuery, toolID)
-	cycle, err := p.scanPressCycle(row)
+	cycle, err := p.scanPressCyclesRow(row)
 	if err == sql.ErrNoRows {
 		return nil, ErrNotFound
 	}
@@ -280,10 +280,7 @@ func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	}
 	defer rows.Close()
 
-	cycles, err := p.scanPressCycles(rows)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
+	cycles, err := p.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -301,10 +298,7 @@ func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error)
 	}
 	defer rows.Close()
 
-	cycles, err := p.scanPressCycles(rows)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
+	cycles, err := p.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -337,10 +331,7 @@ func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenera
 	}
 	defer rows.Close()
 
-	cycles, err := p.scanPressCycles(rows)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
+	cycles, err := p.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -390,10 +381,7 @@ func (p *PressCycles) GetPressCycles(pressNumber PressNumber) ([]*PressCycle, er
 	}
 	defer rows.Close()
 
-	cycles, err := p.scanPressCycles(rows)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
+	cycles, err := p.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -416,10 +404,7 @@ func (p *PressCycles) GetActivePressCycles(pressNumber PressNumber) ([]*PressCyc
 	}
 	defer rows.Close()
 
-	cycles, err := p.scanPressCycles(rows)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
+	cycles, err := p.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -560,9 +545,44 @@ func (p *PressCycles) GetPressCycleStats() (map[PressNumber]struct {
 	return stats, nil
 }
 
+// scanPressCycles scans multiple press cycles from sql.Rows
+func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error) {
+	cycles := make([]*PressCycle, 0)
+	for rows.Next() {
+		cycle := &PressCycle{}
+		var toDate sql.NullTime
+		var performedBy sql.NullInt64
+
+		err := rows.Scan(
+			&cycle.ID,
+			&cycle.PressNumber,
+			&cycle.ToolID,
+			&cycle.FromDate,
+			&toDate,
+			&cycle.TotalCycles,
+			&cycle.PartialCycles,
+			&performedBy,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if toDate.Valid {
+			cycle.ToDate = &toDate.Time
+		}
+
+		if performedBy.Valid {
+			cycle.PerformedBy = &performedBy.Int64
+		}
+
+		cycles = append(cycles, cycle)
+	}
+	return cycles, nil
+}
+
 // scanPressCycle scans a single press cycle from a sql.Row or sql.Rows scanner
-func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*PressCycle, error) {
-	var cycle PressCycle
+func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) {
+	cycle := &PressCycle{}
 	var toDate sql.NullTime
 	var performedBy sql.NullInt64
 
@@ -588,18 +608,5 @@ func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*
 		cycle.PerformedBy = &performedBy.Int64
 	}
 
-	return &cycle, nil
-}
-
-// scanPressCycles scans multiple press cycles from sql.Rows
-func (p *PressCycles) scanPressCycles(rows *sql.Rows) ([]*PressCycle, error) {
-	var cycles []*PressCycle
-	for rows.Next() {
-		cycle, err := p.scanPressCycle(rows)
-		if err != nil {
-			return nil, err
-		}
-		cycles = append(cycles, cycle)
-	}
-	return cycles, nil
+	return cycle, nil
 }
