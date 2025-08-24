@@ -2,7 +2,6 @@ package htmxhandler
 
 import (
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -11,8 +10,6 @@ type TroubleReports struct {
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	logger.HTMXHandlerTroubleReports().Debug("Registering trouble reports HTMX routes")
-
 	// Dialog edit routes
 	editDialogPath := serverPathPrefix + "/htmx/trouble-reports/dialog-edit"
 	e.GET(editDialogPath, func(c echo.Context) error {
