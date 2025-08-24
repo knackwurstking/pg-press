@@ -179,6 +179,11 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 }
 
 func (h *TroubleReports) handlePostModifications(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return err
@@ -201,21 +206,20 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	}
 
 	// Move modification to the top
-	if err := tr.Mods.Rollback(timeQuery); err != nil {
+	mod, err := tr.Mods.Get(timeQuery)
+	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to rollback modification at time %d for trouble report %d: %v",
+			"Failed to get modification at time %d for trouble report %d: %v",
 			timeQuery, id, err,
 		)
 
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to rollback modification: "+err.Error())
+			"failed to get modification: "+err.Error())
 	}
 
-	// Update trouble reports data
-	current := tr.Mods.Current()
-	tr.Title = current.Data.Title
-	tr.Content = current.Data.Content
-	tr.LinkedAttachments = current.Data.LinkedAttachments
+	tr.Title = mod.Data.Title
+	tr.Content = mod.Data.Content
+	tr.LinkedAttachments = mod.Data.LinkedAttachments
 
 	// Update database
 	logger.HTMXHandlerTroubleReports().Debug(
@@ -223,7 +227,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 		id,
 	)
 
-	if err = h.DB.TroubleReports.Update(id, tr); err != nil {
+	if err = h.DB.TroubleReports.Update(id, tr, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error(
 			"Failed to update trouble report %d with restored modification: %v",
 			id, err,

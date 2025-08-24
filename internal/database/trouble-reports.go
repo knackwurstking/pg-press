@@ -1,4 +1,3 @@
-// Package database provides trouble reports management.
 package database
 
 import (
@@ -101,7 +100,7 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(troubleReport *TroubleReport) error {
+func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) error {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
@@ -111,6 +110,8 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport) error {
 	if err := troubleReport.Validate(); err != nil {
 		return err
 	}
+
+	tr.updateMods(user, troubleReport)
 
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
@@ -154,7 +155,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport) error {
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
+func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport, user *User) error {
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
 	if troubleReport == nil {
@@ -164,6 +165,8 @@ func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport) error {
 	if err := troubleReport.Validate(); err != nil {
 		return err
 	}
+
+	tr.updateMods(user, troubleReport)
 
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
@@ -265,4 +268,16 @@ func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, er
 	}
 
 	return report, nil
+}
+
+func (tr *TroubleReports) updateMods(user *User, report *TroubleReport) {
+	if user == nil {
+		return
+	}
+
+	report.Mods.Add(user, TroubleReportMod{
+		Title:             report.Title,
+		Content:           report.Content,
+		LinkedAttachments: report.LinkedAttachments,
+	})
 }

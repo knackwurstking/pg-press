@@ -1,5 +1,3 @@
-// Package database provides helper layer for trouble report operations
-// with attachment lazy loading.
 package database
 
 import (
@@ -119,15 +117,8 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 	// Set the attachment IDs in the trouble report
 	troubleReport.LinkedAttachments = attachmentIDs
 
-	// Add to mods
-	troubleReport.Mods.Add(user, TroubleReportMod{
-		Title:             troubleReport.Title,
-		Content:           troubleReport.Content,
-		LinkedAttachments: troubleReport.LinkedAttachments,
-	})
-
 	// Add the trouble report
-	if err := s.troubleReports.Add(troubleReport); err != nil {
+	if err := s.troubleReports.Add(troubleReport, user); err != nil {
 		// Cleanup attachments on failure
 		for _, id := range attachmentIDs {
 			s.attachments.Remove(id)
@@ -174,15 +165,8 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 	allAttachmentIDs := append(troubleReport.LinkedAttachments, newAttachmentIDs...)
 	troubleReport.LinkedAttachments = allAttachmentIDs
 
-	// Update mods
-	troubleReport.Mods.Add(user, TroubleReportMod{
-		Title:             troubleReport.Title,
-		Content:           troubleReport.Content,
-		LinkedAttachments: troubleReport.LinkedAttachments,
-	})
-
 	// Update the trouble report
-	if err := s.troubleReports.Update(id, troubleReport); err != nil {
+	if err := s.troubleReports.Update(id, troubleReport, user); err != nil {
 		// Cleanup new attachments on failure
 		for _, attachmentID := range newAttachmentIDs {
 			s.attachments.Remove(attachmentID)

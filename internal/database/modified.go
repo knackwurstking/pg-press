@@ -30,18 +30,27 @@ func (m *Mods[T]) Current() *Modified[T] {
 	return (*m)[len(*m)-1]
 }
 
-func (m *Mods[T]) Rollback(time int64) error {
-	for i, mod := range *m {
+func (m *Mods[T]) Get(time int64) (*Modified[T], error) {
+	for _, mod := range *m {
 		if mod.Time == time {
-			// Move the matching modification to the current position
-			before := (*m)[0:i]
-			restMods := append(before, (*m)[i+1:]...)
-			*m = append(restMods, mod)
-			return nil
+			return mod, nil
 		}
 	}
-	return ErrNotFound
+	return nil, ErrNotFound
 }
+
+//func (m *Mods[T]) Rollback(time int64) error {
+//	for i, mod := range *m {
+//		if mod.Time == time {
+//			// Move the matching modification to the current position
+//			before := (*m)[0:i]
+//			restMods := append(before, (*m)[i+1:]...)
+//			*m = append(restMods, mod)
+//			return nil
+//		}
+//	}
+//	return ErrNotFound
+//}
 
 // Modified represents a modification record that tracks changes made to any type T
 type Modified[T any] struct {

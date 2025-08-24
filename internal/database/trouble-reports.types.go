@@ -47,10 +47,6 @@ func (tr *TroubleReport) Validate() error {
 		return err
 	}
 
-	if len(tr.Mods) == 0 {
-		return NewValidationError("mods", "cannot be empty", tr.Mods)
-	}
-
 	return tr.validateAttachments()
 }
 
