@@ -215,16 +215,16 @@ func (h *ToolCyclesHelper) groupCyclesByRegenerations(cycles []*PressCycle, rege
 }
 
 // StartToolOnPress starts a tool on a specific press
-func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumber) error {
+func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumber, user *User) error {
 	logger.DBToolCyclesHelper().Info("Starting tool %d on press %d", toolID, pressNumber)
 
 	// Update tool status to active and set press number
-	err := h.tools.UpdateStatus(toolID, ToolStatusActive)
+	err := h.tools.UpdateStatus(toolID, ToolStatusActive, user)
 	if err != nil {
 		return err
 	}
 
-	err = h.tools.UpdatePress(toolID, &pressNumber)
+	err = h.tools.UpdatePress(toolID, &pressNumber, user)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumbe
 }
 
 // RemoveToolFromPress removes a tool from its current press
-func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64) error {
+func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64, user *User) error {
 	logger.DBToolCyclesHelper().Info("Removing tool %d from press", toolID)
 
 	// End press cycle
@@ -249,12 +249,12 @@ func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64) error {
 	}
 
 	// Update tool status to available and clear press number
-	err = h.tools.UpdateStatus(toolID, ToolStatusAvailable)
+	err = h.tools.UpdateStatus(toolID, ToolStatusAvailable, user)
 	if err != nil {
 		return err
 	}
 
-	err = h.tools.UpdatePress(toolID, nil)
+	err = h.tools.UpdatePress(toolID, nil, user)
 	if err != nil {
 		return err
 	}
@@ -263,17 +263,17 @@ func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64) error {
 }
 
 // RegenerateTool marks a tool as regenerated and resets its cycles
-func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, performedBy string) error {
-	logger.DBToolCyclesHelper().Info("Regenerating tool %d, reason: %s, performed by: %s", toolID, reason, performedBy)
+func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, user *User) error {
+	logger.DBToolCyclesHelper().Info("Regenerating tool %d, reason: %s, performed by: %s", toolID, reason, user.String())
 
 	// Update tool status to regenerating
-	err := h.tools.UpdateStatus(toolID, ToolStatusRegenerating)
+	err := h.tools.UpdateStatus(toolID, ToolStatusRegenerating, user)
 	if err != nil {
 		return err
 	}
 
 	// Save regeneration event to tracking table
-	_, err = h.regenerations.Create(toolID, reason)
+	_, err = h.regenerations.Create(toolID, reason, user)
 	if err != nil {
 		return err
 	}
@@ -288,17 +288,17 @@ func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, performed
 }
 
 // CompleteToolRegeneration marks a tool regeneration as complete
-func (h *ToolCyclesHelper) CompleteToolRegeneration(toolID int64) error {
+func (h *ToolCyclesHelper) CompleteToolRegeneration(toolID int64, user *User) error {
 	logger.DBToolCyclesHelper().Info("Completing regeneration for tool %d", toolID)
 
 	// Update tool status back to available
-	err := h.tools.UpdateStatus(toolID, ToolStatusAvailable)
+	err := h.tools.UpdateStatus(toolID, ToolStatusAvailable, user)
 	if err != nil {
 		return err
 	}
 
 	// Clear press assignment
-	err = h.tools.UpdatePress(toolID, nil)
+	err = h.tools.UpdatePress(toolID, nil, user)
 	if err != nil {
 		return err
 	}

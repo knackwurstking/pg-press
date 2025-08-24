@@ -94,59 +94,58 @@ type ToolRegenerations struct {
 
 // NewToolRegenerations creates a new ToolRegenerations instance
 func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCycles *PressCycles) *ToolRegenerations {
-	t := &ToolRegenerations{
+	if _, err := db.Exec(createToolRegenerationsTableQuery); err != nil {
+		panic(
+			NewDatabaseError(
+				"create_table",
+				"tool_regenerations",
+				"failed to create tool_regenerations table",
+				err,
+			),
+		)
+	}
+
+	return &ToolRegenerations{
 		db:          db,
 		feeds:       feeds,
 		pressCycles: pressCycles,
 	}
-	t.init()
-	return t
-}
-
-func (t *ToolRegenerations) init() {
-	if _, err := t.db.Exec(createToolRegenerationsTableQuery); err != nil {
-		panic(fmt.Errorf("failed to create tool_regenerations table: %w", err))
-	}
 }
 
 // Create records a new tool regeneration event
-func (t *ToolRegenerations) Create(toolID int64, reason string) (*ToolRegeneration, error) {
-	logger.DBToolRegenerations().Info("Creating tool regeneration: tool_id=%d, reason=%s", toolID, reason)
+func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*ToolRegeneration, error) {
+	logger.DBToolRegenerations().Info(
+		"Creating tool regeneration: tool_id=%d, reason=%s",
+		toolID, reason,
+	)
 
 	// Get current total cycles for the tool before regeneration
 	totalCycles, err := t.pressCycles.GetTotalCyclesSinceRegeneration(toolID, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get total cycles: %w", err)
+		return nil, NewDatabaseError("insert", "tool_regenerations",
+			"failed to get total cycles", err)
 	}
+
+	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason)
+	t.updateMods(user, regen)
 
 	// Initialize empty mods array
-	modsJSON, _ := json.Marshal([]*Modified[ToolRegenerationMod]{})
-
-	var regen ToolRegeneration
-	var modsData []byte
-
-	err = t.db.QueryRow(insertToolRegenerationQuery,
-		toolID,
-		time.Now(),
-		totalCycles,
-		reason,
-		modsJSON,
-	).Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
-		&regen.Reason,
-		&modsData,
-	)
-
+	modsJSON, err := json.Marshal(regen.Mods)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create regeneration record: %w", err)
+		return nil, NewDatabaseError("insert", "tool_regenerations",
+			"failed to marshal mods", err)
 	}
 
-	// Unmarshal mods
-	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-		regen.Mods = []*Modified[ToolRegenerationMod]{}
+	regen, err = t.scanFromRow(t.db.QueryRow(insertToolRegenerationQuery,
+		regen.ToolID,
+		regen.RegeneratedAt,
+		regen.CyclesAtRegeneration,
+		regen.Reason,
+		modsJSON,
+	))
+	if err != nil {
+		return nil, NewDatabaseError("insert", "tool_regenerations",
+			"failed to create regeneration record", err)
 	}
 
 	// Create feed entry
@@ -156,35 +155,19 @@ func (t *ToolRegenerations) Create(toolID int64, reason string) (*ToolRegenerati
 			&FeedToolUpdate{
 				ID:         toolID,
 				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s)", toolID, reason),
-				ModifiedBy: nil, // System update
+				ModifiedBy: user,
 			},
 		))
 	}
 
-	return &regen, nil
+	return regen, nil
 }
 
 // Update updates an existing regeneration record (mainly for mods)
-func (t *ToolRegenerations) Update(regen *ToolRegeneration) error {
+func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
-	// Add modification record if values changed
-	existingRegen, err := t.getByID(regen.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get existing regeneration: %w", err)
-	}
-
-	if existingRegen.CyclesAtRegeneration != regen.CyclesAtRegeneration ||
-		existingRegen.Reason != regen.Reason {
-		mod := NewModified(nil, ToolRegenerationMod{
-			ToolID:               existingRegen.ToolID,
-			RegeneratedAt:        existingRegen.RegeneratedAt,
-			CyclesAtRegeneration: existingRegen.CyclesAtRegeneration,
-			Reason:               existingRegen.Reason,
-		})
-		// Prepend new mod to keep most recent first
-		regen.Mods = append([]*Modified[ToolRegenerationMod]{mod}, regen.Mods...)
-	}
+	t.updateMods(user, regen)
 
 	// Marshal mods
 	modsJSON, err := json.Marshal(regen.Mods)
@@ -213,59 +196,26 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 		WHERE id = ?
 	`
 
-	var regen ToolRegeneration
-	var modsData []byte
-
-	err := t.db.QueryRow(query, id).Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
-		&regen.Reason,
-		&modsData,
-	)
-
+	regen, err := t.scanFromRow(t.db.QueryRow(query, id))
 	if err != nil {
-		return nil, err
+		return nil, NewDatabaseError("scan", "tool_regenerations",
+			"failed to get regeneration by ID", err)
 	}
 
-	// Unmarshal mods
-	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-		regen.Mods = []*Modified[ToolRegenerationMod]{}
-	}
-
-	return &regen, nil
+	return regen, nil
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
 func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting last regeneration for tool: tool_id=%d", toolID)
 
-	var regen ToolRegeneration
-	var modsData []byte
-
-	err := t.db.QueryRow(selectLastRegenerationQuery, toolID).Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
-		&regen.Reason,
-		&modsData,
-	)
-
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
+	regen, err := t.scanFromRow(t.db.QueryRow(selectLastRegenerationQuery, toolID))
 	if err != nil {
-		return nil, fmt.Errorf("failed to get last regeneration: %w", err)
+		return nil, NewDatabaseError("scan", "tool_regenerations",
+			"failed to get last regeneration", err)
 	}
 
-	// Unmarshal mods
-	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-		regen.Mods = []*Modified[ToolRegenerationMod]{}
-	}
-
-	return &regen, nil
+	return regen, nil
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
@@ -280,35 +230,16 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		var regen ToolRegeneration
-		var modsData []byte
-
-		err := rows.Scan(
-			&regen.ID,
-			&regen.ToolID,
-			&regen.RegeneratedAt,
-			&regen.CyclesAtRegeneration,
-			&regen.Reason,
-			&modsData,
-		)
+		regen, err := t.scanFromRows(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan regeneration: %w", err)
+			return nil, NewDatabaseError("scan", "tool_regenerations",
+				"failed to get regeneration history", err)
 		}
 
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-			regen.Mods = []*Modified[ToolRegenerationMod]{}
-		}
-
-		regenerations = append(regenerations, &regen)
+		regenerations = append(regenerations, regen)
 	}
 
 	return regenerations, nil
-}
-
-// GetByToolID gets all regenerations for a specific tool (alias for GetRegenerationHistory)
-func (t *ToolRegenerations) GetByToolID(toolID int64) ([]*ToolRegeneration, error) {
-	return t.GetRegenerationHistory(toolID)
 }
 
 // GetRegenerationCount gets the total number of regenerations for a tool
@@ -337,27 +268,13 @@ func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		var regen ToolRegeneration
-		var modsData []byte
-
-		err := rows.Scan(
-			&regen.ID,
-			&regen.ToolID,
-			&regen.RegeneratedAt,
-			&regen.CyclesAtRegeneration,
-			&regen.Reason,
-			&modsData,
-		)
+		regen, err := t.scanFromRows(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan regeneration: %w", err)
+			return nil, NewDatabaseError("scan", "tool_regenerations",
+				"failed to get regenerations between", err)
 		}
 
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-			regen.Mods = []*Modified[ToolRegenerationMod]{}
-		}
-
-		regenerations = append(regenerations, &regen)
+		regenerations = append(regenerations, regen)
 	}
 
 	return regenerations, nil
@@ -375,27 +292,13 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		var regen ToolRegeneration
-		var modsData []byte
-
-		err := rows.Scan(
-			&regen.ID,
-			&regen.ToolID,
-			&regen.RegeneratedAt,
-			&regen.CyclesAtRegeneration,
-			&regen.Reason,
-			&modsData,
-		)
+		regen, err := t.scanFromRows(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan regeneration: %w", err)
+			return nil, NewDatabaseError("scan", "tool_regenerations",
+				"failed to get all regenerations", err)
 		}
 
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
-			regen.Mods = []*Modified[ToolRegenerationMod]{}
-		}
-
-		regenerations = append(regenerations, &regen)
+		regenerations = append(regenerations, regen)
 	}
 
 	return regenerations, nil
@@ -454,4 +357,63 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 	}
 
 	return results, nil
+}
+
+func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
+	var regen ToolRegeneration
+	var modsData []byte
+
+	err := row.Scan(
+		&regen.ID,
+		&regen.ToolID,
+		&regen.RegeneratedAt,
+		&regen.CyclesAtRegeneration,
+		&regen.Reason,
+		&modsData,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal mods data: %w", err)
+	}
+
+	return &regen, nil
+}
+
+func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, error) {
+	var regen ToolRegeneration
+	var modsData []byte
+
+	err := rows.Scan(
+		&regen.ID,
+		&regen.ToolID,
+		&regen.RegeneratedAt,
+		&regen.CyclesAtRegeneration,
+		&regen.Reason,
+		&modsData,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan from rows: %w", err)
+	}
+
+	if err := json.Unmarshal(modsData, &regen.Mods); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal mods data: %w", err)
+	}
+
+	return &regen, nil
+}
+
+func (t *ToolRegenerations) updateMods(user *User, regen *ToolRegeneration) {
+	if user == nil {
+		return
+	}
+
+	regen.Mods.Add(user, ToolRegenerationMod{
+		ToolID:               regen.ToolID,
+		RegeneratedAt:        regen.RegeneratedAt,
+		CyclesAtRegeneration: regen.CyclesAtRegeneration,
+		Reason:               regen.Reason,
+	})
 }

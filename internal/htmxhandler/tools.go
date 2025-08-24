@@ -228,7 +228,7 @@ func (h *Tools) handleCycles(c echo.Context) error {
 	}
 
 	// Get regenerations for this tool
-	regenerations, err := h.DB.ToolRegenerations.GetByToolID(toolID)
+	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
 	if err != nil {
 		logger.HTMXHandlerTools().Error("Failed to get regenerations for tool %d: %v", toolID, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
