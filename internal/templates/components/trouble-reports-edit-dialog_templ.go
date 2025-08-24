@@ -530,7 +530,24 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<!-- File Upload Area --><div class=\"file-input-area flex flex-col justify-center items-center\" onclick=\"clickAttachmentsInput()\" ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<!-- File Upload Area -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, clickAttachmentsInput())
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"file-input-area flex flex-col justify-center items-center\" onclick=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 templ.ComponentScript = clickAttachmentsInput()
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23.Call)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -538,96 +555,96 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<input type=\"file\" name=\"attachments\" id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<input type=\"file\" name=\"attachments\" id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var23 string
-			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAttachments)
+			var templ_7745c5c3_Var24 string
+			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAttachments)
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 264, Col: 36}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" multiple accept=\"image/*\" onchange=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" multiple accept=\"image/*\" onchange=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var24 templ.ComponentScript = onFileInputChange(templ.JSExpression("event"))
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24.Call)
+			var templ_7745c5c3_Var25 templ.ComponentScript = onFileInputChange(templ.JSExpression("event"))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25.Call)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\"></div><!-- File Preview Area --><div id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var25 string
-			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDFilePreview)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 271, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\"></div><!-- File Preview Area --><div id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var26 string
-			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDNewAttachments)
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDFilePreview)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 273, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 271, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex gap justify-end\"><button hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var27 string
-			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true")
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDNewAttachments)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 300, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 273, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" hx-trigger=\"click\" hx-target=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div></div><footer class=\"flex gap justify-end\"><button hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog))
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 302, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 300, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" hx-trigger=\"click\" hx-target=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var29 string
+			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 302, Col: 73}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\" hx-swap=\"outerHTML\" type=\"button\" class=\"secondary flex gap\"><i class=\"bi bi-x-circle\"></i> Schließen</button><!-- Set button text based on ID value --><button type=\"submit\" class=\"flex gap\"><i class=\"bi bi-check-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.ID > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "Aktualisieren")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "Aktualisieren")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "Erstellen")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "Erstellen")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "</button></footer></form><script>\n                document.querySelector(\"#troubleReportEditDialog\").showModal();\n            </script></dialog>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "</button></footer></form><script>\n                document.querySelector(\"#troubleReportEditDialog\").showModal();\n            </script></dialog>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

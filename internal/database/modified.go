@@ -8,14 +8,14 @@ import (
 type Mods[T any] []*Modified[T]
 
 func (m *Mods[T]) Add(user *User, data T) {
- *m = append(*m, NewModified(user, data))
+	*m = append(*m, NewModified(user, data))
 }
 
 func (m *Mods[T]) Current() *Modified[T] {
 	if len(*m) == 0 {
 		return nil
 	}
-	return (*m)[len(*m)-1]
+	return (*m)[0]
 }
 
 // Modified represents a modification record that tracks changes made to any type T

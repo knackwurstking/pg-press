@@ -251,7 +251,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 						<!-- File Upload Area -->
 						<div
 							class="file-input-area flex flex-col justify-center items-center"
-							onclick="clickAttachmentsInput()"
+							onclick={ clickAttachmentsInput() }
 							ondrop="window.dialogEditFunctions.handleFileDrop(event)"
 							ondragover="window.dialogEditFunctions.handleDragOver(event)"
 							ondragleave="window.dialogEditFunctions.handleDragLeave(event)"

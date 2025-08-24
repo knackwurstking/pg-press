@@ -18,7 +18,6 @@ func TroubleReportModifications(
 	user *database.User,
 	troubleReport *database.TroubleReport,
 	firstMod *database.Modified[database.TroubleReportMod],
-	currentMod *database.Modified[database.TroubleReportMod],
 	mods database.Mods[database.TroubleReportMod],
 ) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -48,7 +47,7 @@ func TroubleReportModifications(
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDData)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 16, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 15, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -61,7 +60,7 @@ func TroubleReportModifications(
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 19, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 18, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -74,7 +73,7 @@ func TroubleReportModifications(
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 21, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 20, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -87,7 +86,7 @@ func TroubleReportModifications(
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDModificationsList)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 29, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 28, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -102,7 +101,7 @@ func TroubleReportModifications(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if currentMod.Time == mod.Time {
+			if mods.Current().Time == mod.Time {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " style=\"\n                            border: 2px solid var(--ui-primary);\n                            border-radius: var(--ui-radius);\n                            padding-top: 2rem;\n                        \"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -117,7 +116,7 @@ func TroubleReportModifications(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if currentMod.Time == mod.Time {
+			if mods.Current().Time == mod.Time {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Mark the current modification --> <div style=\"\n                                position: absolute;\n                                top: -1px;\n                                right: 12px;\n                                padding: 4px 12px;\n                                border-radius: 0 0 6px 6px;\n                                font-size: 0.85em;\n                            \" class=\"primary\"><b>Aktuelle Version</b></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -135,7 +134,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(mod.User.UserName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 71, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 70, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +147,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 71, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 70, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -166,7 +165,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(mod.User.UserName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 76, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 75, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -179,7 +178,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 76, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 75, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -197,7 +196,7 @@ func TroubleReportModifications(
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 87, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 86, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -210,7 +209,7 @@ func TroubleReportModifications(
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 96, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 95, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -228,7 +227,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d-%d", troubleReport.ID, mod.Time))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 101, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 100, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -244,7 +243,7 @@ func TroubleReportModifications(
 					serverPathPrefix, troubleReport.ID, mod.Time,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 105, Col: 9}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 104, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -257,7 +256,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(len(mod.Data.LinkedAttachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 111, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 110, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -272,7 +271,7 @@ func TroubleReportModifications(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if currentMod.Time != mod.Time {
+			if mods.Current().Time != mod.Time {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div style=\"\n\t\t                        justify-content: flex-end;\n\t\t                        padding-top: var(--ui-spacing);\n\t\t                        border-top: 1px solid var(--ui-border-color);\n\t\t                    \" class=\"flex gap\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -288,7 +287,7 @@ func TroubleReportModifications(
 						serverPathPrefix, troubleReport.ID, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 131, Col: 10}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 130, Col: 10}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -301,7 +300,7 @@ func TroubleReportModifications(
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 133, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 132, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -322,7 +321,7 @@ func TroubleReportModifications(
 						serverPathPrefix, troubleReport.ID, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 148, Col: 10}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 147, Col: 10}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 					if templ_7745c5c3_Err != nil {
@@ -335,7 +334,7 @@ func TroubleReportModifications(
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 150, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 149, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {

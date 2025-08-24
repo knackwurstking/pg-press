@@ -2,7 +2,6 @@ package htmxhandler
 
 import (
 	"net/http"
-	"slices"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -145,20 +144,20 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 
 	var firstMod *database.Modified[database.TroubleReportMod]
 	if len(tr.Mods) > 0 {
-		firstMod = tr.Mods[0]
+		firstMod = tr.Mods[len(tr.Mods)-1]
 	}
 
-	currentMod := tr.Mods.Current()
-
-	mods := slices.Clone(tr.Mods)
-	slices.Reverse(mods)
+	// FIXME: Mods needs to be fixed...
+	logger.TroubleReport().Debug("Trouble report %d has %d modifications", id, len(tr.Mods))
+	for i, mod := range tr.Mods {
+		logger.TroubleReport().Debug("Mod %d: Time=%d, Title=%s", i, mod.Time, mod.Data.Title)
+	}
 
 	trModifications := components.TroubleReportModifications(
 		user,
 		tr,
 		firstMod,
-		currentMod,
-		mods,
+		tr.Mods,
 	)
 	if err := trModifications.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,

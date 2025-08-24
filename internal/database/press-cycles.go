@@ -27,28 +27,28 @@ const (
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
 		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods)
 		VALUES
-			(0, 0, '2023-01-01', NULL,     0, 	 0, '[]'),
 			(0, 1, '2023-01-01', NULL,     0, 	 0, '[]'),
-			(0, 0, '2023-02-01', NULL,  1000, 1000, '[]'),
+			(0, 2, '2023-01-01', NULL,     0, 	 0, '[]'),
 			(0, 1, '2023-02-01', NULL,  1000, 1000, '[]'),
-			(0, 0, '2023-03-01', NULL,  2000, 1000, '[]'),
+			(0, 2, '2023-02-01', NULL,  1000, 1000, '[]'),
 			(0, 1, '2023-03-01', NULL,  2000, 1000, '[]'),
-			(0, 0, '2023-04-01', NULL,  3000, 1000, '[]'),
+			(0, 2, '2023-03-01', NULL,  2000, 1000, '[]'),
 			(0, 1, '2023-04-01', NULL,  3000, 1000, '[]'),
-			(0, 0, '2023-05-01', NULL,  4000, 1000, '[]'),
+			(0, 2, '2023-04-01', NULL,  3000, 1000, '[]'),
 			(0, 1, '2023-05-01', NULL,  4000, 1000, '[]'),
-			(0, 0, '2023-06-01', NULL,  5000, 1000, '[]'),
+			(0, 2, '2023-05-01', NULL,  4000, 1000, '[]'),
 			(0, 1, '2023-06-01', NULL,  5000, 1000, '[]'),
-			(0, 0, '2023-07-01', NULL,  6000, 1000, '[]'),
+			(0, 2, '2023-06-01', NULL,  5000, 1000, '[]'),
 			(0, 1, '2023-07-01', NULL,  6000, 1000, '[]'),
-			(0, 0, '2023-08-01', NULL,  7000, 1000, '[]'),
+			(0, 2, '2023-07-01', NULL,  6000, 1000, '[]'),
 			(0, 1, '2023-08-01', NULL,  7000, 1000, '[]'),
-			(0, 0, '2023-09-01', NULL,  8000, 1000, '[]'),
+			(0, 2, '2023-08-01', NULL,  7000, 1000, '[]'),
 			(0, 1, '2023-09-01', NULL,  8000, 1000, '[]'),
-			(0, 0, '2023-10-01', NULL,  9000, 1000, '[]'),
+			(0, 2, '2023-09-01', NULL,  8000, 1000, '[]'),
 			(0, 1, '2023-10-01', NULL,  9000, 1000, '[]'),
-			(0, 0, '2023-11-01', NULL, 10000, 1000, '[]'),
-			(0, 1, '2023-11-01', NULL, 10000, 1000, '[]');
+			(0, 2, '2023-10-01', NULL,  9000, 1000, '[]'),
+			(0, 1, '2023-11-01', NULL, 10000, 1000, '[]'),
+			(0, 2, '2023-11-01', NULL, 10000, 1000, '[]');
 	`
 
 	insertPressCycleQuery = `
@@ -98,13 +98,13 @@ const (
 	`
 
 	selectTotalCyclesSinceRegenerationQuery = `
-		SELECT COALESCE(SUM(total_cycles), 0)
+		SELECT COALESCE(SUM(partial_cycles), 0)
 		FROM press_cycles
 		WHERE tool_id = ? AND from_date >= ?
 	`
 
 	selectTotalCyclesAllTimeQuery = `
-		SELECT COALESCE(SUM(total_cycles), 0)
+		SELECT COALESCE(SUM(partial_cycles), 0)
 		FROM press_cycles
 		WHERE tool_id = ?
 	`

@@ -10,7 +10,6 @@ templ TroubleReportModifications(
 	user *database.User,
 	troubleReport *database.TroubleReport,
 	firstMod *database.Modified[database.TroubleReportMod],
-	currentMod *database.Modified[database.TroubleReportMod],
 	mods database.Mods[database.TroubleReportMod],
 ) {
 	<div id={ constants.IDData } class="flex flex-col gap">
@@ -30,7 +29,7 @@ templ TroubleReportModifications(
 			for _, mod := range mods {
 				<!-- Modification Container -->
 				<article
-					if currentMod.Time == mod.Time {
+					if mods.Current().Time == mod.Time {
 						style="
                             border: 2px solid var(--ui-primary);
                             border-radius: var(--ui-radius);
@@ -44,7 +43,7 @@ templ TroubleReportModifications(
 					}
 					class="border"
 				>
-					if currentMod.Time == mod.Time {
+					if mods.Current().Time == mod.Time {
 						<!-- Mark the current modification -->
 						<div
 							style="
@@ -113,7 +112,7 @@ templ TroubleReportModifications(
 							</div>
 						}
 					</div>
-					if currentMod.Time != mod.Time {
+					if mods.Current().Time != mod.Time {
 						<div
 							style="
 		                        justify-content: flex-end;
