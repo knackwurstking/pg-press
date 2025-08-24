@@ -35,19 +35,17 @@ type CyclesBetweenRegenerations struct {
 
 // ToolCyclesHelper provides helper methods for tool cycles management
 type ToolCyclesHelper struct {
-	db            *DB
 	pressCycles   *PressCycles
 	tools         *Tools
 	regenerations *ToolRegenerations
 }
 
 // NewToolCyclesHelper creates a new ToolCyclesHelper instance
-func NewToolCyclesHelper(db *DB) *ToolCyclesHelper {
+func NewToolCyclesHelper(pressCycles *PressCycles, tools *Tools, toolRegenerations *ToolRegenerations) *ToolCyclesHelper {
 	return &ToolCyclesHelper{
-		db:            db,
-		pressCycles:   db.PressCycles,
-		tools:         db.Tools,
-		regenerations: db.ToolRegenerations,
+		pressCycles:   pressCycles,
+		tools:         tools,
+		regenerations: toolRegenerations,
 	}
 }
 

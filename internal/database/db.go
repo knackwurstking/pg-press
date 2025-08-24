@@ -51,12 +51,10 @@ func New(db *sql.DB) *DB {
 		MetalSheets:          metalSheets,
 		PressCycles:          pressCycles,
 		ToolRegenerations:    toolRegenerations,
+		ToolCyclesHelper:     NewToolCyclesHelper(pressCycles, tools, toolRegenerations),
 		Feeds:                feeds,
 		db:                   db,
 	}
-
-	// Initialize ToolCyclesHelper after DB instance is created
-	dbInstance.ToolCyclesHelper = NewToolCyclesHelper(dbInstance)
 
 	return dbInstance
 }
