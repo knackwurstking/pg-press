@@ -157,12 +157,6 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		return err
 	}
 
-	// FIXME: Mods needs to be fixed...
-	logger.HTMXHandlerTroubleReports().Debug("Trouble report %d has %d modifications", id, len(tr.Mods))
-	for i, mod := range tr.Mods {
-		logger.HTMXHandlerTroubleReports().Debug("Mod %d: Time=%d, Title=%#v", i, mod.Time, mod.Data)
-	}
-
 	// Create a reversed copy of tr.Mods
 	trModifications := components.TroubleReportModifications(
 		user,
