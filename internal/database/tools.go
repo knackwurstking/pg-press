@@ -49,7 +49,6 @@ const (
 		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, status = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
 	`
 
-	// TODO: Implement the Tools struct.
 	deleteToolQuery = `
 		DELETE FROM tools WHERE id = $1;
 	`

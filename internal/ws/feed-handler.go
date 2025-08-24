@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/net/websocket"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
@@ -165,7 +166,7 @@ func (fn *FeedHandler) sendFeedCounterUpdate(conn *FeedConnection) {
 
 // renderFeedCounter renders the feed counter template with current data
 func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
-	feeds, err := fn.db.Feeds.ListRange(0, 100)
+	feeds, err := fn.db.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
 		return nil, err
 	}

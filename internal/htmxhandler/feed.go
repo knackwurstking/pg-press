@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
@@ -24,7 +25,7 @@ func (h *Feed) handleGetData(c echo.Context) error {
 	logger.HTMXHandlerFeed().Debug("Fetching feed data")
 
 	// Get feeds
-	feeds, err := h.DB.Feeds.ListRange(0, 100)
+	feeds, err := h.DB.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
 		logger.HTMXHandlerFeed().Error("Failed to fetch feeds: %v", err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),

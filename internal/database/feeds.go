@@ -252,6 +252,5 @@ func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
 		}
 	}
 
-	logger.DBFeeds().Debug("Successfully scanned feed ID %d with type %s", feed.ID, feed.DataType)
 	return feed, nil
 }

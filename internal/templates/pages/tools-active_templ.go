@@ -13,7 +13,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-// TODO: Take database data from the database for this press (prop: press *database.Press)
 func ToolsActivePage(press int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

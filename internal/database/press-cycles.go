@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	// TODO: Add more example data for testing
 	createPressCyclesTableQuery = `
 		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
