@@ -16,20 +16,22 @@ const (
 			regenerated_at DATETIME NOT NULL,
 			cycles_at_regeneration INTEGER NOT NULL DEFAULT 0,
 			reason TEXT,
-			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE
+			performed_by INTEGER,
+			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE,
+			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_date ON tool_regenerations(regenerated_at);
 	`
 
 	insertToolRegenerationQuery = `
-		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason)
-		VALUES (?, ?, ?, ?)
-		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by)
+		VALUES (?, ?, ?, ?, ?)
+		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 	`
 
 	selectLastRegenerationQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -37,7 +39,7 @@ const (
 	`
 
 	selectRegenerationHistoryQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY regenerated_at DESC
@@ -48,14 +50,14 @@ const (
 	`
 
 	selectRegenerationsBetweenQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 		FROM tool_regenerations
 		WHERE tool_id = ? AND regenerated_at BETWEEN ? AND ?
 		ORDER BY regenerated_at DESC
 	`
 
 	selectAllRegenerationsQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 		FROM tool_regenerations
 		ORDER BY regenerated_at DESC
 		LIMIT ? OFFSET ?
@@ -78,7 +80,7 @@ const (
 
 	updateToolRegenerationQuery = `
 		UPDATE tool_regenerations
-		SET cycles_at_regeneration = ?, reason = ?
+		SET cycles_at_regeneration = ?, reason = ?, performed_by = ?
 		WHERE id = ?
 	`
 )
@@ -124,13 +126,19 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 			"failed to get total cycles", err)
 	}
 
-	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason)
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.ID
+	}
+
+	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason, performedBy)
 
 	regen, err = t.scanFromRow(t.db.QueryRow(insertToolRegenerationQuery,
 		regen.ToolID,
 		regen.RegeneratedAt,
 		regen.CyclesAtRegeneration,
 		regen.Reason,
+		performedBy,
 	))
 	if err != nil {
 		return nil, NewDatabaseError("insert", "tool_regenerations",
@@ -156,9 +164,15 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.ID
+	}
+
 	_, err := t.db.Exec(updateToolRegenerationQuery,
 		regen.CyclesAtRegeneration,
 		regen.Reason,
+		performedBy,
 		regen.ID,
 	)
 	if err != nil {
@@ -171,7 +185,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 // getByID is an internal helper to get a regeneration by ID
 func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 	query := `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason
+		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
 		FROM tool_regenerations
 		WHERE id = ?
 	`
@@ -341,6 +355,7 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 
 func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
 	var regen ToolRegeneration
+	var performedBy sql.NullInt64
 
 	err := row.Scan(
 		&regen.ID,
@@ -348,9 +363,14 @@ func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error)
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
+		&performedBy,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	if performedBy.Valid {
+		regen.PerformedBy = &performedBy.Int64
 	}
 
 	return &regen, nil
@@ -358,6 +378,7 @@ func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error)
 
 func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, error) {
 	var regen ToolRegeneration
+	var performedBy sql.NullInt64
 
 	err := rows.Scan(
 		&regen.ID,
@@ -365,9 +386,14 @@ func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, err
 		&regen.RegeneratedAt,
 		&regen.CyclesAtRegeneration,
 		&regen.Reason,
+		&performedBy,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan from rows: %w", err)
+	}
+
+	if performedBy.Valid {
+		regen.PerformedBy = &performedBy.Int64
 	}
 
 	return &regen, nil
