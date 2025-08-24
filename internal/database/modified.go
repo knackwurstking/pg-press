@@ -31,14 +31,12 @@ func (m *Mods[T]) Current() *Modified[T] {
 }
 
 func (m *Mods[T]) Rollback(time int64) error {
-	for i := len(*m) - 1; i >= 0; i-- {
-		if (*m)[i].Time == time {
-			// Move the found modification to index 0
-			c := (*m)[i]
-			r := (*m)[0 : i+1]
-			r = append(r, (*m)[i+1:]...)
-			*m = append(*m, c)
-			*m = append(*m, r...)
+	for i, mod := range *m {
+		if mod.Time == time {
+			// Move the matching modification to the current position
+			before := (*m)[0:i]
+			restMods := append(before, (*m)[i+1:]...)
+			*m = append(restMods, mod)
 			return nil
 		}
 	}
