@@ -230,7 +230,7 @@ func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumbe
 	}
 
 	// Start press cycle tracking
-	_, err = h.pressCycles.StartToolUsage(toolID, pressNumber)
+	_, err = h.pressCycles.StartToolUsage(toolID, pressNumber, user)
 	if err != nil {
 		return err
 	}
@@ -307,9 +307,9 @@ func (h *ToolCyclesHelper) CompleteToolRegeneration(toolID int64, user *User) er
 }
 
 // UpdateToolCycles updates the cycle counts for a tool currently on a press
-func (h *ToolCyclesHelper) UpdateToolCycles(toolID int64, totalCycles, partialCycles int64) error {
+func (h *ToolCyclesHelper) UpdateToolCycles(toolID int64, totalCycles, partialCycles int64, user *User) error {
 	logger.DBToolCyclesHelper().Debug("Updating cycles for tool %d: total=%d, partial=%d", toolID, totalCycles, partialCycles)
-	return h.pressCycles.UpdateCycles(toolID, totalCycles, partialCycles)
+	return h.pressCycles.UpdateCycles(toolID, totalCycles, partialCycles, user)
 }
 
 // GetPressUtilization gets current tool utilization for all presses

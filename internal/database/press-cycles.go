@@ -19,41 +19,43 @@ const (
 			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			partial_cycles INTEGER NOT NULL DEFAULT 0,
-			FOREIGN KEY (tool_id) REFERENCES tools(id)
+			performed_by INTEGER,
+			FOREIGN KEY (tool_id) REFERENCES tools(id),
+			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
-		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles)
+		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by)
 		VALUES
-			(0, 1, '2023-01-01', NULL,     0, 	 0),
-			(0, 2, '2023-01-01', NULL,     0, 	 0),
-			(0, 1, '2023-02-01', NULL,  1000, 1000),
-			(0, 2, '2023-02-01', NULL,  1000, 1000),
-			(0, 1, '2023-03-01', NULL,  2000, 1000),
-			(0, 2, '2023-03-01', NULL,  2000, 1000),
-			(0, 1, '2023-04-01', NULL,  3000, 1000),
-			(0, 2, '2023-04-01', NULL,  3000, 1000),
-			(0, 1, '2023-05-01', NULL,  4000, 1000),
-			(0, 2, '2023-05-01', NULL,  4000, 1000),
-			(0, 1, '2023-06-01', NULL,  5000, 1000),
-			(0, 2, '2023-06-01', NULL,  5000, 1000),
-			(0, 1, '2023-07-01', NULL,  6000, 1000),
-			(0, 2, '2023-07-01', NULL,  6000, 1000),
-			(0, 1, '2023-08-01', NULL,  7000, 1000),
-			(0, 2, '2023-08-01', NULL,  7000, 1000),
-			(0, 1, '2023-09-01', NULL,  8000, 1000),
-			(0, 2, '2023-09-01', NULL,  8000, 1000),
-			(0, 1, '2023-10-01', NULL,  9000, 1000),
-			(0, 2, '2023-10-01', NULL,  9000, 1000),
-			(0, 1, '2023-11-01', NULL, 10000, 1000),
-			(0, 2, '2023-11-01', NULL, 10000, 1000);
+			(0, 1, '2023-01-01', NULL,     0, 	 0, NULL),
+			(0, 2, '2023-01-01', NULL,     0, 	 0, NULL),
+			(0, 1, '2023-02-01', NULL,  1000, 1000, NULL),
+			(0, 2, '2023-02-01', NULL,  1000, 1000, NULL),
+			(0, 1, '2023-03-01', NULL,  2000, 1000, NULL),
+			(0, 2, '2023-03-01', NULL,  2000, 1000, NULL),
+			(0, 1, '2023-04-01', NULL,  3000, 1000, NULL),
+			(0, 2, '2023-04-01', NULL,  3000, 1000, NULL),
+			(0, 1, '2023-05-01', NULL,  4000, 1000, NULL),
+			(0, 2, '2023-05-01', NULL,  4000, 1000, NULL),
+			(0, 1, '2023-06-01', NULL,  5000, 1000, NULL),
+			(0, 2, '2023-06-01', NULL,  5000, 1000, NULL),
+			(0, 1, '2023-07-01', NULL,  6000, 1000, NULL),
+			(0, 2, '2023-07-01', NULL,  6000, 1000, NULL),
+			(0, 1, '2023-08-01', NULL,  7000, 1000, NULL),
+			(0, 2, '2023-08-01', NULL,  7000, 1000, NULL),
+			(0, 1, '2023-09-01', NULL,  8000, 1000, NULL),
+			(0, 2, '2023-09-01', NULL,  8000, 1000, NULL),
+			(0, 1, '2023-10-01', NULL,  9000, 1000, NULL),
+			(0, 2, '2023-10-01', NULL,  9000, 1000, NULL),
+			(0, 1, '2023-11-01', NULL, 10000, 1000, NULL),
+			(0, 2, '2023-11-01', NULL, 10000, 1000, NULL);
 	`
 
 	insertPressCycleQuery = `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles)
-		VALUES (?, ?, ?, 0, 0)
-		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles, performed_by)
+		VALUES (?, ?, ?, 0, 0, ?)
+		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 	`
 
 	endToolUsageQuery = `
@@ -64,33 +66,33 @@ const (
 
 	updatePressCyclesQuery = `
 		UPDATE press_cycles
-		SET total_cycles = ?, partial_cycles = ?
+		SET total_cycles = ?, partial_cycles = ?, performed_by = ?
 		WHERE tool_id = ? AND to_date IS NULL
 	`
 
 	selectCurrentToolUsageQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ? AND to_date IS NULL
 		LIMIT 1
 	`
 
 	selectToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
 	`
 
 	selectToolHistorySinceRegenerationQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ? AND from_date >= ?
 		ORDER BY from_date DESC
 	`
 
 	selectAllToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
@@ -115,14 +117,14 @@ const (
 	`
 
 	selectPressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY from_date DESC
 	`
 
 	selectActivePressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ? AND to_date IS NULL
 		ORDER BY from_date DESC
@@ -172,6 +174,7 @@ func (p *PressCycles) init() {
 func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*PressCycle, error) {
 	var cycle PressCycle
 	var toDate sql.NullTime
+	var performedBy sql.NullInt64
 
 	err := scanner.Scan(
 		&cycle.ID,
@@ -181,6 +184,7 @@ func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*
 		&toDate,
 		&cycle.TotalCycles,
 		&cycle.PartialCycles,
+		&performedBy,
 	)
 	if err != nil {
 		return nil, err
@@ -188,6 +192,10 @@ func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*
 
 	if toDate.Valid {
 		cycle.ToDate = &toDate.Time
+	}
+
+	if performedBy.Valid {
+		cycle.PerformedBy = &performedBy.Int64
 	}
 
 	return &cycle, nil
@@ -207,7 +215,7 @@ func (p *PressCycles) scanPressCycles(rows *sql.Rows) ([]*PressCycle, error) {
 }
 
 // StartToolUsage records when a tool starts being used on a press
-func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*PressCycle, error) {
+func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user *User) (*PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
 
 	// Validate press number
@@ -221,7 +229,12 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*Pr
 	}
 
 	// Create new press cycle entry
-	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now())
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.TelegramID
+	}
+
+	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), performedBy)
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start tool usage: %w", err)
@@ -255,10 +268,16 @@ func (p *PressCycles) EndToolUsage(toolID int64) error {
 }
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press
-func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
+// UpdateCycles updates the total and partial cycles for an active tool
+func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64, user *User) error {
 	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d, partial=%d", toolID, totalCycles, partialCycles)
 
-	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, toolID)
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.TelegramID
+	}
+
+	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, performedBy, toolID)
 	if err != nil {
 		return fmt.Errorf("failed to update cycles: %w", err)
 	}
