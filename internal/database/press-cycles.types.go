@@ -15,14 +15,13 @@ func (pn PressNumber) IsValid() bool {
 }
 
 type PressCycle struct {
-	ID            int64                      `json:"id"`
-	PressNumber   PressNumber                `json:"press_number"`
-	ToolID        int64                      `json:"tool_id"`
-	FromDate      time.Time                  `json:"from_date"`
-	ToDate        *time.Time                 `json:"to_date"`
-	TotalCycles   int64                      `json:"total_cycles"`
-	PartialCycles int64                      `json:"partial_cycles"`
-	Mods          []*Modified[PressCycleMod] `json:"mods"`
+	ID            int64       `json:"id"`
+	PressNumber   PressNumber `json:"press_number"`
+	ToolID        int64       `json:"tool_id"`
+	FromDate      time.Time   `json:"from_date"`
+	ToDate        *time.Time  `json:"to_date"`
+	TotalCycles   int64       `json:"total_cycles"`
+	PartialCycles int64       `json:"partial_cycles"`
 }
 
 // NewPressCycle creates a new PressCycle instance
@@ -33,16 +32,5 @@ func NewPressCycle(pressNumber PressNumber, toolID int64, fromDate time.Time) *P
 		FromDate:      fromDate,
 		TotalCycles:   0,
 		PartialCycles: 0,
-		Mods:          []*Modified[PressCycleMod]{},
 	}
-}
-
-// PressCycleMod represents the modifiable fields of a PressCycle for history tracking
-type PressCycleMod struct {
-	PressNumber   PressNumber `json:"press_number"`
-	ToolID        int64       `json:"tool_id"`
-	FromDate      time.Time   `json:"from_date"`
-	ToDate        *time.Time  `json:"to_date"`
-	TotalCycles   int64       `json:"total_cycles"`
-	PartialCycles int64       `json:"partial_cycles"`
 }

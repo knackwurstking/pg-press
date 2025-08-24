@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -20,42 +19,41 @@ const (
 			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			partial_cycles INTEGER NOT NULL DEFAULT 0,
-			mods BLOB NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id)
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
-		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods)
+		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles)
 		VALUES
-			(0, 1, '2023-01-01', NULL,     0, 	 0, '[]'),
-			(0, 2, '2023-01-01', NULL,     0, 	 0, '[]'),
-			(0, 1, '2023-02-01', NULL,  1000, 1000, '[]'),
-			(0, 2, '2023-02-01', NULL,  1000, 1000, '[]'),
-			(0, 1, '2023-03-01', NULL,  2000, 1000, '[]'),
-			(0, 2, '2023-03-01', NULL,  2000, 1000, '[]'),
-			(0, 1, '2023-04-01', NULL,  3000, 1000, '[]'),
-			(0, 2, '2023-04-01', NULL,  3000, 1000, '[]'),
-			(0, 1, '2023-05-01', NULL,  4000, 1000, '[]'),
-			(0, 2, '2023-05-01', NULL,  4000, 1000, '[]'),
-			(0, 1, '2023-06-01', NULL,  5000, 1000, '[]'),
-			(0, 2, '2023-06-01', NULL,  5000, 1000, '[]'),
-			(0, 1, '2023-07-01', NULL,  6000, 1000, '[]'),
-			(0, 2, '2023-07-01', NULL,  6000, 1000, '[]'),
-			(0, 1, '2023-08-01', NULL,  7000, 1000, '[]'),
-			(0, 2, '2023-08-01', NULL,  7000, 1000, '[]'),
-			(0, 1, '2023-09-01', NULL,  8000, 1000, '[]'),
-			(0, 2, '2023-09-01', NULL,  8000, 1000, '[]'),
-			(0, 1, '2023-10-01', NULL,  9000, 1000, '[]'),
-			(0, 2, '2023-10-01', NULL,  9000, 1000, '[]'),
-			(0, 1, '2023-11-01', NULL, 10000, 1000, '[]'),
-			(0, 2, '2023-11-01', NULL, 10000, 1000, '[]');
+			(0, 1, '2023-01-01', NULL,     0, 	 0),
+			(0, 2, '2023-01-01', NULL,     0, 	 0),
+			(0, 1, '2023-02-01', NULL,  1000, 1000),
+			(0, 2, '2023-02-01', NULL,  1000, 1000),
+			(0, 1, '2023-03-01', NULL,  2000, 1000),
+			(0, 2, '2023-03-01', NULL,  2000, 1000),
+			(0, 1, '2023-04-01', NULL,  3000, 1000),
+			(0, 2, '2023-04-01', NULL,  3000, 1000),
+			(0, 1, '2023-05-01', NULL,  4000, 1000),
+			(0, 2, '2023-05-01', NULL,  4000, 1000),
+			(0, 1, '2023-06-01', NULL,  5000, 1000),
+			(0, 2, '2023-06-01', NULL,  5000, 1000),
+			(0, 1, '2023-07-01', NULL,  6000, 1000),
+			(0, 2, '2023-07-01', NULL,  6000, 1000),
+			(0, 1, '2023-08-01', NULL,  7000, 1000),
+			(0, 2, '2023-08-01', NULL,  7000, 1000),
+			(0, 1, '2023-09-01', NULL,  8000, 1000),
+			(0, 2, '2023-09-01', NULL,  8000, 1000),
+			(0, 1, '2023-10-01', NULL,  9000, 1000),
+			(0, 2, '2023-10-01', NULL,  9000, 1000),
+			(0, 1, '2023-11-01', NULL, 10000, 1000),
+			(0, 2, '2023-11-01', NULL, 10000, 1000);
 	`
 
 	insertPressCycleQuery = `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles, mods)
-		VALUES (?, ?, ?, 0, 0, ?)
-		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, partial_cycles)
+		VALUES (?, ?, ?, 0, 0)
+		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 	`
 
 	endToolUsageQuery = `
@@ -66,33 +64,33 @@ const (
 
 	updatePressCyclesQuery = `
 		UPDATE press_cycles
-		SET total_cycles = ?, partial_cycles = ?, mods = ?
+		SET total_cycles = ?, partial_cycles = ?
 		WHERE tool_id = ? AND to_date IS NULL
 	`
 
 	selectCurrentToolUsageQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE tool_id = ? AND to_date IS NULL
 		LIMIT 1
 	`
 
 	selectToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
 	`
 
 	selectToolHistorySinceRegenerationQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE tool_id = ? AND from_date >= ?
 		ORDER BY from_date DESC
 	`
 
 	selectAllToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
@@ -117,14 +115,14 @@ const (
 	`
 
 	selectPressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY from_date DESC
 	`
 
 	selectActivePressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, mods
+		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, partial_cycles
 		FROM press_cycles
 		WHERE press_number = ? AND to_date IS NULL
 		ORDER BY from_date DESC
@@ -170,6 +168,44 @@ func (p *PressCycles) init() {
 	}
 }
 
+// scanPressCycle scans a single press cycle from a sql.Row or sql.Rows scanner
+func (p *PressCycles) scanPressCycle(scanner interface{ Scan(...any) error }) (*PressCycle, error) {
+	var cycle PressCycle
+	var toDate sql.NullTime
+
+	err := scanner.Scan(
+		&cycle.ID,
+		&cycle.PressNumber,
+		&cycle.ToolID,
+		&cycle.FromDate,
+		&toDate,
+		&cycle.TotalCycles,
+		&cycle.PartialCycles,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if toDate.Valid {
+		cycle.ToDate = &toDate.Time
+	}
+
+	return &cycle, nil
+}
+
+// scanPressCycles scans multiple press cycles from sql.Rows
+func (p *PressCycles) scanPressCycles(rows *sql.Rows) ([]*PressCycle, error) {
+	var cycles []*PressCycle
+	for rows.Next() {
+		cycle, err := p.scanPressCycle(rows)
+		if err != nil {
+			return nil, err
+		}
+		cycles = append(cycles, cycle)
+	}
+	return cycles, nil
+}
+
 // StartToolUsage records when a tool starts being used on a press
 func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
@@ -185,36 +221,10 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*Pr
 	}
 
 	// Create new press cycle entry
-
-	var cycle PressCycle
-	var toDate sql.NullTime
-	var modsData []byte
-
-	// Initialize empty mods array
-	modsJSON, _ := json.Marshal([]*Modified[PressCycleMod]{})
-
-	err := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), modsJSON).Scan(
-		&cycle.ID,
-		&cycle.PressNumber,
-		&cycle.ToolID,
-		&cycle.FromDate,
-		&toDate,
-		&cycle.TotalCycles,
-		&cycle.PartialCycles,
-		&modsData,
-	)
-
+	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now())
+	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start tool usage: %w", err)
-	}
-
-	if toDate.Valid {
-		cycle.ToDate = &toDate.Time
-	}
-
-	// Unmarshal mods
-	if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-		cycle.Mods = []*Modified[PressCycleMod]{}
 	}
 
 	// Create feed entry
@@ -229,7 +239,7 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber) (*Pr
 		))
 	}
 
-	return &cycle, nil
+	return cycle, nil
 }
 
 // EndToolUsage ends the current usage of a tool on any press
@@ -248,35 +258,7 @@ func (p *PressCycles) EndToolUsage(toolID int64) error {
 func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64) error {
 	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d, partial=%d", toolID, totalCycles, partialCycles)
 
-	// First get the current cycle to preserve and update mods
-	current, err := p.GetCurrentToolUsage(toolID)
-	if err != nil {
-		return fmt.Errorf("failed to get current usage: %w", err)
-	}
-	if current == nil {
-		return fmt.Errorf("no active press cycle found for tool %d", toolID)
-	}
-
-	// Add modification record if values changed
-	if current.TotalCycles != totalCycles || current.PartialCycles != partialCycles {
-		mod := NewModified(nil, PressCycleMod{
-			PressNumber:   current.PressNumber,
-			ToolID:        current.ToolID,
-			FromDate:      current.FromDate,
-			ToDate:        current.ToDate,
-			TotalCycles:   current.TotalCycles,
-			PartialCycles: current.PartialCycles,
-		})
-		current.Mods = append([]*Modified[PressCycleMod]{mod}, current.Mods...)
-	}
-
-	// Marshal mods
-	modsJSON, err := json.Marshal(current.Mods)
-	if err != nil {
-		return fmt.Errorf("failed to marshal mods: %w", err)
-	}
-
-	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, modsJSON, toolID)
+	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, toolID)
 	if err != nil {
 		return fmt.Errorf("failed to update cycles: %w", err)
 	}
@@ -297,21 +279,8 @@ func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int6
 func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
 
-	var cycle PressCycle
-	var toDate sql.NullTime
-	var modsData []byte
-
-	err := p.db.QueryRow(selectCurrentToolUsageQuery, toolID).Scan(
-		&cycle.ID,
-		&cycle.PressNumber,
-		&cycle.ToolID,
-		&cycle.FromDate,
-		&toDate,
-		&cycle.TotalCycles,
-		&cycle.PartialCycles,
-		&modsData,
-	)
-
+	row := p.db.QueryRow(selectCurrentToolUsageQuery, toolID)
+	cycle, err := p.scanPressCycle(row)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -319,16 +288,7 @@ func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 		return nil, fmt.Errorf("failed to get current tool usage: %w", err)
 	}
 
-	if toDate.Valid {
-		cycle.ToDate = &toDate.Time
-	}
-
-	// Unmarshal mods
-	if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-		cycle.Mods = []*Modified[PressCycleMod]{}
-	}
-
-	return &cycle, nil
+	return cycle, nil
 }
 
 // GetToolHistory gets the press usage history for a tool
@@ -341,36 +301,9 @@ func (p *PressCycles) GetToolHistory(toolID int64) ([]*PressCycle, error) {
 	}
 	defer rows.Close()
 
-	var cycles []*PressCycle
-	for rows.Next() {
-		var cycle PressCycle
-		var toDate sql.NullTime
-		var modsData []byte
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.FromDate,
-			&toDate,
-			&cycle.TotalCycles,
-			&cycle.PartialCycles,
-			&modsData,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
-		}
-
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-			cycle.Mods = []*Modified[PressCycleMod]{}
-		}
-
-		cycles = append(cycles, &cycle)
+	cycles, err := p.scanPressCycles(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -386,36 +319,9 @@ func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error)
 	}
 	defer rows.Close()
 
-	var cycles []*PressCycle
-	for rows.Next() {
-		var cycle PressCycle
-		var toDate sql.NullTime
-		var modsData []byte
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.FromDate,
-			&toDate,
-			&cycle.TotalCycles,
-			&cycle.PartialCycles,
-			&modsData,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
-		}
-
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-			cycle.Mods = []*Modified[PressCycleMod]{}
-		}
-
-		cycles = append(cycles, &cycle)
+	cycles, err := p.scanPressCycles(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -443,36 +349,9 @@ func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenera
 	}
 	defer rows.Close()
 
-	var cycles []*PressCycle
-	for rows.Next() {
-		var cycle PressCycle
-		var toDate sql.NullTime
-		var modsData []byte
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.FromDate,
-			&toDate,
-			&cycle.TotalCycles,
-			&cycle.PartialCycles,
-			&modsData,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
-		}
-
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-			cycle.Mods = []*Modified[PressCycleMod]{}
-		}
-
-		cycles = append(cycles, &cycle)
+	cycles, err := p.scanPressCycles(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -517,36 +396,9 @@ func (p *PressCycles) GetPressCycles(pressNumber PressNumber) ([]*PressCycle, er
 	}
 	defer rows.Close()
 
-	var cycles []*PressCycle
-	for rows.Next() {
-		var cycle PressCycle
-		var toDate sql.NullTime
-		var modsData []byte
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.FromDate,
-			&toDate,
-			&cycle.TotalCycles,
-			&cycle.PartialCycles,
-			&modsData,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
-		}
-
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-			cycle.Mods = []*Modified[PressCycleMod]{}
-		}
-
-		cycles = append(cycles, &cycle)
+	cycles, err := p.scanPressCycles(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -567,36 +419,9 @@ func (p *PressCycles) GetActivePressCycles(pressNumber PressNumber) ([]*PressCyc
 	}
 	defer rows.Close()
 
-	var cycles []*PressCycle
-	for rows.Next() {
-		var cycle PressCycle
-		var toDate sql.NullTime
-		var modsData []byte
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.FromDate,
-			&toDate,
-			&cycle.TotalCycles,
-			&cycle.PartialCycles,
-			&modsData,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan press cycle: %w", err)
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
-		}
-
-		// Unmarshal mods
-		if err := json.Unmarshal(modsData, &cycle.Mods); err != nil {
-			cycle.Mods = []*Modified[PressCycleMod]{}
-		}
-
-		cycles = append(cycles, &cycle)
+	cycles, err := p.scanPressCycles(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
 
 	return cycles, nil
