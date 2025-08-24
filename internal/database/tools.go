@@ -1,4 +1,3 @@
-// FIXME: Mods handling
 package database
 
 import (
@@ -164,19 +163,7 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
-	// Ensure initial mod entry exists
-	if len(tool.Mods) == 0 {
-		initialMod := NewModified(user, ToolMod{
-			Position:    tool.Position,
-			Format:      tool.Format,
-			Type:        tool.Type,
-			Code:        tool.Code,
-			Status:      tool.Status,
-			Press:       tool.Press,
-			LinkedNotes: tool.LinkedNotes,
-		})
-		tool.Mods = []*Modified[ToolMod]{initialMod}
-	}
+	t.updateMods(user, tool)
 
 	// Marshal JSON fields
 	formatBytes, err := json.Marshal(tool.Format)
@@ -231,33 +218,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 func (t *Tools) Update(tool *Tool, user *User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
-	// Get current tool to compare for changes
-	current, err := t.Get(tool.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get current tool: %w", err)
-	}
-
-	// Add modification record if values changed
-	if current.Position != tool.Position ||
-		current.Format != tool.Format ||
-		current.Type != tool.Type ||
-		current.Code != tool.Code ||
-		current.Status != tool.Status ||
-		!equalPressNumbers(current.Press, tool.Press) ||
-		len(current.LinkedNotes) != len(tool.LinkedNotes) {
-
-		mod := NewModified(user, ToolMod{
-			Position:    current.Position,
-			Format:      current.Format,
-			Type:        current.Type,
-			Code:        current.Code,
-			Status:      current.Status,
-			Press:       current.Press,
-			LinkedNotes: current.LinkedNotes,
-		})
-		// Prepend new mod to keep most recent first
-		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
-	}
+	t.updateMods(user, tool)
 
 	// Marshal JSON fields
 	formatBytes, err := json.Marshal(tool.Format)
@@ -331,7 +292,7 @@ func (t *Tools) Delete(id int64, user *User) error {
 }
 
 // UpdateStatus updates only the status field of a tool
-func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
+func (t *Tools) UpdateStatus(toolID int64, status ToolStatus, user *User) error {
 	logger.DBTools().Info("Updating tool status: %d to %s", toolID, status)
 
 	// Get current tool to track changes
@@ -340,20 +301,15 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 		return fmt.Errorf("failed to get tool for status update: %w", err)
 	}
 
-	// Add modification record if status changed
-	if tool.Status != status {
-		mod := NewModified(nil, ToolMod{ // nil user for system update
-			Position:    tool.Position,
-			Format:      tool.Format,
-			Type:        tool.Type,
-			Code:        tool.Code,
-			Status:      tool.Status,
-			Press:       tool.Press,
-			LinkedNotes: tool.LinkedNotes,
-		})
-		// Prepend new mod to keep most recent first
-		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
+	if tool.Status == status {
+		return nil
 	}
+
+	// Update tool
+	tool.Status = status
+
+	// Update mods
+	t.updateMods(user, tool)
 
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(tool.Mods)
@@ -363,10 +319,10 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 	}
 
 	query := `UPDATE tools SET status = ?, mods = ? WHERE id = ?`
-	_, err = t.db.Exec(query, string(status), modsBytes, toolID)
+	_, err = t.db.Exec(query, tool.Status, modsBytes, tool.ID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
-			fmt.Sprintf("failed to update status for tool %d", toolID), err)
+			fmt.Sprintf("failed to update status for tool %d", tool.ID), err)
 	}
 
 	// Trigger feed update
@@ -375,9 +331,9 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 		t.feeds.Add(NewFeed(
 			FeedTypeToolUpdate,
 			&FeedToolUpdate{
-				ID:         toolID,
+				ID:         tool.ID,
 				Tool:       tool.String(),
-				ModifiedBy: nil, // System update
+				ModifiedBy: user,
 			},
 		))
 	}
@@ -386,7 +342,7 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus) error {
 }
 
 // UpdatePress updates only the press field of a tool
-func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
+func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -395,20 +351,17 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
 		return fmt.Errorf("failed to get tool for press update: %w", err)
 	}
 
-	// Add modification record if press changed
-	if !equalPressNumbers(tool.Press, press) {
-		mod := NewModified(nil, ToolMod{ // nil user for system update
-			Position:    tool.Position,
-			Format:      tool.Format,
-			Type:        tool.Type,
-			Code:        tool.Code,
-			Status:      tool.Status,
-			Press:       tool.Press,
-			LinkedNotes: tool.LinkedNotes,
-		})
-		// Prepend new mod to keep most recent first
-		tool.Mods = append([]*Modified[ToolMod]{mod}, tool.Mods...)
+	if tool.Press == press {
+		return nil
 	}
+
+	// Update tool
+	if err := tool.SetPress(press); err != nil {
+		return fmt.Errorf("failed to set press for tool %d: %w", toolID, err)
+	}
+
+	// Update mods
+	t.updateMods(user, tool)
 
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(tool.Mods)
@@ -432,7 +385,7 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber) error {
 			&FeedToolUpdate{
 				ID:         toolID,
 				Tool:       tool.String(),
-				ModifiedBy: nil, // System update
+				ModifiedBy: user,
 			},
 		))
 	}
@@ -513,6 +466,22 @@ func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
 	}
 
 	return tool, nil
+}
+
+func (t *Tools) updateMods(user *User, tool *Tool) {
+	if user == nil {
+		return
+	}
+
+	tool.Mods.Add(user, ToolMod{
+		Position:    tool.Position,
+		Format:      tool.Format,
+		Type:        tool.Type,
+		Code:        tool.Code,
+		Status:      tool.Status,
+		Press:       tool.Press,
+		LinkedNotes: tool.LinkedNotes,
+	})
 }
 
 // equalPressNumbers compares two press number pointers for equality
