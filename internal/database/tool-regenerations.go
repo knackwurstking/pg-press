@@ -128,7 +128,7 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 
 	var performedBy *int64
 	if user != nil {
-		performedBy = &user.ID
+		performedBy = &user.TelegramID
 	}
 
 	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason, performedBy)
@@ -166,7 +166,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 
 	var performedBy *int64
 	if user != nil {
-		performedBy = &user.ID
+		performedBy = &user.TelegramID
 	}
 
 	_, err := t.db.Exec(updateToolRegenerationQuery,
