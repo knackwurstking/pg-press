@@ -51,6 +51,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 		)
 	}
 
+	// TODO: Fix logging for this component
 	logger.TroubleReport().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
@@ -148,9 +149,9 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 	}
 
 	// FIXME: Mods needs to be fixed...
-	logger.TroubleReport().Debug("Trouble report %d has %d modifications", id, len(tr.Mods))
+	logger.HTMXHandlerTroubleReports().Debug("Trouble report %d has %d modifications", id, len(tr.Mods))
 	for i, mod := range tr.Mods {
-		logger.TroubleReport().Debug("Mod %d: Time=%d, Title=%s", i, mod.Time, mod.Data.Title)
+		logger.HTMXHandlerTroubleReports().Debug("Mod %d: Time=%d, Title=%s", i, mod.Time, mod.Data.Title)
 	}
 
 	trModifications := components.TroubleReportModifications(
@@ -189,6 +190,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	for _, m := range tr.Mods {
 		if m.Time == timeQuery {
 			if mod != nil {
+				// TODO: Fix logging for this component
 				logger.TroubleReport().Warn(
 					"Multiple modifications with the same time, mod: %+v, m: %+v", mod, m)
 				newMods = append(newMods, m)

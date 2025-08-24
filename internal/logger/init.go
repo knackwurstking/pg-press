@@ -95,6 +95,10 @@ func TroubleReport() *Logger {
 	return NewComponentLogger("TroubleReport")
 }
 
+func HTMXHandlerTroubleReports() *Logger {
+	return NewComponentLogger("HTMX Handler TroubleReports")
+}
+
 func TroubleReportsHelper() *Logger {
 	return NewComponentLogger("TroubleReportsHelper")
 }
