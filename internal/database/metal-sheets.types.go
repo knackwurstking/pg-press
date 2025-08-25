@@ -13,6 +13,8 @@ const (
 	MetalSheetStatusDamaged     MetalSheetStatus = "damaged"
 )
 
+// TODO: Add a `MetalSheetList` type with sorting functionality
+
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
 	ID          int64               `json:"id"`
