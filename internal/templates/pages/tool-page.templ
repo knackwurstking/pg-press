@@ -294,16 +294,6 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<section class="cycles">
 			<div class="flex justify-between items-center mb">
 				<h5>Pressennutzungsverlauf</h5>
-				<button
-					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles?tool_id=%d", serverPathPrefix, tool.ID) }
-					hx-trigger="click"
-					hx-target={ fmt.Sprintf("[name='tool-cycles-table'] tbody") }
-					hx-swap="innerHTML"
-					class="secondary icon ghost"
-					title="Tabelle aktualisieren"
-				>
-					<i class="bi bi-arrow-clockwise"></i>
-				</button>
 			</div>
 			<section>
 				<h6 class="mb">
