@@ -72,6 +72,11 @@ func (h *Tools) handleToolsActivePage(c echo.Context) error {
 }
 
 func (h *Tools) handleToolPage(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to parse tool id parameter: %v", err)
@@ -100,7 +105,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
 
-	page := pages.ToolPage(tool, metalSheets)
+	page := pages.ToolPage(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tool page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

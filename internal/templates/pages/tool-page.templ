@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
+templ ToolPage(user *database.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -23,10 +23,10 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 					</h4>
 				</div>
 			</div>
-			@toolPageActions(tool)
+			@toolPageActions(user, tool)
 			@toolPageNotes(tool)
 			if tool.Position == database.PositionTop || tool.Position == database.PositionBottom {
-				@toolPageMetalSheets(tool, metalSheets)
+				@toolPageMetalSheets(user, tool, metalSheets)
 			}
 			@toolPageCylesList(tool)
 		</main>
@@ -37,7 +37,7 @@ templ ToolPage(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet)
 // 	- Action bar (top position)
 // 	 	- Delete button for tool removal, redirect back to tools/ page after deletion
 //  	- Edit button for tool editing
-templ toolPageActions(tool *database.ToolWithNotes) {
+templ toolPageActions(user *database.User, tool *database.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
 			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d", serverPathPrefix, tool.ID) }
@@ -54,6 +54,9 @@ templ toolPageActions(tool *database.ToolWithNotes) {
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			class="destructive flex gap"
+			if !user.IsAdmin() {
+				disabled
+			}
 		>
 			<i class="bi bi-trash"></i>
 			Löschen
@@ -66,7 +69,7 @@ templ toolPageActions(tool *database.ToolWithNotes) {
 templ toolPageNotes(tool *database.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section class="notes-section">
-			<h3>Notizen</h3>
+			<h4>Notizen</h4>
 			<div class="notes-list">
 				for _, note := range tool.LoadedNotes {
 					<div class="card">
@@ -98,34 +101,38 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 	}
 }
 
-templ toolPageMetalSheets(tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheets(user *database.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
 	<section class="metalsheets-section">
 		<div class="flex justify-between items-center mb">
-			<h3>Bleche</h3>
+			<h4>Bleche</h4>
 			<button
 				hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/add?tool_id=%d", serverPathPrefix, tool.ID) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
-				class="primary flex gap"
+				class="secondary small flex gap"
 				title="Neues Blech hinzufügen"
 			>
-				<i class="bi bi-plus"></i>
+				<i class="bi bi-plus-lg"></i>
 				Blech hinzufügen
 			</button>
 		</div>
 		<div class="table-container">
 			switch tool.Position {
 				case database.PositionBottom:
-					@toolPageMetalSheetsTablePositionBottom(metalSheets)
+					@toolPageMetalSheetsTablePositionBottom(
+						user, metalSheets,
+					)
 				case database.PositionTop:
-					@toolPageMetalSheetsTablePositionTop(metalSheets)
+					@toolPageMetalSheetsTablePositionTop(
+						user, metalSheets,
+					)
 			}
 		</div>
 	</section>
 }
 
-templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*database.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -135,7 +142,7 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 					<th>Marke (mm)</th>
 					<th>Stf.</th>
 					<th>Stf. Max</th>
-					<th>Aktionen</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -153,7 +160,7 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-							<td class="flex gap-sm justify-center items-center">
+							<td class="button-group flex justify-center items-center">
 								<button
 									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
 									hx-trigger="click"
@@ -182,6 +189,9 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 									hx-swap="outerHTML"
 									class="destructive icon ghost text-sm"
 									title="Löschen"
+									if !user.IsAdmin() {
+										disabled
+									}
 								>
 									<i class="bi bi-trash"></i>
 								</button>
@@ -194,14 +204,14 @@ templ toolPageMetalSheetsTablePositionBottom(metalSheets []*database.MetalSheet)
 	</figure>
 }
 
-templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*database.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
 				<tr>
 					<th>Stärke (mm)</th>
 					<th>Blech (mm)</th>
-					<th>Aktionen</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -216,7 +226,7 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 						<tr>
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td class="flex gap-sm justify-center items-center">
+							<td class="button-group flex justify-center items-center">
 								<button
 									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
 									hx-trigger="click"
@@ -245,6 +255,9 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 									hx-swap="outerHTML"
 									class="destructive icon ghost text-sm"
 									title="Löschen"
+									if !user.IsAdmin() {
+										disabled
+									}
 								>
 									<i class="bi bi-trash"></i>
 								</button>
@@ -264,9 +277,9 @@ templ toolPageMetalSheetsTablePositionTop(metalSheets []*database.MetalSheet) {
 // 	  history, so just set a mark with a timestamp of regeneration.
 templ toolPageCylesList(tool *database.ToolWithNotes) {
 	<section class="cycles-section flex flex-col gap">
-		<h3>Werkzeugnutzung & Zyklen</h3>
+		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="current-usage">
-			<h4>Aktueller Status</h4>
+			<h5>Aktueller Status</h5>
 			switch tool.Status {
 				case database.ToolStatusActive:
 					<a
@@ -290,7 +303,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		</section>
 		<section class="press-history">
 			<div class="flex justify-between items-center mb">
-				<h4>Pressennutzungsverlauf</h4>
+				<h5>Pressennutzungsverlauf</h5>
 				<button
 					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles?tool_id=%d", serverPathPrefix, tool.ID) }
 					hx-trigger="click"
@@ -318,9 +331,9 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				</div>
 			</section>
 			<section>
-				<h5 class="mb">
+				<h6 class="mb">
 					Gesamtzyklen seit der letzten Regenerierung:
-				</h5>
+				</h6>
 				<span
 					hx-get={ fmt.Sprintf("%s/htmx/tools/total-cycles?tool_id=%d", serverPathPrefix, tool.ID) }
 					hx-trigger="load"

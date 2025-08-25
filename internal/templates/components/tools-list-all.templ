@@ -25,16 +25,27 @@ templ ToolsListAll(tools []*database.ToolWithNotes) {
 }
 
 templ toolListItem(id int64, tool *database.ToolWithNotes) {
-	<li id={ fmt.Sprintf("tool-%d", id) } class="debug">
+	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
 			role="button"
 			href={ fmt.Sprintf(serverPathPrefix+"/tools/all/%d", id) }
-			class="ghost contrast flex justify-between items-center"
+			class="ghost contrast flex justify-between items-center flex gap justify-between"
 		>
-			@ToolPosition(tool.Position)
-			<span>{ tool.Format.Height } x { tool.Format.Width }</span>
-			<span class="badge badge-sm ml">{ tool.Status }</span>
-			<i class="bi bi-chevron-right text-muted"></i>
+			<span class="flex flex-col gap-sm">
+				<span class="text-sm text-normal">{ tool.Format.Height }x{ tool.Format.Width } { tool.Code } { tool.Type }</span>
+				<span>
+					@ToolPosition(tool.Position)
+					switch tool.Status {
+						case database.ToolStatusActive:
+							<small class="badge badge-sm badge-outline ml">Eingebaut</small>
+						case database.ToolStatusAvailable:
+							<small class="badge badge-sm badge-outline ml">Verfügbar</small>
+						case database.ToolStatusRegenerating:
+							<small class="badge badge-sm badge-outline ml">Regenerierung</small>
+					}
+				</span>
+			</span>
+			<i class="bi bi-chevron-right"></i>
 		</a>
 	</li>
 }

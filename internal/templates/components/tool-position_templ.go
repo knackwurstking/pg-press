@@ -33,12 +33,12 @@ func ToolPosition(position database.Position) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		switch position {
 		case database.PositionTop:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<small style=\"border-radius: var(--ui-radius);\" class=\"primary px-sm\">Oberteil</small>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<small class=\"badge badge-sm badge-outline\">Oberteil</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case database.PositionBottom:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<small style=\"border-radius: var(--ui-radius);\" class=\"primary px-sm\">Unterteil</small>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<small class=\"badge badge-sm badge-outline\">Unterteil</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
