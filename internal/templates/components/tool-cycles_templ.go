@@ -392,7 +392,7 @@ func renderCycleRow(user *database.User, cycle *database.PressCycle) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if user.IsAdmin() {
+		if !user.IsAdmin() {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
