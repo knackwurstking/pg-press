@@ -685,14 +685,14 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" class=\"secondary small flex\" title=\"Neuen Eintrag hinzufügen\"><i class=\"bi bi-plus-lg\"></i></button></div><section><h6 class=\"mb\">Gesamtzyklen seit der letzten Regenerierung:</h6><span hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" hx-trigger=\"click\" class=\"secondary small flex\" title=\"Neuen Eintrag hinzufügen\"><i class=\"bi bi-plus-lg\"></i></button></div><section><h6 class=\"mb\">Gesamtzyklen seit der letzten Regenerierung:</h6><span hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/total-cycles?tool_id=%d", serverPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 313, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 311, Col: 93}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -705,7 +705,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/cycles?tool_id=%d", serverPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 333, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 331, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
