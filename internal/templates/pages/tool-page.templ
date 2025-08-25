@@ -33,10 +33,6 @@ templ ToolPage(user *database.User, tool *database.ToolWithNotes, metalSheets []
 	}
 }
 
-// TODO: ...
-// 	- Action bar (top position)
-// 	 	- Delete button for tool removal, redirect back to tools/ page after deletion
-//  	- Edit button for tool editing
 templ toolPageActions(user *database.User, tool *database.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
@@ -64,8 +60,6 @@ templ toolPageActions(user *database.User, tool *database.ToolWithNotes) {
 	</div>
 }
 
-// TODO: ...
-// 	- Show all notes in order of importance
 templ toolPageNotes(tool *database.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section class="notes-section">
@@ -270,15 +264,11 @@ templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*da
 	</figure>
 }
 
-// TODO: Continue here...
-// 	- Show where this tool is currently used, in which press
-//  - Also show a history for last used presses, this should all be a part of the cykles table.
-// 	- Cycles table for this tool, should be reset after regeneration but keep the data in
-// 	  history, so just set a mark with a timestamp of regeneration.
+// TODO: Add action button: "Add", "Edit", "Delete"
 templ toolPageCylesList(tool *database.ToolWithNotes) {
 	<section class="cycles-section flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
-		<section class="current-usage">
+		<section class="setatus">
 			<h5>Aktueller Status</h5>
 			switch tool.Status {
 				case database.ToolStatusActive:
@@ -301,7 +291,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					<span>{ string(tool.Status) }</span>
 			}
 		</section>
-		<section class="press-history">
+		<section class="cycles">
 			<div class="flex justify-between items-center mb">
 				<h5>Pressennutzungsverlauf</h5>
 				<button
@@ -315,21 +305,6 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					<i class="bi bi-arrow-clockwise"></i>
 				</button>
 			</div>
-			<section class="dev-note card warning">
-				<div class="card-header">
-					<h4>
-						<i class="bi bi-exclamation-triangle mr"></i>
-						<span>Dev Note</span>
-					</h4>
-				</div>
-				<div class="card-body">
-					<p>
-						Wenn das Werkzeug regeneriert wird, wird die Tabelle
-						unterbrochen und eine neue hinzugefügt (Reihenfolge:
-						Neu zu Alt).
-					</p>
-				</div>
-			</section>
 			<section>
 				<h6 class="mb">
 					Gesamtzyklen seit der letzten Regenerierung:
