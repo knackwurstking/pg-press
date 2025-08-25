@@ -295,7 +295,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				<h5>Pressennutzungsverlauf</h5>
 				<!-- TODO: This feature is not yet implemented -->
 				<button
-					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles/add?tool_id=%d", serverPathPrefix, tool.ID) }
+					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles/edit?tool_id=%d", serverPathPrefix, tool.ID) }
 					hx-trigger="click"
 					class="secondary small flex"
 					title="Neuen Eintrag hinzufügen"
