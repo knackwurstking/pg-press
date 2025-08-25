@@ -32,6 +32,8 @@ templ toolListItem(id int64, tool *database.ToolWithNotes) {
 			class="ghost contrast flex justify-between items-center"
 		>
 			@ToolPosition(tool.Position)
+			<span>{ tool.Format.Height } x { tool.Format.Width }</span>
+			<span class="badge badge-sm ml">{ tool.Status }</span>
 			<i class="bi bi-chevron-right text-muted"></i>
 		</a>
 	</li>
