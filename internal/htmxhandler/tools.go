@@ -20,9 +20,11 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
+	// List all tools
 	e.GET(serverPathPrefix+"/htmx/tools/list-all", h.handleListAll)
 	e.GET(serverPathPrefix+"/htmx/tools/list-all/", h.handleListAll)
 
+	// Get, add or edit a tool
 	e.GET(serverPathPrefix+"/htmx/tools/edit", func(c echo.Context) error {
 		return h.handleEdit(c, nil)
 	})
@@ -34,18 +36,24 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.PUT(serverPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
 	e.PUT(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
 
+	// Total cycles for a tool
 	e.GET(serverPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
 	e.GET(serverPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
 
+	// Delete a tool
 	e.DELETE(serverPathPrefix+"/htmx/tools/delete", h.handleDelete)
 	e.DELETE(serverPathPrefix+"/htmx/tools/delete/", h.handleDelete)
 
+	// Cycles table rows
 	e.GET(serverPathPrefix+"/htmx/tools/cycles", h.handleCycles)
 	e.GET(serverPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
 
+	// Get, add or edit a cycles table entry
 	// TODO: Add "GET    /htmx/tools/cycles/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
 	// TODO: Add "POST   /htmx/tools/cycles/edit?tool_id=%d"
 	// TODO: Add "PUT    /htmx/tools/cycles/edit?cycle_id=%d"
+
+	// Delete a cycle table entry
 	// TODO: Add "DELETE /htmx/tools/cycles/delete?cycle_id=%d"
 }
 
@@ -103,7 +111,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("User %s is creating a new tool", user.UserName)
 
-	tool, err := h.getToolFromForm(c, user)
+	tool, err := h.getToolFormData(c, user)
 	if err != nil {
 		logger.HTMXHandlerTools().Error("Failed to get tool from form: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -135,7 +143,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("User %s is updating a tool", user.UserName)
 
-	tool, err := h.getToolFromForm(c, user)
+	tool, err := h.getToolFormData(c, user)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool from form: "+err.Error())
@@ -156,7 +164,8 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	})
 }
 
-func (h *Tools) getToolFromForm(c echo.Context, user *database.User) (*database.Tool, error) {
+// getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]
+func (h *Tools) getToolFormData(c echo.Context, user *database.User) (*database.Tool, error) {
 	logger.HTMXHandlerTools().Debug("Parsing tool form data")
 
 	var position database.Position
