@@ -34,14 +34,17 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.PUT(serverPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
 	e.PUT(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
 
-	e.GET(serverPathPrefix+"/htmx/tools/cycles", h.handleCycles)
-	e.GET(serverPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
-
 	e.GET(serverPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
 	e.GET(serverPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
 
 	e.DELETE(serverPathPrefix+"/htmx/tools/delete", h.handleDelete)
 	e.DELETE(serverPathPrefix+"/htmx/tools/delete/", h.handleDelete)
+
+	e.GET(serverPathPrefix+"/htmx/tools/cycles", h.handleCycles)
+	e.GET(serverPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
+
+	// TODO: Add "/htmx/tools/cycles/edit?tool_id=%d"
+	// TODO: Add "/htmx/tools/cycles/delete?tool_id=%d"
 }
 
 func (h *Tools) handleListAll(c echo.Context) error {
@@ -209,6 +212,11 @@ func (h *Tools) getToolFromForm(c echo.Context, user *database.User) (*database.
 }
 
 func (h *Tools) handleCycles(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	// Get tool ID from query parameter
 	toolID, err := utils.ParseInt64Query(c, "tool_id")
 	if err != nil {
@@ -239,7 +247,7 @@ func (h *Tools) handleCycles(c echo.Context) error {
 		len(cycles), len(regenerations), toolID)
 
 	// Render the component
-	cyclesRows := components.ToolCyclesTableRows(cycles, regenerations)
+	cyclesRows := components.ToolCyclesTableRows(user, cycles, regenerations)
 	if err := cyclesRows.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTools().Error("Failed to render tool cycles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

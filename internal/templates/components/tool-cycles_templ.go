@@ -26,7 +26,7 @@ func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bo
 }
 
 // ToolCyclesTableRows renders the tbody content for tool cycles history
-func ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) templ.Component {
+func ToolCyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,7 +48,7 @@ func ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*databas
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(cycles) == 0 && len(regenerations) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<tr><td colspan=\"5\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<tr><td colspan=\"6\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -66,7 +66,7 @@ func ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*databas
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = renderCyclesForPeriod(cycles, regenerations, i).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderCyclesForPeriod(user, cycles, regenerations, i).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -76,13 +76,13 @@ func ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*databas
 				return templ_7745c5c3_Err
 			}
 			if len(regenerations) > 0 {
-				templ_7745c5c3_Err = renderCyclesBeforeFirstRegeneration(cycles, regenerations[0]).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderCyclesBeforeFirstRegeneration(user, cycles, regenerations[0]).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
 				for _, cycle := range cycles {
-					templ_7745c5c3_Err = renderCycleRow(cycle).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = renderCycleRow(user, cycle).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -114,7 +114,7 @@ func renderRegenerationMarker(regeneration *database.ToolRegeneration) templ.Com
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<tr class=\"regeneration-marker\"><td colspan=\"5\" class=\"text-center\"><div class=\"flex gap items-center justify-center\"><i class=\"bi bi-arrow-repeat text-warning\"></i> <span class=\"text-muted\">Regenerierung am ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<tr class=\"regeneration-marker\"><td colspan=\"6\" class=\"text-center\"><div class=\"flex gap items-center justify-center\"><i class=\"bi bi-arrow-repeat text-warning\"></i> <span class=\"text-muted\">Regenerierung am ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -135,7 +135,7 @@ func renderRegenerationMarker(regeneration *database.ToolRegeneration) templ.Com
 	})
 }
 
-func renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration, regenerationIndex int) templ.Component {
+func renderCyclesForPeriod(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration, regenerationIndex int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -161,7 +161,7 @@ func renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*datab
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, &regenerations[regenerationIndex+1].RegeneratedAt).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = renderCyclesInWindow(user, cycles, &regenerations[regenerationIndex].RegeneratedAt, &regenerations[regenerationIndex+1].RegeneratedAt).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -170,7 +170,7 @@ func renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*datab
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = renderCyclesInWindow(user, cycles, &regenerations[regenerationIndex].RegeneratedAt, nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -179,7 +179,7 @@ func renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*datab
 	})
 }
 
-func renderCyclesInWindow(cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time) templ.Component {
+func renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -204,14 +204,14 @@ func renderCyclesInWindow(cycles []*database.PressCycle, startTime *time.Time, e
 		for _, cycle := range cycles {
 			if cycleInPeriod(cycle, startTime, endTime) {
 				hasCycles = true
-				templ_7745c5c3_Err = renderCycleRow(cycle).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderCycleRow(user, cycle).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
 		if !hasCycles {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<tr><td colspan=\"5\" class=\"text-center text-muted\">Keine Zyklen in diesem Zeitraum</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<tr><td colspan=\"6\" class=\"text-center text-muted\">Keine Zyklen in diesem Zeitraum</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -220,7 +220,7 @@ func renderCyclesInWindow(cycles []*database.PressCycle, startTime *time.Time, e
 	})
 }
 
-func renderCyclesBeforeFirstRegeneration(cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) templ.Component {
+func renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -245,14 +245,14 @@ func renderCyclesBeforeFirstRegeneration(cycles []*database.PressCycle, firstReg
 		for _, cycle := range cycles {
 			if cycle.FromDate.Before(firstRegeneration.RegeneratedAt) {
 				hasCycles = true
-				templ_7745c5c3_Err = renderCycleRow(cycle).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderCycleRow(user, cycle).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
 		if hasCycles {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<tr class=\"regeneration-marker\"><td colspan=\"5\" class=\"text-center\"><span class=\"text-muted\">Zyklen vor erster Regenerierung</span></td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<tr class=\"regeneration-marker\"><td colspan=\"6\" class=\"text-center\"><span class=\"text-muted\">Zyklen vor erster Regenerierung</span></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -261,7 +261,7 @@ func renderCyclesBeforeFirstRegeneration(cycles []*database.PressCycle, firstReg
 	})
 }
 
-func renderCycleRow(cycle *database.PressCycle) templ.Component {
+func renderCycleRow(user *database.User, cycle *database.PressCycle) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -282,14 +282,14 @@ func renderCycleRow(cycle *database.PressCycle) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<tr><td><span>Presse ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<tr><td><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PressNumber))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tool-cycles.templ`, Line: 108, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tool-cycles.templ`, Line: 108, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -362,7 +362,7 @@ func renderCycleRow(cycle *database.PressCycle) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</td><td class=\"text-right\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -375,7 +375,7 @@ func renderCycleRow(cycle *database.PressCycle) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</td><td class=\"text-right\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -388,7 +388,17 @@ func renderCycleRow(cycle *database.PressCycle) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</td><td class=\"button-group flex justify-end items-center\"><!-- TODO: This feature is not yet implemented --><button hx-trigger=\"click\" class=\"small ghost\" title=\"Bearbeiten\"><i class=\"bi bi-pencil\"></i></button><!-- TODO: This feature is not yet implemented --><button hx-trigger=\"click\" class=\"destructive small ghost\" title=\"Löschen\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if user.IsAdmin() {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " disabled")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "><i class=\"bi bi-trash\"></i></button></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

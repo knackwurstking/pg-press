@@ -18,10 +18,10 @@ func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bo
 }
 
 // ToolCyclesTableRows renders the tbody content for tool cycles history
-templ ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
+templ ToolCyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
 	if len(cycles) == 0 && len(regenerations) == 0 {
 		<tr>
-			<td colspan="5" class="text-center">
+			<td colspan="6" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -30,15 +30,15 @@ templ ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*databa
 		// Show most recent regeneration period first
 		for i := len(regenerations) - 1; i >= 0; i-- {
 			@renderRegenerationMarker(regenerations[i])
-			@renderCyclesForPeriod(cycles, regenerations, i)
+			@renderCyclesForPeriod(user, cycles, regenerations, i)
 		}
 		// Show cycles before first regeneration (if any)
 		if len(regenerations) > 0 {
-			@renderCyclesBeforeFirstRegeneration(cycles, regenerations[0])
+			@renderCyclesBeforeFirstRegeneration(user, cycles, regenerations[0])
 		} else {
 			// No regenerations, show all cycles
 			for _, cycle := range cycles {
-				@renderCycleRow(cycle)
+				@renderCycleRow(user, cycle)
 			}
 		}
 	}
@@ -46,7 +46,7 @@ templ ToolCyclesTableRows(cycles []*database.PressCycle, regenerations []*databa
 
 templ renderRegenerationMarker(regeneration *database.ToolRegeneration) {
 	<tr class="regeneration-marker">
-		<td colspan="5" class="text-center">
+		<td colspan="6" class="text-center">
 			<div class="flex gap items-center justify-center">
 				<i class="bi bi-arrow-repeat text-warning"></i>
 				<span class="text-muted">
@@ -57,55 +57,55 @@ templ renderRegenerationMarker(regeneration *database.ToolRegeneration) {
 	</tr>
 }
 
-templ renderCyclesForPeriod(cycles []*database.PressCycle, regenerations []*database.ToolRegeneration, regenerationIndex int) {
+templ renderCyclesForPeriod(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration, regenerationIndex int) {
 	// Determine the time window for this regeneration period
 	if regenerationIndex < len(regenerations)-1 {
 		// Period between two regenerations
-		@renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, &regenerations[regenerationIndex+1].RegeneratedAt)
+		@renderCyclesInWindow(user, cycles, &regenerations[regenerationIndex].RegeneratedAt, &regenerations[regenerationIndex+1].RegeneratedAt)
 	} else {
 		// Period after the last regeneration
-		@renderCyclesInWindow(cycles, &regenerations[regenerationIndex].RegeneratedAt, nil)
+		@renderCyclesInWindow(user, cycles, &regenerations[regenerationIndex].RegeneratedAt, nil)
 	}
 }
 
-templ renderCyclesInWindow(cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time) {
+templ renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time) {
 	{{ hasCycles := false }}
 	for _, cycle := range cycles {
 		if cycleInPeriod(cycle, startTime, endTime) {
 			{{ hasCycles = true }}
-			@renderCycleRow(cycle)
+			@renderCycleRow(user, cycle)
 		}
 	}
 	if !hasCycles {
 		<tr>
-			<td colspan="5" class="text-center text-muted">
+			<td colspan="6" class="text-center text-muted">
 				Keine Zyklen in diesem Zeitraum
 			</td>
 		</tr>
 	}
 }
 
-templ renderCyclesBeforeFirstRegeneration(cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
+templ renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
 	{{ hasCycles := false }}
 	for _, cycle := range cycles {
 		if cycle.FromDate.Before(firstRegeneration.RegeneratedAt) {
 			{{ hasCycles = true }}
-			@renderCycleRow(cycle)
+			@renderCycleRow(user, cycle)
 		}
 	}
 	if hasCycles {
 		<tr class="regeneration-marker">
-			<td colspan="5" class="text-center">
+			<td colspan="6" class="text-center">
 				<span class="text-muted">Zyklen vor erster Regenerierung</span>
 			</td>
 		</tr>
 	}
 }
 
-templ renderCycleRow(cycle *database.PressCycle) {
+templ renderCycleRow(user *database.User, cycle *database.PressCycle) {
 	<tr>
 		<td>
-			<span>Presse { fmt.Sprintf("%d", cycle.PressNumber) }</span>
+			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>
 		<td>
 			<div class="flex flex-col">
@@ -123,11 +123,32 @@ templ renderCycleRow(cycle *database.PressCycle) {
 				<span class="primary ghost">Aktiv</span>
 			}
 		</td>
-		<td class="text-right">
+		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
-		<td class="text-right">
+		<td>
 			{ fmt.Sprintf("%d", cycle.PartialCycles) }
+		</td>
+		<td class="button-group flex justify-end items-center">
+			<!-- TODO: This feature is not yet implemented -->
+			<button
+				hx-trigger="click"
+				class="small ghost"
+				title="Bearbeiten"
+			>
+				<i class="bi bi-pencil"></i>
+			</button>
+			<!-- TODO: This feature is not yet implemented -->
+			<button
+				hx-trigger="click"
+				class="destructive small ghost"
+				title="Löschen"
+				if user.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-trash"></i>
+			</button>
 		</td>
 	</tr>
 }

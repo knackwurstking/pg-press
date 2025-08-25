@@ -105,11 +105,10 @@ templ toolPageMetalSheets(user *database.User, tool *database.ToolWithNotes, met
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
-				class="secondary small flex gap"
+				class="secondary small flex"
 				title="Neues Blech hinzufügen"
 			>
 				<i class="bi bi-plus-lg"></i>
-				Blech hinzufügen
 			</button>
 		</div>
 		<div class="table-container">
@@ -155,13 +154,13 @@ templ toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []
 							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-							<td class="button-group flex justify-center items-center">
+							<td class="button-group flex justify-end items-center">
 								<button
 									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
 									hx-trigger="click"
 									hx-target="body"
 									hx-swap="beforeend"
-									class="info icon ghost text-sm"
+									class="info small ghost"
 									title="Details anzeigen"
 								>
 									<i class="bi bi-eye"></i>
@@ -171,7 +170,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []
 									hx-trigger="click"
 									hx-target="body"
 									hx-swap="beforeend"
-									class="primary icon ghost text-sm"
+									class="primary small ghost"
 									title="Bearbeiten"
 								>
 									<i class="bi bi-pencil"></i>
@@ -182,7 +181,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []
 									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
 									hx-target="closest tr"
 									hx-swap="outerHTML"
-									class="destructive icon ghost text-sm"
+									class="destructive small ghost"
 									title="Löschen"
 									if !user.IsAdmin() {
 										disabled
@@ -221,13 +220,13 @@ templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*da
 						<tr>
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td class="button-group flex justify-center items-center">
+							<td class="button-group flex justify-end items-center">
 								<button
 									hx-get={ fmt.Sprintf("%s/htmx/metal-sheets/view?id=%d", serverPathPrefix, sheet.ID) }
 									hx-trigger="click"
 									hx-target="body"
 									hx-swap="beforeend"
-									class="info icon ghost text-sm"
+									class="info small ghost"
 									title="Details anzeigen"
 								>
 									<i class="bi bi-eye"></i>
@@ -237,7 +236,7 @@ templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*da
 									hx-trigger="click"
 									hx-target="body"
 									hx-swap="beforeend"
-									class="primary icon ghost text-sm"
+									class="primary small ghost"
 									title="Bearbeiten"
 								>
 									<i class="bi bi-pencil"></i>
@@ -248,7 +247,7 @@ templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*da
 									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
 									hx-target="closest tr"
 									hx-swap="outerHTML"
-									class="destructive icon ghost text-sm"
+									class="destructive small ghost"
 									title="Löschen"
 									if !user.IsAdmin() {
 										disabled
@@ -265,7 +264,6 @@ templ toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*da
 	</figure>
 }
 
-// TODO: Add action button: "Add", "Edit", "Delete"
 templ toolPageCylesList(tool *database.ToolWithNotes) {
 	<section class="cycles-section flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
@@ -295,6 +293,15 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<section class="cycles">
 			<div class="flex justify-between items-center mb">
 				<h5>Pressennutzungsverlauf</h5>
+				<!-- TODO: This feature is not yet implemented -->
+				<button
+					hx-get={ fmt.Sprintf("%s/htmx/tools/cycles/add?tool_id=%d", serverPathPrefix, tool.ID) }
+					hx-trigger="click"
+					class="secondary small flex"
+					title="Neuen Eintrag hinzufügen"
+				>
+					<i class="bi bi-plus-lg"></i>
+				</button>
 			</div>
 			<section>
 				<h6 class="mb">
@@ -317,6 +324,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 							<th name="to">Bis</th>
 							<th name="total">Gesamtzyklen</th>
 							<th name="partial">Teilzyklen</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody
@@ -325,7 +333,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 						hx-swap="innerHTML"
 					>
 						<tr>
-							<td colspan="5" class="text-center">
+							<td colspan="6" class="text-center">
 								<span class="spinner"></span> Lade Pressenverlauf...
 							</td>
 						</tr>
