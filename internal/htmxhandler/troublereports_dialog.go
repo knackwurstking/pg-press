@@ -16,16 +16,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/templates/components"
+	troublereportscomp "github.com/knackwurstking/pgpress/internal/templates/components/troublereports"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 func (h *TroubleReports) handleGetDialogEdit(
 	c echo.Context,
-	props *components.TroubleReportsEditDialogProps,
+	props *troublereportscomp.EditDialogProps,
 ) error {
 	if props == nil {
-		props = &components.TroubleReportsEditDialogProps{}
+		props = &troublereportscomp.EditDialogProps{}
 	}
 
 	if !props.Close {
@@ -62,7 +62,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 		}
 	}
 
-	dialog := components.TroubleReportsEditDialog(props)
+	dialog := troublereportscomp.EditDialog(props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to render edit dialog: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -72,7 +72,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 }
 
 func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
-	props := &components.TroubleReportsEditDialogProps{
+	props := &troublereportscomp.EditDialogProps{
 		Close: true,
 	}
 
@@ -148,7 +148,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Initialize dialog template data
-	props := &components.TroubleReportsEditDialogProps{
+	props := &troublereportscomp.EditDialogProps{
 		Close:          true,
 		ID:             id,
 		Title:          title,
