@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/templates/components"
 	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -81,9 +80,9 @@ func (h *Tools) handleListAll(c echo.Context) error {
 }
 
 // handleEdit renders a dialog for editing or creating a tool
-func (h *Tools) handleEdit(c echo.Context, props *components.ToolEditDialogProps) error {
+func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
 	if props == nil {
-		props = &components.ToolEditDialogProps{}
+		props = &toolscomp.EditDialogProps{}
 		props.ID, _ = utils.ParseInt64Query(c, constants.QueryParamID)
 		props.Close = utils.ParseBoolQuery(c, constants.QueryParamClose)
 
@@ -95,7 +94,7 @@ func (h *Tools) handleEdit(c echo.Context, props *components.ToolEditDialogProps
 		}
 	}
 
-	toolEdit := components.ToolEditDialog(props)
+	toolEdit := toolscomp.EditDialog(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTools().Error("Failed to render tool edit dialog: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -130,7 +129,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("Successfully created tool with ID %d", tool.ID)
 
-	return h.handleEdit(c, &components.ToolEditDialogProps{
+	return h.handleEdit(c, &toolscomp.EditDialogProps{
 		ID:    tool.ID,
 		Close: true,
 	})
@@ -159,7 +158,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	logger.HTMXHandlerTools().Info("Updating tool %d", id)
 	// TODO: Update tool in database tools
 
-	return h.handleEdit(c, &components.ToolEditDialogProps{
+	return h.handleEdit(c, &toolscomp.EditDialogProps{
 		ID:    id,
 		Close: true,
 	})

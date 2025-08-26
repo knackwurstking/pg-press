@@ -1,12 +1,11 @@
-// TODO: Move to ./tools
-package components
+package tools
 
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
 )
 
-type ToolEditDialogProps struct {
+type EditDialogProps struct {
 	ID       int64
 	Close    bool
 	Position string
@@ -16,7 +15,7 @@ type ToolEditDialogProps struct {
 	Code     string
 }
 
-templ ToolEditDialog(props *ToolEditDialogProps) {
+templ EditDialog(props *EditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolEditDialog }
