@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/templates/components"
+	feedscomp "github.com/knackwurstking/pgpress/internal/templates/components/feeds"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
@@ -42,7 +42,7 @@ func (h *Feed) handleGetData(c echo.Context) error {
 
 	logger.HTMXHandlerFeed().Debug("Rendering feed data for user %s", user.UserName)
 
-	feedData := components.FeedData(feeds, user.LastFeed)
+	feedData := feedscomp.List(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		logger.HTMXHandlerFeed().Error("Failed to render feed data: %v", err)

@@ -180,7 +180,7 @@ func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	err = components.NavFeedCounter(count).Render(context.Background(), &buf)
+	err = components.FeedCounter(count).Render(context.Background(), &buf)
 	if err != nil {
 		return nil, err
 	}
