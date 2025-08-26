@@ -1,9 +1,9 @@
-package components
+package tools
 
 import "fmt"
 
 // ToolTotalCycles renders an input field displaying the total cycles since last regeneration
-templ ToolTotalCycles(totalCycles int64) {
+templ TotalCycles(totalCycles int64) {
 	<input
 		type="number"
 		value={ fmt.Sprintf("%d", totalCycles) }

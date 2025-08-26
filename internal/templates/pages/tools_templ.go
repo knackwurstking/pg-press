@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/templates/components"
+	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
@@ -227,7 +227,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.ToolPosition(database.PositionBottom).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = toolscomp.PositionBadge(database.PositionBottom).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -248,7 +248,7 @@ func activeTool(title, upper, lower, href string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.ToolPosition(database.PositionTop).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = toolscomp.PositionBadge(database.PositionTop).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

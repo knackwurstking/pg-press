@@ -11,6 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
+	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -70,7 +71,7 @@ func (h *Tools) handleListAll(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	toolsListAll := components.ToolsListAll(tools)
+	toolsListAll := toolscomp.ListAll(tools)
 	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTools().Error("Failed to render tools list: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -258,7 +259,7 @@ func (h *Tools) handleCycles(c echo.Context) error {
 		len(cycles), len(regenerations), toolID)
 
 	// Render the component
-	cyclesRows := components.ToolCyclesTableRows(user, cycles, regenerations)
+	cyclesRows := toolscomp.CyclesTableRows(user, cycles, regenerations)
 	if err := cyclesRows.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTools().Error("Failed to render tool cycles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -306,7 +307,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Tool %d has %d total cycles since last regeneration", toolID, totalCycles)
 
 	// Render the component
-	totalCyclesComponent := components.ToolTotalCycles(totalCycles)
+	totalCyclesComponent := toolscomp.TotalCycles(totalCycles)
 	if err := totalCyclesComponent.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerTools().Error("Failed to render total cycles: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

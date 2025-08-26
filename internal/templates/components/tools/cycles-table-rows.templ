@@ -1,5 +1,4 @@
-// TODO: Move to ./tools package
-package components
+package tools
 
 import (
 	"fmt"
@@ -8,19 +7,8 @@ import (
 	"time"
 )
 
-// Helper function to check if a cycle is within a time period
-func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
-	if startTime != nil && cycle.FromDate.Before(*startTime) {
-		return false
-	}
-	if endTime != nil && cycle.FromDate.After(*endTime) {
-		return false
-	}
-	return true
-}
-
-// ToolCyclesTableRows renders the tbody content for tool cycles history
-templ ToolCyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
+// CyclesTableRows renders the tbody content for tool cycles history
+templ CyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
 	if len(cycles) == 0 && len(regenerations) == 0 {
 		<tr>
 			<td colspan="6" class="text-center">
@@ -161,4 +149,15 @@ templ renderCycleRow(user *database.User, cycle *database.PressCycle) {
 			</button>
 		</td>
 	</tr>
+}
+
+// Helper function to check if a cycle is within a time period
+func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
+	if startTime != nil && cycle.FromDate.Before(*startTime) {
+		return false
+	}
+	if endTime != nil && cycle.FromDate.After(*endTime) {
+		return false
+	}
+	return true
 }
