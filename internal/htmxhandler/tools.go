@@ -36,10 +36,6 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.PUT(constants.ServerPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
 	e.PUT(constants.ServerPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
 
-	// Total cycles for a tool
-	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
-	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
-
 	// Delete a tool
 	e.DELETE(constants.ServerPathPrefix+"/htmx/tools/delete", h.handleDelete)
 	e.DELETE(constants.ServerPathPrefix+"/htmx/tools/delete/", h.handleDelete)
@@ -47,6 +43,10 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	// Cycles table rows
 	e.GET(constants.ServerPathPrefix+"/htmx/tools/cycles", h.handleCycles)
 	e.GET(constants.ServerPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
+
+	// Total cycles for a tool
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
 
 	// Get, add or edit a cycles table entry
 	// TODO: Add "GET    /htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
@@ -162,6 +162,37 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		ID:    id,
 		Close: true,
 	})
+}
+
+func (h *Tools) handleDelete(c echo.Context) error {
+	// Get tool ID from query parameter
+	toolID, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		logger.HTMXHandlerTools().Error("Invalid id parameter: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid or missing id parameter: "+err.Error())
+	}
+
+	// Get user from context for audit trail
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	logger.HTMXHandlerTools().Info("User %s is deleting tool %d", user.UserName, toolID)
+
+	// Delete the tool from database
+	if err := h.DB.Tools.Delete(toolID, user); err != nil {
+		logger.HTMXHandlerTools().Error("Failed to delete tool %d: %v", toolID, err)
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to delete tool: "+err.Error())
+	}
+
+	logger.HTMXHandlerTools().Info("Successfully deleted tool %d", toolID)
+
+	// Set redirect header to tools page
+	c.Response().Header().Set("HX-Redirect", constants.ServerPathPrefix+"/tools")
+	return c.NoContent(http.StatusOK)
 }
 
 // getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]
@@ -314,35 +345,4 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 	}
 
 	return nil
-}
-
-func (h *Tools) handleDelete(c echo.Context) error {
-	// Get tool ID from query parameter
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamID)
-	if err != nil {
-		logger.HTMXHandlerTools().Error("Invalid id parameter: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid or missing id parameter: "+err.Error())
-	}
-
-	// Get user from context for audit trail
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return err
-	}
-
-	logger.HTMXHandlerTools().Info("User %s is deleting tool %d", user.UserName, toolID)
-
-	// Delete the tool from database
-	if err := h.DB.Tools.Delete(toolID, user); err != nil {
-		logger.HTMXHandlerTools().Error("Failed to delete tool %d: %v", toolID, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to delete tool: "+err.Error())
-	}
-
-	logger.HTMXHandlerTools().Info("Successfully deleted tool %d", toolID)
-
-	// Set redirect header to tools page
-	c.Response().Header().Set("HX-Redirect", constants.ServerPathPrefix+"/tools")
-	return c.NoContent(http.StatusOK)
 }
