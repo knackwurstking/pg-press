@@ -384,7 +384,7 @@ func renderCycleRow(user *database.User, cycle *database.PressCycle) templ.Compo
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycles/edit?cycle_id=%d",
+			"%s/htmx/tools/cycle/edit?cycle_id=%d",
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
@@ -400,7 +400,7 @@ func renderCycleRow(user *database.User, cycle *database.PressCycle) templ.Compo
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycles/delete?cycle_id=%d",
+			"%s/htmx/tools/cycle/delete?cycle_id=%d",
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {

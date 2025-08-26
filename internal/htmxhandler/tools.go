@@ -49,12 +49,12 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	e.GET(constants.ServerPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
 
 	// Get, add or edit a cycles table entry
-	// TODO: Add "GET    /htmx/tools/cycles/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
-	// TODO: Add "POST   /htmx/tools/cycles/edit?tool_id=%d"
-	// TODO: Add "PUT    /htmx/tools/cycles/edit?cycle_id=%d"
+	// TODO: Add "GET    /htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
+	// TODO: Add "POST   /htmx/tools/cycle/edit?tool_id=%d"
+	// TODO: Add "PUT    /htmx/tools/cycle/edit?cycle_id=%d"
 
 	// Delete a cycle table entry
-	// TODO: Add "DELETE /htmx/tools/cycles/delete?cycle_id=%d"
+	// TODO: Add "DELETE /htmx/tools/cycle/delete?cycle_id=%d"
 }
 
 func (h *Tools) handleListAll(c echo.Context) error {

@@ -708,7 +708,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 		}
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycles/edit?tool_id=%d",
+			"%s/htmx/tools/cycle/edit?tool_id=%d",
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
