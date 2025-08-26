@@ -59,9 +59,9 @@ func TroubleReportModifications(
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/trouble-reports/data")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 19, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 19, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -241,7 +241,7 @@ func TroubleReportModifications(
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 					"%s/htmx/trouble-reports/attachments-preview?id=%d&time=%d",
-					serverPathPrefix, id, mod.Time,
+					constants.ServerPathPrefix, id, mod.Time,
 				))
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 105, Col: 9}
@@ -285,7 +285,7 @@ func TroubleReportModifications(
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 						"%s/htmx/trouble-reports/modifications/%d?time=%d",
-						serverPathPrefix, id, mod.Time,
+						constants.ServerPathPrefix, id, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 131, Col: 10}
@@ -319,7 +319,7 @@ func TroubleReportModifications(
 					var templ_7745c5c3_Var17 string
 					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 						"%s/htmx/trouble-reports/modifications/vote/%d?time=%d",
-						serverPathPrefix, id, mod.Time,
+						constants.ServerPathPrefix, id, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
 						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-report-modifications.templ`, Line: 148, Col: 10}

@@ -78,8 +78,8 @@ script troubleReportsPageScript() {
 }
 
 templ troubleReportsPageAdditionalHead() {
-	<link rel="stylesheet" href={ serverPathPrefix + "/css/trouble-reports/dialog-edit.css" }/>
-	<link rel="stylesheet" href={ serverPathPrefix + "/css/trouble-reports/data.css" }/>
+	<link rel="stylesheet" href={ constants.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css" }/>
+	<link rel="stylesheet" href={ constants.ServerPathPrefix + "/css/trouble-reports/data.css" }/>
 	@troubleReportsPageScript()
 }
 
@@ -107,7 +107,7 @@ templ TroubleReportsPage() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<button
-					hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
+					hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 					hx-trigger="click"
 					hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 					hx-swap="outerHTML"
@@ -120,7 +120,7 @@ templ TroubleReportsPage() {
 			<!-- Trouble Reports Entries -->
 			<section>
 				<span
-					hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
+					hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/data" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 					id={ constants.IDData }

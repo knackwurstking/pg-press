@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
@@ -96,7 +97,7 @@ func HomePage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = homePageItem(
-				serverPathPrefix+"/trouble-reports",
+				constants.ServerPathPrefix+"/trouble-reports",
 				"exclamation-triangle",
 				"Problemberichte",
 				"Verwalten Sie Problemberichte und Lösungen",
@@ -109,7 +110,7 @@ func HomePage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = homePageItem(
-				serverPathPrefix+"/tools",
+				constants.ServerPathPrefix+"/tools",
 				"tools",
 				"Werkzeuglisten",
 				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
@@ -165,7 +166,7 @@ func homePageItem(href, icon, title, description string) templ.Component {
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 52, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 53, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -206,7 +207,7 @@ func homePageItem(href, icon, title, description string) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 59, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 60, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -219,7 +220,7 @@ func homePageItem(href, icon, title, description string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 60, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/home.templ`, Line: 61, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {

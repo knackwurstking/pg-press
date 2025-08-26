@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
@@ -16,10 +17,10 @@ type Profile struct {
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	e.GET(serverPathPrefix+"/htmx/profile/cookies", h.handleGetCookies)
-	e.GET(serverPathPrefix+"/htmx/profile/cookies/", h.handleGetCookies)
-	e.DELETE(serverPathPrefix+"/htmx/profile/cookies", h.handleDeleteCookies)
-	e.DELETE(serverPathPrefix+"/htmx/profile/cookies/", h.handleDeleteCookies)
+	e.GET(constants.ServerPathPrefix+"/htmx/profile/cookies", h.handleGetCookies)
+	e.GET(constants.ServerPathPrefix+"/htmx/profile/cookies/", h.handleGetCookies)
+	e.DELETE(constants.ServerPathPrefix+"/htmx/profile/cookies", h.handleDeleteCookies)
+	e.DELETE(constants.ServerPathPrefix+"/htmx/profile/cookies/", h.handleDeleteCookies)
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {

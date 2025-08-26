@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
@@ -26,14 +27,14 @@ templ HomePage() {
 				<div class="flex flex-col gap justify-center">
 					<!-- Anchor Button => Trouble Reports Page -->
 					@homePageItem(
-						serverPathPrefix+"/trouble-reports",
+						constants.ServerPathPrefix+"/trouble-reports",
 						"exclamation-triangle",
 						"Problemberichte",
 						"Verwalten Sie Problemberichte und Lösungen",
 					)
 					<!-- Anchor Button => Tools Page -->
 					@homePageItem(
-						serverPathPrefix+"/tools",
+						constants.ServerPathPrefix+"/tools",
 						"tools",
 						"Werkzeuglisten",
 						"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",

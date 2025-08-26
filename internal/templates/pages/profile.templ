@@ -83,7 +83,7 @@ templ ProfilePage(user *database.User) {
 						<i class="bi bi-telegram"></i>
 						Telegram ID: { user.TelegramID }
 					</div>
-					<a role="button" href={ serverPathPrefix + "/logout" } class="ghost destructive flex flex-row gap">
+					<a role="button" href={ constants.ServerPathPrefix + "/logout" } class="ghost destructive flex flex-row gap">
 						<i class="bi bi-box-arrow-right"></i>
 						Abmelden
 					</a>
@@ -93,7 +93,7 @@ templ ProfilePage(user *database.User) {
 			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
 				<span
 					id={ constants.IDCookies }
-					hx-get={ serverPathPrefix + "/htmx/profile/cookies" }
+					hx-get={ constants.ServerPathPrefix + "/htmx/profile/cookies" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 				></span>
@@ -120,7 +120,7 @@ templ ProfilePage(user *database.User) {
 						<!-- Cancel button -->
 						<a
 							role="button"
-							href={ serverPathPrefix + "/profile" }
+							href={ constants.ServerPathPrefix + "/profile" }
 							class="secondary flex flex-row gap"
 						>
 							<i class="bi bi-x-circle"></i>

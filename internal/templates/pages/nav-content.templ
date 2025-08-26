@@ -9,7 +9,7 @@ templ navProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ serverPathPrefix + "/profile" }
+		href={ constants.ServerPathPrefix + "/profile" }
 		title="Profil"
 	>
 		<i class="bi bi-person-circle"></i>
@@ -17,7 +17,7 @@ templ navProfileButton() {
 }
 
 templ navHomeButton() {
-	<a role="button" class="ghost contrast icon" href={ serverPathPrefix + "/" } title="Startseite">
+	<a role="button" class="ghost contrast icon" href={ constants.ServerPathPrefix + "/" } title="Startseite">
 		<i class="bi bi-house"></i>
 	</a>
 }
@@ -26,8 +26,8 @@ templ navFeedButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ serverPathPrefix + "/feed" }
-		hx-ws={ "connect:" + serverPathPrefix + "/htmx/nav/feed-counter" }
+		href={ constants.ServerPathPrefix + "/feed" }
+		hx-ws={ "connect:" + constants.ServerPathPrefix + "/htmx/nav/feed-counter" }
 		hx-target={ fmt.Sprintf("#%s", constants.IDFeedCounter) }
 		hx-swap="outerHTML"
 	>

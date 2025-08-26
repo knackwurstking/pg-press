@@ -19,7 +19,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolEditDialog }
-			hx-get={ serverPathPrefix + "/htmx/tools/list-all" }
+			hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
 			hx-trigger="load"
 			hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
 			hx-swap="outerHTML"
@@ -31,10 +31,10 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 				if props.ID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/edit?id=%d",
-						serverPathPrefix, props.ID,
+						constants.ServerPathPrefix, props.ID,
 					) }
 				} else {
-					hx-post={ serverPathPrefix + "/htmx/tools/edit" }
+					hx-post={ constants.ServerPathPrefix + "/htmx/tools/edit" }
 				}
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
@@ -125,7 +125,7 @@ templ ToolEditDialog(props *ToolEditDialogProps) {
 						type="button"
 						class="secondary flex gap"
 						onclick="closeToolEditDialog()"
-						hx-get={ serverPathPrefix + "/htmx/tools/edit?close=true" }
+						hx-get={ constants.ServerPathPrefix + "/htmx/tools/edit?close=true" }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 						hx-swap="outerHTML"

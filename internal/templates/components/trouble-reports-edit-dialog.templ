@@ -125,7 +125,7 @@ type TroubleReportsEditDialogProps struct {
 templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 	if props.Close {
 		<span
-			hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
+			hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/data" }
 			hx-trigger="load"
 			hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 			hx-swap="outerHTML"
@@ -147,10 +147,10 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				if props.ID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/trouble-reports/dialog-edit?id=%d",
-						serverPathPrefix, props.ID,
+						constants.ServerPathPrefix, props.ID,
 					) }
 				} else {
-					hx-post={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit" }
+					hx-post={ constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 				}
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
@@ -297,7 +297,7 @@ templ TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) {
 				</div>
 				<footer class="flex gap justify-end">
 					<button
-						hx-get={ serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true" }
+						hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true" }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 						hx-swap="outerHTML"

@@ -54,7 +54,7 @@ templ activeTools() {
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
 		>
-			@activeTool("Presse 0", "100x100 G01", "100x100 G01", serverPathPrefix+"/tools/active/0")
+			@activeTool("Presse 0", "100x100 G01", "100x100 G01", constants.ServerPathPrefix+"/tools/active/0")
 		</ul>
 	</div>
 }
@@ -98,7 +98,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 			<button
 				type="button"
 				class="primary flex gap"
-				hx-get={ serverPathPrefix + "/htmx/tools/edit" }
+				hx-get={ constants.ServerPathPrefix + "/htmx/tools/edit" }
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 				hx-swap="beforeend"
@@ -109,7 +109,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 		</div>
 		<ul
 			id={ constants.IDAllToolsList }
-			hx-get={ serverPathPrefix + "/htmx/tools/list-all" }
+			hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 			class="flex flex-col gap m-0 p-0"

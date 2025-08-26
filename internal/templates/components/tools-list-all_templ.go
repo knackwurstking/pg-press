@@ -111,9 +111,9 @@ func toolListItem(id int64, tool *database.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(serverPathPrefix+"/tools/all/%d", id))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(constants.ServerPathPrefix+"/tools/all/%d", id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 31, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools-list-all.templ`, Line: 31, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

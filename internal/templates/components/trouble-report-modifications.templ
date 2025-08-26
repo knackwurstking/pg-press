@@ -16,7 +16,7 @@ templ TroubleReportModifications(
 	<div id={ constants.IDData } class="flex flex-col gap">
 		<div class="flex flex-wrap gap justify-between items-center">
 			<button
-				hx-get={ serverPathPrefix + "/htmx/trouble-reports/data" }
+				hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/data" }
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 				hx-swap="outerHTML"
@@ -101,7 +101,7 @@ templ TroubleReportModifications(
 								data-modification-id={ fmt.Sprintf("%d-%d", id, mod.Time) }
 								hx-get={ fmt.Sprintf(
 									"%s/htmx/trouble-reports/attachments-preview?id=%d&time=%d",
-									serverPathPrefix, id, mod.Time,
+									constants.ServerPathPrefix, id, mod.Time,
 								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
@@ -127,7 +127,7 @@ templ TroubleReportModifications(
 								<button
 									hx-post={ fmt.Sprintf(
 										"%s/htmx/trouble-reports/modifications/%d?time=%d",
-										serverPathPrefix, id, mod.Time,
+										constants.ServerPathPrefix, id, mod.Time,
 									) }
 									hx-trigger="click"
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
@@ -144,7 +144,7 @@ templ TroubleReportModifications(
 								<button
 									hx-post={ fmt.Sprintf(
 										"%s/htmx/trouble-reports/modifications/vote/%d?time=%d",
-										serverPathPrefix, id, mod.Time,
+										constants.ServerPathPrefix, id, mod.Time,
 									) }
 									hx-trigger="click"
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }

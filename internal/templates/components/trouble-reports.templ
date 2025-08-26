@@ -108,7 +108,8 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 								class="attachments-preview-placeholder"
 								data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
 								hx-get={ fmt.Sprintf(
-									"%s/htmx/trouble-reports/attachments-preview?id=%d", serverPathPrefix, tr.ID,
+									"%s/htmx/trouble-reports/attachments-preview?id=%d",
+									constants.ServerPathPrefix, tr.ID,
 								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
@@ -124,7 +125,7 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 						<button
 							hx-get={ fmt.Sprintf(
 								"%s/htmx/trouble-reports/modifications/%d",
-								serverPathPrefix, tr.ID,
+								constants.ServerPathPrefix, tr.ID,
 							) }
 							hx-trigger="click"
 							hx-target={ fmt.Sprintf("#%s", constants.IDData) }
@@ -135,7 +136,9 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 						</button>
 						<button
 							hx-get={ fmt.Sprintf(
-								"%s/htmx/trouble-reports/dialog-edit?id=%d", serverPathPrefix, tr.ID) }
+								"%s/htmx/trouble-reports/dialog-edit?id=%d",
+								constants.ServerPathPrefix, tr.ID,
+							) }
 							hx-trigger="click"
 							hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 							hx-swap="outerHTML"
@@ -153,7 +156,10 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 						</button>
 						if user.IsAdmin() {
 							<button
-								hx-delete={ fmt.Sprintf("%s/htmx/trouble-reports/data?id=%d", serverPathPrefix, tr.ID) }
+								hx-delete={ fmt.Sprintf(
+									"%s/htmx/trouble-reports/data?id=%d",
+									constants.ServerPathPrefix, tr.ID,
+								) }
 								hx-trigger="click"
 								hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 								hx-swap="outerHTML"
@@ -166,7 +172,10 @@ templ TroubleReportsList(user *database.User, troubleReports []*database.Trouble
 							<!-- TODO: Benutzer ist kein Administrator, Abstimmungssystem zum Löschen von Problemberichten hinzufügen, noch nicht implementiert -->
 							<button
 								id={ constants.IDVoteForDelete }
-								hx-post={ fmt.Sprintf("%s/htmx/trouble-reports/vote?id=%d&mode=delete", serverPathPrefix, tr.ID) }
+								hx-post={ fmt.Sprintf(
+									"%s/htmx/trouble-reports/vote?id=%d&mode=delete",
+									constants.ServerPathPrefix, tr.ID,
+								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
 								class="ghost destructive flex flex-col justify-between items-center"

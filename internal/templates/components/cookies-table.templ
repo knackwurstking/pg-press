@@ -29,7 +29,7 @@ templ CookiesTable(cookies []*database.Cookie) {
 								<td class="left user-agent-cell">{ cookie.UserAgent }</td>
 								<td class="right select-none">
 									<a
-										hx-delete={ serverPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value }
+										hx-delete={ constants.ServerPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value }
 										hx-trigger="click"
 										hx-target={ fmt.Sprintf("#%s", constants.IDCookies) }
 										hx-swap="outerHTML"

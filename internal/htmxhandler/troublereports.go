@@ -1,6 +1,7 @@
 package htmxhandler
 
 import (
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/labstack/echo/v4"
 )
@@ -11,7 +12,7 @@ type TroubleReports struct {
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	// Dialog edit routes
-	editDialogPath := serverPathPrefix + "/htmx/trouble-reports/dialog-edit"
+	editDialogPath := constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit"
 	e.GET(editDialogPath, func(c echo.Context) error {
 		return h.handleGetDialogEdit(c, nil)
 	})
@@ -24,15 +25,15 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	e.PUT(editDialogPath+"/", h.handlePutDialogEdit)
 
 	// Data routes
-	dataPath := serverPathPrefix + "/htmx/trouble-reports/data"
+	dataPath := constants.ServerPathPrefix + "/htmx/trouble-reports/data"
 	e.GET(dataPath, h.handleGetData)
 	e.DELETE(dataPath, h.handleDeleteData)
 
-	attachmentsPreviewPath := serverPathPrefix + "/htmx/trouble-reports/attachments-preview"
+	attachmentsPreviewPath := constants.ServerPathPrefix + "/htmx/trouble-reports/attachments-preview"
 	e.GET(attachmentsPreviewPath, h.handleGetAttachmentsPreview)
 
 	// Modifications routes
-	modificationsPath := serverPathPrefix + "/htmx/trouble-reports/modifications/:id"
+	modificationsPath := constants.ServerPathPrefix + "/htmx/trouble-reports/modifications/:id"
 	e.GET(modificationsPath, func(c echo.Context) error {
 		return h.handleGetModifications(c, nil)
 	})

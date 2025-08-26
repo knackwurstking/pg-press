@@ -20,8 +20,8 @@ type Profile struct {
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
 	prefix := "/profile"
 
-	e.GET(serverPathPrefix+prefix, h.handleMainPage)
-	e.GET(serverPathPrefix+prefix+"/", h.handleMainPage)
+	e.GET(constants.ServerPathPrefix+prefix, h.handleMainPage)
+	e.GET(constants.ServerPathPrefix+prefix+"/", h.handleMainPage)
 
 	htmxProfile := htmxhandler.Profile{DB: h.DB}
 	htmxProfile.RegisterRoutes(e)

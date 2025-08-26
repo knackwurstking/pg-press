@@ -175,9 +175,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/data")
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 128, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 128, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 					"%s/htmx/trouble-reports/dialog-edit?id=%d",
-					serverPathPrefix, props.ID,
+					constants.ServerPathPrefix, props.ID,
 				))
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 151, Col: 6}
@@ -258,9 +258,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit")
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 153, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 153, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -608,9 +608,9 @@ func TroubleReportsEditDialog(props *TroubleReportsEditDialogProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
-			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true")
+			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 300, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/trouble-reports-edit-dialog.templ`, Line: 300, Col: 90}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {

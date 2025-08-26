@@ -21,32 +21,32 @@ type Tools struct {
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	// List all tools
-	e.GET(serverPathPrefix+"/htmx/tools/list-all", h.handleListAll)
-	e.GET(serverPathPrefix+"/htmx/tools/list-all/", h.handleListAll)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/list-all", h.handleListAll)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/list-all/", h.handleListAll)
 
 	// Get, add or edit a tool
-	e.GET(serverPathPrefix+"/htmx/tools/edit", func(c echo.Context) error {
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/edit", func(c echo.Context) error {
 		return h.handleEdit(c, nil)
 	})
-	e.GET(serverPathPrefix+"/htmx/tools/edit/", func(c echo.Context) error {
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/edit/", func(c echo.Context) error {
 		return h.handleEdit(c, nil)
 	})
-	e.POST(serverPathPrefix+"/htmx/tools/edit", h.handleEditPOST)
-	e.POST(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPOST)
-	e.PUT(serverPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
-	e.PUT(serverPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
+	e.POST(constants.ServerPathPrefix+"/htmx/tools/edit", h.handleEditPOST)
+	e.POST(constants.ServerPathPrefix+"/htmx/tools/edit/", h.handleEditPOST)
+	e.PUT(constants.ServerPathPrefix+"/htmx/tools/edit", h.handleEditPUT)
+	e.PUT(constants.ServerPathPrefix+"/htmx/tools/edit/", h.handleEditPUT)
 
 	// Total cycles for a tool
-	e.GET(serverPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
-	e.GET(serverPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles", h.handleTotalCycles)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/total-cycles/", h.handleTotalCycles)
 
 	// Delete a tool
-	e.DELETE(serverPathPrefix+"/htmx/tools/delete", h.handleDelete)
-	e.DELETE(serverPathPrefix+"/htmx/tools/delete/", h.handleDelete)
+	e.DELETE(constants.ServerPathPrefix+"/htmx/tools/delete", h.handleDelete)
+	e.DELETE(constants.ServerPathPrefix+"/htmx/tools/delete/", h.handleDelete)
 
 	// Cycles table rows
-	e.GET(serverPathPrefix+"/htmx/tools/cycles", h.handleCycles)
-	e.GET(serverPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/cycles", h.handleCycles)
+	e.GET(constants.ServerPathPrefix+"/htmx/tools/cycles/", h.handleCycles)
 
 	// Get, add or edit a cycles table entry
 	// TODO: Add "GET    /htmx/tools/cycles/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
@@ -343,6 +343,6 @@ func (h *Tools) handleDelete(c echo.Context) error {
 	logger.HTMXHandlerTools().Info("Successfully deleted tool %d", toolID)
 
 	// Set redirect header to tools page
-	c.Response().Header().Set("HX-Redirect", serverPathPrefix+"/tools")
+	c.Response().Header().Set("HX-Redirect", constants.ServerPathPrefix+"/tools")
 	return c.NoContent(http.StatusOK)
 }

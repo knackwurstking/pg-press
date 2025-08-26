@@ -150,9 +150,9 @@ func ProfilePage(user *database.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 templ.SafeURL
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/logout")
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/logout")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 86, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 86, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -176,9 +176,9 @@ func ProfilePage(user *database.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/profile/cookies")
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/profile/cookies")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 96, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 96, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -215,9 +215,9 @@ func ProfilePage(user *database.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 templ.SafeURL
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/profile")
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/profile")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 123, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/profile.templ`, Line: 123, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {

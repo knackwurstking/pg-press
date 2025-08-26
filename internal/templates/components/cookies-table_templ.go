@@ -98,9 +98,9 @@ func CookiesTable(cookies []*database.Cookie) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value)
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 32, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/cookies-table.templ`, Line: 32, Col: 96}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -18,8 +19,8 @@ type Feed struct {
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
 	prefix := "/feed"
 
-	e.GET(serverPathPrefix+prefix, h.handleFeed)
-	e.GET(serverPathPrefix+prefix+"/", h.handleFeed)
+	e.GET(constants.ServerPathPrefix+prefix, h.handleFeed)
+	e.GET(constants.ServerPathPrefix+prefix+"/", h.handleFeed)
 
 	htmxFeed := htmxhandler.Feed{DB: h.DB}
 	htmxFeed.RegisterRoutes(e)

@@ -24,7 +24,7 @@ templ FeedPage() {
 		<main class="container fluid">
 			<span
 				id={ constants.IDData }
-				hx-get={ serverPathPrefix + "/htmx/feed/data" }
+				hx-get={ constants.ServerPathPrefix + "/htmx/feed/data" }
 				hx-trigger="load"
 				hx-swap="outerHTML"
 			></span>

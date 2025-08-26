@@ -8,6 +8,8 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/knackwurstking/pgpress/internal/constants"
+
 type MainOptions struct {
 	PageTitle      string
 	AppBarTitle    string
@@ -41,9 +43,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 templ.SafeURL
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/favicon.ico")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/favicon.ico")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 29, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 31, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,9 +56,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 templ.SafeURL
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/icon.png")
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/icon.png")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 30, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 32, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -67,9 +69,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/apple-touch-icon-180x180.png")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/apple-touch-icon-180x180.png")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 31, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 33, Col: 99}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -80,9 +82,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/icon.png")
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/icon.png")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 32, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 34, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -93,9 +95,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/manifest.json")
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/manifest.json")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 34, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 36, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -106,9 +108,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/css/bootstrap-icons.min.css")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/css/bootstrap-icons.min.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 36, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 38, Col: 92}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -119,9 +121,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/css/ui.min.css")
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/css/ui.min.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 37, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 39, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -132,9 +134,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 templ.SafeURL
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(serverPathPrefix + "/css/layout.css")
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(constants.ServerPathPrefix + "/css/layout.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 38, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 40, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -147,7 +149,7 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(options.PageTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 39, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 41, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -158,9 +160,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/js/htmx-v2.0.6.min.js")
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/js/htmx-v2.0.6.min.js")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 41, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 43, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -171,9 +173,9 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js")
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 42, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 44, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -196,7 +198,7 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 52, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/layouts/main.templ`, Line: 54, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
