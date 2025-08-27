@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	// TODO: Partial cycles should always be calculated
 	createPressCyclesTableQuery = `
 		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
@@ -19,7 +20,7 @@ const (
 			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			partial_cycles INTEGER NOT NULL DEFAULT 0,
-			performed_by INTEGER,
+			performed_by INTEGER NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id),
 			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
 		);
@@ -28,28 +29,28 @@ const (
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
 		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, partial_cycles, performed_by)
 		VALUES
-			(0, 1, '2023-01-01', NULL,     0, 	 0, NULL),
-			(0, 2, '2023-01-01', NULL,     0, 	 0, NULL),
-			(0, 1, '2023-02-01', NULL,  1000, 1000, NULL),
-			(0, 2, '2023-02-01', NULL,  1000, 1000, NULL),
-			(0, 1, '2023-03-01', NULL,  2000, 1000, NULL),
-			(0, 2, '2023-03-01', NULL,  2000, 1000, NULL),
-			(0, 1, '2023-04-01', NULL,  3000, 1000, NULL),
-			(0, 2, '2023-04-01', NULL,  3000, 1000, NULL),
-			(0, 1, '2023-05-01', NULL,  4000, 1000, NULL),
-			(0, 2, '2023-05-01', NULL,  4000, 1000, NULL),
-			(0, 1, '2023-06-01', NULL,  5000, 1000, NULL),
-			(0, 2, '2023-06-01', NULL,  5000, 1000, NULL),
-			(0, 1, '2023-07-01', NULL,  6000, 1000, NULL),
-			(0, 2, '2023-07-01', NULL,  6000, 1000, NULL),
-			(0, 1, '2023-08-01', NULL,  7000, 1000, NULL),
-			(0, 2, '2023-08-01', NULL,  7000, 1000, NULL),
-			(0, 1, '2023-09-01', NULL,  8000, 1000, NULL),
-			(0, 2, '2023-09-01', NULL,  8000, 1000, NULL),
-			(0, 1, '2023-10-01', NULL,  9000, 1000, NULL),
-			(0, 2, '2023-10-01', NULL,  9000, 1000, NULL),
-			(0, 1, '2023-11-01', NULL, 10000, 1000, NULL),
-			(0, 2, '2023-11-01', NULL, 10000, 1000, NULL);
+			(0, 1, '2023-01-01', NULL,     0, 	 0, -1),
+			(0, 2, '2023-01-01', NULL,     0, 	 0, -1),
+			(0, 1, '2023-02-01', NULL,  1000, 1000, -1),
+			(0, 2, '2023-02-01', NULL,  1000, 1000, -1),
+			(0, 1, '2023-03-01', NULL,  2000, 1000, -1),
+			(0, 2, '2023-03-01', NULL,  2000, 1000, -1),
+			(0, 1, '2023-04-01', NULL,  3000, 1000, -1),
+			(0, 2, '2023-04-01', NULL,  3000, 1000, -1),
+			(0, 1, '2023-05-01', NULL,  4000, 1000, -1),
+			(0, 2, '2023-05-01', NULL,  4000, 1000, -1),
+			(0, 1, '2023-06-01', NULL,  5000, 1000, -1),
+			(0, 2, '2023-06-01', NULL,  5000, 1000, -1),
+			(0, 1, '2023-07-01', NULL,  6000, 1000, -1),
+			(0, 2, '2023-07-01', NULL,  6000, 1000, -1),
+			(0, 1, '2023-08-01', NULL,  7000, 1000, -1),
+			(0, 2, '2023-08-01', NULL,  7000, 1000, -1),
+			(0, 1, '2023-09-01', NULL,  8000, 1000, -1),
+			(0, 2, '2023-09-01', NULL,  8000, 1000, -1),
+			(0, 1, '2023-10-01', NULL,  9000, 1000, -1),
+			(0, 2, '2023-10-01', NULL,  9000, 1000, -1),
+			(0, 1, '2023-11-01', NULL, 10000, 1000, -1),
+			(0, 2, '2023-11-01', NULL, 10000, 1000, -1);
 	`
 
 	insertPressCycleQuery = `
@@ -229,14 +230,15 @@ func (p *PressCycles) EndToolUsage(toolID int64) error {
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press
 // UpdateCycles updates the total and partial cycles for an active tool
-func (p *PressCycles) UpdateCycles(toolID int64, totalCycles, partialCycles int64, user *User) error {
-	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d, partial=%d", toolID, totalCycles, partialCycles)
+func (p *PressCycles) UpdateCycles(toolID int64, totalCycles int64, user *User) error {
+	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d", toolID, totalCycles)
 
 	var performedBy *int64
 	if user != nil {
 		performedBy = &user.TelegramID
 	}
 
+	// TODO: Partial cycles should always be calculated
 	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, partialCycles, performedBy, toolID)
 	if err != nil {
 		return fmt.Errorf("failed to update cycles: %w", err)
@@ -572,7 +574,7 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error)
 		}
 
 		if performedBy.Valid {
-			cycle.PerformedBy = &performedBy.Int64
+			cycle.PerformedBy = performedBy.Int64
 		}
 
 		cycles = append(cycles, cycle)
@@ -605,7 +607,7 @@ func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) 
 	}
 
 	if performedBy.Valid {
-		cycle.PerformedBy = &performedBy.Int64
+		cycle.PerformedBy = performedBy.Int64
 	}
 
 	return cycle, nil

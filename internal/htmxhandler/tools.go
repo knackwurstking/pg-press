@@ -103,11 +103,16 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("User %s is creating a new tool", user.UserName)
 
-	tool, err := h.getToolFormData(c, user)
+	formData, err := h.getToolFormData(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
+	tool := database.NewTool(formData.Position)
+	tool.Format = formData.Format
+	tool.Type = formData.Type
+	tool.Code = formData.Code
+	tool.Mods.Add(user, database.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
 		tool.Type, tool.Code, tool.Position)
@@ -133,11 +138,17 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("User %s is updating a tool", user.UserName)
 
-	tool, err := h.getToolFormData(c, user)
+	formData, err := h.getToolFormData(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
+	tool := database.NewTool(formData.Position)
+	tool.Format = formData.Format
+	tool.Type = formData.Type
+	tool.Code = formData.Code
+	tool.Mods.Add(user, database.ToolMod{})
+
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
 
 	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
@@ -181,61 +192,6 @@ func (h *Tools) handleDelete(c echo.Context) error {
 	// Set redirect header to tools page
 	c.Response().Header().Set("HX-Redirect", constants.ServerPathPrefix+"/tools")
 	return c.NoContent(http.StatusOK)
-}
-
-// getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]
-func (h *Tools) getToolFormData(c echo.Context, user *database.User) (*database.Tool, error) {
-	logger.HTMXHandlerTools().Debug("Parsing tool form data")
-
-	var position database.Position
-	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
-	case database.PositionTop:
-		position = database.PositionTop
-	case database.PositionBottom:
-		position = database.PositionBottom
-	default:
-		return nil, errors.New("invalid position")
-	}
-
-	tool := database.NewTool(position)
-
-	// Parse width and height
-	widthStr := c.FormValue("width")
-	if widthStr != "" {
-		width, err := strconv.Atoi(widthStr)
-		if err != nil {
-			return nil, errors.New("invalid width: " + err.Error())
-		}
-		tool.Format.Width = width
-	}
-
-	heightStr := c.FormValue("height")
-	if heightStr != "" {
-		height, err := strconv.Atoi(heightStr)
-		if err != nil {
-			return nil, errors.New("invalid height: " + err.Error())
-		}
-		tool.Format.Height = height
-	}
-
-	// Parse type
-	tool.Type = c.FormValue("type")
-	if tool.Type == "" {
-		return nil, errors.New("type is required")
-	}
-
-	// Parse code
-	tool.Code = c.FormValue("code")
-	if tool.Code == "" {
-		return nil, errors.New("code is required")
-	}
-
-	tool.Mods.Add(user, database.ToolMod{})
-
-	logger.HTMXHandlerTools().Debug("Successfully parsed tool: Type=%s, Code=%s, Position=%s, Format=%dx%d",
-		tool.Type, tool.Code, position, tool.Format.Width, tool.Format.Height)
-
-	return tool, nil
 }
 
 func (h *Tools) handleCyclesSection(c echo.Context) error {
@@ -347,8 +303,13 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	return nil
 }
 
-// TODO: Add "/htmx/tools/cycle/edit?tool_id=%d"
+// handleCycleEditPOST "/htmx/tools/cycle/edit?tool_id=%d"
 func (h *Tools) handleCycleEditPOST(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return err
@@ -359,14 +320,27 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 			"failed to get tool: "+err.Error())
 	}
 
-	// TODO: Parse form data (type: PressCycle)
+	// Parse form data (type: PressCycle)
+	formData, err := h.getCycleFormData(c)
+	if err != nil {
+		return err
+	}
+	if tool.Press == nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"tool has no press asigned")
+	}
 
 	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit POST request for tool %d",
-		toolID,
+		"Handling cycle edit POST request for tool %d: formData=%#v",
+		toolID, formData,
 	)
 
-	return errors.New("under construction")
+	if err := h.DB.PressCycles.UpdateCycles(tool.ID, formData.TotalCycles, user); err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to update press cycles: "+err.Error())
+	}
+
+	return nil
 }
 
 // TODO: Add "PUT    /htmx/tools/cycle/edit?cycle_id=%d"
@@ -397,4 +371,74 @@ func (h *Tools) handleCycleDELETE(c echo.Context) error {
 	)
 
 	return errors.New("under construction")
+}
+
+// getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]
+func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
+	logger.HTMXHandlerTools().Debug("Parsing tool form data")
+
+	var position database.Position
+	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
+	case database.PositionTop:
+		position = database.PositionTop
+	case database.PositionBottom:
+		position = database.PositionBottom
+	default:
+		return nil, errors.New("invalid position")
+	}
+
+	data := &ToolEditFormData{
+		Position: position,
+	}
+
+	// Parse width and height
+	widthStr := c.FormValue("width")
+	if widthStr != "" {
+		width, err := strconv.Atoi(widthStr)
+		if err != nil {
+			return nil, errors.New("invalid width: " + err.Error())
+		}
+		data.Format.Width = width
+	}
+
+	heightStr := c.FormValue("height")
+	if heightStr != "" {
+		height, err := strconv.Atoi(heightStr)
+		if err != nil {
+			return nil, errors.New("invalid height: " + err.Error())
+		}
+		data.Format.Height = height
+	}
+
+	// Parse type
+	data.Type = c.FormValue("type")
+	if data.Type == "" {
+		return nil, errors.New("type is required")
+	}
+
+	// Parse code
+	data.Code = c.FormValue("code")
+	if data.Code == "" {
+		return nil, errors.New("code is required")
+	}
+
+	logger.HTMXHandlerTools().Debug("Successfully parsed tool: Type=%s, Code=%s, Position=%s, Format=%dx%d",
+		data.Type, data.Code, position, data.Format.Width, data.Format.Height)
+
+	return data, nil
+}
+
+func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
+	totalCyclesString := c.FormValue("total_cycles")
+	if totalCyclesString == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles is required")
+	}
+	totalCycles, err := strconv.ParseInt(totalCyclesString, 10, 64)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
+	}
+
+	return &CycleEditFormData{
+		TotalCycles: totalCycles,
+	}, nil
 }

@@ -22,17 +22,5 @@ type PressCycle struct {
 	ToDate        *time.Time  `json:"to_date"`
 	TotalCycles   int64       `json:"total_cycles"`
 	PartialCycles int64       `json:"partial_cycles"`
-	PerformedBy   *int64      `json:"performed_by"`
-}
-
-// NewPressCycle creates a new PressCycle instance
-func NewPressCycle(pressNumber PressNumber, toolID int64, fromDate time.Time, performedBy *int64) *PressCycle {
-	return &PressCycle{
-		PressNumber:   pressNumber,
-		ToolID:        toolID,
-		FromDate:      fromDate,
-		TotalCycles:   0,
-		PartialCycles: 0,
-		PerformedBy:   performedBy,
-	}
+	PerformedBy   int64       `json:"performed_by"`
 }
