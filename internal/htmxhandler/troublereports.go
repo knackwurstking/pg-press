@@ -1,8 +1,10 @@
 package htmxhandler
 
 import (
-	"github.com/knackwurstking/pgpress/internal/constants"
+	"net/http"
+
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -11,31 +13,28 @@ type TroubleReports struct {
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	// Dialog edit routes
-	editDialogPath := constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit"
-	e.GET(editDialogPath, func(c echo.Context) error {
-		return h.handleGetDialogEdit(c, nil)
-	})
-	e.GET(editDialogPath+"/", func(c echo.Context) error {
-		return h.handleGetDialogEdit(c, nil)
-	})
-	e.POST(editDialogPath, h.handlePostDialogEdit)
-	e.POST(editDialogPath+"/", h.handlePostDialogEdit)
-	e.PUT(editDialogPath, h.handlePutDialogEdit)
-	e.PUT(editDialogPath+"/", h.handlePutDialogEdit)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			// Dialog edit routes
+			utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/dialog-edit", func(c echo.Context) error {
+				return h.handleGetDialogEdit(c, nil)
+			}),
+			utils.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/dialog-edit", h.handlePostDialogEdit),
+			utils.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/dialog-edit", h.handlePutDialogEdit),
 
-	// Data routes
-	dataPath := constants.ServerPathPrefix + "/htmx/trouble-reports/data"
-	e.GET(dataPath, h.handleGetData)
-	e.DELETE(dataPath, h.handleDeleteData)
+			// Data routes
+			utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data", h.handleGetData),
+			utils.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data", h.handleDeleteData),
 
-	attachmentsPreviewPath := constants.ServerPathPrefix + "/htmx/trouble-reports/attachments-preview"
-	e.GET(attachmentsPreviewPath, h.handleGetAttachmentsPreview)
+			// Attachments preview routes
+			utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview", h.handleGetAttachmentsPreview),
 
-	// Modifications routes
-	modificationsPath := constants.ServerPathPrefix + "/htmx/trouble-reports/modifications/:id"
-	e.GET(modificationsPath, func(c echo.Context) error {
-		return h.handleGetModifications(c, nil)
-	})
-	e.POST(modificationsPath, h.handlePostModifications)
+			// Modifications routes
+			utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/modifications/:id", func(c echo.Context) error {
+				return h.handleGetModifications(c, nil)
+			}),
+			utils.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/modifications/:id", h.handlePostModifications),
+		},
+	)
 }

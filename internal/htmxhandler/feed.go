@@ -17,11 +17,15 @@ type Feed struct {
 }
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
-	e.GET(constants.ServerPathPrefix+"/htmx/feed/data", h.handleGetData)
-	e.GET(constants.ServerPathPrefix+"/htmx/feed/data/", h.handleGetData)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/htmx/feed/list", h.handleListGET),
+		},
+	)
 }
 
-func (h *Feed) handleGetData(c echo.Context) error {
+func (h *Feed) handleListGET(c echo.Context) error {
 	logger.HTMXHandlerFeed().Debug("Fetching feed data")
 
 	// Get feeds
