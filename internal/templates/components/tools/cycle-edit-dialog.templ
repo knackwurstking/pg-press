@@ -29,9 +29,15 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			<form
 				class="container"
 				if props.CycleID > 0 {
-					hx-put={ fmt.Sprintf("%s/...", constants.ServerPathPrefix) }
+					hx-put={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+						constants.ServerPathPrefix, props.Tool.ID, props.CycleID,
+					) }
 				} else {
-					hx-post={ fmt.Sprintf("%s/...", constants.ServerPathPrefix) }
+					hx-post={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?tool_id=%d",
+						constants.ServerPathPrefix, props.Tool.ID,
+					) }
 				}
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }

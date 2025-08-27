@@ -99,9 +99,12 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/...", constants.ServerPathPrefix))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+					constants.ServerPathPrefix, props.Tool.ID, props.CycleID,
+				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 32, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 35, Col: 6}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -117,9 +120,12 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/...", constants.ServerPathPrefix))
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?tool_id=%d",
+					constants.ServerPathPrefix, props.Tool.ID,
+				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 34, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 40, Col: 6}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -137,7 +143,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDToolCycleEditDialog))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 37, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 43, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -174,7 +180,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				constants.ServerPathPrefix, props.Tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 73, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 79, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -187,7 +193,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDToolCycleEditDialog))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 75, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 81, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
