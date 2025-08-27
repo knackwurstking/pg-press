@@ -40,6 +40,14 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			>
 				{{ active := false }}
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+					<div class="card warning">
+						<div class="card-header">
+							<h4>Dev Note</h4>
+						</div>
+						<div class="card-body">
+							Die Zykluseinstellungen können nur bearbeitet werden wenn das Werkzeug aktiv ist oder bereits ein Zyklus läuft.
+						</div>
+					</div>
 					if props.Tool.Status == database.ToolStatusActive || props.CycleID > 0 {
 						{{ active = true }}
 						<section class="flex flex-col gap-sm">
