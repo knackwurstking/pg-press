@@ -225,67 +225,6 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 	</tr>
 }
 
-// renderCycleRow is deprecated - use renderCycleRowWithPartialCalc instead
-// This is kept for backward compatibility but uses the database-calculated partial cycles
-templ renderCycleRow(user *database.User, cycle *database.PressCycle) {
-	<tr>
-		<td>
-			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
-		</td>
-		<td>
-			<div class="flex flex-col">
-				<span>{ cycle.FromDate.Format("02.01.2006") }</span>
-				<span class="text-muted text-sm">{ cycle.FromDate.Format("15:04") }</span>
-			</div>
-		</td>
-		<td>
-			if cycle.ToDate != nil {
-				<div class="flex flex-col">
-					<span>{ cycle.ToDate.Format("02.01.2006") }</span>
-					<span class="text-muted text-sm">{ cycle.ToDate.Format("15:04") }</span>
-				</div>
-			} else {
-				<span class="primary ghost">Aktiv</span>
-			}
-		</td>
-		<td>
-			{ fmt.Sprintf("%d", cycle.TotalCycles) }
-		</td>
-		<td>
-			{ fmt.Sprintf("%d", cycle.PartialCycles) }
-		</td>
-		<td class="button-group flex justify-end items-center">
-			<!-- TODO: This feature is not yet implemented -->
-			<button
-				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?cycle_id=%d",
-					constants.ServerPathPrefix, cycle.ID,
-				) }
-				hx-trigger="click"
-				class="small ghost"
-				title="Bearbeiten"
-			>
-				<i class="bi bi-pencil"></i>
-			</button>
-			<!-- TODO: This feature is not yet implemented -->
-			<button
-				hx-delete={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?cycle_id=%d",
-					constants.ServerPathPrefix, cycle.ID,
-				) }
-				hx-trigger="click"
-				class="destructive small ghost"
-				title="Löschen"
-				if !user.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-trash"></i>
-			</button>
-		</td>
-	</tr>
-}
-
 // Helper function to check if a cycle is within a time period
 func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
 	if startTime != nil && cycle.FromDate.Before(*startTime) {
