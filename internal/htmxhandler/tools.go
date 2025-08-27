@@ -335,7 +335,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if err := h.DB.PressCycles.UpdateCycles(tool.ID, formData.TotalCycles, user); err != nil {
+	if err := h.DB.ToolCyclesHelper.UpdateToolCycles(tool.ID, formData.TotalCycles, user); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to update press cycles: "+err.Error())
 	}
