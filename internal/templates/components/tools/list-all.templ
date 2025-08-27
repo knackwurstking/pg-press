@@ -28,7 +28,7 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
 			role="button"
-			href={ fmt.Sprintf(constants.ServerPathPrefix+"/tools/press/%d", id) }
+			href={ fmt.Sprintf(constants.ServerPathPrefix+"/tools/tool/%d", id) }
 			class="ghost contrast flex justify-between items-center flex gap justify-between"
 		>
 			<span class="flex flex-col gap-sm">

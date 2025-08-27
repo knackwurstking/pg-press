@@ -22,7 +22,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 		[]*utils.EchoRoute{
 			utils.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
 			utils.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
-			utils.NewEchoRoute(http.MethodGet, "/tools/press/:id", h.handleToolPage),
+			utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
 		},
 	)
 
