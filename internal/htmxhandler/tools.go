@@ -296,7 +296,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	return nil
 }
 
-// TODO: Add "GET    /htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
+// handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
 func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
 	if props == nil {
 		props = &toolscomp.CycleEditDialogProps{}
@@ -308,7 +308,8 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	}
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return err
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
 	}
 	props.Tool = tool
 
@@ -346,12 +347,19 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	return nil
 }
 
-// TODO: Add "POST   /htmx/tools/cycle/edit?tool_id=%d"
+// TODO: Add "/htmx/tools/cycle/edit?tool_id=%d"
 func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return err
 	}
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
+	}
+
+	// TODO: Parse form data (type: PressCycle)
 
 	logger.HTMXHandlerTools().Debug(
 		"Handling cycle edit POST request for tool %d",
