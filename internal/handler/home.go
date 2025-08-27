@@ -3,17 +3,21 @@ package handler
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 type Home struct{}
 
 func (h *Home) RegisterRoutes(e *echo.Echo) {
-	e.GET(constants.ServerPathPrefix, h.handleHome)
-	e.GET(constants.ServerPathPrefix+"/", h.handleHome)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "", h.handleHome),
+		},
+	)
 }
 
 // handleHome handles the home page request.

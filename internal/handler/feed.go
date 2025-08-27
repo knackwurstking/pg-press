@@ -5,11 +5,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 type Feed struct {
@@ -17,10 +17,12 @@ type Feed struct {
 }
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
-	prefix := "/feed"
-
-	e.GET(constants.ServerPathPrefix+prefix, h.handleFeed)
-	e.GET(constants.ServerPathPrefix+prefix+"/", h.handleFeed)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/feed", h.handleFeed),
+		},
+	)
 
 	htmxFeed := htmxhandler.Feed{DB: h.DB}
 	htmxFeed.RegisterRoutes(e)

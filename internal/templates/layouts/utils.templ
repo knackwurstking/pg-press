@@ -5,7 +5,7 @@ script OpenImageViewer(attachmentID int64) {
     var dialog = document.querySelector('dialog[name="image-viewer"]');
     if (dialog) dialog.close();
 
-    var imageURL = `./trouble-reports/attachments?attachment_id=${attachmentID}`;
+    var imageURL = `./trouble-reports/attachment?attachment_id=${attachmentID}`;
     var imageViewer = document.querySelector('template[name="image-viewer"]');
     dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
     var img = dialog.querySelector('img.attachment');

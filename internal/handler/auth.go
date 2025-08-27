@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/utils"
 )
 
 type Auth struct {
@@ -19,10 +20,13 @@ type Auth struct {
 }
 
 func (h *Auth) RegisterRoutes(e *echo.Echo) {
-	e.GET(constants.ServerPathPrefix+"/login", h.handleLogin)
-	e.GET(constants.ServerPathPrefix+"/login/", h.handleLogin)
-	e.GET(constants.ServerPathPrefix+"/logout", h.handleLogout)
-	e.GET(constants.ServerPathPrefix+"/logout/", h.handleLogout)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
+			utils.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
+		},
+	)
 }
 
 // handleLogin handles the login page and form submission.

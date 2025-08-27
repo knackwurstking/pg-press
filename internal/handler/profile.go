@@ -18,16 +18,18 @@ type Profile struct {
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	prefix := "/profile"
-
-	e.GET(constants.ServerPathPrefix+prefix, h.handleMainPage)
-	e.GET(constants.ServerPathPrefix+prefix+"/", h.handleMainPage)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/profile", h.handleProfile),
+		},
+	)
 
 	htmxProfile := htmxhandler.Profile{DB: h.DB}
 	htmxProfile.RegisterRoutes(e)
 }
 
-func (h *Profile) handleMainPage(c echo.Context) error {
+func (h *Profile) handleProfile(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
 		return err

@@ -17,21 +17,20 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	path := "/tools"
-
-	e.GET(constants.ServerPathPrefix+path, h.handleToolsPage)
-	e.GET(constants.ServerPathPrefix+path+"/", h.handleToolsPage)
-
-	e.GET(constants.ServerPathPrefix+path+"/active/:press", h.handleToolsActivePage)
-	e.GET(constants.ServerPathPrefix+path+"/active/:press/", h.handleToolsActivePage)
-	e.GET(constants.ServerPathPrefix+path+"/all/:id", h.handleToolPage)
-	e.GET(constants.ServerPathPrefix+path+"/all/:id/", h.handleToolPage)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
+			utils.NewEchoRoute(http.MethodGet, "/tools/active/:press", h.handlePressPage), // TODO: Maybe rename this stupid path
+			utils.NewEchoRoute(http.MethodGet, "/tools/all/:id", h.handleToolPage),        // TODO: Maybe rename this stupid path
+		},
+	)
 
 	htmxTroubleReports := htmxhandler.Tools{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
 }
 
-func (h *Tools) handleToolsPage(c echo.Context) error {
+func (h *Tools) handleTools(c echo.Context) error {
 	logger.HandlerTools().Debug("Rendering tools page")
 
 	tools, err := h.DB.ToolsHelper.ListWithNotes()
@@ -52,7 +51,7 @@ func (h *Tools) handleToolsPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleToolsActivePage(c echo.Context) error {
+func (h *Tools) handlePressPage(c echo.Context) error {
 	press, err := utils.ParseInt64Param(c, constants.QueryParamPress)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to parse press parameter: %v", err)

@@ -23,24 +23,20 @@ type TroubleReports struct {
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	path := "/trouble-reports"
-	e.GET(constants.ServerPathPrefix+path, h.handleMainPage)
-	e.GET(constants.ServerPathPrefix+path+"/", h.handleMainPage)
-
-	sharePdfPath := constants.ServerPathPrefix + path + "/share-pdf"
-	e.GET(sharePdfPath, h.handleGetSharePdf)
-	e.GET(sharePdfPath+"/", h.handleGetSharePdf)
-
-	// Attachment routes
-	attachmentsPath := constants.ServerPathPrefix + "/trouble-reports/attachments"
-	e.GET(attachmentsPath, h.handleGetAttachment)
-	e.GET(attachmentsPath+"/", h.handleGetAttachment)
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			utils.NewEchoRoute(http.MethodGet, "/trouble-reports", h.handleTroubleReports),
+			utils.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.handleGetSharePdf),
+			utils.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.handleGetAttachment),
+		},
+	)
 
 	htmxTroubleReports := htmxhandler.TroubleReports{DB: h.DB}
 	htmxTroubleReports.RegisterRoutes(e)
 }
 
-func (h *TroubleReports) handleMainPage(c echo.Context) error {
+func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 	logger.HandlerTroubleReports().Debug("Rendering trouble reports page")
 
 	page := pages.TroubleReportsPage()

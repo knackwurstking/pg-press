@@ -10,12 +10,12 @@ import templruntime "github.com/a-h/templ/runtime"
 
 func OpenImageViewer(attachmentID int64) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_OpenImageViewer_cbf4`,
-		Function: `function __templ_OpenImageViewer_cbf4(attachmentID){// Close any existing image viewer
+		Name: `__templ_OpenImageViewer_0755`,
+		Function: `function __templ_OpenImageViewer_0755(attachmentID){// Close any existing image viewer
     var dialog = document.querySelector('dialog[name="image-viewer"]');
     if (dialog) dialog.close();
 
-    var imageURL = ` + "`" + `./trouble-reports/attachments?attachment_id=${attachmentID}` + "`" + `;
+    var imageURL = ` + "`" + `./trouble-reports/attachment?attachment_id=${attachmentID}` + "`" + `;
     var imageViewer = document.querySelector('template[name="image-viewer"]');
     dialog = imageViewer.content.cloneNode(true).querySelector('dialog');
     var img = dialog.querySelector('img.attachment');
@@ -44,8 +44,8 @@ func OpenImageViewer(attachmentID int64) templ.ComponentScript {
     document.body.appendChild(dialog);
     dialog.showModal();
 }`,
-		Call:       templ.SafeScript(`__templ_OpenImageViewer_cbf4`, attachmentID),
-		CallInline: templ.SafeScriptInline(`__templ_OpenImageViewer_cbf4`, attachmentID),
+		Call:       templ.SafeScript(`__templ_OpenImageViewer_0755`, attachmentID),
+		CallInline: templ.SafeScriptInline(`__templ_OpenImageViewer_0755`, attachmentID),
 	}
 }
 

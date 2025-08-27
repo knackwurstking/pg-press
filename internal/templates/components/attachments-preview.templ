@@ -25,7 +25,7 @@ templ AttachmentsPreview(attachments []*database.Attachment) {
 						<div class="attachment-preview-image">
 							<img
 								loading="lazy"
-								src={ fmt.Sprintf("./trouble-reports/attachments?attachment_id=%s", attachment.ID) }
+								src={ fmt.Sprintf("./trouble-reports/attachment?attachment_id=%s", attachment.ID) }
 								alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
 								class="preview-thumbnail select-none"
 								loading="lazy"
