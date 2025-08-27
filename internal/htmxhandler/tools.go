@@ -308,6 +308,18 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	}
 	props.ToolID = toolID
 
+	close := utils.ParseBoolQuery(c, constants.QueryParamClose)
+	if close {
+		props.Close = true
+
+		cycleEditDialog := toolscomp.CycleEditDialog(props)
+		if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError,
+				"failed to close cycle edit dialog: "+err.Error())
+		}
+		return nil
+	}
+
 	// TODO: Get tool data from the database
 
 	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)

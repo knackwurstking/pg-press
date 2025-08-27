@@ -34,7 +34,33 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
-				<!-- TODO: Continue here... -->
+				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+					<!-- TODO: Continue here... -->
+				</div>
+				<footer class="flex gap justify-end">
+					<button
+						type="button"
+						class="secondary flex gap"
+						hx-get={ fmt.Sprintf(
+							"%s/htmx/tools/cycle/edit?close=true&tool_id=%d",
+							constants.ServerPathPrefix, props.ToolID,
+						) }
+						hx-trigger="click"
+						hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+						hx-swap="outerHTML"
+					>
+						<i class="bi bi-x-circle"></i>
+						Schließen
+					</button>
+					<button type="submit" class="flex gap">
+						<i class="bi bi-check-circle"></i>
+						if props.CycleID > 0 {
+							Aktualisieren
+						} else {
+							Erstellen
+						}
+					</button>
+				</footer>
 			</form>
 			<script defer>
                 document.querySelector("#toolCycleEditDialog").showModal();

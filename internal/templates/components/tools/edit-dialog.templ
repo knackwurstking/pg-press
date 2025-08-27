@@ -19,13 +19,19 @@ templ EditDialog(props *EditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolEditDialog }
-			hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
-			hx-trigger="load"
-			hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
-			hx-swap="outerHTML"
+			if props.ID <= 0 {
+				hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
+				hx-trigger="load"
+				hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
+				hx-swap="outerHTML"
+			}
 		></span>
 	} else {
-		<dialog name="tool-edit-dialog" class="fullscreen clean flex flex-col justify-center items-center">
+		<dialog
+			name="tool-edit-dialog"
+			id={ constants.IDToolEditDialog }
+			class="fullscreen clean flex flex-col justify-center items-center"
+		>
 			<form
 				class="flex flex-col gap max-w-full"
 				if props.ID > 0 {
@@ -124,8 +130,10 @@ templ EditDialog(props *EditDialogProps) {
 					<button
 						type="button"
 						class="secondary flex gap"
-						onclick="closeToolEditDialog()"
-						hx-get={ constants.ServerPathPrefix + "/htmx/tools/edit?close=true" }
+						hx-get={ fmt.Sprintf(
+							"%s/htmx/tools/edit?id=%d&close=true",
+							constants.ServerPathPrefix, props.ID,
+						) }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 						hx-swap="outerHTML"
@@ -144,12 +152,6 @@ templ EditDialog(props *EditDialogProps) {
 				</footer>
 			</form>
 			<script>
-    			function closeToolEditDialog() {
-    				var dialog = document.querySelector(`dialog[name="tool-edit-dialog"]`);
-    				dialog.close();
-    				dialog.parentElement.removeChild(dialog);
-    			}
-
     			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
     		</script>
 		</dialog>
