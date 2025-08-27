@@ -1,7 +1,40 @@
 package tools
 
+import "fmt"
+import "github.com/knackwurstking/pgpress/internal/constants"
+
 type CycleEditDialogProps struct {
+	ToolID  int64
+	CycleID int64
+	Close   bool
 }
 
-templ CycleEditDialog() {
+templ CycleEditDialog(props *CycleEditDialogProps) {
+	if props.Close {
+		<!-- TODO: Reload the total cycles and the cycles table data -->
+		<span
+			hx-get={ fmt.Sprintf(
+				"%s/htmx/tools/cycles?tool_id=%d",
+				constants.ServerPathPrefix, props.ToolID,
+			) }
+			hx-trigger="load"
+			hx-target="section.cycles"
+			hx-swap="innerHTML"
+			id={ constants.IDToolCycleEditDialog }
+		></span>
+	} else {
+		<dialog class="fullscreen clean">
+			<form
+				if props.CycleID > 0 {
+					hx-put={ fmt.Sprintf("%s/...", constants.ServerPathPrefix) }
+				} else {
+					hx-post={ fmt.Sprintf("%s/...", constants.ServerPathPrefix) }
+				}
+				hx-trigger="submit"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+				hx-swap="outerHTML"
+				enctype="multipart/form-data"
+			></form>
+		</dialog>
+	}
 }

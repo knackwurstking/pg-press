@@ -37,13 +37,12 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
 
 			// Cycles table rows
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleCycles),
-
-			// Total cycles for a tool
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
+			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleCyclesSection),
 
 			// Get, add or edit a cycles table entry
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", h.handleCycleEditGET),
+			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", func(c echo.Context) error {
+				return h.handleCycleEditGET(nil, c)
+			}),
 			utils.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleCycleEditPOST),
 			utils.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleCycleEditPUT),
 
@@ -239,7 +238,7 @@ func (h *Tools) getToolFormData(c echo.Context, user *database.User) (*database.
 	return tool, nil
 }
 
-func (h *Tools) handleCycles(c echo.Context) error {
+func (h *Tools) handleCyclesSection(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
 		return err
@@ -271,9 +270,25 @@ func (h *Tools) handleCycles(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for tool %d",
 		len(cycles), len(regenerations), toolID)
 
+	// Calculate total cycles since last regeneration
+	var lastRegenerationDate *time.Time
+	if len(regenerations) > 0 {
+		lastRegenerationDate = &regenerations[len(regenerations)-1].RegeneratedAt
+	}
+
+	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(
+		toolID, lastRegenerationDate,
+	)
+
 	// Render the component
-	cyclesRows := toolscomp.CyclesTableRows(user, cycles, regenerations)
-	if err := cyclesRows.Render(c.Request().Context(), c.Response()); err != nil {
+	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
+		User:          user,
+		ToolID:        toolID,
+		TotalCycles:   totalCycles,
+		Cycles:        cycles,
+		Regenerations: regenerations,
+	})
+	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool cycles: "+err.Error())
 	}
@@ -281,57 +296,24 @@ func (h *Tools) handleCycles(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleTotalCycles(c echo.Context) error {
-	// Get tool ID from query parameter
-	toolID, err := utils.ParseInt64Query(c, "tool_id")
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid or missing tool_id parameter: "+err.Error())
-	}
-
-	logger.HTMXHandlerTools().Debug("Calculating total cycles for tool %d", toolID)
-
-	// Get the last regeneration for this tool
-	lastRegeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
-	if err != nil && err != database.ErrNotFound {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to get last regeneration: "+err.Error())
-	}
-
-	// Calculate total cycles since last regeneration
-	var lastRegenerationDate *time.Time
-	if lastRegeneration != nil {
-		lastRegenerationDate = &lastRegeneration.RegeneratedAt
-	}
-
-	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID, lastRegenerationDate)
-	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to get total cycles: "+err.Error())
-	}
-
-	logger.HTMXHandlerTools().Debug("Tool %d has %d total cycles since last regeneration", toolID, totalCycles)
-
-	// Render the component
-	totalCyclesComponent := toolscomp.TotalCycles(totalCycles)
-	if err := totalCyclesComponent.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render total cycles: "+err.Error())
-	}
-
-	return nil
-}
-
 // TODO: Add "GET    /htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
-func (h *Tools) handleCycleEditGET(c echo.Context) error {
+func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
+	if props == nil {
+		props = &toolscomp.CycleEditDialogProps{}
+	}
+
 	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return err
 	}
+	props.ToolID = toolID
+
+	// TODO: Get tool data from the database
 
 	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
-	if err != nil {
-		return err
+	if err == nil {
+		props.CycleID = cycleID
+		// TODO: Get cycle data from the database
 	}
 
 	logger.HTMXHandlerTools().Debug(
@@ -339,9 +321,13 @@ func (h *Tools) handleCycleEditGET(c echo.Context) error {
 		toolID, cycleID,
 	)
 
-	// TODO: ...
+	cycleEditDialog := toolscomp.CycleEditDialog(props)
+	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render cycle edit dialog: "+err.Error())
+	}
 
-	return errors.New("under construction")
+	return nil
 }
 
 // TODO: Add "POST   /htmx/tools/cycle/edit?tool_id=%d"

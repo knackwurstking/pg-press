@@ -12,6 +12,9 @@ const (
 	// IDToolEditDialog is the ID for the tool edit dialog element
 	IDToolEditDialog = "toolEditDialog"
 
+	// IDToolCycleEditDialog is the ID for the tool cycle edit dialog element
+	IDToolCycleEditDialog = "toolCycleEditDialog"
+
 	// IDTroubleReportEditDialog is the ID for the trouble report edit dialog element
 	IDTroubleReportEditDialog = "troubleReportEditDialog"
 )

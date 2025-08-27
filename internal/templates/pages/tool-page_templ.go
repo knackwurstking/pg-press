@@ -702,55 +702,23 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</section><section class=\"cycles\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5><!-- TODO: This feature is not yet implemented --><button hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "</section><section class=\"cycles\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/edit?tool_id=%d",
+			"%s/htmx/tools/cycles?tool_id=%d",
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 331, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 328, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" hx-trigger=\"click\" class=\"secondary small flex\" title=\"Neuen Eintrag hinzufügen\"><i class=\"bi bi-plus-lg\"></i></button></div><section><h6 class=\"mb\">Gesamtzyklen seit der letzten Regenerierung:</h6><span hx-get=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var31 string
-		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/total-cycles?tool_id=%d",
-			constants.ServerPathPrefix, tool.ID,
-		))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 347, Col: 6}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><input value=\"...\" readonly></span></section><figure class=\"w-full overflow-x-scroll\"><table name=\"tool-cycles-table\" class=\"table borderless compact\"><thead><tr><th name=\"press\">Presse</th><th name=\"from\">Von</th><th name=\"to\">Bis</th><th name=\"total\">Gesamtzyklen</th><th name=\"partial\">Teilzyklen</th><th></th></tr></thead> <tbody hx-get=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var32 string
-		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycles?tool_id=%d",
-			constants.ServerPathPrefix, tool.ID,
-		))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 370, Col: 7}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"><tr><td colspan=\"6\" class=\"text-center\"><span class=\"spinner\"></span> Lade Pressenverlauf...</td></tr></tbody></table></figure></section></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

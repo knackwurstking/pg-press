@@ -320,65 +320,14 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 					<span>{ string(tool.Status) }</span>
 			}
 		</section>
-		<section class="cycles">
-			<div class="flex justify-between items-center mb">
-				<h5>Pressennutzungsverlauf</h5>
-				<!-- TODO: This feature is not yet implemented -->
-				<button
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d",
-						constants.ServerPathPrefix, tool.ID,
-					) }
-					hx-trigger="click"
-					class="secondary small flex"
-					title="Neuen Eintrag hinzufügen"
-				>
-					<i class="bi bi-plus-lg"></i>
-				</button>
-			</div>
-			<section>
-				<h6 class="mb">
-					Gesamtzyklen seit der letzten Regenerierung:
-				</h6>
-				<span
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/total-cycles?tool_id=%d",
-						constants.ServerPathPrefix, tool.ID,
-					) }
-					hx-trigger="load"
-					hx-swap="innerHTML"
-				>
-					<input value="..." readonly/>
-				</span>
-			</section>
-			<figure class="w-full overflow-x-scroll">
-				<table name="tool-cycles-table" class="table borderless compact">
-					<thead>
-						<tr>
-							<th name="press">Presse</th>
-							<th name="from">Von</th>
-							<th name="to">Bis</th>
-							<th name="total">Gesamtzyklen</th>
-							<th name="partial">Teilzyklen</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody
-						hx-get={ fmt.Sprintf(
-							"%s/htmx/tools/cycles?tool_id=%d",
-							constants.ServerPathPrefix, tool.ID,
-						) }
-						hx-trigger="load"
-						hx-swap="innerHTML"
-					>
-						<tr>
-							<td colspan="6" class="text-center">
-								<span class="spinner"></span> Lade Pressenverlauf...
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</figure>
-		</section>
+		<section
+			class="cycles"
+			hx-get={ fmt.Sprintf(
+				"%s/htmx/tools/cycles?tool_id=%d",
+				constants.ServerPathPrefix, tool.ID,
+			) }
+			hx-trigger="load"
+			hx-swap="innerHTML"
+		></section>
 	</section>
 }
