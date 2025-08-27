@@ -23,7 +23,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			id={ constants.IDToolCycleEditDialog }
 		></span>
 	} else {
-		<dialog class="fullscreen clean">
+		<dialog class="fullscreen clean" id={ constants.IDToolCycleEditDialog }>
 			<form
 				if props.CycleID > 0 {
 					hx-put={ fmt.Sprintf("%s/...", constants.ServerPathPrefix) }
@@ -35,6 +35,9 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			></form>
+			<script defer>
+                document.querySelector("#toolCycleEditDialog").showModal();
+            </script>
 		</dialog>
 	}
 }

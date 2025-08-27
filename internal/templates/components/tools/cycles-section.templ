@@ -26,6 +26,8 @@ templ CyclesSection(props *CyclesSectionProps) {
 						constants.ServerPathPrefix, props.ToolID,
 					) }
 			hx-trigger="click"
+			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+			hx-swap="outerHTML"
 			class="secondary small flex"
 			title="Neuen Eintrag hinzufügen"
 		>
