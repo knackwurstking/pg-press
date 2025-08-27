@@ -119,8 +119,8 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 		toolID, reason,
 	)
 
-	// Get current total cycles for the tool before regeneration
-	totalCycles, err := t.pressCycles.GetTotalCyclesSinceRegeneration(toolID, nil)
+	// Get current absolute total cycles for the tool before regeneration
+	totalCycles, err := t.pressCycles.GetCurrentTotalCycles(toolID)
 	if err != nil {
 		return nil, NewDatabaseError("insert", "tool_regenerations",
 			"failed to get total cycles", err)
