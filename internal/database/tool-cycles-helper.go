@@ -106,7 +106,7 @@ func (h *ToolCyclesHelper) GetToolPressHistory(toolID int64) (*ToolPressHistory,
 	}
 
 	// Get tool status
-	tool, err := h.tools.GetByID(toolID)
+	tool, err := h.tools.Get(toolID)
 	if err != nil {
 		return nil, err
 	}

@@ -393,11 +393,6 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error 
 	return nil
 }
 
-// GetByID retrieves a tool by its ID (alias for Get)
-func (t *Tools) GetByID(id int64) (*Tool, error) {
-	return t.Get(id)
-}
-
 func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	tool := &Tool{}
 

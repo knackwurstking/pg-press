@@ -306,7 +306,11 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	if err != nil {
 		return err
 	}
-	props.ToolID = toolID
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return err
+	}
+	props.Tool = tool
 
 	close := utils.ParseBoolQuery(c, constants.QueryParamClose)
 	if close {
