@@ -40,20 +40,19 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			>
 				{{ active := false }}
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-					switch props.Tool.Status {
-						case database.ToolStatusActive:
-							{{ active = true }}
-							<section class="flex flex-col gap-sm">
-								<label>Gesamtzyklen</label>
-								<input type="number" min="0" step="1" id="total_cycles" name="total_cycles" placeholder="Gesamtzyklen" required/>
-							</section>
-						default:
-							<div class="card destructive">
-								<span class="card-body">
-									<i class="bi bi-exclamation-triangle"></i>
-									<span>Werkzeug ist nicht aktiv</span>
-								</span>
-							</div>
+					if props.Tool.Status == database.ToolStatusActive || props.CycleID > 0 {
+						{{ active = true }}
+						<section class="flex flex-col gap-sm">
+							<label>Gesamtzyklen</label>
+							<input type="number" min="0" step="1" id="total_cycles" name="total_cycles" placeholder="Gesamtzyklen" required/>
+						</section>
+					} else {
+						<div class="card destructive">
+							<span class="card-body">
+								<i class="bi bi-exclamation-triangle"></i>
+								<span>Werkzeug ist nicht aktiv</span>
+							</span>
+						</div>
 					}
 				</div>
 				<footer class="flex gap justify-end">
