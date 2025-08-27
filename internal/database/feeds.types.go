@@ -99,7 +99,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat ein neues Werkzeug
-		<a href="./tools/all/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
+		<a href="./tools/press/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
 	</div>
 </div>
 `
@@ -111,7 +111,7 @@ const (
 		style="padding: var(--ui-spacing);"
 	>
 		Benutzer <strong>%s</strong> hat das Werkzeug
-		<a href="./tools/all/%d" class="info">%s</a> aktualisiert.
+		<a href="./tools/press/%d" class="info">%s</a> aktualisiert.
 	</div>
 </div>
 `
@@ -498,7 +498,7 @@ func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAss
 func (f *FeedMetalSheetToolAssignment) Render() template.HTML {
 	action := "vom Werkzeug getrennt"
 	if f.ToolID != nil {
-		action = fmt.Sprintf("dem Werkzeug <a href=\"./tools/all/%d\" class=\"info\">#%d</a> zugewiesen", *f.ToolID, *f.ToolID)
+		action = fmt.Sprintf("dem Werkzeug <a href=\"./tools/press/%d\" class=\"info\">#%d</a> zugewiesen", *f.ToolID, *f.ToolID)
 	}
 	return template.HTML(fmt.Sprintf(MetalSheetToolAssignmentRenderTemplate,
 		f.ModifiedBy.UserName, f.SheetID, f.SheetID, action))

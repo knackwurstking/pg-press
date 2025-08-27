@@ -21,8 +21,8 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*utils.EchoRoute{
 			utils.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
-			utils.NewEchoRoute(http.MethodGet, "/tools/active/:press", h.handlePressPage), // TODO: Maybe rename this stupid path
-			utils.NewEchoRoute(http.MethodGet, "/tools/all/:id", h.handleToolPage),        // TODO: Maybe rename this stupid path
+			utils.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
+			utils.NewEchoRoute(http.MethodGet, "/tools/press/:id", h.handleToolPage),
 		},
 	)
 

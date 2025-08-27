@@ -646,7 +646,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			}
 			var templ_7745c5c3_Var27 templ.SafeURL
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
-				"%s/tools/active/%d",
+				"%s/tools/press/%d",
 				constants.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {

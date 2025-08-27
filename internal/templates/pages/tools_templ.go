@@ -151,7 +151,7 @@ func activeTools() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = activeTool("Presse 0", "100x100 G01", "100x100 G01", constants.ServerPathPrefix+"/tools/active/0").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = activeTool("Presse 0", "100x100 G01", "100x100 G01", constants.ServerPathPrefix+"/tools/press/0").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
