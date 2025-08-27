@@ -42,12 +42,12 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			// Total cycles for a tool
 			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
 
-			// TODO: Get, add or edit a cycles table entry
+			// Get, add or edit a cycles table entry
 			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", h.handleCycleEditGET),
 			utils.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleCycleEditPOST),
 			utils.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleCycleEditPUT),
 
-			// TODO: Delete a cycle table entry
+			// Delete a cycle table entry
 			utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete", h.handleCycleDELETE),
 		},
 	)
