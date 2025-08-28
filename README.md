@@ -39,18 +39,19 @@
 
 ### Tools
 
-| Method | Path                     | Handler                                 | Description                    |
-| ------ | ------------------------ | --------------------------------------- | ------------------------------ |
-| GET    | /htmx/tools/list         | `htmxhandler.Tools.handleList`          | Fetches all tools.             |
-| GET    | /htmx/tools/edit         | `htmxhandler.Tools.handleEdit`          | Renders the tool edit dialog.  |
-| POST   | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPOST`      | Creates a new tool.            |
-| PUT    | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPUT`       | Updates a tool.                |
-| DELETE | /htmx/tools/delete       | `htmxhandler.Tools.handleDelete`        | Deletes a tool.                |
-| GET    | /htmx/tools/cycles       | `htmxhandler.Tools.handleCyclesSection` | Fetches the cycles section.    |
-| GET    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditGET`  | Renders the cycle edit dialog. |
-| POST   | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPOST` | Creates a new cycle.           |
-| PUT    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPUT`  | Updates a cycle.               |
-| DELETE | /htmx/tools/cycle/delete | `htmxhandler.Tools.handleCycleDELETE`   | Deletes a cycle.               |
+| Method | Path                     | Handler                                 | Description                          |
+| ------ | ------------------------ | --------------------------------------- | ------------------------------------ |
+| GET    | /htmx/tools/list         | `htmxhandler.Tools.handleList`          | Fetches all tools.                   |
+| GET    | /htmx/tools/edit         | `htmxhandler.Tools.handleEdit`          | Renders the tool edit dialog.        |
+| POST   | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPOST`      | Creates a new tool.                  |
+| PUT    | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPUT`       | Updates a tool.                      |
+| DELETE | /htmx/tools/delete       | `htmxhandler.Tools.handleDelete`        | Deletes a tool.                      |
+| GET    | /htmx/tools/cycles       | `htmxhandler.Tools.handleCyclesSection` | Fetches the cycles section.          |
+| GET    | /htmx/tools/total-cycles | `htmxhandler.Tools.handleTotalCycles`   | Fetches the total cycles for a tool. |
+| GET    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditGET`  | Renders the cycle edit dialog.       |
+| POST   | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPOST` | Creates a new cycle.                 |
+| PUT    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPUT`  | Updates a cycle.                     |
+| DELETE | /htmx/tools/cycle/delete | `htmxhandler.Tools.handleCycleDELETE`   | Deletes a cycle.                     |
 
 ### Trouble Reports
 
