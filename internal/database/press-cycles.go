@@ -62,9 +62,13 @@ const (
 	updatePressCyclesQuery = `
 		UPDATE press_cycles
 		SET total_cycles = ?, performed_by = ?
-		WHERE tool_id = ?
-		ORDER BY date DESC
-		LIMIT 1
+		WHERE id = (
+			SELECT id
+			FROM press_cycles
+			WHERE tool_id = ?
+			ORDER BY date DESC
+			LIMIT 1
+		)
 	`
 
 	selectCurrentToolUsageQuery = `
@@ -256,6 +260,27 @@ func (p *PressCycles) EndToolUsage(toolID int64) error {
 	logger.DBPressCycles().Info("EndToolUsage called (deprecated): tool_id=%d", toolID)
 	// No-op - we don't track to_date anymore
 	return nil
+}
+
+// AddCycle adds a new press cycle entry for a tool
+func (p *PressCycles) AddCycle(toolID int64, pressNumber PressNumber, totalCycles int64, user *User) (*PressCycle, error) {
+	logger.DBPressCycles().Info("Adding new cycle: tool_id=%d, press_number=%d, total_cycles=%d", toolID, pressNumber, totalCycles)
+
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.TelegramID
+	}
+
+	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), totalCycles, performedBy)
+	cycle, err := p.scanPressCyclesRow(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to add cycle: %w", err)
+	}
+
+	return cycle, nil
 }
 
 // UpdateCycles updates the cycle counts for a currently active tool on a press

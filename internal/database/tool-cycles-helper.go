@@ -310,6 +310,12 @@ func (h *ToolCyclesHelper) UpdateToolCycles(toolID int64, totalCycles int64, use
 	return h.pressCycles.UpdateCycles(toolID, totalCycles, user)
 }
 
+// AddToolCycles adds a new press cycle entry for a tool
+func (h *ToolCyclesHelper) AddToolCycles(toolID int64, pressNumber PressNumber, totalCycles int64, user *User) (*PressCycle, error) {
+	logger.DBToolCyclesHelper().Debug("Adding new cycle for tool %d: total=%d", toolID, totalCycles)
+	return h.pressCycles.AddCycle(toolID, pressNumber, totalCycles, user)
+}
+
 // GetPressUtilization gets current tool utilization for all presses
 func (h *ToolCyclesHelper) GetPressUtilization() (map[PressNumber][]int64, error) {
 	logger.DBToolCyclesHelper().Info("Getting press utilization for all presses")

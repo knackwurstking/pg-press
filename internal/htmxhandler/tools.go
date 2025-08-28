@@ -258,19 +258,21 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		props = &toolscomp.CycleEditDialogProps{}
 	}
 
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
-	if err != nil {
-		return err
+	if props.Tool == nil {
+		toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+		if err != nil {
+			return err
+		}
+		tool, err := h.DB.Tools.Get(toolID)
+		if err != nil {
+			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+				"failed to get tool: "+err.Error())
+		}
+		props.Tool = tool
 	}
-	tool, err := h.DB.Tools.Get(toolID)
-	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
-	}
-	props.Tool = tool
 
 	close := utils.ParseBoolQuery(c, constants.QueryParamClose)
-	if close {
+	if close || props.Close {
 		props.Close = true
 
 		cycleEditDialog := toolscomp.CycleEditDialog(props)
@@ -281,8 +283,6 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		return nil
 	}
 
-	// TODO: Get tool data from the database
-
 	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err == nil {
 		props.CycleID = cycleID
@@ -291,7 +291,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 
 	logger.HTMXHandlerTools().Debug(
 		"Handling cycle edit GET request for tool %d and cycle %d",
-		toolID, cycleID,
+		props.Tool.ID, cycleID,
 	)
 
 	cycleEditDialog := toolscomp.CycleEditDialog(props)
@@ -335,12 +335,15 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if err := h.DB.ToolCyclesHelper.UpdateToolCycles(tool.ID, formData.TotalCycles, user); err != nil {
+	if _, err := h.DB.ToolCyclesHelper.AddToolCycles(tool.ID, *tool.Press, formData.TotalCycles, user); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to update press cycles: "+err.Error())
+			"failed to add press cycles: "+err.Error())
 	}
 
-	return nil
+	return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		Tool:  tool,
+		Close: true,
+	}, c)
 }
 
 // TODO: Add "PUT    /htmx/tools/cycle/edit?cycle_id=%d"
