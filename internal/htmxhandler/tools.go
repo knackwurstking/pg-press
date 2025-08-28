@@ -23,7 +23,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(
 		e,
 		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/list-all", h.handleListAll),
+			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
 
 			// Get, Post or Edit a tool
 			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
@@ -53,7 +53,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	)
 }
 
-func (h *Tools) handleListAll(c echo.Context) error {
+func (h *Tools) handleList(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Fetching all tools with notes")
 
 	// Get tools from database
@@ -65,7 +65,7 @@ func (h *Tools) handleListAll(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	toolsListAll := toolscomp.ListAll(tools)
+	toolsListAll := toolscomp.List(tools)
 	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools list all: "+err.Error())

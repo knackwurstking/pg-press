@@ -37,15 +37,14 @@ templ ToolsPage(tools []*database.ToolWithNotes) {
 				</div>
 			</div>
 			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
-				@activeTools()
-				@allTools(tools)
+				@pressSection()
+				@toolsSection(tools)
 			</div>
 		</main>
 	}
 }
 
-// TODO: Rename to pressSection
-templ activeTools() {
+templ pressSection() {
 	<div class="active-tools p">
 		<h4 class="mb">
 			<i class="bi bi-gear-fill mr"></i>
@@ -55,13 +54,17 @@ templ activeTools() {
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
 		>
-			@activeTool("Presse 0", "100x100 G01", "100x100 G01", constants.ServerPathPrefix+"/tools/press/0")
+			@pressSectionListItem(
+				"Presse 0",
+				"100x100 G01",
+				"100x100 G01",
+				constants.ServerPathPrefix+"/tools/press/0",
+			)
 		</ul>
 	</div>
 }
 
-// TODO: Rename to pressSectionListItem
-templ activeTool(title, upper, lower, href string) {
+templ pressSectionListItem(title, upper, lower, href string) {
 	<li title={ title }>
 		<a
 			role="button"
@@ -90,8 +93,7 @@ templ activeTool(title, upper, lower, href string) {
 	</li>
 }
 
-// TODO: Rename to toolsSection
-templ allTools(tools []*database.ToolWithNotes) {
+templ toolsSection(tools []*database.ToolWithNotes) {
 	<div class="all-tools p">
 		<h3 class="mb">
 			<i class="bi bi-archive mr"></i>
@@ -112,7 +114,7 @@ templ allTools(tools []*database.ToolWithNotes) {
 		</div>
 		<ul
 			id={ constants.IDAllToolsList }
-			hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
+			hx-get={ constants.ServerPathPrefix + "/htmx/tools/list" }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 			class="flex flex-col gap m-0 p-0"

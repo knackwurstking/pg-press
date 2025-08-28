@@ -41,7 +41,7 @@
 
 | Method | Path                     | Handler                                 | Description                    |
 | ------ | ------------------------ | --------------------------------------- | ------------------------------ |
-| GET    | /htmx/tools/list-all     | `htmxhandler.Tools.handleListAll`       | Fetches all tools.             |
+| GET    | /htmx/tools/list         | `htmxhandler.Tools.handleList`          | Fetches all tools.             |
 | GET    | /htmx/tools/edit         | `htmxhandler.Tools.handleEdit`          | Renders the tool edit dialog.  |
 | POST   | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPOST`      | Creates a new tool.            |
 | PUT    | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPUT`       | Updates a tool.                |

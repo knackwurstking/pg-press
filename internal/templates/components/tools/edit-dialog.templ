@@ -20,7 +20,7 @@ templ EditDialog(props *EditDialogProps) {
 		<span
 			id={ constants.IDToolEditDialog }
 			if props.ID <= 0 {
-				hx-get={ constants.ServerPathPrefix + "/htmx/tools/list-all" }
+				hx-get={ constants.ServerPathPrefix + "/htmx/tools/list" }
 				hx-trigger="load"
 				hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
 				hx-swap="outerHTML"
