@@ -211,12 +211,16 @@ func cyclesTableRows(user *database.User, cycles []*database.PressCycle, regener
 					return templ_7745c5c3_Err
 				}
 			} else {
-				for _, cycle := range cycles {
+				for i, cycle := range cycles {
+					previousTotalCycles := int64(0)
+					if i+1 < len(cycles) {
+						previousTotalCycles = cycles[i+1].TotalCycles
+					}
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, 0).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -255,7 +259,7 @@ func renderRegenerationMarker(regeneration *database.ToolRegeneration) templ.Com
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(regeneration.RegeneratedAt.Format("02.01.2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 109, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 112, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -313,7 +317,7 @@ func renderCyclesForPeriod(user *database.User, cycles []*database.PressCycle, r
 	})
 }
 
-func renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time, cyclesAtRegeneration int64) templ.Component {
+func renderCyclesInWindow(user *database.User, allCycles []*database.PressCycle, startTime *time.Time, endTime *time.Time, cyclesAtRegeneration int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -334,27 +338,41 @@ func renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, st
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		hasCycles := false
-		for _, cycle := range cycles {
+
+		periodCycles := []*database.PressCycle{}
+		for _, cycle := range allCycles {
 			if cycleInPeriod(cycle, startTime, endTime) {
-				hasCycles = true
-				templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, cyclesAtRegeneration).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+				periodCycles = append(periodCycles, cycle)
 			}
 		}
-		if !hasCycles {
+		if len(periodCycles) == 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<tr><td colspan=\"5\" class=\"text-center text-muted\">Keine Zyklen in diesem Zeitraum</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
+			}
+		} else {
+			for i, cycle := range periodCycles {
+				previousTotalCycles := int64(0)
+				if i+1 < len(periodCycles) {
+					previousTotalCycles = periodCycles[i+1].TotalCycles
+				} else {
+					previousTotalCycles = cyclesAtRegeneration
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		return nil
 	})
 }
 
-func renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) templ.Component {
+func renderCyclesBeforeFirstRegeneration(user *database.User, allCycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -375,18 +393,29 @@ func renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		hasCycles := false
-		for _, cycle := range cycles {
+
+		periodCycles := []*database.PressCycle{}
+		for _, cycle := range allCycles {
 			if cycle.Date.Before(firstRegeneration.RegeneratedAt) {
-				hasCycles = true
-				templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, 0).Render(ctx, templ_7745c5c3_Buffer)
+				periodCycles = append(periodCycles, cycle)
+			}
+		}
+		if len(periodCycles) > 0 {
+			for i, cycle := range periodCycles {
+				previousTotalCycles := int64(0)
+				if i+1 < len(periodCycles) {
+					previousTotalCycles = periodCycles[i+1].TotalCycles
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-		}
-		if hasCycles {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<tr class=\"regeneration-marker\"><td colspan=\"5\" class=\"text-center\"><span class=\"text-muted\">Zyklen vor erster Regenerierung</span></td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " <tr class=\"regeneration-marker\"><td colspan=\"5\" class=\"text-center\"><span class=\"text-muted\">Zyklen vor erster Regenerierung</span></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -396,8 +425,8 @@ func renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
-// Partial cycles = total_cycles - cycles_at_regeneration
-func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCycle, cyclesAtRegeneration int64) templ.Component {
+// Partial cycles = total_cycles - previous_total_cycles
+func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCycle, previousTotalCycles int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -418,73 +447,73 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		partialCycles := cycle.TotalCycles - cyclesAtRegeneration
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<tr><td><span>")
+		partialCycles := cycle.TotalCycles - previousTotalCycles
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<tr><td><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PressNumber))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 168, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 190, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</span></td><td><div class=\"flex flex-col\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span></td><td><div class=\"flex flex-col\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("02.01.2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 172, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 194, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</span> <span class=\"text-muted text-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span> <span class=\"text-muted text-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 173, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 195, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span></div></td><td>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></div></td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 177, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 199, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</td><td><span title=\"Berechnet: Gesamtzyklen - Zyklen bei Regenerierung\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</td><td><span title=\"Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", partialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 181, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 203, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></td><td class=\"button-group flex justify-end items-center\"><button hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span></td><td class=\"button-group flex justify-end items-center\"><button hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -494,13 +523,13 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 189, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 211, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-trigger=\"click\" class=\"small ghost\" title=\"Bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" hx-trigger=\"click\" class=\"small ghost\" title=\"Bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -510,23 +539,23 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 200, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 222, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" hx-trigger=\"click\" class=\"destructive small ghost\" title=\"Löschen\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" hx-trigger=\"click\" class=\"destructive small ghost\" title=\"Löschen\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if !user.IsAdmin() {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, " disabled")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "><i class=\"bi bi-trash\"></i></button></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "><i class=\"bi bi-trash\"></i></button></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

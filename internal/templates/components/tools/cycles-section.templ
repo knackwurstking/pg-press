@@ -92,9 +92,12 @@ templ cyclesTableRows(user *database.User, cycles []*database.PressCycle, regene
 			@renderCyclesBeforeFirstRegeneration(user, cycles, regenerations[0])
 		} else {
 			// No regenerations, show all cycles
-			for _, cycle := range cycles {
-				// No regenerations, so partial cycles equal total cycles
-				@renderCycleRowWithPartialCalc(user, cycle, 0)
+			for i, cycle := range cycles {
+				{{ previousTotalCycles := int64(0) }}
+				if i+1 < len(cycles) {
+					{{ previousTotalCycles = cycles[i+1].TotalCycles }}
+				}
+				@renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles)
 			}
 		}
 	}
@@ -125,32 +128,51 @@ templ renderCyclesForPeriod(user *database.User, cycles []*database.PressCycle, 
 	}
 }
 
-templ renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, startTime *time.Time, endTime *time.Time, cyclesAtRegeneration int64) {
-	{{ hasCycles := false }}
-	for _, cycle := range cycles {
-		if cycleInPeriod(cycle, startTime, endTime) {
-			{{ hasCycles = true }}
-			@renderCycleRowWithPartialCalc(user, cycle, cyclesAtRegeneration)
+templ renderCyclesInWindow(user *database.User, allCycles []*database.PressCycle, startTime *time.Time, endTime *time.Time, cyclesAtRegeneration int64) {
+	{{
+		periodCycles := []*database.PressCycle{}
+		for _, cycle := range allCycles {
+			if cycleInPeriod(cycle, startTime, endTime) {
+				periodCycles = append(periodCycles, cycle)
+			}
 		}
-	}
-	if !hasCycles {
+	}}
+	if len(periodCycles) == 0 {
 		<tr>
 			<td colspan="5" class="text-center text-muted">
 				Keine Zyklen in diesem Zeitraum
 			</td>
 		</tr>
+	} else {
+		for i, cycle := range periodCycles {
+			{{ previousTotalCycles := int64(0) }}
+			if i+1 < len(periodCycles) {
+				{{ previousTotalCycles = periodCycles[i+1].TotalCycles }}
+			} else {
+				{{ previousTotalCycles = cyclesAtRegeneration }}
+			}
+			@renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles)
+		}
 	}
 }
 
-templ renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
-	{{ hasCycles := false }}
-	for _, cycle := range cycles {
-		if cycle.Date.Before(firstRegeneration.RegeneratedAt) {
-			{{ hasCycles = true }}
-			@renderCycleRowWithPartialCalc(user, cycle, 0)
+templ renderCyclesBeforeFirstRegeneration(user *database.User, allCycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
+	{{
+		periodCycles := []*database.PressCycle{}
+		for _, cycle := range allCycles {
+			if cycle.Date.Before(firstRegeneration.RegeneratedAt) {
+				periodCycles = append(periodCycles, cycle)
+			}
 		}
-	}
-	if hasCycles {
+	}}
+	if len(periodCycles) > 0 {
+		for i, cycle := range periodCycles {
+			{{ previousTotalCycles := int64(0) }}
+			if i+1 < len(periodCycles) {
+				{{ previousTotalCycles = periodCycles[i+1].TotalCycles }}
+			}
+			@renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles)
+		}
 		<tr class="regeneration-marker">
 			<td colspan="5" class="text-center">
 				<span class="text-muted">Zyklen vor erster Regenerierung</span>
@@ -160,9 +182,9 @@ templ renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*databas
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
-// Partial cycles = total_cycles - cycles_at_regeneration
-templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCycle, cyclesAtRegeneration int64) {
-	{{ partialCycles := cycle.TotalCycles - cyclesAtRegeneration }}
+// Partial cycles = total_cycles - previous_total_cycles
+templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCycle, previousTotalCycles int64) {
+	{{ partialCycles := cycle.TotalCycles - previousTotalCycles }}
 	<tr>
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
@@ -177,7 +199,7 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
 		<td>
-			<span title="Berechnet: Gesamtzyklen - Zyklen bei Regenerierung">
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
 				{ fmt.Sprintf("%d", partialCycles) }
 			</span>
 		</td>
