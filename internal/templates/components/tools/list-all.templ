@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 )
 
+// TODO: Rename to ListTools
 templ ListAll(tools []*database.ToolWithNotes) {
 	if len(tools) == 0 {
 		<div class="flex justify-center items-center mt">
@@ -15,8 +16,6 @@ templ ListAll(tools []*database.ToolWithNotes) {
 			</div>
 		</div>
 	}
-	<!-- TODO: For these items here i need an icon which marks a tool is gone
-			for regeneration, another icon for broken and an icon for attention -->
 	<ul id={ constants.IDAllToolsList } class="p-0 py mt">
 		for _, t := range tools {
 			@listItem(t.ID, t)
@@ -24,6 +23,7 @@ templ ListAll(tools []*database.ToolWithNotes) {
 	</ul>
 }
 
+// TODO: Add icons previewing notes (warning, error, info or whatever)
 templ listItem(id int64, tool *database.ToolWithNotes) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
@@ -31,19 +31,30 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 			href={ fmt.Sprintf(constants.ServerPathPrefix+"/tools/tool/%d", id) }
 			class="ghost contrast flex justify-between items-center flex gap justify-between"
 		>
-			<span class="flex flex-col gap-sm">
-				<span class="text-sm text-normal">{ tool.Format.Height }x{ tool.Format.Width } { tool.Code } { tool.Type }</span>
-				<span>
-					@PositionBadge(tool.Position)
-					switch tool.Status {
-						case database.ToolStatusActive:
-							<small class="badge badge-sm badge-outline ml">Eingebaut</small>
-						case database.ToolStatusAvailable:
-							<small class="badge badge-sm badge-outline ml">Verfügbar</small>
-						case database.ToolStatusRegenerating:
-							<small class="badge badge-sm badge-outline ml">Regenerierung</small>
-					}
+			<span class="flex gap-sm w-full">
+				<span class="flex flex-col gap-sm">
+					<span class="text-sm text-normal">{ tool.Format.Height }x{ tool.Format.Width } { tool.Code } { tool.Type }</span>
+					<span>
+						@PositionBadge(tool.Position)
+						switch tool.Status {
+							case database.ToolStatusActive:
+								<small class="badge badge-sm badge-outline ml">Eingebaut</small>
+							case database.ToolStatusAvailable:
+								<small class="badge badge-sm badge-outline ml">Verfügbar</small>
+							case database.ToolStatusRegenerating:
+								<small class="badge badge-sm badge-outline ml">Regenerierung</small>
+						}
+					</span>
 				</span>
+				<span
+					class="flex justify-end items-center w-full pr text-sm"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/total-cycles?tool_id=%d&input=false&color_class=%s",
+						constants.ServerPathPrefix, tool.ID, "muted",
+					) }
+					hx-trigger="load"
+					hx-swap="innerHTML"
+				></span>
 			</span>
 			<i class="bi bi-chevron-right"></i>
 		</a>

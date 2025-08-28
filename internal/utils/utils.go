@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -27,6 +28,15 @@ func GetUserFromContext(ctx echo.Context) (*database.User, error) {
 		)
 	}
 	return user, nil
+}
+
+func ParseStringQuery(ctx echo.Context, paramName string) (string, error) {
+	s := ctx.QueryParam(paramName)
+	if s == "" {
+		return "", fmt.Errorf("missing %s query parameter", paramName)
+	}
+
+	return s, nil
 }
 
 func ParseInt64Param(ctx echo.Context, paramName string) (int64, error) {

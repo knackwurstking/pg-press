@@ -37,7 +37,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			Gesamtzyklen seit der letzten Regenerierung:
 		</h6>
 		<span>
-			@totalCycles(props.TotalCycles)
+			@TotalCycles(props.TotalCycles, true, "")
 		</span>
 	</section>
 	<figure class="w-full overflow-x-scroll">
@@ -57,17 +57,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 		</table>
 	</figure>
 	<span id={ constants.IDToolCycleEditDialog }></span>
-}
-
-// totalCycles renders an input field displaying the total cycles since last regeneration
-templ totalCycles(totalCycles int64) {
-	<input
-		type="number"
-		value={ fmt.Sprintf("%d", totalCycles) }
-		readonly
-		class="total-cycles-display"
-		title="Gesamtzyklen seit der letzten Regenerierung"
-	/>
 }
 
 // cyclesTableRows renders the tbody content for tool cycles history

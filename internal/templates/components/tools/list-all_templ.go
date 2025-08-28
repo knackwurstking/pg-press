@@ -14,6 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 )
 
+// TODO: Rename to ListTools
 func ListAll(tools []*database.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -41,14 +42,14 @@ func ListAll(tools []*database.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- TODO: For these items here i need an icon which marks a tool is gone\n\t\t\tfor regeneration, another icon for broken and an icon for attention --><ul id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<ul id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAllToolsList)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 20, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 19, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -72,6 +73,7 @@ func ListAll(tools []*database.ToolWithNotes) templ.Component {
 	})
 }
 
+// TODO: Add icons previewing notes (warning, error, info or whatever)
 func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -119,14 +121,14 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"ghost contrast flex justify-between items-center flex gap justify-between\"><span class=\"flex flex-col gap-sm\"><span class=\"text-sm text-normal\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"ghost contrast flex justify-between items-center flex gap justify-between\"><span class=\"flex gap-sm w-full\"><span class=\"flex flex-col gap-sm\"><span class=\"text-sm text-normal\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Format.Height)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 35, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 36, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -139,7 +141,7 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Format.Width)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 35, Col: 80}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 36, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -152,7 +154,7 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 35, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 36, Col: 95}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -165,7 +167,7 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Type)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 35, Col: 108}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 36, Col: 109}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -196,7 +198,23 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></span> <i class=\"bi bi-chevron-right\"></i></a></li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span></span> <span class=\"flex justify-end items-center w-full pr text-sm\" hx-get=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+			"%s/htmx/tools/total-cycles?tool_id=%d&input=false&color_class=%s",
+			constants.ServerPathPrefix, tool.ID, "muted",
+		))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/list-all.templ`, Line: 54, Col: 6}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\"></span></span> <i class=\"bi bi-chevron-right\"></i></a></li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

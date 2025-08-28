@@ -38,6 +38,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 
 			// Cycles table rows
 			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleCyclesSection),
+			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
 
 			// Get, add or edit a cycles table entry
 			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", func(c echo.Context) error {
@@ -250,6 +251,45 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Tools) handleTotalCycles(c echo.Context) error {
+	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid or missing tool_id parameter: "+err.Error())
+	}
+
+	colorClass, err := utils.ParseStringQuery(c, constants.QueryParamColorClass)
+	if err != nil {
+		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
+	}
+
+	// Get regenerations for this tool to find the last one
+	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
+	if err != nil && !errors.Is(err, database.ErrNotFound) {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool regenerations: "+err.Error())
+	}
+
+	var lastRegenerationDate *time.Time
+	if len(regenerations) > 0 {
+		lastRegenerationDate = &regenerations[0].RegeneratedAt
+	}
+
+	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(
+		toolID, lastRegenerationDate,
+	)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get total cycles: "+err.Error())
+	}
+
+	return toolscomp.TotalCycles(
+		totalCycles,
+		utils.ParseBoolQuery(c, constants.QueryParamInput),
+		colorClass,
+	).Render(c.Request().Context(), c.Response())
 }
 
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle

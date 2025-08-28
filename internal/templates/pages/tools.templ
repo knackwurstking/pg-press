@@ -44,6 +44,7 @@ templ ToolsPage(tools []*database.ToolWithNotes) {
 	}
 }
 
+// TODO: Rename to pressSection
 templ activeTools() {
 	<div class="active-tools p">
 		<h4 class="mb">
@@ -59,6 +60,7 @@ templ activeTools() {
 	</div>
 }
 
+// TODO: Rename to pressSectionListItem
 templ activeTool(title, upper, lower, href string) {
 	<li title={ title }>
 		<a
@@ -88,6 +90,7 @@ templ activeTool(title, upper, lower, href string) {
 	</li>
 }
 
+// TODO: Rename to toolsSection
 templ allTools(tools []*database.ToolWithNotes) {
 	<div class="all-tools p">
 		<h3 class="mb">
