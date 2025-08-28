@@ -6,18 +6,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-script showEditUserNameDialog() {
-	document.querySelector("#dialogEditUserName").showModal();
-}
-
-templ profileNavContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton()
-		@navProfileButton()
-		@navHomeButton()
-	</div>
-}
-
 templ ProfilePage(user *database.User) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -136,4 +124,16 @@ templ ProfilePage(user *database.User) {
 			</dialog>
 		</main>
 	}
+}
+
+script showEditUserNameDialog() {
+	document.querySelector("#dialogEditUserName").showModal();
+}
+
+templ profileNavContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
+	</div>
 }

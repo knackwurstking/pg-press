@@ -61,7 +61,7 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tools active page for press %d", press)
 
-	page := pages.ToolsActivePage(press)
+	page := pages.ToolsPressPage(press)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools active page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

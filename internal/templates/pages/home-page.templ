@@ -6,14 +6,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-templ homeNavContent(relPath string) {
-	<div class="flex flex-row gap justify-end items-center">
-		@navFeedButton()
-		@navProfileButton()
-		@navHomeButton()
-	</div>
-}
-
 templ HomePage() {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -43,6 +35,14 @@ templ HomePage() {
 			</nav>
 		</main>
 	}
+}
+
+templ homeNavContent(relPath string) {
+	<div class="flex flex-row gap justify-end items-center">
+		@navFeedButton()
+		@navProfileButton()
+		@navHomeButton()
+	</div>
 }
 
 templ homePageItem(href, icon, title, description string) {
