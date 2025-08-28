@@ -15,7 +15,7 @@ const (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
 			tool_id INTEGER NOT NULL,
-			from_date DATETIME NOT NULL,
+			date DATETIME NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			performed_by INTEGER NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id),
@@ -23,8 +23,8 @@ const (
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_from_date ON press_cycles(from_date);
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, performed_by)
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_date ON press_cycles(date);
+		INSERT INTO press_cycles (press_number, tool_id, date, total_cycles, performed_by)
 		VALUES
 			(0, 1, '2023-01-01',     0, -1),
 			(0, 2, '2023-01-01',     0, -1),
@@ -51,9 +51,9 @@ const (
 	`
 
 	insertPressCycleQuery = `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, performed_by)
+		INSERT INTO press_cycles (press_number, tool_id, date, total_cycles, performed_by)
 		VALUES (?, ?, ?, ?, ?)
-		RETURNING id, press_number, tool_id, from_date, total_cycles, performed_by
+		RETURNING id, press_number, tool_id, date, total_cycles, performed_by
 	`
 
 	// This query is no longer needed since we don't track to_date
@@ -63,52 +63,52 @@ const (
 		UPDATE press_cycles
 		SET total_cycles = ?, performed_by = ?
 		WHERE tool_id = ?
-		ORDER BY from_date DESC
+		ORDER BY date DESC
 		LIMIT 1
 	`
 
 	selectCurrentToolUsageQuery = `
-		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY from_date DESC
+		ORDER BY date DESC
 		LIMIT 1
 	`
 
 	selectToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY from_date DESC
+		ORDER BY date DESC
 		LIMIT ? OFFSET ?
 	`
 
 	selectToolHistorySinceRegenerationQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.total_cycles,
+		SELECT pc.id, pc.press_number, pc.tool_id, pc.date, pc.total_cycles,
 		       (pc.total_cycles - COALESCE(
 		           (SELECT cycles_at_regeneration
 		            FROM tool_regenerations
-		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.from_date
+		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.date
 		            ORDER BY regenerated_at DESC
 		            LIMIT 1), 0)) as partial_cycles,
 		       pc.performed_by
 		FROM press_cycles pc
-		WHERE pc.tool_id = ? AND pc.from_date >= ?
-		ORDER BY pc.from_date DESC
+		WHERE pc.tool_id = ? AND pc.date >= ?
+		ORDER BY pc.date DESC
 	`
 
 	selectAllToolHistoryQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.total_cycles,
+		SELECT pc.id, pc.press_number, pc.tool_id, pc.date, pc.total_cycles,
 		       (pc.total_cycles - COALESCE(
 		           (SELECT cycles_at_regeneration
 		            FROM tool_regenerations
-		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.from_date
+		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.date
 		            ORDER BY regenerated_at DESC
 		            LIMIT 1), 0)) as partial_cycles,
 		       pc.performed_by
 		FROM press_cycles pc
 		WHERE pc.tool_id = ?
-		ORDER BY pc.from_date DESC
+		ORDER BY pc.date DESC
 	`
 
 	selectTotalCyclesSinceRegenerationQuery = `
@@ -131,30 +131,30 @@ const (
 		SELECT tool_id
 		FROM (
 			SELECT tool_id, press_number,
-			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
 			FROM press_cycles
 		)
 		WHERE press_number = ? AND rn = 1
 	`
 
 	selectPressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
-		ORDER BY from_date DESC
+		ORDER BY date DESC
 		LIMIT ? OFFSET ?
 	`
 
 	selectActivePressCyclesForPressQuery = `
-		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.from_date, pc1.total_cycles, pc1.performed_by
+		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.date, pc1.total_cycles, pc1.performed_by
 		FROM press_cycles pc1
 		WHERE pc1.press_number = ?
-		  AND pc1.from_date = (
-		    SELECT MAX(pc2.from_date)
+		  AND pc1.date = (
+		    SELECT MAX(pc2.date)
 		    FROM press_cycles pc2
 		    WHERE pc2.tool_id = pc1.tool_id
 		  )
-		ORDER BY pc1.from_date DESC
+		ORDER BY pc1.date DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -162,7 +162,7 @@ const (
 		SELECT press_number, tool_id
 		FROM (
 			SELECT press_number, tool_id,
-			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
 			FROM press_cycles
 		)
 		WHERE rn = 1
@@ -177,7 +177,7 @@ const (
 			(SELECT COUNT(DISTINCT tool_id)
 			 FROM (
 			   SELECT tool_id,
-			          ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			          ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
 			   FROM press_cycles pc2
 			   WHERE pc2.press_number = press_cycles.press_number
 			 ) WHERE rn = 1) as active_tools
@@ -602,7 +602,7 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error)
 			&cycle.ID,
 			&cycle.PressNumber,
 			&cycle.ToolID,
-			&cycle.FromDate,
+			&cycle.Date,
 			&cycle.TotalCycles,
 			&performedBy,
 		)
@@ -633,7 +633,7 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 			&cycle.ID,
 			&cycle.PressNumber,
 			&cycle.ToolID,
-			&cycle.FromDate,
+			&cycle.Date,
 			&cycle.TotalCycles,
 			&cycle.PartialCycles,
 			&performedBy,
@@ -660,7 +660,7 @@ func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) 
 		&cycle.ID,
 		&cycle.PressNumber,
 		&cycle.ToolID,
-		&cycle.FromDate,
+		&cycle.Date,
 		&cycle.TotalCycles,
 		&performedBy,
 	)

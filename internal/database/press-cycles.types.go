@@ -18,7 +18,7 @@ type PressCycle struct {
 	ID            int64       `json:"id"`
 	PressNumber   PressNumber `json:"press_number"`
 	ToolID        int64       `json:"tool_id"`
-	FromDate      time.Time   `json:"from_date"`
+	Date          time.Time   `json:"date"`
 	TotalCycles   int64       `json:"total_cycles"`
 	PartialCycles int64       `json:"partial_cycles"`
 	PerformedBy   int64       `json:"performed_by"`

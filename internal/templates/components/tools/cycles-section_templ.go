@@ -81,7 +81,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></section><figure class=\"w-full overflow-x-scroll\"><table name=\"tool-cycles-table\" class=\"table borderless compact\"><thead><tr><th name=\"press\">Presse</th><th name=\"from\">Von</th><th name=\"total\">Gesamtzyklen</th><th name=\"partial\">Teilzyklen (berechnet)</th><th></th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></section><figure class=\"w-full overflow-x-scroll\"><table name=\"tool-cycles-table\" class=\"table borderless compact\"><thead><tr><th name=\"press\">Presse</th><th name=\"date\">Datum</th><th name=\"total\">Gesamtzyklen</th><th name=\"partial\">Teilzyklen (berechnet)</th><th></th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -377,7 +377,7 @@ func renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database
 		ctx = templ.ClearChildren(ctx)
 		hasCycles := false
 		for _, cycle := range cycles {
-			if cycle.FromDate.Before(firstRegeneration.RegeneratedAt) {
+			if cycle.Date.Before(firstRegeneration.RegeneratedAt) {
 				hasCycles = true
 				templ_7745c5c3_Err = renderCycleRowWithPartialCalc(user, cycle, 0).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -437,9 +437,9 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.FromDate.Format("02.01.2006"))
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("02.01.2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 173, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 173, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -450,9 +450,9 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.FromDate.Format("15:04"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 174, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 174, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -536,10 +536,10 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 
 // Helper function to check if a cycle is within a time period
 func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
-	if startTime != nil && cycle.FromDate.Before(*startTime) {
+	if startTime != nil && cycle.Date.Before(*startTime) {
 		return false
 	}
-	if endTime != nil && cycle.FromDate.After(*endTime) {
+	if endTime != nil && cycle.Date.After(*endTime) {
 		return false
 	}
 	return true

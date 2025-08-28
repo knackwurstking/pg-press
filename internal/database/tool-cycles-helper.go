@@ -163,8 +163,8 @@ func (h *ToolCyclesHelper) groupCyclesByRegenerations(cycles []*PressCycle, rege
 
 		// Find cycles in this period
 		for _, cycle := range cycles {
-			if (lastRegenTime == nil || cycle.FromDate.After(*lastRegenTime)) &&
-				cycle.FromDate.Before(regen.RegeneratedAt) {
+			if (lastRegenTime == nil || cycle.Date.After(*lastRegenTime)) &&
+				cycle.Date.Before(regen.RegeneratedAt) {
 				group.PressCycles = append(group.PressCycles, cycle)
 				group.TotalCycles += cycle.TotalCycles
 			}
@@ -183,7 +183,7 @@ func (h *ToolCyclesHelper) groupCyclesByRegenerations(cycles []*PressCycle, rege
 	}
 
 	for _, cycle := range cycles {
-		if lastRegenTime == nil || cycle.FromDate.After(*lastRegenTime) {
+		if lastRegenTime == nil || cycle.Date.After(*lastRegenTime) {
 			finalGroup.PressCycles = append(finalGroup.PressCycles, cycle)
 			finalGroup.TotalCycles += cycle.TotalCycles
 		}

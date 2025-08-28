@@ -46,7 +46,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			<thead>
 				<tr>
 					<th name="press">Presse</th>
-					<th name="from">Von</th>
+					<th name="date">Datum</th>
 					<th name="total">Gesamtzyklen</th>
 					<th name="partial">Teilzyklen (berechnet)</th>
 					<th></th>
@@ -146,7 +146,7 @@ templ renderCyclesInWindow(user *database.User, cycles []*database.PressCycle, s
 templ renderCyclesBeforeFirstRegeneration(user *database.User, cycles []*database.PressCycle, firstRegeneration *database.ToolRegeneration) {
 	{{ hasCycles := false }}
 	for _, cycle := range cycles {
-		if cycle.FromDate.Before(firstRegeneration.RegeneratedAt) {
+		if cycle.Date.Before(firstRegeneration.RegeneratedAt) {
 			{{ hasCycles = true }}
 			@renderCycleRowWithPartialCalc(user, cycle, 0)
 		}
@@ -170,8 +170,8 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 		</td>
 		<td>
 			<div class="flex flex-col">
-				<span>{ cycle.FromDate.Format("02.01.2006") }</span>
-				<span class="text-muted text-sm">{ cycle.FromDate.Format("15:04") }</span>
+				<span>{ cycle.Date.Format("02.01.2006") }</span>
+				<span class="text-muted text-sm">{ cycle.Date.Format("15:04") }</span>
 			</div>
 		</td>
 		<td>
@@ -216,10 +216,10 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 
 // Helper function to check if a cycle is within a time period
 func cycleInPeriod(cycle *database.PressCycle, startTime, endTime *time.Time) bool {
-	if startTime != nil && cycle.FromDate.Before(*startTime) {
+	if startTime != nil && cycle.Date.Before(*startTime) {
 		return false
 	}
-	if endTime != nil && cycle.FromDate.After(*endTime) {
+	if endTime != nil && cycle.Date.After(*endTime) {
 		return false
 	}
 	return true
