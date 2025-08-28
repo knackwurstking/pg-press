@@ -16,7 +16,6 @@ const (
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
 			tool_id INTEGER NOT NULL,
 			from_date DATETIME NOT NULL,
-			to_date DATETIME,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			performed_by INTEGER NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id),
@@ -24,61 +23,60 @@ const (
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_dates ON press_cycles(from_date, to_date);
-		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, performed_by)
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_from_date ON press_cycles(from_date);
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, performed_by)
 		VALUES
-			(0, 1, '2023-01-01', NULL,     0, -1),
-			(0, 2, '2023-01-01', NULL,     0, -1),
-			(0, 1, '2023-02-01', NULL,  1000, -1),
-			(0, 2, '2023-02-01', NULL,  1000, -1),
-			(0, 1, '2023-03-01', NULL,  2000, -1),
-			(0, 2, '2023-03-01', NULL,  2000, -1),
-			(0, 1, '2023-04-01', NULL,  3000, -1),
-			(0, 2, '2023-04-01', NULL,  3000, -1),
-			(0, 1, '2023-05-01', NULL,  4000, -1),
-			(0, 2, '2023-05-01', NULL,  4000, -1),
-			(0, 1, '2023-06-01', NULL,  5000, -1),
-			(0, 2, '2023-06-01', NULL,  5000, -1),
-			(0, 1, '2023-07-01', NULL,  6000, -1),
-			(0, 2, '2023-07-01', NULL,  6000, -1),
-			(0, 1, '2023-08-01', NULL,  7000, -1),
-			(0, 2, '2023-08-01', NULL,  7000, -1),
-			(0, 1, '2023-09-01', NULL,  8000, -1),
-			(0, 2, '2023-09-01', NULL,  8000, -1),
-			(0, 1, '2023-10-01', NULL,  9000, -1),
-			(0, 2, '2023-10-01', NULL,  9000, -1),
-			(0, 1, '2023-11-01', NULL, 10000, -1),
-			(0, 2, '2023-11-01', NULL, 10000, -1);
+			(0, 1, '2023-01-01',     0, -1),
+			(0, 2, '2023-01-01',     0, -1),
+			(0, 1, '2023-02-01',  1000, -1),
+			(0, 2, '2023-02-01',  1000, -1),
+			(0, 1, '2023-03-01',  2000, -1),
+			(0, 2, '2023-03-01',  2000, -1),
+			(0, 1, '2023-04-01',  3000, -1),
+			(0, 2, '2023-04-01',  3000, -1),
+			(0, 1, '2023-05-01',  4000, -1),
+			(0, 2, '2023-05-01',  4000, -1),
+			(0, 1, '2023-06-01',  5000, -1),
+			(0, 2, '2023-06-01',  5000, -1),
+			(0, 1, '2023-07-01',  6000, -1),
+			(0, 2, '2023-07-01',  6000, -1),
+			(0, 1, '2023-08-01',  7000, -1),
+			(0, 2, '2023-08-01',  7000, -1),
+			(0, 1, '2023-09-01',  8000, -1),
+			(0, 2, '2023-09-01',  8000, -1),
+			(0, 1, '2023-10-01',  9000, -1),
+			(0, 2, '2023-10-01',  9000, -1),
+			(0, 1, '2023-11-01', 10000, -1),
+			(0, 2, '2023-11-01', 10000, -1);
 	`
 
 	insertPressCycleQuery = `
-		INSERT INTO press_cycles (press_number, tool_id, from_date, to_date, total_cycles, performed_by)
-		VALUES (?, ?, ?, NULL, ?, ?)
-		RETURNING id, press_number, tool_id, from_date, to_date, total_cycles, performed_by
+		INSERT INTO press_cycles (press_number, tool_id, from_date, total_cycles, performed_by)
+		VALUES (?, ?, ?, ?, ?)
+		RETURNING id, press_number, tool_id, from_date, total_cycles, performed_by
 	`
 
-	endToolUsageQuery = `
-		UPDATE press_cycles
-		SET to_date = ?
-		WHERE tool_id = ? AND to_date IS NULL
-	`
+	// This query is no longer needed since we don't track to_date
+	// endToolUsageQuery is deprecated
 
 	updatePressCyclesQuery = `
 		UPDATE press_cycles
 		SET total_cycles = ?, performed_by = ?
-		WHERE tool_id = ? AND to_date IS NULL
+		WHERE tool_id = ?
+		ORDER BY from_date DESC
+		LIMIT 1
 	`
 
 	selectCurrentToolUsageQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
 		FROM press_cycles
-		WHERE tool_id = ? AND to_date IS NULL
+		WHERE tool_id = ?
 		ORDER BY from_date DESC
 		LIMIT 1
 	`
 
 	selectToolHistoryQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY from_date DESC
@@ -86,7 +84,7 @@ const (
 	`
 
 	selectToolHistorySinceRegenerationQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.to_date, pc.total_cycles,
+		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.total_cycles,
 		       (pc.total_cycles - COALESCE(
 		           (SELECT cycles_at_regeneration
 		            FROM tool_regenerations
@@ -100,7 +98,7 @@ const (
 	`
 
 	selectAllToolHistoryQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.to_date, pc.total_cycles,
+		SELECT pc.id, pc.press_number, pc.tool_id, pc.from_date, pc.total_cycles,
 		       (pc.total_cycles - COALESCE(
 		           (SELECT cycles_at_regeneration
 		            FROM tool_regenerations
@@ -131,12 +129,16 @@ const (
 
 	selectCurrentToolsOnPressQuery = `
 		SELECT tool_id
-		FROM press_cycles
-		WHERE press_number = ? AND to_date IS NULL
+		FROM (
+			SELECT tool_id, press_number,
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			FROM press_cycles
+		)
+		WHERE press_number = ? AND rn = 1
 	`
 
 	selectPressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, from_date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY from_date DESC
@@ -144,17 +146,26 @@ const (
 	`
 
 	selectActivePressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, from_date, to_date, total_cycles, performed_by
-		FROM press_cycles
-		WHERE press_number = ? AND to_date IS NULL
-		ORDER BY from_date DESC
+		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.from_date, pc1.total_cycles, pc1.performed_by
+		FROM press_cycles pc1
+		WHERE pc1.press_number = ?
+		  AND pc1.from_date = (
+		    SELECT MAX(pc2.from_date)
+		    FROM press_cycles pc2
+		    WHERE pc2.tool_id = pc1.tool_id
+		  )
+		ORDER BY pc1.from_date DESC
 		LIMIT ? OFFSET ?
 	`
 
 	selectPressUtilizationQuery = `
 		SELECT press_number, tool_id
-		FROM press_cycles
-		WHERE to_date IS NULL
+		FROM (
+			SELECT press_number, tool_id,
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			FROM press_cycles
+		)
+		WHERE rn = 1
 		ORDER BY press_number, tool_id
 	`
 
@@ -163,7 +174,13 @@ const (
 			press_number,
 			SUM(total_cycles) as total_cycles,
 			COUNT(DISTINCT tool_id) as total_tools_used,
-			SUM(CASE WHEN to_date IS NULL THEN 1 ELSE 0 END) as active_tools
+			(SELECT COUNT(DISTINCT tool_id)
+			 FROM (
+			   SELECT tool_id,
+			          ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY from_date DESC) as rn
+			   FROM press_cycles pc2
+			   WHERE pc2.press_number = press_cycles.press_number
+			 ) WHERE rn = 1) as active_tools
 		FROM press_cycles
 		GROUP BY press_number
 	`
@@ -200,10 +217,7 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
-	// First, end any current usage of this tool on other presses
-	if err := p.EndToolUsage(toolID); err != nil {
-		return nil, fmt.Errorf("failed to end previous tool usage: %w", err)
-	}
+	// No need to end previous usage since we're not tracking to_date anymore
 
 	// Create new press cycle entry
 	var performedBy *int64
@@ -236,15 +250,11 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user
 	return cycle, nil
 }
 
-// EndToolUsage ends the current usage of a tool on any press
+// EndToolUsage is deprecated - we no longer track end dates
+// Kept for backward compatibility but does nothing
 func (p *PressCycles) EndToolUsage(toolID int64) error {
-	logger.DBPressCycles().Info("Ending tool usage: tool_id=%d", toolID)
-
-	_, err := p.db.Exec(endToolUsageQuery, time.Now(), toolID)
-	if err != nil {
-		return fmt.Errorf("failed to end tool usage: %w", err)
-	}
-
+	logger.DBPressCycles().Info("EndToolUsage called (deprecated): tool_id=%d", toolID)
+	// No-op - we don't track to_date anymore
 	return nil
 }
 
@@ -512,10 +522,7 @@ func (p *PressCycles) GetPressUtilization() (map[PressNumber][]int64, error) {
 func (p *PressCycles) MarkToolRegeneration(toolID int64) error {
 	logger.DBPressCycles().Info("Marking tool regeneration: tool_id=%d", toolID)
 
-	// End any current usage
-	if err := p.EndToolUsage(toolID); err != nil {
-		return fmt.Errorf("failed to end tool usage for regeneration: %w", err)
-	}
+	// No need to end usage since we don't track to_date anymore
 
 	// Create feed entry
 	if p.feeds != nil {
@@ -589,7 +596,6 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error)
 	cycles := make([]*PressCycle, 0)
 	for rows.Next() {
 		cycle := &PressCycle{}
-		var toDate sql.NullTime
 		var performedBy sql.NullInt64
 
 		err := rows.Scan(
@@ -597,16 +603,11 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error)
 			&cycle.PressNumber,
 			&cycle.ToolID,
 			&cycle.FromDate,
-			&toDate,
 			&cycle.TotalCycles,
 			&performedBy,
 		)
 		if err != nil {
 			return nil, err
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
 		}
 
 		if performedBy.Valid {
@@ -626,7 +627,6 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 	cycles := make([]*PressCycle, 0)
 	for rows.Next() {
 		cycle := &PressCycle{}
-		var toDate sql.NullTime
 		var performedBy sql.NullInt64
 
 		err := rows.Scan(
@@ -634,17 +634,12 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 			&cycle.PressNumber,
 			&cycle.ToolID,
 			&cycle.FromDate,
-			&toDate,
 			&cycle.TotalCycles,
 			&cycle.PartialCycles,
 			&performedBy,
 		)
 		if err != nil {
 			return nil, err
-		}
-
-		if toDate.Valid {
-			cycle.ToDate = &toDate.Time
 		}
 
 		if performedBy.Valid {
@@ -659,7 +654,6 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 // scanPressCyclesRow scans a single press cycle from a sql.Row (without partial_cycles)
 func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) {
 	cycle := &PressCycle{}
-	var toDate sql.NullTime
 	var performedBy sql.NullInt64
 
 	err := scanner.Scan(
@@ -667,16 +661,11 @@ func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) 
 		&cycle.PressNumber,
 		&cycle.ToolID,
 		&cycle.FromDate,
-		&toDate,
 		&cycle.TotalCycles,
 		&performedBy,
 	)
 	if err != nil {
 		return nil, err
-	}
-
-	if toDate.Valid {
-		cycle.ToDate = &toDate.Time
 	}
 
 	if performedBy.Valid {
