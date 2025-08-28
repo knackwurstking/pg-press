@@ -76,14 +76,14 @@ templ pressSectionListItem(title, upper, lower, href string) {
 				<span class="flex flex-wrap gap-lg justify-evenly items-center w-full">
 					<!-- Lower Tool -->
 					<span class="flex flex-col justify-center items-center">
-						@toolscomp.PositionBadge(database.PositionBottom)
+						@toolscomp.PositionBadge(database.PositionBottom, "muted")
 						<span class="text-sm">{ lower }</span>
 					</span>
 					<!-- Separator -->
 					<span class="muted ghost">|</span>
 					<!-- Upper Tool -->
 					<span class="flex flex-col justify-center items-center">
-						@toolscomp.PositionBadge(database.PositionTop)
+						@toolscomp.PositionBadge(database.PositionTop, "muted")
 						<span class="text-sm">{ upper }</span>
 					</span>
 				</span>

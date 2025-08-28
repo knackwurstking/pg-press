@@ -34,14 +34,14 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 				<span class="flex flex-col gap-sm">
 					<span class="text-sm text-normal">{ tool.Format.Height }x{ tool.Format.Width } { tool.Code } { tool.Type }</span>
 					<span>
-						@PositionBadge(tool.Position)
+						@PositionBadge(tool.Position, "muted")
 						switch tool.Status {
 							case database.ToolStatusActive:
-								<small class="badge badge-sm badge-outline ml">Eingebaut</small>
+								<small class="badge badge-sm badge-outline muted ml">Eingebaut</small>
 							case database.ToolStatusAvailable:
-								<small class="badge badge-sm badge-outline ml">Verfügbar</small>
+								<small class="badge badge-sm badge-outline primary ml">Verfügbar</small>
 							case database.ToolStatusRegenerating:
-								<small class="badge badge-sm badge-outline ml">Regenerierung</small>
+								<small class="badge badge-sm badge-outline info ml">Regenerierung</small>
 						}
 					</span>
 				</span>
