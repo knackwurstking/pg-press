@@ -44,7 +44,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5><!-- TODO: This feature is not yet implemented --><button hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5><button hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,7 +54,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 			constants.ServerPathPrefix, props.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 26, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 25, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -67,7 +67,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDToolCycleEditDialog))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 28, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 27, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDToolCycleEditDialog)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 60, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 59, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -139,7 +139,7 @@ func totalCycles(totalCycles int64) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", totalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 67, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 66, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -155,7 +155,7 @@ func totalCycles(totalCycles int64) templ.Component {
 
 // cyclesTableRows renders the tbody content for tool cycles history
 //
-// TODO: I really need to clean up this someday
+// TODO: I still need to test this for different scenarios
 func cyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -255,7 +255,7 @@ func renderRegenerationMarker(regeneration *database.ToolRegeneration) templ.Com
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(regeneration.RegeneratedAt.Format("02.01.2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 110, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 109, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -426,7 +426,7 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PressNumber))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 169, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 168, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -439,7 +439,7 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("02.01.2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 173, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 172, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -452,7 +452,7 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 174, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 173, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -465,7 +465,7 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 178, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 177, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -478,13 +478,13 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", partialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 182, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 181, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></td><td class=\"button-group flex justify-end items-center\"><!-- TODO: This feature is not yet implemented --><button hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></td><td class=\"button-group flex justify-end items-center\"><button hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -494,13 +494,13 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 191, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 189, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-trigger=\"click\" class=\"small ghost\" title=\"Bearbeiten\"><i class=\"bi bi-pencil\"></i></button><!-- TODO: This feature is not yet implemented --><button hx-delete=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-trigger=\"click\" class=\"small ghost\" title=\"Bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -510,7 +510,7 @@ func renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCyc
 			constants.ServerPathPrefix, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 203, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycles-section.templ`, Line: 200, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {

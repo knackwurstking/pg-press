@@ -18,12 +18,11 @@ type CyclesSectionProps struct {
 templ CyclesSection(props *CyclesSectionProps) {
 	<div class="flex justify-between items-center mb">
 		<h5>Pressennutzungsverlauf</h5>
-		<!-- TODO: This feature is not yet implemented -->
 		<button
 			hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d",
-						constants.ServerPathPrefix, props.ToolID,
-					) }
+				"%s/htmx/tools/cycle/edit?tool_id=%d",
+				constants.ServerPathPrefix, props.ToolID,
+			) }
 			hx-trigger="click"
 			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 			hx-swap="outerHTML"
@@ -73,7 +72,7 @@ templ totalCycles(totalCycles int64) {
 
 // cyclesTableRows renders the tbody content for tool cycles history
 //
-// TODO: I really need to clean up this someday
+// TODO: I still need to test this for different scenarios
 templ cyclesTableRows(user *database.User, cycles []*database.PressCycle, regenerations []*database.ToolRegeneration) {
 	if len(cycles) == 0 && len(regenerations) == 0 {
 		<tr>
@@ -183,7 +182,6 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 			</span>
 		</td>
 		<td class="button-group flex justify-end items-center">
-			<!-- TODO: This feature is not yet implemented -->
 			<button
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/tools/cycle/edit?cycle_id=%d",
@@ -195,7 +193,6 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 			>
 				<i class="bi bi-pencil"></i>
 			</button>
-			<!-- TODO: This feature is not yet implemented -->
 			<button
 				hx-delete={ fmt.Sprintf(
 					"%s/htmx/tools/cycle/delete?cycle_id=%d",
