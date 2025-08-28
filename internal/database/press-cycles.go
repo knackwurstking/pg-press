@@ -280,6 +280,18 @@ func (p *PressCycles) AddCycle(toolID int64, pressNumber PressNumber, totalCycle
 		return nil, fmt.Errorf("failed to add cycle: %w", err)
 	}
 
+	// Create feed entry
+	if p.feeds != nil {
+		p.feeds.Add(NewFeed(
+			FeedTypePressCycleAdd,
+			&FeedPressCycleAdd{
+				ToolID:      toolID,
+				TotalCycles: totalCycles,
+				ModifiedBy:  user,
+			},
+		))
+	}
+
 	return cycle, nil
 }
 
@@ -305,6 +317,18 @@ func (p *PressCycles) UpdateCycles(toolID int64, totalCycles int64, user *User) 
 
 	if rows == 0 {
 		return fmt.Errorf("no active press cycle found for tool %d", toolID)
+	}
+
+	// Create feed entry
+	if p.feeds != nil {
+		p.feeds.Add(NewFeed(
+			FeedTypePressCycleUpdate,
+			&FeedPressCycleUpdate{
+				ToolID:      toolID,
+				TotalCycles: totalCycles,
+				ModifiedBy:  user,
+			},
+		))
 	}
 
 	return nil

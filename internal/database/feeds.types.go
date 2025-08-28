@@ -22,6 +22,9 @@ const (
 	FeedTypeMetalSheetDelete         = "metal_sheet_delete"
 	FeedTypeMetalSheetStatusChange   = "metal_sheet_status_change"
 	FeedTypeMetalSheetToolAssignment = "metal_sheet_tool_assignment"
+	FeedTypePressCycleAdd            = "press_cycle_add"
+	FeedTypePressCycleUpdate         = "press_cycle_update"
+	FeedTypePressCycleDelete         = "press_cycle_delete"
 
 	AddUserRenderTemplate = `
 <div class="feed-item">
@@ -184,6 +187,28 @@ const (
 	>
 		Benutzer <strong>%s</strong> hat Blech
 		<a href="./metal-sheets/%d" class="info">#%d</a> %s.
+	</div>
+</div>
+`
+
+	AddPressCycleRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content;"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat einen neuen Pressenzyklus für Werkzeug <a href="./tools/tool/%d" class="info">#%d</a> mit <strong>%d</strong> Zyklen hinzugefügt.
+	</div>
+</div>
+`
+
+	UpdatePressCycleRenderTemplate = `
+<div class="feed-item">
+	<div
+		class="feed-item-content"
+		style="padding: var(--ui-spacing);"
+	>
+		Benutzer <strong>%s</strong> hat den Pressenzyklus für Werkzeug <a href="./tools/tool/%d" class="info">#%d</a> auf <strong>%d</strong> Zyklen aktualisiert.
 	</div>
 </div>
 `
@@ -504,7 +529,52 @@ func (f *FeedMetalSheetToolAssignment) Render() template.HTML {
 		f.ModifiedBy.UserName, f.SheetID, f.SheetID, action))
 }
 
+// FeedPressCycleAdd represents a press cycle creation event.
+type FeedPressCycleAdd struct {
+	ToolID      int64 `json:"tool_id"`
+	TotalCycles int64 `json:"total_cycles"`
+	ModifiedBy  *User `json:"modified_by"`
+}
+
+func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
+	return &FeedPressCycleAdd{
+		ToolID:      int64(data["tool_id"].(float64)),
+		TotalCycles: int64(data["total_cycles"].(float64)),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedPressCycleAdd) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(AddPressCycleRenderTemplate,
+		f.ModifiedBy.UserName, f.ToolID, f.ToolID, f.TotalCycles))
+}
+
+// FeedPressCycleUpdate represents a press cycle update event.
+type FeedPressCycleUpdate struct {
+	ToolID      int64 `json:"tool_id"`
+	TotalCycles int64 `json:"total_cycles"`
+	ModifiedBy  *User `json:"modified_by"`
+}
+
+func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
+	return &FeedPressCycleUpdate{
+		ToolID:      int64(data["tool_id"].(float64)),
+		TotalCycles: int64(data["total_cycles"].(float64)),
+		ModifiedBy: NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+func (f *FeedPressCycleUpdate) Render() template.HTML {
+	return template.HTML(fmt.Sprintf(UpdatePressCycleRenderTemplate,
+		f.ModifiedBy.UserName, f.ToolID, f.ToolID, f.TotalCycles))
+}
+
 // Feed represents a feed entry in the system that tracks activity events.
+
 type Feed struct {
 	ID       int64  `json:"id"`
 	Time     int64  `json:"time"`
@@ -569,6 +639,12 @@ func (f *Feed) Render() template.HTML {
 		feedContent = NewFeedMetalSheetStatusChange(data).Render()
 	case FeedTypeMetalSheetToolAssignment:
 		feedContent = NewFeedMetalSheetToolAssignment(data).Render()
+
+	// Press Cycle Types
+	case FeedTypePressCycleAdd:
+		feedContent = NewFeedPressCycleAdd(data).Render()
+	case FeedTypePressCycleUpdate:
+		feedContent = NewFeedPressCycleUpdate(data).Render()
 
 	// Fallback
 
