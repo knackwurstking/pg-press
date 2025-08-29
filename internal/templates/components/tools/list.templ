@@ -32,7 +32,7 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 		>
 			<span class="flex gap-sm w-full">
 				<span class="flex flex-col gap-sm">
-					<span class="text-sm text-normal">{ tool.Format.Height }x{ tool.Format.Width } { tool.Code } { tool.Type }</span>
+					<span class="text-sm text-normal">{ tool.Format.Width }x{ tool.Format.Height } { tool.Code } { tool.Type }</span>
 					<span>
 						@PositionBadge(tool.Position, "muted")
 						switch tool.Status {
