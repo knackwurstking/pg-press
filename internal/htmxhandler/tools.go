@@ -118,16 +118,19 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
 		tool.Type, tool.Code, tool.Position)
 
-	if _, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
+	if t, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to add tool: "+err.Error())
+	} else {
+		tool.ID = t.ID
 	}
 
 	logger.HTMXHandlerTools().Info("Successfully created tool with ID %d", tool.ID)
 
 	return h.handleEdit(c, &toolscomp.EditDialogProps{
-		ID:    tool.ID,
-		Close: true,
+		ID:              tool.ID,
+		Close:           true,
+		ReloadToolsList: true,
 	})
 }
 

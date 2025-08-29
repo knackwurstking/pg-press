@@ -6,20 +6,21 @@ import (
 )
 
 type EditDialogProps struct {
-	ID       int64
-	Close    bool
-	Position string
-	Width    int
-	Height   int
-	Type     string
-	Code     string
+	ID              int64
+	Close           bool
+	Position        string
+	Width           int
+	Height          int
+	Type            string
+	Code            string
+	ReloadToolsList bool
 }
 
 templ EditDialog(props *EditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolEditDialog }
-			if props.ID <= 0 {
+			if props.ReloadToolsList {
 				hx-get={ constants.ServerPathPrefix + "/htmx/tools/list" }
 				hx-trigger="load"
 				hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
