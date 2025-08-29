@@ -37,11 +37,11 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 						@PositionBadge(tool.Position, "muted")
 						switch tool.Status {
 							case database.ToolStatusActive:
-								<small class="badge badge-sm badge-outline muted ml">Eingebaut</small>
+								<small class="badge badge-sm badge-outline primary ml">Eingebaut</small>
 							case database.ToolStatusAvailable:
-								<small class="badge badge-sm badge-outline primary ml">Verfügbar</small>
+								<small class="badge badge-sm badge-outline info ml">Verfügbar</small>
 							case database.ToolStatusRegenerating:
-								<small class="badge badge-sm badge-outline info ml">Regenerierung</small>
+								<small class="badge badge-sm badge-outline warning ml">Regenerierung</small>
 						}
 					</span>
 				</span>
