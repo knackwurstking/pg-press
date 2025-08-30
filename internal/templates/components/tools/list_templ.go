@@ -180,7 +180,7 @@ func listItem(id int64, tool *database.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch tool.Status {
+		switch tool.Status() {
 		case database.ToolStatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<small class=\"badge badge-sm badge-outline primary ml\">Eingebaut</small>")
 			if templ_7745c5c3_Err != nil {

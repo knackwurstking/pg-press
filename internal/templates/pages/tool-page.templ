@@ -296,7 +296,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="setatus">
 			<h5>Aktueller Status</h5>
-			switch tool.Status {
+			switch tool.Status() {
 				case database.ToolStatusActive:
 					<a
 						role="button"
@@ -317,7 +317,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 				case database.ToolStatusRegenerating:
 					<span class="warning ghost">Regenerierung</span>
 				default:
-					<span>{ string(tool.Status) }</span>
+					<span>{ tool.Status() }</span>
 			}
 		</section>
 		<section

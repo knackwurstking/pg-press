@@ -27,30 +27,39 @@ func (tf ToolFormat) String() string {
 // Tool represents a tool in the database.
 //
 // TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
-// TODO: Status should be set based on the press value, only need an enry for the regenerating status
 type Tool struct {
-	ID          int64         `json:"id"`
-	Position    Position      `json:"position"`
-	Format      ToolFormat    `json:"format"`
-	Type        string        `json:"type"` // Ex: FC, GTC, MASS
-	Code        string        `json:"code"` // Ex: G01, G02, ...
-	Status      ToolStatus    `json:"status"`
-	Press       *PressNumber  `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes []int64       `json:"notes"` // Contains note ids from the "notes" table
-	Mods        Mods[ToolMod] `json:"mods"`
+	ID           int64         `json:"id"`
+	Position     Position      `json:"position"`
+	Format       ToolFormat    `json:"format"`
+	Type         string        `json:"type"` // Ex: FC, GTC, MASS
+	Code         string        `json:"code"` // Ex: G01, G02, ...
+	Regenerating bool          `json:"regenerating"`
+	Press        *PressNumber  `json:"press"` // Press number (0-5) when status is active
+	LinkedNotes  []int64       `json:"notes"` // Contains note ids from the "notes" table
+	Mods         Mods[ToolMod] `json:"mods"`
 }
 
 func NewTool(position Position) *Tool {
 	return &Tool{
-		Format:      ToolFormat{},
-		Position:    position,
-		Type:        "",
-		Code:        "",
-		Status:      ToolStatusAvailable,
-		Press:       nil,
-		LinkedNotes: make([]int64, 0),
-		Mods:        make([]*Modified[ToolMod], 0),
+		Format:       ToolFormat{},
+		Position:     position,
+		Type:         "",
+		Code:         "",
+		Regenerating: false,
+		Press:        nil,
+		LinkedNotes:  make([]int64, 0),
+		Mods:         make([]*Modified[ToolMod], 0),
 	}
+}
+
+func (t *Tool) Status() ToolStatus {
+	if t.Regenerating {
+		return ToolStatusRegenerating
+	}
+	if t.Press != nil {
+		return ToolStatusActive
+	}
+	return ToolStatusAvailable
 }
 
 func (t *Tool) String() string {
@@ -65,7 +74,7 @@ func (t *Tool) String() string {
 	}
 
 	// Add press information if tool is active
-	if t.Status == ToolStatusActive && t.Press != nil {
+	if t.Status() == ToolStatusActive && t.Press != nil {
 		base = fmt.Sprintf("%s - Presse %d", base, *t.Press)
 	}
 
@@ -95,7 +104,7 @@ func (t *Tool) ClearPress() {
 
 // IsActive checks if the tool is active on a press
 func (t *Tool) IsActive() bool {
-	return t.Status == ToolStatusActive && t.Press != nil
+	return t.Status() == ToolStatusActive && t.Press != nil
 }
 
 // GetPressString returns a formatted string of the press assignment
@@ -115,11 +124,11 @@ func (t *Tool) GetPressString() string {
 }
 
 type ToolMod struct {
-	Position    Position     `json:"position"`
-	Format      ToolFormat   `json:"format"`
-	Type        string       `json:"type"`
-	Code        string       `json:"code"`
-	Status      ToolStatus   `json:"status"`
-	Press       *PressNumber `json:"press"`
-	LinkedNotes []int64      `json:"notes"`
+	Position     Position     `json:"position"`
+	Format       ToolFormat   `json:"format"`
+	Type         string       `json:"type"`
+	Code         string       `json:"code"`
+	Regenerating bool         `json:"regenerating"`
+	Press        *PressNumber `json:"press"`
+	LinkedNotes  []int64      `json:"notes"`
 }

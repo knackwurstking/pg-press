@@ -153,10 +153,9 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Tool.Status != database.ToolStatusActive {
+			if props.Tool.Status() != database.ToolStatusActive {
 
-				// TODO: Need a press selection inut element: Press 0 - 5
-				// TODO: ...
+				// TODO: Need a press selection input element: Press 0 - 5
 			}
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<section class=\"total-cycles flex flex-col gap-sm\"><label>Gesamtzyklen</label> <input type=\"number\" min=\"0\" step=\"1\" id=\"total_cycles\" name=\"total_cycles\" placeholder=\"Gesamtzyklen\" required></section></div><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
@@ -168,7 +167,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				constants.ServerPathPrefix, props.Tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 74, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 73, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -181,7 +180,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDToolCycleEditDialog))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 76, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 75, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {

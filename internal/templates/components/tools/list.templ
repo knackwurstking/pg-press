@@ -35,7 +35,7 @@ templ listItem(id int64, tool *database.ToolWithNotes) {
 					<span class="text-sm text-normal">{ tool.Format.Width }x{ tool.Format.Height } { tool.Code } { tool.Type }</span>
 					<span>
 						@PositionBadge(tool.Position, "muted")
-						switch tool.Status {
+						switch tool.Status() {
 							case database.ToolStatusActive:
 								<small class="badge badge-sm badge-outline primary ml">Eingebaut</small>
 							case database.ToolStatusAvailable:

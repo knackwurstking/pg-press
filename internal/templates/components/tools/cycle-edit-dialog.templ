@@ -53,7 +53,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							Die Zykluseinstellungen können nur bearbeitet werden wenn das Werkzeug aktiv ist oder bereits ein Zyklus läuft.
 						</div>
 					</div>
-					if props.Tool.Status != database.ToolStatusActive {
+					if props.Tool.Status() != database.ToolStatusActive {
 						{{
 							// TODO: Need a press selection input element: Press 0 - 5
 						}}

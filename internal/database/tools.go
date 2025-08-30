@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	// TODO: Status should be set based on the press value, only need an enry for the regenerating status
 	createToolsTableQuery = `
 		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
@@ -18,32 +17,32 @@ const (
 			format BLOB NOT NULL,
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
-			status TEXT NOT NULL DEFAULT 'active',
+			regenerating INTEGER NOT NULL DEFAULT 0,
 			press INTEGER,
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO tools (position, format, type, code, status, press, notes, mods)
+		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods)
 		VALUES
-			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]'),
-			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', "available", NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', "available", NULL, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', "regenerating", NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', "regenerating", NULL, '[]', '[]');
+			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', 0, 0, '[]', '[]'),
+			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', 0, 0, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', 0, NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', 0, NULL, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', 1, NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', 1, NULL, '[]', '[]');
 	`
 
 	selectAllToolsQuery = `
-		SELECT id, position, format, type, code, status, press, notes, mods FROM tools;
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools;
 	`
 
 	selectToolByIDQuery = `
-		SELECT id, position, format, type, code, status, press, notes, mods FROM tools WHERE id = $1;
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1;
 	`
 
 	selectToolsByPressQuery = `
-		SELECT id, position, format, type, code, status, press, notes, mods FROM tools WHERE press = $1 AND status = 'active';
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE press = $1 AND regenerating = 0;
 	`
 
 	checkToolsExistenceQuery = `
@@ -51,11 +50,11 @@ const (
 	`
 
 	insertToolQuery = `
-		INSERT INTO tools (position, format, type, code, status, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
 
 	updateToolQuery = `
-		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, status = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
 	`
 
 	deleteToolQuery = `
@@ -201,7 +200,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	t.updateMods(user, tool)
 
 	result, err := t.db.Exec(insertToolQuery,
-		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes)
+		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
 			"failed to insert tool", err)
@@ -261,7 +260,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	t.updateMods(user, tool)
 
 	_, err = t.db.Exec(updateToolQuery,
-		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes, tool.ID)
+		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
@@ -312,22 +311,22 @@ func (t *Tools) Delete(id int64, user *User) error {
 	return nil
 }
 
-// UpdateStatus updates only the status field of a tool
-func (t *Tools) UpdateStatus(toolID int64, status ToolStatus, user *User) error {
-	logger.DBTools().Info("Updating tool status: %d to %s", toolID, status)
+// UpdateRegenerating updates only the regenerating field of a tool
+func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *User) error {
+	logger.DBTools().Info("Updating tool regenerating status: %d to %v", toolID, regenerating)
 
 	// Get current tool to track changes
 	tool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for status update: %w", err)
+		return fmt.Errorf("failed to get tool for regenerating status update: %w", err)
 	}
 
-	if tool.Status == status {
+	if tool.Regenerating == regenerating {
 		return nil
 	}
 
 	// Update tool
-	tool.Status = status
+	tool.Regenerating = regenerating
 
 	// Update mods
 	t.updateMods(user, tool)
@@ -339,16 +338,15 @@ func (t *Tools) UpdateStatus(toolID int64, status ToolStatus, user *User) error 
 			"failed to marshal mods", err)
 	}
 
-	query := `UPDATE tools SET status = ?, mods = ? WHERE id = ?`
-	_, err = t.db.Exec(query, tool.Status, modsBytes, tool.ID)
+	query := `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
+	_, err = t.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
-			fmt.Sprintf("failed to update status for tool %d", tool.ID), err)
+			fmt.Sprintf("failed to update regenerating for tool %d", tool.ID), err)
 	}
 
 	// Trigger feed update
 	if t.feeds != nil {
-		tool.Status = status // Update status for correct display
 		t.feeds.Add(NewFeed(
 			FeedTypeToolUpdate,
 			&FeedToolUpdate{
@@ -372,7 +370,7 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error 
 		return fmt.Errorf("failed to get tool for press update: %w", err)
 	}
 
-	if tool.Press == press {
+	if equalPressNumbers(tool.Press, press) {
 		return nil
 	}
 
@@ -439,17 +437,14 @@ func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
 		mods        []byte
 	)
 
-	var status string
 	if err := scanner.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
+		&tool.Code, &tool.Regenerating, &tool.Press, &linkedNotes, &mods); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
-
-	tool.Status = ToolStatus(status)
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, NewDatabaseError("scan", "tools",
@@ -474,13 +469,13 @@ func (t *Tools) updateMods(user *User, tool *Tool) {
 	}
 
 	tool.Mods.Add(user, ToolMod{
-		Position:    tool.Position,
-		Format:      tool.Format,
-		Type:        tool.Type,
-		Code:        tool.Code,
-		Status:      tool.Status,
-		Press:       tool.Press,
-		LinkedNotes: tool.LinkedNotes,
+		Position:     tool.Position,
+		Format:       tool.Format,
+		Type:         tool.Type,
+		Code:         tool.Code,
+		Regenerating: tool.Regenerating,
+		Press:        tool.Press,
+		LinkedNotes:  tool.LinkedNotes,
 	})
 }
 

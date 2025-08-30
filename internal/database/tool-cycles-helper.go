@@ -1,3 +1,4 @@
+// TODO: Ok, I really need to check if i need all of this stuff
 package database
 
 import (
@@ -110,7 +111,7 @@ func (h *ToolCyclesHelper) GetToolPressHistory(toolID int64) (*ToolPressHistory,
 	if err != nil {
 		return nil, err
 	}
-	history.CurrentStatus = tool.Status
+	history.CurrentStatus = tool.Status()
 	history.CurrentPress = tool.Press
 
 	// Get all press cycles
@@ -216,12 +217,13 @@ func (h *ToolCyclesHelper) groupCyclesByRegenerations(cycles []*PressCycle, rege
 func (h *ToolCyclesHelper) StartToolOnPress(toolID int64, pressNumber PressNumber, user *User) error {
 	logger.DBToolCyclesHelper().Info("Starting tool %d on press %d", toolID, pressNumber)
 
-	// Update tool status to active and set press number
-	err := h.tools.UpdateStatus(toolID, ToolStatusActive, user)
+	// Set regenerating to false
+	err := h.tools.UpdateRegenerating(toolID, false, user)
 	if err != nil {
 		return err
 	}
 
+	// Set press number, which makes the tool active
 	err = h.tools.UpdatePress(toolID, &pressNumber, user)
 	if err != nil {
 		return err
@@ -246,8 +248,8 @@ func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64, user *User) error {
 		return err
 	}
 
-	// Update tool status to available and clear press number
-	err = h.tools.UpdateStatus(toolID, ToolStatusAvailable, user)
+	// A tool removed from the press should be available
+	err = h.tools.UpdateRegenerating(toolID, false, user)
 	if err != nil {
 		return err
 	}
@@ -264,8 +266,14 @@ func (h *ToolCyclesHelper) RemoveToolFromPress(toolID int64, user *User) error {
 func (h *ToolCyclesHelper) RegenerateTool(toolID int64, reason string, user *User) error {
 	logger.DBToolCyclesHelper().Info("Regenerating tool %d, reason: %s, performed by: %s", toolID, reason, user.String())
 
-	// Update tool status to regenerating
-	err := h.tools.UpdateStatus(toolID, ToolStatusRegenerating, user)
+	// Update tool to be regenerating
+	err := h.tools.UpdateRegenerating(toolID, true, user)
+	if err != nil {
+		return err
+	}
+
+	// A regenerating tool is not on a press
+	err = h.tools.UpdatePress(toolID, nil, user)
 	if err != nil {
 		return err
 	}
@@ -290,7 +298,7 @@ func (h *ToolCyclesHelper) CompleteToolRegeneration(toolID int64, user *User) er
 	logger.DBToolCyclesHelper().Info("Completing regeneration for tool %d", toolID)
 
 	// Update tool status back to available
-	err := h.tools.UpdateStatus(toolID, ToolStatusAvailable, user)
+	err := h.tools.UpdateRegenerating(toolID, false, user)
 	if err != nil {
 		return err
 	}
