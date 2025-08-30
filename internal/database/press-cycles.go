@@ -56,21 +56,6 @@ const (
 		RETURNING id, press_number, tool_id, date, total_cycles, performed_by
 	`
 
-	// This query is no longer needed since we don't track to_date
-	// endToolUsageQuery is deprecated
-
-	updatePressCyclesQuery = `
-		UPDATE press_cycles
-		SET total_cycles = ?, performed_by = ?
-		WHERE id = (
-			SELECT id
-			FROM press_cycles
-			WHERE tool_id = ?
-			ORDER BY date DESC
-			LIMIT 1
-		)
-	`
-
 	selectCurrentToolUsageQuery = `
 		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
@@ -171,6 +156,12 @@ const (
 		)
 		WHERE rn = 1
 		ORDER BY press_number, tool_id
+	`
+
+	updatePressCycleByIDQuery = `
+		UPDATE press_cycles
+		SET total_cycles = ?, performed_by = ?, press_number = ?, date = ?
+		WHERE id = ?
 	`
 
 	selectPressCycleStatsQuery = `
@@ -293,45 +284,6 @@ func (p *PressCycles) AddCycle(toolID int64, pressNumber PressNumber, totalCycle
 	}
 
 	return cycle, nil
-}
-
-// UpdateCycles updates the cycle counts for a currently active tool on a press
-// UpdateCycles updates the total and partial cycles for an active tool
-func (p *PressCycles) UpdateCycles(toolID int64, totalCycles int64, user *User) error {
-	logger.DBPressCycles().Debug("Updating cycles: tool_id=%d, total=%d", toolID, totalCycles)
-
-	var performedBy *int64
-	if user != nil {
-		performedBy = &user.TelegramID
-	}
-
-	result, err := p.db.Exec(updatePressCyclesQuery, totalCycles, performedBy, toolID)
-	if err != nil {
-		return fmt.Errorf("failed to update cycles: %w", err)
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
-	}
-
-	if rows == 0 {
-		return fmt.Errorf("no active press cycle found for tool %d", toolID)
-	}
-
-	// Create feed entry
-	if p.feeds != nil {
-		p.feeds.Add(NewFeed(
-			FeedTypePressCycleUpdate,
-			&FeedPressCycleUpdate{
-				ToolID:      toolID,
-				TotalCycles: totalCycles,
-				ModifiedBy:  user,
-			},
-		))
-	}
-
-	return nil
 }
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
@@ -709,4 +661,49 @@ func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
 	cycle.PartialCycles = 0
 
 	return cycle, nil
+}
+
+// UpdateCycle updates a specific press cycle entry.
+func (p *PressCycles) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, date time.Time, user *User) error {
+	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycleID)
+
+	var performedBy *int64
+	if user != nil {
+		performedBy = &user.TelegramID
+	}
+
+	result, err := p.db.Exec(updatePressCycleByIDQuery, totalCycles, performedBy, pressNumber, date, cycleID)
+	if err != nil {
+		return fmt.Errorf("failed to update press cycle with id %d: %w", cycleID, err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no press cycle found with id %d", cycleID)
+	}
+
+	// Create feed entry
+	if p.feeds != nil {
+		var toolID int64
+		// We need to get the tool_id for the feed.
+		err := p.db.QueryRow("SELECT tool_id FROM press_cycles WHERE id = ?", cycleID).Scan(&toolID)
+		if err != nil {
+			logger.DBPressCycles().Error("Could not get tool_id for updated press cycle %d to create feed: %v", cycleID, err)
+		} else {
+			p.feeds.Add(NewFeed(
+				FeedTypePressCycleUpdate,
+				&FeedPressCycleUpdate{
+					ToolID:      toolID,
+					TotalCycles: totalCycles,
+					ModifiedBy:  user,
+				},
+			))
+		}
+	}
+
+	return nil
 }
