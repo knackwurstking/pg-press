@@ -71,7 +71,7 @@ func (n *Notes) List() ([]*Note, error) {
 	var notes []*Note
 
 	for rows.Next() {
-		note, err := n.scanNoteFromRows(rows)
+		note, err := n.scanNote(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan note")
 		}
@@ -91,7 +91,7 @@ func (n *Notes) Get(id int64) (*Note, error) {
 
 	row := n.db.QueryRow(selectNoteByIDQuery, id)
 
-	note, err := n.scanNoteFromRow(row)
+	note, err := n.scanNote(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -132,7 +132,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	noteMap := make(map[int64]*Note)
 
 	for rows.Next() {
-		note, err := n.scanNoteFromRows(rows)
+		note, err := n.scanNote(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan attachment")
 		}
@@ -181,21 +181,13 @@ func (n *Notes) Delete(id int64, user *User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Notes) scanNoteFromRows(rows *sql.Rows) (*Note, error) {
+func (n *Notes) scanNote(scanner scannable) (*Note, error) {
 	note := &Note{}
 
-	if err := rows.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
-		return nil, NewDatabaseError("scan", "notes",
-			"failed to scan row", err)
-	}
-
-	return note, nil
-}
-
-func (n *Notes) scanNoteFromRow(row *sql.Row) (*Note, error) {
-	note := &Note{}
-
-	if err := row.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
+	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "notes",
 			"failed to scan row", err)
 	}

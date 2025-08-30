@@ -89,7 +89,7 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 
 	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
 
-	report, err := tr.scanTroubleReportRow(row)
+	report, err := tr.scanTroubleReport(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -250,37 +250,18 @@ func (tr *TroubleReports) Delete(id int64, user *User) error {
 	return nil
 }
 
-func (tr *TroubleReports) scanTroubleReport(rows *sql.Rows) (*TroubleReport, error) {
+func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*TroubleReport, error) {
 	report := &TroubleReport{}
 	var linkedAttachments string
 	var mods []byte
 
-	if err := rows.Scan(&report.ID, &report.Title, &report.Content,
+	if err := scanner.Scan(&report.ID, &report.Title, &report.Content,
 		&linkedAttachments, &mods); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "trouble_reports",
 			"failed to scan row", err)
-	}
-
-	// Try to unmarshal as new format (array of int64 IDs) first
-	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		return nil, WrapError(err, "failed to unmarshal linked attachments")
-	}
-
-	if err := json.Unmarshal(mods, &report.Mods); err != nil {
-		return nil, WrapError(err, "failed to unmarshal mods data")
-	}
-
-	return report, nil
-}
-
-func (tr *TroubleReports) scanTroubleReportRow(row *sql.Row) (*TroubleReport, error) {
-	report := &TroubleReport{}
-	var linkedAttachments string
-	var mods []byte
-
-	if err := row.Scan(&report.ID, &report.Title, &report.Content,
-		&linkedAttachments, &mods); err != nil {
-		return nil, err
 	}
 
 	// Try to unmarshal as new format (array of int64 IDs) first

@@ -86,7 +86,7 @@ func (a *Attachments) Get(id int64) (*Attachment, error) {
 
 	row := a.db.QueryRow(selectAttachmentByIDQuery, id)
 
-	attachment, err := a.scanAttachmentRow(row)
+	attachment, err := a.scanAttachment(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -233,27 +233,21 @@ func (a *Attachments) Delete(id int64, _ *User) error {
 	return nil
 }
 
-func (a *Attachments) scanAttachment(rows *sql.Rows) (*Attachment, error) {
-	attachment := &Attachment{}
-	var id int64
-
-	if err := rows.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {
-		return nil, NewDatabaseError("scan", "attachments",
-			"failed to scan row", err)
-	}
-
-	// Set the ID using string conversion to maintain compatibility
-	attachment.ID = fmt.Sprintf("%d", id)
-
-	return attachment, nil
+// scannable is an interface that abstracts sql.Row and sql.Rows for scanning.
+type scannable interface {
+	Scan(dest ...any) error
 }
 
-func (a *Attachments) scanAttachmentRow(row *sql.Row) (*Attachment, error) {
+func (a *Attachments) scanAttachment(scanner scannable) (*Attachment, error) {
 	attachment := &Attachment{}
 	var id int64
 
-	if err := row.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {
-		return nil, err
+	if err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {
+		// The `Get` method needs the original sql.ErrNoRows error
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, NewDatabaseError("scan", "attachments", "failed to scan row", err)
 	}
 
 	// Set the ID using string conversion to maintain compatibility

@@ -1,0 +1,33 @@
+package feeds
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/database"
+)
+
+templ AddTool(data *database.FeedToolAdd) {
+	<div class="feed-item">
+		<div class="feed-item-content" style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat ein neues Werkzeug
+			<a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ID)) } class="info">{ data.Tool }</a> zur <a href={ templ.URL(fmt.Sprintf("./tools/#tool-%d", data.ID)) } class="info">Werkzeugliste</a> hinzugefügt.
+		</div>
+	</div>
+}
+
+templ UpdateTool(data *database.FeedToolUpdate) {
+	<div class="feed-item">
+		<div class="feed-item-content" style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug
+			<a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ID)) } class="info">{ data.Tool }</a> aktualisiert.
+		</div>
+	</div>
+}
+
+templ DeleteTool(data *database.FeedToolDelete) {
+	<div class="feed-item">
+		<div class="feed-item-content" style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug
+			<strong style="color: var(--ui-secondary);">{ data.Tool }</strong> entfernt.
+		</div>
+	</div>
+}

@@ -133,7 +133,7 @@ func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*To
 
 	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason, performedBy)
 
-	regen, err = t.scanFromRow(t.db.QueryRow(insertToolRegenerationQuery,
+	regen, err = t.scanToolRegeneration(t.db.QueryRow(insertToolRegenerationQuery,
 		regen.ToolID,
 		regen.RegeneratedAt,
 		regen.CyclesAtRegeneration,
@@ -193,7 +193,7 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 		WHERE id = ?
 	`
 
-	regen, err := t.scanFromRow(t.db.QueryRow(query, id))
+	regen, err := t.scanToolRegeneration(t.db.QueryRow(query, id))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -209,7 +209,7 @@ func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
 func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting last regeneration for tool: tool_id=%d", toolID)
 
-	regen, err := t.scanFromRow(t.db.QueryRow(selectLastRegenerationQuery, toolID))
+	regen, err := t.scanToolRegeneration(t.db.QueryRow(selectLastRegenerationQuery, toolID))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -233,7 +233,7 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		regen, err := t.scanFromRows(rows)
+		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
 			return nil, NewDatabaseError("scan", "tool_regenerations",
 				"failed to get regeneration history", err)
@@ -271,7 +271,7 @@ func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		regen, err := t.scanFromRows(rows)
+		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
 			return nil, NewDatabaseError("scan", "tool_regenerations",
 				"failed to get regenerations between", err)
@@ -295,7 +295,7 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 
 	var regenerations []*ToolRegeneration
 	for rows.Next() {
-		regen, err := t.scanFromRows(rows)
+		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
 			return nil, NewDatabaseError("scan", "tool_regenerations",
 				"failed to get all regenerations", err)
@@ -362,11 +362,11 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 	return results, nil
 }
 
-func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) scanToolRegeneration(scanner scannable) (*ToolRegeneration, error) {
 	regen := &ToolRegeneration{}
 	var performedBy sql.NullInt64
 
-	err := rows.Scan(
+	err := scanner.Scan(
 		&regen.ID,
 		&regen.ToolID,
 		&regen.RegeneratedAt,
@@ -375,29 +375,9 @@ func (t *ToolRegenerations) scanFromRows(rows *sql.Rows) (*ToolRegeneration, err
 		&performedBy,
 	)
 	if err != nil {
-		return nil, err
-	}
-
-	if performedBy.Valid {
-		regen.PerformedBy = &performedBy.Int64
-	}
-
-	return regen, nil
-}
-
-func (t *ToolRegenerations) scanFromRow(row *sql.Row) (*ToolRegeneration, error) {
-	regen := &ToolRegeneration{}
-	var performedBy sql.NullInt64
-
-	err := row.Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
-		&regen.Reason,
-		&performedBy,
-	)
-	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, err
 	}
 

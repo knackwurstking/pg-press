@@ -15,7 +15,7 @@ templ List(feeds []*database.Feed, lastFeedID int64) {
 							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
 						</div>
 					}
-					@templ.Raw(feed.Render())
+					@RenderFeed(feed)
 				</section>
 			}
 		</ul>

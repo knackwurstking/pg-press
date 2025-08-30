@@ -63,7 +63,7 @@ func List(feeds []*database.Feed, lastFeedID int64) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templ.Raw(feed.Render()).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = RenderFeed(feed).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

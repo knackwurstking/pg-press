@@ -165,7 +165,7 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 	}
 
 	row := f.db.QueryRow(selectFeedByIDQuery, id)
-	feed, err := f.scanFeedRow(row)
+	feed, err := f.scanFeed(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -226,23 +226,15 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 	return feeds, nil
 }
 
-// scanFeed scans a single feed from a database row
-func (f *Feeds) scanFeed(rows *sql.Rows) (*Feed, error) {
-	return f.scanFeedData(rows.Scan)
-}
-
-// scanFeedRow scans a single feed from a query row
-func (f *Feeds) scanFeedRow(row *sql.Row) (*Feed, error) {
-	return f.scanFeedData(row.Scan)
-}
-
-// scanFeedData scans feed data using the provided scan function
-func (f *Feeds) scanFeedData(scanFunc func(dest ...any) error) (*Feed, error) {
+func (f *Feeds) scanFeed(scanner scannable) (*Feed, error) {
 	feed := &Feed{}
 	var data []byte
 
-	if err := scanFunc(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {
-		return nil, err
+	if err := scanner.Scan(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, NewDatabaseError("scan", "feeds", "failed to scan row", err)
 	}
 
 	if len(data) > 0 {

@@ -126,7 +126,7 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 	var sheets []*MetalSheet
 
 	for rows.Next() {
-		sheet, err := ms.scanMetalSheetFromRows(rows)
+		sheet, err := ms.scanMetalSheet(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan metal sheet")
 		}
@@ -148,7 +148,7 @@ func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
 
 	row := ms.db.QueryRow(selectMetalSheetByIDQuery, id)
 
-	sheet, err := ms.scanMetalSheetFromRow(row)
+	sheet, err := ms.scanMetalSheet(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -203,7 +203,7 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 	var sheets []*MetalSheet
 
 	for rows.Next() {
-		sheet, err := ms.scanMetalSheetFromRows(rows)
+		sheet, err := ms.scanMetalSheet(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan metal sheet")
 		}
@@ -233,7 +233,7 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 	var sheets []*MetalSheet
 
 	for rows.Next() {
-		sheet, err := ms.scanMetalSheetFromRows(rows)
+		sheet, err := ms.scanMetalSheet(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan metal sheet")
 		}
@@ -472,9 +472,8 @@ func (ms *MetalSheets) Delete(id int64, user *User) error {
 	return nil
 }
 
-// scanMetalSheetFromRows scans a metal sheet from database rows
-func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, error) {
-	logger.DBMetalSheets().Debug("Scanning metal sheet from rows")
+func (ms *MetalSheets) scanMetalSheet(scanner scannable) (*MetalSheet, error) {
+	logger.DBMetalSheets().Debug("Scanning metal sheet")
 	sheet := &MetalSheet{}
 
 	var (
@@ -483,42 +482,11 @@ func (ms *MetalSheets) scanMetalSheetFromRows(rows *sql.Rows) (*MetalSheet, erro
 		toolID      sql.NullInt64
 	)
 
-	if err := rows.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
+	if err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
 		&toolID, &linkedNotes, &mods); err != nil {
-		return nil, NewDatabaseError("scan", "metal_sheets",
-			"failed to scan row", err)
-	}
-
-	// Handle nullable tool_id
-	if toolID.Valid {
-		sheet.ToolID = &toolID.Int64
-	}
-
-	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
-		return nil, NewDatabaseError("scan", "metal_sheets",
-			"failed to unmarshal notes", err)
-	}
-
-	if err := json.Unmarshal(mods, &sheet.Mods); err != nil {
-		return nil, WrapError(err, "failed to unmarshal mods data")
-	}
-
-	return sheet, nil
-}
-
-// scanMetalSheetFromRow scans a metal sheet from a database row
-func (ms *MetalSheets) scanMetalSheetFromRow(row *sql.Row) (*MetalSheet, error) {
-	logger.DBMetalSheets().Debug("Scanning metal sheet from row")
-	sheet := &MetalSheet{}
-
-	var (
-		linkedNotes []byte
-		mods        []byte
-		toolID      sql.NullInt64
-	)
-
-	if err := row.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
-		&toolID, &linkedNotes, &mods); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "metal_sheets",
 			"failed to scan row", err)
 	}

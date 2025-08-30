@@ -97,7 +97,7 @@ func (t *Tools) List() ([]*Tool, error) {
 	var tools []*Tool
 
 	for rows.Next() {
-		tool, err := t.scanToolFromRows(rows)
+		tool, err := t.scanTool(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan tool")
 		}
@@ -117,7 +117,7 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 
 	row := t.db.QueryRow(selectToolByIDQuery, id)
 
-	tool, err := t.scanToolFromRow(row)
+	tool, err := t.scanTool(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -151,7 +151,7 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 	var tools []*Tool
 
 	for rows.Next() {
-		tool, err := t.scanToolFromRows(rows)
+		tool, err := t.scanTool(rows)
 		if err != nil {
 			return nil, WrapError(err, "failed to scan tool")
 		}
@@ -425,7 +425,7 @@ func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
 	return nil
 }
 
-func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
+func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
 	tool := &Tool{}
 
 	var (
@@ -435,44 +435,13 @@ func (t *Tools) scanToolFromRows(rows *sql.Rows) (*Tool, error) {
 	)
 
 	var status string
-	if err := rows.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
+	if err := scanner.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
 		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
-	}
-
-	tool.Status = ToolStatus(status)
-
-	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, NewDatabaseError("scan", "tools",
-			"failed to unmarshal format", err)
-	}
-
-	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
-		return nil, NewDatabaseError("scan", "tools",
-			"failed to unmarshal notes", err)
-	}
-
-	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
-		return nil, WrapError(err, "failed to unmarshal mods data")
-	}
-
-	return tool, nil
-}
-
-func (t *Tools) scanToolFromRow(row *sql.Row) (*Tool, error) {
-	tool := &Tool{}
-
-	var (
-		format      []byte
-		linkedNotes []byte
-		mods        []byte
-	)
-
-	var status string
-	if err := row.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &status, &tool.Press, &linkedNotes, &mods); err != nil {
-		return nil, err
 	}
 
 	tool.Status = ToolStatus(status)

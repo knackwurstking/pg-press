@@ -94,7 +94,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 
 	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
 
-	user, err := u.scanUserRow(row)
+	user, err := u.scanUser(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -247,23 +247,15 @@ func (u *Users) Update(user *User, actor *User) error {
 	return nil
 }
 
-// scanUser scans a user from database rows.
-func (u *Users) scanUser(rows *sql.Rows) (*User, error) {
+func (u *Users) scanUser(scanner scannable) (*User, error) {
 	user := &User{}
-	err := rows.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
+	err := scanner.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "users",
 			"failed to scan row", err)
-	}
-	return user, nil
-}
-
-// scanUserRow scans a user from a single database row.
-func (u *Users) scanUserRow(row *sql.Row) (*User, error) {
-	user := &User{}
-	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
-	if err != nil {
-		return nil, err
 	}
 	return user, nil
 }

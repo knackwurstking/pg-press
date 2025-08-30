@@ -117,7 +117,7 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 	}
 
 	row := c.db.QueryRow(selectCookieByValueQuery, value)
-	cookie, err := c.scanCookieRow(row)
+	cookie, err := c.scanCookie(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -274,20 +274,14 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (c *Cookies) scanCookie(rows *sql.Rows) (*Cookie, error) {
+func (c *Cookies) scanCookie(scanner scannable) (*Cookie, error) {
 	cookie := &Cookie{}
-	err := rows.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
+	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, NewDatabaseError("scan", "cookies", "failed to scan row", err)
-	}
-	return cookie, nil
-}
-
-func (c *Cookies) scanCookieRow(row *sql.Row) (*Cookie, error) {
-	cookie := &Cookie{}
-	err := row.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
-	if err != nil {
-		return nil, err
 	}
 	return cookie, nil
 }

@@ -1,0 +1,27 @@
+package feeds
+
+import "github.com/knackwurstking/pgpress/internal/database"
+
+templ AddUser(data *database.FeedUserAdd) {
+	<div class="feed-item">
+		<div class="feed-item-content;" style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.Name }</strong> wurde hinzugefügt.
+		</div>
+	</div>
+}
+
+templ RemoveUser(data *database.FeedUserRemove) {
+	<div class="feed-item">
+		<div class="feed-item-content;" style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.Name }</strong> wurde entfernt.
+		</div>
+	</div>
+}
+
+templ ChangeUserName(data *database.FeedUserNameChange) {
+	<div class="feed-item">
+		<div class="feed-item-content " style="padding: var(--ui-spacing);">
+			Benutzer <strong>{ data.Old }</strong> hat den Namen zu <strong>{ data.New }</strong> geändert.
+		</div>
+	</div>
+}

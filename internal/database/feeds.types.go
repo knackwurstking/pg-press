@@ -3,7 +3,6 @@ package database
 
 import (
 	"fmt"
-	"html/template"
 	"time"
 )
 
@@ -25,193 +24,6 @@ const (
 	FeedTypePressCycleAdd            = "press_cycle_add"
 	FeedTypePressCycleUpdate         = "press_cycle_update"
 	FeedTypePressCycleDelete         = "press_cycle_delete"
-
-	AddUserRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content;"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> wurde hinzugefügt.
-	</div>
-</div>
-`
-
-	RemoveUserRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content;"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> wurde entfernt.
-	</div>
-</div>
-`
-
-	ChangeUserNameRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content "
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat den Namen zu <strong>%s</strong> geändert.
-	</div>
-</div>
-`
-
-	AddTroubleReportRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat einen neuen Problembericht mit dem Titel
-		<a href="./trouble-reports#trouble-report-%d" class="info">%s</a> hinzugefügt.
-	</div>
-</div>
-`
-
-	UpdateTroubleReportRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat den Problembericht mit dem Titel
-		<a href="./trouble-reports#trouble-report-%d" class="info">%s</a> aktualisiert.
-	</div>
-</div>
-`
-
-	RemoveTroubleReportRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		User <strong>%s<strong> hat den Problembericht mit dem Titel
-		<strong style="color: var(--ui-secondary);">%s</strong> entfernt.
-	</div>
-</div>
-`
-
-	AddToolRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat ein neues Werkzeug
-		<a href="./tools/tool/%d" class="info">%s</a> zur <a href="./tools/#tool-%d" class="info">Werkzeugliste</a> hinzugefügt.
-	</div>
-</div>
-`
-
-	UpdateToolRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat das Werkzeug
-		<a href="./tools/tool/%d" class="info">%s</a> aktualisiert.
-	</div>
-</div>
-`
-
-	DeleteToolRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat das Werkzeug
-		<strong style="color: var(--ui-secondary);">%s</strong> entfernt.
-	</div>
-</div>
-`
-
-	AddMetalSheetRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat ein neues Blech
-		<a href="./metal-sheets/%d" class="info">%s</a> hinzugefügt.
-	</div>
-</div>
-`
-
-	UpdateMetalSheetRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat das Blech
-		<a href="./metal-sheets/%d" class="info">%s</a> aktualisiert.
-	</div>
-</div>
-`
-
-	DeleteMetalSheetRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat das Blech mit ID
-		<strong style="color: var(--ui-secondary);">%d</strong> entfernt.
-	</div>
-</div>
-`
-
-	MetalSheetStatusChangeRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat den Status von Blech
-		<a href="./metal-sheets/%d" class="info">#%d</a> zu <strong>%s</strong> geändert.
-	</div>
-</div>
-`
-
-	MetalSheetToolAssignmentRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat Blech
-		<a href="./metal-sheets/%d" class="info">#%d</a> %s.
-	</div>
-</div>
-`
-
-	AddPressCycleRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content;"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat einen neuen Pressenzyklus für Werkzeug <a href="./tools/tool/%d" class="info">#%d</a> mit <strong>%d</strong> Zyklen hinzugefügt.
-	</div>
-</div>
-`
-
-	UpdatePressCycleRenderTemplate = `
-<div class="feed-item">
-	<div
-		class="feed-item-content"
-		style="padding: var(--ui-spacing);"
-	>
-		Benutzer <strong>%s</strong> hat den Pressenzyklus für Werkzeug <a href="./tools/tool/%d" class="info">#%d</a> auf <strong>%d</strong> Zyklen aktualisiert.
-	</div>
-</div>
-`
 )
 
 // FeedUserAdd represents a user addition event.
@@ -227,10 +39,6 @@ func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
 	}
 }
 
-func (f *FeedUserAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddUserRenderTemplate, f.Name))
-}
-
 // FeedUserRemove represents a user removal event.
 type FeedUserRemove struct {
 	ID   int64  `json:"id"`
@@ -242,10 +50,6 @@ func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
 		ID:   int64(data["id"].(float64)),
 		Name: data["name"].(string),
 	}
-}
-
-func (f *FeedUserRemove) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(RemoveUserRenderTemplate, f.Name))
 }
 
 // FeedUserNameChange represents a user name change event.
@@ -261,10 +65,6 @@ func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 		Old: data["old"].(string),
 		New: data["new"].(string),
 	}
-}
-
-func (f *FeedUserNameChange) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(ChangeUserNameRenderTemplate, f.Old, f.New))
 }
 
 // FeedTroubleReportAdd represents a trouble report creation event.
@@ -284,11 +84,6 @@ func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	}
 }
 
-func (f *FeedTroubleReportAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddTroubleReportRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.Title))
-}
-
 // FeedTroubleReportUpdate represents a trouble report update event.
 type FeedTroubleReportUpdate struct {
 	ID         int64  `json:"id"`
@@ -304,13 +99,6 @@ func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedTroubleReportUpdate) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(
-		UpdateTroubleReportRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.Title,
-	))
 }
 
 // FeedTroubleReportRemove represents a trouble report removal event.
@@ -330,12 +118,6 @@ func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	}
 }
 
-func (f *FeedTroubleReportRemove) Render() template.HTML {
-	return template.HTML(
-		fmt.Sprintf(RemoveTroubleReportRenderTemplate, f.RemovedBy.UserName, f.Title),
-	)
-}
-
 // FeedToolAdd represents a tool addition event.
 type FeedToolAdd struct {
 	ID         int64  `json:"id"`
@@ -351,11 +133,6 @@ func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedToolAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddToolRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.Tool, f.ID))
 }
 
 // FeedToolUpdate represents a tool update event.
@@ -375,11 +152,6 @@ func NewFeedToolUpdate(data map[string]any) *FeedToolUpdate {
 	}
 }
 
-func (f *FeedToolUpdate) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(UpdateToolRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.Tool))
-}
-
 // FeedToolDelete represents a tool deletion event.
 type FeedToolDelete struct {
 	ID         int64  `json:"id"`
@@ -395,11 +167,6 @@ func NewFeedToolDelete(data map[string]any) *FeedToolDelete {
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedToolDelete) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(DeleteToolRenderTemplate,
-		f.ModifiedBy.UserName, f.Tool))
 }
 
 // FeedMetalSheetAdd represents a metal sheet addition event.
@@ -419,11 +186,6 @@ func NewFeedMetalSheetAdd(data map[string]any) *FeedMetalSheetAdd {
 	}
 }
 
-func (f *FeedMetalSheetAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddMetalSheetRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.MetalSheet))
-}
-
 // FeedMetalSheetUpdate represents a metal sheet update event.
 type FeedMetalSheetUpdate struct {
 	ID         int64  `json:"id"`
@@ -441,11 +203,6 @@ func NewFeedMetalSheetUpdate(data map[string]any) *FeedMetalSheetUpdate {
 	}
 }
 
-func (f *FeedMetalSheetUpdate) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(UpdateMetalSheetRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.MetalSheet))
-}
-
 // FeedMetalSheetDelete represents a metal sheet deletion event.
 type FeedMetalSheetDelete struct {
 	ID         int64 `json:"id"`
@@ -459,11 +216,6 @@ func NewFeedMetalSheetDelete(data map[string]any) *FeedMetalSheetDelete {
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedMetalSheetDelete) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(DeleteMetalSheetRenderTemplate,
-		f.ModifiedBy.UserName, f.ID))
 }
 
 // FeedMetalSheetStatusChange represents a metal sheet status change event.
@@ -481,22 +233,6 @@ func NewFeedMetalSheetStatusChange(data map[string]any) *FeedMetalSheetStatusCha
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedMetalSheetStatusChange) Render() template.HTML {
-	statusTranslation := map[string]string{
-		"available":   "Verfügbar",
-		"in_use":      "In Verwendung",
-		"maintenance": "Wartung",
-		"reserved":    "Reserviert",
-		"damaged":     "Beschädigt",
-	}
-	status := statusTranslation[f.NewStatus]
-	if status == "" {
-		status = f.NewStatus
-	}
-	return template.HTML(fmt.Sprintf(MetalSheetStatusChangeRenderTemplate,
-		f.ModifiedBy.UserName, f.ID, f.ID, status))
 }
 
 // FeedMetalSheetToolAssignment represents a metal sheet tool assignment event.
@@ -520,15 +256,6 @@ func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAss
 	return assignment
 }
 
-func (f *FeedMetalSheetToolAssignment) Render() template.HTML {
-	action := "vom Werkzeug getrennt"
-	if f.ToolID != nil {
-		action = fmt.Sprintf("dem Werkzeug <a href=\"./tools/tool/%d\" class=\"info\">#%d</a> zugewiesen", *f.ToolID, *f.ToolID)
-	}
-	return template.HTML(fmt.Sprintf(MetalSheetToolAssignmentRenderTemplate,
-		f.ModifiedBy.UserName, f.SheetID, f.SheetID, action))
-}
-
 // FeedPressCycleAdd represents a press cycle creation event.
 type FeedPressCycleAdd struct {
 	ToolID      int64 `json:"tool_id"`
@@ -544,11 +271,6 @@ func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
 			data["modified_by"].(map[string]any),
 		),
 	}
-}
-
-func (f *FeedPressCycleAdd) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(AddPressCycleRenderTemplate,
-		f.ModifiedBy.UserName, f.ToolID, f.ToolID, f.TotalCycles))
 }
 
 // FeedPressCycleUpdate represents a press cycle update event.
@@ -568,11 +290,6 @@ func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
 	}
 }
 
-func (f *FeedPressCycleUpdate) Render() template.HTML {
-	return template.HTML(fmt.Sprintf(UpdatePressCycleRenderTemplate,
-		f.ModifiedBy.UserName, f.ToolID, f.ToolID, f.TotalCycles))
-}
-
 // Feed represents a feed entry in the system that tracks activity events.
 
 type Feed struct {
@@ -589,87 +306,6 @@ func NewFeed(dataType string, data any) *Feed {
 		DataType: dataType,
 		Data:     data,
 	}
-}
-
-// Render generates HTML for the feed entry.
-func (f *Feed) Render() template.HTML {
-	timeStr := f.GetTime().Format("2006-01-02 15:04:05")
-	var feedContent template.HTML
-
-	data, _ := f.Data.(map[string]any)
-
-	switch f.DataType {
-
-	// User Types
-
-	case FeedTypeUserAdd:
-		feedContent = NewFeedUserAdd(data).Render()
-	case FeedTypeUserNameChange:
-		feedContent = NewFeedUserNameChange(data).Render()
-	case FeedTypeUserRemove:
-		feedContent = NewFeedUserRemove(data).Render()
-
-	// Trouble Report Types
-
-	case FeedTypeTroubleReportAdd:
-		feedContent = NewFeedTroubleReportAdd(data).Render()
-	case FeedTypeTroubleReportUpdate:
-		feedContent = NewFeedTroubleReportUpdate(data).Render()
-	case FeedTypeTroubleReportRemove:
-		feedContent = NewFeedTroubleReportRemove(data).Render()
-
-	// Tool Types
-
-	case FeedTypeToolAdd:
-		feedContent = NewFeedToolAdd(data).Render()
-	case FeedTypeToolUpdate:
-		feedContent = NewFeedToolUpdate(data).Render()
-	case FeedTypeToolDelete:
-		feedContent = NewFeedToolDelete(data).Render()
-
-	// Metal Sheet Types
-
-	case FeedTypeMetalSheetAdd:
-		feedContent = NewFeedMetalSheetAdd(data).Render()
-	case FeedTypeMetalSheetUpdate:
-		feedContent = NewFeedMetalSheetUpdate(data).Render()
-	case FeedTypeMetalSheetDelete:
-		feedContent = NewFeedMetalSheetDelete(data).Render()
-	case FeedTypeMetalSheetStatusChange:
-		feedContent = NewFeedMetalSheetStatusChange(data).Render()
-	case FeedTypeMetalSheetToolAssignment:
-		feedContent = NewFeedMetalSheetToolAssignment(data).Render()
-
-	// Press Cycle Types
-	case FeedTypePressCycleAdd:
-		feedContent = NewFeedPressCycleAdd(data).Render()
-	case FeedTypePressCycleUpdate:
-		feedContent = NewFeedPressCycleUpdate(data).Render()
-
-	// Fallback
-
-	default:
-		return template.HTML(fmt.Sprintf(
-			`
-			<article id="feed-%d" class="card" data-id="%d" data-time="%d">
-				<div style="margin-bottom: var(--ui-spacing);" class="card-body"><pre>%#v</pre></div>
-				<div class="card-footer">
-					<small style="float: right;">%s</small>
-				</div>
-			</article>`,
-			f.ID, f.ID, f.Time, f.Data, timeStr,
-		))
-	}
-
-	return template.HTML(fmt.Sprintf(`
-		<article id="feed-%d" class="card" data-id="%d" data-time="%d">
-			<div style="margin-bottom: var(--ui-spacing);" class="card-body">%s</div>
-			<div class="card-footer">
-				<small style="float: right;">%s</small>
-			</div>
-		</article>`,
-		f.ID, f.ID, f.Time, feedContent, timeStr,
-	))
 }
 
 // Validate checks if the feed has valid data.

@@ -230,7 +230,7 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user
 	}
 
 	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), 0, performedBy)
-	cycle, err := p.scanPressCyclesRow(row)
+	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -272,7 +272,7 @@ func (p *PressCycles) AddCycle(toolID int64, pressNumber PressNumber, totalCycle
 	}
 
 	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), totalCycles, performedBy)
-	cycle, err := p.scanPressCyclesRow(row)
+	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
@@ -339,7 +339,7 @@ func (p *PressCycles) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
 
 	row := p.db.QueryRow(selectCurrentToolUsageQuery, toolID)
-	cycle, err := p.scanPressCyclesRow(row)
+	cycle, err := p.scanPressCycle(row)
 	if err == sql.ErrNoRows {
 		return nil, ErrNotFound
 	}
@@ -644,28 +644,10 @@ func (p *PressCycles) GetPressCycleStats() (map[PressNumber]struct {
 func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error) {
 	cycles := make([]*PressCycle, 0)
 	for rows.Next() {
-		cycle := &PressCycle{}
-		var performedBy sql.NullInt64
-
-		err := rows.Scan(
-			&cycle.ID,
-			&cycle.PressNumber,
-			&cycle.ToolID,
-			&cycle.Date,
-			&cycle.TotalCycles,
-			&performedBy,
-		)
+		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
 			return nil, err
 		}
-
-		if performedBy.Valid {
-			cycle.PerformedBy = performedBy.Int64
-		}
-
-		// Partial cycles will be calculated when needed
-		cycle.PartialCycles = 0
-
 		cycles = append(cycles, cycle)
 	}
 	return cycles, nil
@@ -700,8 +682,7 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 	return cycles, nil
 }
 
-// scanPressCyclesRow scans a single press cycle from a sql.Row (without partial_cycles)
-func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) {
+func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
 	cycle := &PressCycle{}
 	var performedBy sql.NullInt64
 
@@ -714,6 +695,9 @@ func (p *PressCycles) scanPressCyclesRow(scanner *sql.Row) (*PressCycle, error) 
 		&performedBy,
 	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
 		return nil, err
 	}
 
