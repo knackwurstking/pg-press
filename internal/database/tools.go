@@ -41,6 +41,10 @@ const (
 		SELECT id, position, format, type, code, status, press, notes, mods FROM tools WHERE press = $1 AND status = 'active';
 	`
 
+	checkToolsExistenceQuery = `
+		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
+	`
+
 	insertToolQuery = `
 		INSERT INTO tools (position, format, type, code, status, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
@@ -163,15 +167,18 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
-	t.updateMods(user, tool)
-
-	// Marshal JSON fields
+	// Marshal format for the existence check and insert
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
 			"failed to marshal format", err)
 	}
 
+	if err := t.exists(tool, formatBytes); err != nil {
+		return 0, err
+	}
+
+	// Marshal other JSON fields
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
@@ -183,6 +190,8 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 		return 0, NewDatabaseError("insert", "tools",
 			"failed to marshal mods", err)
 	}
+
+	t.updateMods(user, tool)
 
 	result, err := t.db.Exec(insertToolQuery,
 		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes)
@@ -218,15 +227,18 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 func (t *Tools) Update(tool *Tool, user *User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
-	t.updateMods(user, tool)
-
-	// Marshal JSON fields
+	// Marshal format for the existence check and update
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
-			"failed to marshal format", err)
+			"failed to marshal format for existence check", err)
 	}
 
+	if err := t.exists(tool, formatBytes); err != nil {
+		return err
+	}
+
+	// Marshal other JSON fields
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
@@ -238,6 +250,8 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 		return NewDatabaseError("update", "tools",
 			"failed to marshal mods", err)
 	}
+
+	t.updateMods(user, tool)
 
 	_, err = t.db.Exec(updateToolQuery,
 		tool.Position, formatBytes, tool.Type, tool.Code, string(tool.Status), tool.Press, notesBytes, modsBytes, tool.ID)
@@ -388,6 +402,22 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error 
 				ModifiedBy: user,
 			},
 		))
+	}
+
+	return nil
+}
+
+func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
+	var count int
+
+	err := t.db.QueryRow(checkToolsExistenceQuery,
+		tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check for existing tool: %#v", err)
+	}
+
+	if count > 0 {
+		return ErrAlreadyExists
 	}
 
 	return nil
