@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	// TODO: Status should be set based on the press value, only need an enry for the regenerating status
 	createToolsTableQuery = `
 		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
@@ -26,7 +27,11 @@ const (
 		INSERT INTO tools (position, format, type, code, status, press, notes, mods)
 		VALUES
 			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]'),
-			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]');
+			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', "active", 0, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', "available", NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', "available", NULL, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', "regenerating", NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', "regenerating", NULL, '[]', '[]');
 	`
 
 	selectAllToolsQuery = `

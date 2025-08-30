@@ -44,7 +44,6 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
-				{{ active := false }}
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
 					<div class="card warning">
 						<div class="card-header">
@@ -54,20 +53,15 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							Die Zykluseinstellungen können nur bearbeitet werden wenn das Werkzeug aktiv ist oder bereits ein Zyklus läuft.
 						</div>
 					</div>
-					if props.Tool.Status == database.ToolStatusActive || props.CycleID > 0 {
-						{{ active = true }}
-						<section class="flex flex-col gap-sm">
-							<label>Gesamtzyklen</label>
-							<input type="number" min="0" step="1" id="total_cycles" name="total_cycles" placeholder="Gesamtzyklen" required/>
-						</section>
-					} else {
-						<div class="card destructive">
-							<span class="card-body">
-								<i class="bi bi-exclamation-triangle"></i>
-								<span>Werkzeug ist nicht aktiv</span>
-							</span>
-						</div>
+					if props.Tool.Status != database.ToolStatusActive {
+						{{
+							// TODO: Need a press selection input element: Press 0 - 5
+						}}
 					}
+					<section class="total-cycles flex flex-col gap-sm">
+						<label>Gesamtzyklen</label>
+						<input type="number" min="0" step="1" id="total_cycles" name="total_cycles" placeholder="Gesamtzyklen" required/>
+					</section>
 				</div>
 				<footer class="flex gap justify-end">
 					<button
@@ -84,13 +78,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 						<i class="bi bi-x-circle"></i>
 						Schließen
 					</button>
-					<button
-						type="submit"
-						class="flex gap"
-						if !active {
-							disabled
-						}
-					>
+					<button type="submit" class="flex gap">
 						<i class="bi bi-check-circle"></i>
 						if props.CycleID > 0 {
 							Aktualisieren

@@ -27,6 +27,7 @@ func (tf ToolFormat) String() string {
 // Tool represents a tool in the database.
 //
 // TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
+// TODO: Status should be set based on the press value, only need an enry for the regenerating status
 type Tool struct {
 	ID          int64         `json:"id"`
 	Position    Position      `json:"position"`
