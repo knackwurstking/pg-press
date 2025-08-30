@@ -382,7 +382,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if _, err := h.DB.ToolCyclesHelper.AddToolCycles(tool.ID, *tool.Press, formData.TotalCycles, user); err != nil {
+	if _, err := h.DB.ToolsHelper.AddToolCycles(tool.ID, *tool.Press, formData.TotalCycles, user); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to add press cycles: "+err.Error())
 	}

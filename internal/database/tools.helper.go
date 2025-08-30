@@ -12,17 +12,20 @@ type ToolWithNotes struct {
 }
 
 type ToolsHelper struct {
-	tools DataOperations[*Tool]
-	notes *Notes
+	tools       DataOperations[*Tool]
+	notes       *Notes
+	pressCycles *PressCycles
 }
 
 func NewToolsHelper(
 	tools DataOperations[*Tool],
 	notes *Notes,
+	pressCycles *PressCycles,
 ) *ToolsHelper {
 	return &ToolsHelper{
-		tools: tools,
-		notes: notes,
+		tools:       tools,
+		notes:       notes,
+		pressCycles: pressCycles,
 	}
 }
 
@@ -106,4 +109,10 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 		Tool:        tool,
 		LoadedNotes: notes,
 	}, nil
+}
+
+// AddToolCycles adds a new press cycle entry for a tool
+func (th *ToolsHelper) AddToolCycles(toolID int64, pressNumber PressNumber, totalCycles int64, user *User) (*PressCycle, error) {
+	logger.DBToolsHelper().Debug("Adding new cycle for tool %d: total=%d", toolID, totalCycles)
+	return th.pressCycles.AddCycle(toolID, pressNumber, totalCycles, user)
 }

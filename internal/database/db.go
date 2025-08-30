@@ -18,9 +18,9 @@ type DB struct {
 	MetalSheets          DataOperations[*MetalSheet]
 	PressCycles          *PressCycles
 	ToolRegenerations    *ToolRegenerations
-	ToolCyclesHelper     *ToolCyclesHelper
-	Feeds                *Feeds
-	db                   *sql.DB
+
+	Feeds *Feeds
+	db    *sql.DB
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -32,12 +32,13 @@ func New(db *sql.DB) *DB {
 	troubleReports := NewTroubleReports(db, feeds)
 	troubleReportsHelper := NewTroubleReportsHelper(troubleReports, attachments)
 
+	pressCycles := NewPressCycles(db, feeds)
+
 	notes := NewNotes(db)
 	tools := NewTools(db, feeds)
-	toolsHelper := NewToolsHelper(tools, notes)
+	toolsHelper := NewToolsHelper(tools, notes, pressCycles)
 
 	metalSheets := NewMetalSheets(db, feeds, notes)
-	pressCycles := NewPressCycles(db, feeds)
 	toolRegenerations := NewToolRegenerations(db, feeds, pressCycles)
 	usersHelper := NewUsersHelper(db)
 
@@ -54,9 +55,9 @@ func New(db *sql.DB) *DB {
 		MetalSheets:          metalSheets,
 		PressCycles:          pressCycles,
 		ToolRegenerations:    toolRegenerations,
-		ToolCyclesHelper:     NewToolCyclesHelper(pressCycles, tools, toolRegenerations),
-		Feeds:                feeds,
-		db:                   db,
+
+		Feeds: feeds,
+		db:    db,
 	}
 
 	return dbInstance
