@@ -214,6 +214,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, props)
 }
 
+// TODO: Do somehtings like the `get*FormData` method in "tools.go"
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
 	attachments []*database.Attachment,
