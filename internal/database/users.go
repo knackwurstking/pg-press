@@ -45,6 +45,8 @@ type Users struct {
 	feeds *Feeds
 }
 
+var _ DataOperations[*User] = (*Users)(nil)
+
 // NewUsers creates a new Users instance and initializes the database table.
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 	if _, err := db.Exec(createUsersTableQuery); err != nil {
@@ -104,57 +106,35 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 	return user, nil
 }
 
-// GetUserFromApiKey retrieves a user by their API key.
-func (u *Users) GetUserFromApiKey(apiKey string) (*User, error) {
-	logger.DBUsers().Debug("Getting user by API key")
-
-	if apiKey == "" {
-		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
-	}
-
-	row := u.db.QueryRow(selectUserByAPIKeyQuery, apiKey)
-
-	user, err := u.scanUserRow(row)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
-		}
-		return nil, NewDatabaseError("select", "users",
-			"failed to get user by API key", err)
-	}
-
-	return user, nil
-}
-
 // Add creates a new user and generates a corresponding activity feed entry.
-func (u *Users) Add(user *User) error {
+func (u *Users) Add(user *User, actor *User) (int64, error) {
 	if user == nil {
-		return NewValidationError("user", "user cannot be nil", nil)
+		return 0, NewValidationError("user", "user cannot be nil", nil)
 	}
 
 	logger.DBUsers().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
 
 	if err := user.Validate(); err != nil {
-		return err
+		return 0, err
 	}
 
 	// Check if user already exists
 	var count int
 	err := u.db.QueryRow(selectUserExistsQuery, user.TelegramID).Scan(&count)
 	if err != nil {
-		return NewDatabaseError("select", "users",
+		return 0, NewDatabaseError("select", "users",
 			"failed to check user existence", err)
 	}
 
 	if count > 0 {
-		return ErrAlreadyExists
+		return 0, ErrAlreadyExists
 	}
 
 	// Insert the new user
 	_, err = u.db.Exec(insertUserQuery,
 		user.TelegramID, user.UserName, user.ApiKey, user.LastFeed)
 	if err != nil {
-		return NewDatabaseError("insert", "users",
+		return 0, NewDatabaseError("insert", "users",
 			"failed to insert user", err)
 	}
 
@@ -164,14 +144,14 @@ func (u *Users) Add(user *User) error {
 		FeedUserAdd{user.TelegramID, user.UserName},
 	)
 	if err := u.feeds.Add(feed); err != nil {
-		return WrapError(err, "failed to add feed entry")
+		return user.TelegramID, WrapError(err, "failed to add feed entry")
 	}
 
-	return nil
+	return user.TelegramID, nil
 }
 
-// Remove deletes a user by Telegram ID and generates an activity feed entry.
-func (u *Users) Remove(telegramID int64) error {
+// Delete deletes a user by Telegram ID and generates an activity feed entry.
+func (u *Users) Delete(telegramID int64, actor *User) error {
 	logger.DBUsers().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
@@ -208,7 +188,8 @@ func (u *Users) Remove(telegramID int64) error {
 }
 
 // Update modifies an existing user and generates activity feed entries for changes.
-func (u *Users) Update(telegramID int64, user *User) error {
+func (u *Users) Update(user *User, actor *User) error {
+	telegramID := user.TelegramID
 	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
 
 	if user == nil {

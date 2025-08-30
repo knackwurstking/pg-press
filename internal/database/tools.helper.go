@@ -12,12 +12,12 @@ type ToolWithNotes struct {
 }
 
 type ToolsHelper struct {
-	tools *Tools
+	tools DataOperations[*Tool]
 	notes *Notes
 }
 
 func NewToolsHelper(
-	tools *Tools,
+	tools DataOperations[*Tool],
 	notes *Notes,
 ) *ToolsHelper {
 	return &ToolsHelper{
@@ -82,7 +82,7 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 	// First, add all notes and collect their IDs
 	var noteIDs []int64
 	for _, note := range notes {
-		noteID, err := th.notes.Add(note)
+		noteID, err := th.notes.Add(note, user)
 		if err != nil {
 			return nil, WrapError(err, "failed to add note")
 		}

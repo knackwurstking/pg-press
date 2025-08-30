@@ -95,7 +95,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	logger.HandlerTools().Debug("Successfully fetched tool %d: Type=%s, Code=%s", id, tool.Type, tool.Code)
 
 	// Fetch metal sheets assigned to this tool
-	metalSheets, err := h.DB.MetalSheets.GetByToolID(id)
+	metalSheets, err := h.DB.MetalSheets.(*database.MetalSheets).GetByToolID(id)
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
 		logger.HandlerTools().Error("Failed to fetch metal sheets: " + err.Error())

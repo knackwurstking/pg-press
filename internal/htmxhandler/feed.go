@@ -60,7 +60,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 		logger.HTMXHandlerFeed().Info("Updating user %s last feed from %d to %d",
 			user.UserName, oldLastFeed, user.LastFeed)
 
-		if err := h.DB.Users.Update(user.TelegramID, user); err != nil {
+		if err := h.DB.Users.Update(user, user); err != nil {
 			logger.HTMXHandlerFeed().Error("Failed to update user's last feed: %v", err)
 			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())

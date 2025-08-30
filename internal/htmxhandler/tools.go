@@ -161,7 +161,11 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 
 	logger.HTMXHandlerTools().Info("Updating tool %d", id)
-	// TODO: Update tool in database tools
+	tool.ID = id
+	if err := h.DB.Tools.Update(tool, user); err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to update tool: "+err.Error())
+	}
 
 	return h.handleEdit(c, &toolscomp.EditDialogProps{
 		ID:    id,

@@ -90,6 +90,8 @@ type MetalSheets struct {
 	notes *Notes
 }
 
+var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
+
 // NewMetalSheets creates a new MetalSheets instance
 func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 	if _, err := db.Exec(createMetalSheetsTableQuery); err != nil {

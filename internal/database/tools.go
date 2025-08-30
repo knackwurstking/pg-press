@@ -64,6 +64,8 @@ type Tools struct {
 	feeds *Feeds
 }
 
+var _ DataOperations[*Tool] = (*Tools)(nil)
+
 func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	if _, err := db.Exec(createToolsTableQuery); err != nil {
 		panic(

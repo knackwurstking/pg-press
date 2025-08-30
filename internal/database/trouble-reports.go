@@ -35,6 +35,8 @@ type TroubleReports struct {
 	feeds *Feeds
 }
 
+var _ DataOperations[*TroubleReport] = (*TroubleReports)(nil)
+
 // NewTroubleReports creates a new TroubleReports instance and initializes the database table.
 func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 	if _, err := db.Exec(createTroubleReportsTableQuery); err != nil {
@@ -100,27 +102,27 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) error {
+func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, error) {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
-		return NewValidationError("report", "trouble report cannot be nil", nil)
+		return 0, NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	if err := troubleReport.Validate(); err != nil {
-		return err
+		return 0, err
 	}
 
 	tr.updateMods(user, troubleReport)
 
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
-		return WrapError(err, "failed to marshal linked attachments")
+		return 0, WrapError(err, "failed to marshal linked attachments")
 	}
 
 	mods, err := json.Marshal(troubleReport.Mods)
 	if err != nil {
-		return WrapError(err, "failed to marshal mods data")
+		return 0, WrapError(err, "failed to marshal mods data")
 	}
 
 	// After exec this insert query, i need to get the id
@@ -129,15 +131,16 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) error {
 		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods,
 	)
 	if err != nil {
-		return NewDatabaseError("insert", "trouble_reports",
+		return 0, NewDatabaseError("insert", "trouble_reports",
 			"failed to insert trouble report", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return NewDatabaseError("insert", "trouble_reports",
+		return 0, NewDatabaseError("insert", "trouble_reports",
 			"failed to get last insert ID", err)
 	}
+	troubleReport.ID = id
 
 	feed := NewFeed(
 		FeedTypeTroubleReportAdd,
@@ -148,14 +151,15 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) error {
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
-		return WrapError(err, "failed to add feed entry")
+		return id, WrapError(err, "failed to add feed entry")
 	}
 
-	return nil
+	return id, nil
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport, user *User) error {
+func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error {
+	id := troubleReport.ID
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
 	if troubleReport == nil {
@@ -202,9 +206,15 @@ func (tr *TroubleReports) Update(id int64, troubleReport *TroubleReport, user *U
 	return nil
 }
 
-// Remove deletes a trouble report by ID and generates an activity feed entry.
-func (tr *TroubleReports) Remove(id int64) error {
+// Delete deletes a trouble report by ID and generates an activity feed entry.
+func (tr *TroubleReports) Delete(id int64, user *User) error {
 	logger.DBTroubleReports().Info("Removing trouble report, id: %d", id)
+
+	// Get the user before deleting for the feed entry
+	report, err := tr.Get(id)
+	if err != nil {
+		return WrapError(err, "failed to get trouble report before deletion")
+	}
 
 	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
 	if err != nil {
@@ -220,6 +230,21 @@ func (tr *TroubleReports) Remove(id int64) error {
 
 	if rowsAffected == 0 {
 		return ErrNotFound
+	}
+
+	// Create feed entry for the removed user
+	if user != nil {
+		feed := NewFeed(
+			FeedTypeTroubleReportRemove,
+			&FeedTroubleReportRemove{
+				ID:        report.ID,
+				Title:     report.Title,
+				RemovedBy: user,
+			},
+		)
+		if err := tr.feeds.Add(feed); err != nil {
+			return WrapError(err, "failed to add feed entry")
+		}
 	}
 
 	return nil

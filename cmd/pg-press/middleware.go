@@ -108,7 +108,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	logger.Middleware().Debug("Received login request, apiKey: %#v, user: %#v, err: %v", auth, user, err)
 	if err != nil {
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
-		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
+		if user, err = db.UsersHelper.GetUserFromApiKey(auth); err != nil {
 			return false, echo.NewHTTPError(
 				database.GetHTTPStatusCode(database.ErrInvalidCredentials),
 				"failed to validate user from API key: "+err.Error())
@@ -136,7 +136,7 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, 
 		return nil, database.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
-	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
+	user, err := db.UsersHelper.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}

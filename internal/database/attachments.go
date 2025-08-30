@@ -33,6 +33,8 @@ type Attachments struct {
 	db *sql.DB
 }
 
+var _ DataOperations[*Attachment] = (*Attachments)(nil)
+
 // NewAttachments creates a new Attachments instance and initializes the database table.
 func NewAttachments(db *sql.DB) *Attachments {
 	if _, err := db.Exec(createAttachmentsTableQuery); err != nil {
@@ -150,7 +152,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Attachments) Add(attachment *Attachment) (int64, error) {
+func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -177,7 +179,8 @@ func (a *Attachments) Add(attachment *Attachment) (int64, error) {
 }
 
 // Update modifies an existing attachment.
-func (a *Attachments) Update(id int64, attachment *Attachment) error {
+func (a *Attachments) Update(attachment *Attachment, _ *User) error {
+	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
 	if attachment == nil {
@@ -207,8 +210,8 @@ func (a *Attachments) Update(id int64, attachment *Attachment) error {
 	return nil
 }
 
-// Remove deletes an attachment by ID.
-func (a *Attachments) Remove(id int64) error {
+// Delete deletes an attachment by ID.
+func (a *Attachments) Delete(id int64, _ *User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
 	result, err := a.db.Exec(deleteAttachmentQuery, id)

@@ -6,15 +6,16 @@ import (
 
 // DB represents the main database connection and provides access to all data access objects.
 type DB struct {
-	Users                *Users
+	Users                DataOperations[*User]
+	UsersHelper          *UsersHelper
 	Cookies              *Cookies
 	Attachments          *Attachments
-	TroubleReports       *TroubleReports
+	TroubleReports       DataOperations[*TroubleReport]
 	TroubleReportsHelper *TroubleReportsHelper
 	Notes                *Notes
-	Tools                *Tools
+	Tools                DataOperations[*Tool]
 	ToolsHelper          *ToolsHelper
-	MetalSheets          *MetalSheets
+	MetalSheets          DataOperations[*MetalSheet]
 	PressCycles          *PressCycles
 	ToolRegenerations    *ToolRegenerations
 	ToolCyclesHelper     *ToolCyclesHelper
@@ -38,9 +39,11 @@ func New(db *sql.DB) *DB {
 	metalSheets := NewMetalSheets(db, feeds, notes)
 	pressCycles := NewPressCycles(db, feeds)
 	toolRegenerations := NewToolRegenerations(db, feeds, pressCycles)
+	usersHelper := NewUsersHelper(db)
 
 	dbInstance := &DB{
 		Users:                NewUsers(db, feeds),
+		UsersHelper:          usersHelper,
 		Cookies:              NewCookies(db),
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,

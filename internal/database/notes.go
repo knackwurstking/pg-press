@@ -39,6 +39,8 @@ type Notes struct {
 	db *sql.DB
 }
 
+var _ DataOperations[*Note] = (*Notes)(nil)
+
 func NewNotes(db *sql.DB) *Notes {
 	if _, err := db.Exec(createNotesTableQuery); err != nil {
 		panic(
@@ -153,7 +155,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Add(note *Note) (int64, error) {
+func (n *Notes) Add(note *Note, _ *User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	result, err := n.db.Exec(insertNoteQuery, note.Level, note.Content)
@@ -169,6 +171,14 @@ func (n *Notes) Add(note *Note) (int64, error) {
 	}
 
 	return id, nil
+}
+
+func (n *Notes) Update(note *Note, user *User) error {
+	return fmt.Errorf("operation not supported")
+}
+
+func (n *Notes) Delete(id int64, user *User) error {
+	return fmt.Errorf("operation not supported")
 }
 
 func (n *Notes) scanNoteFromRows(rows *sql.Rows) (*Note, error) {

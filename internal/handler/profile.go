@@ -75,7 +75,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) erro
 	updatedUser := database.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
-	if err := h.DB.Users.Update(user.TelegramID, updatedUser); err != nil {
+	if err := h.DB.Users.Update(updatedUser, user); err != nil {
 		logger.HandlerProfile().Error("Failed to update username in database: %v", err)
 		return err
 	}

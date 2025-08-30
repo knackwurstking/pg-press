@@ -58,7 +58,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	logger.HTMXHandlerTroubleReports().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.UserName, user.TelegramID, id)
 
-	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id); err != nil {
+	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to delete trouble report: "+err.Error())
@@ -222,7 +222,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 		id,
 	)
 
-	if err = h.DB.TroubleReports.Update(id, tr, user); err != nil {
+	if err = h.DB.TroubleReports.Update(tr, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error(
 			"Failed to update trouble report %d with restored modification: %v",
 			id, err,
