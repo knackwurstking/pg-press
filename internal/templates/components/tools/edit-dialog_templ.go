@@ -337,7 +337,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" required></div></div><footer class=\"flex gap justify-end\"><button type=\"button\" class=\"secondary flex gap\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" required></div></div><footer class=\"flex gap justify-end p\"><button type=\"button\" class=\"secondary flex gap\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
