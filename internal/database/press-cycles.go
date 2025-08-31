@@ -663,6 +663,22 @@ func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
 	return cycle, nil
 }
 
+// Get a single press cycle by its ID
+func (p *PressCycles) Get(id int64) (*PressCycle, error) {
+	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
+
+	row := p.db.QueryRow("SELECT id, press_number, tool_id, date, total_cycles, performed_by FROM press_cycles WHERE id = ?", id)
+	cycle, err := p.scanPressCycle(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to get press cycle %d: %w", id, err)
+	}
+
+	return cycle, nil
+}
+
 // UpdateCycle updates a specific press cycle entry.
 func (p *PressCycles) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, date time.Time, user *User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycleID)

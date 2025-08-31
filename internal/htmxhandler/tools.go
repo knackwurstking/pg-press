@@ -372,17 +372,13 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	if tool.Press == nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"tool has no press asigned")
-	}
 
 	logger.HTMXHandlerTools().Debug(
 		"Handling cycle edit POST request for tool %d: formData=%#v",
 		toolID, formData,
 	)
 
-	if _, err := h.DB.ToolsHelper.AddCycle(tool.ID, *tool.Press, formData.TotalCycles, user); err != nil {
+	if _, err := h.DB.ToolsHelper.AddCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user); err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to add press cycles: "+err.Error())
 	}
@@ -488,7 +484,18 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
 	}
 
+	pressString := c.FormValue("press_number")
+	if pressString == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number is required")
+	}
+	press, err := strconv.Atoi(pressString)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
+	}
+	pressNumber := database.PressNumber(press)
+
 	return &CycleEditFormData{
 		TotalCycles: totalCycles,
+		PressNumber: &pressNumber,
 	}, nil
 }

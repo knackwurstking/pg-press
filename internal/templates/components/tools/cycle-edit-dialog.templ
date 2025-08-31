@@ -7,9 +7,10 @@ import (
 )
 
 type CycleEditDialogProps struct {
-	Tool    *database.Tool
-	CycleID int64
-	Close   bool
+	Tool             *database.Tool
+	CycleID          int64
+	Close            bool
+	InputTotalCycles int64
 }
 
 templ CycleEditDialog(props *CycleEditDialogProps) {
@@ -45,22 +46,27 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				enctype="multipart/form-data"
 			>
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-					<div class="card warning">
-						<div class="card-header">
-							<h4>Dev Note</h4>
-						</div>
-						<div class="card-body">
-							Die Zykluseinstellungen können nur bearbeitet werden wenn das Werkzeug aktiv ist oder bereits ein Zyklus läuft.
-						</div>
-					</div>
-					if props.Tool.Status() != database.ToolStatusActive {
-						{{
-							// TODO: Need a press selection input element: Press 0 - 5
-						}}
-					}
+					<section class="press flex flex-col gap-sm">
+						<label for="press">Presse</label>
+						<select id="press" name="press_number" required>
+							<option value="" disabled selected?={ props.Tool.Press == nil }>Presse auswählen</option>
+							for i := 0; i <= 5; i++ {
+								<option value={ fmt.Sprintf("%d", i) } selected?={ props.Tool.Press != nil && int(*props.Tool.Press) == i }>Presse { i }</option>
+							}
+						</select>
+					</section>
 					<section class="total-cycles flex flex-col gap-sm">
 						<label>Gesamtzyklen</label>
-						<input type="number" min="0" step="1" id="total_cycles" name="total_cycles" placeholder="Gesamtzyklen" required/>
+						<input
+							type="number"
+							min="0"
+							step="1"
+							id="total_cycles"
+							name="total_cycles"
+							placeholder="Gesamtzyklen"
+							value={ props.InputTotalCycles }
+							required
+						/>
 					</section>
 				</div>
 				<footer class="flex gap justify-end">
