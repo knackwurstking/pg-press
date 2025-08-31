@@ -17,7 +17,7 @@ const (
 			format BLOB NOT NULL,
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
-			regenerating INTEGER NOT NULL DEFAULT 0,
+			regenerating BOOLEAN NOT NULL DEFAULT 0,
 			press INTEGER,
 			notes BLOB NOT NULL,
 			mods BLOB NOT NULL,
@@ -25,12 +25,12 @@ const (
 		);
 		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods)
 		VALUES
-			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', 0, 0, '[]', '[]'),
-			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', 0, 0, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', 0, NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', 0, NULL, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', 1, NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', 1, NULL, '[]', '[]');
+			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', false, 0, '[]', '[]'),
+			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', false, 0, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', false, NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', false, NULL, '[]', '[]'),
+			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]'),
+			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]');
 	`
 
 	selectAllToolsQuery = `
