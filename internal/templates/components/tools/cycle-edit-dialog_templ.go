@@ -197,7 +197,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 61, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 66, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -207,7 +207,8 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if (props.InputPressNumber != -1 && props.InputPressNumber == i) || (props.InputPressNumber == -1 && isSelectedPress(props.Tool.Press, i)) {
+				if (props.InputPressNumber != -1 && props.InputPressNumber == i) ||
+					(props.InputPressNumber == -1 && isSelectedPress(props.Tool.Press, i)) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -220,7 +221,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(i)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 61, Col: 207}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 69, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -238,7 +239,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputTotalCycles)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 74, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 82, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -254,7 +255,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				constants.ServerPathPrefix, props.Tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 86, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 94, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -267,7 +268,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDToolCycleEditDialog))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 88, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/cycle-edit-dialog.templ`, Line: 96, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
