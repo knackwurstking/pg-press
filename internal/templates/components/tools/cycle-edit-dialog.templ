@@ -79,7 +79,9 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							id="total_cycles"
 							name="total_cycles"
 							placeholder="Gesamtzyklen"
-							value={ props.InputTotalCycles }
+							if props.InputTotalCycles != 0 {
+								value={ props.InputTotalCycles }
+							}
 							required
 						/>
 					</section>
