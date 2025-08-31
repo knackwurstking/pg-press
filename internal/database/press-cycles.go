@@ -56,6 +56,12 @@ const (
 		RETURNING id, press_number, tool_id, date, total_cycles, performed_by
 	`
 
+	updatePressCycleByIDQuery = `
+		UPDATE press_cycles
+		SET total_cycles = ?, performed_by = ?, press_number = ?, date = ?
+		WHERE id = ?
+	`
+
 	selectCurrentToolUsageQuery = `
 		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
@@ -156,12 +162,6 @@ const (
 		)
 		WHERE rn = 1
 		ORDER BY press_number, tool_id
-	`
-
-	updatePressCycleByIDQuery = `
-		UPDATE press_cycles
-		SET total_cycles = ?, performed_by = ?, press_number = ?, date = ?
-		WHERE id = ?
 	`
 
 	selectPressCycleStatsQuery = `
