@@ -302,7 +302,9 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
 func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
 	if props == nil {
-		props = &toolscomp.CycleEditDialogProps{}
+		props = &toolscomp.CycleEditDialogProps{
+			InputPressNumber: -1,
+		}
 	}
 
 	if props.Tool == nil {
@@ -370,7 +372,11 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	// Parse form data (type: PressCycle)
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return err
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			Error:            err.Error(),
+			InputPressNumber: -1, // Don't have form data to repopulate
+		}, c)
 	}
 
 	logger.HTMXHandlerTools().Debug(
@@ -379,8 +385,12 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	)
 
 	if _, err := h.DB.ToolsHelper.AddCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user); err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to add press cycles: "+err.Error())
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			Error:            err.Error(),
+			InputTotalCycles: formData.TotalCycles,
+			InputPressNumber: int(*formData.PressNumber),
+		}, c)
 	}
 
 	return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
