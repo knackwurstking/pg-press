@@ -195,10 +195,12 @@ templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCy
 		<td class="button-group flex justify-end items-center">
 			<button
 				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?cycle_id=%d",
-					constants.ServerPathPrefix, cycle.ID,
+					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+					constants.ServerPathPrefix, cycle.ToolID, cycle.ID,
 				) }
 				hx-trigger="click"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+				hx-swap="outerHTML"
 				class="small ghost"
 				title="Bearbeiten"
 			>

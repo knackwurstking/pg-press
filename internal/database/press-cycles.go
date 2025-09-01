@@ -66,7 +66,7 @@ const (
 		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY date DESC
+		ORDER BY id DESC
 		LIMIT 1
 	`
 
@@ -74,7 +74,7 @@ const (
 		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY date DESC
+		ORDER BY id DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -89,7 +89,7 @@ const (
 		       pc.performed_by
 		FROM press_cycles pc
 		WHERE pc.tool_id = ? AND pc.date >= ?
-		ORDER BY pc.date DESC
+		ORDER BY pc.id DESC
 	`
 
 	selectAllToolHistoryQuery = `
@@ -103,7 +103,7 @@ const (
 		       pc.performed_by
 		FROM press_cycles pc
 		WHERE pc.tool_id = ?
-		ORDER BY pc.date DESC
+		ORDER BY pc.id DESC
 	`
 
 	selectTotalCyclesSinceRegenerationQuery = `
@@ -126,7 +126,7 @@ const (
 		SELECT tool_id
 		FROM (
 			SELECT tool_id, press_number,
-			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY id DESC) as rn
 			FROM press_cycles
 		)
 		WHERE press_number = ? AND rn = 1
@@ -136,7 +136,7 @@ const (
 		SELECT id, press_number, tool_id, date, total_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
-		ORDER BY date DESC
+		ORDER BY id DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -144,12 +144,12 @@ const (
 		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.date, pc1.total_cycles, pc1.performed_by
 		FROM press_cycles pc1
 		WHERE pc1.press_number = ?
-		  AND pc1.date = (
-		    SELECT MAX(pc2.date)
+		  AND pc1.id = (
+		    SELECT MAX(pc2.id)
 		    FROM press_cycles pc2
 		    WHERE pc2.tool_id = pc1.tool_id
 		  )
-		ORDER BY pc1.date DESC
+		ORDER BY pc1.id DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -157,7 +157,7 @@ const (
 		SELECT press_number, tool_id
 		FROM (
 			SELECT press_number, tool_id,
-			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
+			       ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY id DESC) as rn
 			FROM press_cycles
 		)
 		WHERE rn = 1
@@ -172,7 +172,7 @@ const (
 			(SELECT COUNT(DISTINCT tool_id)
 			 FROM (
 			   SELECT tool_id,
-			          ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY date DESC) as rn
+			          ROW_NUMBER() OVER (PARTITION BY tool_id ORDER BY id DESC) as rn
 			   FROM press_cycles pc2
 			   WHERE pc2.press_number = press_cycles.press_number
 			 ) WHERE rn = 1) as active_tools
