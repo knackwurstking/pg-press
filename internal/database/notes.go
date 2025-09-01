@@ -7,8 +7,14 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createNotesTableQuery = `
+type Notes struct {
+	db *sql.DB
+}
+
+var _ DataOperations[*Note] = (*Notes)(nil)
+
+func NewNotes(db *sql.DB) *Notes {
+	query := `
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
 			level INTEGER NOT NULL,
@@ -18,31 +24,7 @@ const (
 		);
 	`
 
-	selectAllNotesQuery = `
-		SELECT id, level, content, created_at FROM notes;
-	`
-
-	selectNoteByIDQuery = `
-		SELECT id, level, content, created_at FROM notes WHERE id = $1;
-	`
-
-	insertNoteQuery = `
-		INSERT INTO notes (level, content) VALUES ($1, $2);
-	`
-
-	selectNotesByIDsQuery = `
-		SELECT id, level, content, created_at FROM notes WHERE id IN (%s);
-	`
-)
-
-type Notes struct {
-	db *sql.DB
-}
-
-var _ DataOperations[*Note] = (*Notes)(nil)
-
-func NewNotes(db *sql.DB) *Notes {
-	if _, err := db.Exec(createNotesTableQuery); err != nil {
+	if _, err := db.Exec(query); err != nil {
 		panic(
 			NewDatabaseError(
 				"create_table",
@@ -61,7 +43,11 @@ func NewNotes(db *sql.DB) *Notes {
 func (n *Notes) List() ([]*Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
-	rows, err := n.db.Query(selectAllNotesQuery)
+	query := `
+		SELECT id, level, content, created_at FROM notes;
+	`
+
+	rows, err := n.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "notes",
 			"failed to query notes", err)
@@ -89,7 +75,11 @@ func (n *Notes) List() ([]*Note, error) {
 func (n *Notes) Get(id int64) (*Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
-	row := n.db.QueryRow(selectNoteByIDQuery, id)
+	query := `
+		SELECT id, level, content, created_at FROM notes WHERE id = $1;
+	`
+
+	row := n.db.QueryRow(query, id)
 
 	note, err := n.scanNote(row)
 	if err != nil {
@@ -118,8 +108,10 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 		args[i] = id
 	}
 
-	query := fmt.Sprintf(selectNotesByIDsQuery,
-		joinStrings(placeholders, ","))
+	query := fmt.Sprintf(
+		`SELECT id, level, content, created_at FROM notes WHERE id IN (%s);`,
+		joinStrings(placeholders, ","),
+	)
 
 	rows, err := n.db.Query(query, args...)
 	if err != nil {
@@ -158,7 +150,11 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 func (n *Notes) Add(note *Note, _ *User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
-	result, err := n.db.Exec(insertNoteQuery, note.Level, note.Content)
+	query := `
+		INSERT INTO notes (level, content) VALUES ($1, $2);
+	`
+
+	result, err := n.db.Exec(query, note.Level, note.Content)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "notes",
 			"failed to insert note", err)
