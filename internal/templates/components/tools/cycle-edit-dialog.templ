@@ -11,7 +11,7 @@ type CycleEditDialogProps struct {
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
-	InputPressNumber int
+	InputPressNumber *database.PressNumber
 	Error            string
 }
 
@@ -59,13 +59,13 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							<option
 								value=""
 								disabled
-								selected?={ props.Tool.Press == nil && props.InputPressNumber == -1 }
+								selected?={ props.Tool.Press == nil && props.InputPressNumber == nil }
 							>Presse auswählen</option>
 							for i := 0; i <= 5; i++ {
 								<option
 									value={ fmt.Sprintf("%d", i) }
-									selected?={ (props.InputPressNumber != -1 && props.InputPressNumber == i) ||
-										(props.InputPressNumber == -1 && isSelectedPress(props.Tool.Press, i)) }
+									selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
+										(props.InputPressNumber == nil && isSelectedPress(props.Tool.Press, i)) }
 								>Presse { i }</option>
 							}
 						</select>

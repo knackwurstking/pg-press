@@ -302,9 +302,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
 func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
 	if props == nil {
-		props = &toolscomp.CycleEditDialogProps{
-			InputPressNumber: -1,
-		}
+		props = &toolscomp.CycleEditDialogProps{}
 	}
 
 	if props.Tool == nil {
@@ -335,7 +333,15 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err == nil {
 		props.CycleID = cycleID
-		// TODO: Get cycle data from the database
+		// Get cycle data from the database
+		cycle, err := h.DB.PressCycles.Get(cycleID)
+		if err != nil {
+			props.Error = "Fehler beim Laden der Zyklusdaten: " + err.Error()
+		} else {
+			props.InputTotalCycles = cycle.TotalCycles
+			pressNumber := cycle.PressNumber
+			props.InputPressNumber = &pressNumber
+		}
 	}
 
 	logger.HTMXHandlerTools().Debug(
@@ -375,7 +381,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            err.Error(),
-			InputPressNumber: -1, // Don't have form data to repopulate
+			InputPressNumber: nil, // Don't have form data to repopulate
 		}, c)
 	}
 
@@ -389,7 +395,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 			Tool:             tool,
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: int(*formData.PressNumber),
+			InputPressNumber: formData.PressNumber,
 		}, c)
 	}
 
@@ -399,19 +405,57 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	}, c)
 }
 
-// TODO: Add "PUT    /htmx/tools/cycle/edit?cycle_id=%d"
+// handleCycleEditPUT "/htmx/tools/cycle/edit?cycle_id=%d"
 func (h *Tools) handleCycleEditPUT(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit PUT request for cycle %d",
-		cycleID,
+	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+	if err != nil {
+		return err
+	}
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
+	}
+
+	logger.HTMXHandlerTools().Info(
+		"User %s is handling cycle edit PUT request for cycle %d",
+		user.UserName, cycleID,
 	)
 
-	return errors.New("under construction")
+	formData, err := h.getCycleFormData(c)
+	if err != nil {
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			CycleID:          cycleID,
+			Error:            err.Error(),
+			InputPressNumber: nil, // Don't have form data to repopulate
+		}, c)
+	}
+
+	if err := h.DB.ToolsHelper.UpdateCycle(cycleID, formData.TotalCycles, *formData.PressNumber, time.Now(), user); err != nil {
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			CycleID:          cycleID,
+			Error:            err.Error(),
+			InputTotalCycles: formData.TotalCycles,
+			InputPressNumber: formData.PressNumber,
+		}, c)
+	}
+
+	return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		Tool:  tool,
+		Close: true,
+	}, c)
 }
 
 // TODO: Add "DELETE /htmx/tools/cycle/delete?cycle_id=%d"

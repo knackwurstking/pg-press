@@ -19,7 +19,7 @@ type CycleEditDialogProps struct {
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
-	InputPressNumber int
+	InputPressNumber *database.PressNumber
 	Error            string
 }
 
@@ -179,7 +179,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Tool.Press == nil && props.InputPressNumber == -1 {
+			if props.Tool.Press == nil && props.InputPressNumber == nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -207,8 +207,8 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if (props.InputPressNumber != -1 && props.InputPressNumber == i) ||
-					(props.InputPressNumber == -1 && isSelectedPress(props.Tool.Press, i)) {
+				if (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
+					(props.InputPressNumber == nil && isSelectedPress(props.Tool.Press, i)) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
