@@ -10,6 +10,7 @@ import (
 
 const (
 	createToolRegenerationsTableQuery = `
+		DROP TABLE IF EXISTS tool_regenerations;
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,
