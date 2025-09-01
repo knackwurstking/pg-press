@@ -7,27 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createFeedsTableQuery = `
-		CREATE TABLE IF NOT EXISTS feeds (
-			id INTEGER NOT NULL,
-			time INTEGER NOT NULL,
-			data_type TEXT NOT NULL,
-			data BLOB NOT NULL,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
-	selectAllFeedsQuery   = `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
-	selectFeedsRangeQuery = `SELECT id, time, data_type, data FROM feeds
-		ORDER BY id DESC LIMIT ? OFFSET ?`
-	selectFeedByIDQuery    = `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
-	insertFeedQuery        = `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
-	countFeedsQuery        = `SELECT COUNT(*) FROM feeds`
-	deleteFeedsByTimeQuery = `DELETE FROM feeds WHERE time < ?`
-	deleteFeedByIDQuery    = `DELETE FROM feeds WHERE id = ?`
-)
-
 // Feeds handles database operations for feed entries
 type Feeds struct {
 	db          *sql.DB
@@ -36,7 +15,16 @@ type Feeds struct {
 
 // NewFeeds creates a new Feeds instance and initializes the database table
 func NewFeeds(db *sql.DB) *Feeds {
-	if _, err := db.Exec(createFeedsTableQuery); err != nil {
+	query := `
+		CREATE TABLE IF NOT EXISTS feeds (
+			id INTEGER NOT NULL,
+			time INTEGER NOT NULL,
+			data_type TEXT NOT NULL,
+			data BLOB NOT NULL,
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+	if _, err := db.Exec(query); err != nil {
 		panic(NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
 	}
 	return &Feeds{db: db}
@@ -52,7 +40,8 @@ func (f *Feeds) SetBroadcaster(notifier Broadcaster) {
 func (f *Feeds) List() ([]*Feed, error) {
 	logger.DBFeeds().Info("Listing all feeds")
 
-	rows, err := f.db.Query(selectAllFeedsQuery)
+	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
+	rows, err := f.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "feeds", "failed to query feeds", err)
 	}
@@ -75,7 +64,9 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 		return nil, NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
-	rows, err := f.db.Query(selectFeedsRangeQuery, limit, offset)
+	query := `SELECT id, time, data_type, data FROM feeds
+		ORDER BY id DESC LIMIT ? OFFSET ?`
+	rows, err := f.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, NewDatabaseError("select", "feeds", "failed to query feeds range", err)
 	}
@@ -103,7 +94,8 @@ func (f *Feeds) Add(feed *Feed) error {
 		return WrapError(err, "failed to marshal feed data")
 	}
 
-	_, err = f.db.Exec(insertFeedQuery, feed.Time, feed.DataType, data)
+	query := `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
+	_, err = f.db.Exec(query, feed.Time, feed.DataType, data)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to insert feed: %v", err)
 		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
@@ -124,7 +116,8 @@ func (f *Feeds) Count() (int, error) {
 	logger.DBFeeds().Debug("Counting feeds")
 
 	var count int
-	err := f.db.QueryRow(countFeedsQuery).Scan(&count)
+	query := `SELECT COUNT(*) FROM feeds`
+	err := f.db.QueryRow(query).Scan(&count)
 	if err != nil {
 		return 0, NewDatabaseError("count", "feeds", "failed to count feeds", err)
 	}
@@ -140,7 +133,8 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 		return 0, NewValidationError("timestamp", "must be positive", timestamp)
 	}
 
-	result, err := f.db.Exec(deleteFeedsByTimeQuery, timestamp)
+	query := `DELETE FROM feeds WHERE time < ?`
+	result, err := f.db.Exec(query, timestamp)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to delete feeds by timestamp: %v", err)
 		return 0, NewDatabaseError("delete", "feeds", "failed to delete feeds by timestamp", err)
@@ -164,7 +158,8 @@ func (f *Feeds) Get(id int) (*Feed, error) {
 		return nil, NewValidationError("id", "must be positive", id)
 	}
 
-	row := f.db.QueryRow(selectFeedByIDQuery, id)
+	query := `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
+	row := f.db.QueryRow(query, id)
 	feed, err := f.scanFeed(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -184,7 +179,8 @@ func (f *Feeds) Delete(id int) error {
 		return NewValidationError("id", "must be positive", id)
 	}
 
-	result, err := f.db.Exec(deleteFeedByIDQuery, id)
+	query := `DELETE FROM feeds WHERE id = ?`
+	result, err := f.db.Exec(query, id)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to delete feed with ID %d: %v", id, err)
 		return NewDatabaseError("delete", "feeds", "failed to delete feed", err)

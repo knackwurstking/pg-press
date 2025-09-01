@@ -13,30 +13,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-// SQL queries for user operations
-const (
-	createUsersTableQuery = `
-		CREATE TABLE IF NOT EXISTS users (
-			telegram_id INTEGER NOT NULL,
-			user_name TEXT NOT NULL,
-			api_key TEXT NOT NULL UNIQUE,
-			last_feed TEXT NOT NULL,
-			PRIMARY KEY("telegram_id")
-		);
-	`
-
-	selectAllUsersQuery         = `SELECT * FROM users`
-	selectUserByTelegramIDQuery = `SELECT * FROM users WHERE telegram_id = ?`
-	selectUserByAPIKeyQuery     = `SELECT * FROM users WHERE api_key = ?`
-	selectUserExistsQuery       = `SELECT COUNT(*) FROM users
-		WHERE telegram_id = ?`
-	insertUserQuery = `INSERT INTO users
-		(telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
-	updateUserQuery = `UPDATE users
-		SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
-	deleteUserQuery = `DELETE FROM users WHERE telegram_id = ?`
-)
-
 // Users provides database operations for managing user accounts.
 // It handles CRUD operations and maintains integration with the activity feed system
 // to track user lifecycle events (create, update, delete).
@@ -49,7 +25,16 @@ var _ DataOperations[*User] = (*Users)(nil)
 
 // NewUsers creates a new Users instance and initializes the database table.
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
-	if _, err := db.Exec(createUsersTableQuery); err != nil {
+	query := `
+		CREATE TABLE IF NOT EXISTS users (
+			telegram_id INTEGER NOT NULL,
+			user_name TEXT NOT NULL,
+			api_key TEXT NOT NULL UNIQUE,
+			last_feed TEXT NOT NULL,
+			PRIMARY KEY("telegram_id")
+		);
+	`
+	if _, err := db.Exec(query); err != nil {
 		panic(NewDatabaseError("create_table", "users",
 			"failed to create users table", err))
 	}
@@ -64,7 +49,8 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 func (u *Users) List() ([]*User, error) {
 	logger.DBUsers().Info("Listing all users")
 
-	rows, err := u.db.Query(selectAllUsersQuery)
+	query := `SELECT * FROM users`
+	rows, err := u.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "users",
 			"failed to query users", err)
@@ -92,7 +78,8 @@ func (u *Users) List() ([]*User, error) {
 func (u *Users) Get(telegramID int64) (*User, error) {
 	logger.DBUsers().Debug("Getting user by Telegram ID: %d", telegramID)
 
-	row := u.db.QueryRow(selectUserByTelegramIDQuery, telegramID)
+	query := `SELECT * FROM users WHERE telegram_id = ?`
+	row := u.db.QueryRow(query, telegramID)
 
 	user, err := u.scanUser(row)
 	if err != nil {
@@ -120,7 +107,9 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 
 	// Check if user already exists
 	var count int
-	err := u.db.QueryRow(selectUserExistsQuery, user.TelegramID).Scan(&count)
+	query := `SELECT COUNT(*) FROM users
+		WHERE telegram_id = ?`
+	err := u.db.QueryRow(query, user.TelegramID).Scan(&count)
 	if err != nil {
 		return 0, NewDatabaseError("select", "users",
 			"failed to check user existence", err)
@@ -131,7 +120,9 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 	}
 
 	// Insert the new user
-	_, err = u.db.Exec(insertUserQuery,
+	query = `INSERT INTO users
+		(telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
+	_, err = u.db.Exec(query,
 		user.TelegramID, user.UserName, user.ApiKey, user.LastFeed)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "users",
@@ -157,7 +148,8 @@ func (u *Users) Delete(telegramID int64, actor *User) error {
 	// Get the user before deleting for the feed entry
 	user, _ := u.Get(telegramID)
 
-	result, err := u.db.Exec(deleteUserQuery, telegramID)
+	query := `DELETE FROM users WHERE telegram_id = ?`
+	result, err := u.db.Exec(query, telegramID)
 	if err != nil {
 		return NewDatabaseError("delete", "users",
 			fmt.Sprintf("failed to delete user with Telegram ID %d", telegramID), err)
@@ -220,7 +212,9 @@ func (u *Users) Update(user *User, actor *User) error {
 	}
 
 	// Update the user
-	_, err = u.db.Exec(updateUserQuery,
+	query := `UPDATE users
+		SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
+	_, err = u.db.Exec(query,
 		user.UserName, user.ApiKey, user.LastFeed, telegramID)
 	if err != nil {
 		return NewDatabaseError("update", "users",

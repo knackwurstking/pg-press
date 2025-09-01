@@ -17,7 +17,7 @@ type Tools struct {
 var _ DataOperations[*Tool] = (*Tools)(nil)
 
 func NewTools(db *sql.DB, feeds *Feeds) *Tools {
-	const createToolsTableQuery = `
+	query := `
 		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
@@ -40,7 +40,7 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]'),
 			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]');
 	`
-	if _, err := db.Exec(createToolsTableQuery); err != nil {
+	if _, err := db.Exec(query); err != nil {
 		panic(
 			NewDatabaseError(
 				"create_table",
@@ -60,10 +60,10 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 func (t *Tools) List() ([]*Tool, error) {
 	logger.DBTools().Info("Listing tools")
 
-	const selectAllToolsQuery = `
+	query := `
 		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools;
 	`
-	rows, err := t.db.Query(selectAllToolsQuery)
+	rows, err := t.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "tools",
 			"failed to query tools", err)
@@ -77,6 +77,7 @@ func (t *Tools) List() ([]*Tool, error) {
 		if err != nil {
 			return nil, WrapError(err, "failed to scan tool")
 		}
+
 		tools = append(tools, tool)
 	}
 
@@ -91,10 +92,10 @@ func (t *Tools) List() ([]*Tool, error) {
 func (t *Tools) Get(id int64) (*Tool, error) {
 	logger.DBTools().Info("Getting tool, id: %d", id)
 
-	const selectToolByIDQuery = `
+	query := `
 		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1;
 	`
-	row := t.db.QueryRow(selectToolByIDQuery, id)
+	row := t.db.QueryRow(query, id)
 
 	tool, err := t.scanTool(row)
 	if err != nil {
@@ -137,10 +138,10 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 
 	t.updateMods(user, tool)
 
-	const insertToolQuery = `
+	query := `
 		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
-	result, err := t.db.Exec(insertToolQuery,
+	result, err := t.db.Exec(query,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "tools",
@@ -200,10 +201,10 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 
 	t.updateMods(user, tool)
 
-	const updateToolQuery = `
+	query := `
 		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
 	`
-	_, err = t.db.Exec(updateToolQuery,
+	_, err = t.db.Exec(query,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
 		return NewDatabaseError("update", "tools",
@@ -234,10 +235,10 @@ func (t *Tools) Delete(id int64, user *User) error {
 		return WrapError(err, "failed to get tool before deletion")
 	}
 
-	const deleteToolQuery = `
+	query := `
 		DELETE FROM tools WHERE id = $1;
 	`
-	_, err = t.db.Exec(deleteToolQuery, id)
+	_, err = t.db.Exec(query, id)
 	if err != nil {
 		return NewDatabaseError("delete", "tools",
 			fmt.Sprintf("failed to delete tool with ID %d", id), err)
@@ -261,10 +262,10 @@ func (t *Tools) Delete(id int64, user *User) error {
 func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
 	var count int
 
-	const checkToolsExistenceQuery = `
+	query := `
 		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
 	`
-	err := t.db.QueryRow(checkToolsExistenceQuery,
+	err := t.db.QueryRow(query,
 		tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
 	if err != nil {
 		return fmt.Errorf("failed to check for existing tool: %#v", err)

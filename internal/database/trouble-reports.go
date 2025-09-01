@@ -8,27 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createTroubleReportsTableQuery = `
-		CREATE TABLE IF NOT EXISTS trouble_reports (
-			id INTEGER NOT NULL,
-			title TEXT NOT NULL,
-			content TEXT NOT NULL,
-			linked_attachments TEXT NOT NULL,
-			mods BLOB NOT NULL,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
-	selectAllTroubleReportsQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
-	selectTroubleReportByIDQuery = `SELECT * FROM trouble_reports WHERE id = ?`
-	insertTroubleReportQuery     = `INSERT INTO trouble_reports
-		(title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
-	updateTroubleReportQuery = `UPDATE trouble_reports
-		SET title = ?, content = ?, linked_attachments = ?, mods = ? WHERE id = ?`
-	deleteTroubleReportQuery = `DELETE FROM trouble_reports WHERE id = ?`
-)
-
 // TroubleReports provides database operations for managing trouble reports.
 type TroubleReports struct {
 	db    *sql.DB
@@ -39,7 +18,17 @@ var _ DataOperations[*TroubleReport] = (*TroubleReports)(nil)
 
 // NewTroubleReports creates a new TroubleReports instance and initializes the database table.
 func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
-	if _, err := db.Exec(createTroubleReportsTableQuery); err != nil {
+	query := `
+		CREATE TABLE IF NOT EXISTS trouble_reports (
+			id INTEGER NOT NULL,
+			title TEXT NOT NULL,
+			content TEXT NOT NULL,
+			linked_attachments TEXT NOT NULL,
+			mods BLOB NOT NULL,
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+	if _, err := db.Exec(query); err != nil {
 		panic(NewDatabaseError(
 			"create_table",
 			"trouble_reports",
@@ -58,7 +47,8 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 	logger.DBTroubleReports().Info("Listing trouble reports")
 
-	rows, err := tr.db.Query(selectAllTroubleReportsQuery)
+	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
+	rows, err := tr.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "trouble_reports",
 			"failed to query trouble reports", err)
@@ -87,7 +77,8 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report, id: %d", id)
 
-	row := tr.db.QueryRow(selectTroubleReportByIDQuery, id)
+	query := `SELECT * FROM trouble_reports WHERE id = ?`
+	row := tr.db.QueryRow(query, id)
 
 	report, err := tr.scanTroubleReport(row)
 	if err != nil {
@@ -125,9 +116,11 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 		return 0, WrapError(err, "failed to marshal mods data")
 	}
 
+	query := `INSERT INTO trouble_reports
+		(title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
 	// After exec this insert query, i need to get the id
 	result, err := tr.db.Exec(
-		insertTroubleReportQuery,
+		query,
 		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods,
 	)
 	if err != nil {
@@ -182,8 +175,10 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 		return WrapError(err, "failed to marshal mods data")
 	}
 
+	query := `UPDATE trouble_reports
+		SET title = ?, content = ?, linked_attachments = ?, mods = ? WHERE id = ?`
 	_, err = tr.db.Exec(
-		updateTroubleReportQuery,
+		query,
 		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods, id,
 	)
 	if err != nil {
@@ -216,7 +211,8 @@ func (tr *TroubleReports) Delete(id int64, user *User) error {
 		return WrapError(err, "failed to get trouble report before deletion")
 	}
 
-	result, err := tr.db.Exec(deleteTroubleReportQuery, id)
+	query := `DELETE FROM trouble_reports WHERE id = ?`
+	result, err := tr.db.Exec(query, id)
 	if err != nil {
 		return NewDatabaseError("delete", "trouble_reports",
 			fmt.Sprintf("failed to delete trouble report with ID %d", id), err)

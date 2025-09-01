@@ -8,8 +8,18 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createMetalSheetsTableQuery = `
+// MetalSheets represents a collection of metal sheets in the database.
+type MetalSheets struct {
+	db    *sql.DB
+	feeds *Feeds
+	notes *Notes
+}
+
+var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
+
+// NewMetalSheets creates a new MetalSheets instance
+func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
+	query := `
 		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
@@ -31,70 +41,7 @@ const (
 			(6, 4, -1, -1, -1, 1, '[]', '[]'),
 			(6, 25, 45, 12.8, 19.8, 2, '[]', '[]');
 	`
-
-	selectAllMetalSheetsQuery = `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
-		FROM metal_sheets
-		ORDER BY id DESC;
-	`
-
-	selectMetalSheetByIDQuery = `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
-		FROM metal_sheets
-		WHERE id = $1;
-	`
-
-	selectMetalSheetsByToolIDQuery = `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
-		FROM metal_sheets
-		WHERE tool_id = $1
-		ORDER BY id DESC;
-	`
-
-	selectAvailableMetalSheetsQuery = `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
-		FROM metal_sheets
-		WHERE tool_id IS NULL
-		ORDER BY id DESC;
-	`
-
-	insertMetalSheetQuery = `
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-	`
-
-	updateMetalSheetQuery = `
-		UPDATE metal_sheets
-		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
-		    tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $9;
-	`
-
-	// Status query removed - no longer have status column
-
-	updateMetalSheetToolQuery = `
-		UPDATE metal_sheets
-		SET tool_id = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2;
-	`
-
-	deleteMetalSheetQuery = `
-		DELETE FROM metal_sheets WHERE id = $1;
-	`
-)
-
-// MetalSheets represents a collection of metal sheets in the database.
-type MetalSheets struct {
-	db    *sql.DB
-	feeds *Feeds
-	notes *Notes
-}
-
-var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
-
-// NewMetalSheets creates a new MetalSheets instance
-func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
-	if _, err := db.Exec(createMetalSheetsTableQuery); err != nil {
+	if _, err := db.Exec(query); err != nil {
 		panic(
 			NewDatabaseError(
 				"create_table",
@@ -116,7 +63,12 @@ func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
-	rows, err := ms.db.Query(selectAllMetalSheetsQuery)
+	query := `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		FROM metal_sheets
+		ORDER BY id DESC;
+	`
+	rows, err := ms.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "metal_sheets",
 			"failed to query metal sheets", err)
@@ -146,7 +98,12 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
-	row := ms.db.QueryRow(selectMetalSheetByIDQuery, id)
+	query := `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		FROM metal_sheets
+		WHERE id = $1;
+	`
+	row := ms.db.QueryRow(query, id)
 
 	sheet, err := ms.scanMetalSheet(row)
 	if err != nil {
@@ -193,7 +150,13 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
-	rows, err := ms.db.Query(selectMetalSheetsByToolIDQuery, toolID)
+	query := `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		FROM metal_sheets
+		WHERE tool_id = $1
+		ORDER BY id DESC;
+	`
+	rows, err := ms.db.Query(query, toolID)
 	if err != nil {
 		return nil, NewDatabaseError("select", "metal_sheets",
 			fmt.Sprintf("failed to query metal sheets for tool ID %d", toolID), err)
@@ -223,7 +186,13 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
-	rows, err := ms.db.Query(selectAvailableMetalSheetsQuery)
+	query := `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		FROM metal_sheets
+		WHERE tool_id IS NULL
+		ORDER BY id DESC;
+	`
+	rows, err := ms.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "metal_sheets",
 			"failed to query available metal sheets", err)
@@ -280,7 +249,11 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 			"failed to marshal mods", err)
 	}
 
-	result, err := ms.db.Exec(insertMetalSheetQuery,
+	query := `
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+	`
+	result, err := ms.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes)
 	if err != nil {
@@ -359,7 +332,13 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 			"failed to marshal mods", err)
 	}
 
-	_, err = ms.db.Exec(updateMetalSheetQuery,
+	query := `
+		UPDATE metal_sheets
+		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
+		    tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $9;
+	`
+	_, err = ms.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
 	if err != nil {
@@ -450,7 +429,10 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) erro
 func (ms *MetalSheets) Delete(id int64, user *User) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
-	_, err := ms.db.Exec(deleteMetalSheetQuery, id)
+	query := `
+		DELETE FROM metal_sheets WHERE id = $1;
+	`
+	_, err := ms.db.Exec(query, id)
 	if err != nil {
 		return NewDatabaseError("delete", "metal_sheets",
 			fmt.Sprintf("failed to delete metal sheet with ID %d", id), err)

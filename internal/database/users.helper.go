@@ -27,7 +27,8 @@ func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*User, error) {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
-	row := uh.db.QueryRow(selectUserByAPIKeyQuery, apiKey)
+	query := `SELECT * FROM users WHERE api_key = ?`
+	row := uh.db.QueryRow(query, apiKey)
 
 	user := &User{}
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)

@@ -8,8 +8,14 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createCookiesTableQuery = `
+// Cookies provides database operations for managing authentication cookies and sessions.
+type Cookies struct {
+	db *sql.DB
+}
+
+// NewCookies creates a new Cookies instance and initializes the database table.
+func NewCookies(db *sql.DB) *Cookies {
+	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
 			value TEXT NOT NULL,
@@ -18,29 +24,7 @@ const (
 			PRIMARY KEY("value")
 		);
 	`
-
-	selectAllCookiesQuery      = `SELECT * FROM cookies ORDER BY last_login DESC`
-	selectCookiesByAPIKeyQuery = `SELECT * FROM cookies
-		WHERE api_key = ? ORDER BY last_login DESC`
-	selectCookieByValueQuery = `SELECT * FROM cookies WHERE value = ?`
-	selectCookieExistsQuery  = `SELECT COUNT(*) FROM cookies WHERE value = ?`
-	insertCookieQuery        = `INSERT INTO cookies
-		(user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
-	updateCookieQuery = `UPDATE cookies
-		SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
-	deleteCookieByValueQuery     = `DELETE FROM cookies WHERE value = ?`
-	deleteCookiesByAPIKeyQuery   = `DELETE FROM cookies WHERE api_key = ?`
-	deleteCookiesBeforeTimeQuery = `DELETE FROM cookies WHERE last_login < ?`
-)
-
-// Cookies provides database operations for managing authentication cookies and sessions.
-type Cookies struct {
-	db *sql.DB
-}
-
-// NewCookies creates a new Cookies instance and initializes the database table.
-func NewCookies(db *sql.DB) *Cookies {
-	if _, err := db.Exec(createCookiesTableQuery); err != nil {
+	if _, err := db.Exec(query); err != nil {
 		panic(NewDatabaseError("create_table", "cookies",
 			"failed to create cookies table", err))
 	}
@@ -52,7 +36,8 @@ func NewCookies(db *sql.DB) *Cookies {
 func (c *Cookies) List() ([]*Cookie, error) {
 	logger.DBCookies().Info("Listing all cookies")
 
-	rows, err := c.db.Query(selectAllCookiesQuery)
+	query := `SELECT * FROM cookies ORDER BY last_login DESC`
+	rows, err := c.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "cookies", "failed to query cookies", err)
 	}
@@ -84,7 +69,9 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
-	rows, err := c.db.Query(selectCookiesByAPIKeyQuery, apiKey)
+	query := `SELECT * FROM cookies
+		WHERE api_key = ? ORDER BY last_login DESC`
+	rows, err := c.db.Query(query, apiKey)
 	if err != nil {
 		return nil, NewDatabaseError("select", "cookies", "failed to query cookies by API key", err)
 	}
@@ -116,7 +103,8 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 		return nil, NewValidationError("value", "cookie value cannot be empty", value)
 	}
 
-	row := c.db.QueryRow(selectCookieByValueQuery, value)
+	query := `SELECT * FROM cookies WHERE value = ?`
+	row := c.db.QueryRow(query, value)
 	cookie, err := c.scanCookie(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -151,7 +139,8 @@ func (c *Cookies) Add(cookie *Cookie) error {
 	}
 
 	var count int
-	err := c.db.QueryRow(selectCookieExistsQuery, cookie.Value).Scan(&count)
+	query := `SELECT COUNT(*) FROM cookies WHERE value = ?`
+	err := c.db.QueryRow(query, cookie.Value).Scan(&count)
 	if err != nil {
 		return NewDatabaseError("select", "cookies", "failed to check cookie existence", err)
 	}
@@ -160,7 +149,9 @@ func (c *Cookies) Add(cookie *Cookie) error {
 		return ErrAlreadyExists
 	}
 
-	_, err = c.db.Exec(insertCookieQuery,
+	query = `INSERT INTO cookies
+		(user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
+	_, err = c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
 		return NewDatabaseError("insert", "cookies", "failed to insert cookie", err)
@@ -196,7 +187,9 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 			"last login timestamp must be positive", cookie.LastLogin)
 	}
 
-	result, err := c.db.Exec(updateCookieQuery,
+	query := `UPDATE cookies
+		SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
+	result, err := c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
 		return NewDatabaseError("update", "cookies", "failed to update cookie", err)
@@ -224,7 +217,8 @@ func (c *Cookies) Remove(value string) error {
 		return NewValidationError("value", "cookie value cannot be empty", value)
 	}
 
-	_, err := c.db.Exec(deleteCookieByValueQuery, value)
+	query := `DELETE FROM cookies WHERE value = ?`
+	_, err := c.db.Exec(query, value)
 	if err != nil {
 		return NewDatabaseError("delete", "cookies", "failed to delete cookie", err)
 	}
@@ -242,7 +236,8 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 		return NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
-	_, err := c.db.Exec(deleteCookiesByAPIKeyQuery, apiKey)
+	query := `DELETE FROM cookies WHERE api_key = ?`
+	_, err := c.db.Exec(query, apiKey)
 	if err != nil {
 		return NewDatabaseError("delete", "cookies", "failed to delete cookies by API key", err)
 	}
@@ -260,7 +255,8 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
 		return 0, NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)
 	}
 
-	result, err := c.db.Exec(deleteCookiesBeforeTimeQuery, beforeTimestamp)
+	query := `DELETE FROM cookies WHERE last_login < ?`
+	result, err := c.db.Exec(query, beforeTimestamp)
 	if err != nil {
 		return 0, NewDatabaseError("delete", "cookies", "failed to delete expired cookies", err)
 	}
