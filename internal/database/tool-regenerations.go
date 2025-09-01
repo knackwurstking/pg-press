@@ -13,53 +13,46 @@ const (
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,
-			regenerated_at DATETIME NOT NULL,
-			cycles_at_regeneration INTEGER NOT NULL DEFAULT 0,
+			cycle_id INTEGER NOT NULL,
 			reason TEXT,
 			performed_by INTEGER,
 			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE,
-			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
+			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL,
+			FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE CASCADE
 		);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
-		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_date ON tool_regenerations(regenerated_at);
+		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_cycle_id ON tool_regenerations(cycle_id);
 	`
 
 	insertToolRegenerationQuery = `
-		INSERT INTO tool_regenerations (tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by)
-		VALUES (?, ?, ?, ?, ?)
-		RETURNING id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
+		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
+		VALUES (?, ?, ?, ?)
+		RETURNING id, tool_id, cycle_id, reason, performed_by
 	`
 
 	selectLastRegenerationQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
+		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM tool_regenerations
 		WHERE tool_id = ?
-		ORDER BY regenerated_at DESC
+		ORDER BY id DESC
 		LIMIT 1
 	`
 
 	selectRegenerationHistoryQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
+		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM tool_regenerations
 		WHERE tool_id = ?
-		ORDER BY regenerated_at DESC
+		ORDER BY id DESC
 	`
 
 	selectRegenerationCountQuery = `
 		SELECT COUNT(*) FROM tool_regenerations WHERE tool_id = ?
 	`
 
-	selectRegenerationsBetweenQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
-		FROM tool_regenerations
-		WHERE tool_id = ? AND regenerated_at BETWEEN ? AND ?
-		ORDER BY regenerated_at DESC
-	`
-
 	selectAllRegenerationsQuery = `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
+		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM tool_regenerations
-		ORDER BY regenerated_at DESC
+		ORDER BY id DESC
 		LIMIT ? OFFSET ?
 	`
 
@@ -69,31 +62,33 @@ const (
 
 	selectToolsWithMostRegenerationsQuery = `
 		SELECT
-			tool_id,
-			COUNT(*) as regen_count,
-			MAX(regenerated_at) as last_regen
-		FROM tool_regenerations
-		GROUP BY tool_id
+			t.tool_id,
+			COUNT(t.id) as regen_count,
+			MAX(p.date) as last_regen
+		FROM tool_regenerations t
+		JOIN press_cycles p ON t.cycle_id = p.id
+		GROUP BY t.tool_id
 		ORDER BY regen_count DESC
 		LIMIT ?
 	`
 
 	updateToolRegenerationQuery = `
 		UPDATE tool_regenerations
-		SET cycles_at_regeneration = ?, reason = ?, performed_by = ?
+		SET cycle_id = ?, reason = ?, performed_by = ?
 		WHERE id = ?
 	`
 )
 
 // ToolRegenerations handles tool regeneration tracking
 type ToolRegenerations struct {
-	db          *sql.DB
-	feeds       *Feeds
-	pressCycles *PressCycles
+	db    *sql.DB
+	feeds *Feeds
+	//pressCycles *PressCycles
+	pressCyclesHelper *PressCyclesHelper
 }
 
 // NewToolRegenerations creates a new ToolRegenerations instance
-func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCycles *PressCycles) *ToolRegenerations {
+func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCyclesHelper *PressCyclesHelper) *ToolRegenerations {
 	if _, err := db.Exec(createToolRegenerationsTableQuery); err != nil {
 		panic(
 			NewDatabaseError(
@@ -106,37 +101,29 @@ func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCycles *PressCycles) *T
 	}
 
 	return &ToolRegenerations{
-		db:          db,
-		feeds:       feeds,
-		pressCycles: pressCycles,
+		db:                db,
+		feeds:             feeds,
+		pressCyclesHelper: pressCyclesHelper,
 	}
 }
 
 // Create records a new tool regeneration event
-func (t *ToolRegenerations) Create(toolID int64, reason string, user *User) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, user *User) (*ToolRegeneration, error) {
 	logger.DBToolRegenerations().Info(
-		"Creating tool regeneration: tool_id=%d, reason=%s",
-		toolID, reason,
+		"Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s",
+		toolID, cycleID, reason,
 	)
-
-	// Get current absolute total cycles for the tool before regeneration
-	totalCycles, err := t.pressCycles.GetCurrentTotalCycles(toolID)
-	if err != nil {
-		return nil, NewDatabaseError("insert", "tool_regenerations",
-			"failed to get total cycles", err)
-	}
 
 	var performedBy *int64
 	if user != nil {
 		performedBy = &user.TelegramID
 	}
 
-	regen := NewToolRegeneration(toolID, time.Now(), totalCycles, reason, performedBy)
+	regen := NewToolRegeneration(toolID, cycleID, reason, performedBy)
 
-	regen, err = t.scanToolRegeneration(t.db.QueryRow(insertToolRegenerationQuery,
+	regen, err := t.scanToolRegeneration(t.db.QueryRow(insertToolRegenerationQuery,
 		regen.ToolID,
-		regen.RegeneratedAt,
-		regen.CyclesAtRegeneration,
+		regen.CycleID,
 		regen.Reason,
 		performedBy,
 	))
@@ -173,7 +160,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 	}
 
 	_, err := t.db.Exec(updateToolRegenerationQuery,
-		regen.CyclesAtRegeneration,
+		regen.CycleID,
 		regen.Reason,
 		performedBy,
 		regen.ID,
@@ -183,26 +170,6 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
 	}
 
 	return nil
-}
-
-// getByID is an internal helper to get a regeneration by ID
-func (t *ToolRegenerations) getByID(id int64) (*ToolRegeneration, error) {
-	query := `
-		SELECT id, tool_id, regenerated_at, cycles_at_regeneration, reason, performed_by
-		FROM tool_regenerations
-		WHERE id = ?
-	`
-
-	regen, err := t.scanToolRegeneration(t.db.QueryRow(query, id))
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
-		}
-		return nil, NewDatabaseError("scan", "tool_regenerations",
-			"failed to get regeneration by ID", err)
-	}
-
-	return regen, nil
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
@@ -256,31 +223,6 @@ func (t *ToolRegenerations) GetRegenerationCount(toolID int64) (int, error) {
 	}
 
 	return count, nil
-}
-
-// GetRegenerationsBetween gets regenerations for a tool within a time period
-func (t *ToolRegenerations) GetRegenerationsBetween(toolID int64, from, to time.Time) ([]*ToolRegeneration, error) {
-	logger.DBToolRegenerations().Debug("Getting regenerations between dates for tool: tool_id=%d, from=%s, to=%s",
-		toolID, from.Format("2006-01-02"), to.Format("2006-01-02"))
-
-	rows, err := t.db.Query(selectRegenerationsBetweenQuery, toolID, from, to)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get regenerations between dates: %w", err)
-	}
-	defer rows.Close()
-
-	var regenerations []*ToolRegeneration
-	for rows.Next() {
-		regen, err := t.scanToolRegeneration(rows)
-		if err != nil {
-			return nil, NewDatabaseError("scan", "tool_regenerations",
-				"failed to get regenerations between", err)
-		}
-
-		regenerations = append(regenerations, regen)
-	}
-
-	return regenerations, nil
 }
 
 // GetAllRegenerations gets all regenerations across all tools
@@ -369,8 +311,7 @@ func (t *ToolRegenerations) scanToolRegeneration(scanner scannable) (*ToolRegene
 	err := scanner.Scan(
 		&regen.ID,
 		&regen.ToolID,
-		&regen.RegeneratedAt,
-		&regen.CyclesAtRegeneration,
+		&regen.CycleID,
 		&regen.Reason,
 		&performedBy,
 	)

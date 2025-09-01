@@ -216,7 +216,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Fetching cycles for tool %d", toolID)
 
 	// Get press cycles for this tool
-	cycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
+	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
@@ -232,7 +232,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for tool %d",
 		len(cycles), len(regenerations), toolID)
 
-	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID)
+	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
 
 	// Render the component
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
@@ -262,7 +262,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
 	}
 
-	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID)
+	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get total cycles: "+err.Error())

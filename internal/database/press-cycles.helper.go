@@ -254,26 +254,20 @@ func (pch *PressCyclesHelper) GetPressUtilization() (map[PressNumber][]int64, er
 	return utilization, nil
 }
 
-// GetPressCycleStats gets statistics for all presses
-func (pch *PressCyclesHelper) GetPressCycleStats() (map[PressNumber]struct {
+type PressCycleStats struct {
 	TotalCycles    int64
 	ActiveTools    int
 	TotalToolsUsed int
-}, error) {
+}
+
+// GetPressCycleStats gets statistics for all presses
+func (pch *PressCyclesHelper) GetPressCycleStats() (map[PressNumber]*PressCycleStats, error) {
 	logger.DBPressCycles().Debug("Getting press cycle statistics for all presses")
 
-	stats := make(map[PressNumber]struct {
-		TotalCycles    int64
-		ActiveTools    int
-		TotalToolsUsed int
-	})
+	stats := make(map[PressNumber]*PressCycleStats)
 
 	for i := PressNumber(0); i <= 5; i++ {
-		stats[i] = struct {
-			TotalCycles    int64
-			ActiveTools    int
-			TotalToolsUsed int
-		}{}
+		stats[i] = &PressCycleStats{}
 	}
 
 	query := `
@@ -309,13 +303,89 @@ func (pch *PressCyclesHelper) GetPressCycleStats() (map[PressNumber]struct {
 		}
 
 		stat := stats[pressNumber]
+
 		if totalCycles.Valid {
 			stat.TotalCycles = totalCycles.Int64
 		}
+
 		stat.TotalToolsUsed = totalToolsUsed
 		stat.ActiveTools = activeTools
-		stats[pressNumber] = stat
 	}
 
 	return stats, nil
+}
+
+// GetCurrentTotalCycles gets the current total cycles for a specific tool.
+// It retrieves the `total_cycles` from the most recent press cycle entry for the given tool ID.
+func (pch *PressCyclesHelper) GetCurrentTotalCycles(toolID int64) (int64, error) {
+	logger.DBPressCycles().Debug("Getting current total cycles for tool: tool_id=%d", toolID)
+
+	query := `
+		SELECT total_cycles
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY id DESC
+		LIMIT 1
+	`
+
+	var totalCycles int64
+	err := pch.pressCycles.db.QueryRow(query, toolID).Scan(&totalCycles)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// If no rows are found, it means the tool has no cycle entries yet.
+			// In this case, the total cycles should be considered 0.
+			return 0, nil
+		}
+		return 0, fmt.Errorf("failed to get current total cycles for tool %d: %w", toolID, err)
+	}
+
+	return totalCycles, nil
+}
+
+// GetTotalCyclesSinceRegeneration calculates the total cycles of a tool since its last regeneration.
+func (pch *PressCyclesHelper) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
+	logger.DBPressCycles().Debug("Getting total cycles since last regeneration for tool: tool_id=%d", toolID)
+
+	// Step 1: Get the cycle_id of the last regeneration for the tool.
+	lastRegenCycleIDQuery := `
+		SELECT cycle_id
+		FROM tool_regenerations
+		WHERE tool_id = ?
+		ORDER BY id DESC
+		LIMIT 1
+	`
+	var lastRegenCycleID int64
+	err := pch.pressCycles.db.QueryRow(lastRegenCycleIDQuery, toolID).Scan(&lastRegenCycleID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No regeneration found, so return all cycles.
+			return pch.GetCurrentTotalCycles(toolID)
+		}
+		return 0, fmt.Errorf("failed to get last regeneration cycle for tool %d: %w", toolID, err)
+	}
+
+	// Step 2: Get the total cycles at the last regeneration.
+	cyclesAtRegenQuery := `
+		SELECT total_cycles
+		FROM press_cycles
+		WHERE id = ?
+	`
+	var cyclesAtRegen int64
+	err = pch.pressCycles.db.QueryRow(cyclesAtRegenQuery, lastRegenCycleID).Scan(&cyclesAtRegen)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// This should not happen if the foreign key is set up correctly.
+			return 0, fmt.Errorf("press cycle for regeneration not found for tool %d, cycle %d: %w", toolID, lastRegenCycleID, err)
+		}
+		return 0, fmt.Errorf("failed to get cycles at regeneration for tool %d: %w", toolID, err)
+	}
+
+	// Step 3: Get the current total cycles.
+	currentCycles, err := pch.GetCurrentTotalCycles(toolID)
+	if err != nil {
+		return 0, err
+	}
+
+	// Step 4: The difference is the cycles since regeneration.
+	return currentCycles - cyclesAtRegen, nil
 }

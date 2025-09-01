@@ -41,7 +41,7 @@ func New(db *sql.DB) *DB {
 	toolsHelper := NewToolsHelper(tools, notes, pressCycles)
 
 	metalSheets := NewMetalSheets(db, feeds, notes)
-	toolRegenerations := NewToolRegenerations(db, feeds, pressCycles)
+	toolRegenerations := NewToolRegenerations(db, feeds, pressCyclesHelper)
 	usersHelper := NewUsersHelper(db)
 
 	dbInstance := &DB{
