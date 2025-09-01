@@ -366,7 +366,11 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if _, err := h.DB.ToolsHelper.AddCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user); err != nil {
+	// TODO: I need to make the press argument optional, because i will allow editing tools not active
+	if _, err := h.DB.PressCycles.Add(
+		database.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
+		user,
+	); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            err.Error(),
@@ -418,7 +422,11 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if err := h.DB.ToolsHelper.UpdateCycle(cycleID, formData.TotalCycles, *formData.PressNumber, user); err != nil {
+	// TODO: I need to make the press argument optional, because i will allow editing tools not active
+	if err := h.DB.PressCycles.Update(
+		database.NewPressCycle(cycleID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
+		user,
+	); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
