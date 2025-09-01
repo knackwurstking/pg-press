@@ -8,8 +8,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createToolsTableQuery = `
+// Tools represents a collection of tools in the database.
+type Tools struct {
+	db    *sql.DB
+	feeds *Feeds
+}
+
+var _ DataOperations[*Tool] = (*Tools)(nil)
+
+func NewTools(db *sql.DB, feeds *Feeds) *Tools {
+	const createToolsTableQuery = `
 		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
@@ -33,44 +41,6 @@ const (
 			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]');
 	`
 
-	selectAllToolsQuery = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools;
-	`
-
-	selectToolByIDQuery = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1;
-	`
-
-	selectToolsByPressQuery = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE press = $1 AND regenerating = 0;
-	`
-
-	checkToolsExistenceQuery = `
-		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
-	`
-
-	insertToolQuery = `
-		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
-	`
-
-	updateToolQuery = `
-		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
-	`
-
-	deleteToolQuery = `
-		DELETE FROM tools WHERE id = $1;
-	`
-)
-
-// Tools represents a collection of tools in the database.
-type Tools struct {
-	db    *sql.DB
-	feeds *Feeds
-}
-
-var _ DataOperations[*Tool] = (*Tools)(nil)
-
-func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	if _, err := db.Exec(createToolsTableQuery); err != nil {
 		panic(
 			NewDatabaseError(
@@ -91,6 +61,9 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 func (t *Tools) List() ([]*Tool, error) {
 	logger.DBTools().Info("Listing tools")
 
+	const selectAllToolsQuery = `
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools;
+	`
 	rows, err := t.db.Query(selectAllToolsQuery)
 	if err != nil {
 		return nil, NewDatabaseError("select", "tools",
@@ -119,6 +92,9 @@ func (t *Tools) List() ([]*Tool, error) {
 func (t *Tools) Get(id int64) (*Tool, error) {
 	logger.DBTools().Info("Getting tool, id: %d", id)
 
+	const selectToolByIDQuery = `
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1;
+	`
 	row := t.db.QueryRow(selectToolByIDQuery, id)
 
 	tool, err := t.scanTool(row)
@@ -162,6 +138,9 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 
 	t.updateMods(user, tool)
 
+	const insertToolQuery = `
+		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+	`
 	result, err := t.db.Exec(insertToolQuery,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes)
 	if err != nil {
@@ -222,6 +201,9 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 
 	t.updateMods(user, tool)
 
+	const updateToolQuery = `
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
+	`
 	_, err = t.db.Exec(updateToolQuery,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
@@ -253,6 +235,9 @@ func (t *Tools) Delete(id int64, user *User) error {
 		return WrapError(err, "failed to get tool before deletion")
 	}
 
+	const deleteToolQuery = `
+		DELETE FROM tools WHERE id = $1;
+	`
 	_, err = t.db.Exec(deleteToolQuery, id)
 	if err != nil {
 		return NewDatabaseError("delete", "tools",
@@ -288,6 +273,9 @@ func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 		logger.DBTools().Info("Getting active tools for press: %d", *pressNumber)
 	}
 
+	const selectToolsByPressQuery = `
+		SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE press = $1 AND regenerating = 0;
+	`
 	rows, err := t.db.Query(selectToolsByPressQuery, pressNumber)
 	if err != nil {
 		return nil, NewDatabaseError("select", "tools",
@@ -421,6 +409,9 @@ func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error 
 func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
 	var count int
 
+	const checkToolsExistenceQuery = `
+		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
+	`
 	err := t.db.QueryRow(checkToolsExistenceQuery,
 		tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
 	if err != nil {
