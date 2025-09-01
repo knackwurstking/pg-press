@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -15,7 +14,6 @@ const (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
 			tool_id INTEGER NOT NULL,
-			date DATETIME NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			performed_by INTEGER NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id),
@@ -23,47 +21,46 @@ const (
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_date ON press_cycles(date);
-		INSERT INTO press_cycles (press_number, tool_id, date, total_cycles, performed_by)
+		INSERT INTO press_cycles (press_number, tool_id, total_cycles, performed_by)
 		VALUES
-			(0, 1, '2023-01-01',     0, -1),
-			(0, 2, '2023-01-01',     0, -1),
-			(0, 1, '2023-02-01',  1000, -1),
-			(0, 2, '2023-02-01',  1000, -1),
-			(0, 1, '2023-03-01',  2000, -1),
-			(0, 2, '2023-03-01',  2000, -1),
-			(0, 1, '2023-04-01',  3000, -1),
-			(0, 2, '2023-04-01',  3000, -1),
-			(0, 1, '2023-05-01',  4000, -1),
-			(0, 2, '2023-05-01',  4000, -1),
-			(0, 1, '2023-06-01',  5000, -1),
-			(0, 2, '2023-06-01',  5000, -1),
-			(0, 1, '2023-07-01',  6000, -1),
-			(0, 2, '2023-07-01',  6000, -1),
-			(0, 1, '2023-08-01',  7000, -1),
-			(0, 2, '2023-08-01',  7000, -1),
-			(0, 1, '2023-09-01',  8000, -1),
-			(0, 2, '2023-09-01',  8000, -1),
-			(0, 1, '2023-10-01',  9000, -1),
-			(0, 2, '2023-10-01',  9000, -1),
-			(0, 1, '2023-11-01', 10000, -1),
-			(0, 2, '2023-11-01', 10000, -1);
+			(0, 1,     0, -1),
+			(0, 2,     0, -1),
+			(0, 1,  1000, -1),
+			(0, 2,  1000, -1),
+			(0, 1,  2000, -1),
+			(0, 2,  2000, -1),
+			(0, 1,  3000, -1),
+			(0, 2,  3000, -1),
+			(0, 1,  4000, -1),
+			(0, 2,  4000, -1),
+			(0, 1,  5000, -1),
+			(0, 2,  5000, -1),
+			(0, 1,  6000, -1),
+			(0, 2,  6000, -1),
+			(0, 1,  7000, -1),
+			(0, 2,  7000, -1),
+			(0, 1,  8000, -1),
+			(0, 2,  8000, -1),
+			(0, 1,  9000, -1),
+			(0, 2,  9000, -1),
+			(0, 1, 10000, -1),
+			(0, 2, 10000, -1);
 	`
 
 	insertPressCycleQuery = `
-		INSERT INTO press_cycles (press_number, tool_id, date, total_cycles, performed_by)
-		VALUES (?, ?, ?, ?, ?)
-		RETURNING id, press_number, tool_id, date, total_cycles, performed_by
+		INSERT INTO press_cycles (press_number, tool_id, total_cycles, performed_by)
+		VALUES (?, ?, ?, ?)
+		RETURNING id, press_number, tool_id, total_cycles, performed_by
 	`
 
 	updatePressCycleByIDQuery = `
 		UPDATE press_cycles
-		SET total_cycles = ?, performed_by = ?, press_number = ?, date = ?
+		SET total_cycles = ?, performed_by = ?, press_number = ?
 		WHERE id = ?
 	`
 
 	selectCurrentToolUsageQuery = `
-		SELECT id, press_number, tool_id, date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY id DESC
@@ -71,49 +68,18 @@ const (
 	`
 
 	selectToolHistoryQuery = `
-		SELECT id, press_number, tool_id, date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, total_cycles, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY id DESC
 		LIMIT ? OFFSET ?
 	`
 
-	selectToolHistorySinceRegenerationQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.date, pc.total_cycles,
-		       (pc.total_cycles - COALESCE(
-		           (SELECT cycles_at_regeneration
-		            FROM tool_regenerations
-		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.date
-		            ORDER BY regenerated_at DESC
-		            LIMIT 1), 0)) as partial_cycles,
-		       pc.performed_by
-		FROM press_cycles pc
-		WHERE pc.tool_id = ? AND pc.date >= ?
-		ORDER BY pc.id DESC
-	`
-
 	selectAllToolHistoryQuery = `
-		SELECT pc.id, pc.press_number, pc.tool_id, pc.date, pc.total_cycles,
-		       (pc.total_cycles - COALESCE(
-		           (SELECT cycles_at_regeneration
-		            FROM tool_regenerations
-		            WHERE tool_id = pc.tool_id AND regenerated_at <= pc.date
-		            ORDER BY regenerated_at DESC
-		            LIMIT 1), 0)) as partial_cycles,
-		       pc.performed_by
-		FROM press_cycles pc
-		WHERE pc.tool_id = ?
-		ORDER BY pc.id DESC
-	`
-
-	selectTotalCyclesSinceRegenerationQuery = `
-		SELECT COALESCE(
-		    (SELECT MAX(total_cycles) FROM press_cycles WHERE tool_id = ?) -
-		    COALESCE((SELECT cycles_at_regeneration
-		              FROM tool_regenerations
-		              WHERE tool_id = ? AND regenerated_at = ?
-		              ORDER BY regenerated_at DESC
-		              LIMIT 1), 0), 0)
+		SELECT id, press_number, tool_id, total_cycles, 0 as partial_cycles, performed_by
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY id DESC
 	`
 
 	selectTotalCyclesAllTimeQuery = `
@@ -133,7 +99,7 @@ const (
 	`
 
 	selectPressCyclesForPressQuery = `
-		SELECT id, press_number, tool_id, date, total_cycles, performed_by
+		SELECT id, press_number, tool_id, total_cycles, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY id DESC
@@ -141,7 +107,7 @@ const (
 	`
 
 	selectActivePressCyclesForPressQuery = `
-		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.date, pc1.total_cycles, pc1.performed_by
+		SELECT DISTINCT pc1.id, pc1.press_number, pc1.tool_id, pc1.total_cycles, pc1.performed_by
 		FROM press_cycles pc1
 		WHERE pc1.press_number = ?
 		  AND pc1.id = (
@@ -220,7 +186,7 @@ func (p *PressCycles) StartToolUsage(toolID int64, pressNumber PressNumber, user
 		performedBy = &user.TelegramID
 	}
 
-	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), 0, performedBy)
+	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, 0, performedBy)
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -262,7 +228,7 @@ func (p *PressCycles) AddCycle(toolID int64, pressNumber PressNumber, totalCycle
 		performedBy = &user.TelegramID
 	}
 
-	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, time.Now(), totalCycles, performedBy)
+	row := p.db.QueryRow(insertPressCycleQuery, pressNumber, toolID, totalCycles, performedBy)
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -339,57 +305,12 @@ func (p *PressCycles) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error)
 	return cycles, nil
 }
 
-// GetToolHistorySinceRegeneration gets press cycles since the last tool regeneration
-func (p *PressCycles) GetToolHistorySinceRegeneration(toolID int64, lastRegenerationDate *time.Time) ([]*PressCycle, error) {
-	logger.DBPressCycles().Debug("Getting tool history since regeneration: tool_id=%d", toolID)
-
-	var query string
-	var args []any
-
-	if lastRegenerationDate != nil {
-		query = selectToolHistorySinceRegenerationQuery
-		args = []any{toolID, *lastRegenerationDate}
-	} else {
-		// If no regeneration date, get all history
-		query = selectAllToolHistoryQuery
-		args = []any{toolID}
-	}
-
-	rows, err := p.db.Query(query, args...)
-	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tool history since regeneration: %w", err)
-	}
-	defer rows.Close()
-
-	cycles, err := p.scanPressCyclesRowsWithPartial(rows)
-	if err != nil {
-		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
-	}
-
-	return cycles, nil
-}
-
 // GetTotalCyclesSinceRegeneration calculates total cycles since last regeneration
-func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64, lastRegenerationDate *time.Time) (int64, error) {
+func (p *PressCycles) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
 	logger.DBPressCycles().Debug("Getting total cycles since regeneration: tool_id=%d", toolID)
 
-	var query string
-	var args []any
-
-	if lastRegenerationDate != nil {
-		query = selectTotalCyclesSinceRegenerationQuery
-		args = []any{toolID, toolID, *lastRegenerationDate}
-	} else {
-		// If no regeneration date, get total cycles all time
-		query = selectTotalCyclesAllTimeQuery
-		args = []any{toolID}
-	}
-
 	var totalCycles int64
-	err := p.db.QueryRow(query, args...).Scan(&totalCycles)
+	err := p.db.QueryRow(selectTotalCyclesAllTimeQuery, toolID).Scan(&totalCycles)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return 0, nil
@@ -616,7 +537,6 @@ func (p *PressCycles) scanPressCyclesRowsWithPartial(rows *sql.Rows) ([]*PressCy
 			&cycle.ID,
 			&cycle.PressNumber,
 			&cycle.ToolID,
-			&cycle.Date,
 			&cycle.TotalCycles,
 			&cycle.PartialCycles,
 			&performedBy,
@@ -642,7 +562,6 @@ func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
 		&cycle.ID,
 		&cycle.PressNumber,
 		&cycle.ToolID,
-		&cycle.Date,
 		&cycle.TotalCycles,
 		&performedBy,
 	)
@@ -667,7 +586,7 @@ func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
 func (p *PressCycles) Get(id int64) (*PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
-	row := p.db.QueryRow("SELECT id, press_number, tool_id, date, total_cycles, performed_by FROM press_cycles WHERE id = ?", id)
+	row := p.db.QueryRow("SELECT id, press_number, tool_id, total_cycles, performed_by FROM press_cycles WHERE id = ?", id)
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -680,7 +599,7 @@ func (p *PressCycles) Get(id int64) (*PressCycle, error) {
 }
 
 // UpdateCycle updates a specific press cycle entry.
-func (p *PressCycles) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, date time.Time, user *User) error {
+func (p *PressCycles) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, user *User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycleID)
 
 	var performedBy *int64
@@ -688,7 +607,7 @@ func (p *PressCycles) UpdateCycle(cycleID int64, totalCycles int64, pressNumber 
 		performedBy = &user.TelegramID
 	}
 
-	result, err := p.db.Exec(updatePressCycleByIDQuery, totalCycles, performedBy, pressNumber, date, cycleID)
+	result, err := p.db.Exec(updatePressCycleByIDQuery, totalCycles, performedBy, pressNumber, cycleID)
 	if err != nil {
 		return fmt.Errorf("failed to update press cycle with id %d: %w", cycleID, err)
 	}

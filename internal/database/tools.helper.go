@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -119,7 +118,7 @@ func (th *ToolsHelper) AddCycle(toolID int64, pressNumber PressNumber, totalCycl
 }
 
 // UpdateToolCycle updates a specific press cycle entry.
-func (th *ToolsHelper) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, date time.Time, user *User) error {
+func (th *ToolsHelper) UpdateCycle(cycleID int64, totalCycles int64, pressNumber PressNumber, user *User) error {
 	logger.DBToolsHelper().Debug("Updating tool cycle %d", cycleID)
-	return th.pressCycles.UpdateCycle(cycleID, totalCycles, pressNumber, date, user)
+	return th.pressCycles.UpdateCycle(cycleID, totalCycles, pressNumber, user)
 }

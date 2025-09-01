@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"time"
-
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -234,15 +232,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for tool %d",
 		len(cycles), len(regenerations), toolID)
 
-	// Calculate total cycles since last regeneration
-	var lastRegenerationDate *time.Time
-	if len(regenerations) > 0 {
-		lastRegenerationDate = &regenerations[len(regenerations)-1].RegeneratedAt
-	}
-
-	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(
-		toolID, lastRegenerationDate,
-	)
+	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID)
 
 	// Render the component
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
@@ -272,21 +262,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
 	}
 
-	// Get regenerations for this tool to find the last one
-	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
-	if err != nil && !errors.Is(err, database.ErrNotFound) {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
-			"failed to get tool regenerations: "+err.Error())
-	}
-
-	var lastRegenerationDate *time.Time
-	if len(regenerations) > 0 {
-		lastRegenerationDate = &regenerations[0].RegeneratedAt
-	}
-
-	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(
-		toolID, lastRegenerationDate,
-	)
+	totalCycles, err := h.DB.PressCycles.GetTotalCyclesSinceRegeneration(toolID)
 	if err != nil {
 		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
 			"failed to get total cycles: "+err.Error())
@@ -442,7 +418,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if err := h.DB.ToolsHelper.UpdateCycle(cycleID, formData.TotalCycles, *formData.PressNumber, time.Now(), user); err != nil {
+	if err := h.DB.ToolsHelper.UpdateCycle(cycleID, formData.TotalCycles, *formData.PressNumber, user); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
