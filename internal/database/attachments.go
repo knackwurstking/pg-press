@@ -8,26 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-const (
-	createAttachmentsTableQuery = `
-		CREATE TABLE IF NOT EXISTS attachments (
-			id INTEGER NOT NULL,
-			mime_type TEXT NOT NULL,
-			data BLOB NOT NULL,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
-	selectAllAttachmentsQuery   = `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
-	selectAttachmentByIDQuery   = `SELECT id, mime_type, data FROM attachments WHERE id = ?`
-	selectAttachmentsByIDsQuery = `SELECT id, mime_type, data FROM attachments
-		WHERE id IN (%s) ORDER BY id ASC`
-	insertAttachmentQuery = `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
-	updateAttachmentQuery = `UPDATE attachments
-		SET mime_type = ?, data = ? WHERE id = ?`
-	deleteAttachmentQuery = `DELETE FROM attachments WHERE id = ?`
-)
-
 // Attachments provides database operations for managing attachments with lazy loading.
 type Attachments struct {
 	db *sql.DB
@@ -37,7 +17,16 @@ var _ DataOperations[*Attachment] = (*Attachments)(nil)
 
 // NewAttachments creates a new Attachments instance and initializes the database table.
 func NewAttachments(db *sql.DB) *Attachments {
-	if _, err := db.Exec(createAttachmentsTableQuery); err != nil {
+	query := `
+		CREATE TABLE IF NOT EXISTS attachments (
+			id INTEGER NOT NULL,
+			mime_type TEXT NOT NULL,
+			data BLOB NOT NULL,
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+
+	if _, err := db.Exec(query); err != nil {
 		panic(NewDatabaseError(
 			"create_table",
 			"attachments",
@@ -55,7 +44,8 @@ func NewAttachments(db *sql.DB) *Attachments {
 func (a *Attachments) List() ([]*Attachment, error) {
 	logger.DBAttachments().Debug("Listing all attachments")
 
-	rows, err := a.db.Query(selectAllAttachmentsQuery)
+	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
+	rows, err := a.db.Query(query)
 	if err != nil {
 		return nil, NewDatabaseError("select", "attachments",
 			"failed to query attachments", err)
@@ -84,8 +74,8 @@ func (a *Attachments) List() ([]*Attachment, error) {
 func (a *Attachments) Get(id int64) (*Attachment, error) {
 	logger.DBAttachments().Debug("Getting attachment, id: %d", id)
 
-	row := a.db.QueryRow(selectAttachmentByIDQuery, id)
-
+	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
+	row := a.db.QueryRow(query, id)
 	attachment, err := a.scanAttachment(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -114,8 +104,14 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 		args[i] = id
 	}
 
-	query := fmt.Sprintf(selectAttachmentsByIDsQuery,
-		joinStrings(placeholders, ","))
+	query := fmt.Sprintf(
+		`
+			SELECT id, mime_type, data FROM attachments
+			WHERE id IN (%s)
+			ORDER BY id ASC
+		`,
+		joinStrings(placeholders, ","),
+	)
 
 	rows, err := a.db.Query(query, args...)
 	if err != nil {
@@ -163,7 +159,8 @@ func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
 		return 0, err
 	}
 
-	result, err := a.db.Exec(insertAttachmentQuery, attachment.MimeType, attachment.Data)
+	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
+	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
 		return 0, NewDatabaseError("insert", "attachments",
 			"failed to insert attachment", err)
@@ -191,7 +188,8 @@ func (a *Attachments) Update(attachment *Attachment, _ *User) error {
 		return err
 	}
 
-	result, err := a.db.Exec(updateAttachmentQuery, attachment.MimeType, attachment.Data, id)
+	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
+	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
 		return NewDatabaseError("update", "attachments",
 			fmt.Sprintf("failed to update attachment with ID %d", id), err)
@@ -214,7 +212,8 @@ func (a *Attachments) Update(attachment *Attachment, _ *User) error {
 func (a *Attachments) Delete(id int64, _ *User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
-	result, err := a.db.Exec(deleteAttachmentQuery, id)
+	query := `DELETE FROM attachments WHERE id = ?`
+	result, err := a.db.Exec(query, id)
 	if err != nil {
 		return NewDatabaseError("delete", "attachments",
 			fmt.Sprintf("failed to delete attachment with ID %d", id), err)
