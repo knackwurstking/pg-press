@@ -153,6 +153,10 @@ type PressCycles struct {
 	feeds *Feeds
 }
 
+// TODO: Convert this sturct to be a valid DataOperations interface
+// TODO: For this to work we need a helper class
+//var _ DataOperations[*PressCycle] = (*PressCycles)(nil)
+
 func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
 	p := &PressCycles{
 		db:    db,

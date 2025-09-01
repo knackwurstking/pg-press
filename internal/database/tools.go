@@ -133,43 +133,6 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
-// GetByPress returns all active tools for a specific press (0-5)
-func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
-	if pressNumber != nil && !(*pressNumber).IsValid() {
-		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
-	}
-
-	if pressNumber == nil {
-		logger.DBTools().Info("Getting inactive tools")
-	} else {
-		logger.DBTools().Info("Getting active tools for press: %d", *pressNumber)
-	}
-
-	rows, err := t.db.Query(selectToolsByPressQuery, pressNumber)
-	if err != nil {
-		return nil, NewDatabaseError("select", "tools",
-			fmt.Sprintf("failed to query tools for press %d", pressNumber), err)
-	}
-	defer rows.Close()
-
-	var tools []*Tool
-
-	for rows.Next() {
-		tool, err := t.scanTool(rows)
-		if err != nil {
-			return nil, WrapError(err, "failed to scan tool")
-		}
-		tools = append(tools, tool)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "tools",
-			"error iterating over rows", err)
-	}
-
-	return tools, nil
-}
-
 func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
@@ -311,7 +274,48 @@ func (t *Tools) Delete(id int64, user *User) error {
 	return nil
 }
 
+// GetByPress returns all active tools for a specific press (0-5)
+//
+// TODO: Move this method to the helper struct
+func (t *Tools) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
+	if pressNumber != nil && !(*pressNumber).IsValid() {
+		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
+	}
+
+	if pressNumber == nil {
+		logger.DBTools().Info("Getting inactive tools")
+	} else {
+		logger.DBTools().Info("Getting active tools for press: %d", *pressNumber)
+	}
+
+	rows, err := t.db.Query(selectToolsByPressQuery, pressNumber)
+	if err != nil {
+		return nil, NewDatabaseError("select", "tools",
+			fmt.Sprintf("failed to query tools for press %d", pressNumber), err)
+	}
+	defer rows.Close()
+
+	var tools []*Tool
+
+	for rows.Next() {
+		tool, err := t.scanTool(rows)
+		if err != nil {
+			return nil, WrapError(err, "failed to scan tool")
+		}
+		tools = append(tools, tool)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, NewDatabaseError("select", "tools",
+			"error iterating over rows", err)
+	}
+
+	return tools, nil
+}
+
 // UpdateRegenerating updates only the regenerating field of a tool
+//
+// TODO: Move this method to the helper struct
 func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *User) error {
 	logger.DBTools().Info("Updating tool regenerating status: %d to %v", toolID, regenerating)
 
@@ -361,6 +365,8 @@ func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *User) 
 }
 
 // UpdatePress updates only the press field of a tool
+//
+// TODO: Move this method to the helper struct
 func (t *Tools) UpdatePress(toolID int64, press *PressNumber, user *User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
