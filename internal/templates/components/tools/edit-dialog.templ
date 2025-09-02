@@ -74,6 +74,12 @@ templ EditDialog(props *EditDialogProps) {
 									selected
 								}
 							>Unterteil</option>
+							<option
+								value="top"
+								if props.Position == "top" {
+									selected
+								}
+							>Cassette Oberteil</option>
 						</select>
 					</div>
 					<div class="flex flex-col gap-sm">

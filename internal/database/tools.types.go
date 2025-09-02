@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	PositionTop         = Position("top")
-	PositionTopCassette = Position("top cassette")
+	PositionTopCassette = Position("cassette top")
 	PositionBottom      = Position("bottom")
 
 	ToolStatusActive       = ToolStatus("active")
