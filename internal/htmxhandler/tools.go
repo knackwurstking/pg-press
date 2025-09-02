@@ -80,7 +80,18 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 
 		if props.ID > 0 {
 			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ID)
-			// TODO: Get tool from database tools
+			tool, err := h.DB.ToolsHelper.GetWithNotes(props.ID)
+			if err != nil {
+				return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+					"failed to get tool from database: "+err.Error())
+			}
+
+			props.InputPosition = string(tool.Position)
+			props.InputWidth = tool.Format.Width
+			props.InputHeight = tool.Format.Height
+			props.InputType = tool.Type
+			props.InputCode = tool.Code
+			props.SelectPressSelection = tool.Press
 		} else {
 			logger.HTMXHandlerTools().Debug("Creating new tool")
 		}
