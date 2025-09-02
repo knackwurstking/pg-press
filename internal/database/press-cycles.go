@@ -27,7 +27,7 @@ func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
 
 func (p *PressCycles) init() {
 	query := `
-		DROP TABLE IF NOT EXISTS press_cycles;
+		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),

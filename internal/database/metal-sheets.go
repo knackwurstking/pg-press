@@ -20,7 +20,7 @@ var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
 // NewMetalSheets creates a new MetalSheets instance
 func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 	query := `
-		DROP TABLE IF NOT EXISTS metal_sheets;
+		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
 			tile_height REAL NOT NULL,

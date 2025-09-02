@@ -18,7 +18,7 @@ var _ DataOperations[*Tool] = (*Tools)(nil)
 
 func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	query := `
-		DROP TABLE IF NOT EXISTS tools;
+		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
