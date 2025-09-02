@@ -10,9 +10,8 @@ import (
 
 // ToolRegenerations handles tool regeneration tracking
 type ToolRegenerations struct {
-	db    *sql.DB
-	feeds *Feeds
-	//pressCycles *PressCycles
+	db                *sql.DB
+	feeds             *Feeds
 	pressCyclesHelper *PressCyclesHelper
 }
 
