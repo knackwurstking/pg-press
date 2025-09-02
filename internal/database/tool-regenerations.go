@@ -18,6 +18,7 @@ type ToolRegenerations struct {
 // NewToolRegenerations creates a new ToolRegenerations instance
 func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCyclesHelper *PressCyclesHelper) *ToolRegenerations {
 	query := `
+		DROP TABLE IF NOT EXISTS tool_regenerations;
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,
