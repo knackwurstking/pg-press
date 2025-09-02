@@ -52,40 +52,56 @@ templ EditDialog(props *EditDialogProps) {
 				enctype="multipart/form-data"
 			>
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-					<div class="flex flex-col gap-sm">
-						<label for="position">Position</label>
-						<select
-							id={ constants.IDPosition }
-							name="position"
-							required
-						>
-							<option
-								value=""
-								if props.InputPosition == "" {
-									selected
-								}
-							>Position auswählen</option>
-							<option
-								value="top"
-								if props.InputPosition == "top" {
-									selected
-								}
-							>Oberteil</option>
-							<option
-								value="bottom"
-								if props.InputPosition == "bottom" {
-									selected
-								}
-							>Unterteil</option>
-							<option
-								value="top"
-								if props.InputPosition == "top" {
-									selected
-								}
-							>Cassette Oberteil</option>
-						</select>
-					</div>
-					<div class="flex flex-col gap-sm">
+					<span class="flex flex-row gap flex-wrap justify-between items-center">
+						<span class="flex flex-col gap-0">
+							<label for="position">Position</label>
+							<select
+								id={ constants.IDPosition }
+								name="position"
+								required
+							>
+								<option
+									value=""
+									if props.InputPosition == "" {
+										selected
+									}
+								>Position auswählen</option>
+								<option
+									value="top"
+									if props.InputPosition == "top" {
+										selected
+									}
+								>Oberteil</option>
+								<option
+									value="bottom"
+									if props.InputPosition == "bottom" {
+										selected
+									}
+								>Unterteil</option>
+								<option
+									value="top"
+									if props.InputPosition == "top" {
+										selected
+									}
+								>Cassette Oberteil</option>
+							</select>
+						</span>
+						<span class="flex flex-col gap-0 w-fit">
+							<label for="press">Press</label>
+							<select
+								id={ constants.IDPressSelection }
+								name="press-selection"
+							>
+								<option value="">Nicht Eingebaut</option>
+								<option value="0">Presse 0</option>
+								<option value="2">Presse 2</option>
+								<option value="3">Presse 3</option>
+								<option value="4">Presse 4</option>
+								<option value="5">Presse 5</option>
+							</select>
+						</span>
+					</span>
+					<span class="flex flex-col gap-0">
 						<label>Format</label>
 						<div class="flex gap-sm">
 							<input
@@ -112,8 +128,8 @@ templ EditDialog(props *EditDialogProps) {
 								required
 							/>
 						</div>
-					</div>
-					<div class="flex flex-col gap-sm">
+					</span>
+					<span class="flex flex-col gap-0">
 						<label for="type">Typ</label>
 						<input
 							type="text"
@@ -123,8 +139,8 @@ templ EditDialog(props *EditDialogProps) {
 							value={ props.InputType }
 							required
 						/>
-					</div>
-					<div class="flex flex-col gap-sm">
+					</span>
+					<span class="flex flex-col gap-0">
 						<label for="code">Code</label>
 						<input
 							type="text"
@@ -134,7 +150,7 @@ templ EditDialog(props *EditDialogProps) {
 							value={ props.InputCode }
 							required
 						/>
-					</div>
+					</span>
 				</div>
 				<footer class="flex gap justify-end p">
 					<button
