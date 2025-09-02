@@ -66,20 +66,20 @@ templ EditDialog(props *EditDialogProps) {
 									}
 								>Position auswählen</option>
 								<option
-									value="top"
-									if props.InputPosition == "top" {
+									value={ database.PositionTop }
+									if database.Position(props.InputPosition) == database.PositionTop {
 										selected
 									}
 								>Oberteil</option>
 								<option
-									value="bottom"
-									if props.InputPosition == "bottom" {
+									value={ database.PositionBottom }
+									if database.Position(props.InputPosition) == database.PositionBottom {
 										selected
 									}
 								>Unterteil</option>
 								<option
-									value="top"
-									if props.InputPosition == "top" {
+									value={ database.PositionTopCassette }
+									if database.Position(props.InputPosition) == database.PositionTopCassette {
 										selected
 									}
 								>Cassette Oberteil</option>

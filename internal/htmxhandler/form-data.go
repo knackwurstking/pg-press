@@ -3,10 +3,11 @@ package htmxhandler
 import "github.com/knackwurstking/pgpress/internal/database"
 
 type ToolEditFormData struct {
-	Position database.Position   // Position form field name "position"
-	Format   database.ToolFormat // Format form field names "width" and "height"
-	Type     string              // Type form field name "type"
-	Code     string              // Code form field name "code"
+	Position database.Position     // Position form field name "position"
+	Format   database.ToolFormat   // Format form field names "width" and "height"
+	Type     string                // Type form field name "type"
+	Code     string                // Code form field name "code"
+	Press    *database.PressNumber // Press form field name "press-selection"
 }
 
 type CycleEditFormData struct {

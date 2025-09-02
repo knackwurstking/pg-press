@@ -122,6 +122,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
+	tool.Press = formData.Press
 	tool.Mods.Add(user, database.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
@@ -160,6 +161,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
+	tool.Press = formData.Press
 	tool.Mods.Add(user, database.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
@@ -517,6 +519,20 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 	data.Code = c.FormValue("code")
 	if data.Code == "" {
 		return nil, errors.New("code is required")
+	}
+
+	// Parse press selection
+	pressStr := c.FormValue("press-selection")
+	if pressStr != "" {
+		press, err := strconv.Atoi(pressStr)
+		if err != nil {
+			return nil, errors.New("invalid press number: " + err.Error())
+		}
+		pressNumber := database.PressNumber(press)
+		if !pressNumber.IsValid() {
+			return nil, errors.New("invalid press number")
+		}
+		data.Press = &pressNumber
 	}
 
 	logger.HTMXHandlerTools().Debug("Successfully parsed tool: Type=%s, Code=%s, Position=%s, Format=%dx%d",
