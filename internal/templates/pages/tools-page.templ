@@ -45,11 +45,13 @@ templ ToolsPage(tools []*database.ToolWithNotes) {
 }
 
 templ pressSection() {
-	<div class="active-tools p">
-		<h4 class="mb">
-			<i class="bi bi-gear-fill mr"></i>
-			Eingebaute Werkzeuge
-		</h4>
+	<details class="active-tools">
+		<summary class="mb">
+			<h4>
+				<i class="bi bi-gear-fill mr"></i>
+				Eingebaute Werkzeuge
+			</h4>
+		</summary>
 		<ul
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
@@ -85,7 +87,7 @@ templ pressSection() {
 				constants.ServerPathPrefix+"/tools/press/5",
 			)
 		</ul>
-	</div>
+	</details>
 }
 
 templ pressSectionListItem(title, upper, lower, href string) {
@@ -119,10 +121,10 @@ templ pressSectionListItem(title, upper, lower, href string) {
 
 templ toolsSection(tools []*database.ToolWithNotes) {
 	<div class="all-tools p">
-		<h3 class="mb">
+		<h4 class="mb p">
 			<i class="bi bi-archive mr"></i>
 			Alle Werkzeuge
-		</h3>
+		</h4>
 		<div class="actions-bar flex gap justify-end items-center">
 			<button
 				type="button"
