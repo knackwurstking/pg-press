@@ -20,7 +20,6 @@ var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
 // NewMetalSheets creates a new MetalSheets instance
 func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 	query := `
-		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
 			tile_height REAL NOT NULL,
@@ -36,11 +35,8 @@ func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
-		VALUES
-			(6, 4, -1, -1, -1, 1, '[]', '[]'),
-			(6, 25, 45, 12.8, 19.8, 2, '[]', '[]');
 	`
+
 	if _, err := db.Exec(query); err != nil {
 		panic(
 			NewDatabaseError(

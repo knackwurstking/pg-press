@@ -27,7 +27,6 @@ func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
 
 func (p *PressCycles) init() {
 	query := `
-		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
@@ -40,30 +39,6 @@ func (p *PressCycles) init() {
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
-		INSERT INTO press_cycles (press_number, tool_id, total_cycles, date, performed_by)
-		VALUES
-			(0, 1,     0, '2023-01-01 10:00:00', -1),
-			(0, 2,     0, '2023-01-01 10:00:00', -1),
-			(0, 1,  1000, '2023-01-02 10:00:00', -1),
-			(0, 2,  1000, '2023-01-02 10:00:00', -1),
-			(0, 1,  2000, '2023-01-03 10:00:00', -1),
-			(0, 2,  2000, '2023-01-03 10:00:00', -1),
-			(0, 1,  3000, '2023-01-04 10:00:00', -1),
-			(0, 2,  3000, '2023-01-04 10:00:00', -1),
-			(0, 1,  4000, '2023-01-05 10:00:00', -1),
-			(0, 2,  4000, '2023-01-05 10:00:00', -1),
-			(0, 1,  5000, '2023-01-06 10:00:00', -1),
-			(0, 2,  5000, '2023-01-06 10:00:00', -1),
-			(0, 1,  6000, '2023-01-07 10:00:00', -1),
-			(0, 2,  6000, '2023-01-07 10:00:00', -1),
-			(0, 1,  7000, '2023-01-08 10:00:00', -1),
-			(0, 2,  7000, '2023-01-08 10:00:00', -1),
-			(0, 1,  8000, '2023-01-09 10:00:00', -1),
-			(0, 2,  8000, '2023-01-09 10:00:00', -1),
-			(0, 1,  9000, '2023-01-10 10:00:00', -1),
-			(0, 2,  9000, '2023-01-10 10:00:00', -1),
-			(0, 1, 10000, '2023-01-11 10:00:00', -1),
-			(0, 2, 10000, '2023-01-11 10:00:00', -1);
 	`
 
 	if _, err := p.db.Exec(query); err != nil {

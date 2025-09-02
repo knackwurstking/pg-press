@@ -18,7 +18,6 @@ var _ DataOperations[*Tool] = (*Tools)(nil)
 
 func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	query := `
-		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
@@ -31,14 +30,6 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods)
-		VALUES
-			('top', '{"width": 100, "height": 100}', 'MASS', 'G01', false, 0, '[]', '[]'),
-			('bottom', '{"width": 100, "height": 100}', 'MASS', 'G01', false, 0, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G06', false, NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G06', false, NULL, '[]', '[]'),
-			('top', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]'),
-			('bottom', '{"width": 120, "height": 60}', 'MASS', 'G03', true, NULL, '[]', '[]');
 	`
 	if _, err := db.Exec(query); err != nil {
 		panic(
