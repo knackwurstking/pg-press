@@ -60,10 +60,12 @@ templ pressSection() {
 				"Presse 0",
 				"",
 				"",
+				"",
 				constants.ServerPathPrefix+"/tools/press/0",
 			)
 			@pressSectionListItem(
 				"Presse 2",
+				"",
 				"",
 				"",
 				constants.ServerPathPrefix+"/tools/press/2",
@@ -72,10 +74,12 @@ templ pressSection() {
 				"Presse 3",
 				"",
 				"",
+				"",
 				constants.ServerPathPrefix+"/tools/press/3",
 			)
 			@pressSectionListItem(
 				"Presse 4",
+				"",
 				"",
 				"",
 				constants.ServerPathPrefix+"/tools/press/4",
@@ -84,13 +88,14 @@ templ pressSection() {
 				"Presse 5",
 				"",
 				"",
+				"",
 				constants.ServerPathPrefix+"/tools/press/5",
 			)
 		</ul>
 	</details>
 }
 
-templ pressSectionListItem(title, upper, lower, href string) {
+templ pressSectionListItem(title, top, topCassette, bottom, href string) {
 	<li title={ title }>
 		<a
 			role="button"
@@ -103,14 +108,22 @@ templ pressSectionListItem(title, upper, lower, href string) {
 					<!-- Lower Tool -->
 					<span class="flex flex-col justify-center items-center">
 						@toolscomp.PositionBadge(database.PositionBottom, "muted")
-						<span class="text-sm">{ lower }</span>
+						<span class="text-sm">{ bottom }</span>
 					</span>
 					<!-- Separator -->
 					<span class="muted ghost">|</span>
 					<!-- Upper Tool -->
-					<span class="flex flex-col justify-center items-center">
-						@toolscomp.PositionBadge(database.PositionTop, "muted")
-						<span class="text-sm">{ upper }</span>
+					<span class="flex flex-col gap-sm">
+						<span class="flex flex-col gap-0 justify-center items-center">
+							@toolscomp.PositionBadge(database.PositionTop, "muted")
+							<span class="text-sm">{ top }</span>
+						</span>
+						if topCassette != "" {
+							<span class="flex flex-col gap-0 justify-center items-center">
+								@toolscomp.PositionBadge(database.PositionTopCassette, "muted")
+								<span class="text-sm">{ topCassette }</span>
+							</span>
+						}
 					</span>
 				</span>
 			</span>

@@ -3,8 +3,9 @@ package database
 import "fmt"
 
 const (
-	PositionTop    = Position("top")
-	PositionBottom = Position("bottom")
+	PositionTop         = Position("top")
+	PositionTopCassette = Position("top cassette")
+	PositionBottom      = Position("bottom")
 
 	ToolStatusActive       = ToolStatus("active")
 	ToolStatusAvailable    = ToolStatus("available")
@@ -67,6 +68,8 @@ func (t *Tool) String() string {
 	switch t.Position {
 	case PositionTop:
 		base = fmt.Sprintf("%s %s (%s, Oberteil)", t.Format, t.Code, t.Type)
+	case PositionTopCassette:
+		base = fmt.Sprintf("%s %s (%s, Kassette Oberteil)", t.Format, t.Code, t.Type)
 	case PositionBottom:
 		base = fmt.Sprintf("%s %s (%s, Unterteil)", t.Format, t.Code, t.Type)
 	default:

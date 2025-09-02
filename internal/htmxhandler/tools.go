@@ -465,6 +465,8 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
 	case database.PositionTop:
 		position = database.PositionTop
+	case database.PositionTopCassette:
+		position = database.PositionTopCassette
 	case database.PositionBottom:
 		position = database.PositionBottom
 	default:

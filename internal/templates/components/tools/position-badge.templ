@@ -11,6 +11,10 @@ templ PositionBadge(position database.Position, classNames string) {
 			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
 				Oberteil
 			</small>
+		case database.PositionTopCassette:
+			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
+				Kassette Oberteil
+			</small>
 		case database.PositionBottom:
 			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
 				Unterteil
