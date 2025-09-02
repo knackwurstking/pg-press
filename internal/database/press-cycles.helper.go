@@ -129,7 +129,7 @@ func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*PressCycle
 	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
-		SELECT id, press_number, tool_id, total_cycles, 0 as partial_cycles, date, performed_by
+		SELECT id, press_number, tool_id, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
 		ORDER BY id DESC
