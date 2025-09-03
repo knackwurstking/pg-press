@@ -1,9 +1,6 @@
-// Package database defines cookie models for user sessions and authentication.
-package database
+package models
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
@@ -108,7 +105,7 @@ func (c *Cookie) UpdateLastLogin() {
 
 // RefreshToken generates a new secure token for the cookie value.
 func (c *Cookie) RefreshToken() error {
-	newValue, err := generateSecureToken(32)
+	newValue, err := dbutils.GenerateSecureToken(32)
 	if err != nil {
 		return dberror.WrapError(err, "failed to refresh token")
 	}
@@ -120,7 +117,7 @@ func (c *Cookie) RefreshToken() error {
 
 // RefreshAPIKey generates a new secure API key.
 func (c *Cookie) RefreshAPIKey() error {
-	newAPIKey, err := generateSecureToken(dbutils.MinAPIKeyLength)
+	newAPIKey, err := dbutils.GenerateSecureToken(dbutils.MinAPIKeyLength)
 	if err != nil {
 		return dberror.WrapError(err, "failed to refresh API key")
 	}
@@ -169,12 +166,4 @@ func (c *Cookie) Equals(other *Cookie) bool {
 		c.Value == other.Value &&
 		c.ApiKey == other.ApiKey &&
 		c.LastLogin == other.LastLogin
-}
-
-func generateSecureToken(length int) (string, error) {
-	bytes := make([]byte, length/2)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
 }

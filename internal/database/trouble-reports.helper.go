@@ -5,12 +5,13 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.
 type TroubleReportWithAttachments struct {
 	*TroubleReport
-	LoadedAttachments []*Attachment `json:"loaded_attachments"`
+	LoadedAttachments []*models.Attachment `json:"loaded_attachments"`
 }
 
 // TroubleReportsHelper provides high-level operations for trouble reports
@@ -89,7 +90,7 @@ func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttach
 func (s *TroubleReportsHelper) AddWithAttachments(
 	user *User,
 	troubleReport *TroubleReport,
-	attachments []*Attachment,
+	attachments []*models.Attachment,
 ) error {
 	logger.DBTroubleReportsHelper().Info("Adding trouble report with %d attachments", len(attachments))
 
@@ -135,7 +136,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 	user *User,
 	id int64,
 	troubleReport *TroubleReport,
-	newAttachments []*Attachment,
+	newAttachments []*models.Attachment,
 ) error {
 	logger.DBTroubleReportsHelper().Info(
 		"Updating trouble report %d with %d new attachments", id, len(newAttachments))
@@ -205,7 +206,7 @@ func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *User) (*Tro
 }
 
 // LoadAttachments loads attachments for a trouble report.
-func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment, error) {
+func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*models.Attachment, error) {
 	logger.DBTroubleReportsHelper().Debug("Loading attachments for trouble report")
 
 	if tr == nil {
@@ -216,7 +217,7 @@ func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment
 }
 
 // GetAttachment retrieves a specific attachment by ID.
-func (s *TroubleReportsHelper) GetAttachment(id int64) (*Attachment, error) {
+func (s *TroubleReportsHelper) GetAttachment(id int64) (*models.Attachment, error) {
 	logger.DBTroubleReportsHelper().Debug("Getting attachment with ID %d", id)
 	return s.attachments.Get(id)
 }

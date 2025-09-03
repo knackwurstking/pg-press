@@ -1,11 +1,4 @@
-// Package pgpress attachment models.
-//
-// This file defines the Attachment data structure and its associated
-// validation and utility methods. Attachments represent files that can
-// be linked to trouble reports or other entities in the system.
-//
-// Attachments store data in byte form with mime type and unique ID.
-package database
+package models
 
 import (
 	"fmt"
@@ -19,6 +12,18 @@ const (
 	MinAttachmentIDLength = 1
 	MaxAttachmentIDLength = 255
 	MaxAttachmentDataSize = 10 * 1024 * 1024 // 10MB
+)
+
+var (
+	mimeTypes = map[string]string{
+		".jpg":  "image/jpeg",
+		".jpeg": "image/jpeg",
+		".png":  "image/png",
+		".gif":  "image/gif",
+		".bmp":  "image/bmp",
+		".svg":  "image/svg+xml",
+		".webp": "image/webp",
+	}
 )
 
 // Attachment represents a file attachment with its data and metadata.
@@ -67,18 +72,6 @@ func (a *Attachment) GetFileExtension() string {
 	}
 	return ""
 }
-
-var (
-	mimeTypes = map[string]string{
-		".jpg":  "image/jpeg",
-		".jpeg": "image/jpeg",
-		".png":  "image/png",
-		".gif":  "image/gif",
-		".bmp":  "image/bmp",
-		".svg":  "image/svg+xml",
-		".webp": "image/webp",
-	}
-)
 
 // IsImage checks if the attachment is an image file based on its mime type.
 func (a *Attachment) IsImage() bool {

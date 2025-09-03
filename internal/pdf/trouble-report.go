@@ -7,6 +7,7 @@ import (
 
 	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Options contains common options for PDF generation
@@ -157,8 +158,8 @@ func getTroubleReportMetadataInfo(o *troubleReportOptions) (
 	return earliestTime, latestTime, creator, lastModifier
 }
 
-func getTroubleReportImageAttachments(attachments []*database.Attachment) []*database.Attachment {
-	var images []*database.Attachment
+func getTroubleReportImageAttachments(attachments []*models.Attachment) []*models.Attachment {
+	var images []*models.Attachment
 	for _, attachment := range attachments {
 		if attachment.IsImage() {
 			images = append(images, attachment)
@@ -167,7 +168,7 @@ func getTroubleReportImageAttachments(attachments []*database.Attachment) []*dat
 	return images
 }
 
-func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*database.Attachment) {
+func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*models.Attachment) {
 	pageWidth, _ := o.PDF.GetPageSize()
 	leftMargin, _, rightMargin, _ := o.PDF.GetMargins()
 	usableWidth := pageWidth - leftMargin - rightMargin

@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
@@ -23,7 +23,7 @@ type EditDialogProps struct {
 	InvalidContent  bool
 	Close           bool
 	AttachmentError string
-	Attachments     []*database.Attachment
+	Attachments     []*models.Attachment
 }
 
 func EditDialog(props *EditDialogProps) templ.Component {

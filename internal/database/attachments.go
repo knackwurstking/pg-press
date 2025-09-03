@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Attachments provides database operations for managing attachments with lazy loading.
@@ -15,7 +16,7 @@ type Attachments struct {
 	db *sql.DB
 }
 
-var _ DataOperations[*Attachment] = (*Attachments)(nil)
+var _ DataOperations[*models.Attachment] = (*Attachments)(nil)
 
 // NewAttachments creates a new Attachments instance and initializes the database table.
 func NewAttachments(db *sql.DB) *Attachments {
@@ -43,7 +44,7 @@ func NewAttachments(db *sql.DB) *Attachments {
 }
 
 // List retrieves all attachments ordered by ID ascending.
-func (a *Attachments) List() ([]*Attachment, error) {
+func (a *Attachments) List() ([]*models.Attachment, error) {
 	logger.DBAttachments().Debug("Listing all attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
@@ -54,7 +55,7 @@ func (a *Attachments) List() ([]*Attachment, error) {
 	}
 	defer rows.Close()
 
-	var attachments []*Attachment
+	var attachments []*models.Attachment
 
 	for rows.Next() {
 		attachment, err := a.scanAttachment(rows)
@@ -73,7 +74,7 @@ func (a *Attachments) List() ([]*Attachment, error) {
 }
 
 // Get retrieves a specific attachment by ID.
-func (a *Attachments) Get(id int64) (*Attachment, error) {
+func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	logger.DBAttachments().Debug("Getting attachment, id: %d", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
@@ -91,9 +92,9 @@ func (a *Attachments) Get(id int64) (*Attachment, error) {
 }
 
 // GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
+func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	if len(ids) == 0 {
-		return []*Attachment{}, nil
+		return []*models.Attachment{}, nil
 	}
 
 	logger.DBAttachments().Debug("Getting attachments by IDs: %v", ids)
@@ -123,7 +124,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachmentMap := make(map[int64]*Attachment)
+	attachmentMap := make(map[int64]*models.Attachment)
 
 	for rows.Next() {
 		attachment, err := a.scanAttachment(rows)
@@ -139,7 +140,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 	}
 
 	// Return attachments in the order of the requested IDs
-	var attachments []*Attachment
+	var attachments []*models.Attachment
 	for _, id := range ids {
 		if attachment, exists := attachmentMap[id]; exists {
 			attachments = append(attachments, attachment)
@@ -150,7 +151,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
+func (a *Attachments) Add(attachment *models.Attachment, _ *User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -178,7 +179,7 @@ func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
 }
 
 // Update modifies an existing attachment.
-func (a *Attachments) Update(attachment *Attachment, _ *User) error {
+func (a *Attachments) Update(attachment *models.Attachment, _ *User) error {
 	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
@@ -239,8 +240,8 @@ type scannable interface {
 	Scan(dest ...any) error
 }
 
-func (a *Attachments) scanAttachment(scanner scannable) (*Attachment, error) {
-	attachment := &Attachment{}
+func (a *Attachments) scanAttachment(scanner scannable) (*models.Attachment, error) {
+	attachment := &models.Attachment{}
 	var id int64
 
 	if err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {

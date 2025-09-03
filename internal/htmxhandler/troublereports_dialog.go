@@ -17,6 +17,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	troublereportscomp "github.com/knackwurstking/pgpress/internal/templates/components/troublereports"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
@@ -177,7 +178,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
-	var newAttachments []*database.Attachment
+	var newAttachments []*models.Attachment
 	for _, a := range props.Attachments {
 		if a.GetID() > 0 {
 			existingAttachmentIDs = append(existingAttachmentIDs, a.GetID())
@@ -218,7 +219,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 // TODO: Do somehtings like the `get*FormData` method in "tools.go"
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
-	attachments []*database.Attachment,
+	attachments []*models.Attachment,
 	err error,
 ) {
 	logger.HTMXHandlerTroubleReports().Debug("Validating dialog edit form data")
@@ -251,9 +252,9 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	return title, content, attachments, nil
 }
 
-func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attachment, error) {
+func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
 	logger.HTMXHandlerTroubleReports().Debug("Processing attachments")
-	var attachments []*database.Attachment
+	var attachments []*models.Attachment
 
 	// Get existing attachments if editing
 	if idStr := ctx.QueryParam(constants.QueryParamID); idStr != "" {
@@ -262,7 +263,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
 				if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(
 					existingTR); err == nil {
-					attachments = make([]*database.Attachment, len(loadedAttachments))
+					attachments = make([]*models.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
 					logger.HTMXHandlerTroubleReports().Debug("Loaded %d existing attachments for trouble report %d", len(loadedAttachments), id)
 				}
@@ -319,11 +320,11 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*database.Attac
 func (h *TroubleReports) processFileUpload(
 	fileHeader *multipart.FileHeader,
 	index int,
-) (*database.Attachment, error) {
+) (*models.Attachment, error) {
 	logger.HTMXHandlerTroubleReports().Debug("Processing file upload: %s (size: %d bytes)", fileHeader.Filename, fileHeader.Size)
 
-	if fileHeader.Size > database.MaxAttachmentDataSize {
-		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, database.MaxAttachmentDataSize)
+	if fileHeader.Size > models.MaxAttachmentDataSize {
+		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, models.MaxAttachmentDataSize)
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
 	}
@@ -345,8 +346,8 @@ func (h *TroubleReports) processFileUpload(
 	attachmentID := fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
 
 	// Ensure ID doesn't exceed maximum length
-	if len(attachmentID) > database.MaxAttachmentIDLength {
-		maxFilenameLen := database.MaxAttachmentIDLength - len(timestamp) -
+	if len(attachmentID) > models.MaxAttachmentIDLength {
+		maxFilenameLen := models.MaxAttachmentIDLength - len(timestamp) -
 			len(fmt.Sprintf("temp_%d", index)) - 2
 		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
 			sanitizedFilename = sanitizedFilename[:maxFilenameLen]
@@ -374,7 +375,7 @@ func (h *TroubleReports) processFileUpload(
 		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
 	}
 
-	attachment := &database.Attachment{
+	attachment := &models.Attachment{
 		ID:       attachmentID,
 		MimeType: mimeType,
 		Data:     data,

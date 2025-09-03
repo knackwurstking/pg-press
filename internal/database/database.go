@@ -1,8 +1,10 @@
 package database
 
-import (
-	"database/sql"
-)
+import "database/sql"
+
+type Broadcaster interface {
+	Broadcast()
+}
 
 // DB represents the main database connection and provides access to all data access objects.
 type DB struct {

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/jung-kurt/gofpdf/v2"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type imageOptions struct {
@@ -34,7 +34,7 @@ func processImageRow(
 	o *imageOptions,
 	layout *imageLayoutOptions,
 	position *imagePositionOptions,
-	images []*database.Attachment,
+	images []*models.Attachment,
 ) {
 	leftHeight, rightHeight := calculateImageHeights(
 		o, images, position.StartIndex, layout.ImageWidth)
@@ -64,7 +64,7 @@ func processImageRow(
 
 func calculateImageHeights(
 	o *imageOptions,
-	images []*database.Attachment,
+	images []*models.Attachment,
 	startIndex int,
 	imageWidth float64,
 ) (leftHeight, rightHeight float64) {
@@ -83,7 +83,7 @@ func calculateImageHeights(
 
 func calculateSingleImageHeight(
 	o *imageOptions,
-	image *database.Attachment,
+	image *models.Attachment,
 	imageWidth float64,
 ) (height float64) {
 	tmpFile, err := createTempImageFile(image)
@@ -127,7 +127,7 @@ func addImageCaptions(
 
 func addImages(
 	o *imageOptions,
-	images []*database.Attachment,
+	images []*models.Attachment,
 	position *imagePositionOptions,
 	imageY float64,
 ) {
@@ -152,7 +152,7 @@ func addImages(
 
 func addSingleImage(
 	o *imageOptions,
-	image *database.Attachment,
+	image *models.Attachment,
 	x, y, width float64,
 ) {
 	tmpFile, err := createTempImageFile(image)
@@ -165,7 +165,7 @@ func addSingleImage(
 	o.PDF.Image(tmpFile, x, y, width, 0, false, imageType, 0, "")
 }
 
-func createTempImageFile(image *database.Attachment) (string, error) {
+func createTempImageFile(image *models.Attachment) (string, error) {
 	tmpFile, err := os.CreateTemp("",
 		fmt.Sprintf("attachment_%s_*.jpg", image.ID))
 	if err != nil {
