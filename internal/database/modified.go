@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 type Mods[T any] []*Modified[T]
@@ -36,7 +38,7 @@ func (m *Mods[T]) Get(time int64) (*Modified[T], error) {
 			return mod, nil
 		}
 	}
-	return nil, ErrNotFound
+	return nil, dberror.ErrNotFound
 }
 
 //func (m *Mods[T]) Rollback(time int64) error {

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 )
 
@@ -47,24 +48,24 @@ func NewUserFromInterfaceMap(modified map[string]any) *User {
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
 	if u.TelegramID <= 0 {
-		return NewValidationError("telegram_id", "must be positive", u.TelegramID)
+		return dberror.NewValidationError("telegram_id", "must be positive", u.TelegramID)
 	}
 
 	if u.UserName == "" {
-		return NewValidationError("user_name", "cannot be empty", u.UserName)
+		return dberror.NewValidationError("user_name", "cannot be empty", u.UserName)
 	}
 	if len(u.UserName) < MinUserNameLength {
-		return NewValidationError("user_name", "too short", len(u.UserName))
+		return dberror.NewValidationError("user_name", "too short", len(u.UserName))
 	}
 	if len(u.UserName) > MaxUserNameLength {
-		return NewValidationError("user_name", "too long", len(u.UserName))
+		return dberror.NewValidationError("user_name", "too long", len(u.UserName))
 	}
 
 	if u.ApiKey == "" {
-		return NewValidationError("api_key", "cannot be empty", u.ApiKey)
+		return dberror.NewValidationError("api_key", "cannot be empty", u.ApiKey)
 	}
 	if len(u.ApiKey) < dbutils.MinAPIKeyLength {
-		return NewValidationError(
+		return dberror.NewValidationError(
 			"api_key",
 			fmt.Sprintf("too short for security, must be at least %d characters", dbutils.MinAPIKeyLength),
 			len(u.ApiKey),
@@ -72,7 +73,7 @@ func (u *User) Validate() error {
 	}
 
 	if u.LastFeed < 0 {
-		return NewValidationError("last_feed", "cannot be negative", u.LastFeed)
+		return dberror.NewValidationError("last_feed", "cannot be negative", u.LastFeed)
 	}
 
 	return nil

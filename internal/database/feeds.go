@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -25,7 +26,7 @@ func NewFeeds(db *sql.DB) *Feeds {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
+		panic(dberror.NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
 	}
 	return &Feeds{db: db}
 }
@@ -43,7 +44,7 @@ func (f *Feeds) List() ([]*Feed, error) {
 	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
 	rows, err := f.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "feeds", "failed to query feeds", err)
+		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds", err)
 	}
 	defer rows.Close()
 
@@ -55,20 +56,20 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
-		return nil, NewValidationError("offset", "must be non-negative", offset)
+		return nil, dberror.NewValidationError("offset", "must be non-negative", offset)
 	}
 	if limit <= 0 {
-		return nil, NewValidationError("limit", "must be positive", limit)
+		return nil, dberror.NewValidationError("limit", "must be positive", limit)
 	}
 	if limit > 1000 {
-		return nil, NewValidationError("limit", "must not exceed 1000", limit)
+		return nil, dberror.NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
 	query := `SELECT id, time, data_type, data FROM feeds
 		ORDER BY id DESC LIMIT ? OFFSET ?`
 	rows, err := f.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, NewDatabaseError("select", "feeds", "failed to query feeds range", err)
+		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds range", err)
 	}
 	defer rows.Close()
 
@@ -81,7 +82,7 @@ func (f *Feeds) Add(feed *Feed) error {
 
 	if feed == nil {
 		logger.DBFeeds().Debug("Validation failed: feed is nil")
-		return NewValidationError("feed", "cannot be nil", nil)
+		return dberror.NewValidationError("feed", "cannot be nil", nil)
 	}
 	if err := feed.Validate(); err != nil {
 		logger.DBFeeds().Debug("Feed validation failed: %v", err)
@@ -91,14 +92,14 @@ func (f *Feeds) Add(feed *Feed) error {
 	data, err := json.Marshal(feed.Data)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to marshal feed data: %v", err)
-		return WrapError(err, "failed to marshal feed data")
+		return dberror.WrapError(err, "failed to marshal feed data")
 	}
 
 	query := `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
 	_, err = f.db.Exec(query, feed.Time, feed.DataType, data)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to insert feed: %v", err)
-		return NewDatabaseError("insert", "feeds", "failed to insert feed", err)
+		return dberror.NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
 
 	// Notify about new feed if notifier is set
@@ -119,7 +120,7 @@ func (f *Feeds) Count() (int, error) {
 	query := `SELECT COUNT(*) FROM feeds`
 	err := f.db.QueryRow(query).Scan(&count)
 	if err != nil {
-		return 0, NewDatabaseError("count", "feeds", "failed to count feeds", err)
+		return 0, dberror.NewDatabaseError("count", "feeds", "failed to count feeds", err)
 	}
 	return count, nil
 }

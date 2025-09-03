@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 )
 
@@ -38,28 +39,28 @@ func NewCookie(userAgent, value, apiKey string) *Cookie {
 // Validate checks if the cookie has valid data.
 func (c *Cookie) Validate() error {
 	if c.UserAgent == "" {
-		return NewValidationError("user_agent", "cannot be empty", c.UserAgent)
+		return dberror.NewValidationError("user_agent", "cannot be empty", c.UserAgent)
 	}
 	if len(c.UserAgent) > MaxUserAgentLength {
-		return NewValidationError("user_agent", "too long", len(c.UserAgent))
+		return dberror.NewValidationError("user_agent", "too long", len(c.UserAgent))
 	}
 
 	if c.Value == "" {
-		return NewValidationError("value", "cannot be empty", c.Value)
+		return dberror.NewValidationError("value", "cannot be empty", c.Value)
 	}
 	if len(c.Value) < MinCookieValueLength {
-		return NewValidationError("value", "too short for security", len(c.Value))
+		return dberror.NewValidationError("value", "too short for security", len(c.Value))
 	}
 
 	if c.ApiKey == "" {
-		return NewValidationError("api_key", "cannot be empty", c.ApiKey)
+		return dberror.NewValidationError("api_key", "cannot be empty", c.ApiKey)
 	}
 	if len(c.ApiKey) < dbutils.MinAPIKeyLength {
-		return NewValidationError("api_key", "too short for security", len(c.ApiKey))
+		return dberror.NewValidationError("api_key", "too short for security", len(c.ApiKey))
 	}
 
 	if c.LastLogin <= 0 {
-		return NewValidationError("last_login", "must be positive", c.LastLogin)
+		return dberror.NewValidationError("last_login", "must be positive", c.LastLogin)
 	}
 
 	return nil
@@ -109,7 +110,7 @@ func (c *Cookie) UpdateLastLogin() {
 func (c *Cookie) RefreshToken() error {
 	newValue, err := generateSecureToken(32)
 	if err != nil {
-		return WrapError(err, "failed to refresh token")
+		return dberror.WrapError(err, "failed to refresh token")
 	}
 
 	c.Value = newValue
@@ -121,7 +122,7 @@ func (c *Cookie) RefreshToken() error {
 func (c *Cookie) RefreshAPIKey() error {
 	newAPIKey, err := generateSecureToken(dbutils.MinAPIKeyLength)
 	if err != nil {
-		return WrapError(err, "failed to refresh API key")
+		return dberror.WrapError(err, "failed to refresh API key")
 	}
 
 	c.ApiKey = newAPIKey

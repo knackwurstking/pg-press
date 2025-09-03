@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 func GetUserFromContext(ctx echo.Context) (*database.User, error) {
@@ -94,14 +95,14 @@ func HandleTemplate(
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			database.WrapError(err, "failed to parse templates"),
+			dberror.WrapError(err, "failed to parse templates"),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			database.WrapError(err, "failed to render page"),
+			dberror.WrapError(err, "failed to render page"),
 		)
 	}
 

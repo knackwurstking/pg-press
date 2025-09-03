@@ -10,6 +10,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 func removeCookiesCommand() cli.Command {
@@ -81,7 +82,7 @@ func autoCleanCookiesCommand() cli.Command {
 				if *telegramID != 0 {
 					u, err := db.Users.Get(*telegramID)
 					if err != nil {
-						if errors.Is(err, database.ErrNotFound) {
+						if errors.Is(err, dberror.ErrNotFound) {
 							os.Exit(exitCodeNotFound)
 						}
 

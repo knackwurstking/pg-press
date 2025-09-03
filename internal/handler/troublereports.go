@@ -11,6 +11,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
@@ -63,7 +64,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			"Failed to retrieve trouble report %d for PDF generation: %v",
 			id, err,
 		)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to retrieve trouble report: "+err.Error())
 	}
 
@@ -115,7 +116,7 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get attachment: "+err.Error())
 	}
 

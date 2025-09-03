@@ -10,6 +10,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -70,7 +71,7 @@ func (h *Auth) handleLogout(c echo.Context) error {
 func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	user, err := h.DB.UsersHelper.GetUserFromApiKey(apiKey)
 	if err != nil {
-		if !errors.Is(err, database.ErrNotFound) {
+		if !errors.Is(err, dberror.ErrNotFound) {
 			logger.HandlerAuth().Error("Failed to get user from API key: %v", err)
 		}
 		return false

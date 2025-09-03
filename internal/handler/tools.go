@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
@@ -36,7 +37,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 	tools, err := h.DB.ToolsHelper.ListWithNotes()
 	if err != nil {
 		logger.HandlerTools().Error("Failed to fetch tools: %v", err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tools: "+err.Error())
 	}
 
@@ -88,7 +89,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	tool, err := h.DB.ToolsHelper.GetWithNotes(id)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to fetch tool %d: %v", id, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())
 	}
 

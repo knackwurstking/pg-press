@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -36,7 +37,7 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(NewDatabaseError("create_table", "users",
+		panic(dberror.NewDatabaseError("create_table", "users",
 			"failed to create users table", err))
 	}
 
@@ -53,7 +54,7 @@ func (u *Users) List() ([]*User, error) {
 	query := `SELECT * FROM users`
 	rows, err := u.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "users",
+		return nil, dberror.NewDatabaseError("select", "users",
 			"failed to query users", err)
 	}
 	defer rows.Close()
@@ -62,13 +63,13 @@ func (u *Users) List() ([]*User, error) {
 	for rows.Next() {
 		user, err := u.scanUser(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan user")
+			return nil, dberror.WrapError(err, "failed to scan user")
 		}
 		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "users",
+		return nil, dberror.NewDatabaseError("select", "users",
 			"error iterating over rows", err)
 	}
 
@@ -85,9 +86,9 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 	user, err := u.scanUser(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "users",
+		return nil, dberror.NewDatabaseError("select", "users",
 			fmt.Sprintf("failed to get user with Telegram ID %d", telegramID), err)
 	}
 
@@ -97,7 +98,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 // Add creates a new user and generates a corresponding activity feed entry.
 func (u *Users) Add(user *User, actor *User) (int64, error) {
 	if user == nil {
-		return 0, NewValidationError("user", "user cannot be nil", nil)
+		return 0, dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
 
 	logger.DBUsers().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
@@ -112,12 +113,12 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 		WHERE telegram_id = ?`
 	err := u.db.QueryRow(query, user.TelegramID).Scan(&count)
 	if err != nil {
-		return 0, NewDatabaseError("select", "users",
+		return 0, dberror.NewDatabaseError("select", "users",
 			"failed to check user existence", err)
 	}
 
 	if count > 0 {
-		return 0, ErrAlreadyExists
+		return 0, dberror.ErrAlreadyExists
 	}
 
 	// Insert the new user
@@ -126,7 +127,7 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 	_, err = u.db.Exec(query,
 		user.TelegramID, user.UserName, user.ApiKey, user.LastFeed)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "users",
+		return 0, dberror.NewDatabaseError("insert", "users",
 			"failed to insert user", err)
 	}
 
@@ -136,7 +137,7 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 		FeedUserAdd{user.TelegramID, user.UserName},
 	)
 	if err := u.feeds.Add(feed); err != nil {
-		return user.TelegramID, WrapError(err, "failed to add feed entry")
+		return user.TelegramID, dberror.WrapError(err, "failed to add feed entry")
 	}
 
 	return user.TelegramID, nil
@@ -152,18 +153,18 @@ func (u *Users) Delete(telegramID int64, actor *User) error {
 	query := `DELETE FROM users WHERE telegram_id = ?`
 	result, err := u.db.Exec(query, telegramID)
 	if err != nil {
-		return NewDatabaseError("delete", "users",
+		return dberror.NewDatabaseError("delete", "users",
 			fmt.Sprintf("failed to delete user with Telegram ID %d", telegramID), err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return NewDatabaseError("delete", "users",
+		return dberror.NewDatabaseError("delete", "users",
 			"failed to get rows affected", err)
 	}
 
 	if rowsAffected == 0 {
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	// Create feed entry for the removed user
@@ -173,7 +174,7 @@ func (u *Users) Delete(telegramID int64, actor *User) error {
 			FeedUserRemove{user.TelegramID, user.UserName},
 		)
 		if err := u.feeds.Add(feed); err != nil {
-			return WrapError(err, "failed to add feed entry")
+			return dberror.WrapError(err, "failed to add feed entry")
 		}
 	}
 
@@ -186,22 +187,22 @@ func (u *Users) Update(user *User, actor *User) error {
 	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
 
 	if user == nil {
-		return NewValidationError("user", "user cannot be nil", nil)
+		return dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
 
 	if user.UserName == "" {
 		logger.DBUsers().Debug("Validation failed: empty username")
-		return NewValidationError("user_name", "username cannot be empty", user.UserName)
+		return dberror.NewValidationError("user_name", "username cannot be empty", user.UserName)
 	}
 
 	if user.ApiKey == "" {
 		logger.DBUsers().Debug("Validation failed: empty API key")
-		return NewValidationError("api_key", "API key cannot be empty", user.ApiKey)
+		return dberror.NewValidationError("api_key", "API key cannot be empty", user.ApiKey)
 	}
 
 	if len(user.ApiKey) < dbutils.MinAPIKeyLength {
 		logger.DBUsers().Debug("Validation failed: API key too short (length=%d, required=%d)", len(user.ApiKey), dbutils.MinAPIKeyLength)
-		return NewValidationError("api_key",
+		return dberror.NewValidationError("api_key",
 			fmt.Sprintf("API key must be at least %d characters", dbutils.MinAPIKeyLength),
 			len(user.ApiKey))
 	}
@@ -218,7 +219,7 @@ func (u *Users) Update(user *User, actor *User) error {
 	_, err = u.db.Exec(query,
 		user.UserName, user.ApiKey, user.LastFeed, telegramID)
 	if err != nil {
-		return NewDatabaseError("update", "users",
+		return dberror.NewDatabaseError("update", "users",
 			fmt.Sprintf("failed to update user with Telegram ID %d", telegramID), err)
 	}
 
@@ -235,7 +236,7 @@ func (u *Users) Update(user *User, actor *User) error {
 		)
 
 		if err := u.feeds.Add(feed); err != nil {
-			return WrapError(err, "failed to add feed entry")
+			return dberror.WrapError(err, "failed to add feed entry")
 		}
 	}
 
@@ -249,7 +250,7 @@ func (u *Users) scanUser(scanner scannable) (*User, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "users",
+		return nil, dberror.NewDatabaseError("scan", "users",
 			"failed to scan row", err)
 	}
 	return user, nil

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -34,7 +35,7 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	`
 	if _, err := db.Exec(query); err != nil {
 		panic(
-			NewDatabaseError(
+			dberror.NewDatabaseError(
 				"create_table",
 				"tools",
 				"failed to create tools table",
@@ -57,7 +58,7 @@ func (t *Tools) List() ([]*Tool, error) {
 	`
 	rows, err := t.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "tools",
+		return nil, dberror.NewDatabaseError("select", "tools",
 			"failed to query tools", err)
 	}
 	defer rows.Close()
@@ -67,14 +68,14 @@ func (t *Tools) List() ([]*Tool, error) {
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan tool")
+			return nil, dberror.WrapError(err, "failed to scan tool")
 		}
 
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "tools",
+		return nil, dberror.NewDatabaseError("select", "tools",
 			"error iterating over rows", err)
 	}
 
@@ -92,9 +93,9 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	tool, err := t.scanTool(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "tools",
+		return nil, dberror.NewDatabaseError("select", "tools",
 			fmt.Sprintf("failed to get tool with ID %d", id), err)
 	}
 
@@ -107,7 +108,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	// Marshal format for the existence check and insert
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "tools",
+		return 0, dberror.NewDatabaseError("insert", "tools",
 			"failed to marshal format", err)
 	}
 
@@ -118,13 +119,13 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	// Marshal other JSON fields
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "tools",
+		return 0, dberror.NewDatabaseError("insert", "tools",
 			"failed to marshal notes", err)
 	}
 
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "tools",
+		return 0, dberror.NewDatabaseError("insert", "tools",
 			"failed to marshal mods", err)
 	}
 
@@ -136,13 +137,13 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	result, err := t.db.Exec(query,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "tools",
+		return 0, dberror.NewDatabaseError("insert", "tools",
 			"failed to insert tool", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, NewDatabaseError("insert", "tools",
+		return 0, dberror.NewDatabaseError("insert", "tools",
 			"failed to get last insert ID", err)
 	}
 
@@ -170,7 +171,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	// Marshal format for the existence check and update
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			"failed to marshal format for existence check", err)
 	}
 
@@ -181,13 +182,13 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	// Marshal other JSON fields
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			"failed to marshal notes", err)
 	}
 
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			"failed to marshal mods", err)
 	}
 
@@ -199,7 +200,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	_, err = t.db.Exec(query,
 		tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
 	}
 
@@ -224,7 +225,7 @@ func (t *Tools) Delete(id int64, user *User) error {
 	// Get tool info before deletion for feed
 	tool, err := t.Get(id)
 	if err != nil {
-		return WrapError(err, "failed to get tool before deletion")
+		return dberror.WrapError(err, "failed to get tool before deletion")
 	}
 
 	query := `
@@ -232,7 +233,7 @@ func (t *Tools) Delete(id int64, user *User) error {
 	`
 	_, err = t.db.Exec(query, id)
 	if err != nil {
-		return NewDatabaseError("delete", "tools",
+		return dberror.NewDatabaseError("delete", "tools",
 			fmt.Sprintf("failed to delete tool with ID %d", id), err)
 	}
 
@@ -264,7 +265,7 @@ func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
 	}
 
 	if count > 0 {
-		return ErrAlreadyExists
+		return dberror.ErrAlreadyExists
 	}
 
 	return nil
@@ -284,22 +285,22 @@ func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "tools",
+		return nil, dberror.NewDatabaseError("scan", "tools",
 			"failed to scan row", err)
 	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, NewDatabaseError("scan", "tools",
+		return nil, dberror.NewDatabaseError("scan", "tools",
 			"failed to unmarshal format", err)
 	}
 
 	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
-		return nil, NewDatabaseError("scan", "tools",
+		return nil, dberror.NewDatabaseError("scan", "tools",
 			"failed to unmarshal notes", err)
 	}
 
 	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
-		return nil, WrapError(err, "failed to unmarshal mods data")
+		return nil, dberror.WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return tool, nil

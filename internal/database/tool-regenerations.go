@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -35,7 +36,7 @@ func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCyclesHelper *PressCycl
 
 	if _, err := db.Exec(query); err != nil {
 		panic(
-			NewDatabaseError(
+			dberror.NewDatabaseError(
 				"create_table",
 				"tool_regenerations",
 				"failed to create tool_regenerations table",
@@ -78,9 +79,9 @@ func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, u
 	))
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("insert", "tool_regenerations",
+		return nil, dberror.NewDatabaseError("insert", "tool_regenerations",
 			"failed to create regeneration record", err)
 	}
 
@@ -140,9 +141,9 @@ func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration
 	regen, err := t.scanToolRegeneration(t.db.QueryRow(query, toolID))
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("scan", "tool_regenerations",
+		return nil, dberror.NewDatabaseError("scan", "tool_regenerations",
 			"failed to get last regeneration", err)
 	}
 
@@ -169,7 +170,7 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
-			return nil, NewDatabaseError("scan", "tool_regenerations",
+			return nil, dberror.NewDatabaseError("scan", "tool_regenerations",
 				"failed to get regeneration history", err)
 		}
 
@@ -215,7 +216,7 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
-			return nil, NewDatabaseError("scan", "tool_regenerations",
+			return nil, dberror.NewDatabaseError("scan", "tool_regenerations",
 				"failed to get all regenerations", err)
 		}
 

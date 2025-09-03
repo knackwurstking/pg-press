@@ -13,7 +13,7 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/router"
 )
@@ -85,7 +85,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				message = http.StatusText(code)
 			}
 		} else {
-			code = database.GetHTTPStatusCode(err)
+			code = dberror.GetHTTPStatusCode(err)
 			message = err.Error()
 		}
 

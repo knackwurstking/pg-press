@@ -9,6 +9,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 
 	"github.com/labstack/echo/v4"
@@ -110,7 +111,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
 		if user, err = db.UsersHelper.GetUserFromApiKey(auth); err != nil {
 			return false, echo.NewHTTPError(
-				database.GetHTTPStatusCode(database.ErrInvalidCredentials),
+				dberror.GetHTTPStatusCode(dberror.ErrInvalidCredentials),
 				"failed to validate user from API key: "+err.Error())
 		}
 	}
@@ -133,7 +134,7 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, 
 	// Check if cookie has expired
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if c.LastLogin < expirationTime {
-		return nil, database.NewValidationError("cookie", "cookie has expired", nil)
+		return nil, dberror.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
 	user, err := db.UsersHelper.GetUserFromApiKey(c.ApiKey)

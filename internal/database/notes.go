@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -27,7 +28,7 @@ func NewNotes(db *sql.DB) *Notes {
 
 	if _, err := db.Exec(query); err != nil {
 		panic(
-			NewDatabaseError(
+			dberror.NewDatabaseError(
 				"create_table",
 				"notes",
 				"failed to create notes table",
@@ -50,7 +51,7 @@ func (n *Notes) List() ([]*Note, error) {
 
 	rows, err := n.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "notes",
+		return nil, dberror.NewDatabaseError("select", "notes",
 			"failed to query notes", err)
 	}
 	defer rows.Close()
@@ -60,13 +61,13 @@ func (n *Notes) List() ([]*Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan note")
+			return nil, dberror.WrapError(err, "failed to scan note")
 		}
 		notes = append(notes, note)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "notes",
+		return nil, dberror.NewDatabaseError("select", "notes",
 			"error iterating over rows", err)
 	}
 
@@ -85,9 +86,9 @@ func (n *Notes) Get(id int64) (*Note, error) {
 	note, err := n.scanNote(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "notes",
+		return nil, dberror.NewDatabaseError("select", "notes",
 			fmt.Sprintf("failed to get note with ID %d", id), err)
 	}
 
@@ -116,7 +117,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 
 	rows, err := n.db.Query(query, args...)
 	if err != nil {
-		return nil, NewDatabaseError("select", "notes",
+		return nil, dberror.NewDatabaseError("select", "notes",
 			"failed to query notes by IDs", err)
 	}
 	defer rows.Close()
@@ -127,13 +128,13 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan attachment")
+			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
 		noteMap[note.ID] = note
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "notes",
+		return nil, dberror.NewDatabaseError("select", "notes",
 			"error iterating over rows", err)
 	}
 
@@ -157,13 +158,13 @@ func (n *Notes) Add(note *Note, _ *User) (int64, error) {
 
 	result, err := n.db.Exec(query, note.Level, note.Content)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "notes",
+		return 0, dberror.NewDatabaseError("insert", "notes",
 			"failed to insert note", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, NewDatabaseError("insert", "notes",
+		return 0, dberror.NewDatabaseError("insert", "notes",
 			"failed to get last insert ID", err)
 	}
 
@@ -185,7 +186,7 @@ func (n *Notes) scanNote(scanner scannable) (*Note, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "notes",
+		return nil, dberror.NewDatabaseError("scan", "notes",
 			"failed to scan row", err)
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -45,7 +46,7 @@ func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber PressNumb
 	cycle, err := pch.pressCycles.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
 
 		return nil, fmt.Errorf("failed to start tool usage: %w", err)
@@ -89,7 +90,7 @@ func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*PressCycle, er
 	row := pch.pressCycles.db.QueryRow(query, toolID)
 	cycle, err := pch.pressCycles.scanPressCycle(row)
 	if err == sql.ErrNoRows {
-		return nil, ErrNotFound
+		return nil, dberror.ErrNotFound
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current tool usage: %w", err)

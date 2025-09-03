@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -24,7 +25,7 @@ func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*User, error) {
 	logger.DBUsers().Debug("Getting user by API key")
 
 	if apiKey == "" {
-		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
+		return nil, dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
 	query := `SELECT * FROM users WHERE api_key = ?`
@@ -34,9 +35,9 @@ func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*User, error) {
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "users",
+		return nil, dberror.NewDatabaseError("select", "users",
 			"failed to get user by API key", err)
 	}
 

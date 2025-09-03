@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -29,7 +30,7 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(NewDatabaseError(
+		panic(dberror.NewDatabaseError(
 			"create_table",
 			"trouble_reports",
 			"failed to create trouble_reports table",
@@ -50,7 +51,7 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := tr.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "trouble_reports",
+		return nil, dberror.NewDatabaseError("select", "trouble_reports",
 			"failed to query trouble reports", err)
 	}
 	defer rows.Close()
@@ -60,13 +61,13 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 	for rows.Next() {
 		report, err := tr.scanTroubleReport(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan trouble report")
+			return nil, dberror.WrapError(err, "failed to scan trouble report")
 		}
 		reports = append(reports, report)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "trouble_reports",
+		return nil, dberror.NewDatabaseError("select", "trouble_reports",
 			"error iterating over rows", err)
 	}
 
@@ -83,9 +84,9 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 	report, err := tr.scanTroubleReport(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "trouble_reports",
+		return nil, dberror.NewDatabaseError("select", "trouble_reports",
 			fmt.Sprintf("failed to get trouble report with ID %d", id), err)
 	}
 
@@ -97,7 +98,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
-		return 0, NewValidationError("report", "trouble report cannot be nil", nil)
+		return 0, dberror.NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	if err := troubleReport.Validate(); err != nil {
@@ -108,12 +109,12 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
-		return 0, WrapError(err, "failed to marshal linked attachments")
+		return 0, dberror.WrapError(err, "failed to marshal linked attachments")
 	}
 
 	mods, err := json.Marshal(troubleReport.Mods)
 	if err != nil {
-		return 0, WrapError(err, "failed to marshal mods data")
+		return 0, dberror.WrapError(err, "failed to marshal mods data")
 	}
 
 	query := `INSERT INTO trouble_reports
@@ -124,13 +125,13 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods,
 	)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "trouble_reports",
+		return 0, dberror.NewDatabaseError("insert", "trouble_reports",
 			"failed to insert trouble report", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, NewDatabaseError("insert", "trouble_reports",
+		return 0, dberror.NewDatabaseError("insert", "trouble_reports",
 			"failed to get last insert ID", err)
 	}
 	troubleReport.ID = id
@@ -144,7 +145,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
-		return id, WrapError(err, "failed to add feed entry")
+		return id, dberror.WrapError(err, "failed to add feed entry")
 	}
 
 	return id, nil
@@ -156,7 +157,7 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
 	if troubleReport == nil {
-		return NewValidationError("report", "trouble report cannot be nil", nil)
+		return dberror.NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	if err := troubleReport.Validate(); err != nil {
@@ -167,12 +168,12 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
-		return WrapError(err, "failed to marshal linked attachments")
+		return dberror.WrapError(err, "failed to marshal linked attachments")
 	}
 
 	mods, err := json.Marshal(troubleReport.Mods)
 	if err != nil {
-		return WrapError(err, "failed to marshal mods data")
+		return dberror.WrapError(err, "failed to marshal mods data")
 	}
 
 	query := `UPDATE trouble_reports
@@ -182,7 +183,7 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods, id,
 	)
 	if err != nil {
-		return NewDatabaseError("update", "trouble_reports",
+		return dberror.NewDatabaseError("update", "trouble_reports",
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
@@ -195,7 +196,7 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 		},
 	)
 	if err := tr.feeds.Add(feed); err != nil {
-		return WrapError(err, "failed to add feed entry")
+		return dberror.WrapError(err, "failed to add feed entry")
 	}
 
 	return nil
@@ -208,24 +209,24 @@ func (tr *TroubleReports) Delete(id int64, user *User) error {
 	// Get the user before deleting for the feed entry
 	report, err := tr.Get(id)
 	if err != nil {
-		return WrapError(err, "failed to get trouble report before deletion")
+		return dberror.WrapError(err, "failed to get trouble report before deletion")
 	}
 
 	query := `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := tr.db.Exec(query, id)
 	if err != nil {
-		return NewDatabaseError("delete", "trouble_reports",
+		return dberror.NewDatabaseError("delete", "trouble_reports",
 			fmt.Sprintf("failed to delete trouble report with ID %d", id), err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return NewDatabaseError("delete", "trouble_reports",
+		return dberror.NewDatabaseError("delete", "trouble_reports",
 			"failed to get rows affected", err)
 	}
 
 	if rowsAffected == 0 {
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	// Create feed entry for the removed user
@@ -239,7 +240,7 @@ func (tr *TroubleReports) Delete(id int64, user *User) error {
 			},
 		)
 		if err := tr.feeds.Add(feed); err != nil {
-			return WrapError(err, "failed to add feed entry")
+			return dberror.WrapError(err, "failed to add feed entry")
 		}
 	}
 
@@ -256,17 +257,17 @@ func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*TroubleReport, 
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "trouble_reports",
+		return nil, dberror.NewDatabaseError("scan", "trouble_reports",
 			"failed to scan row", err)
 	}
 
 	// Try to unmarshal as new format (array of int64 IDs) first
 	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		return nil, WrapError(err, "failed to unmarshal linked attachments")
+		return nil, dberror.WrapError(err, "failed to unmarshal linked attachments")
 	}
 
 	if err := json.Unmarshal(mods, &report.Mods); err != nil {
-		return nil, WrapError(err, "failed to unmarshal mods data")
+		return nil, dberror.WrapError(err, "failed to unmarshal mods data")
 	}
 
 	return report, nil

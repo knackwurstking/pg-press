@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -59,7 +60,7 @@ func (p *PressCycles) Get(id int64) (*PressCycle, error) {
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
 		return nil, fmt.Errorf("failed to get press cycle %d: %w", id, err)
 	}
@@ -190,7 +191,7 @@ func (p *PressCycles) Delete(id int64, user *User) error {
 		return fmt.Errorf("failed to get rows affected for delete: %w", err)
 	}
 	if rows == 0 {
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	// Create feed entry

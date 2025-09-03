@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	profilecomp "github.com/knackwurstking/pgpress/internal/templates/components/profile"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -36,7 +37,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		logger.HTMXHandlerProfile().Error("Failed to list cookies for user %s: %v", user.UserName, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to list cookies: "+err.Error())
 	}
 
@@ -63,7 +64,7 @@ func (h *Profile) handleDeleteCookies(c echo.Context) error {
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
 		logger.HTMXHandlerProfile().Error("Failed to delete cookie: %v", err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to delete cookie: "+err.Error())
 	}
 

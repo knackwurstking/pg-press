@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/gommon/color"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 func listUserCommand() cli.Command {
@@ -74,7 +75,7 @@ func showUserCommand() cli.Command {
 
 				user, err := db.Users.Get(*telegramID)
 				if err != nil {
-					if errors.Is(err, database.ErrNotFound) {
+					if errors.Is(err, dberror.ErrNotFound) {
 						os.Exit(exitCodeNotFound)
 					}
 
@@ -144,7 +145,7 @@ func addUserCommand() cli.Command {
 				}
 
 				user := database.NewUser(*telegramID, *userName, *apiKey)
-				if _, err = db.Users.Add(user, nil); errors.Is(err, database.ErrAlreadyExists) {
+				if _, err = db.Users.Add(user, nil); errors.Is(err, dberror.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
 				}

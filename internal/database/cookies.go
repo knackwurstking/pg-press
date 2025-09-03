@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"slices"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -25,7 +26,7 @@ func NewCookies(db *sql.DB) *Cookies {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(NewDatabaseError("create_table", "cookies",
+		panic(dberror.NewDatabaseError("create_table", "cookies",
 			"failed to create cookies table", err))
 	}
 
@@ -39,7 +40,7 @@ func (c *Cookies) List() ([]*Cookie, error) {
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "cookies", "failed to query cookies", err)
+		return nil, dberror.NewDatabaseError("select", "cookies", "failed to query cookies", err)
 	}
 	defer rows.Close()
 
@@ -47,13 +48,13 @@ func (c *Cookies) List() ([]*Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan cookie")
+			return nil, dberror.WrapError(err, "failed to scan cookie")
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "cookies", "error iterating over rows", err)
+		return nil, dberror.NewDatabaseError("select", "cookies", "error iterating over rows", err)
 	}
 
 	logger.DBCookies().Debug("Listed %d cookies", len(cookies))
@@ -66,14 +67,14 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 
 	if apiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return nil, NewValidationError("api_key", "API key cannot be empty", apiKey)
+		return nil, dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
 	query := `SELECT * FROM cookies
 		WHERE api_key = ? ORDER BY last_login DESC`
 	rows, err := c.db.Query(query, apiKey)
 	if err != nil {
-		return nil, NewDatabaseError("select", "cookies", "failed to query cookies by API key", err)
+		return nil, dberror.NewDatabaseError("select", "cookies", "failed to query cookies by API key", err)
 	}
 	defer rows.Close()
 
@@ -81,13 +82,13 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan cookie")
+			return nil, dberror.WrapError(err, "failed to scan cookie")
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "cookies", "error iterating over rows", err)
+		return nil, dberror.NewDatabaseError("select", "cookies", "error iterating over rows", err)
 	}
 
 	logger.DBCookies().Debug("Found %d cookies for API key", len(cookies))
@@ -100,7 +101,7 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return nil, NewValidationError("value", "cookie value cannot be empty", value)
+		return nil, dberror.NewValidationError("value", "cookie value cannot be empty", value)
 	}
 
 	query := `SELECT * FROM cookies WHERE value = ?`
@@ -108,9 +109,9 @@ func (c *Cookies) Get(value string) (*Cookie, error) {
 	cookie, err := c.scanCookie(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "cookies", "failed to get cookie by value", err)
+		return nil, dberror.NewDatabaseError("select", "cookies", "failed to get cookie by value", err)
 	}
 
 	return cookie, nil
@@ -122,19 +123,19 @@ func (c *Cookies) Add(cookie *Cookie) error {
 
 	if cookie == nil {
 		logger.DBCookies().Debug("Validation failed: cookie is nil")
-		return NewValidationError("cookie", "cookie cannot be nil", nil)
+		return dberror.NewValidationError("cookie", "cookie cannot be nil", nil)
 	}
 	if cookie.Value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return NewValidationError("value", "cookie value cannot be empty", cookie.Value)
+		return dberror.NewValidationError("value", "cookie value cannot be empty", cookie.Value)
 	}
 	if cookie.ApiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
+		return dberror.NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
 	}
 	if cookie.LastLogin <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
-		return NewValidationError("last_login",
+		return dberror.NewValidationError("last_login",
 			"last login timestamp must be positive", cookie.LastLogin)
 	}
 
@@ -142,11 +143,11 @@ func (c *Cookies) Add(cookie *Cookie) error {
 	query := `SELECT COUNT(*) FROM cookies WHERE value = ?`
 	err := c.db.QueryRow(query, cookie.Value).Scan(&count)
 	if err != nil {
-		return NewDatabaseError("select", "cookies", "failed to check cookie existence", err)
+		return dberror.NewDatabaseError("select", "cookies", "failed to check cookie existence", err)
 	}
 	if count > 0 {
 		logger.DBCookies().Debug("Cookie already exists with value")
-		return ErrAlreadyExists
+		return dberror.ErrAlreadyExists
 	}
 
 	query = `INSERT INTO cookies
@@ -154,7 +155,7 @@ func (c *Cookies) Add(cookie *Cookie) error {
 	_, err = c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return NewDatabaseError("insert", "cookies", "failed to insert cookie", err)
+		return dberror.NewDatabaseError("insert", "cookies", "failed to insert cookie", err)
 	}
 
 	logger.DBCookies().Debug("Successfully added cookie")
@@ -167,23 +168,23 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty current cookie value")
-		return NewValidationError("value", "current cookie value cannot be empty", value)
+		return dberror.NewValidationError("value", "current cookie value cannot be empty", value)
 	}
 	if cookie == nil {
 		logger.DBCookies().Debug("Validation failed: cookie is nil")
-		return NewValidationError("cookie", "cookie cannot be nil", nil)
+		return dberror.NewValidationError("cookie", "cookie cannot be nil", nil)
 	}
 	if cookie.Value == "" {
 		logger.DBCookies().Debug("Validation failed: empty new cookie value")
-		return NewValidationError("value", "new cookie value cannot be empty", cookie.Value)
+		return dberror.NewValidationError("value", "new cookie value cannot be empty", cookie.Value)
 	}
 	if cookie.ApiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
+		return dberror.NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
 	}
 	if cookie.LastLogin <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
-		return NewValidationError("last_login",
+		return dberror.NewValidationError("last_login",
 			"last login timestamp must be positive", cookie.LastLogin)
 	}
 
@@ -192,16 +193,16 @@ func (c *Cookies) Update(value string, cookie *Cookie) error {
 	result, err := c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
-		return NewDatabaseError("update", "cookies", "failed to update cookie", err)
+		return dberror.NewDatabaseError("update", "cookies", "failed to update cookie", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return NewDatabaseError("update", "cookies", "failed to get rows affected", err)
+		return dberror.NewDatabaseError("update", "cookies", "failed to get rows affected", err)
 	}
 	if rowsAffected == 0 {
 		logger.DBCookies().Debug("No cookie found to update")
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	logger.DBCookies().Debug("Successfully updated cookie")

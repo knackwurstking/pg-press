@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -46,7 +47,7 @@ func (s *TroubleReportsHelper) GetWithAttachments(
 	// Load attachments
 	attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
 	if err != nil {
-		return nil, WrapError(err, "failed to load attachments for trouble report")
+		return nil, dberror.WrapError(err, "failed to load attachments for trouble report")
 	}
 
 	return &TroubleReportWithAttachments{
@@ -71,7 +72,7 @@ func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttach
 		// Load attachments for each report
 		attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
 		if err != nil {
-			return nil, WrapError(err,
+			return nil, dberror.WrapError(err,
 				fmt.Sprintf("failed to load attachments for trouble report %d", tr.ID))
 		}
 
@@ -93,7 +94,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 	logger.DBTroubleReportsHelper().Info("Adding trouble report with %d attachments", len(attachments))
 
 	if troubleReport == nil {
-		return NewValidationError("report", "trouble report cannot be nil", nil)
+		return dberror.NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	// First, add the attachments and collect their IDs
@@ -109,7 +110,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 			for _, addedID := range attachmentIDs {
 				s.attachments.Delete(addedID, user)
 			}
-			return WrapError(err, "failed to add attachment")
+			return dberror.WrapError(err, "failed to add attachment")
 		}
 		attachmentIDs = append(attachmentIDs, id)
 	}
@@ -123,7 +124,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 		for _, id := range attachmentIDs {
 			s.attachments.Delete(id, user)
 		}
-		return WrapError(err, "failed to add trouble report")
+		return dberror.WrapError(err, "failed to add trouble report")
 	}
 
 	return nil
@@ -140,7 +141,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 		"Updating trouble report %d with %d new attachments", id, len(newAttachments))
 
 	if troubleReport == nil {
-		return NewValidationError("report", "trouble report cannot be nil", nil)
+		return dberror.NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	// Add new attachments
@@ -156,7 +157,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 			for _, addedID := range newAttachmentIDs {
 				s.attachments.Delete(addedID, user)
 			}
-			return WrapError(err, "failed to add new attachment")
+			return dberror.WrapError(err, "failed to add new attachment")
 		}
 		newAttachmentIDs = append(newAttachmentIDs, attachmentID)
 	}
@@ -172,7 +173,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 		for _, attachmentID := range newAttachmentIDs {
 			s.attachments.Delete(attachmentID, user)
 		}
-		return WrapError(err, "failed to update trouble report")
+		return dberror.WrapError(err, "failed to update trouble report")
 	}
 
 	return nil
@@ -185,12 +186,12 @@ func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *User) (*Tro
 	// Get the trouble report to find its attachments
 	tr, err := s.troubleReports.Get(id)
 	if err != nil {
-		return tr, WrapError(err, "failed to get trouble report for removal")
+		return tr, dberror.WrapError(err, "failed to get trouble report for removal")
 	}
 
 	// Remove the trouble report first
 	if err := s.troubleReports.Delete(id, user); err != nil {
-		return tr, WrapError(err, "failed to remove trouble report")
+		return tr, dberror.WrapError(err, "failed to remove trouble report")
 	}
 
 	// Remove associated attachments
@@ -208,7 +209,7 @@ func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*Attachment
 	logger.DBTroubleReportsHelper().Debug("Loading attachments for trouble report")
 
 	if tr == nil {
-		return nil, NewValidationError("report", "trouble report cannot be nil", nil)
+		return nil, dberror.NewValidationError("report", "trouble report cannot be nil", nil)
 	}
 
 	return s.attachments.GetByIDs(tr.LinkedAttachments)

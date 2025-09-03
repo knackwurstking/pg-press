@@ -1,6 +1,10 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/dberror"
+)
 
 const (
 	PositionTop         = Position("top")
@@ -92,7 +96,7 @@ func (t *Tool) SetPress(pressNumber *PressNumber) error {
 	}
 
 	if !(*pressNumber).IsValid() {
-		return NewValidationError("press", "invalid press number", pressNumber)
+		return dberror.NewValidationError("press", "invalid press number", pressNumber)
 	}
 
 	t.Press = pressNumber

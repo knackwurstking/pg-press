@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 const (
@@ -29,28 +31,28 @@ type Attachment struct {
 // Validate checks if the attachment has valid data.
 func (a *Attachment) Validate() error {
 	if a.ID == "" {
-		return NewValidationError("id", "cannot be empty", a.ID)
+		return dberror.NewValidationError("id", "cannot be empty", a.ID)
 	}
 	if len(a.ID) < MinAttachmentIDLength {
-		return NewValidationError("id", "too short", len(a.ID))
+		return dberror.NewValidationError("id", "too short", len(a.ID))
 	}
 	if len(a.ID) > MaxAttachmentIDLength {
-		return NewValidationError("id", "too long", len(a.ID))
+		return dberror.NewValidationError("id", "too long", len(a.ID))
 	}
 
 	if a.MimeType == "" {
-		return NewValidationError("mime_type", "cannot be empty", a.MimeType)
+		return dberror.NewValidationError("mime_type", "cannot be empty", a.MimeType)
 	}
 
 	if !a.IsImage() {
-		return NewValidationError("mime_type", "only image files are allowed", a.MimeType)
+		return dberror.NewValidationError("mime_type", "only image files are allowed", a.MimeType)
 	}
 
 	if a.Data == nil {
-		return NewValidationError("data", "cannot be nil", a.Data)
+		return dberror.NewValidationError("data", "cannot be nil", a.Data)
 	}
 	if len(a.Data) > MaxAttachmentDataSize {
-		return NewValidationError("data", "too large", len(a.Data))
+		return dberror.NewValidationError("data", "too large", len(a.Data))
 	}
 
 	return nil
@@ -118,13 +120,13 @@ func (a *Attachment) Clone() *Attachment {
 func (a *Attachment) UpdateID(newID string) error {
 	newID = strings.TrimSpace(newID)
 	if newID == "" {
-		return NewValidationError("id", "cannot be empty", newID)
+		return dberror.NewValidationError("id", "cannot be empty", newID)
 	}
 	if len(newID) < MinAttachmentIDLength {
-		return NewValidationError("id", "too short", len(newID))
+		return dberror.NewValidationError("id", "too short", len(newID))
 	}
 	if len(newID) > MaxAttachmentIDLength {
-		return NewValidationError("id", "too long", len(newID))
+		return dberror.NewValidationError("id", "too long", len(newID))
 	}
 	a.ID = newID
 	return nil
@@ -134,7 +136,7 @@ func (a *Attachment) UpdateID(newID string) error {
 func (a *Attachment) UpdateMimeType(newMimeType string) error {
 	newMimeType = strings.TrimSpace(newMimeType)
 	if newMimeType == "" {
-		return NewValidationError("mime_type", "cannot be empty", newMimeType)
+		return dberror.NewValidationError("mime_type", "cannot be empty", newMimeType)
 	}
 	a.MimeType = newMimeType
 	return nil
@@ -143,7 +145,7 @@ func (a *Attachment) UpdateMimeType(newMimeType string) error {
 // UpdateData updates the attachment's data with validation.
 func (a *Attachment) UpdateData(newData []byte) error {
 	if newData == nil {
-		return NewValidationError("data", "cannot be nil", newData)
+		return dberror.NewValidationError("data", "cannot be nil", newData)
 	}
 	if len(newData) > MaxAttachmentDataSize {
 		return NewValidationError("data", "too large", len(newData))

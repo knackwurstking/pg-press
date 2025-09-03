@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -57,7 +58,7 @@ func (h *Tools) handleList(c echo.Context) error {
 	// Get tools from database
 	tools, err := h.DB.ToolsHelper.ListWithNotes()
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tools from database: "+err.Error())
 	}
 
@@ -82,7 +83,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ID)
 			tool, err := h.DB.ToolsHelper.GetWithNotes(props.ID)
 			if err != nil {
-				return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
 			}
 
@@ -129,7 +130,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		tool.Type, tool.Code, tool.Position)
 
 	if t, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to add tool: "+err.Error())
 	} else {
 		tool.ID = t.ID
@@ -174,7 +175,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	logger.HTMXHandlerTools().Info("Updating tool %d", id)
 	tool.ID = id
 	if err := h.DB.Tools.Update(tool, user); err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to update tool: "+err.Error())
 	}
 
@@ -202,7 +203,7 @@ func (h *Tools) handleDelete(c echo.Context) error {
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to delete tool: "+err.Error())
 	}
 
@@ -231,14 +232,14 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	// Get press cycles for this tool
 	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
 
 	// Get regenerations for this tool
 	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool regenerations: "+err.Error())
 	}
 
@@ -277,7 +278,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 
 	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get total cycles: "+err.Error())
 	}
 
@@ -301,7 +302,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		}
 		tool, err := h.DB.Tools.Get(toolID)
 		if err != nil {
-			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 				"failed to get tool: "+err.Error())
 		}
 		props.Tool = tool
@@ -360,7 +361,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	}
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())
 	}
 
@@ -416,7 +417,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	}
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())
 	}
 

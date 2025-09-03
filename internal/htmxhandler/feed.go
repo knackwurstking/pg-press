@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	feedscomp "github.com/knackwurstking/pgpress/internal/templates/components/feeds"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -32,7 +33,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	feeds, err := h.DB.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
 		logger.HTMXHandlerFeed().Error("Failed to fetch feeds: %v", err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"error getting feeds: "+err.Error())
 	}
 
@@ -62,7 +63,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 
 		if err := h.DB.Users.Update(user, user); err != nil {
 			logger.HTMXHandlerFeed().Error("Failed to update user's last feed: %v", err)
-			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())
 		}
 

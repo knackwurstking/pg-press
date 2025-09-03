@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -28,7 +29,7 @@ func NewAttachments(db *sql.DB) *Attachments {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(NewDatabaseError(
+		panic(dberror.NewDatabaseError(
 			"create_table",
 			"attachments",
 			"failed to create attachments table",
@@ -48,7 +49,7 @@ func (a *Attachments) List() ([]*Attachment, error) {
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
 	rows, err := a.db.Query(query)
 	if err != nil {
-		return nil, NewDatabaseError("select", "attachments",
+		return nil, dberror.NewDatabaseError("select", "attachments",
 			"failed to query attachments", err)
 	}
 	defer rows.Close()
@@ -58,13 +59,13 @@ func (a *Attachments) List() ([]*Attachment, error) {
 	for rows.Next() {
 		attachment, err := a.scanAttachment(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan attachment")
+			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
 		attachments = append(attachments, attachment)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "attachments",
+		return nil, dberror.NewDatabaseError("select", "attachments",
 			"error iterating over rows", err)
 	}
 
@@ -80,9 +81,9 @@ func (a *Attachments) Get(id int64) (*Attachment, error) {
 	attachment, err := a.scanAttachment(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ErrNotFound
+			return nil, dberror.ErrNotFound
 		}
-		return nil, NewDatabaseError("select", "attachments",
+		return nil, dberror.NewDatabaseError("select", "attachments",
 			fmt.Sprintf("failed to get attachment with ID %d", id), err)
 	}
 
@@ -116,7 +117,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 
 	rows, err := a.db.Query(query, args...)
 	if err != nil {
-		return nil, NewDatabaseError("select", "attachments",
+		return nil, dberror.NewDatabaseError("select", "attachments",
 			"failed to query attachments by IDs", err)
 	}
 	defer rows.Close()
@@ -127,13 +128,13 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 	for rows.Next() {
 		attachment, err := a.scanAttachment(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan attachment")
+			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
 		attachmentMap[attachment.GetID()] = attachment
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "attachments",
+		return nil, dberror.NewDatabaseError("select", "attachments",
 			"error iterating over rows", err)
 	}
 
@@ -153,7 +154,7 @@ func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
-		return 0, NewValidationError("attachment", "attachment cannot be nil", nil)
+		return 0, dberror.NewValidationError("attachment", "attachment cannot be nil", nil)
 	}
 
 	if err := attachment.Validate(); err != nil {
@@ -163,13 +164,13 @@ func (a *Attachments) Add(attachment *Attachment, _ *User) (int64, error) {
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, NewDatabaseError("insert", "attachments",
+		return 0, dberror.NewDatabaseError("insert", "attachments",
 			"failed to insert attachment", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, NewDatabaseError("insert", "attachments",
+		return 0, dberror.NewDatabaseError("insert", "attachments",
 			"failed to get last insert ID", err)
 	}
 
@@ -182,7 +183,7 @@ func (a *Attachments) Update(attachment *Attachment, _ *User) error {
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
 	if attachment == nil {
-		return NewValidationError("attachment", "attachment cannot be nil", nil)
+		return dberror.NewValidationError("attachment", "attachment cannot be nil", nil)
 	}
 
 	if err := attachment.Validate(); err != nil {
@@ -192,18 +193,18 @@ func (a *Attachments) Update(attachment *Attachment, _ *User) error {
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return NewDatabaseError("update", "attachments",
+		return dberror.NewDatabaseError("update", "attachments",
 			fmt.Sprintf("failed to update attachment with ID %d", id), err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return NewDatabaseError("update", "attachments",
+		return dberror.NewDatabaseError("update", "attachments",
 			"failed to get rows affected", err)
 	}
 
 	if rowsAffected == 0 {
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	return nil
@@ -216,18 +217,18 @@ func (a *Attachments) Delete(id int64, _ *User) error {
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.db.Exec(query, id)
 	if err != nil {
-		return NewDatabaseError("delete", "attachments",
+		return dberror.NewDatabaseError("delete", "attachments",
 			fmt.Sprintf("failed to delete attachment with ID %d", id), err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return NewDatabaseError("delete", "attachments",
+		return dberror.NewDatabaseError("delete", "attachments",
 			"failed to get rows affected", err)
 	}
 
 	if rowsAffected == 0 {
-		return ErrNotFound
+		return dberror.ErrNotFound
 	}
 
 	return nil
@@ -247,7 +248,7 @@ func (a *Attachments) scanAttachment(scanner scannable) (*Attachment, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "attachments", "failed to scan row", err)
+		return nil, dberror.NewDatabaseError("scan", "attachments", "failed to scan row", err)
 	}
 
 	// Set the ID using string conversion to maintain compatibility

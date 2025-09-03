@@ -1,5 +1,4 @@
-// Package database provides error handling utilities and types.
-package database
+package dberror
 
 import (
 	"errors"

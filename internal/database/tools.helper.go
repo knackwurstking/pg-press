@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -49,7 +50,7 @@ func (th *ToolsHelper) GetWithNotes(id int64) (*ToolWithNotes, error) {
 	// Load notes
 	notes, err := th.notes.GetByIDs(tool.LinkedNotes)
 	if err != nil {
-		return nil, WrapError(err, "failed to load attachments for trouble report")
+		return nil, dberror.WrapError(err, "failed to load attachments for trouble report")
 	}
 
 	return &ToolWithNotes{
@@ -74,7 +75,7 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 		// Load notes for each tool
 		notes, err := th.notes.GetByIDs(tool.LinkedNotes)
 		if err != nil {
-			return nil, WrapError(err,
+			return nil, dberror.WrapError(err,
 				fmt.Sprintf("failed to load notes for tool %d", tool.ID))
 		}
 
@@ -96,7 +97,7 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 	for _, note := range notes {
 		noteID, err := th.notes.Add(note, user)
 		if err != nil {
-			return nil, WrapError(err, "failed to add note")
+			return nil, dberror.WrapError(err, "failed to add note")
 		}
 		noteIDs = append(noteIDs, noteID)
 	}
@@ -107,7 +108,7 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*To
 	// Add the tool
 	toolID, err := th.tools.Add(tool, user)
 	if err != nil {
-		return nil, WrapError(err, "failed to add tool")
+		return nil, dberror.WrapError(err, "failed to add tool")
 	}
 
 	// Set the tool ID
@@ -137,7 +138,7 @@ func (th *ToolsHelper) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 	`
 	rows, err := th.tools.db.Query(query, pressNumber)
 	if err != nil {
-		return nil, NewDatabaseError("select", "tools",
+		return nil, dberror.NewDatabaseError("select", "tools",
 			fmt.Sprintf("failed to query tools for press %v", pressNumber), err)
 	}
 	defer rows.Close()
@@ -147,13 +148,13 @@ func (th *ToolsHelper) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 	for rows.Next() {
 		tool, err := th.tools.scanTool(rows)
 		if err != nil {
-			return nil, WrapError(err, "failed to scan tool")
+			return nil, dberror.WrapError(err, "failed to scan tool")
 		}
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, NewDatabaseError("select", "tools",
+		return nil, dberror.NewDatabaseError("select", "tools",
 			"error iterating over rows", err)
 	}
 
@@ -183,14 +184,14 @@ func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user 
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			"failed to marshal mods", err)
 	}
 
 	const query = `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
 	_, err = th.tools.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update regenerating for tool %d", tool.ID), err)
 	}
 
@@ -234,14 +235,14 @@ func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *User)
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			"failed to marshal mods", err)
 	}
 
 	const query = `UPDATE tools SET press = ?, mods = ? WHERE id = ?`
 	_, err = th.tools.db.Exec(query, press, modsBytes, toolID)
 	if err != nil {
-		return NewDatabaseError("update", "tools",
+		return dberror.NewDatabaseError("update", "tools",
 			fmt.Sprintf("failed to update press for tool %d", toolID), err)
 	}
 

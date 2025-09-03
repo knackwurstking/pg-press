@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	troublereportscomp "github.com/knackwurstking/pgpress/internal/templates/components/troublereports"
@@ -23,7 +24,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to load trouble reports: "+err.Error())
 	}
 
@@ -31,7 +32,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	troubleReportsList := troublereportscomp.List(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to render trouble reports list component: "+err.Error())
 	}
 	return nil
@@ -60,7 +61,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 
 	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to delete trouble report: "+err.Error())
 	} else {
 		logger.HTMXHandlerTroubleReports().Info("Successfully deleted trouble report %d (%s)", removedReport.ID, removedReport.Title)
@@ -74,7 +75,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 		)
 		if err := h.DB.Feeds.Add(feed); err != nil {
 			logger.HTMXHandlerTroubleReports().Error("Failed to add feed entry for deleted trouble report %d: %v", id, err)
-			return database.WrapError(err, "failed to add feed entry")
+			return dberror.WrapError(err, "failed to add feed entry")
 		}
 		logger.HTMXHandlerTroubleReports().Debug("Feed entry created for deleted trouble report %d", id)
 	}
@@ -92,7 +93,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
 	if err != nil {
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to load trouble report: "+err.Error())
 	}
 
@@ -114,7 +115,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(modifiedTr)
 				if err != nil {
 					logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for modified trouble report %d: %v", id, err)
-					return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+					return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 						"failed to load attachments for modified trouble report: "+err.Error())
 				}
 
@@ -148,7 +149,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.Tro
 		var err error
 		tr, err = h.DB.TroubleReports.Get(id)
 		if err != nil {
-			return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 				"failed to load trouble report: "+err.Error())
 		}
 	}
@@ -196,7 +197,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to load trouble report %d: %v", id, err)
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to load trouble report: "+err.Error())
 	}
 
@@ -208,7 +209,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 			timeQuery, id, err,
 		)
 
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get modification: "+err.Error())
 	}
 
@@ -228,7 +229,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 			id, err,
 		)
 
-		return echo.NewHTTPError(database.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 

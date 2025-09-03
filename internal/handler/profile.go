@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
@@ -40,7 +41,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	if err = h.handleUserNameChange(c, user); err != nil {
 		logger.HandlerProfile().Error("Failed to update username for user %s: %v", user.UserName, err)
 		return echo.NewHTTPError(
-			database.GetHTTPStatusCode(err),
+			dberror.GetHTTPStatusCode(err),
 			"error updating username: "+err.Error(),
 		)
 	}
@@ -65,7 +66,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) erro
 	if len(userName) < constants.UserNameMinLength || len(userName) > constants.UserNameMaxLength {
 		logger.HandlerProfile().Warn("Invalid username length for user %s: %d characters (attempted: %s)",
 			user.UserName, len(userName), userName)
-		return database.NewValidationError(constants.UserNameFormField,
+		return dberror.NewValidationError(constants.UserNameFormField,
 			"username must be between 1 and 100 characters", len(userName))
 	}
 

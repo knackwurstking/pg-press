@@ -12,6 +12,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 // listFeedsCommand creates a CLI command for listing feeds from the database.
@@ -280,7 +281,7 @@ func removeFeedsByIDs(db *database.DB, ids []string) error {
 
 		err = db.Feeds.Delete(id)
 		if err != nil {
-			if errors.Is(err, database.ErrNotFound) {
+			if errors.Is(err, dberror.ErrNotFound) {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
 			} else {
 				failed = append(failed, fmt.Sprintf("failed to remove feed ID %d: %s", id, err))

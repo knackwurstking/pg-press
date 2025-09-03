@@ -4,6 +4,8 @@ package database
 import (
 	"fmt"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/dberror"
 )
 
 const (
@@ -311,13 +313,13 @@ func NewFeed(dataType string, data any) *Feed {
 // Validate checks if the feed has valid data.
 func (f *Feed) Validate() error {
 	if f.Data == nil {
-		return NewValidationError("cache", "cannot be nil", f.Data)
+		return dberror.NewValidationError("cache", "cannot be nil", f.Data)
 	}
 	if f.DataType == "" {
-		return NewValidationError("data type", "cannot be empty", f.DataType)
+		return dberror.NewValidationError("data type", "cannot be empty", f.DataType)
 	}
 	if f.Time <= 0 {
-		return NewValidationError("time", "must be positive", f.Time)
+		return dberror.NewValidationError("time", "must be positive", f.Time)
 	}
 	return nil
 }
