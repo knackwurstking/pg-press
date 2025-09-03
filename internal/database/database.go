@@ -37,7 +37,7 @@ type DB struct {
 	UsersHelper          *UsersHelper
 	Cookies              *Cookies
 	Attachments          *Attachments
-	TroubleReports       DataOperations[*TroubleReport]
+	TroubleReports       DataOperations[*models.TroubleReport]
 	TroubleReportsHelper *TroubleReportsHelper
 	Notes                *Notes
 	Tools                DataOperations[*models.Tool]

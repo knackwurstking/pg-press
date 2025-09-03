@@ -1,12 +1,11 @@
 // Package database provides trouble report models for tracking issues and problems.
-package database
+package models
 
 import (
 	"fmt"
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
-	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 const (
@@ -24,11 +23,11 @@ type TroubleReportMod struct {
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64                         `json:"id"`
-	Title             string                        `json:"title"`
-	Content           string                        `json:"content"`
-	LinkedAttachments []int64                       `json:"linked_attachments"`
-	Mods              models.Mods[TroubleReportMod] `json:"mods"`
+	ID                int64                  `json:"id"`
+	Title             string                 `json:"title"`
+	Content           string                 `json:"content"`
+	LinkedAttachments []int64                `json:"linked_attachments"`
+	Mods              Mods[TroubleReportMod] `json:"mods"`
 }
 
 // NewTroubleReport creates a new trouble report with the provided details.
@@ -37,7 +36,7 @@ func NewTroubleReport(title, content string) *TroubleReport {
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              models.Mods[TroubleReportMod]{},
+		Mods:              Mods[TroubleReportMod]{},
 	}
 }
 

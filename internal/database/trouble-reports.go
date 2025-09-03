@@ -16,7 +16,7 @@ type TroubleReports struct {
 	feeds *Feeds
 }
 
-var _ DataOperations[*TroubleReport] = (*TroubleReports)(nil)
+var _ DataOperations[*models.TroubleReport] = (*TroubleReports)(nil)
 
 // NewTroubleReports creates a new TroubleReports instance and initializes the database table.
 func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
@@ -46,7 +46,7 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 }
 
 // List retrieves all trouble reports ordered by ID descending.
-func (tr *TroubleReports) List() ([]*TroubleReport, error) {
+func (tr *TroubleReports) List() ([]*models.TroubleReport, error) {
 	logger.DBTroubleReports().Info("Listing trouble reports")
 
 	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
@@ -57,7 +57,7 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 	}
 	defer rows.Close()
 
-	var reports []*TroubleReport
+	var reports []*models.TroubleReport
 
 	for rows.Next() {
 		report, err := tr.scanTroubleReport(rows)
@@ -76,7 +76,7 @@ func (tr *TroubleReports) List() ([]*TroubleReport, error) {
 }
 
 // Get retrieves a specific trouble report by ID.
-func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
+func (tr *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report, id: %d", id)
 
 	query := `SELECT * FROM trouble_reports WHERE id = ?`
@@ -95,7 +95,7 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *models.User) (int64, error) {
+func (tr *TroubleReports) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
@@ -153,7 +153,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *models.User) (
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *models.User) error {
+func (tr *TroubleReports) Update(troubleReport *models.TroubleReport, user *models.User) error {
 	id := troubleReport.ID
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
@@ -248,8 +248,8 @@ func (tr *TroubleReports) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*TroubleReport, error) {
-	report := &TroubleReport{}
+func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*models.TroubleReport, error) {
+	report := &models.TroubleReport{}
 	var linkedAttachments string
 	var mods []byte
 
@@ -274,12 +274,12 @@ func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*TroubleReport, 
 	return report, nil
 }
 
-func (tr *TroubleReports) updateMods(user *models.User, report *TroubleReport) {
+func (tr *TroubleReports) updateMods(user *models.User, report *models.TroubleReport) {
 	if user == nil {
 		return
 	}
 
-	report.Mods.Add(user, TroubleReportMod{
+	report.Mods.Add(user, models.TroubleReportMod{
 		Title:             report.Title,
 		Content:           report.Content,
 		LinkedAttachments: report.LinkedAttachments,

@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
@@ -98,7 +97,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-		tr := database.NewTroubleReport(title, content)
+		tr := models.NewTroubleReport(title, content)
 
 		logger.HTMXHandlerTroubleReports().Debug(
 			"Creating trouble report: title='%s', attachments=%d",

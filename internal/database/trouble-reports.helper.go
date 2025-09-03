@@ -10,20 +10,20 @@ import (
 
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.
 type TroubleReportWithAttachments struct {
-	*TroubleReport
+	*models.TroubleReport
 	LoadedAttachments []*models.Attachment `json:"loaded_attachments"`
 }
 
 // TroubleReportsHelper provides high-level operations for trouble reports
 // with attachment management.
 type TroubleReportsHelper struct {
-	troubleReports DataOperations[*TroubleReport]
+	troubleReports DataOperations[*models.TroubleReport]
 	attachments    *Attachments
 }
 
 // NewTroubleReportsHelper creates a new helper instance.
 func NewTroubleReportsHelper(
-	troubleReports DataOperations[*TroubleReport],
+	troubleReports DataOperations[*models.TroubleReport],
 	attachments *Attachments,
 ) *TroubleReportsHelper {
 	return &TroubleReportsHelper{
@@ -89,7 +89,7 @@ func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttach
 // AddWithAttachments creates a new trouble report and its attachments.
 func (s *TroubleReportsHelper) AddWithAttachments(
 	user *models.User,
-	troubleReport *TroubleReport,
+	troubleReport *models.TroubleReport,
 	attachments []*models.Attachment,
 ) error {
 	logger.DBTroubleReportsHelper().Info("Adding trouble report with %d attachments", len(attachments))
@@ -135,7 +135,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 func (s *TroubleReportsHelper) UpdateWithAttachments(
 	user *models.User,
 	id int64,
-	troubleReport *TroubleReport,
+	troubleReport *models.TroubleReport,
 	newAttachments []*models.Attachment,
 ) error {
 	logger.DBTroubleReportsHelper().Info(
@@ -181,7 +181,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
-func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *models.User) (*TroubleReport, error) {
+func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *models.User) (*models.TroubleReport, error) {
 	logger.DBTroubleReportsHelper().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments
@@ -206,7 +206,7 @@ func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *models.User
 }
 
 // LoadAttachments loads attachments for a trouble report.
-func (s *TroubleReportsHelper) LoadAttachments(tr *TroubleReport) ([]*models.Attachment, error) {
+func (s *TroubleReportsHelper) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachment, error) {
 	logger.DBTroubleReportsHelper().Debug("Loading attachments for trouble report")
 
 	if tr == nil {

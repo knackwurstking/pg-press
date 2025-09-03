@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
@@ -105,7 +104,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		for _, mod := range tr.Mods {
 			if mod.Time == timeQuery {
 				// Create a temporary trouble report with the modified data
-				modifiedTr := &database.TroubleReport{
+				modifiedTr := &models.TroubleReport{
 					ID:                tr.ID,
 					Title:             mod.Data.Title,
 					Content:           mod.Data.Content,
@@ -138,7 +137,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) handleGetModifications(c echo.Context, tr *database.TroubleReport) error {
+func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.TroubleReport) error {
 	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return err

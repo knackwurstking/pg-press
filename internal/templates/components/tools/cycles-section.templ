@@ -3,7 +3,6 @@ package tools
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
@@ -12,7 +11,7 @@ type CyclesSectionProps struct {
 	ToolID        int64
 	TotalCycles   int64
 	Cycles        []*models.PressCycle
-	Regenerations []*database.ToolRegeneration
+	Regenerations []*models.ToolRegeneration
 }
 
 templ CyclesSection(props *CyclesSectionProps) {

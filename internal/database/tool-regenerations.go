@@ -54,7 +54,7 @@ func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCyclesHelper *PressCycl
 }
 
 // Create records a new tool regeneration event
-func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, user *models.User) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, user *models.User) (*models.ToolRegeneration, error) {
 	logger.DBToolRegenerations().Info(
 		"Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s",
 		toolID, cycleID, reason,
@@ -65,7 +65,7 @@ func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, u
 		performedBy = &user.TelegramID
 	}
 
-	regen := NewToolRegeneration(toolID, cycleID, reason, performedBy)
+	regen := models.NewToolRegeneration(toolID, cycleID, reason, performedBy)
 
 	query := `
 		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
@@ -102,7 +102,7 @@ func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, u
 }
 
 // Update updates an existing regeneration record
-func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *models.User) error {
+func (t *ToolRegenerations) Update(regen *models.ToolRegeneration, user *models.User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
 	var performedBy *int64
@@ -129,7 +129,7 @@ func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *models.User) e
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
-func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.ToolRegeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting last regeneration for tool: tool_id=%d", toolID)
 
 	query := `
@@ -152,7 +152,7 @@ func (t *ToolRegenerations) GetLastRegeneration(toolID int64) (*ToolRegeneration
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
-func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegeneration, error) {
+func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*models.ToolRegeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting regeneration history for tool: tool_id=%d", toolID)
 
 	query := `
@@ -167,7 +167,7 @@ func (t *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*ToolRegener
 	}
 	defer rows.Close()
 
-	var regenerations []*ToolRegeneration
+	var regenerations []*models.ToolRegeneration
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
@@ -198,7 +198,7 @@ func (t *ToolRegenerations) GetRegenerationCount(toolID int64) (int, error) {
 }
 
 // GetAllRegenerations gets all regenerations across all tools
-func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegeneration, error) {
+func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*models.ToolRegeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting all regenerations: limit=%d, offset=%d", limit, offset)
 
 	query := `
@@ -213,7 +213,7 @@ func (t *ToolRegenerations) GetAllRegenerations(limit, offset int) ([]*ToolRegen
 	}
 	defer rows.Close()
 
-	var regenerations []*ToolRegeneration
+	var regenerations []*models.ToolRegeneration
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
@@ -296,8 +296,8 @@ func (t *ToolRegenerations) GetToolsWithMostRegenerations(limit int) ([]struct {
 	return results, nil
 }
 
-func (t *ToolRegenerations) scanToolRegeneration(scanner scannable) (*ToolRegeneration, error) {
-	regen := &ToolRegeneration{}
+func (t *ToolRegenerations) scanToolRegeneration(scanner scannable) (*models.ToolRegeneration, error) {
+	regen := &models.ToolRegeneration{}
 	var performedBy sql.NullInt64
 
 	err := scanner.Scan(
