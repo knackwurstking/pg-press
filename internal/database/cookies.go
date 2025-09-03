@@ -215,13 +215,13 @@ func (c *Cookies) Remove(value string) error {
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return NewValidationError("value", "cookie value cannot be empty", value)
+		return dberror.NewValidationError("value", "cookie value cannot be empty", value)
 	}
 
 	query := `DELETE FROM cookies WHERE value = ?`
 	_, err := c.db.Exec(query, value)
 	if err != nil {
-		return NewDatabaseError("delete", "cookies", "failed to delete cookie", err)
+		return dberror.NewDatabaseError("delete", "cookies", "failed to delete cookie", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookie")
@@ -234,13 +234,13 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 
 	if apiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return NewValidationError("api_key", "API key cannot be empty", apiKey)
+		return dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
 	}
 
 	query := `DELETE FROM cookies WHERE api_key = ?`
 	_, err := c.db.Exec(query, apiKey)
 	if err != nil {
-		return NewDatabaseError("delete", "cookies", "failed to delete cookies by API key", err)
+		return dberror.NewDatabaseError("delete", "cookies", "failed to delete cookies by API key", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookies for API key")
@@ -253,18 +253,18 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
 
 	if beforeTimestamp <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid timestamp %d", beforeTimestamp)
-		return 0, NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)
+		return 0, dberror.NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)
 	}
 
 	query := `DELETE FROM cookies WHERE last_login < ?`
 	result, err := c.db.Exec(query, beforeTimestamp)
 	if err != nil {
-		return 0, NewDatabaseError("delete", "cookies", "failed to delete expired cookies", err)
+		return 0, dberror.NewDatabaseError("delete", "cookies", "failed to delete expired cookies", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, NewDatabaseError("delete", "cookies", "failed to get rows affected", err)
+		return 0, dberror.NewDatabaseError("delete", "cookies", "failed to get rows affected", err)
 	}
 
 	logger.DBCookies().Debug("Removed %d expired cookies", rowsAffected)
@@ -278,7 +278,7 @@ func (c *Cookies) scanCookie(scanner scannable) (*Cookie, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, NewDatabaseError("scan", "cookies", "failed to scan row", err)
+		return nil, dberror.NewDatabaseError("scan", "cookies", "failed to scan row", err)
 	}
 	return cookie, nil
 }

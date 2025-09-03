@@ -148,7 +148,7 @@ func (a *Attachment) UpdateData(newData []byte) error {
 		return dberror.NewValidationError("data", "cannot be nil", newData)
 	}
 	if len(newData) > MaxAttachmentDataSize {
-		return NewValidationError("data", "too large", len(newData))
+		return dberror.NewValidationError("data", "too large", len(newData))
 	}
 	a.Data = make([]byte, len(newData))
 	copy(a.Data, newData)
