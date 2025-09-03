@@ -1,0 +1,226 @@
+/*
+ * Trouble Reports Dialog Edit CSS
+ * Optimized for better textarea editing experience using ui.min.css utilities
+ */
+
+/* =================================================================
+ * FORM LAYOUT
+ * ================================================================= */
+
+form {
+    width: 100% !important;
+    height: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.form-content {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* =================================================================
+ * DIALOG STYLES
+ * ================================================================= */
+
+#dialogEdit form {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 100% !important;
+}
+
+/* =================================================================
+ * TITLE INPUT SECTION
+ * ================================================================= */
+
+label[for="title"] {
+    flex: 0 0 auto;
+}
+
+input[name="title"] {
+    width: 100%;
+}
+
+/* =================================================================
+ * CONTENT TEXTAREA SECTION - NON-RESIZABLE FOR CONSISTENT LAYOUT
+ * ================================================================= */
+
+label[for="content"] {
+    /* Give much more space to the textarea */
+    flex: 4;
+    min-height: 65%;
+}
+
+textarea[name="content"] {
+    width: 100%;
+    height: 100%;
+    resize: none;
+}
+
+/* =================================================================
+ * ATTACHMENTS CONTAINER - FIXED LAYOUT TO PREVENT OVERLAPPING
+ * ================================================================= */
+
+#attachments-section {
+    padding: var(--ui-spacing);
+}
+
+.attachments-container {
+    /* Reduced flex to give more space to textarea */
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+/* Main attachments label */
+.attachments-label {
+    width: 100%;
+    font-weight: 600;
+    color: var(--ui-text, inherit);
+}
+
+/* =================================================================
+ * EXISTING ATTACHMENTS SECTION - FOLDABLE WITH DETAILS
+ * ================================================================= */
+
+.attachments-section {
+    width: 100%;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.attachments-section:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-color: var(--ui-info, #007bff);
+}
+
+.attachments-section[open] {
+    max-height: none;
+    overflow: visible;
+}
+
+.attachments-section:not([open]) {
+    max-height: auto;
+}
+
+.attachments-section summary {
+    padding: var(--ui-spacing);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    background: var(--ui-background-hover, rgba(0, 0, 0, 0.02));
+    border-bottom: var(--ui-border-width) var(--ui-border-style) transparent;
+    font-weight: 600;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: var(--ui-radius) var(--ui-radius) 0 0;
+}
+
+.attachments-section:not([open]) summary {
+    border-radius: var(--ui-radius);
+}
+
+.attachments-section[open] summary {
+    border-bottom-color: var(--ui-border-color);
+}
+
+#existing-attachments {
+    animation: slideDown 0.3s ease-out;
+    padding: var(--ui-spacing);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 100vh;
+    }
+}
+
+.attachment-item {
+    padding: var(--ui-spacing);
+    transition: all 0.2s ease;
+}
+
+.attachment-info {
+    width: 100%;
+    overflow: hidden;
+}
+
+.attachment-actions button {
+    padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
+    font-size: 0.875rem;
+}
+
+/* =================================================================
+ * FILE INPUT AREA - SEPARATED TO PREVENT OVERLAPPING
+ * ================================================================= */
+
+.file-input-area {
+    width: 100%;
+    border: 2px dashed var(--ui-border-color);
+    border-radius: var(--ui-radius);
+    padding: var(--ui-spacing);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* Minimal margin for compact layout */
+    margin: calc(var(--ui-spacing) * 0.5) 0;
+}
+
+.file-input-area:hover {
+    border-color: var(--ui-info);
+    background-color: var(--ui-info-background, rgba(0, 123, 255, 0.05));
+    transform: translateY(-1px);
+}
+
+.file-input-area.dragover {
+    border-color: var(--ui-info);
+    background-color: var(--ui-info-background, rgba(0, 123, 255, 0.1));
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.file-input-area i {
+    margin-bottom: calc(var(--ui-spacing) * 0.5);
+}
+
+#attachments {
+    display: none;
+}
+
+/* =================================================================
+ * FILE PREVIEW AREA - NEW ATTACHMENTS
+ * ================================================================= */
+
+.file-preview {
+    width: 100%;
+    display: none;
+    padding: var(--ui-spacing);
+}
+
+.file-preview .attachments-label {
+    margin-bottom: calc(var(--ui-spacing) * 0.5);
+    font-size: 0.9rem;
+}
+
+/* =================================================================
+ * STATUS AND FEEDBACK STYLES
+ * ================================================================= */
+
+.attachment-error {
+    color: var(--ui-destructive);
+    font-size: 0.875rem;
+    padding: var(--ui-spacing);
+    border-radius: var(--ui-radius);
+    background-color: var(--ui-destructive-background, rgba(220, 53, 69, 0.1));
+    border: 1px solid var(--ui-destructive-border, rgba(220, 53, 69, 0.2));
+}

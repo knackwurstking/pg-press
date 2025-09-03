@@ -1,0 +1,35 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+)
+
+templ ToolsPressPage(press int64) {
+	@layouts.Main(
+		layouts.MainOptions{
+			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
+			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
+			NavContent:  toolsPageNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<div class="card warning">
+				<div class="card-header">
+					<h4>
+						<i class="bi bi-exclamation-triangle mr"></i>
+						<span>Work in Progress</span>
+					</h4>
+				</div>
+				<div class="card-body">
+					<ul>
+						<!-- TODO: ... -->
+						<li>Display the metal sheets table for the lower and upper tool.</li>
+						<li>Show notes with levels (INFO, WARNING, ERROR) or something like this.</li>
+						<li>Show Zyklen made with these tools, allow editing, reset after regeneration but keep the data.</li>
+					</ul>
+				</div>
+			</div>
+		</main>
+	}
+}

@@ -15,7 +15,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/router"
+	"github.com/knackwurstking/pgpress/internal/web/router"
 )
 
 // serverCommand creates the CLI command for starting the HTTP server.

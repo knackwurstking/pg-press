@@ -1,0 +1,37 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
+)
+
+templ navProfileButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ constants.ServerPathPrefix + "/profile" }
+		title="Profil"
+	>
+		<i class="bi bi-person-circle"></i>
+	</a>
+}
+
+templ navHomeButton() {
+	<a role="button" class="ghost contrast icon" href={ constants.ServerPathPrefix + "/" } title="Startseite">
+		<i class="bi bi-house"></i>
+	</a>
+}
+
+templ navFeedButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ constants.ServerPathPrefix + "/feed" }
+		hx-ws={ "connect:" + constants.ServerPathPrefix + "/htmx/nav/feed-counter" }
+		hx-target={ fmt.Sprintf("#%s", constants.IDFeedCounter) }
+		hx-swap="outerHTML"
+	>
+		<i class="bi bi-bell"></i>
+		<span id={ constants.IDFeedCounter }></span>
+	</a>
+}

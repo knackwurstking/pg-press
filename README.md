@@ -22,49 +22,49 @@
 
 | Method | Path            | Handler                          | Description                |
 | ------ | --------------- | -------------------------------- | -------------------------- |
-| GET    | /htmx/feed/list | `htmxhandler.Feed.handleListGET` | Fetches the list of feeds. |
+| GET    | /htmx/feed/list | `htmx.Feed.handleListGET` | Fetches the list of feeds. |
 
 ### Navigation
 
 | Method | Path                   | Handler                                          | Description                 |
 | ------ | ---------------------- | ------------------------------------------------ | --------------------------- |
-| GET    | /htmx/nav/feed-counter | `htmxhandler.Nav.handleFeedCounterWebSocketEcho` | WebSocket for feed counter. |
+| GET    | /htmx/nav/feed-counter | `htmx.Nav.handleFeedCounterWebSocketEcho` | WebSocket for feed counter. |
 
 ### Profile
 
 | Method | Path                  | Handler                                   | Description                 |
 | ------ | --------------------- | ----------------------------------------- | --------------------------- |
-| GET    | /htmx/profile/cookies | `htmxhandler.Profile.handleGetCookies`    | Fetches the user's cookies. |
-| DELETE | /htmx/profile/cookies | `htmxhandler.Profile.handleDeleteCookies` | Deletes a user's cookie.    |
+| GET    | /htmx/profile/cookies | `htmx.Profile.handleGetCookies`    | Fetches the user's cookies. |
+| DELETE | /htmx/profile/cookies | `htmx.Profile.handleDeleteCookies` | Deletes a user's cookie.    |
 
 ### Tools
 
 | Method | Path                     | Handler                                 | Description                          |
 | ------ | ------------------------ | --------------------------------------- | ------------------------------------ |
-| GET    | /htmx/tools/list         | `htmxhandler.Tools.handleList`          | Fetches all tools.                   |
-| GET    | /htmx/tools/edit         | `htmxhandler.Tools.handleEdit`          | Renders the tool edit dialog.        |
-| POST   | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPOST`      | Creates a new tool.                  |
-| PUT    | /htmx/tools/edit         | `htmxhandler.Tools.handleEditPUT`       | Updates a tool.                      |
-| DELETE | /htmx/tools/delete       | `htmxhandler.Tools.handleDelete`        | Deletes a tool.                      |
-| GET    | /htmx/tools/cycles       | `htmxhandler.Tools.handleCyclesSection` | Fetches the cycles section.          |
-| GET    | /htmx/tools/total-cycles | `htmxhandler.Tools.handleTotalCycles`   | Fetches the total cycles for a tool. |
-| GET    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditGET`  | Renders the cycle edit dialog.       |
-| POST   | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPOST` | Creates a new cycle.                 |
-| PUT    | /htmx/tools/cycle/edit   | `htmxhandler.Tools.handleCycleEditPUT`  | Updates a cycle.                     |
-| DELETE | /htmx/tools/cycle/delete | `htmxhandler.Tools.handleCycleDELETE`   | Deletes a cycle.                     |
+| GET    | /htmx/tools/list         | `htmx.Tools.handleList`          | Fetches all tools.                   |
+| GET    | /htmx/tools/edit         | `htmx.Tools.handleEdit`          | Renders the tool edit dialog.        |
+| POST   | /htmx/tools/edit         | `htmx.Tools.handleEditPOST`      | Creates a new tool.                  |
+| PUT    | /htmx/tools/edit         | `htmx.Tools.handleEditPUT`       | Updates a tool.                      |
+| DELETE | /htmx/tools/delete       | `htmx.Tools.handleDelete`        | Deletes a tool.                      |
+| GET    | /htmx/tools/cycles       | `htmx.Tools.handleCyclesSection` | Fetches the cycles section.          |
+| GET    | /htmx/tools/total-cycles | `htmx.Tools.handleTotalCycles`   | Fetches the total cycles for a tool. |
+| GET    | /htmx/tools/cycle/edit   | `htmx.Tools.handleCycleEditGET`  | Renders the cycle edit dialog.       |
+| POST   | /htmx/tools/cycle/edit   | `htmx.Tools.handleCycleEditPOST` | Creates a new cycle.                 |
+| PUT    | /htmx/tools/cycle/edit   | `htmx.Tools.handleCycleEditPUT`  | Updates a cycle.                     |
+| DELETE | /htmx/tools/cycle/delete | `htmx.Tools.handleCycleDELETE`   | Deletes a cycle.                     |
 
 ### Trouble Reports
 
 | Method | Path                                      | Handler                                                  | Description                   |
 | ------ | ----------------------------------------- | -------------------------------------------------------- | ----------------------------- |
-| GET    | /htmx/trouble-reports/dialog-edit         | `htmxhandler.TroubleReports.handleGetDialogEdit`         | Renders the edit dialog.      |
-| POST   | /htmx/trouble-reports/dialog-edit         | `htmxhandler.TroubleReports.handlePostDialogEdit`        | Creates a new trouble report. |
-| PUT    | /htmx/trouble-reports/dialog-edit         | `htmxhandler.TroubleReports.handlePutDialogEdit`         | Updates a trouble report.     |
-| GET    | /htmx/trouble-reports/data                | `htmxhandler.TroubleReports.handleGetData`               | Fetches trouble report data.  |
-| DELETE | /htmx/trouble-reports/data                | `htmxhandler.TroubleReports.handleDeleteData`            | Deletes a trouble report.     |
-| GET    | /htmx/trouble-reports/attachments-preview | `htmxhandler.TroubleReports.handleGetAttachmentsPreview` | Fetches attachment previews.  |
-| GET    | /htmx/trouble-reports/modifications/:id   | `htmxhandler.TroubleReports.handleGetModifications`      | Fetches modifications.        |
-| POST   | /htmx/trouble-reports/modifications/:id   | `htmxhandler.TroubleReports.handlePostModifications`     | Restores a modification.      |
+| GET    | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handleGetDialogEdit`         | Renders the edit dialog.      |
+| POST   | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handlePostDialogEdit`        | Creates a new trouble report. |
+| PUT    | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handlePutDialogEdit`         | Updates a trouble report.     |
+| GET    | /htmx/trouble-reports/data                | `htmx.TroubleReports.handleGetData`               | Fetches trouble report data.  |
+| DELETE | /htmx/trouble-reports/data                | `htmx.TroubleReports.handleDeleteData`            | Deletes a trouble report.     |
+| GET    | /htmx/trouble-reports/attachments-preview | `htmx.TroubleReports.handleGetAttachmentsPreview` | Fetches attachment previews.  |
+| GET    | /htmx/trouble-reports/modifications/:id   | `htmx.TroubleReports.handleGetModifications`      | Fetches modifications.        |
+| POST   | /htmx/trouble-reports/modifications/:id   | `htmx.TroubleReports.handlePostModifications`     | Restores a modification.      |
 
 ## Database
 

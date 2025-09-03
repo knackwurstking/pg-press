@@ -1,0 +1,166 @@
+package troublereports
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/models"
+)
+
+templ ListMods(
+	user *models.User,
+	id int64,
+	first *models.Mod[models.TroubleReportMod],
+	current *models.Mod[models.TroubleReportMod],
+	mods models.Mods[models.TroubleReportMod],
+) {
+	<div id={ constants.IDData } class="flex flex-col gap">
+		<div class="flex flex-wrap gap justify-between items-center">
+			<button
+				hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/data" }
+				hx-trigger="click"
+				hx-target={ fmt.Sprintf("#%s", constants.IDData) }
+				hx-swap="outerHTML"
+				class="ghost secondary flex gap"
+			>
+				<i class="bi bi-arrow-left"></i>Zurück
+			</button>
+			<h4>Änderungsverlauf</h4>
+		</div>
+		<div id={ constants.IDModificationsList } class="flex flex-col gap">
+			for _, mod := range mods.Reversed() {
+				<!-- Modification Container -->
+				<article
+					if current.Time == mod.Time {
+						style="
+                            border: 2px solid var(--ui-primary);
+                            border-radius: var(--ui-radius);
+                            padding-top: 2rem;
+                        "
+					} else {
+						style="
+                            border: 1px solid var(--ui-border-color);
+                            border-radius: var(--ui-radius);
+                        "
+					}
+					class="border"
+				>
+					if current.Time == mod.Time {
+						<!-- Mark the current modification -->
+						<div
+							style="
+                                position: absolute;
+                                top: -1px;
+                                right: 12px;
+                                padding: 4px 12px;
+                                border-radius: 0 0 6px 6px;
+                                font-size: 0.85em;
+                            "
+							class="primary"
+						>
+							<b>Aktuelle Version</b>
+						</div>
+					}
+					<div style="margin-bottom: var(--ui-spacing);">
+						<div
+							style="color: var(--ui-muted-text); font-size: 0.9em;"
+							class="flex gap items-center"
+						>
+							if first.Time == mod.Time {
+								<i class="bi bi-plus-circle" style="color: var(--ui-success);"></i>
+								<span>
+									Erstellt von <strong>{ mod.User.UserName }</strong> am { mod.GetTimeString() }
+								</span>
+							} else {
+								<i class="bi bi-pencil-square" style="color: var(--ui-warning);"></i>
+								<span>
+									Geändert von <strong>{ mod.User.UserName }</strong> am { mod.GetTimeString() }
+								</span>
+							}
+						</div>
+					</div>
+					<div
+						class="flex flex-col gap"
+						style="margin-bottom: var(--ui-spacing);"
+					>
+						<!-- Title and Content -->
+						<h4>
+							{ mod.Data.Title }
+						</h4>
+						<pre
+							style="
+                                padding: var(--ui-spacing);
+                                white-space: pre-wrap;
+                                word-wrap: break-word;
+                                overflow-y: auto;
+                            "
+						>{ mod.Data.Content }</pre>
+						<!-- Attachments for this modification -->
+						if len(mod.Data.LinkedAttachments) > 0 {
+							<div
+								class="attachments-preview-placeholder"
+								data-modification-id={ fmt.Sprintf("%d-%d", id, mod.Time) }
+								hx-get={ fmt.Sprintf(
+									"%s/htmx/trouble-reports/attachments-preview?id=%d&time=%d",
+									constants.ServerPathPrefix, id, mod.Time,
+								) }
+								hx-trigger="click"
+								hx-swap="outerHTML"
+							>
+								<div class="attachments-preview-label">
+									<i class="bi bi-paperclip"></i>
+									Anhänge ({ len(mod.Data.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
+								</div>
+							</div>
+						}
+					</div>
+					if current.Time != mod.Time {
+						<div
+							style="
+		                        justify-content: flex-end;
+		                        padding-top: var(--ui-spacing);
+		                        border-top: 1px solid var(--ui-border-color);
+		                    "
+							class="flex gap"
+						>
+							if user.IsAdmin() {
+								<!-- Rollback Button -->
+								<button
+									hx-post={ fmt.Sprintf(
+										"%s/htmx/trouble-reports/modifications/%d?time=%d",
+										constants.ServerPathPrefix, id, mod.Time,
+									) }
+									hx-trigger="click"
+									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
+									hx-swap="outerHTML"
+									hx-confirm="Möchten Sie wirklich zu dieser Version zurückkehren?"
+									class="secondary flex gap"
+									style="font-size: 0.9em;"
+								>
+									<i class="bi bi-arrow-counterclockwise"></i>
+									Zu dieser Version zurücksetzen
+								</button>
+							} else {
+								<!-- Rollback Button (Vote) -->
+								<button
+									hx-post={ fmt.Sprintf(
+										"%s/htmx/trouble-reports/modifications/vote/%d?time=%d",
+										constants.ServerPathPrefix, id, mod.Time,
+									) }
+									hx-trigger="click"
+									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
+									hx-swap="outerHTML"
+									class="secondary flex gap"
+									style="font-size: 0.9em;"
+									disabled
+								>
+									<i class="bi bi-arrow-counterclockwise"></i>
+									<small>ABSTIMMEN:</small> Zu dieser Version zurücksetzen
+								</button>
+							}
+						</div>
+					}
+				</article>
+			}
+		</div>
+	</div>
+}

@@ -1,0 +1,184 @@
+package tools
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/models"
+)
+
+type EditDialogProps struct {
+	ID                   int64
+	Close                bool
+	InputPosition        string
+	InputWidth           int
+	InputHeight          int
+	InputType            string
+	InputCode            string
+	ReloadToolsList      bool
+	SelectPressSelection *models.PressNumber
+}
+
+templ EditDialog(props *EditDialogProps) {
+	if props.Close {
+		<span
+			id={ constants.IDToolEditDialog }
+			if props.ReloadToolsList {
+				hx-get={ constants.ServerPathPrefix + "/htmx/tools/list" }
+				hx-trigger="load"
+				hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
+				hx-swap="outerHTML"
+			}
+		></span>
+	} else {
+		<dialog
+			name="tool-edit-dialog"
+			id={ constants.IDToolEditDialog }
+			class="fullscreen clean flex flex-col justify-center items-center"
+		>
+			<form
+				class="flex flex-col gap max-w-full"
+				if props.ID > 0 {
+					hx-put={ fmt.Sprintf(
+						"%s/htmx/tools/edit?id=%d",
+						constants.ServerPathPrefix, props.ID,
+					) }
+				} else {
+					hx-post={ constants.ServerPathPrefix + "/htmx/tools/edit" }
+				}
+				hx-trigger="submit"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
+				hx-swap="outerHTML"
+				enctype="multipart/form-data"
+			>
+				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+					<span class="flex flex-row gap flex-wrap justify-between items-center">
+						<span class="flex flex-col gap-0">
+							<label for="position">Position</label>
+							<select
+								id={ constants.IDPosition }
+								name="position"
+								required
+							>
+								<option
+									value=""
+									if props.InputPosition == "" {
+										selected
+									}
+								>Position auswählen</option>
+								<option
+									value={ models.PositionTop }
+									if models.Position(props.InputPosition) == models.PositionTop {
+										selected
+									}
+								>Oberteil</option>
+								<option
+									value={ models.PositionBottom }
+									if models.Position(props.InputPosition) == models.PositionBottom {
+										selected
+									}
+								>Unterteil</option>
+								<option
+									value={ models.PositionTopCassette }
+									if models.Position(props.InputPosition) == models.PositionTopCassette {
+										selected
+									}
+								>Cassette Oberteil</option>
+							</select>
+						</span>
+						<span class="flex flex-col gap-0 w-fit">
+							<label for="press">Presse</label>
+							<select
+								id={ constants.IDPressSelection }
+								name="press-selection"
+							>
+								<option value="">Nicht Eingebaut</option>
+								<option value="0">Presse 0</option>
+								<option value="2">Presse 2</option>
+								<option value="3">Presse 3</option>
+								<option value="4">Presse 4</option>
+								<option value="5">Presse 5</option>
+							</select>
+						</span>
+					</span>
+					<span class="flex flex-col gap-0">
+						<label>Format</label>
+						<div class="flex gap-sm">
+							<input
+								type="number"
+								id={ constants.IDWidth }
+								name="width"
+								class="w-full"
+								placeholder="z.B. 120"
+								if props.InputWidth != 0 {
+									value={ props.InputWidth }
+								}
+								required
+							/>
+							<span style="margin: auto 0;" class="text-xl">x</span>
+							<input
+								type="number"
+								id={ constants.IDHeight }
+								name="height"
+								class="w-full"
+								placeholder="z.B. 60"
+								if props.InputHeight != 0 {
+									value={ props.InputHeight }
+								}
+								required
+							/>
+						</div>
+					</span>
+					<span class="flex flex-col gap-0">
+						<label for="type">Typ</label>
+						<input
+							type="text"
+							id={ constants.IDType }
+							name="type"
+							placeholder="z.B. MASS, FC, GTC"
+							value={ props.InputType }
+							required
+						/>
+					</span>
+					<span class="flex flex-col gap-0">
+						<label for="code">Code</label>
+						<input
+							type="text"
+							id={ constants.IDCode }
+							name="code"
+							placeholder="z.B. G01, G02, XXL01, 3573"
+							value={ props.InputCode }
+							required
+						/>
+					</span>
+				</div>
+				<footer class="flex gap justify-end p">
+					<button
+						type="button"
+						class="secondary flex gap"
+						hx-get={ fmt.Sprintf(
+							"%s/htmx/tools/edit?id=%d&close=true",
+							constants.ServerPathPrefix, props.ID,
+						) }
+						hx-trigger="click"
+						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
+						hx-swap="outerHTML"
+					>
+						<i class="bi bi-x-circle"></i>
+						Schließen
+					</button>
+					<button type="submit" class="flex gap">
+						<i class="bi bi-check-circle"></i>
+						if props.ID > 0 {
+							Aktualisieren
+						} else {
+							Erstellen
+						}
+					</button>
+				</footer>
+			</form>
+			<script>
+    			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
+    		</script>
+		</dialog>
+	}
+}

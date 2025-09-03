@@ -1,0 +1,124 @@
+package tools
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/models"
+)
+
+type CyclesSectionProps struct {
+	User          *models.User
+	ToolID        int64
+	TotalCycles   int64
+	Cycles        []*models.PressCycle
+	Regenerations []*models.ToolRegeneration
+}
+
+templ CyclesSection(props *CyclesSectionProps) {
+	<div class="flex justify-between items-center mb">
+		<h5>Pressennutzungsverlauf</h5>
+		<button
+			hx-get={ fmt.Sprintf(
+				"%s/htmx/tools/cycle/edit?tool_id=%d",
+				constants.ServerPathPrefix, props.ToolID,
+			) }
+			hx-trigger="click"
+			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+			hx-swap="outerHTML"
+			class="secondary small flex"
+			title="Neuen Eintrag hinzufügen"
+		>
+			<i class="bi bi-plus-lg"></i>
+		</button>
+	</div>
+	<section>
+		<h6 class="mb">
+			Gesamtzyklen:
+		</h6>
+		<span>
+			@TotalCycles(props.TotalCycles, true, "")
+		</span>
+	</section>
+	<figure class="w-full overflow-x-scroll">
+		<table name="tool-cycles-table" class="table borderless compact">
+			<thead>
+				<tr>
+					<th name="press">Presse</th>
+					<th name="total">Gesamtzyklen</th>
+					<th name="partial">Teilzyklen (berechnet)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@cyclesTableRows(props.User, props.Cycles)
+			</tbody>
+		</table>
+	</figure>
+	<span id={ constants.IDToolCycleEditDialog }></span>
+}
+
+templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
+	if len(cycles) == 0 {
+		<tr>
+			<td colspan="4" class="text-center">
+				Kein Pressenverlauf verfügbar
+			</td>
+		</tr>
+	} else {
+		for i, cycle := range cycles {
+			{{ previousTotalCycles := int64(0) }}
+			if i+1 < len(cycles) {
+				{{ previousTotalCycles = cycles[i+1].TotalCycles }}
+			}
+			@renderCycleRowWithPartialCalc(user, cycle, previousTotalCycles)
+		}
+	}
+}
+
+// renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
+// Partial cycles = total_cycles - previous_total_cycles
+templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle, previousTotalCycles int64) {
+	{{ partialCycles := cycle.TotalCycles - previousTotalCycles }}
+	<tr>
+		<td>
+			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
+		</td>
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+		<td>
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
+				{ fmt.Sprintf("%d", partialCycles) }
+			</span>
+		</td>
+		<td class="button-group flex justify-end items-center">
+			<button
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+					constants.ServerPathPrefix, cycle.ToolID, cycle.ID,
+				) }
+				hx-trigger="click"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+				hx-swap="outerHTML"
+				class="small ghost"
+				title="Bearbeiten"
+			>
+				<i class="bi bi-pencil"></i>
+			</button>
+			<button
+				hx-delete={ fmt.Sprintf(
+					"%s/htmx/tools/cycle/delete?cycle_id=%d",
+					constants.ServerPathPrefix, cycle.ID,
+				) }
+				hx-trigger="click"
+				class="destructive small ghost"
+				title="Löschen"
+				if !user.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-trash"></i>
+			</button>
+		</td>
+	</tr>
+}
