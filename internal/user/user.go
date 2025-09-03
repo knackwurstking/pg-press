@@ -4,7 +4,7 @@
 // including CRUD operations, authentication via API keys, and integration
 // with the activity feed system. All database operations use parameterized
 // queries to prevent SQL injection attacks.
-package database
+package user
 
 import (
 	"database/sql"
@@ -12,22 +12,20 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
+	"github.com/knackwurstking/pgpress/internal/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// Users provides database operations for managing user accounts.
-// It handles CRUD operations and maintains integration with the activity feed system
-// to track user lifecycle events (create, update, delete).
-type Users struct {
+type Service struct {
 	db    *sql.DB
-	feeds *Feeds
+	feeds *feed.Service
 }
 
-var _ DataOperations[*models.User] = (*Users)(nil)
+var _ interfaces.DataOperations[*models.User] = (*Service)(nil)
 
-// NewUsers creates a new Users instance and initializes the database table.
-func NewUsers(db *sql.DB, feeds *Feeds) *Users {
+func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			telegram_id INTEGER NOT NULL,
@@ -42,14 +40,14 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 			"failed to create users table", err))
 	}
 
-	return &Users{
+	return &Service{
 		db:    db,
 		feeds: feeds,
 	}
 }
 
 // List retrieves all users from the database.
-func (u *Users) List() ([]*models.User, error) {
+func (u *Service) List() ([]*models.User, error) {
 	logger.DBUsers().Info("Listing all users")
 
 	query := `SELECT * FROM users`
@@ -78,7 +76,7 @@ func (u *Users) List() ([]*models.User, error) {
 }
 
 // Get retrieves a specific user by Telegram ID.
-func (u *Users) Get(telegramID int64) (*models.User, error) {
+func (u *Service) Get(telegramID int64) (*models.User, error) {
 	logger.DBUsers().Debug("Getting user by Telegram ID: %d", telegramID)
 
 	query := `SELECT * FROM users WHERE telegram_id = ?`
@@ -97,7 +95,7 @@ func (u *Users) Get(telegramID int64) (*models.User, error) {
 }
 
 // Add creates a new user and generates a corresponding activity feed entry.
-func (u *Users) Add(user *models.User, actor *models.User) (int64, error) {
+func (u *Service) Add(user *models.User, actor *models.User) (int64, error) {
 	if user == nil {
 		return 0, dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
@@ -145,7 +143,7 @@ func (u *Users) Add(user *models.User, actor *models.User) (int64, error) {
 }
 
 // Delete deletes a user by Telegram ID and generates an activity feed entry.
-func (u *Users) Delete(telegramID int64, actor *models.User) error {
+func (u *Service) Delete(telegramID int64, actor *models.User) error {
 	logger.DBUsers().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
@@ -183,7 +181,7 @@ func (u *Users) Delete(telegramID int64, actor *models.User) error {
 }
 
 // Update modifies an existing user and generates activity feed entries for changes.
-func (u *Users) Update(user, actor *models.User) error {
+func (u *Service) Update(user, actor *models.User) error {
 	telegramID := user.TelegramID
 	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
 
@@ -244,7 +242,7 @@ func (u *Users) Update(user, actor *models.User) error {
 	return nil
 }
 
-func (u *Users) scanUser(scanner scannable) (*models.User, error) {
+func (u *Service) scanUser(scanner interfaces.Scannable) (*models.User, error) {
 	user := &models.User{}
 	err := scanner.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {

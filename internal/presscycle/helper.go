@@ -1,4 +1,4 @@
-package database
+package presscycle
 
 import (
 	"database/sql"
@@ -13,11 +13,11 @@ import (
 // PressCyclesHelper provides additional press cycle-related database operations
 // that are not part of the generic DataOperations interface.
 type PressCyclesHelper struct {
-	pressCycles *PressCycles
+	pressCycles *Service
 }
 
 // NewPressCyclesHelper creates a new PressCyclesHelper instance.
-func NewPressCyclesHelper(pressCycles *PressCycles) *PressCyclesHelper {
+func NewPressCyclesHelper(pressCycles *Service) *PressCyclesHelper {
 	return &PressCyclesHelper{
 		pressCycles: pressCycles,
 	}

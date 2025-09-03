@@ -3,78 +3,69 @@ package database
 import (
 	"database/sql"
 
+	"github.com/knackwurstking/pgpress/internal/attachment"
+	"github.com/knackwurstking/pgpress/internal/cookie"
+	"github.com/knackwurstking/pgpress/internal/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
+	"github.com/knackwurstking/pgpress/internal/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/internal/note"
+	"github.com/knackwurstking/pgpress/internal/presscycle"
+	"github.com/knackwurstking/pgpress/internal/regeneration"
+	"github.com/knackwurstking/pgpress/internal/tool"
+	"github.com/knackwurstking/pgpress/internal/troublereport"
+	"github.com/knackwurstking/pgpress/internal/user"
 )
-
-type Broadcaster interface {
-	Broadcast()
-}
-
-// DataOperations defines a basic generic interface for handling data models in the database.
-// It standardizes the Add, Update, and Delete operations.
-// This interface can be implemented by database handlers to provide a consistent API.
-//
-// T is the type of the data model (e.g., *Tool).
-type DataOperations[T any] interface {
-	Get(id int64) (T, error)
-	List() ([]T, error)
-	// Add creates a new record for the given model.
-	// It may take a user for auditing purposes and may return the ID of the new record.
-	Add(model T, user *models.User) (int64, error)
-
-	// Update modifies an existing record.
-	// It may take a user for auditing purposes. The model should contain its ID.
-	Update(model T, user *models.User) error
-
-	// Delete removes a record from the database by its ID.
-	// It may take a user for auditing purposes.
-	Delete(id int64, user *models.User) error
-}
 
 // DB represents the main database connection and provides access to all data access objects.
 type DB struct {
-	Users                DataOperations[*models.User]
-	UsersHelper          *UsersHelper
-	Cookies              *Cookies
-	Attachments          *Attachments
-	TroubleReports       DataOperations[*models.TroubleReport]
-	TroubleReportsHelper *TroubleReportsHelper
-	Notes                *Notes
-	Tools                DataOperations[*models.Tool]
-	ToolsHelper          *ToolsHelper
-	MetalSheets          DataOperations[*models.MetalSheet]
-	PressCycles          DataOperations[*models.PressCycle]
-	PressCyclesHelper    *PressCyclesHelper
-	ToolRegenerations    *ToolRegenerations
+	db *sql.DB
 
-	Feeds *Feeds
-	db    *sql.DB
+	// Kind of DataOperations, TODO: Need to change this
+	Cookies           *cookie.Service
+	ToolRegenerations *regeneration.Service
+	Feeds             *feed.Service
+
+	// DataOperations
+	Users          interfaces.DataOperations[*models.User]
+	Attachments    interfaces.DataOperations[*models.Attachment]
+	TroubleReports interfaces.DataOperations[*models.TroubleReport]
+	Notes          interfaces.DataOperations[*models.Note]
+	Tools          interfaces.DataOperations[*models.Tool]
+	MetalSheets    interfaces.DataOperations[*models.MetalSheet]
+	PressCycles    interfaces.DataOperations[*models.PressCycle]
+
+	// Helper
+	UsersHelper          *user.UsersHelper
+	TroubleReportsHelper *troublereport.TroubleReportsHelper
+	ToolsHelper          *tool.ToolsHelper
+	PressCyclesHelper    *presscycle.PressCyclesHelper
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
 // Feeds must be created before Users and TroubleReports as they generate feed entries.
 func New(db *sql.DB) *DB {
-	feeds := NewFeeds(db)
+	feeds := feed.New(db)
 
-	attachments := NewAttachments(db)
-	troubleReports := NewTroubleReports(db, feeds)
-	troubleReportsHelper := NewTroubleReportsHelper(troubleReports, attachments)
+	attachments := attachment.New(db)
+	troubleReports := troublereport.New(db, feeds)
+	troubleReportsHelper := troublereport.NewTroubleReportsHelper(troubleReports, attachments)
 
-	pressCycles := NewPressCycles(db, feeds)
-	pressCyclesHelper := NewPressCyclesHelper(pressCycles)
+	pressCycles := presscycle.New(db, feeds)
+	pressCyclesHelper := presscycle.NewPressCyclesHelper(pressCycles)
 
-	notes := NewNotes(db)
-	tools := NewTools(db, feeds)
-	toolsHelper := NewToolsHelper(tools, notes, pressCycles)
+	notes := note.New(db)
+	tools := tool.New(db, feeds)
+	toolsHelper := tool.NewToolsHelper(tools, notes, pressCycles)
 
-	metalSheets := NewMetalSheets(db, feeds, notes)
-	toolRegenerations := NewToolRegenerations(db, feeds, pressCyclesHelper)
-	usersHelper := NewUsersHelper(db)
+	metalSheets := metalsheet.New(db, feeds, notes)
+	toolRegenerations := regeneration.New(db, feeds, pressCyclesHelper)
+	usersHelper := user.NewUsersHelper(db)
 
 	dbInstance := &DB{
-		Users:                NewUsers(db, feeds),
+		Users:                user.New(db, feeds),
 		UsersHelper:          usersHelper,
-		Cookies:              NewCookies(db),
+		Cookies:              cookie.New(db),
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,
 		TroubleReportsHelper: troubleReportsHelper,

@@ -1,9 +1,10 @@
+// TODO: Move to interfaces package
 package ws
 
 import (
 	"context"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"golang.org/x/net/websocket"
 )
 
@@ -97,7 +98,7 @@ type Connection interface {
 
 // Compile-time interface compliance checks
 var (
-	_ WSHandler            = (*FeedHandler)(nil)
-	_ database.Broadcaster = (*FeedHandler)(nil)
-	_ Connection           = (*FeedConnection)(nil)
+	_ WSHandler              = (*FeedHandler)(nil)
+	_ interfaces.Broadcaster = (*FeedHandler)(nil)
+	_ Connection             = (*FeedConnection)(nil)
 )

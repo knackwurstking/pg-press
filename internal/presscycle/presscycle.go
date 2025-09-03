@@ -1,4 +1,4 @@
-package database
+package presscycle
 
 import (
 	"database/sql"
@@ -6,20 +6,21 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// PressCycles manages press cycle data and operations
-type PressCycles struct {
+type Service struct {
 	db    *sql.DB
-	feeds *Feeds
+	feeds *feed.Service
 }
 
-var _ DataOperations[*models.PressCycle] = (*PressCycles)(nil)
+var _ interfaces.DataOperations[*models.PressCycle] = (*Service)(nil)
 
-func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
-	p := &PressCycles{
+func New(db *sql.DB, feeds *feed.Service) *Service {
+	p := &Service{
 		db:    db,
 		feeds: feeds,
 	}
@@ -27,7 +28,7 @@ func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
 	return p
 }
 
-func (p *PressCycles) init() {
+func (p *Service) init() {
 	query := `
 		DROP TABLE IF EXISTS press_cycles;
 		CREATE TABLE IF NOT EXISTS press_cycles (
@@ -50,7 +51,7 @@ func (p *PressCycles) init() {
 }
 
 // Get retrieves a specific press cycle by its ID.
-func (p *PressCycles) Get(id int64) (*models.PressCycle, error) {
+func (p *Service) Get(id int64) (*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
 	query := `
@@ -70,7 +71,7 @@ func (p *PressCycles) Get(id int64) (*models.PressCycle, error) {
 }
 
 // List retrieves all press cycles from the database, ordered by ID descending.
-func (p *PressCycles) List() ([]*models.PressCycle, error) {
+func (p *Service) List() ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Listing all press cycles")
 
 	query := `
@@ -87,7 +88,7 @@ func (p *PressCycles) List() ([]*models.PressCycle, error) {
 }
 
 // Add creates a new press cycle entry in the database.
-func (p *PressCycles) Add(cycle *models.PressCycle, user *models.User) (int64, error) {
+func (p *Service) Add(cycle *models.PressCycle, user *models.User) (int64, error) {
 	logger.DBPressCycles().Info("Adding new cycle: tool_id=%d, press_number=%d, total_cycles=%d", cycle.ToolID, cycle.PressNumber, cycle.TotalCycles)
 
 	if cycle.Date.IsZero() {
@@ -126,7 +127,7 @@ func (p *PressCycles) Add(cycle *models.PressCycle, user *models.User) (int64, e
 }
 
 // Update modifies an existing press cycle entry.
-func (p *PressCycles) Update(cycle *models.PressCycle, user *models.User) error {
+func (p *Service) Update(cycle *models.PressCycle, user *models.User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycle.ID)
 
 	if cycle.Date.IsZero() {
@@ -169,7 +170,7 @@ func (p *PressCycles) Update(cycle *models.PressCycle, user *models.User) error 
 }
 
 // Delete removes a press cycle from the database.
-func (p *PressCycles) Delete(id int64, user *models.User) error {
+func (p *Service) Delete(id int64, user *models.User) error {
 	logger.DBPressCycles().Info("Deleting press cycle: id=%d", id)
 
 	// Get cycle for feed before deleting
@@ -211,7 +212,7 @@ func (p *PressCycles) Delete(id int64, user *models.User) error {
 }
 
 // scanPressCyclesRows scans multiple press cycles from sql.Rows (without partial_cycles)
-func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.PressCycle, error) {
+func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.PressCycle, error) {
 	cycles := make([]*models.PressCycle, 0)
 	for rows.Next() {
 		cycle, err := p.scanPressCycle(rows)
@@ -223,7 +224,7 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.PressCycle,
 	return cycles, nil
 }
 
-func (p *PressCycles) scanPressCycle(scanner scannable) (*models.PressCycle, error) {
+func (p *Service) scanPressCycle(scanner interfaces.Scannable) (*models.PressCycle, error) {
 	cycle := &models.PressCycle{}
 	var performedBy sql.NullInt64
 

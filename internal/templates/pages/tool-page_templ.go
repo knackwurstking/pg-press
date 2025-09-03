@@ -11,12 +11,12 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
+	"github.com/knackwurstking/pgpress/internal/tool"
 )
 
-func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
+func ToolPage(user *models.User, tool *tool.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -91,7 +91,7 @@ func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*mo
 	})
 }
 
-func toolPageActions(user *models.User, tool *database.ToolWithNotes) templ.Component {
+func toolPageActions(user *models.User, tool *tool.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -162,7 +162,7 @@ func toolPageActions(user *models.User, tool *database.ToolWithNotes) templ.Comp
 	})
 }
 
-func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
+func toolPageNotes(tool *tool.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -251,7 +251,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 }
 
 // TODO: Need some sorting logic here
-func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
+func toolPageMetalSheets(user *models.User, tool *tool.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -614,7 +614,7 @@ func toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*model
 	})
 }
 
-func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
+func toolPageCylesList(tool *tool.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

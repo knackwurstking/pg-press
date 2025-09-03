@@ -1,9 +1,11 @@
-package database
+package troublereport
 
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/attachment"
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
@@ -17,14 +19,14 @@ type TroubleReportWithAttachments struct {
 // TroubleReportsHelper provides high-level operations for trouble reports
 // with attachment management.
 type TroubleReportsHelper struct {
-	troubleReports DataOperations[*models.TroubleReport]
-	attachments    *Attachments
+	troubleReports interfaces.DataOperations[*models.TroubleReport]
+	attachments    *attachment.Service
 }
 
 // NewTroubleReportsHelper creates a new helper instance.
 func NewTroubleReportsHelper(
-	troubleReports DataOperations[*models.TroubleReport],
-	attachments *Attachments,
+	troubleReports interfaces.DataOperations[*models.TroubleReport],
+	attachments *attachment.Service,
 ) *TroubleReportsHelper {
 	return &TroubleReportsHelper{
 		troubleReports: troubleReports,

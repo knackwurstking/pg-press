@@ -1,4 +1,4 @@
-package database
+package tool
 
 import (
 	"database/sql"
@@ -6,19 +6,20 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// Tools represents a collection of tools in the database.
-type Tools struct {
+type Service struct {
 	db    *sql.DB
-	feeds *Feeds
+	feeds *feed.Service
 }
 
-var _ DataOperations[*models.Tool] = (*Tools)(nil)
+var _ interfaces.DataOperations[*models.Tool] = (*Service)(nil)
 
-func NewTools(db *sql.DB, feeds *Feeds) *Tools {
+func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
 		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
@@ -45,13 +46,13 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 		)
 	}
 
-	return &Tools{
+	return &Service{
 		db:    db,
 		feeds: feeds,
 	}
 }
 
-func (t *Tools) List() ([]*models.Tool, error) {
+func (t *Service) List() ([]*models.Tool, error) {
 	logger.DBTools().Info("Listing tools")
 
 	query := `
@@ -83,7 +84,7 @@ func (t *Tools) List() ([]*models.Tool, error) {
 	return tools, nil
 }
 
-func (t *Tools) Get(id int64) (*models.Tool, error) {
+func (t *Service) Get(id int64) (*models.Tool, error) {
 	logger.DBTools().Info("Getting tool, id: %d", id)
 
 	query := `
@@ -103,7 +104,7 @@ func (t *Tools) Get(id int64) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
+func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
 	// Marshal format for the existence check and insert
@@ -166,7 +167,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 	return id, nil
 }
 
-func (t *Tools) Update(tool *models.Tool, user *models.User) error {
+func (t *Service) Update(tool *models.Tool, user *models.User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
 	// Marshal format for the existence check and update
@@ -220,7 +221,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) Delete(id int64, user *models.User) error {
+func (t *Service) Delete(id int64, user *models.User) error {
 	logger.DBTools().Info("Deleting tool: %d", id)
 
 	// Get tool info before deletion for feed
@@ -253,7 +254,7 @@ func (t *Tools) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) exists(tool *models.Tool, formatBytes []byte) error {
+func (t *Service) exists(tool *models.Tool, formatBytes []byte) error {
 	var count int
 
 	query := `
@@ -272,7 +273,7 @@ func (t *Tools) exists(tool *models.Tool, formatBytes []byte) error {
 	return nil
 }
 
-func (t *Tools) scanTool(scanner scannable) (*models.Tool, error) {
+func (t *Service) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
 
 	var (
@@ -307,7 +308,7 @@ func (t *Tools) scanTool(scanner scannable) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) updateMods(user *models.User, tool *models.Tool) {
+func (t *Service) updateMods(user *models.User, tool *models.Tool) {
 	if user == nil {
 		return
 	}

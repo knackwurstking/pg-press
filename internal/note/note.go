@@ -1,4 +1,4 @@
-package database
+package note
 
 import (
 	"database/sql"
@@ -6,17 +6,18 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-type Notes struct {
+type Service struct {
 	db *sql.DB
 }
 
-var _ DataOperations[*models.Note] = (*Notes)(nil)
+var _ interfaces.DataOperations[*models.Note] = (*Service)(nil)
 
-func NewNotes(db *sql.DB) *Notes {
+func New(db *sql.DB) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
@@ -38,12 +39,12 @@ func NewNotes(db *sql.DB) *Notes {
 		)
 	}
 
-	return &Notes{
+	return &Service{
 		db: db,
 	}
 }
 
-func (n *Notes) List() ([]*models.Note, error) {
+func (n *Service) List() ([]*models.Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
 	query := `
@@ -75,7 +76,7 @@ func (n *Notes) List() ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Get(id int64) (*models.Note, error) {
+func (n *Service) Get(id int64) (*models.Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	query := `
@@ -96,7 +97,7 @@ func (n *Notes) Get(id int64) (*models.Note, error) {
 	return note, nil
 }
 
-func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -150,7 +151,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Add(note *models.Note, _ *models.User) (int64, error) {
+func (n *Service) Add(note *models.Note, _ *models.User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -172,15 +173,15 @@ func (n *Notes) Add(note *models.Note, _ *models.User) (int64, error) {
 	return id, nil
 }
 
-func (n *Notes) Update(note *models.Note, user *models.User) error {
+func (n *Service) Update(note *models.Note, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Notes) Delete(id int64, user *models.User) error {
+func (n *Service) Delete(id int64, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Notes) scanNote(scanner scannable) (*models.Note, error) {
+func (n *Service) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
 
 	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {

@@ -1,4 +1,4 @@
-package database
+package troublereport
 
 import (
 	"database/sql"
@@ -6,20 +6,20 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// TroubleReports provides database operations for managing trouble reports.
-type TroubleReports struct {
+type Service struct {
 	db    *sql.DB
-	feeds *Feeds
+	feeds *feed.Service
 }
 
-var _ DataOperations[*models.TroubleReport] = (*TroubleReports)(nil)
+var _ interfaces.DataOperations[*models.TroubleReport] = (*Service)(nil)
 
-// NewTroubleReports creates a new TroubleReports instance and initializes the database table.
-func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
+func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -39,14 +39,14 @@ func NewTroubleReports(db *sql.DB, feeds *Feeds) *TroubleReports {
 		))
 	}
 
-	return &TroubleReports{
+	return &Service{
 		db:    db,
 		feeds: feeds,
 	}
 }
 
 // List retrieves all trouble reports ordered by ID descending.
-func (tr *TroubleReports) List() ([]*models.TroubleReport, error) {
+func (tr *Service) List() ([]*models.TroubleReport, error) {
 	logger.DBTroubleReports().Info("Listing trouble reports")
 
 	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
@@ -76,7 +76,7 @@ func (tr *TroubleReports) List() ([]*models.TroubleReport, error) {
 }
 
 // Get retrieves a specific trouble report by ID.
-func (tr *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
+func (tr *Service) Get(id int64) (*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report, id: %d", id)
 
 	query := `SELECT * FROM trouble_reports WHERE id = ?`
@@ -95,7 +95,7 @@ func (tr *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
+func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
@@ -153,7 +153,7 @@ func (tr *TroubleReports) Add(troubleReport *models.TroubleReport, user *models.
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(troubleReport *models.TroubleReport, user *models.User) error {
+func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User) error {
 	id := troubleReport.ID
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
@@ -204,7 +204,7 @@ func (tr *TroubleReports) Update(troubleReport *models.TroubleReport, user *mode
 }
 
 // Delete deletes a trouble report by ID and generates an activity feed entry.
-func (tr *TroubleReports) Delete(id int64, user *models.User) error {
+func (tr *Service) Delete(id int64, user *models.User) error {
 	logger.DBTroubleReports().Info("Removing trouble report, id: %d", id)
 
 	// Get the user before deleting for the feed entry
@@ -248,7 +248,7 @@ func (tr *TroubleReports) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*models.TroubleReport, error) {
+func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
 	report := &models.TroubleReport{}
 	var linkedAttachments string
 	var mods []byte
@@ -274,7 +274,7 @@ func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*models.TroubleR
 	return report, nil
 }
 
-func (tr *TroubleReports) updateMods(user *models.User, report *models.TroubleReport) {
+func (tr *Service) updateMods(user *models.User, report *models.TroubleReport) {
 	if user == nil {
 		return
 	}

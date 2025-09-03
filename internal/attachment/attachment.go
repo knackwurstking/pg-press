@@ -1,5 +1,5 @@
 // Package database provides attachment management with lazy loading.
-package database
+package attachment
 
 import (
 	"database/sql"
@@ -7,19 +7,20 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// Attachments provides database operations for managing attachments with lazy loading.
-type Attachments struct {
+// Service provides database operations for managing attachments with lazy loading.
+type Service struct {
 	db *sql.DB
 }
 
-var _ DataOperations[*models.Attachment] = (*Attachments)(nil)
+var _ interfaces.DataOperations[*models.Attachment] = (*Service)(nil)
 
-// NewAttachments creates a new Attachments instance and initializes the database table.
-func NewAttachments(db *sql.DB) *Attachments {
+// New creates a new Service instance and initializes the database table.
+func New(db *sql.DB) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS attachments (
 			id INTEGER NOT NULL,
@@ -38,13 +39,13 @@ func NewAttachments(db *sql.DB) *Attachments {
 		))
 	}
 
-	return &Attachments{
+	return &Service{
 		db: db,
 	}
 }
 
 // List retrieves all attachments ordered by ID ascending.
-func (a *Attachments) List() ([]*models.Attachment, error) {
+func (a *Service) List() ([]*models.Attachment, error) {
 	logger.DBAttachments().Debug("Listing all attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
@@ -58,7 +59,7 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 	var attachments []*models.Attachment
 
 	for rows.Next() {
-		attachment, err := a.scanAttachment(rows)
+		attachment, err := a.scan(rows)
 		if err != nil {
 			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
@@ -74,12 +75,12 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 }
 
 // Get retrieves a specific attachment by ID.
-func (a *Attachments) Get(id int64) (*models.Attachment, error) {
+func (a *Service) Get(id int64) (*models.Attachment, error) {
 	logger.DBAttachments().Debug("Getting attachment, id: %d", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
 	row := a.db.QueryRow(query, id)
-	attachment, err := a.scanAttachment(row)
+	attachment, err := a.scan(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound
@@ -92,7 +93,7 @@ func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 }
 
 // GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
+func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -127,7 +128,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	attachmentMap := make(map[int64]*models.Attachment)
 
 	for rows.Next() {
-		attachment, err := a.scanAttachment(rows)
+		attachment, err := a.scan(rows)
 		if err != nil {
 			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
@@ -151,7 +152,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Attachments) Add(attachment *models.Attachment, _ *models.User) (int64, error) {
+func (a *Service) Add(attachment *models.Attachment, _ *models.User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -179,7 +180,7 @@ func (a *Attachments) Add(attachment *models.Attachment, _ *models.User) (int64,
 }
 
 // Update modifies an existing attachment.
-func (a *Attachments) Update(attachment *models.Attachment, _ *models.User) error {
+func (a *Service) Update(attachment *models.Attachment, _ *models.User) error {
 	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
@@ -212,7 +213,7 @@ func (a *Attachments) Update(attachment *models.Attachment, _ *models.User) erro
 }
 
 // Delete deletes an attachment by ID.
-func (a *Attachments) Delete(id int64, _ *models.User) error {
+func (a *Service) Delete(id int64, _ *models.User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
@@ -235,12 +236,7 @@ func (a *Attachments) Delete(id int64, _ *models.User) error {
 	return nil
 }
 
-// scannable is an interface that abstracts sql.Row and sql.Rows for scanning.
-type scannable interface {
-	Scan(dest ...any) error
-}
-
-func (a *Attachments) scanAttachment(scanner scannable) (*models.Attachment, error) {
+func (a *Service) scan(scanner interfaces.Scannable) (*models.Attachment, error) {
 	attachment := &models.Attachment{}
 	var id int64
 

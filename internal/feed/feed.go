@@ -1,22 +1,24 @@
-package database
+// TODO: Need to fix this type to fit the `interfaces.DataOperations[*models.Cookie]` type
+package feed
 
 import (
 	"database/sql"
 	"encoding/json"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-// Feeds handles database operations for feed entries
-type Feeds struct {
+// Service handles database operations for feed entries
+type Service struct {
 	db          *sql.DB
-	broadcaster Broadcaster
+	broadcaster interfaces.Broadcaster
 }
 
-// NewFeeds creates a new Feeds instance and initializes the database table
-func NewFeeds(db *sql.DB) *Feeds {
+// New creates a new Service instance and initializes the database table
+func New(db *sql.DB) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
@@ -27,33 +29,38 @@ func NewFeeds(db *sql.DB) *Feeds {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(dberror.NewDatabaseError("create table", "feeds", "failed to create feeds table", err))
+		panic(dberror.NewDatabaseError(
+			"create table",
+			"feeds",
+			"failed to create feeds table",
+			err,
+		))
 	}
-	return &Feeds{db: db}
+	return &Service{db: db}
 }
 
 // SetNotifier sets the feed notifier for real-time updates
-func (f *Feeds) SetBroadcaster(notifier Broadcaster) {
+func (s *Service) SetBroadcaster(notifier interfaces.Broadcaster) {
 	logger.DBFeeds().Debug("Setting broadcaster for real-time updates")
-	f.broadcaster = notifier
+	s.broadcaster = notifier
 }
 
 // List retrieves all feeds ordered by ID in descending order
-func (f *Feeds) List() ([]*models.Feed, error) {
+func (s *Service) List() ([]*models.Feed, error) {
 	logger.DBFeeds().Info("Listing all feeds")
 
 	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
-	rows, err := f.db.Query(query)
+	rows, err := s.db.Query(query)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds", err)
 	}
 	defer rows.Close()
 
-	return f.scanAllRows(rows)
+	return s.scanAllRows(rows)
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
-func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
+func (s *Service) ListRange(offset, limit int) ([]*models.Feed, error) {
 	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
@@ -68,17 +75,17 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 
 	query := `SELECT id, time, data_type, data FROM feeds
 		ORDER BY id DESC LIMIT ? OFFSET ?`
-	rows, err := f.db.Query(query, limit, offset)
+	rows, err := s.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds range", err)
 	}
 	defer rows.Close()
 
-	return f.scanAllRows(rows)
+	return s.scanAllRows(rows)
 }
 
 // Add creates a new feed entry in the database
-func (f *Feeds) Add(feed *models.Feed) error {
+func (s *Service) Add(feed *models.Feed) error {
 	logger.DBFeeds().Info("Adding feed: %+v", feed)
 
 	if feed == nil {
@@ -97,16 +104,16 @@ func (f *Feeds) Add(feed *models.Feed) error {
 	}
 
 	query := `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
-	_, err = f.db.Exec(query, feed.Time, feed.DataType, data)
+	_, err = s.db.Exec(query, feed.Time, feed.DataType, data)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to insert feed: %v", err)
 		return dberror.NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
 
 	// Notify about new feed if notifier is set
-	if f.broadcaster != nil {
+	if s.broadcaster != nil {
 		logger.DBFeeds().Debug("Broadcasting new feed notification")
-		f.broadcaster.Broadcast()
+		s.broadcaster.Broadcast()
 	}
 
 	logger.DBFeeds().Debug("Successfully added feed with data type: %s", feed.DataType)
@@ -114,12 +121,12 @@ func (f *Feeds) Add(feed *models.Feed) error {
 }
 
 // Count returns the total number of feeds in the database
-func (f *Feeds) Count() (int, error) {
+func (s *Service) Count() (int, error) {
 	logger.DBFeeds().Debug("Counting feeds")
 
 	var count int
 	query := `SELECT COUNT(*) FROM feeds`
-	err := f.db.QueryRow(query).Scan(&count)
+	err := s.db.QueryRow(query).Scan(&count)
 	if err != nil {
 		return 0, dberror.NewDatabaseError("count", "feeds", "failed to count feeds", err)
 	}
@@ -127,7 +134,7 @@ func (f *Feeds) Count() (int, error) {
 }
 
 // DeleteBefore removes all feeds created before the specified timestamp
-func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
+func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
 	logger.DBFeeds().Info("Deleting feeds before timestamp: %d", timestamp)
 
 	if timestamp <= 0 {
@@ -136,7 +143,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 	}
 
 	query := `DELETE FROM feeds WHERE time < ?`
-	result, err := f.db.Exec(query, timestamp)
+	result, err := s.db.Exec(query, timestamp)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to delete feeds by timestamp: %v", err)
 		return 0, dberror.NewDatabaseError("delete", "feeds", "failed to delete feeds by timestamp", err)
@@ -153,7 +160,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (f *Feeds) Get(id int) (*models.Feed, error) {
+func (s *Service) Get(id int) (*models.Feed, error) {
 	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
@@ -161,8 +168,8 @@ func (f *Feeds) Get(id int) (*models.Feed, error) {
 	}
 
 	query := `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
-	row := f.db.QueryRow(query, id)
-	feed, err := f.scanFeed(row)
+	row := s.db.QueryRow(query, id)
+	feed, err := s.scanFeed(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound
@@ -173,7 +180,7 @@ func (f *Feeds) Get(id int) (*models.Feed, error) {
 }
 
 // Delete removes a specific feed by ID
-func (f *Feeds) Delete(id int) error {
+func (s *Service) Delete(id int) error {
 	logger.DBFeeds().Info("Deleting feed by ID: %d", id)
 
 	if id <= 0 {
@@ -182,7 +189,7 @@ func (f *Feeds) Delete(id int) error {
 	}
 
 	query := `DELETE FROM feeds WHERE id = ?`
-	result, err := f.db.Exec(query, id)
+	result, err := s.db.Exec(query, id)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to delete feed with ID %d: %v", id, err)
 		return dberror.NewDatabaseError("delete", "feeds", "failed to delete feed", err)
@@ -204,10 +211,10 @@ func (f *Feeds) Delete(id int) error {
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
-func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
+func (s *Service) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	var feeds []*models.Feed
 	for rows.Next() {
-		feed, err := f.scanFeed(rows)
+		feed, err := s.scanFeed(rows)
 		if err != nil {
 			logger.DBFeeds().Error("Failed to scan feed row: %v", err)
 			return nil, dberror.NewDatabaseError("scan", "feeds", "failed to scan feed row", err)
@@ -224,7 +231,7 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	return feeds, nil
 }
 
-func (f *Feeds) scanFeed(scanner scannable) (*models.Feed, error) {
+func (s *Service) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
 	feed := &models.Feed{}
 	var data []byte
 

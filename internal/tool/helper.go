@@ -1,4 +1,4 @@
-package database
+package tool
 
 import (
 	"encoding/json"
@@ -7,6 +7,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/internal/note"
+	"github.com/knackwurstking/pgpress/internal/presscycle"
 )
 
 // ToolWithNotes represents a tool with its related notes loaded.
@@ -15,20 +17,17 @@ type ToolWithNotes struct {
 	LoadedNotes []*models.Note `json:"loaded_notes"`
 }
 
-// ToolsHelper provides high-level operations for tools that are not part of the
-// standard DataOperations interface. It combines functionality from Tools, Notes,
-// and PressCycles to offer more complex queries and updates.
 type ToolsHelper struct {
-	tools       *Tools
-	notes       *Notes
-	pressCycles *PressCycles
+	tools       *Service
+	notes       *note.Service
+	pressCycles *presscycle.Service
 }
 
 // NewToolsHelper creates a new ToolsHelper instance.
 func NewToolsHelper(
-	tools *Tools,
-	notes *Notes,
-	pressCycles *PressCycles,
+	tools *Service,
+	notes *note.Service,
+	pressCycles *presscycle.Service,
 ) *ToolsHelper {
 	return &ToolsHelper{
 		tools:       tools,

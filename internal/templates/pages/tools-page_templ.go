@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/models"
 	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
+	"github.com/knackwurstking/pgpress/internal/tool"
 )
 
 func toolsPageNavContent() templ.Component {
@@ -62,7 +62,7 @@ func toolsPageNavContent() templ.Component {
 	})
 }
 
-func ToolsPage(tools []*database.ToolWithNotes) templ.Component {
+func ToolsPage(tools []*tool.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -351,7 +351,7 @@ func pressSectionListItem(title, top, topCassette, bottom, href string) templ.Co
 	})
 }
 
-func toolsSection(tools []*database.ToolWithNotes) templ.Component {
+func toolsSection(tools []*tool.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
