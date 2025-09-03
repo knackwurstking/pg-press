@@ -5,9 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/cookie"
-	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
+	"github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/errors"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	profilecomp "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
 	"github.com/knackwurstking/pgpress/internal/utils"

@@ -4,7 +4,7 @@ package ws
 import (
 	"context"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
+	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	"golang.org/x/net/websocket"
 )
 

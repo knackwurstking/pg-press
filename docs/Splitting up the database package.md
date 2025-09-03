@@ -15,19 +15,18 @@ I suggest creating a new package, for example, `internal/models`, to hold all yo
 3.  **Update package declarations:** In each of the moved files, change the package declaration from `package database` to `package models`.
 4.  **Update imports:** In the `internal/database` package (and any other package that uses these types), you would add an import for the new `models` package:
     ```go
-    import "github.com/knackwurstking/pgpress/internal/models"
+    import "github.com/knackwurstking/pgpress/internal/database/models"
     ```
     You would then reference the types with the package name, for example `models.User`, `models.Tool`, etc.
 
 **Benefits of this approach:**
 
-*   **Clear Separation of Concerns:** Your data models (the "what") are cleanly separated from your database logic (the "how").
-*   **Reduced Package Size:** The `database` package becomes smaller and more focused on its core responsibility: interacting with the database.
-*   **Improved Readability and Maintainability:** It's easier for developers to find the code they are looking for.
+- **Clear Separation of Concerns:** Your data models (the "what") are cleanly separated from your database logic (the "how").
+- **Reduced Package Size:** The `database` package becomes smaller and more focused on its core responsibility: interacting with the database.
+- **Improved Readability and Maintainability:** It's easier for developers to find the code they are looking for.
 
 ### Alternative for the Future: Package by Domain
 
 As your application grows even larger, you might consider a "package by domain" or "package by feature" structure. In this approach, you could create sub-packages within `database` (or at the `internal` level) for each major feature, like `user`, `tool`, `report`, etc. Each of these packages would contain its own models, handlers, and helpers.
 
 For now, creating a `models` package is a fantastic step forward and will make your codebase much cleaner.
-

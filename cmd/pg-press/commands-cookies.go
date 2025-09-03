@@ -9,8 +9,8 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/dberror"
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 )
 
 func removeCookiesCommand() cli.Command {

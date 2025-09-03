@@ -13,7 +13,7 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/errors"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/router"
 )

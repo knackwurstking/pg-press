@@ -1,6 +1,6 @@
 package htmx
 
-import "github.com/knackwurstking/pgpress/internal/models"
+import "github.com/knackwurstking/pgpress/internal/database/models"
 
 type ToolEditFormData struct {
 	Position models.Position     // Position form field name "position"
