@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/dbutils"
 )
 
 const (
@@ -52,7 +54,7 @@ func (c *Cookie) Validate() error {
 	if c.ApiKey == "" {
 		return NewValidationError("api_key", "cannot be empty", c.ApiKey)
 	}
-	if len(c.ApiKey) < MinAPIKeyLength {
+	if len(c.ApiKey) < dbutils.MinAPIKeyLength {
 		return NewValidationError("api_key", "too short for security", len(c.ApiKey))
 	}
 
@@ -117,7 +119,7 @@ func (c *Cookie) RefreshToken() error {
 
 // RefreshAPIKey generates a new secure API key.
 func (c *Cookie) RefreshAPIKey() error {
-	newAPIKey, err := generateSecureToken(MinAPIKeyLength)
+	newAPIKey, err := generateSecureToken(dbutils.MinAPIKeyLength)
 	if err != nil {
 		return WrapError(err, "failed to refresh API key")
 	}
@@ -151,8 +153,8 @@ func (c *Cookie) Clone() *Cookie {
 // Sanitize creates a version of the cookie with sensitive data removed (for logging).
 func (c *Cookie) Sanitize() *Cookie {
 	sanitized := c.Clone()
-	sanitized.Value = maskString(c.Value)
-	sanitized.ApiKey = maskString(c.ApiKey)
+	sanitized.Value = dbutils.MaskString(c.Value)
+	sanitized.ApiKey = dbutils.MaskString(c.ApiKey)
 	return sanitized
 }
 

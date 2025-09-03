@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -110,7 +111,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at FROM notes WHERE id IN (%s);`,
-		joinStrings(placeholders, ","),
+		dbutils.JoinStrings(placeholders, ","),
 	)
 
 	rows, err := n.db.Query(query, args...)

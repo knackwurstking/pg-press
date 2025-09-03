@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/knackwurstking/pgpress/internal/dbutils"
 )
 
 const (
@@ -61,10 +63,10 @@ func (u *User) Validate() error {
 	if u.ApiKey == "" {
 		return NewValidationError("api_key", "cannot be empty", u.ApiKey)
 	}
-	if len(u.ApiKey) < MinAPIKeyLength {
+	if len(u.ApiKey) < dbutils.MinAPIKeyLength {
 		return NewValidationError(
 			"api_key",
-			fmt.Sprintf("too short for security, must be at least %d characters", MinAPIKeyLength),
+			fmt.Sprintf("too short for security, must be at least %d characters", dbutils.MinAPIKeyLength),
 			len(u.ApiKey),
 		)
 	}
@@ -126,10 +128,10 @@ func (u *User) Clone() *User {
 	}
 }
 
-// Sanitize creates a version of the user with sensitive data removed (for logging)
+// Sanitize creates a version of the user with sensitive data removed (for logging).
 func (u *User) Sanitize() *User {
 	sanitized := u.Clone()
-	sanitized.ApiKey = maskString(sanitized.ApiKey)
+	sanitized.ApiKey = dbutils.MaskString(sanitized.ApiKey)
 	return sanitized
 }
 

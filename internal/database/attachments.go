@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -110,7 +111,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*Attachment, error) {
 			WHERE id IN (%s)
 			ORDER BY id ASC
 		`,
-		joinStrings(placeholders, ","),
+		dbutils.JoinStrings(placeholders, ","),
 	)
 
 	rows, err := a.db.Query(query, args...)

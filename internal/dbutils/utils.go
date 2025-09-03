@@ -1,5 +1,5 @@
-// Package database provides a PostgreSQL visualization and management system.
-package database
+// Package dbutils provides common database utility functions.
+package dbutils
 
 import "strings"
 
@@ -8,7 +8,7 @@ const (
 	MinAPIKeyLength = 32
 )
 
-func joinStrings(strs []string, sep string) string {
+func JoinStrings(strs []string, sep string) string {
 	if len(strs) == 0 {
 		return ""
 	}
@@ -26,9 +26,9 @@ func joinStrings(strs []string, sep string) string {
 	return result
 }
 
-// maskString masks sensitive strings by showing only the first and last 4 characters.
+// MaskString masks sensitive strings by showing only the first and last 4 characters.
 // For strings with 8 or fewer characters, all characters are masked.
-func maskString(s string) string {
+func MaskString(s string) string {
 	if len(s) <= 8 {
 		return strings.Repeat("*", len(s))
 	}

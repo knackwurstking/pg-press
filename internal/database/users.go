@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -198,10 +199,10 @@ func (u *Users) Update(user *User, actor *User) error {
 		return NewValidationError("api_key", "API key cannot be empty", user.ApiKey)
 	}
 
-	if len(user.ApiKey) < MinAPIKeyLength {
-		logger.DBUsers().Debug("Validation failed: API key too short (length=%d, required=%d)", len(user.ApiKey), MinAPIKeyLength)
+	if len(user.ApiKey) < dbutils.MinAPIKeyLength {
+		logger.DBUsers().Debug("Validation failed: API key too short (length=%d, required=%d)", len(user.ApiKey), dbutils.MinAPIKeyLength)
 		return NewValidationError("api_key",
-			fmt.Sprintf("API key must be at least %d characters", MinAPIKeyLength),
+			fmt.Sprintf("API key must be at least %d characters", dbutils.MinAPIKeyLength),
 			len(user.ApiKey))
 	}
 
