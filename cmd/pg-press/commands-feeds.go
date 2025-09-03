@@ -13,6 +13,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // listFeedsCommand creates a CLI command for listing feeds from the database.
@@ -64,7 +65,7 @@ func listFeedsCommand() cli.Command {
 					return err
 				}
 
-				var feeds []*database.Feed
+				var feeds []*models.Feed
 
 				// Get feeds based on parameters
 				if *limit > 0 {
@@ -185,8 +186,8 @@ func removeFeedsCommand() cli.Command {
 
 // Helper functions
 
-func filterFeedsByDate(feeds []*database.Feed, since, before string) []*database.Feed {
-	var filtered []*database.Feed
+func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Feed {
+	var filtered []*models.Feed
 
 	var sinceTime, beforeTime time.Time
 	var err error
@@ -249,17 +250,17 @@ func formatFeedData(data any, dataType string) string {
 	}
 
 	switch dataType {
-	case database.FeedTypeUserAdd, database.FeedTypeUserRemove:
+	case models.FeedTypeUserAdd, models.FeedTypeUserRemove:
 		if name, exists := dataMap["name"]; exists {
 			return fmt.Sprintf("User: %v", name)
 		}
-	case database.FeedTypeUserNameChange:
+	case models.FeedTypeUserNameChange:
 		if old, exists := dataMap["old"]; exists {
 			if new, exists := dataMap["new"]; exists {
 				return fmt.Sprintf("User: %v -> %v", old, new)
 			}
 		}
-	case database.FeedTypeTroubleReportAdd, database.FeedTypeTroubleReportUpdate, database.FeedTypeTroubleReportRemove:
+	case models.FeedTypeTroubleReportAdd, models.FeedTypeTroubleReportUpdate, models.FeedTypeTroubleReportRemove:
 		if title, exists := dataMap["title"]; exists {
 			return fmt.Sprintf("Report: %v", title)
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
 )
@@ -55,7 +56,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	return nil
 }
 
-func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) error {
+func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
 	formParams, _ := c.FormParams()
 	userName := utils.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
@@ -73,7 +74,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *database.User) erro
 	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
 		user.UserName, user.TelegramID, userName)
 
-	updatedUser := database.NewUser(user.TelegramID, userName, user.ApiKey)
+	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
 	if err := h.DB.Users.Update(updatedUser, user); err != nil {

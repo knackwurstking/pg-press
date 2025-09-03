@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/components"
 	troublereportscomp "github.com/knackwurstking/pgpress/internal/templates/components/troublereports"
 	"github.com/knackwurstking/pgpress/internal/utils"
@@ -65,9 +66,9 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 			"failed to delete trouble report: "+err.Error())
 	} else {
 		logger.HTMXHandlerTroubleReports().Info("Successfully deleted trouble report %d (%s)", removedReport.ID, removedReport.Title)
-		feed := database.NewFeed(
-			database.FeedTypeTroubleReportRemove,
-			&database.FeedTroubleReportRemove{
+		feed := models.NewFeed(
+			models.FeedTypeTroubleReportRemove,
+			&models.FeedTroubleReportRemove{
 				ID:        removedReport.ID,
 				Title:     removedReport.Title,
 				RemovedBy: user,

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type CyclesSectionProps struct {
-	User          *database.User
+	User          *models.User
 	ToolID        int64
 	TotalCycles   int64
 	Cycles        []*database.PressCycle
@@ -57,7 +58,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
-templ cyclesTableRows(user *database.User, cycles []*database.PressCycle) {
+templ cyclesTableRows(user *models.User, cycles []*database.PressCycle) {
 	if len(cycles) == 0 {
 		<tr>
 			<td colspan="4" class="text-center">
@@ -77,7 +78,7 @@ templ cyclesTableRows(user *database.User, cycles []*database.PressCycle) {
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(user *database.User, cycle *database.PressCycle, previousTotalCycles int64) {
+templ renderCycleRowWithPartialCalc(user *models.User, cycle *database.PressCycle, previousTotalCycles int64) {
 	{{ partialCycles := cycle.TotalCycles - previousTotalCycles }}
 	<tr>
 		<td>

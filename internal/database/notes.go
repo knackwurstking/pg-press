@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type Notes struct {
@@ -149,7 +150,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Add(note *Note, _ *User) (int64, error) {
+func (n *Notes) Add(note *Note, _ *models.User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -171,11 +172,11 @@ func (n *Notes) Add(note *Note, _ *User) (int64, error) {
 	return id, nil
 }
 
-func (n *Notes) Update(note *Note, user *User) error {
+func (n *Notes) Update(note *Note, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Notes) Delete(id int64, user *User) error {
+func (n *Notes) Delete(id int64, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 

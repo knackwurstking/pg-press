@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // PressCyclesHelper provides additional press cycle-related database operations
@@ -23,7 +24,7 @@ func NewPressCyclesHelper(pressCycles *PressCycles) *PressCyclesHelper {
 }
 
 // StartToolUsage records when a tool starts being used on a press
-func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber PressNumber, user *User) (*PressCycle, error) {
+func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber PressNumber, user *models.User) (*PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
 
 	if !pressNumber.IsValid() {
@@ -54,9 +55,9 @@ func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber PressNumb
 
 	// Create feed entry
 	if pch.pressCycles.feeds != nil {
-		pch.pressCycles.feeds.Add(NewFeed(
-			FeedTypeToolUpdate,
-			&FeedToolUpdate{
+		pch.pressCycles.feeds.Add(models.NewFeed(
+			models.FeedTypeToolUpdate,
+			&models.FeedToolUpdate{
 				ID:         toolID,
 				Tool:       fmt.Sprintf("Werkzeug #%d wurde an Presse %d angebracht", toolID, pressNumber),
 				ModifiedBy: user,

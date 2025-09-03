@@ -10,51 +10,51 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func RenderFeed(feed *database.Feed) templ.Component {
+func RenderFeed(feed *models.Feed) templ.Component {
 	var feedContent templ.Component
 	data, _ := feed.Data.(map[string]any)
 
 	switch feed.DataType {
 	// User Types
-	case database.FeedTypeUserAdd:
-		feedContent = AddUser(database.NewFeedUserAdd(data))
-	case database.FeedTypeUserNameChange:
-		feedContent = ChangeUserName(database.NewFeedUserNameChange(data))
-	case database.FeedTypeUserRemove:
-		feedContent = RemoveUser(database.NewFeedUserRemove(data))
+	case models.FeedTypeUserAdd:
+		feedContent = AddUser(models.NewFeedUserAdd(data))
+	case models.FeedTypeUserNameChange:
+		feedContent = ChangeUserName(models.NewFeedUserNameChange(data))
+	case models.FeedTypeUserRemove:
+		feedContent = RemoveUser(models.NewFeedUserRemove(data))
 	// Trouble Report Types
-	case database.FeedTypeTroubleReportAdd:
-		feedContent = AddTroubleReport(database.NewFeedTroubleReportAdd(data))
-	case database.FeedTypeTroubleReportUpdate:
-		feedContent = UpdateTroubleReport(database.NewFeedTroubleReportUpdate(data))
-	case database.FeedTypeTroubleReportRemove:
-		feedContent = RemoveTroubleReport(database.NewFeedTroubleReportRemove(data))
+	case models.FeedTypeTroubleReportAdd:
+		feedContent = AddTroubleReport(models.NewFeedTroubleReportAdd(data))
+	case models.FeedTypeTroubleReportUpdate:
+		feedContent = UpdateTroubleReport(models.NewFeedTroubleReportUpdate(data))
+	case models.FeedTypeTroubleReportRemove:
+		feedContent = RemoveTroubleReport(models.NewFeedTroubleReportRemove(data))
 	// Tool Types
-	case database.FeedTypeToolAdd:
-		feedContent = AddTool(database.NewFeedToolAdd(data))
-	case database.FeedTypeToolUpdate:
-		feedContent = UpdateTool(database.NewFeedToolUpdate(data))
-	case database.FeedTypeToolDelete:
-		feedContent = DeleteTool(database.NewFeedToolDelete(data))
+	case models.FeedTypeToolAdd:
+		feedContent = AddTool(models.NewFeedToolAdd(data))
+	case models.FeedTypeToolUpdate:
+		feedContent = UpdateTool(models.NewFeedToolUpdate(data))
+	case models.FeedTypeToolDelete:
+		feedContent = DeleteTool(models.NewFeedToolDelete(data))
 	// Metal Sheet Types
-	case database.FeedTypeMetalSheetAdd:
-		feedContent = AddMetalSheet(database.NewFeedMetalSheetAdd(data))
-	case database.FeedTypeMetalSheetUpdate:
-		feedContent = UpdateMetalSheet(database.NewFeedMetalSheetUpdate(data))
-	case database.FeedTypeMetalSheetDelete:
-		feedContent = DeleteMetalSheet(database.NewFeedMetalSheetDelete(data))
-	case database.FeedTypeMetalSheetStatusChange:
-		feedContent = MetalSheetStatusChange(database.NewFeedMetalSheetStatusChange(data))
-	case database.FeedTypeMetalSheetToolAssignment:
-		feedContent = MetalSheetToolAssignment(database.NewFeedMetalSheetToolAssignment(data))
+	case models.FeedTypeMetalSheetAdd:
+		feedContent = AddMetalSheet(models.NewFeedMetalSheetAdd(data))
+	case models.FeedTypeMetalSheetUpdate:
+		feedContent = UpdateMetalSheet(models.NewFeedMetalSheetUpdate(data))
+	case models.FeedTypeMetalSheetDelete:
+		feedContent = DeleteMetalSheet(models.NewFeedMetalSheetDelete(data))
+	case models.FeedTypeMetalSheetStatusChange:
+		feedContent = MetalSheetStatusChange(models.NewFeedMetalSheetStatusChange(data))
+	case models.FeedTypeMetalSheetToolAssignment:
+		feedContent = MetalSheetToolAssignment(models.NewFeedMetalSheetToolAssignment(data))
 	// Press Cycle Types
-	case database.FeedTypePressCycleAdd:
-		feedContent = AddPressCycle(database.NewFeedPressCycleAdd(data))
-	case database.FeedTypePressCycleUpdate:
-		feedContent = UpdatePressCycle(database.NewFeedPressCycleUpdate(data))
+	case models.FeedTypePressCycleAdd:
+		feedContent = AddPressCycle(models.NewFeedPressCycleAdd(data))
+	case models.FeedTypePressCycleUpdate:
+		feedContent = UpdatePressCycle(models.NewFeedPressCycleUpdate(data))
 	// Fallback
 	default:
 		feedContent = templ.Raw(fmt.Sprintf(`<pre>%#v</pre>`, feed.Data))

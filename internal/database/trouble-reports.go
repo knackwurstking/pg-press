@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // TroubleReports provides database operations for managing trouble reports.
@@ -94,7 +95,7 @@ func (tr *TroubleReports) Get(id int64) (*TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, error) {
+func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *models.User) (int64, error) {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
@@ -136,9 +137,9 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 	}
 	troubleReport.ID = id
 
-	feed := NewFeed(
-		FeedTypeTroubleReportAdd,
-		&FeedTroubleReportAdd{
+	feed := models.NewFeed(
+		models.FeedTypeTroubleReportAdd,
+		&models.FeedTroubleReportAdd{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -152,7 +153,7 @@ func (tr *TroubleReports) Add(troubleReport *TroubleReport, user *User) (int64, 
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error {
+func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *models.User) error {
 	id := troubleReport.ID
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
@@ -187,9 +188,9 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
-	feed := NewFeed(
-		FeedTypeTroubleReportUpdate,
-		&FeedTroubleReportUpdate{
+	feed := models.NewFeed(
+		models.FeedTypeTroubleReportUpdate,
+		&models.FeedTroubleReportUpdate{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -203,7 +204,7 @@ func (tr *TroubleReports) Update(troubleReport *TroubleReport, user *User) error
 }
 
 // Delete deletes a trouble report by ID and generates an activity feed entry.
-func (tr *TroubleReports) Delete(id int64, user *User) error {
+func (tr *TroubleReports) Delete(id int64, user *models.User) error {
 	logger.DBTroubleReports().Info("Removing trouble report, id: %d", id)
 
 	// Get the user before deleting for the feed entry
@@ -231,9 +232,9 @@ func (tr *TroubleReports) Delete(id int64, user *User) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := NewFeed(
-			FeedTypeTroubleReportRemove,
-			&FeedTroubleReportRemove{
+		feed := models.NewFeed(
+			models.FeedTypeTroubleReportRemove,
+			&models.FeedTroubleReportRemove{
 				ID:        report.ID,
 				Title:     report.Title,
 				RemovedBy: user,
@@ -273,7 +274,7 @@ func (tr *TroubleReports) scanTroubleReport(scanner scannable) (*TroubleReport, 
 	return report, nil
 }
 
-func (tr *TroubleReports) updateMods(user *User, report *TroubleReport) {
+func (tr *TroubleReports) updateMods(user *models.User, report *TroubleReport) {
 	if user == nil {
 		return
 	}

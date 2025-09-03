@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // ToolRegenerations handles tool regeneration tracking
@@ -53,7 +54,7 @@ func NewToolRegenerations(db *sql.DB, feeds *Feeds, pressCyclesHelper *PressCycl
 }
 
 // Create records a new tool regeneration event
-func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, user *User) (*ToolRegeneration, error) {
+func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, user *models.User) (*ToolRegeneration, error) {
 	logger.DBToolRegenerations().Info(
 		"Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s",
 		toolID, cycleID, reason,
@@ -87,9 +88,9 @@ func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, u
 
 	// Create feed entry
 	if t.feeds != nil {
-		t.feeds.Add(NewFeed(
-			FeedTypeToolUpdate,
-			&FeedToolUpdate{
+		t.feeds.Add(models.NewFeed(
+			models.FeedTypeToolUpdate,
+			&models.FeedToolUpdate{
 				ID:         toolID,
 				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s)", toolID, reason),
 				ModifiedBy: user,
@@ -101,7 +102,7 @@ func (t *ToolRegenerations) Create(toolID int64, cycleID int64, reason string, u
 }
 
 // Update updates an existing regeneration record
-func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *User) error {
+func (t *ToolRegenerations) Update(regen *ToolRegeneration, user *models.User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
 	var performedBy *int64

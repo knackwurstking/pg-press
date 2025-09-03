@@ -140,7 +140,7 @@ func addTroubleReportImagesSection(o *troubleReportOptions) {
 
 func getTroubleReportMetadataInfo(o *troubleReportOptions) (
 	earliestTime, latestTime int64,
-	creator *database.User, lastModifier *database.User,
+	creator *models.User, lastModifier *models.User,
 ) {
 	earliestTime, latestTime = o.Report.Mods[0].Time, o.Report.Mods[0].Time
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // MetalSheets represents a collection of metal sheets in the database.
@@ -217,7 +218,7 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
+func (ms *MetalSheets) Add(sheet *MetalSheet, user *models.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
@@ -271,9 +272,9 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 
 	// Trigger feed update
 	if ms.feeds != nil {
-		ms.feeds.Add(NewFeed(
-			FeedTypeMetalSheetAdd,
-			&FeedMetalSheetAdd{
+		ms.feeds.Add(models.NewFeed(
+			models.FeedTypeMetalSheetAdd,
+			&models.FeedMetalSheetAdd{
 				ID:         id,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -285,7 +286,7 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *User) (int64, error) {
 }
 
 // Update updates an existing metal sheet
-func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
+func (ms *MetalSheets) Update(sheet *MetalSheet, user *models.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
@@ -347,9 +348,9 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 
 	// Trigger feed update
 	if ms.feeds != nil {
-		ms.feeds.Add(NewFeed(
-			FeedTypeMetalSheetUpdate,
-			&FeedMetalSheetUpdate{
+		ms.feeds.Add(models.NewFeed(
+			models.FeedTypeMetalSheetUpdate,
+			&models.FeedMetalSheetUpdate{
 				ID:         sheet.ID,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -361,7 +362,7 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *User) error {
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) error {
+func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -409,9 +410,9 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) erro
 
 	// Trigger feed update
 	if ms.feeds != nil {
-		ms.feeds.Add(NewFeed(
-			FeedTypeMetalSheetToolAssignment,
-			&FeedMetalSheetToolAssignment{
+		ms.feeds.Add(models.NewFeed(
+			models.FeedTypeMetalSheetToolAssignment,
+			&models.FeedMetalSheetToolAssignment{
 				SheetID:    sheetID,
 				ToolID:     toolID,
 				ModifiedBy: user,
@@ -423,7 +424,7 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *User) erro
 }
 
 // Delete deletes a metal sheet
-func (ms *MetalSheets) Delete(id int64, user *User) error {
+func (ms *MetalSheets) Delete(id int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	query := `
@@ -439,9 +440,9 @@ func (ms *MetalSheets) Delete(id int64, user *User) error {
 
 	// Trigger feed update
 	if ms.feeds != nil {
-		ms.feeds.Add(NewFeed(
-			FeedTypeMetalSheetDelete,
-			&FeedMetalSheetDelete{
+		ms.feeds.Add(models.NewFeed(
+			models.FeedTypeMetalSheetDelete,
+			&models.FeedMetalSheetDelete{
 				ID:         id,
 				ModifiedBy: user,
 			},

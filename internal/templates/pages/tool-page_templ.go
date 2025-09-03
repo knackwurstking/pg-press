@@ -12,10 +12,11 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-func ToolPage(user *database.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
+func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -90,7 +91,7 @@ func ToolPage(user *database.User, tool *database.ToolWithNotes, metalSheets []*
 	})
 }
 
-func toolPageActions(user *database.User, tool *database.ToolWithNotes) templ.Component {
+func toolPageActions(user *models.User, tool *database.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -121,7 +122,7 @@ func toolPageActions(user *database.User, tool *database.ToolWithNotes) templ.Co
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 43, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 44, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -137,7 +138,7 @@ func toolPageActions(user *database.User, tool *database.ToolWithNotes) templ.Co
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 56, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 57, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +217,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 92, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 93, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -229,7 +230,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 96, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 97, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -250,7 +251,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 }
 
 // TODO: Need some sorting logic here
-func toolPageMetalSheets(user *database.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -281,7 +282,7 @@ func toolPageMetalSheets(user *database.User, tool *database.ToolWithNotes, meta
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 114, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 115, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -315,7 +316,7 @@ func toolPageMetalSheets(user *database.User, tool *database.ToolWithNotes, meta
 	})
 }
 
-func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -354,7 +355,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.TileHeight))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 162, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 163, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -367,7 +368,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 163, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 164, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -380,7 +381,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", sheet.MarkeHeight))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 164, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 165, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -393,7 +394,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.STF))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 165, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 166, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -406,7 +407,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.STFMax))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 166, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 167, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -422,7 +423,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 					constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 172, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 173, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -438,7 +439,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 					constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 185, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 186, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -453,7 +454,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 					"%s/htmx/metal-sheets/delete?id=%d", constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 197, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 198, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -483,7 +484,7 @@ func toolPageMetalSheetsTablePositionBottom(user *database.User, metalSheets []*
 	})
 }
 
-func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*database.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -522,7 +523,7 @@ func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*dat
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.TileHeight))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 239, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 240, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -535,7 +536,7 @@ func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*dat
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 240, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 241, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -551,7 +552,7 @@ func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*dat
 					constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 246, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 247, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -567,7 +568,7 @@ func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*dat
 					constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 259, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 260, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -583,7 +584,7 @@ func toolPageMetalSheetsTablePositionTop(user *database.User, metalSheets []*dat
 					constants.ServerPathPrefix, sheet.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 272, Col: 10}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 273, Col: 10}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -650,7 +651,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 				constants.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 307, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 308, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -663,7 +664,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 310, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 311, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
@@ -691,7 +692,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Status())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 320, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 321, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
@@ -712,7 +713,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			constants.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 328, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/pages/tool-page.templ`, Line: 329, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {

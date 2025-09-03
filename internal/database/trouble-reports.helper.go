@@ -88,7 +88,7 @@ func (s *TroubleReportsHelper) ListWithAttachments() ([]*TroubleReportWithAttach
 
 // AddWithAttachments creates a new trouble report and its attachments.
 func (s *TroubleReportsHelper) AddWithAttachments(
-	user *User,
+	user *models.User,
 	troubleReport *TroubleReport,
 	attachments []*models.Attachment,
 ) error {
@@ -133,7 +133,7 @@ func (s *TroubleReportsHelper) AddWithAttachments(
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
 func (s *TroubleReportsHelper) UpdateWithAttachments(
-	user *User,
+	user *models.User,
 	id int64,
 	troubleReport *TroubleReport,
 	newAttachments []*models.Attachment,
@@ -181,7 +181,7 @@ func (s *TroubleReportsHelper) UpdateWithAttachments(
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
-func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *User) (*TroubleReport, error) {
+func (s *TroubleReportsHelper) RemoveWithAttachments(id int64, user *models.User) (*TroubleReport, error) {
 	logger.DBTroubleReportsHelper().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments

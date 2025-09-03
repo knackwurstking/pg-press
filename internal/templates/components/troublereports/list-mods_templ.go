@@ -12,10 +12,11 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 func ListMods(
-	user *database.User,
+	user *models.User,
 	id int64,
 	first *database.Modified[database.TroubleReportMod],
 	current *database.Modified[database.TroubleReportMod],
@@ -48,7 +49,7 @@ func ListMods(
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDData)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 16, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 17, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -61,7 +62,7 @@ func ListMods(
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(constants.ServerPathPrefix + "/htmx/trouble-reports/data")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 19, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 20, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -74,7 +75,7 @@ func ListMods(
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 21, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 22, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -87,7 +88,7 @@ func ListMods(
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDModificationsList)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 29, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 30, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -135,7 +136,7 @@ func ListMods(
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(mod.User.UserName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 71, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 72, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +149,7 @@ func ListMods(
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 71, Col: 85}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 72, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -166,7 +167,7 @@ func ListMods(
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(mod.User.UserName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 76, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 77, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -179,7 +180,7 @@ func ListMods(
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 76, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 77, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -197,7 +198,7 @@ func ListMods(
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 87, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 88, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -210,7 +211,7 @@ func ListMods(
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 96, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 97, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -228,7 +229,7 @@ func ListMods(
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d-%d", id, mod.Time))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 101, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 102, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -244,7 +245,7 @@ func ListMods(
 					constants.ServerPathPrefix, id, mod.Time,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 105, Col: 9}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 106, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -257,7 +258,7 @@ func ListMods(
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(len(mod.Data.LinkedAttachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 111, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 112, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -288,7 +289,7 @@ func ListMods(
 						constants.ServerPathPrefix, id, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 131, Col: 10}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 132, Col: 10}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -301,7 +302,7 @@ func ListMods(
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 133, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 134, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -322,7 +323,7 @@ func ListMods(
 						constants.ServerPathPrefix, id, mod.Time,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 148, Col: 10}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 149, Col: 10}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 					if templ_7745c5c3_Err != nil {
@@ -335,7 +336,7 @@ func ListMods(
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDData))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 150, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/troublereports/list-mods.templ`, Line: 151, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {

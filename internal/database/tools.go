@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Tools represents a collection of tools in the database.
@@ -102,7 +103,7 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
+func (t *Tools) Add(tool *Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
 	// Marshal format for the existence check and insert
@@ -152,9 +153,9 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(NewFeed(
-			FeedTypeToolAdd,
-			&FeedToolAdd{
+		t.feeds.Add(models.NewFeed(
+			models.FeedTypeToolAdd,
+			&models.FeedToolAdd{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -165,7 +166,7 @@ func (t *Tools) Add(tool *Tool, user *User) (int64, error) {
 	return id, nil
 }
 
-func (t *Tools) Update(tool *Tool, user *User) error {
+func (t *Tools) Update(tool *Tool, user *models.User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
 	// Marshal format for the existence check and update
@@ -206,9 +207,9 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(NewFeed(
-			FeedTypeToolUpdate,
-			&FeedToolUpdate{
+		t.feeds.Add(models.NewFeed(
+			models.FeedTypeToolUpdate,
+			&models.FeedToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -219,7 +220,7 @@ func (t *Tools) Update(tool *Tool, user *User) error {
 	return nil
 }
 
-func (t *Tools) Delete(id int64, user *User) error {
+func (t *Tools) Delete(id int64, user *models.User) error {
 	logger.DBTools().Info("Deleting tool: %d", id)
 
 	// Get tool info before deletion for feed
@@ -239,9 +240,9 @@ func (t *Tools) Delete(id int64, user *User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(NewFeed(
-			FeedTypeToolDelete,
-			&FeedToolDelete{
+		t.feeds.Add(models.NewFeed(
+			models.FeedTypeToolDelete,
+			&models.FeedToolDelete{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -306,7 +307,7 @@ func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) updateMods(user *User, tool *Tool) {
+func (t *Tools) updateMods(user *models.User, tool *Tool) {
 	if user == nil {
 		return
 	}

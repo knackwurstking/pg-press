@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func AddPressCycle(data *database.FeedPressCycleAdd) templ.Component {
+func AddPressCycle(data *models.FeedPressCycleAdd) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -94,7 +94,7 @@ func AddPressCycle(data *database.FeedPressCycleAdd) templ.Component {
 	})
 }
 
-func UpdatePressCycle(data *database.FeedPressCycleUpdate) templ.Component {
+func UpdatePressCycle(data *models.FeedPressCycleUpdate) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

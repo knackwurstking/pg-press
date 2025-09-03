@@ -1,6 +1,10 @@
 package database
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/models"
+)
 
 // MetalSheetStatus represents the current status of a metal sheet
 type MetalSheetStatus string
@@ -29,7 +33,7 @@ type MetalSheet struct {
 }
 
 // NewMetalSheet creates a new MetalSheet with default values
-func NewMetalSheet(user *User) *MetalSheet {
+func NewMetalSheet(user *models.User) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,

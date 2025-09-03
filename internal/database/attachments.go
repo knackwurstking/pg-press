@@ -151,7 +151,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Attachments) Add(attachment *models.Attachment, _ *User) (int64, error) {
+func (a *Attachments) Add(attachment *models.Attachment, _ *models.User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -179,7 +179,7 @@ func (a *Attachments) Add(attachment *models.Attachment, _ *User) (int64, error)
 }
 
 // Update modifies an existing attachment.
-func (a *Attachments) Update(attachment *models.Attachment, _ *User) error {
+func (a *Attachments) Update(attachment *models.Attachment, _ *models.User) error {
 	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
@@ -212,7 +212,7 @@ func (a *Attachments) Update(attachment *models.Attachment, _ *User) error {
 }
 
 // Delete deletes an attachment by ID.
-func (a *Attachments) Delete(id int64, _ *User) error {
+func (a *Attachments) Delete(id int64, _ *models.User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`

@@ -6,6 +6,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // ToolWithNotes represents a tool with its related notes loaded.
@@ -89,7 +90,7 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 }
 
 // AddWithNotes creates a new tool and its associated notes in a single transaction.
-func (th *ToolsHelper) AddWithNotes(tool *Tool, user *User, notes ...*Note) (*ToolWithNotes, error) {
+func (th *ToolsHelper) AddWithNotes(tool *Tool, user *models.User, notes ...*Note) (*ToolWithNotes, error) {
 	logger.DBToolsHelper().Debug("Adding tool with notes")
 
 	// First, add all notes and collect their IDs
@@ -162,7 +163,7 @@ func (th *ToolsHelper) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 }
 
 // UpdateRegenerating updates only the regenerating field of a tool.
-func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user *User) error {
+func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
 	logger.DBTools().Info("Updating tool regenerating status: %d to %v", toolID, regenerating)
 
 	// Get current tool to track changes
@@ -197,9 +198,9 @@ func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user 
 
 	// Trigger feed update
 	if th.tools.feeds != nil {
-		th.tools.feeds.Add(NewFeed(
-			FeedTypeToolUpdate,
-			&FeedToolUpdate{
+		th.tools.feeds.Add(models.NewFeed(
+			models.FeedTypeToolUpdate,
+			&models.FeedToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -211,7 +212,7 @@ func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user 
 }
 
 // UpdatePress updates only the press field of a tool.
-func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *User) error {
+func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *models.User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -249,9 +250,9 @@ func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *User)
 	// Trigger feed update
 	if th.tools.feeds != nil {
 		tool.Press = press // Update press for correct display
-		th.tools.feeds.Add(NewFeed(
-			FeedTypeToolUpdate,
-			&FeedToolUpdate{
+		th.tools.feeds.Add(models.NewFeed(
+			models.FeedTypeToolUpdate,
+			&models.FeedToolUpdate{
 				ID:         toolID,
 				Tool:       tool.String(),
 				ModifiedBy: user,

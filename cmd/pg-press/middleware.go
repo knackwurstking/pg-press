@@ -11,6 +11,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -69,7 +70,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 			"${latency_human} ${custom}\n",
 		Output: os.Stderr,
 		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-			user, ok := c.Get("user").(*database.User)
+			user, ok := c.Get("user").(*models.User)
 			if !ok {
 				return 0, nil
 			}
@@ -120,7 +121,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *database.DB) (*database.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())

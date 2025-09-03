@@ -11,6 +11,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 func listUserCommand() cli.Command {
@@ -144,7 +145,7 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				user := database.NewUser(*telegramID, *userName, *apiKey)
+				user := models.NewUser(*telegramID, *userName, *apiKey)
 				if _, err = db.Users.Add(user, nil); errors.Is(err, dberror.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)

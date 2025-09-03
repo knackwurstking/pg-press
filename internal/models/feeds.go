@@ -1,5 +1,4 @@
-// Package database provides feed models for tracking system events and user actions.
-package database
+package models
 
 import (
 	"fmt"

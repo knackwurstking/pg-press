@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/dbutils"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Users provides database operations for managing user accounts.
@@ -23,7 +24,7 @@ type Users struct {
 	feeds *Feeds
 }
 
-var _ DataOperations[*User] = (*Users)(nil)
+var _ DataOperations[*models.User] = (*Users)(nil)
 
 // NewUsers creates a new Users instance and initializes the database table.
 func NewUsers(db *sql.DB, feeds *Feeds) *Users {
@@ -48,7 +49,7 @@ func NewUsers(db *sql.DB, feeds *Feeds) *Users {
 }
 
 // List retrieves all users from the database.
-func (u *Users) List() ([]*User, error) {
+func (u *Users) List() ([]*models.User, error) {
 	logger.DBUsers().Info("Listing all users")
 
 	query := `SELECT * FROM users`
@@ -59,7 +60,7 @@ func (u *Users) List() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	var users []*User
+	var users []*models.User
 	for rows.Next() {
 		user, err := u.scanUser(rows)
 		if err != nil {
@@ -77,7 +78,7 @@ func (u *Users) List() ([]*User, error) {
 }
 
 // Get retrieves a specific user by Telegram ID.
-func (u *Users) Get(telegramID int64) (*User, error) {
+func (u *Users) Get(telegramID int64) (*models.User, error) {
 	logger.DBUsers().Debug("Getting user by Telegram ID: %d", telegramID)
 
 	query := `SELECT * FROM users WHERE telegram_id = ?`
@@ -96,7 +97,7 @@ func (u *Users) Get(telegramID int64) (*User, error) {
 }
 
 // Add creates a new user and generates a corresponding activity feed entry.
-func (u *Users) Add(user *User, actor *User) (int64, error) {
+func (u *Users) Add(user *models.User, actor *models.User) (int64, error) {
 	if user == nil {
 		return 0, dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
@@ -132,9 +133,9 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 	}
 
 	// Create feed entry for the new user
-	feed := NewFeed(
-		FeedTypeUserAdd,
-		FeedUserAdd{user.TelegramID, user.UserName},
+	feed := models.NewFeed(
+		models.FeedTypeUserAdd,
+		models.FeedUserAdd{ID: user.TelegramID, Name: user.UserName},
 	)
 	if err := u.feeds.Add(feed); err != nil {
 		return user.TelegramID, dberror.WrapError(err, "failed to add feed entry")
@@ -144,7 +145,7 @@ func (u *Users) Add(user *User, actor *User) (int64, error) {
 }
 
 // Delete deletes a user by Telegram ID and generates an activity feed entry.
-func (u *Users) Delete(telegramID int64, actor *User) error {
+func (u *Users) Delete(telegramID int64, actor *models.User) error {
 	logger.DBUsers().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
@@ -169,9 +170,9 @@ func (u *Users) Delete(telegramID int64, actor *User) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := NewFeed(
-			FeedTypeUserRemove,
-			FeedUserRemove{user.TelegramID, user.UserName},
+		feed := models.NewFeed(
+			models.FeedTypeUserRemove,
+			models.FeedUserRemove{ID: user.TelegramID, Name: user.UserName},
 		)
 		if err := u.feeds.Add(feed); err != nil {
 			return dberror.WrapError(err, "failed to add feed entry")
@@ -182,7 +183,7 @@ func (u *Users) Delete(telegramID int64, actor *User) error {
 }
 
 // Update modifies an existing user and generates activity feed entries for changes.
-func (u *Users) Update(user *User, actor *User) error {
+func (u *Users) Update(user, actor *models.User) error {
 	telegramID := user.TelegramID
 	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
 
@@ -226,9 +227,9 @@ func (u *Users) Update(user *User, actor *User) error {
 	// Create feed entry if username changed
 	if prevUser.UserName != user.UserName {
 		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.UserName, user.UserName)
-		feed := NewFeed(
-			FeedTypeUserNameChange,
-			&FeedUserNameChange{
+		feed := models.NewFeed(
+			models.FeedTypeUserNameChange,
+			&models.FeedUserNameChange{
 				ID:  user.TelegramID,
 				Old: prevUser.UserName,
 				New: user.UserName,
@@ -243,8 +244,8 @@ func (u *Users) Update(user *User, actor *User) error {
 	return nil
 }
 
-func (u *Users) scanUser(scanner scannable) (*User, error) {
-	user := &User{}
+func (u *Users) scanUser(scanner scannable) (*models.User, error) {
+	user := &models.User{}
 	err := scanner.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {

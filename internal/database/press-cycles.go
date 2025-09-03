@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // PressCycles manages press cycle data and operations
@@ -86,7 +87,7 @@ func (p *PressCycles) List() ([]*PressCycle, error) {
 }
 
 // Add creates a new press cycle entry in the database.
-func (p *PressCycles) Add(cycle *PressCycle, user *User) (int64, error) {
+func (p *PressCycles) Add(cycle *PressCycle, user *models.User) (int64, error) {
 	logger.DBPressCycles().Info("Adding new cycle: tool_id=%d, press_number=%d, total_cycles=%d", cycle.ToolID, cycle.PressNumber, cycle.TotalCycles)
 
 	if cycle.Date.IsZero() {
@@ -111,9 +112,9 @@ func (p *PressCycles) Add(cycle *PressCycle, user *User) (int64, error) {
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(NewFeed(
-			FeedTypePressCycleAdd,
-			&FeedPressCycleAdd{
+		p.feeds.Add(models.NewFeed(
+			models.FeedTypePressCycleAdd,
+			&models.FeedPressCycleAdd{
 				ToolID:      cycle.ToolID,
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,
@@ -125,7 +126,7 @@ func (p *PressCycles) Add(cycle *PressCycle, user *User) (int64, error) {
 }
 
 // Update modifies an existing press cycle entry.
-func (p *PressCycles) Update(cycle *PressCycle, user *User) error {
+func (p *PressCycles) Update(cycle *PressCycle, user *models.User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycle.ID)
 
 	if cycle.Date.IsZero() {
@@ -154,9 +155,9 @@ func (p *PressCycles) Update(cycle *PressCycle, user *User) error {
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(NewFeed(
-			FeedTypePressCycleUpdate,
-			&FeedPressCycleUpdate{
+		p.feeds.Add(models.NewFeed(
+			models.FeedTypePressCycleUpdate,
+			&models.FeedPressCycleUpdate{
 				ToolID:      cycle.ToolID,
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,
@@ -168,7 +169,7 @@ func (p *PressCycles) Update(cycle *PressCycle, user *User) error {
 }
 
 // Delete removes a press cycle from the database.
-func (p *PressCycles) Delete(id int64, user *User) error {
+func (p *PressCycles) Delete(id int64, user *models.User) error {
 	logger.DBPressCycles().Info("Deleting press cycle: id=%d", id)
 
 	// Get cycle for feed before deleting
@@ -196,9 +197,9 @@ func (p *PressCycles) Delete(id int64, user *User) error {
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(NewFeed(
-			FeedTypePressCycleDelete,
-			&FeedPressCycleUpdate{ // Using Update here, as Delete doesn't exist
+		p.feeds.Add(models.NewFeed(
+			models.FeedTypePressCycleDelete,
+			&models.FeedPressCycleUpdate{ // Using Update here, as Delete doesn't exist
 				ToolID:      cycle.ToolID,
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,

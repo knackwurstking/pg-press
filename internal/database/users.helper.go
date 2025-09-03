@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // UsersHelper provides additional user-related database operations
@@ -21,7 +22,7 @@ func NewUsersHelper(db *sql.DB) *UsersHelper {
 }
 
 // GetUserFromApiKey retrieves a user by their API key.
-func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*User, error) {
+func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*models.User, error) {
 	logger.DBUsers().Debug("Getting user by API key")
 
 	if apiKey == "" {
@@ -31,7 +32,7 @@ func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*User, error) {
 	query := `SELECT * FROM users WHERE api_key = ?`
 	row := uh.db.QueryRow(query, apiKey)
 
-	user := &User{}
+	user := &models.User{}
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {

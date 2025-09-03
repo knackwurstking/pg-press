@@ -6,6 +6,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Feeds handles database operations for feed entries
@@ -38,7 +39,7 @@ func (f *Feeds) SetBroadcaster(notifier Broadcaster) {
 }
 
 // List retrieves all feeds ordered by ID in descending order
-func (f *Feeds) List() ([]*Feed, error) {
+func (f *Feeds) List() ([]*models.Feed, error) {
 	logger.DBFeeds().Info("Listing all feeds")
 
 	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
@@ -52,7 +53,7 @@ func (f *Feeds) List() ([]*Feed, error) {
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
-func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
+func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
@@ -77,7 +78,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*Feed, error) {
 }
 
 // Add creates a new feed entry in the database
-func (f *Feeds) Add(feed *Feed) error {
+func (f *Feeds) Add(feed *models.Feed) error {
 	logger.DBFeeds().Info("Adding feed: %+v", feed)
 
 	if feed == nil {
@@ -152,7 +153,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (f *Feeds) Get(id int) (*Feed, error) {
+func (f *Feeds) Get(id int) (*models.Feed, error) {
 	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
@@ -203,8 +204,8 @@ func (f *Feeds) Delete(id int) error {
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
-func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
-	var feeds []*Feed
+func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
+	var feeds []*models.Feed
 	for rows.Next() {
 		feed, err := f.scanFeed(rows)
 		if err != nil {
@@ -223,8 +224,8 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*Feed, error) {
 	return feeds, nil
 }
 
-func (f *Feeds) scanFeed(scanner scannable) (*Feed, error) {
-	feed := &Feed{}
+func (f *Feeds) scanFeed(scanner scannable) (*models.Feed, error) {
+	feed := &models.Feed{}
 	var data []byte
 
 	if err := scanner.Scan(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {
