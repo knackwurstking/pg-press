@@ -11,15 +11,15 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type CycleEditDialogProps struct {
-	Tool             *database.Tool
+	Tool             *models.Tool
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
-	InputPressNumber *database.PressNumber
+	InputPressNumber *models.PressNumber
 	Error            string
 }
 
@@ -308,7 +308,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 	})
 }
 
-func isSelectedPress(p *database.PressNumber, v int) bool {
+func isSelectedPress(p *models.PressNumber, v int) bool {
 	if p == nil {
 		return false
 	}

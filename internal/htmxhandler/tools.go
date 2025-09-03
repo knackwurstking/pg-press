@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	toolscomp "github.com/knackwurstking/pgpress/internal/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -119,12 +120,12 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
-	tool := database.NewTool(formData.Position)
+	tool := models.NewTool(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
 	tool.Press = formData.Press
-	tool.Mods.Add(user, database.ToolMod{})
+	tool.Mods.Add(user, models.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
 		tool.Type, tool.Code, tool.Position)
@@ -158,12 +159,12 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
-	tool := database.NewTool(formData.Position)
+	tool := models.NewTool(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
 	tool.Press = formData.Press
-	tool.Mods.Add(user, database.ToolMod{})
+	tool.Mods.Add(user, models.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
 
@@ -382,7 +383,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 
 	// TODO: I need to make the press argument optional, because i will allow editing tools not active
 	if _, err := h.DB.PressCycles.Add(
-		database.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
+		models.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
 		user,
 	); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
@@ -438,7 +439,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 
 	// TODO: I need to make the press argument optional, because i will allow editing tools not active
 	if err := h.DB.PressCycles.Update(
-		database.NewPressCycle(cycleID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
+		models.NewPressCycle(cycleID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
 		user,
 	); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
@@ -475,14 +476,14 @@ func (h *Tools) handleCycleDELETE(c echo.Context) error {
 func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 	logger.HTMXHandlerTools().Debug("Parsing tool form data")
 
-	var position database.Position
-	switch positionFormValue := c.FormValue("position"); database.Position(positionFormValue) {
-	case database.PositionTop:
-		position = database.PositionTop
-	case database.PositionTopCassette:
-		position = database.PositionTopCassette
-	case database.PositionBottom:
-		position = database.PositionBottom
+	var position models.Position
+	switch positionFormValue := c.FormValue("position"); models.Position(positionFormValue) {
+	case models.PositionTop:
+		position = models.PositionTop
+	case models.PositionTopCassette:
+		position = models.PositionTopCassette
+	case models.PositionBottom:
+		position = models.PositionBottom
 	default:
 		return nil, errors.New("invalid position")
 	}
@@ -529,7 +530,7 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 		if err != nil {
 			return nil, errors.New("invalid press number: " + err.Error())
 		}
-		pressNumber := database.PressNumber(press)
+		pressNumber := models.PressNumber(press)
 		if !pressNumber.IsValid() {
 			return nil, errors.New("invalid press number")
 		}
@@ -560,7 +561,7 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
 	}
-	pressNumber := database.PressNumber(press)
+	pressNumber := models.PressNumber(press)
 
 	return &CycleEditFormData{
 		TotalCycles: totalCycles,

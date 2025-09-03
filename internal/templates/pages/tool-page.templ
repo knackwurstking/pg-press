@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-templ ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
+templ ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -27,7 +27,7 @@ templ ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*d
 			</div>
 			@toolPageActions(user, tool)
 			@toolPageNotes(tool)
-			if tool.Position == database.PositionTop || tool.Position == database.PositionBottom {
+			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				@toolPageMetalSheets(user, tool, metalSheets)
 			}
 			@toolPageCylesList(tool)
@@ -78,13 +78,13 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 						<div class="card-header">
 							<span class="note-importance">
 								switch note.Level {
-									case database.INFO:
+									case models.INFO:
 										<i class="bi bi-info-circle"></i>
 										Info
-									case database.ATTENTION:
+									case models.ATTENTION:
 										<i class="bi bi-exclamation-triangle text-warning"></i>
 										<strong>Achtung</strong>
-									case database.BROKEN:
+									case models.BROKEN:
 										<i class="bi bi-x-circle text-danger"></i>
 										<strong>Defekt</strong>
 								}
@@ -104,7 +104,7 @@ templ toolPageNotes(tool *database.ToolWithNotes) {
 }
 
 // TODO: Need some sorting logic here
-templ toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	<section class="metalsheets-section">
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
@@ -124,11 +124,11 @@ templ toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metal
 		</div>
 		<div class="table-container">
 			switch tool.Position {
-				case database.PositionBottom:
+				case models.PositionBottom:
 					@toolPageMetalSheetsTablePositionBottom(
 						user, metalSheets,
 					)
-				case database.PositionTop:
+				case models.PositionTop:
 					@toolPageMetalSheetsTablePositionTop(
 						user, metalSheets,
 					)
@@ -137,7 +137,7 @@ templ toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metal
 	</section>
 }
 
-templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*models.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -217,7 +217,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*d
 	</figure>
 }
 
-templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*database.MetalSheet) {
+templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*models.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -298,7 +298,7 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 		<section class="setatus">
 			<h5>Aktueller Status</h5>
 			switch tool.Status() {
-				case database.ToolStatusActive:
+				case models.ToolStatusActive:
 					<a
 						role="button"
 						class="secondary ghost flex gap justify-between w-full"
@@ -313,9 +313,9 @@ templ toolPageCylesList(tool *database.ToolWithNotes) {
 						</span>
 						<i class="bi bi-chevron-right text-muted"></i>
 					</a>
-				case database.ToolStatusAvailable:
+				case models.ToolStatusAvailable:
 					<span class="info ghost">Verfügbar</span>
-				case database.ToolStatusRegenerating:
+				case models.ToolStatusRegenerating:
 					<span class="warning ghost">Regenerierung</span>
 				default:
 					<span>{ tool.Status() }</span>

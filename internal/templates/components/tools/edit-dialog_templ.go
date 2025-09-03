@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type EditDialogProps struct {
@@ -23,7 +23,7 @@ type EditDialogProps struct {
 	InputType            string
 	InputCode            string
 	ReloadToolsList      bool
-	SelectPressSelection *database.PressNumber
+	SelectPressSelection *models.PressNumber
 }
 
 func EditDialog(props *EditDialogProps) templ.Component {
@@ -200,9 +200,9 @@ func EditDialog(props *EditDialogProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(database.PositionTop)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTop)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 69, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 69, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -212,7 +212,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if database.Position(props.InputPosition) == database.PositionTop {
+			if models.Position(props.InputPosition) == models.PositionTop {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -223,9 +223,9 @@ func EditDialog(props *EditDialogProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(database.PositionBottom)
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionBottom)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 75, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 75, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -235,7 +235,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if database.Position(props.InputPosition) == database.PositionBottom {
+			if models.Position(props.InputPosition) == models.PositionBottom {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -246,9 +246,9 @@ func EditDialog(props *EditDialogProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(database.PositionTopCassette)
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTopCassette)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 81, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/components/tools/edit-dialog.templ`, Line: 81, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -258,7 +258,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if database.Position(props.InputPosition) == database.PositionTopCassette {
+			if models.Position(props.InputPosition) == models.PositionTopCassette {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

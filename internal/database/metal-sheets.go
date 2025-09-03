@@ -17,7 +17,7 @@ type MetalSheets struct {
 	notes *Notes
 }
 
-var _ DataOperations[*MetalSheet] = (*MetalSheets)(nil)
+var _ DataOperations[*models.MetalSheet] = (*MetalSheets)(nil)
 
 // NewMetalSheets creates a new MetalSheets instance
 func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
@@ -59,7 +59,7 @@ func NewMetalSheets(db *sql.DB, feeds *Feeds, notes *Notes) *MetalSheets {
 }
 
 // List returns all metal sheets
-func (ms *MetalSheets) List() ([]*MetalSheet, error) {
+func (ms *MetalSheets) List() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
@@ -74,7 +74,7 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := ms.scanMetalSheet(rows)
@@ -94,7 +94,7 @@ func (ms *MetalSheets) List() ([]*MetalSheet, error) {
 }
 
 // Get returns a metal sheet by ID
-func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
+func (ms *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
@@ -117,7 +117,7 @@ func (ms *MetalSheets) Get(id int64) (*MetalSheet, error) {
 }
 
 // GetWithNotes returns a metal sheet with its related notes loaded
-func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
+func (ms *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := ms.Get(id)
@@ -125,9 +125,9 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 		return nil, err
 	}
 
-	result := &MetalSheetWithNotes{
+	result := &models.MetalSheetWithNotes{
 		MetalSheet:  sheet,
-		LoadedNotes: []*Note{},
+		LoadedNotes: []*models.Note{},
 	}
 
 	// Load notes if there are any linked
@@ -146,7 +146,7 @@ func (ms *MetalSheets) GetWithNotes(id int64) (*MetalSheetWithNotes, error) {
 }
 
 // GetByToolID returns all metal sheets assigned to a specific tool
-func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
+func (ms *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
@@ -162,7 +162,7 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := ms.scanMetalSheet(rows)
@@ -182,7 +182,7 @@ func (ms *MetalSheets) GetByToolID(toolID int64) ([]*MetalSheet, error) {
 }
 
 // GetAvailable returns all available metal sheets
-func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
+func (ms *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
@@ -198,7 +198,7 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := ms.scanMetalSheet(rows)
@@ -218,12 +218,12 @@ func (ms *MetalSheets) GetAvailable() ([]*MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (ms *MetalSheets) Add(sheet *MetalSheet, user *models.User) (int64, error) {
+func (ms *MetalSheets) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
-		initialMod := NewModified(user, MetalSheetMod{
+		initialMod := models.NewMod(user, models.MetalSheetMod{
 			TileHeight:  sheet.TileHeight,
 			Value:       sheet.Value,
 			MarkeHeight: sheet.MarkeHeight,
@@ -232,7 +232,7 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *models.User) (int64, error) 
 			ToolID:      sheet.ToolID,
 			LinkedNotes: sheet.LinkedNotes,
 		})
-		sheet.Mods = []*Modified[MetalSheetMod]{initialMod}
+		sheet.Mods = []*models.Mod[models.MetalSheetMod]{initialMod}
 	}
 
 	// Marshal JSON fields
@@ -286,7 +286,7 @@ func (ms *MetalSheets) Add(sheet *MetalSheet, user *models.User) (int64, error) 
 }
 
 // Update updates an existing metal sheet
-func (ms *MetalSheets) Update(sheet *MetalSheet, user *models.User) error {
+func (ms *MetalSheets) Update(sheet *models.MetalSheet, user *models.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
@@ -304,7 +304,7 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *models.User) error {
 		!equalToolIDs(current.ToolID, sheet.ToolID) ||
 		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
 
-		mod := NewModified(user, MetalSheetMod{
+		mod := models.NewMod(user, models.MetalSheetMod{
 			TileHeight:  current.TileHeight,
 			Value:       current.Value,
 			MarkeHeight: current.MarkeHeight,
@@ -314,7 +314,7 @@ func (ms *MetalSheets) Update(sheet *MetalSheet, user *models.User) error {
 			LinkedNotes: current.LinkedNotes,
 		})
 		// Prepend new mod to keep most recent first
-		sheet.Mods = append([]*Modified[MetalSheetMod]{mod}, sheet.Mods...)
+		sheet.Mods = append([]*models.Mod[models.MetalSheetMod]{mod}, sheet.Mods...)
 	}
 
 	// Marshal JSON fields
@@ -372,7 +372,7 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *models.Use
 	}
 
 	// Add modification record before changing
-	mod := NewModified(user, MetalSheetMod{
+	mod := models.NewMod(user, models.MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -382,7 +382,7 @@ func (ms *MetalSheets) AssignTool(sheetID int64, toolID *int64, user *models.Use
 		LinkedNotes: sheet.LinkedNotes,
 	})
 	// Prepend new mod to keep most recent first
-	sheet.Mods = append([]*Modified[MetalSheetMod]{mod}, sheet.Mods...)
+	sheet.Mods = append(models.Mods[models.MetalSheetMod]{mod}, sheet.Mods...)
 
 	// Update the tool assignment
 	sheet.ToolID = toolID
@@ -452,9 +452,9 @@ func (ms *MetalSheets) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (ms *MetalSheets) scanMetalSheet(scanner scannable) (*MetalSheet, error) {
+func (ms *MetalSheets) scanMetalSheet(scanner scannable) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Debug("Scanning metal sheet")
-	sheet := &MetalSheet{}
+	sheet := &models.MetalSheet{}
 
 	var (
 		linkedNotes []byte

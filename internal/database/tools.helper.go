@@ -11,8 +11,8 @@ import (
 
 // ToolWithNotes represents a tool with its related notes loaded.
 type ToolWithNotes struct {
-	*Tool
-	LoadedNotes []*Note `json:"loaded_notes"`
+	*models.Tool
+	LoadedNotes []*models.Note `json:"loaded_notes"`
 }
 
 // ToolsHelper provides high-level operations for tools that are not part of the
@@ -90,7 +90,7 @@ func (th *ToolsHelper) ListWithNotes() ([]*ToolWithNotes, error) {
 }
 
 // AddWithNotes creates a new tool and its associated notes in a single transaction.
-func (th *ToolsHelper) AddWithNotes(tool *Tool, user *models.User, notes ...*Note) (*ToolWithNotes, error) {
+func (th *ToolsHelper) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*ToolWithNotes, error) {
 	logger.DBToolsHelper().Debug("Adding tool with notes")
 
 	// First, add all notes and collect their IDs
@@ -123,7 +123,7 @@ func (th *ToolsHelper) AddWithNotes(tool *Tool, user *models.User, notes ...*Not
 }
 
 // GetByPress returns all active tools for a specific press (0-5).
-func (th *ToolsHelper) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
+func (th *ToolsHelper) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
 	if pressNumber != nil && !(*pressNumber).IsValid() {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
@@ -144,7 +144,7 @@ func (th *ToolsHelper) GetByPress(pressNumber *PressNumber) ([]*Tool, error) {
 	}
 	defer rows.Close()
 
-	var tools []*Tool
+	var tools []*models.Tool
 
 	for rows.Next() {
 		tool, err := th.tools.scanTool(rows)
@@ -212,7 +212,7 @@ func (th *ToolsHelper) UpdateRegenerating(toolID int64, regenerating bool, user 
 }
 
 // UpdatePress updates only the press field of a tool.
-func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *models.User) error {
+func (th *ToolsHelper) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -264,7 +264,7 @@ func (th *ToolsHelper) UpdatePress(toolID int64, press *PressNumber, user *model
 }
 
 // equalPressNumbers compares two press number pointers for equality
-func equalPressNumbers(a, b *PressNumber) bool {
+func equalPressNumbers(a, b *models.PressNumber) bool {
 	if a == nil && b == nil {
 		return true
 	}

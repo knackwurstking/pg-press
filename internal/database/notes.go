@@ -14,7 +14,7 @@ type Notes struct {
 	db *sql.DB
 }
 
-var _ DataOperations[*Note] = (*Notes)(nil)
+var _ DataOperations[*models.Note] = (*Notes)(nil)
 
 func NewNotes(db *sql.DB) *Notes {
 	query := `
@@ -43,7 +43,7 @@ func NewNotes(db *sql.DB) *Notes {
 	}
 }
 
-func (n *Notes) List() ([]*Note, error) {
+func (n *Notes) List() ([]*models.Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
 	query := `
@@ -57,7 +57,7 @@ func (n *Notes) List() ([]*Note, error) {
 	}
 	defer rows.Close()
 
-	var notes []*Note
+	var notes []*models.Note
 
 	for rows.Next() {
 		note, err := n.scanNote(rows)
@@ -75,7 +75,7 @@ func (n *Notes) List() ([]*Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Get(id int64) (*Note, error) {
+func (n *Notes) Get(id int64) (*models.Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	query := `
@@ -96,9 +96,9 @@ func (n *Notes) Get(id int64) (*Note, error) {
 	return note, nil
 }
 
-func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
+func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 	if len(ids) == 0 {
-		return []*Note{}, nil
+		return []*models.Note{}, nil
 	}
 
 	logger.DBNotes().Debug("Getting notes by IDs: %v", ids)
@@ -124,7 +124,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	noteMap := make(map[int64]*Note)
+	noteMap := make(map[int64]*models.Note)
 
 	for rows.Next() {
 		note, err := n.scanNote(rows)
@@ -140,7 +140,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	}
 
 	// Return attachments in the order of the requested IDs
-	var notes []*Note
+	var notes []*models.Note
 	for _, id := range ids {
 		if note, exists := noteMap[id]; exists {
 			notes = append(notes, note)
@@ -150,7 +150,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*Note, error) {
 	return notes, nil
 }
 
-func (n *Notes) Add(note *Note, _ *models.User) (int64, error) {
+func (n *Notes) Add(note *models.Note, _ *models.User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -172,7 +172,7 @@ func (n *Notes) Add(note *Note, _ *models.User) (int64, error) {
 	return id, nil
 }
 
-func (n *Notes) Update(note *Note, user *models.User) error {
+func (n *Notes) Update(note *models.Note, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
@@ -180,8 +180,8 @@ func (n *Notes) Delete(id int64, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Notes) scanNote(scanner scannable) (*Note, error) {
-	note := &Note{}
+func (n *Notes) scanNote(scanner scannable) (*models.Note, error) {
+	note := &models.Note{}
 
 	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {

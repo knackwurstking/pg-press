@@ -16,7 +16,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/templates/layouts"
 )
 
-func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
+func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -61,7 +61,7 @@ func ToolPage(user *models.User, tool *database.ToolWithNotes, metalSheets []*da
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if tool.Position == database.PositionTop || tool.Position == database.PositionBottom {
+			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				templ_7745c5c3_Err = toolPageMetalSheets(user, tool, metalSheets).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -194,17 +194,17 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				switch note.Level {
-				case database.INFO:
+				case models.INFO:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<i class=\"bi bi-info-circle\"></i> Info")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case database.ATTENTION:
+				case models.ATTENTION:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<i class=\"bi bi-exclamation-triangle text-warning\"></i> <strong>Achtung</strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case database.BROKEN:
+				case models.BROKEN:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<i class=\"bi bi-x-circle text-danger\"></i> <strong>Defekt</strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -251,7 +251,7 @@ func toolPageNotes(tool *database.ToolWithNotes) templ.Component {
 }
 
 // TODO: Need some sorting logic here
-func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -293,14 +293,14 @@ func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalS
 			return templ_7745c5c3_Err
 		}
 		switch tool.Position {
-		case database.PositionBottom:
+		case models.PositionBottom:
 			templ_7745c5c3_Err = toolPageMetalSheetsTablePositionBottom(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case database.PositionTop:
+		case models.PositionTop:
 			templ_7745c5c3_Err = toolPageMetalSheetsTablePositionTop(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
@@ -316,7 +316,7 @@ func toolPageMetalSheets(user *models.User, tool *database.ToolWithNotes, metalS
 	})
 }
 
-func toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -484,7 +484,7 @@ func toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*da
 	})
 }
 
-func toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*database.MetalSheet) templ.Component {
+func toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -640,7 +640,7 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch tool.Status() {
-		case database.ToolStatusActive:
+		case models.ToolStatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<a role=\"button\" class=\"secondary ghost flex gap justify-between w-full\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -674,12 +674,12 @@ func toolPageCylesList(tool *database.ToolWithNotes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case database.ToolStatusAvailable:
+		case models.ToolStatusAvailable:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<span class=\"info ghost\">Verfügbar</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case database.ToolStatusRegenerating:
+		case models.ToolStatusRegenerating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<span class=\"warning ghost\">Regenerierung</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

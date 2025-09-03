@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/dberror"
 	"github.com/knackwurstking/pgpress/internal/htmxhandler"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -100,7 +101,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
 		logger.HandlerTools().Error("Failed to fetch metal sheets: " + err.Error())
-		metalSheets = []*database.MetalSheet{}
+		metalSheets = []*models.MetalSheet{}
 	}
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))

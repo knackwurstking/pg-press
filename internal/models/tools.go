@@ -1,4 +1,4 @@
-package database
+package models
 
 import (
 	"fmt"
@@ -53,7 +53,7 @@ func NewTool(position Position) *Tool {
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),
-		Mods:         make([]*Modified[ToolMod], 0),
+		Mods:         make(Mods[ToolMod], 0),
 	}
 }
 

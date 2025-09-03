@@ -1,4 +1,4 @@
-package database
+package models
 
 import (
 	"fmt"
@@ -6,34 +6,33 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/dberror"
-	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-type Mods[T any] []*Modified[T]
+type Mods[T any] []*Mod[T]
 
-func (m *Mods[T]) Reversed() []*Modified[T] {
-	reversed := make([]*Modified[T], len(*m))
+func (m *Mods[T]) Reversed() []*Mod[T] {
+	reversed := make([]*Mod[T], len(*m))
 	copy(reversed, *m)
 	slices.Reverse(reversed)
 	return reversed
 }
 
-func (m *Mods[T]) Add(user *models.User, data T) {
-	*m = append(*m, NewModified(user, data))
+func (m *Mods[T]) Add(user *User, data T) {
+	*m = append(*m, NewMod(user, data))
 }
 
-func (m *Mods[T]) First() *Modified[T] {
+func (m *Mods[T]) First() *Mod[T] {
 	return (*m)[0]
 }
 
-func (m *Mods[T]) Current() *Modified[T] {
+func (m *Mods[T]) Current() *Mod[T] {
 	if len(*m) == 0 {
 		return nil
 	}
 	return (*m)[len(*m)-1]
 }
 
-func (m *Mods[T]) Get(time int64) (*Modified[T], error) {
+func (m *Mods[T]) Get(time int64) (*Mod[T], error) {
 	for _, mod := range *m {
 		if mod.Time == time {
 			return mod, nil
@@ -55,21 +54,21 @@ func (m *Mods[T]) Get(time int64) (*Modified[T], error) {
 //	return ErrNotFound
 //}
 
-// Modified represents a modification record that tracks changes made to any type T
-type Modified[T any] struct {
-	User *models.User `json:"user"`
-	Time int64        `json:"time"` // Time of modification in milliseconds since Unix epoch,
+// Mod represents a modification record that tracks changes made to any type T
+type Mod[T any] struct {
+	User *User `json:"user"`
+	Time int64 `json:"time"` // Time of modification in milliseconds since Unix epoch,
 	// should be unique
 	Data T `json:"data"`
 }
 
-// NewModified creates a new modification record with the current timestamp
-func NewModified[T any](user *models.User, data T) *Modified[T] {
+// NewMod creates a new modification record with the current timestamp
+func NewMod[T any](user *User, data T) *Mod[T] {
 	if user == nil {
-		user = &models.User{UserName: "system"}
+		user = &User{UserName: "system"}
 	}
 
-	return &Modified[T]{
+	return &Mod[T]{
 		User: user,
 		Time: time.Now().UnixMilli(),
 		Data: data,
@@ -77,16 +76,16 @@ func NewModified[T any](user *models.User, data T) *Modified[T] {
 }
 
 // GetTime returns the modification time as a Go time.Time
-func (m *Modified[T]) GetTime() time.Time {
+func (m *Mod[T]) GetTime() time.Time {
 	return time.UnixMilli(m.Time)
 }
 
-func (m *Modified[T]) GetTimeString() string {
+func (m *Mod[T]) GetTimeString() string {
 	return m.GetTime().Format("2006-01-02 15:04:05")
 }
 
 // GetUserName returns the username of the user who made the modification
-func (m *Modified[T]) GetUserName() string {
+func (m *Mod[T]) GetUserName() string {
 	if m.User == nil {
 		return "unknown"
 	}
@@ -94,7 +93,7 @@ func (m *Modified[T]) GetUserName() string {
 }
 
 // IsModifiedBy checks if the modification was made by a specific user
-func (m *Modified[T]) IsModifiedBy(userName string) bool {
+func (m *Mod[T]) IsModifiedBy(userName string) bool {
 	if m.User == nil {
 		return userName == "unknown" || userName == ""
 	}
@@ -102,29 +101,29 @@ func (m *Modified[T]) IsModifiedBy(userName string) bool {
 }
 
 // String returns a human-readable representation of the modification
-func (m *Modified[T]) String() string {
+func (m *Mod[T]) String() string {
 	return fmt.Sprintf("Modified by %s at %s",
 		m.GetUserName(),
 		m.GetTime().Format("2006-01-02 15:04:05"))
 }
 
 // Age returns the duration since the modification was made
-func (m *Modified[T]) Age() time.Duration {
+func (m *Mod[T]) Age() time.Duration {
 	return time.Since(m.GetTime())
 }
 
 // IsOlderThan checks if the modification is older than the specified duration
-func (m *Modified[T]) IsOlderThan(duration time.Duration) bool {
+func (m *Mod[T]) IsOlderThan(duration time.Duration) bool {
 	return m.Age() > duration
 }
 
 // IsNewerThan checks if the modification is newer than the specified duration
-func (m *Modified[T]) IsNewerThan(duration time.Duration) bool {
+func (m *Mod[T]) IsNewerThan(duration time.Duration) bool {
 	return m.Age() < duration
 }
 
 // Validate checks if the modification record is valid
-func (m *Modified[T]) Validate() error {
+func (m *Mod[T]) Validate() error {
 	if m.Time <= 0 {
 		return fmt.Errorf("modification time must be positive")
 	}

@@ -1,10 +1,6 @@
-package database
+package models
 
-import (
-	"fmt"
-
-	"github.com/knackwurstking/pgpress/internal/models"
-)
+import "fmt"
 
 // MetalSheetStatus represents the current status of a metal sheet
 type MetalSheetStatus string
@@ -33,7 +29,7 @@ type MetalSheet struct {
 }
 
 // NewMetalSheet creates a new MetalSheet with default values
-func NewMetalSheet(user *models.User) *MetalSheet {
+func NewMetalSheet(user *User) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,
@@ -42,11 +38,11 @@ func NewMetalSheet(user *models.User) *MetalSheet {
 		STFMax:      0,
 		ToolID:      nil,
 		LinkedNotes: make([]int64, 0),
-		Mods:        make([]*Modified[MetalSheetMod], 0),
+		Mods:        make(Mods[MetalSheetMod], 0),
 	}
 
 	// Create initial mod entry
-	initialMod := NewModified(user, MetalSheetMod{
+	initialMod := NewMod(user, MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,

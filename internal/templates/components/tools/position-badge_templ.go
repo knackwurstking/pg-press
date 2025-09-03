@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func PositionBadge(position database.Position, classNames string) templ.Component {
+func PositionBadge(position models.Position, classNames string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,7 +35,7 @@ func PositionBadge(position database.Position, classNames string) templ.Componen
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch position {
-		case database.PositionTop:
+		case models.PositionTop:
 			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
@@ -58,7 +58,7 @@ func PositionBadge(position database.Position, classNames string) templ.Componen
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case database.PositionTopCassette:
+		case models.PositionTopCassette:
 			var templ_7745c5c3_Var4 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
@@ -81,7 +81,7 @@ func PositionBadge(position database.Position, classNames string) templ.Componen
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case database.PositionBottom:
+		case models.PositionBottom:
 			var templ_7745c5c3_Var6 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {

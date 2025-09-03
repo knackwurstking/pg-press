@@ -40,10 +40,10 @@ type DB struct {
 	TroubleReports       DataOperations[*TroubleReport]
 	TroubleReportsHelper *TroubleReportsHelper
 	Notes                *Notes
-	Tools                DataOperations[*Tool]
+	Tools                DataOperations[*models.Tool]
 	ToolsHelper          *ToolsHelper
-	MetalSheets          DataOperations[*MetalSheet]
-	PressCycles          DataOperations[*PressCycle]
+	MetalSheets          DataOperations[*models.MetalSheet]
+	PressCycles          DataOperations[*models.PressCycle]
 	PressCyclesHelper    *PressCyclesHelper
 	ToolRegenerations    *ToolRegenerations
 

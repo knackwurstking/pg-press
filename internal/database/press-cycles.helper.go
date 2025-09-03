@@ -24,7 +24,7 @@ func NewPressCyclesHelper(pressCycles *PressCycles) *PressCyclesHelper {
 }
 
 // StartToolUsage records when a tool starts being used on a press
-func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber PressNumber, user *models.User) (*PressCycle, error) {
+func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.PressNumber, user *models.User) (*models.PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
 
 	if !pressNumber.IsValid() {
@@ -77,7 +77,7 @@ func (pch *PressCyclesHelper) EndToolUsage(toolID int64) error {
 }
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
-func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*PressCycle, error) {
+func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
 
 	query := `
@@ -101,7 +101,7 @@ func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*PressCycle, er
 }
 
 // GetToolHistory retrieves all press cycles for a specific tool
-func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([]*PressCycle, error) {
+func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting tool history: tool_id=%d, limit=%d, offset=%d", toolID, limit, offset)
 
 	query := `
@@ -127,7 +127,7 @@ func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([
 }
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
-func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*PressCycle, error) {
+func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
@@ -152,7 +152,7 @@ func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*PressCycle
 }
 
 // GetPressCycles gets all press cycles (current and historical) for a specific press
-func (pch *PressCyclesHelper) GetPressCycles(pressNumber PressNumber, limit, offset int) ([]*PressCycle, error) {
+func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, limit, offset int) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
 
 	if !pressNumber.IsValid() {
@@ -182,7 +182,7 @@ func (pch *PressCyclesHelper) GetPressCycles(pressNumber PressNumber, limit, off
 }
 
 // GetCurrentToolsOnPress gets all tools currently active on a specific press
-func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber PressNumber) ([]int64, error) {
+func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber models.PressNumber) ([]int64, error) {
 	logger.DBPressCycles().Debug("Getting current tools on press: press_number=%d", pressNumber)
 
 	if !pressNumber.IsValid() {
@@ -218,12 +218,12 @@ func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber PressNumber) ([
 }
 
 // GetPressUtilization gets current tool count for each press (0-5)
-func (pch *PressCyclesHelper) GetPressUtilization() (map[PressNumber][]int64, error) {
+func (pch *PressCyclesHelper) GetPressUtilization() (map[models.PressNumber][]int64, error) {
 	logger.DBPressCycles().Debug("Getting press utilization for all presses")
 
-	utilization := map[PressNumber][]int64{}
+	utilization := map[models.PressNumber][]int64{}
 
-	for i := PressNumber(0); i <= 5; i++ {
+	for i := models.PressNumber(0); i <= 5; i++ {
 		utilization[i] = []int64{}
 	}
 
@@ -245,7 +245,7 @@ func (pch *PressCyclesHelper) GetPressUtilization() (map[PressNumber][]int64, er
 	defer rows.Close()
 
 	for rows.Next() {
-		var pressNumber PressNumber
+		var pressNumber models.PressNumber
 		var toolID int64
 		if err := rows.Scan(&pressNumber, &toolID); err != nil {
 			return nil, fmt.Errorf("failed to scan utilization data: %w", err)
@@ -263,12 +263,12 @@ type PressCycleStats struct {
 }
 
 // GetPressCycleStats gets statistics for all presses
-func (pch *PressCyclesHelper) GetPressCycleStats() (map[PressNumber]*PressCycleStats, error) {
+func (pch *PressCyclesHelper) GetPressCycleStats() (map[models.PressNumber]*PressCycleStats, error) {
 	logger.DBPressCycles().Debug("Getting press cycle statistics for all presses")
 
-	stats := make(map[PressNumber]*PressCycleStats)
+	stats := make(map[models.PressNumber]*PressCycleStats)
 
-	for i := PressNumber(0); i <= 5; i++ {
+	for i := models.PressNumber(0); i <= 5; i++ {
 		stats[i] = &PressCycleStats{}
 	}
 
@@ -295,7 +295,7 @@ func (pch *PressCyclesHelper) GetPressCycleStats() (map[PressNumber]*PressCycleS
 	defer rows.Close()
 
 	for rows.Next() {
-		var pressNumber PressNumber
+		var pressNumber models.PressNumber
 		var totalCycles sql.NullInt64
 		var totalToolsUsed, activeTools int
 

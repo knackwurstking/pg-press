@@ -10,9 +10,9 @@ import (
 templ ListMods(
 	user *models.User,
 	id int64,
-	first *database.Modified[database.TroubleReportMod],
-	current *database.Modified[database.TroubleReportMod],
-	mods database.Mods[database.TroubleReportMod],
+	first *models.Mod[database.TroubleReportMod],
+	current *models.Mod[database.TroubleReportMod],
+	mods models.Mods[database.TroubleReportMod],
 ) {
 	<div id={ constants.IDData } class="flex flex-col gap">
 		<div class="flex flex-wrap gap justify-between items-center">

@@ -16,7 +16,7 @@ type PressCycles struct {
 	feeds *Feeds
 }
 
-var _ DataOperations[*PressCycle] = (*PressCycles)(nil)
+var _ DataOperations[*models.PressCycle] = (*PressCycles)(nil)
 
 func NewPressCycles(db *sql.DB, feeds *Feeds) *PressCycles {
 	p := &PressCycles{
@@ -50,7 +50,7 @@ func (p *PressCycles) init() {
 }
 
 // Get retrieves a specific press cycle by its ID.
-func (p *PressCycles) Get(id int64) (*PressCycle, error) {
+func (p *PressCycles) Get(id int64) (*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
 	query := `
@@ -70,7 +70,7 @@ func (p *PressCycles) Get(id int64) (*PressCycle, error) {
 }
 
 // List retrieves all press cycles from the database, ordered by ID descending.
-func (p *PressCycles) List() ([]*PressCycle, error) {
+func (p *PressCycles) List() ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Listing all press cycles")
 
 	query := `
@@ -87,7 +87,7 @@ func (p *PressCycles) List() ([]*PressCycle, error) {
 }
 
 // Add creates a new press cycle entry in the database.
-func (p *PressCycles) Add(cycle *PressCycle, user *models.User) (int64, error) {
+func (p *PressCycles) Add(cycle *models.PressCycle, user *models.User) (int64, error) {
 	logger.DBPressCycles().Info("Adding new cycle: tool_id=%d, press_number=%d, total_cycles=%d", cycle.ToolID, cycle.PressNumber, cycle.TotalCycles)
 
 	if cycle.Date.IsZero() {
@@ -126,7 +126,7 @@ func (p *PressCycles) Add(cycle *PressCycle, user *models.User) (int64, error) {
 }
 
 // Update modifies an existing press cycle entry.
-func (p *PressCycles) Update(cycle *PressCycle, user *models.User) error {
+func (p *PressCycles) Update(cycle *models.PressCycle, user *models.User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycle.ID)
 
 	if cycle.Date.IsZero() {
@@ -211,8 +211,8 @@ func (p *PressCycles) Delete(id int64, user *models.User) error {
 }
 
 // scanPressCyclesRows scans multiple press cycles from sql.Rows (without partial_cycles)
-func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error) {
-	cycles := make([]*PressCycle, 0)
+func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.PressCycle, error) {
+	cycles := make([]*models.PressCycle, 0)
 	for rows.Next() {
 		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
@@ -223,8 +223,8 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*PressCycle, error)
 	return cycles, nil
 }
 
-func (p *PressCycles) scanPressCycle(scanner scannable) (*PressCycle, error) {
-	cycle := &PressCycle{}
+func (p *PressCycles) scanPressCycle(scanner scannable) (*models.PressCycle, error) {
+	cycle := &models.PressCycle{}
 	var performedBy sql.NullInt64
 
 	err := scanner.Scan(

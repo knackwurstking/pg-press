@@ -16,7 +16,7 @@ type Tools struct {
 	feeds *Feeds
 }
 
-var _ DataOperations[*Tool] = (*Tools)(nil)
+var _ DataOperations[*models.Tool] = (*Tools)(nil)
 
 func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	query := `
@@ -51,7 +51,7 @@ func NewTools(db *sql.DB, feeds *Feeds) *Tools {
 	}
 }
 
-func (t *Tools) List() ([]*Tool, error) {
+func (t *Tools) List() ([]*models.Tool, error) {
 	logger.DBTools().Info("Listing tools")
 
 	query := `
@@ -64,7 +64,7 @@ func (t *Tools) List() ([]*Tool, error) {
 	}
 	defer rows.Close()
 
-	var tools []*Tool
+	var tools []*models.Tool
 
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
@@ -83,7 +83,7 @@ func (t *Tools) List() ([]*Tool, error) {
 	return tools, nil
 }
 
-func (t *Tools) Get(id int64) (*Tool, error) {
+func (t *Tools) Get(id int64) (*models.Tool, error) {
 	logger.DBTools().Info("Getting tool, id: %d", id)
 
 	query := `
@@ -103,7 +103,7 @@ func (t *Tools) Get(id int64) (*Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) Add(tool *Tool, user *models.User) (int64, error) {
+func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
 	// Marshal format for the existence check and insert
@@ -166,7 +166,7 @@ func (t *Tools) Add(tool *Tool, user *models.User) (int64, error) {
 	return id, nil
 }
 
-func (t *Tools) Update(tool *Tool, user *models.User) error {
+func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
 	// Marshal format for the existence check and update
@@ -253,7 +253,7 @@ func (t *Tools) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
+func (t *Tools) exists(tool *models.Tool, formatBytes []byte) error {
 	var count int
 
 	query := `
@@ -272,8 +272,8 @@ func (t *Tools) exists(tool *Tool, formatBytes []byte) error {
 	return nil
 }
 
-func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
-	tool := &Tool{}
+func (t *Tools) scanTool(scanner scannable) (*models.Tool, error) {
+	tool := &models.Tool{}
 
 	var (
 		format      []byte
@@ -307,12 +307,12 @@ func (t *Tools) scanTool(scanner scannable) (*Tool, error) {
 	return tool, nil
 }
 
-func (t *Tools) updateMods(user *models.User, tool *Tool) {
+func (t *Tools) updateMods(user *models.User, tool *models.Tool) {
 	if user == nil {
 		return
 	}
 
-	tool.Mods.Add(user, ToolMod{
+	tool.Mods.Add(user, models.ToolMod{
 		Position:     tool.Position,
 		Format:       tool.Format,
 		Type:         tool.Type,

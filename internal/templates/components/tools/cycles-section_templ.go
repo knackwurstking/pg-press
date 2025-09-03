@@ -19,7 +19,7 @@ type CyclesSectionProps struct {
 	User          *models.User
 	ToolID        int64
 	TotalCycles   int64
-	Cycles        []*database.PressCycle
+	Cycles        []*models.PressCycle
 	Regenerations []*database.ToolRegeneration
 }
 
@@ -110,7 +110,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 	})
 }
 
-func cyclesTableRows(user *models.User, cycles []*database.PressCycle) templ.Component {
+func cyclesTableRows(user *models.User, cycles []*models.PressCycle) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -158,7 +158,7 @@ func cyclesTableRows(user *models.User, cycles []*database.PressCycle) templ.Com
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-func renderCycleRowWithPartialCalc(user *models.User, cycle *database.PressCycle, previousTotalCycles int64) templ.Component {
+func renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle, previousTotalCycles int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
