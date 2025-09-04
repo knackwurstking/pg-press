@@ -429,8 +429,6 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 }
 
 // handleCycleEditPUT "/htmx/tools/cycle/edit?cycle_id=%d"
-//
-// FIXME: Fix "no press cycle found with id 0" after submitting a change
 func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
@@ -463,8 +461,8 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	}
 
 	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit PUT request for tool %d: formData=%#v",
-		toolID, formData,
+		"Handling cycle edit PUT request for tool %d and cycle %d: formData=%#v",
+		toolID, cycleID, formData,
 	)
 
 	if !models.IsValidPressNumber(formData.PressNumber) {
@@ -476,10 +474,9 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if err := h.DB.PressCycles.Update(
-		models.NewPressCycle(cycleID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
-		user,
-	); err != nil {
+	pressCycle := models.NewPressCycle(toolID, *formData.PressNumber, formData.TotalCycles, user.TelegramID)
+	pressCycle.ID = cycleID
+	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
