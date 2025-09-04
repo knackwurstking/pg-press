@@ -25,7 +25,7 @@ type EditDialogProps struct {
 	InputType            string
 	InputCode            string
 	ReloadToolsList      bool
-	SelectPressSelection *models.PressNumber
+	SelectPressSelection *models.PressNumber // TODO: Still needs to be implemented, only if not nil
 }
 
 func EditDialog(props *EditDialogProps) templ.Component {

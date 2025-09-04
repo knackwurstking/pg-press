@@ -62,13 +62,17 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 								value=""
 								disabled
 								selected?={ props.Tool.Press == nil && props.InputPressNumber == nil }
-							>Presse auswählen</option>
-							for i := 0; i <= 5; i++ {
+							>
+								Presse auswählen
+							</option>
+							for _, i := range []int{0, 2, 3, 4, 5} {
 								<option
 									value={ fmt.Sprintf("%d", i) }
 									selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
 										(props.InputPressNumber == nil && isSelectedPress(props.Tool.Press, i)) }
-								>Presse { i }</option>
+								>
+									Presse { i }
+								</option>
 							}
 						</select>
 					</section>

@@ -382,7 +382,15 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	// TODO: I need to make the press argument optional, because i will allow editing tools not active
+	if !formData.PressNumber.IsValid() {
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			Error:            "press_number must be a valid integer",
+			InputTotalCycles: formData.TotalCycles,
+			InputPressNumber: formData.PressNumber,
+		}, c)
+	}
+
 	if _, err := h.DB.PressCycles.Add(
 		models.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
 		user,
@@ -423,11 +431,6 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 			"failed to get tool: "+err.Error())
 	}
 
-	logger.HTMXHandlerTools().Info(
-		"User %s is handling cycle edit PUT request for cycle %d",
-		user.UserName, cycleID,
-	)
-
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
@@ -438,7 +441,20 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	// TODO: I need to make the press argument optional, because i will allow editing tools not active
+	logger.HTMXHandlerTools().Debug(
+		"Handling cycle edit PUT request for tool %d: formData=%#v",
+		toolID, formData,
+	)
+
+	if !formData.PressNumber.IsValid() {
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			Error:            "press_number must be a valid integer",
+			InputTotalCycles: formData.TotalCycles,
+			InputPressNumber: formData.PressNumber,
+		}, c)
+	}
+
 	if err := h.DB.PressCycles.Update(
 		models.NewPressCycle(cycleID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
 		user,
@@ -554,18 +570,19 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
 	}
 
-	pressString := c.FormValue("press_number")
-	if pressString == "" {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number is required")
+	var pressNumber *models.PressNumber
+	if pressString := c.FormValue("press_number"); pressString != "" {
+		press, err := strconv.Atoi(pressString)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
+		}
+
+		pn := models.PressNumber(press)
+		pressNumber = &pn
 	}
-	press, err := strconv.Atoi(pressString)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
-	}
-	pressNumber := models.PressNumber(press)
 
 	return &CycleEditFormData{
 		TotalCycles: totalCycles,
-		PressNumber: &pressNumber,
+		PressNumber: pressNumber,
 	}, nil
 }

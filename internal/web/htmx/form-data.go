@@ -11,6 +11,6 @@ type ToolEditFormData struct {
 }
 
 type CycleEditFormData struct {
-	TotalCycles int64               // TotalCycles form field name "total_cycles"
-	PressNumber *models.PressNumber // PressNumber form field name "press_number", numbers lower 0 means disabled
+	TotalCycles int64 // TotalCycles form field name "total_cycles"
+	PressNumber *models.PressNumber
 }

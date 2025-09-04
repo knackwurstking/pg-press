@@ -16,14 +16,13 @@ func (pn PressNumber) IsValid() bool {
 
 type PressCycle struct {
 	ID          int64       `json:"id"`
-	PressNumber PressNumber `json:"press_number"`
+	PressNumber PressNumber `json:"press_number"` // PressNumber is optional
 	ToolID      int64       `json:"tool_id"`
 	Date        time.Time   `json:"date"`
 	TotalCycles int64       `json:"total_cycles"`
 	PerformedBy int64       `json:"performed_by"`
 }
 
-// TODO: I need to make the press argument optional, because i will allow editing tools not active
 func NewPressCycle(toolID int64, press PressNumber, totalCycles, user int64) *PressCycle {
 	return &PressCycle{
 		ToolID:      toolID,
