@@ -429,6 +429,8 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 }
 
 // handleCycleEditPUT "/htmx/tools/cycle/edit?cycle_id=%d"
+//
+// FIXME: Fix "no press cycle found with id 0" after submitting a change
 func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
