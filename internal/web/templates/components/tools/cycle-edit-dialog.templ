@@ -23,6 +23,7 @@ type CycleEditDialogProps struct {
 templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span
+			id={ constants.IDToolCycleEditDialog }
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycles?tool_id=%d",
 				env.ServerPathPrefix, props.Tool.ID,
@@ -30,7 +31,6 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			hx-trigger="load"
 			hx-target="section.cycles"
 			hx-swap="innerHTML"
-			id={ constants.IDToolCycleEditDialog }
 		></span>
 	} else {
 		<dialog class="fullscreen clean" id={ constants.IDToolCycleEditDialog }>

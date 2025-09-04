@@ -23,7 +23,10 @@ type EditDialogProps struct {
 
 templ EditDialog(props *EditDialogProps) {
 	if props.Close {
-		<span onload="window.location.reload();"></span>
+		<script>
+			// NOTE: For now, this will work just fine
+			window.location.reload();
+		</script>
 	} else {
 		<dialog
 			name="tool-edit-dialog"

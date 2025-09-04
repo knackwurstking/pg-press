@@ -155,10 +155,18 @@ templ toolsSection(tools []*tool.ToolWithNotes) {
 		<ul
 			id={ constants.IDAllToolsList }
 			hx-get={ env.ServerPathPrefix + "/htmx/tools/list" }
-			hx-trigger="load"
-			hx-swap="outerHTML"
-			class="flex flex-col gap m-0 p-0"
+			hx-trigger="load,pageLoaded"
+			hx-swap="innerHTML"
+			class="flex flex-col gap m-t p-0"
 			style="list-style: none;"
 		></ul>
+		<script>
+			window.addEventListener("visibilitychange", function() {
+    			if (document.visibilityState === 'visible') {
+                    console.debug("Reload #allToolsList because of a visibility change")
+    				htmx.trigger("#allToolsList", 'pageLoaded');
+    			}
+    		});
+		</script>
 	</div>
 }
