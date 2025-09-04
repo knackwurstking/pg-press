@@ -8,7 +8,7 @@ import (
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/web/html"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
-	"github.com/knackwurstking/pgpress/internal/web/ws"
+	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,7 +24,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 
 	wsh := startWebSocketHandlers(db)
 
-	(&htmx.Nav{DB: db, WSHandler: wsh}).RegisterRoutes(e)
+	(&htmx.Nav{DB: db, WSFeedHandler: wsh}).RegisterRoutes(e)
 
 	(&html.Auth{DB: db}).RegisterRoutes(e)
 	(&html.Home{}).RegisterRoutes(e)
@@ -34,17 +34,16 @@ func Serve(e *echo.Echo, db *database.DB) {
 	(&html.Tools{DB: db}).RegisterRoutes(e)
 }
 
-func startWebSocketHandlers(db *database.DB) *ws.WSHandlers {
-	wsh := &ws.WSHandlers{
-		Feed: ws.NewFeedHandler(db),
-	}
+// NOTE: If i have more then just this on handler i need to change the return type
+func startWebSocketHandlers(db *database.DB) *wshandlers.FeedHandler {
+	wsfh := wshandlers.NewFeedHandler(db)
 
 	// Start the feed notification manager in a goroutine
 	ctx := context.Background()
-	go wsh.Feed.Start(ctx)
+	go wsfh.Start(ctx)
 
 	// Set the notifier on the feeds for real-time updates
-	db.Feeds.SetBroadcaster(wsh.Feed)
+	db.Feeds.SetBroadcaster(wsfh)
 
-	return wsh
+	return wsfh
 }

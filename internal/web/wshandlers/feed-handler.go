@@ -1,4 +1,4 @@
-package ws
+package wshandlers
 
 import (
 	"bytes"
@@ -257,9 +257,9 @@ func (conn *FeedConnection) WritePump() {
 }
 
 // ReadPump handles reading messages from the WebSocket connection
-func (conn *FeedConnection) ReadPump(notifier WSHandler) {
+func (conn *FeedConnection) ReadPump(handler *FeedHandler) {
 	defer func() {
-		notifier.UnregisterConnection(conn)
+		handler.UnregisterConnection(conn)
 		conn.Conn.Close()
 	}()
 
