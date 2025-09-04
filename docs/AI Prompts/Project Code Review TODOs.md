@@ -48,12 +48,6 @@ Here's a summary of the TODOs and my analysis:
 - **Comment:** `// TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)`
 - **My take:** This seems like a business rule that needs to be implemented. Adding these cycle limits to your `Tool` model would allow you to track the tool's lifecycle and provide visual indicators (like colors) when it's approaching its end of life.
 
-### 7. Move `ws/interfaces.go`
-
-- **File:** `internal/web/ws/interfaces.go`
-- **Comment:** `// TODO: Move to interfaces package`
-- **My take:** This is a good organizational refactoring. Moving the WebSocket interfaces to the `internal/database/interfaces` package would centralize your application's interfaces, making the project structure cleaner and more consistent.
-
 ### 8. Add a voting system for deleting trouble reports
 
 - **Files:** `internal/web/templates/components/troublereports/list.templ`
