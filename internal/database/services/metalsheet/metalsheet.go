@@ -25,7 +25,6 @@ var _ interfaces.DataOperations[*models.MetalSheet] = (*Service)(nil)
 // NewMetalSheets creates a new MetalSheets instance
 func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 	query := `
-		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
 			tile_height REAL NOT NULL,

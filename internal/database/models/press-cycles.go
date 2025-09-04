@@ -36,3 +36,14 @@ func NewPressCycle(toolID int64, press PressNumber, totalCycles, user int64) *Pr
 		PerformedBy: user,
 	}
 }
+
+func NewPressCycleWithID(id, toolID int64, press PressNumber, totalCycles, user int64, date time.Time) *PressCycle {
+	return &PressCycle{
+		ID:          id,
+		ToolID:      toolID,
+		PressNumber: press,
+		Date:        date,
+		TotalCycles: totalCycles,
+		PerformedBy: user,
+	}
+}

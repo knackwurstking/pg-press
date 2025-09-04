@@ -23,15 +23,7 @@ type EditDialogProps struct {
 
 templ EditDialog(props *EditDialogProps) {
 	if props.Close {
-		<span
-			id={ constants.IDToolEditDialog }
-			if props.ReloadToolsList {
-				hx-get={ env.ServerPathPrefix + "/htmx/tools/list" }
-				hx-trigger="load"
-				hx-target={ fmt.Sprintf("#%s", constants.IDAllToolsList) }
-				hx-swap="outerHTML"
-			}
-		></span>
+		<span onload="window.location.reload();"></span>
 	} else {
 		<dialog
 			name="tool-edit-dialog"
@@ -53,6 +45,13 @@ templ EditDialog(props *EditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
+				if props.Error != "" {
+					<div class="card compact destructive">
+						<div class="card-body">
+							{ props.Error }
+						</div>
+					</div>
+				}
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
 					<span class="flex flex-row gap flex-wrap justify-between items-center">
 						<span class="flex flex-col gap-0">

@@ -143,17 +143,15 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	if t, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
 		if err == dberror.ErrAlreadyExists {
 			props.Error = "Tool bereits vorhanden"
+		} else {
+			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				"failed to add tool: "+err.Error())
 		}
-
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to add tool: "+err.Error())
 	} else {
 		props.Close = true
 		props.ReloadToolsList = true
 		props.ToolID = t.ID // Yeah, there is no need to set the tool ID here
 	}
-
-	logger.HTMXHandlerTools().Info("Successfully created tool with ID %d", tool.ID)
 
 	return h.handleEdit(c, props)
 }
@@ -166,6 +164,11 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Info("User %s is updating a tool", user.UserName)
 
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	if err != nil {
+		return err
+	}
+
 	formData, err := h.getToolFormData(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -173,6 +176,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 
 	props := &toolscomp.EditDialogProps{
+		ToolID:              toolID,
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
 		InputHeight:         formData.Format.Height,
@@ -182,6 +186,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 
 	tool := models.NewTool(formData.Position)
+	tool.ID = toolID
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -189,19 +194,16 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
 
-	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
-	if err != nil {
-		return err
-	}
-	tool.ID = id
-
-	logger.HTMXHandlerTools().Info("Updating tool %d", id)
-
 	if err := h.DB.Tools.Update(tool, user); err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to update tool: "+err.Error())
+		if err == dberror.ErrAlreadyExists {
+			props.Error = "Tool bereits vorhanden"
+		} else {
+			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				"failed to update tool: "+err.Error())
+		}
+	} else {
+		props.Close = true
 	}
-	props.Close = true
 
 	return h.handleEdit(c, props)
 }
@@ -227,8 +229,6 @@ func (h *Tools) handleDelete(c echo.Context) error {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to delete tool: "+err.Error())
 	}
-
-	logger.HTMXHandlerTools().Info("Successfully deleted tool %d", toolID)
 
 	// Set redirect header to tools page
 	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
@@ -352,6 +352,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 			props.InputTotalCycles = cycle.TotalCycles
 			pressNumber := cycle.PressNumber
 			props.InputPressNumber = &pressNumber
+			props.OriginalDate = &cycle.Date
 		}
 	}
 
@@ -474,8 +475,27 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	pressCycle := models.NewPressCycle(toolID, *formData.PressNumber, formData.TotalCycles, user.TelegramID)
-	pressCycle.ID = cycleID
+	// Get existing cycle to preserve its original date
+	existingCycle, err := h.DB.PressCycles.Get(cycleID)
+	if err != nil {
+		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+			Tool:             tool,
+			CycleID:          cycleID,
+			Error:            "Failed to get existing cycle: " + err.Error(),
+			InputTotalCycles: formData.TotalCycles,
+			InputPressNumber: formData.PressNumber,
+		}, c)
+	}
+
+	// Update only the fields that should change, preserving the original date
+	pressCycle := models.NewPressCycleWithID(
+		cycleID,
+		toolID,
+		*formData.PressNumber,
+		formData.TotalCycles,
+		user.TelegramID,
+		existingCycle.Date,
+	)
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,

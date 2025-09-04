@@ -21,7 +21,6 @@ var _ interfaces.DataOperations[*models.Tool] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
-		DROP TABLE IF EXISTS tools;
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
@@ -114,8 +113,18 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 			"failed to marshal format", err)
 	}
 
-	if err := t.exists(tool, formatBytes); err != nil {
-		return 0, err
+	// Vaidate tool
+	var count int
+	query := `
+		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
+	`
+	err = t.db.QueryRow(query, tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to check for existing tool: %#v", err)
+	}
+
+	if count > 0 {
+		return 0, dberror.ErrAlreadyExists
 	}
 
 	// Marshal other JSON fields
@@ -133,7 +142,7 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 
 	t.updateMods(user, tool)
 
-	query := `
+	query = `
 		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
 	`
 	result, err := t.db.Exec(query,
@@ -177,8 +186,18 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 			"failed to marshal format for existence check", err)
 	}
 
-	if err := t.exists(tool, formatBytes); err != nil {
-		return err
+	// Validate tool
+	var count int
+	query := `
+		SELECT COUNT(*) FROM tools WHERE id != $1 AND position = $2 AND format = $3 AND type = $4 AND code = $5
+	`
+	err = t.db.QueryRow(query, tool.ID, tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check for existing tool: %#v", err)
+	}
+
+	if count > 0 {
+		return dberror.ErrAlreadyExists
 	}
 
 	// Marshal other JSON fields
@@ -196,7 +215,7 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 
 	t.updateMods(user, tool)
 
-	query := `
+	query = `
 		UPDATE tools SET position = $1, format = $2, type = $3, code = $4, regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9;
 	`
 	_, err = t.db.Exec(query,
@@ -249,25 +268,6 @@ func (t *Service) Delete(id int64, user *models.User) error {
 				ModifiedBy: user,
 			},
 		))
-	}
-
-	return nil
-}
-
-func (t *Service) exists(tool *models.Tool, formatBytes []byte) error {
-	var count int
-
-	query := `
-		SELECT COUNT(*) FROM tools WHERE position = $1 AND format = $2 AND type = $3 AND code = $4
-	`
-	err := t.db.QueryRow(query,
-		tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
-	if err != nil {
-		return fmt.Errorf("failed to check for existing tool: %#v", err)
-	}
-
-	if count > 0 {
-		return dberror.ErrAlreadyExists
 	}
 
 	return nil

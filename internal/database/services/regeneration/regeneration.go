@@ -21,7 +21,6 @@ type Service struct {
 
 func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.PressCyclesHelper) *Service {
 	query := `
-		DROP TABLE IF EXISTS tool_regenerations;
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,

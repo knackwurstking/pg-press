@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
@@ -14,9 +15,11 @@ type CycleEditDialogProps struct {
 	Close            bool
 	InputTotalCycles int64
 	InputPressNumber *models.PressNumber
+	OriginalDate     *time.Time
 	Error            string
 }
 
+// TODO: Prevent close dialog with escape
 templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span
@@ -49,12 +52,14 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				hx-swap="outerHTML"
 				enctype="multipart/form-data"
 			>
-				if props.Error != "" {
-					<section class="p bg-error-container-text color-on-error-container-text">
-						{ props.Error }
-					</section>
-				}
 				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+					if props.Error != "" {
+						<div class="card compact destructive">
+							<div class="card-body">
+								{ props.Error }
+							</div>
+						</div>
+					}
 					<section class="press flex flex-col gap-sm">
 						<label for="press">Presse</label>
 						<select id="press" name="press_number" required>
@@ -76,6 +81,18 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							}
 						</select>
 					</section>
+					if props.CycleID > 0 && props.OriginalDate != nil {
+						<section class="original-date flex flex-col gap-sm">
+							<label>Ursprüngliches Datum</label>
+							<input
+								type="text"
+								value={ props.OriginalDate.Format("02.01.2006") }
+								readonly
+								class="muted"
+								title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
+							/>
+						</section>
+					}
 					<section class="total-cycles flex flex-col gap-sm">
 						<label>Gesamtzyklen</label>
 						<input
