@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -72,6 +73,35 @@ func isTerminal(w io.Writer) bool {
 		return f == os.Stdout || f == os.Stderr
 	}
 	return false
+}
+
+// callerInfo returns the caller's file and line number
+func callerInfo() string {
+	_, file, line, ok := runtime.Caller(2)
+	var caller string
+	if ok {
+		// Get the working directory to calculate relative path
+		wd, err := os.Getwd()
+		if err == nil {
+			// Try to get relative path from working directory
+			if relPath, err := filepath.Rel(wd, file); err == nil && !strings.HasPrefix(relPath, "..") {
+				caller = fmt.Sprintf("%s:%d", relPath, line)
+			} else {
+				// Fallback to just filename if relative path goes outside working dir
+				parts := strings.Split(file, "/")
+				if len(parts) > 0 {
+					caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
+				}
+			}
+		} else {
+			// Fallback to just filename if we can't get working directory
+			parts := strings.Split(file, "/")
+			if len(parts) > 0 {
+				caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
+			}
+		}
+	}
+	return caller
 }
 
 // SetLevel sets the minimum log level
@@ -155,17 +185,6 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 	// Get current time
 	timestamp := time.Now().Format("2006/01/02 15:04:05")
 
-	// Get caller information
-	_, file, line, ok := runtime.Caller(2)
-	var caller string
-	if ok {
-		// Extract just the filename from the full path
-		parts := strings.Split(file, "/")
-		if len(parts) > 0 {
-			caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
-		}
-	}
-
 	// Build the log message
 	levelStr := l.levelToString(level)
 	color := ""
@@ -175,21 +194,24 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 		reset = Reset
 	}
 
+	// Get caller information
+	caller := callerInfo()
+
 	var logLine string
 	if caller != "" {
-		logLine = fmt.Sprintf("%s[%s]%s %s %s [%s] %s\n",
+		logLine = fmt.Sprintf("%s[%-5s]%s %s %s [%s] %s\n",
 			color+Bold, levelStr, reset,
-			color+timestamp,
+			timestamp,
 			prefix,
 			caller,
-			message+reset)
+			color+message+reset)
 
 	} else {
-		logLine = fmt.Sprintf("%s[%s]%s %s %s %s\n",
+		logLine = fmt.Sprintf("%s[%-5s]%s %s %s %s\n",
 			color+Bold, levelStr, reset,
-			color+timestamp,
+			timestamp,
 			prefix,
-			message+reset)
+			color+message+reset)
 	}
 
 	output.Write([]byte(logLine))
