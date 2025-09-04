@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"slices"
 	"time"
@@ -64,19 +62,36 @@ func init() {
 }
 
 func middlewareLogger() echo.MiddlewareFunc {
-	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${time_rfc3339} ${status} ${method} ${uri} (${remote_ip}) " +
-			"${latency_human} ${custom}\n",
-		Output: os.Stderr,
-		CustomTagFunc: func(c echo.Context, buf *bytes.Buffer) (int, error) {
-			user, ok := c.Get("user").(*models.User)
-			if !ok {
-				return 0, nil
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			start := time.Now()
+
+			// Process request
+			err := next(c)
+
+			// Calculate latency
+			latency := time.Since(start)
+
+			// Get request info
+			req := c.Request()
+			res := c.Response()
+			status := res.Status
+			method := req.Method
+			uri := req.RequestURI
+			remoteIP := c.RealIP()
+
+			// Get user info if available
+			userInfo := ""
+			if user, ok := c.Get("user").(*models.User); ok {
+				userInfo = " " + user.String()
 			}
 
-			return buf.WriteString(user.String())
-		},
-	})
+			// Log using internal logger with special HTTP highlighting
+			logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+
+			return err
+		}
+	}
 }
 
 func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {

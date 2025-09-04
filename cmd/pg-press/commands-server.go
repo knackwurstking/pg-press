@@ -89,10 +89,10 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 			message = err.Error()
 		}
 
+		// Note: Request logging is handled by the logger middleware
+		// Only log here if we need additional context beyond the standard request log
 		if code >= 500 {
-			logger.Server().Error("Server error (%d): %s", code, message)
-		} else if code >= 400 {
-			logger.Server().Warn("Client error (%d): %s", code, message)
+			logger.Server().Debug("Error details: %s", message)
 		}
 
 		if !c.Response().Committed {

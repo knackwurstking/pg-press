@@ -24,16 +24,22 @@ const (
 
 // ANSI color codes
 const (
-	Reset  = "\033[0m"
-	Red    = "\033[31m"
-	Green  = "\033[32m"
-	Yellow = "\033[33m"
-	Blue   = "\033[34m"
-	Purple = "\033[35m"
-	Cyan   = "\033[36m"
-	Gray   = "\033[37m"
-	Bold   = "\033[1m"
-	Italic = "\033[3m"
+	Reset     = "\033[0m"
+	Red       = "\033[31m"
+	Green     = "\033[32m"
+	Yellow    = "\033[33m"
+	Blue      = "\033[34m"
+	Purple    = "\033[35m"
+	Cyan      = "\033[36m"
+	Gray      = "\033[37m"
+	Bold      = "\033[1m"
+	Italic    = "\033[3m"
+	BgBlue    = "\033[44m"
+	BgGreen   = "\033[42m"
+	BgYellow  = "\033[43m"
+	BgRed     = "\033[41m"
+	BgCyan    = "\033[46m"
+	Underline = "\033[4m"
 )
 
 // Logger represents a colored logger instance
@@ -263,6 +269,132 @@ func (l *Logger) Error(format string, args ...any) {
 		return
 	}
 	l.log(ERROR, format, args...)
+}
+
+// HTTPRequest logs an HTTP request with special highlighting
+func (l *Logger) HTTPRequest(status int, method, uri, remoteIP string, latency time.Duration, userInfo string) {
+	// Determine log level based on status code
+	var level LogLevel
+	if status >= 500 {
+		level = ERROR
+	} else if status >= 400 {
+		level = WARN
+	} else {
+		level = INFO
+	}
+
+	// Early exit for performance if level too low
+	l.mu.Lock()
+	currentLevel := l.level
+	enableColors := l.enableColors
+	prefix := l.prefix
+	output := l.output
+	l.mu.Unlock()
+
+	if level < currentLevel {
+		return
+	}
+
+	// Get current time
+	timestamp := time.Now().Format("2006/01/02 15:04:05")
+
+	// Get caller information (skip one more frame since we're in HTTPRequest)
+	_, file, line, ok := runtime.Caller(2)
+	var caller string
+	if ok {
+		wd, err := os.Getwd()
+		if err == nil {
+			if relPath, err := filepath.Rel(wd, file); err == nil && !strings.HasPrefix(relPath, "..") {
+				caller = fmt.Sprintf("%s:%d", relPath, line)
+			} else {
+				parts := strings.Split(file, "/")
+				if len(parts) > 0 {
+					caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
+				}
+			}
+		} else {
+			parts := strings.Split(file, "/")
+			if len(parts) > 0 {
+				caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
+			}
+		}
+	}
+
+	// Build the special HTTP log message with enhanced formatting
+	var logLine string
+	if enableColors {
+		// Choose colors and symbols based on status code
+		var statusColor, methodColor, httpIcon string
+
+		if status >= 500 {
+			statusColor = BgRed + Bold
+			httpIcon = "🔥"
+		} else if status >= 400 {
+			statusColor = BgYellow + Bold
+			httpIcon = "⚠️ "
+		} else if status >= 300 {
+			statusColor = BgCyan + Bold
+			httpIcon = "↩️ "
+		} else {
+			statusColor = BgGreen + Bold
+			httpIcon = "✅"
+		}
+
+		// Method color coding
+		switch method {
+		case "GET":
+			methodColor = Blue + Bold
+		case "POST":
+			methodColor = Green + Bold
+		case "PUT":
+			methodColor = Yellow + Bold
+		case "DELETE":
+			methodColor = Red + Bold
+		case "PATCH":
+			methodColor = Purple + Bold
+		default:
+			methodColor = Cyan + Bold
+		}
+
+		if caller != "" {
+			logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s [%s] %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
+				httpIcon,
+				Bold+Cyan, Reset,
+				timestamp,
+				prefix,
+				caller,
+				statusColor, status, Reset,
+				methodColor, method, Reset,
+				Underline+Cyan, uri, Reset,
+				Gray, remoteIP, Reset,
+				Bold+Purple, latency, Reset,
+				userInfo)
+		} else {
+			logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
+				httpIcon,
+				Bold+Cyan, Reset,
+				timestamp,
+				prefix,
+				statusColor, status, Reset,
+				methodColor, method, Reset,
+				Underline+Cyan, uri, Reset,
+				Gray, remoteIP, Reset,
+				Bold+Purple, latency, Reset,
+				userInfo)
+		}
+	} else {
+		// Plain text version for when colors are disabled
+		levelStr := l.levelToString(level)
+		if caller != "" {
+			logLine = fmt.Sprintf("[%-5s] %s %s [%s] [HTTP] %d %s %s (%s) %v%s\n",
+				levelStr, timestamp, prefix, caller, status, method, uri, remoteIP, latency, userInfo)
+		} else {
+			logLine = fmt.Sprintf("[%-5s] %s %s [HTTP] %d %s %s (%s) %v%s\n",
+				levelStr, timestamp, prefix, status, method, uri, remoteIP, latency, userInfo)
+		}
+	}
+
+	output.Write([]byte(logLine))
 }
 
 // InitializeFromStandardLog configures the logger to replace standard log package
