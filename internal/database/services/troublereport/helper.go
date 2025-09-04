@@ -3,11 +3,11 @@ package troublereport
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.

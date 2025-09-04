@@ -1,7 +1,8 @@
 package pages
 
 import (
-	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
@@ -16,7 +17,7 @@ templ FeedPage() {
 		<main class="container fluid">
 			<span
 				id={ constants.IDData }
-				hx-get={ constants.ServerPathPrefix + "/htmx/feed/list" }
+				hx-get={ env.ServerPathPrefix + "/htmx/feed/list" }
 				hx-trigger="load"
 				hx-swap="outerHTML"
 			></span>

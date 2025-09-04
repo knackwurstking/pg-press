@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/net/websocket"
-
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/core"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+
+	"golang.org/x/net/websocket"
 )
 
 // FeedCounterTemplateData represents the data for rendering feed counter template

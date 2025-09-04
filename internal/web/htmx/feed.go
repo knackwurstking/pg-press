@@ -3,14 +3,14 @@ package htmx
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/core"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	feedscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/feeds"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+	feedscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/feeds"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Feed struct {

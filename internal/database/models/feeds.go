@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 )
 
 const (

@@ -1,7 +1,9 @@
 package feeds
 
-import "time"
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 templ Layout(id int64, t time.Time, content templ.Component) {
 	<article id={ fmt.Sprintf("feed-%d", id) } class="card" data-id={ fmt.Sprintf("%d", id) } data-time={ fmt.Sprintf("%d", t.UnixMilli()) }>

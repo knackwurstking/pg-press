@@ -2,8 +2,10 @@ package troublereports
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/constants"
+
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
@@ -21,7 +23,7 @@ type EditDialogProps struct {
 templ EditDialog(props *EditDialogProps) {
 	if props.Close {
 		<span
-			hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/data" }
+			hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
 			hx-trigger="load"
 			hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 			hx-swap="outerHTML"
@@ -43,10 +45,10 @@ templ EditDialog(props *EditDialogProps) {
 				if props.ID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/trouble-reports/dialog-edit?id=%d",
-						constants.ServerPathPrefix, props.ID,
+						env.ServerPathPrefix, props.ID,
 					) }
 				} else {
-					hx-post={ constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
+					hx-post={ env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 				}
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
@@ -193,7 +195,7 @@ templ EditDialog(props *EditDialogProps) {
 				</div>
 				<footer class="flex gap justify-end">
 					<button
-						hx-get={ constants.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true" }
+						hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit?close=true" }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 						hx-swap="outerHTML"

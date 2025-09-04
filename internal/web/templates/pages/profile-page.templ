@@ -1,8 +1,9 @@
 package pages
 
 import (
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
@@ -71,7 +72,7 @@ templ ProfilePage(user *models.User) {
 						<i class="bi bi-telegram"></i>
 						Telegram ID: { user.TelegramID }
 					</div>
-					<a role="button" href={ constants.ServerPathPrefix + "/logout" } class="ghost destructive flex flex-row gap">
+					<a role="button" href={ env.ServerPathPrefix + "/logout" } class="ghost destructive flex flex-row gap">
 						<i class="bi bi-box-arrow-right"></i>
 						Abmelden
 					</a>
@@ -81,7 +82,7 @@ templ ProfilePage(user *models.User) {
 			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
 				<span
 					id={ constants.IDCookies }
-					hx-get={ constants.ServerPathPrefix + "/htmx/profile/cookies" }
+					hx-get={ env.ServerPathPrefix + "/htmx/profile/cookies" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 				></span>
@@ -108,7 +109,7 @@ templ ProfilePage(user *models.User) {
 						<!-- Cancel button -->
 						<a
 							role="button"
-							href={ constants.ServerPathPrefix + "/profile" }
+							href={ env.ServerPathPrefix + "/profile" }
 							class="secondary flex flex-row gap"
 						>
 							<i class="bi bi-x-circle"></i>

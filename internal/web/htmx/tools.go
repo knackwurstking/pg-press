@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/core"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/labstack/echo/v4"
 )
 
@@ -211,7 +212,7 @@ func (h *Tools) handleDelete(c echo.Context) error {
 	logger.HTMXHandlerTools().Info("Successfully deleted tool %d", toolID)
 
 	// Set redirect header to tools page
-	c.Response().Header().Set("HX-Redirect", constants.ServerPathPrefix+"/tools")
+	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
 	return c.NoContent(http.StatusOK)
 }
 

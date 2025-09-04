@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
+
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/labstack/gommon/color"
-
-	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/database/models"
 )
 
 func listUserCommand() cli.Command {

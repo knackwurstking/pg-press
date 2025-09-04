@@ -8,13 +8,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/core"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
 )
 
 type Auth struct {
@@ -39,7 +39,7 @@ func (h *Auth) handleLogin(c echo.Context) error {
 	if apiKey != "" && h.processApiKeyLogin(apiKey, c) {
 		if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError,
-				constants.RedirectFailedMessage)
+				"failed to redirect to profile page")
 		}
 		return nil
 	}
@@ -62,7 +62,7 @@ func (h *Auth) handleLogout(c echo.Context) error {
 
 	if err := c.Redirect(http.StatusSeeOther, "./login"); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
-			constants.RedirectFailedMessage)
+			"failed to redirect to login page")
 	}
 
 	return nil

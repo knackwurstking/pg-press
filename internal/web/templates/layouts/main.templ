@@ -1,6 +1,6 @@
 package layouts
 
-import "github.com/knackwurstking/pgpress/internal/constants"
+import "github.com/knackwurstking/pgpress/internal/env"
 
 type MainOptions struct {
 	PageTitle      string
@@ -28,20 +28,20 @@ templ Main(options MainOptions) {
 			<meta name="msapplication-TileColor" content="#3e3c49"/>
 			<meta name="theme-color" content="#000000"/>
 			<!-- Icons and manifest -->
-			<link rel="icon" href={ constants.ServerPathPrefix + "/favicon.ico" } sizes="any"/>
-			<link rel="icon" href={ constants.ServerPathPrefix + "/icon.png" } type="image/png"/>
-			<link rel="apple-touch-icon" href={ constants.ServerPathPrefix + "/apple-touch-icon-180x180.png" }/>
-			<link rel="mask-icon" href={ constants.ServerPathPrefix + "/icon.png" } color="#3e3c49"/>
+			<link rel="icon" href={ env.ServerPathPrefix + "/favicon.ico" } sizes="any"/>
+			<link rel="icon" href={ env.ServerPathPrefix + "/icon.png" } type="image/png"/>
+			<link rel="apple-touch-icon" href={ env.ServerPathPrefix + "/apple-touch-icon-180x180.png" }/>
+			<link rel="mask-icon" href={ env.ServerPathPrefix + "/icon.png" } color="#3e3c49"/>
 			<!-- PWA Manifest -->
-			<link rel="manifest" href={ constants.ServerPathPrefix + "/manifest.json" }/>
+			<link rel="manifest" href={ env.ServerPathPrefix + "/manifest.json" }/>
 			<!-- Stylesheets -->
-			<link rel="stylesheet" href={ constants.ServerPathPrefix + "/css/bootstrap-icons.min.css" }/>
-			<link rel="stylesheet" href={ constants.ServerPathPrefix + "/css/ui.min.css" }/>
-			<link rel="stylesheet" href={ constants.ServerPathPrefix + "/css/layout.css" }/>
+			<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/bootstrap-icons.min.css" }/>
+			<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/ui.min.css" }/>
+			<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/layout.css" }/>
 			<title>{ options.PageTitle }</title>
 			<!-- HTMX for dynamic content -->
-			<script src={ constants.ServerPathPrefix + "/js/htmx-v2.0.6.min.js" }></script>
-			<script src={ constants.ServerPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js" }></script>
+			<script src={ env.ServerPathPrefix + "/js/htmx-v2.0.6.min.js" }></script>
+			<script src={ env.ServerPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js" }></script>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}

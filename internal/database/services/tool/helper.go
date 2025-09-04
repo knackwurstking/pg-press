@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
 	"github.com/knackwurstking/pgpress/internal/database/services/presscycle"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 // ToolWithNotes represents a tool with its related notes loaded.

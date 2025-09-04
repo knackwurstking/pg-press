@@ -2,10 +2,11 @@ package pages
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/constants"
+
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/internal/database/services/tool"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
 templ ToolPage(user *models.User, tool *tool.ToolWithNotes, metalSheets []*models.MetalSheet) {
@@ -40,7 +41,7 @@ templ toolPageActions(user *models.User, tool *tool.ToolWithNotes) {
 		<button
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/edit?id=%d",
-				constants.ServerPathPrefix, tool.ID,
+				env.ServerPathPrefix, tool.ID,
 			) }
 			hx-trigger="click"
 			hx-target="body"
@@ -53,7 +54,7 @@ templ toolPageActions(user *models.User, tool *tool.ToolWithNotes) {
 		<button
 			hx-delete={ fmt.Sprintf(
 				"%s/htmx/tools/delete?id=%d",
-				constants.ServerPathPrefix, tool.ID,
+				env.ServerPathPrefix, tool.ID,
 			) }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
@@ -111,7 +112,7 @@ templ toolPageMetalSheets(user *models.User, tool *tool.ToolWithNotes, metalShee
 			<button
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/metal-sheets/add?tool_id=%d",
-					constants.ServerPathPrefix, tool.ID,
+					env.ServerPathPrefix, tool.ID,
 				) }
 				hx-trigger="click"
 				hx-target="body"
@@ -169,7 +170,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*m
 								<button
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/view?id=%d",
-										constants.ServerPathPrefix, sheet.ID,
+										env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-target="body"
@@ -182,7 +183,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*m
 								<button
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
-										constants.ServerPathPrefix, sheet.ID,
+										env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-target="body"
@@ -194,7 +195,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*m
 								</button>
 								<button
 									hx-delete={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/delete?id=%d", constants.ServerPathPrefix, sheet.ID,
+										"%s/htmx/metal-sheets/delete?id=%d", env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
@@ -243,7 +244,7 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 								<button
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/view?id=%d",
-										constants.ServerPathPrefix, sheet.ID,
+										env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-target="body"
@@ -256,7 +257,7 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 								<button
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
-										constants.ServerPathPrefix, sheet.ID,
+										env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-target="body"
@@ -269,7 +270,7 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 								<button
 									hx-delete={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d",
-										constants.ServerPathPrefix, sheet.ID,
+										env.ServerPathPrefix, sheet.ID,
 									) }
 									hx-trigger="click"
 									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
@@ -304,7 +305,7 @@ templ toolPageCylesList(tool *tool.ToolWithNotes) {
 						class="secondary ghost flex gap justify-between w-full"
 						href={ fmt.Sprintf(
 							"%s/tools/press/%d",
-							constants.ServerPathPrefix, *tool.Press,
+							env.ServerPathPrefix, *tool.Press,
 						) }
 					>
 						<span class="flex gap items-center  text-sm">
@@ -325,7 +326,7 @@ templ toolPageCylesList(tool *tool.ToolWithNotes) {
 			class="cycles"
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycles?tool_id=%d",
-				constants.ServerPathPrefix, tool.ID,
+				env.ServerPathPrefix, tool.ID,
 			) }
 			hx-trigger="load"
 			hx-swap="innerHTML"

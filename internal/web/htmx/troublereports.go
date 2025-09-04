@@ -3,7 +3,7 @@ package htmx
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/internal/database/core"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/labstack/echo/v4"
 )

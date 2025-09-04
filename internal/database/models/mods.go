@@ -5,7 +5,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 )
 
 type Mods[T any] []*Mod[T]

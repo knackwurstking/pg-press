@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,24 +26,24 @@ func RegisterEchoRoutes(e *echo.Echo, routes []*EchoRoute) {
 	for _, route := range routes {
 		switch route.Method {
 		case http.MethodGet:
-			e.GET(constants.ServerPathPrefix+route.Path, route.Handler)
+			e.GET(env.ServerPathPrefix+route.Path, route.Handler)
 			if !strings.HasSuffix(route.Path, "/") {
-				e.GET(constants.ServerPathPrefix+route.Path+"/", route.Handler)
+				e.GET(env.ServerPathPrefix+route.Path+"/", route.Handler)
 			}
 		case http.MethodPost:
-			e.POST(constants.ServerPathPrefix+route.Path, route.Handler)
+			e.POST(env.ServerPathPrefix+route.Path, route.Handler)
 			if !strings.HasSuffix(route.Path, "/") {
-				e.POST(constants.ServerPathPrefix+route.Path+"/", route.Handler)
+				e.POST(env.ServerPathPrefix+route.Path+"/", route.Handler)
 			}
 		case http.MethodPut:
-			e.PUT(constants.ServerPathPrefix+route.Path, route.Handler)
+			e.PUT(env.ServerPathPrefix+route.Path, route.Handler)
 			if !strings.HasSuffix(route.Path, "/") {
-				e.PUT(constants.ServerPathPrefix+route.Path+"/", route.Handler)
+				e.PUT(env.ServerPathPrefix+route.Path+"/", route.Handler)
 			}
 		case http.MethodDelete:
-			e.DELETE(constants.ServerPathPrefix+route.Path, route.Handler)
+			e.DELETE(env.ServerPathPrefix+route.Path, route.Handler)
 			if !strings.HasSuffix(route.Path, "/") {
-				e.DELETE(constants.ServerPathPrefix+route.Path+"/", route.Handler)
+				e.DELETE(env.ServerPathPrefix+route.Path+"/", route.Handler)
 			}
 		default:
 			panic("unhandled method: " + route.Method)

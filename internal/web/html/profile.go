@@ -5,14 +5,19 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/core"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/web/htmx"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/internal/web/htmx"
+	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+)
+
+const (
+	UserNameMinLength = 1
+	UserNameMaxLength = 100
 )
 
 type Profile struct {
@@ -64,7 +69,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 		return nil
 	}
 
-	if len(userName) < constants.UserNameMinLength || len(userName) > constants.UserNameMaxLength {
+	if len(userName) < UserNameMinLength || len(userName) > UserNameMaxLength {
 		logger.HandlerProfile().Warn("Invalid username length for user %s: %d characters (attempted: %s)",
 			user.UserName, len(userName), userName)
 		return dberror.NewValidationError(constants.UserNameFormField,

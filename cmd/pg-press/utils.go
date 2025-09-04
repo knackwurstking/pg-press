@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
-
-	"github.com/knackwurstking/pgpress/internal/database/core"
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/logger"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func openDB(customPath string) (*database.DB, error) {

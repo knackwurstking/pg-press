@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/database/utils"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 )
 
 const (

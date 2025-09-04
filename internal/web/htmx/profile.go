@@ -3,14 +3,14 @@ package htmx
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
+	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
-	"github.com/knackwurstking/pgpress/internal/database/core"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	profilecomp "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	profilecomp "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Profile struct {

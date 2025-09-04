@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
 	"github.com/labstack/echo/v4"
 )
 

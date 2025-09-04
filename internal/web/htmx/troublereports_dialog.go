@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	troublereportscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/utils"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+	troublereportscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
+
+	"github.com/labstack/echo/v4"
 )
 
 func (h *TroubleReports) handleGetDialogEdit(
@@ -277,7 +277,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	}
 
 	existingAttachmentsToRemove := strings.Split(
-		form.Value[constants.ExistingAttachmentsRemoval][0],
+		form.Value[constants.ExistingAttachmentsRemovalFormField][0],
 		",",
 	)
 	logger.HTMXHandlerTroubleReports().Debug("Removing %d existing attachments", len(existingAttachmentsToRemove))

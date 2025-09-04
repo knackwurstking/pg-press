@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
 // Service handles database operations for feed entries

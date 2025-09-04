@@ -6,11 +6,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/SuperPaintman/nice/cli"
-
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/errors"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
+
+	"github.com/SuperPaintman/nice/cli"
 )
 
 func removeCookiesCommand() cli.Command {
