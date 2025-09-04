@@ -5,8 +5,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -79,35 +77,6 @@ func isTerminal(w io.Writer) bool {
 		return f == os.Stdout || f == os.Stderr
 	}
 	return false
-}
-
-// callerInfo returns the caller's file and line number
-func callerInfo() string {
-	_, file, line, ok := runtime.Caller(2)
-	var caller string
-	if ok {
-		// Get the working directory to calculate relative path
-		wd, err := os.Getwd()
-		if err == nil {
-			// Try to get relative path from working directory
-			if relPath, err := filepath.Rel(wd, file); err == nil && !strings.HasPrefix(relPath, "..") {
-				caller = fmt.Sprintf("%s:%d", relPath, line)
-			} else {
-				// Fallback to just filename if relative path goes outside working dir
-				parts := strings.Split(file, "/")
-				if len(parts) > 0 {
-					caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
-				}
-			}
-		} else {
-			// Fallback to just filename if we can't get working directory
-			parts := strings.Split(file, "/")
-			if len(parts) > 0 {
-				caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
-			}
-		}
-	}
-	return caller
 }
 
 // SetLevel sets the minimum log level
@@ -200,25 +169,11 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 		reset = Reset
 	}
 
-	// Get caller information
-	caller := callerInfo()
-
-	var logLine string
-	if caller != "" {
-		logLine = fmt.Sprintf("%s[%-5s]%s %s %s [%s] %s\n",
-			color+Bold, levelStr, reset,
-			timestamp,
-			prefix,
-			caller,
-			color+message+reset)
-
-	} else {
-		logLine = fmt.Sprintf("%s[%-5s]%s %s %s %s\n",
-			color+Bold, levelStr, reset,
-			timestamp,
-			prefix,
-			color+message+reset)
-	}
+	logLine := fmt.Sprintf("%s[%-5s]%s %s %s %s\n",
+		color+Bold, levelStr, reset,
+		timestamp,
+		prefix,
+		color+message+reset)
 
 	output.Write([]byte(logLine))
 }
@@ -298,28 +253,6 @@ func (l *Logger) HTTPRequest(status int, method, uri, remoteIP string, latency t
 	// Get current time
 	timestamp := time.Now().Format("2006/01/02 15:04:05")
 
-	// Get caller information (skip one more frame since we're in HTTPRequest)
-	_, file, line, ok := runtime.Caller(2)
-	var caller string
-	if ok {
-		wd, err := os.Getwd()
-		if err == nil {
-			if relPath, err := filepath.Rel(wd, file); err == nil && !strings.HasPrefix(relPath, "..") {
-				caller = fmt.Sprintf("%s:%d", relPath, line)
-			} else {
-				parts := strings.Split(file, "/")
-				if len(parts) > 0 {
-					caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
-				}
-			}
-		} else {
-			parts := strings.Split(file, "/")
-			if len(parts) > 0 {
-				caller = fmt.Sprintf("%s:%d", parts[len(parts)-1], line)
-			}
-		}
-	}
-
 	// Build the special HTTP log message with enhanced formatting
 	var logLine string
 	if enableColors {
@@ -356,42 +289,22 @@ func (l *Logger) HTTPRequest(status int, method, uri, remoteIP string, latency t
 			methodColor = Cyan + Bold
 		}
 
-		if caller != "" {
-			logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s [%s] %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
-				httpIcon,
-				Bold+Cyan, Reset,
-				timestamp,
-				prefix,
-				caller,
-				statusColor, status, Reset,
-				methodColor, method, Reset,
-				Underline+Cyan, uri, Reset,
-				Gray, remoteIP, Reset,
-				Bold+Purple, latency, Reset,
-				userInfo)
-		} else {
-			logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
-				httpIcon,
-				Bold+Cyan, Reset,
-				timestamp,
-				prefix,
-				statusColor, status, Reset,
-				methodColor, method, Reset,
-				Underline+Cyan, uri, Reset,
-				Gray, remoteIP, Reset,
-				Bold+Purple, latency, Reset,
-				userInfo)
-		}
+		logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
+			httpIcon,
+			Bold+Cyan, Reset,
+			timestamp,
+			prefix,
+			statusColor, status, Reset,
+			methodColor, method, Reset,
+			Underline+Cyan, uri, Reset,
+			Gray, remoteIP, Reset,
+			Bold+Purple, latency, Reset,
+			userInfo)
 	} else {
 		// Plain text version for when colors are disabled
 		levelStr := l.levelToString(level)
-		if caller != "" {
-			logLine = fmt.Sprintf("[%-5s] %s %s [%s] [HTTP] %d %s %s (%s) %v%s\n",
-				levelStr, timestamp, prefix, caller, status, method, uri, remoteIP, latency, userInfo)
-		} else {
-			logLine = fmt.Sprintf("[%-5s] %s %s [HTTP] %d %s %s (%s) %v%s\n",
-				levelStr, timestamp, prefix, status, method, uri, remoteIP, latency, userInfo)
-		}
+		logLine = fmt.Sprintf("[%-5s] %s %s [HTTP] %d %s %s (%s) %v%s\n",
+			levelStr, timestamp, prefix, status, method, uri, remoteIP, latency, userInfo)
 	}
 
 	output.Write([]byte(logLine))
