@@ -88,6 +88,13 @@ func (l *Logger) SetColors(enabled bool) {
 	l.enableColors = enabled && isTerminal(l.output)
 }
 
+// ForceColors enables or disables colored output, bypassing terminal detection
+func (l *Logger) ForceColors(enabled bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.enableColors = enabled
+}
+
 // SetPrefix sets a prefix for all log messages
 func (l *Logger) SetPrefix(prefix string) {
 	l.mu.Lock()
@@ -113,10 +120,6 @@ func (l *Logger) levelToString(level LogLevel) string {
 
 // levelToColor returns the ANSI color code for a log level
 func (l *Logger) levelToColor(level LogLevel) string {
-	if !l.enableColors {
-		return ""
-	}
-
 	switch level {
 	case DEBUG:
 		return Green + Italic
@@ -133,11 +136,16 @@ func (l *Logger) levelToColor(level LogLevel) string {
 
 // log is the internal logging function
 func (l *Logger) log(level LogLevel, format string, args ...any) {
+	// Fast path: check level without lock first
 	l.mu.Lock()
-	defer l.mu.Unlock()
+	currentLevel := l.level
+	enableColors := l.enableColors
+	prefix := l.prefix
+	output := l.output
+	l.mu.Unlock()
 
 	// Check if we should log this level
-	if level < l.level {
+	if level < currentLevel {
 		return
 	}
 
@@ -160,9 +168,10 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 
 	// Build the log message
 	levelStr := l.levelToString(level)
-	color := l.levelToColor(level)
+	color := ""
 	reset := ""
-	if l.enableColors {
+	if enableColors {
+		color = l.levelToColor(level)
 		reset = Reset
 	}
 
@@ -171,7 +180,7 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 		logLine = fmt.Sprintf("%s[%s]%s %s %s [%s] %s\n",
 			color+Bold, levelStr, reset,
 			color+timestamp,
-			l.prefix,
+			prefix,
 			caller,
 			message+reset)
 
@@ -179,30 +188,58 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 		logLine = fmt.Sprintf("%s[%s]%s %s %s %s\n",
 			color+Bold, levelStr, reset,
 			color+timestamp,
-			l.prefix,
+			prefix,
 			message+reset)
 	}
 
-	l.output.Write([]byte(logLine))
+	output.Write([]byte(logLine))
 }
 
 // Debug logs a debug message
 func (l *Logger) Debug(format string, args ...any) {
+	// Early exit for performance if level too low
+	l.mu.Lock()
+	currentLevel := l.level
+	l.mu.Unlock()
+	if DEBUG < currentLevel {
+		return
+	}
 	l.log(DEBUG, format, args...)
 }
 
 // Info logs an info message
 func (l *Logger) Info(format string, args ...any) {
+	// Early exit for performance if level too low
+	l.mu.Lock()
+	currentLevel := l.level
+	l.mu.Unlock()
+	if INFO < currentLevel {
+		return
+	}
 	l.log(INFO, format, args...)
 }
 
 // Warn logs a warning message
 func (l *Logger) Warn(format string, args ...any) {
+	// Early exit for performance if level too low
+	l.mu.Lock()
+	currentLevel := l.level
+	l.mu.Unlock()
+	if WARN < currentLevel {
+		return
+	}
 	l.log(WARN, format, args...)
 }
 
 // Error logs an error message
 func (l *Logger) Error(format string, args ...any) {
+	// Early exit for performance if level too low
+	l.mu.Lock()
+	currentLevel := l.level
+	l.mu.Unlock()
+	if ERROR < currentLevel {
+		return
+	}
 	l.log(ERROR, format, args...)
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 // AppLogger is the global logger instance for the application
@@ -23,126 +24,69 @@ func Initialize() {
 	InitializeFromStandardLog()
 }
 
+var (
+	componentLoggers = make(map[string]*Logger)
+	componentMutex   sync.RWMutex
+)
+
 // NewComponentLogger creates a new logger for a specific component
 func NewComponentLogger(component string) *Logger {
 	logger := New(os.Stderr, AppLogger.level, AppLogger.enableColors)
-	logger.SetPrefix(fmt.Sprintf("[%s] ", component))
+	logger.SetPrefix(fmt.Sprintf("[%s]", component))
 	return logger
 }
 
-// Middleware returns a logger configured for middleware operations
-func Middleware() *Logger {
-	return NewComponentLogger("Middleware")
+// GetComponentLogger returns a logger for the specified component, creating it if necessary
+func GetComponentLogger(component string) *Logger {
+	componentMutex.RLock()
+	if logger, exists := componentLoggers[component]; exists {
+		componentMutex.RUnlock()
+		return logger
+	}
+	componentMutex.RUnlock()
+
+	componentMutex.Lock()
+	defer componentMutex.Unlock()
+
+	// Double-check after acquiring write lock
+	if logger, exists := componentLoggers[component]; exists {
+		return logger
+	}
+
+	logger := NewComponentLogger(component)
+	componentLoggers[component] = logger
+	return logger
 }
 
-// Server returns a logger configured for server operations
-func Server() *Logger {
-	return NewComponentLogger("Server")
-}
-
-func WSFeedHandler() *Logger {
-	return NewComponentLogger("WS Feed Handler")
-}
-
-func WSFeedConnection() *Logger {
-	return NewComponentLogger("WS Feed Connection")
-}
-
-func DBAttachments() *Logger {
-	return NewComponentLogger("DB Attachments")
-}
-
-func DBCookies() *Logger {
-	return NewComponentLogger("DB Cookies")
-}
-
-func DBFeeds() *Logger {
-	return NewComponentLogger("DB Feeds")
-}
-
-func DBTools() *Logger {
-	return NewComponentLogger("DB Tools")
-}
-
-func DBToolCyclesHelper() *Logger {
-	return NewComponentLogger("DB ToolCyclesHelper")
-}
-
-func DBUsers() *Logger {
-	return NewComponentLogger("DB Users")
-}
-
-func DBTroubleReportsHelper() *Logger {
-	return NewComponentLogger("DB TroubleReportsHelper")
-}
-
-func DBMetalSheets() *Logger {
-	return NewComponentLogger("DB MetalSheets")
-}
-
-func DBNotes() *Logger {
-	return NewComponentLogger("DB Notes")
-}
-
-func DBTroubleReports() *Logger {
-	return NewComponentLogger("DB TroubleReports")
-}
-
-func DBToolsHelper() *Logger {
-	return NewComponentLogger("DB ToolsHelper")
-}
-
-func DBPressCycles() *Logger {
-	return NewComponentLogger("DB PressCycles")
-}
-
-func DBToolRegenerations() *Logger {
-	return NewComponentLogger("DB ToolRegenerations")
-}
-
-func HandlerAuth() *Logger {
-	return NewComponentLogger("Handler Auth")
-}
-
-func HandlerFeed() *Logger {
-	return NewComponentLogger("Handler Feed")
-}
-
-func HandlerHome() *Logger {
-	return NewComponentLogger("Handler Home")
-}
-
-func HandlerProfile() *Logger {
-	return NewComponentLogger("Handler Profile")
-}
-
-func HandlerTools() *Logger {
-	return NewComponentLogger("Handler Tools")
-}
-
-func HandlerTroubleReports() *Logger {
-	return NewComponentLogger("Handler TroubleReports")
-}
-
-func HTMXHandlerFeed() *Logger {
-	return NewComponentLogger("HTMX Handler Feed")
-}
-
-func HTMXHandlerNav() *Logger {
-	return NewComponentLogger("HTMX Handler Nav")
-}
-
-func HTMXHandlerProfile() *Logger {
-	return NewComponentLogger("HTMX Handler Profile")
-}
-
-func HTMXHandlerTools() *Logger {
-	return NewComponentLogger("HTMX Handler Tools")
-}
-
-func HTMXHandlerTroubleReports() *Logger {
-	return NewComponentLogger("HTMX Handler TroubleReports")
-}
+// Backward compatibility functions with original names
+func Middleware() *Logger                { return GetComponentLogger("Middleware") }
+func Server() *Logger                    { return GetComponentLogger("Server") }
+func WSFeedHandler() *Logger             { return GetComponentLogger("WS Feed Handler") }
+func WSFeedConnection() *Logger          { return GetComponentLogger("WS Feed Connection") }
+func DBAttachments() *Logger             { return GetComponentLogger("DB Attachments") }
+func DBCookies() *Logger                 { return GetComponentLogger("DB Cookies") }
+func DBFeeds() *Logger                   { return GetComponentLogger("DB Feeds") }
+func DBTools() *Logger                   { return GetComponentLogger("DB Tools") }
+func DBToolCyclesHelper() *Logger        { return GetComponentLogger("DB ToolCyclesHelper") }
+func DBUsers() *Logger                   { return GetComponentLogger("DB Users") }
+func DBTroubleReportsHelper() *Logger    { return GetComponentLogger("DB TroubleReportsHelper") }
+func DBMetalSheets() *Logger             { return GetComponentLogger("DB MetalSheets") }
+func DBNotes() *Logger                   { return GetComponentLogger("DB Notes") }
+func DBTroubleReports() *Logger          { return GetComponentLogger("DB TroubleReports") }
+func DBToolsHelper() *Logger             { return GetComponentLogger("DB ToolsHelper") }
+func DBPressCycles() *Logger             { return GetComponentLogger("DB PressCycles") }
+func DBToolRegenerations() *Logger       { return GetComponentLogger("DB ToolRegenerations") }
+func HandlerAuth() *Logger               { return GetComponentLogger("Handler Auth") }
+func HandlerFeed() *Logger               { return GetComponentLogger("Handler Feed") }
+func HandlerHome() *Logger               { return GetComponentLogger("Handler Home") }
+func HandlerProfile() *Logger            { return GetComponentLogger("Handler Profile") }
+func HandlerTools() *Logger              { return GetComponentLogger("Handler Tools") }
+func HandlerTroubleReports() *Logger     { return GetComponentLogger("Handler TroubleReports") }
+func HTMXHandlerFeed() *Logger           { return GetComponentLogger("HTMX Handler Feed") }
+func HTMXHandlerNav() *Logger            { return GetComponentLogger("HTMX Handler Nav") }
+func HTMXHandlerProfile() *Logger        { return GetComponentLogger("HTMX Handler Profile") }
+func HTMXHandlerTools() *Logger          { return GetComponentLogger("HTMX Handler Tools") }
+func HTMXHandlerTroubleReports() *Logger { return GetComponentLogger("HTMX Handler TroubleReports") }
 
 // init function to automatically initialize the logger when the package is imported
 func init() {
