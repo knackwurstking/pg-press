@@ -95,7 +95,7 @@ func (t *Tool) SetPress(pressNumber *PressNumber) error {
 		return nil
 	}
 
-	if !(*pressNumber).IsValid() {
+	if !IsValidPressNumber(pressNumber) {
 		return dberror.NewValidationError("press", "invalid press number", pressNumber)
 	}
 

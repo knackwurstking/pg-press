@@ -27,7 +27,7 @@ func NewPressCyclesHelper(pressCycles *Service) *PressCyclesHelper {
 func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.PressNumber, user *models.User) (*models.PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
 
-	if !pressNumber.IsValid() {
+	if !models.IsValidPressNumber(&pressNumber) {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
@@ -155,7 +155,7 @@ func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*models.Pre
 func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, limit, offset int) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
 
-	if !pressNumber.IsValid() {
+	if !models.IsValidPressNumber(&pressNumber) {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 
@@ -185,7 +185,7 @@ func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, lim
 func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber models.PressNumber) ([]int64, error) {
 	logger.DBPressCycles().Debug("Getting current tools on press: press_number=%d", pressNumber)
 
-	if !pressNumber.IsValid() {
+	if !models.IsValidPressNumber(&pressNumber) {
 		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
 	}
 

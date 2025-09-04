@@ -10,8 +10,12 @@ const (
 type PressNumber int8
 
 // IsValid checks if the press number is within the valid range (0-5)
-func (pn PressNumber) IsValid() bool {
-	return pn >= MinPressNumber && pn <= MaxPressNumber
+func IsValidPressNumber(n *PressNumber) bool {
+	if n == nil {
+		return false
+	}
+
+	return *n >= MinPressNumber && *n <= MaxPressNumber
 }
 
 type PressCycle struct {

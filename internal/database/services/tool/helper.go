@@ -108,6 +108,9 @@ func (th *ToolsHelper) AddWithNotes(tool *models.Tool, user *models.User, notes 
 	// Add the tool
 	toolID, err := th.tools.Add(tool, user)
 	if err != nil {
+		if err == dberror.ErrAlreadyExists {
+			return nil, err
+		}
 		return nil, dberror.WrapError(err, "failed to add tool")
 	}
 
@@ -123,7 +126,7 @@ func (th *ToolsHelper) AddWithNotes(tool *models.Tool, user *models.User, notes 
 
 // GetByPress returns all active tools for a specific press (0-5).
 func (th *ToolsHelper) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
-	if pressNumber != nil && !(*pressNumber).IsValid() {
+	if !models.IsValidPressNumber(pressNumber) {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 

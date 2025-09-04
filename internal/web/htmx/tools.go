@@ -78,12 +78,12 @@ func (h *Tools) handleList(c echo.Context) error {
 func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
 	if props == nil {
 		props = &toolscomp.EditDialogProps{}
-		props.ID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
+		props.ToolID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
 		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
-		if props.ID > 0 {
-			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ID)
-			tool, err := h.DB.ToolsHelper.GetWithNotes(props.ID)
+		if props.ToolID > 0 {
+			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ToolID)
+			tool, err := h.DB.ToolsHelper.GetWithNotes(props.ToolID)
 			if err != nil {
 				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
@@ -94,7 +94,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 			props.InputHeight = tool.Format.Height
 			props.InputType = tool.Type
 			props.InputCode = tool.Code
-			props.SelectPressSelection = tool.Press
+			props.InputPressSelection = tool.Press
 		} else {
 			logger.HTMXHandlerTools().Debug("Creating new tool")
 		}
@@ -121,30 +121,41 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
+
+	props := &toolscomp.EditDialogProps{
+		InputPosition:       string(formData.Position),
+		InputWidth:          formData.Format.Width,
+		InputHeight:         formData.Format.Height,
+		InputType:           formData.Type,
+		InputCode:           formData.Code,
+		InputPressSelection: formData.Press,
+	}
+
 	tool := models.NewTool(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
 	tool.Press = formData.Press
-	tool.Mods.Add(user, models.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
 		tool.Type, tool.Code, tool.Position)
 
 	if t, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
+		if err == dberror.ErrAlreadyExists {
+			props.Error = "Tool bereits vorhanden"
+		}
+
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to add tool: "+err.Error())
 	} else {
-		tool.ID = t.ID
+		props.Close = true
+		props.ReloadToolsList = true
+		props.ToolID = t.ID // Yeah, there is no need to set the tool ID here
 	}
 
 	logger.HTMXHandlerTools().Info("Successfully created tool with ID %d", tool.ID)
 
-	return h.handleEdit(c, &toolscomp.EditDialogProps{
-		ID:              tool.ID,
-		Close:           true,
-		ReloadToolsList: true,
-	})
+	return h.handleEdit(c, props)
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
@@ -160,12 +171,21 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get tool form data: "+err.Error())
 	}
+
+	props := &toolscomp.EditDialogProps{
+		InputPosition:       string(formData.Position),
+		InputWidth:          formData.Format.Width,
+		InputHeight:         formData.Format.Height,
+		InputType:           formData.Type,
+		InputCode:           formData.Code,
+		InputPressSelection: formData.Press,
+	}
+
 	tool := models.NewTool(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
 	tool.Press = formData.Press
-	tool.Mods.Add(user, models.ToolMod{})
 
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
 
@@ -173,18 +193,17 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	tool.ID = id
 
 	logger.HTMXHandlerTools().Info("Updating tool %d", id)
-	tool.ID = id
+
 	if err := h.DB.Tools.Update(tool, user); err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to update tool: "+err.Error())
 	}
+	props.Close = true
 
-	return h.handleEdit(c, &toolscomp.EditDialogProps{
-		ID:    id,
-		Close: true,
-	})
+	return h.handleEdit(c, props)
 }
 
 func (h *Tools) handleDelete(c echo.Context) error {
@@ -382,7 +401,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if !formData.PressNumber.IsValid() {
+	if !models.IsValidPressNumber(formData.PressNumber) {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            "press_number must be a valid integer",
@@ -446,7 +465,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		toolID, formData,
 	)
 
-	if !formData.PressNumber.IsValid() {
+	if !models.IsValidPressNumber(formData.PressNumber) {
 		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            "press_number must be a valid integer",
@@ -547,11 +566,12 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 		if err != nil {
 			return nil, errors.New("invalid press number: " + err.Error())
 		}
-		pressNumber := models.PressNumber(press)
-		if !pressNumber.IsValid() {
+
+		pn := models.PressNumber(press)
+		data.Press = &pn
+		if !models.IsValidPressNumber(data.Press) {
 			return nil, errors.New("invalid press number")
 		}
-		data.Press = &pressNumber
 	}
 
 	logger.HTMXHandlerTools().Debug("Successfully parsed tool: Type=%s, Code=%s, Position=%s, Format=%dx%d",

@@ -9,15 +9,16 @@ import (
 )
 
 type EditDialogProps struct {
-	ID                   int64
-	Close                bool
-	InputPosition        string
-	InputWidth           int
-	InputHeight          int
-	InputType            string
-	InputCode            string
-	ReloadToolsList      bool
-	SelectPressSelection *models.PressNumber // TODO: Still needs to be implemented, only if not nil
+	ToolID              int64
+	Close               bool
+	InputPosition       string
+	InputWidth          int
+	InputHeight         int
+	InputType           string
+	InputCode           string
+	ReloadToolsList     bool // TODO: This needs to be handled differently, get rid of it
+	InputPressSelection *models.PressNumber
+	Error               string
 }
 
 templ EditDialog(props *EditDialogProps) {
@@ -39,10 +40,10 @@ templ EditDialog(props *EditDialogProps) {
 		>
 			<form
 				class="flex flex-col gap max-w-full"
-				if props.ID > 0 {
+				if props.ToolID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/edit?id=%d",
-						env.ServerPathPrefix, props.ID,
+						env.ServerPathPrefix, props.ToolID,
 					) }
 				} else {
 					hx-post={ env.ServerPathPrefix + "/htmx/tools/edit" }
@@ -93,12 +94,42 @@ templ EditDialog(props *EditDialogProps) {
 								id={ constants.IDPressSelection }
 								name="press-selection"
 							>
-								<option value="">Nicht Eingebaut</option>
-								<option value="0">Presse 0</option>
-								<option value="2">Presse 2</option>
-								<option value="3">Presse 3</option>
-								<option value="4">Presse 4</option>
-								<option value="5">Presse 5</option>
+								<option
+									value=""
+									if !models.IsValidPressNumber(props.InputPressSelection) {
+										selected
+									}
+								>Nicht Eingebaut</option>
+								<option
+									value="0"
+									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
+										selected
+									}
+								>Presse 0</option>
+								<option
+									value="2"
+									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
+										selected
+									}
+								>Presse 2</option>
+								<option
+									value="3"
+									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
+										selected
+									}
+								>Presse 3</option>
+								<option
+									value="4"
+									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
+										selected
+									}
+								>Presse 4</option>
+								<option
+									value="5"
+									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
+										selected
+									}
+								>Presse 5</option>
 							</select>
 						</span>
 					</span>
@@ -159,7 +190,7 @@ templ EditDialog(props *EditDialogProps) {
 						class="secondary flex gap"
 						hx-get={ fmt.Sprintf(
 							"%s/htmx/tools/edit?id=%d&close=true",
-							env.ServerPathPrefix, props.ID,
+							env.ServerPathPrefix, props.ToolID,
 						) }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
@@ -170,7 +201,7 @@ templ EditDialog(props *EditDialogProps) {
 					</button>
 					<button type="submit" class="flex gap">
 						<i class="bi bi-check-circle"></i>
-						if props.ID > 0 {
+						if props.ToolID > 0 {
 							Aktualisieren
 						} else {
 							Erstellen
