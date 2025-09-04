@@ -46,6 +46,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			<thead>
 				<tr>
 					<th name="press">Presse</th>
+					<th name="date">Datum</th>
 					<th name="total">Gesamtzyklen</th>
 					<th name="partial">Teilzyklen (berechnet)</th>
 					<th></th>
@@ -62,7 +63,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
 	if len(cycles) == 0 {
 		<tr>
-			<td colspan="4" class="text-center">
+			<td colspan="5" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -84,6 +85,9 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 	<tr>
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
+		</td>
+		<td>
+			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
 		</td>
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
