@@ -411,7 +411,7 @@ func toolsSection(tools []*tool.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-trigger=\"load,pageLoaded\" hx-swap=\"innerHTML\" class=\"flex flex-col gap m-t p-0\" style=\"list-style: none;\"></ul><script>\n\t\t\twindow.addEventListener(\"visibilitychange\", function() {\n    \t\t\tif (document.visibilityState === 'visible') {\n                    console.warn('visibility changed');\n    \t\t\t\thtmx.trigger(\"#allToolsList\", 'pageLoaded');\n    \t\t\t}\n    \t\t});\n\t\t</script></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" hx-trigger=\"load,pageLoaded\" hx-swap=\"innerHTML\" class=\"flex flex-col gap m-t p-0\" style=\"list-style: none;\"></ul><script>\n\t\t\twindow.addEventListener(\"visibilitychange\", function() {\n    \t\t\tif (document.visibilityState === 'visible') {\n                    console.debug(\"Reload #allToolsList because of a visibility change\")\n    \t\t\t\thtmx.trigger(\"#allToolsList\", 'pageLoaded');\n    \t\t\t}\n    \t\t});\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
