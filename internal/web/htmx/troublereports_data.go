@@ -65,19 +65,6 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 			"failed to delete trouble report: "+err.Error())
 	} else {
 		logger.HTMXHandlerTroubleReports().Info("Successfully deleted trouble report %d (%s)", removedReport.ID, removedReport.Title)
-		feed := models.NewFeed(
-			models.FeedTypeTroubleReportRemove,
-			&models.FeedTroubleReportRemove{
-				ID:        removedReport.ID,
-				Title:     removedReport.Title,
-				RemovedBy: user,
-			},
-		)
-		if err := h.DB.Feeds.Add(feed); err != nil {
-			logger.HTMXHandlerTroubleReports().Error("Failed to add feed entry for deleted trouble report %d: %v", id, err)
-			return dberror.WrapError(err, "failed to add feed entry")
-		}
-		logger.HTMXHandlerTroubleReports().Debug("Feed entry created for deleted trouble report %d", id)
 	}
 
 	return h.handleGetData(c)
