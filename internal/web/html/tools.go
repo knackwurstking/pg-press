@@ -8,10 +8,10 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/database/services/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,12 +20,12 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
+	webhelpers.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
-			utils.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
-			utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
+		[]*webhelpers.EchoRoute{
+			webhelpers.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
+			webhelpers.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
+			webhelpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
 		},
 	)
 
@@ -55,7 +55,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 }
 
 func (h *Tools) handlePressPage(c echo.Context) error {
-	press, err := utils.ParseInt64Param(c, constants.QueryParamPress)
+	press, err := webhelpers.ParseInt64Param(c, constants.QueryParamPress)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to parse press parameter: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest,
@@ -74,12 +74,12 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 }
 
 func (h *Tools) handleToolPage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	id, err := utils.ParseInt64Param(c, constants.QueryParamID)
+	id, err := webhelpers.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to parse tool id parameter: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest,

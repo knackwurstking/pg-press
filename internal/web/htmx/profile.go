@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	profilecomp "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
+	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,17 +18,17 @@ type Profile struct {
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
+	webhelpers.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/htmx/profile/cookies", h.handleGetCookies),
-			utils.NewEchoRoute(http.MethodDelete, "/htmx/profile/cookies", h.handleDeleteCookies),
+		[]*webhelpers.EchoRoute{
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/profile/cookies", h.handleGetCookies),
+			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/profile/cookies", h.handleDeleteCookies),
 		},
 	)
 }
 
 func (h *Profile) handleGetCookies(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 }
 
 func (h *Profile) handleDeleteCookies(c echo.Context) error {
-	value := utils.SanitizeInput(c.QueryParam("value"))
+	value := webhelpers.SanitizeInput(c.QueryParam("value"))
 	if value == "" {
 		logger.HTMXHandlerProfile().Error("Cookie deletion attempted with empty value")
 		return echo.NewHTTPError(http.StatusBadRequest,

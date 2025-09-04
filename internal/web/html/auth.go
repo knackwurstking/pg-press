@@ -12,9 +12,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 type Auth struct {
@@ -22,11 +22,11 @@ type Auth struct {
 }
 
 func (h *Auth) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
+	webhelpers.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
-			utils.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
+		[]*webhelpers.EchoRoute{
+			webhelpers.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
+			webhelpers.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
 		},
 	)
 }

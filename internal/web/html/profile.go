@@ -9,10 +9,10 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/templates/pages"
+	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 const (
@@ -25,10 +25,10 @@ type Profile struct {
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
+	webhelpers.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/profile", h.handleProfile),
+		[]*webhelpers.EchoRoute{
+			webhelpers.NewEchoRoute(http.MethodGet, "/profile", h.handleProfile),
 		},
 	)
 
@@ -37,7 +37,7 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Profile) handleProfile(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 
 func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
 	formParams, _ := c.FormParams()
-	userName := utils.SanitizeInput(formParams.Get(constants.UserNameFormField))
+	userName := webhelpers.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
 	if userName == "" || userName == user.UserName {
 		return nil

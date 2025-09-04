@@ -10,9 +10,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,35 +21,35 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
+	webhelpers.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
+		[]*webhelpers.EchoRoute{
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
 
 			// Get, Post or Edit a tool
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
 				return h.handleEdit(c, nil)
 			}),
 
-			utils.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
-			utils.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
+			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
+			webhelpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
 
 			// Delete a tool
-			utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
+			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
 
 			// Cycles table rows
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleCyclesSection),
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleCyclesSection),
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
 
 			// Get, add or edit a cycles table entry
-			utils.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", func(c echo.Context) error {
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", func(c echo.Context) error {
 				return h.handleCycleEditGET(nil, c)
 			}),
-			utils.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleCycleEditPOST),
-			utils.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleCycleEditPUT),
+			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleCycleEditPOST),
+			webhelpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleCycleEditPUT),
 
 			// Delete a cycle table entry
-			utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete", h.handleCycleDELETE),
+			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete", h.handleCycleDELETE),
 		},
 	)
 }
@@ -78,8 +78,8 @@ func (h *Tools) handleList(c echo.Context) error {
 func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
 	if props == nil {
 		props = &toolscomp.EditDialogProps{}
-		props.ID, _ = utils.ParseInt64Query(c, constants.QueryParamID)
-		props.Close = utils.ParseBoolQuery(c, constants.QueryParamClose)
+		props.ID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
+		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
 		if props.ID > 0 {
 			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ID)
@@ -109,7 +109,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 }
 
 func (h *Tools) handleEditPOST(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Received tool data: %#v", tool)
 
-	id, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
@@ -189,14 +189,14 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 func (h *Tools) handleDelete(c echo.Context) error {
 	// Get tool ID from query parameter
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamID)
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"invalid or missing id parameter: "+err.Error())
 	}
 
 	// Get user from context for audit trail
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -217,13 +217,13 @@ func (h *Tools) handleDelete(c echo.Context) error {
 }
 
 func (h *Tools) handleCyclesSection(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
 	// Get tool ID from query parameter
-	toolID, err := utils.ParseInt64Query(c, "tool_id")
+	toolID, err := webhelpers.ParseInt64Query(c, "tool_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"invalid or missing tool_id parameter: "+err.Error())
@@ -267,13 +267,13 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 }
 
 func (h *Tools) handleTotalCycles(c echo.Context) error {
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"invalid or missing tool_id parameter: "+err.Error())
 	}
 
-	colorClass, err := utils.ParseStringQuery(c, constants.QueryParamColorClass)
+	colorClass, err := webhelpers.ParseStringQuery(c, constants.QueryParamColorClass)
 	if err != nil {
 		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
 	}
@@ -286,7 +286,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 
 	return toolscomp.TotalCycles(
 		totalCycles,
-		utils.ParseBoolQuery(c, constants.QueryParamInput),
+		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
 		colorClass,
 	).Render(c.Request().Context(), c.Response())
 }
@@ -298,7 +298,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	}
 
 	if props.Tool == nil {
-		toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+		toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 		if err != nil {
 			return err
 		}
@@ -310,7 +310,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		props.Tool = tool
 	}
 
-	close := utils.ParseBoolQuery(c, constants.QueryParamClose)
+	close := webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 	if close || props.Close {
 		props.Close = true
 
@@ -322,7 +322,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		return nil
 	}
 
-	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err == nil {
 		props.CycleID = cycleID
 		// Get cycle data from the database
@@ -352,12 +352,12 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 
 // handleCycleEditPOST "/htmx/tools/cycle/edit?tool_id=%d"
 func (h *Tools) handleCycleEditPOST(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return err
 	}
@@ -403,17 +403,17 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 
 // handleCycleEditPUT "/htmx/tools/cycle/edit?cycle_id=%d"
 func (h *Tools) handleCycleEditPUT(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
+	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
 
-	toolID, err := utils.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return err
 	}
@@ -460,7 +460,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 
 // TODO: Add "DELETE /htmx/tools/cycle/delete?cycle_id=%d"
 func (h *Tools) handleCycleDELETE(c echo.Context) error {
-	cycleID, err := utils.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
