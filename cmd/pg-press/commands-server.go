@@ -45,6 +45,8 @@ func serverCommand() cli.Command {
 				e.HideBanner = true
 
 				e.Use(middlewareLogger())
+				e.Use(conditionalCacheMiddleware())
+				e.Use(staticCacheMiddleware())
 				e.Use(middlewareKeyAuth(db))
 				e.HTTPErrorHandler = createHTTPErrorHandler()
 

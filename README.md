@@ -1,3 +1,51 @@
+# pg-vis
+
+A web application for press visualization and management with efficient asset caching.
+
+## Features
+
+- Press management and visualization
+- Trouble report generation and PDF export
+- Real-time feed updates via WebSockets
+- Efficient asset caching for optimal performance
+- User authentication and authorization
+
+## Asset Caching
+
+This application implements a comprehensive asset caching strategy to improve performance:
+
+### Cache Headers
+
+Static assets are cached with appropriate headers based on file type:
+
+- **CSS/JS files**: 1 year cache with `immutable` flag
+- **Font files**: 1 year cache with `immutable` flag
+- **Images**: 30 days cache
+- **Icons/Favicons**: 1 week cache
+- **JSON files**: 1 day cache
+
+### Asset Versioning
+
+Assets include version parameters for cache invalidation:
+
+- URLs like `/css/ui.min.css?v=1705405800` ensure fresh assets after updates
+- Version based on server startup timestamp
+- Automatic cache invalidation on server restarts/deployments
+
+### Testing Cache Implementation
+
+Run the caching test script to verify headers:
+
+```bash
+# Start the development server
+make dev
+
+# In another terminal, test caching
+./scripts/test-caching.sh
+```
+
+See [docs/CACHING.md](docs/CACHING.md) for detailed implementation details.
+
 # Routing Table
 
 ## Page Routes
@@ -20,27 +68,27 @@
 
 ### Feed
 
-| Method | Path            | Handler                          | Description                |
-| ------ | --------------- | -------------------------------- | -------------------------- |
+| Method | Path            | Handler                   | Description                |
+| ------ | --------------- | ------------------------- | -------------------------- |
 | GET    | /htmx/feed/list | `htmx.Feed.handleListGET` | Fetches the list of feeds. |
 
 ### Navigation
 
-| Method | Path                   | Handler                                          | Description                 |
-| ------ | ---------------------- | ------------------------------------------------ | --------------------------- |
+| Method | Path                   | Handler                                   | Description                 |
+| ------ | ---------------------- | ----------------------------------------- | --------------------------- |
 | GET    | /htmx/nav/feed-counter | `htmx.Nav.handleFeedCounterWebSocketEcho` | WebSocket for feed counter. |
 
 ### Profile
 
-| Method | Path                  | Handler                                   | Description                 |
-| ------ | --------------------- | ----------------------------------------- | --------------------------- |
+| Method | Path                  | Handler                            | Description                 |
+| ------ | --------------------- | ---------------------------------- | --------------------------- |
 | GET    | /htmx/profile/cookies | `htmx.Profile.handleGetCookies`    | Fetches the user's cookies. |
 | DELETE | /htmx/profile/cookies | `htmx.Profile.handleDeleteCookies` | Deletes a user's cookie.    |
 
 ### Tools
 
-| Method | Path                     | Handler                                 | Description                          |
-| ------ | ------------------------ | --------------------------------------- | ------------------------------------ |
+| Method | Path                     | Handler                          | Description                          |
+| ------ | ------------------------ | -------------------------------- | ------------------------------------ |
 | GET    | /htmx/tools/list         | `htmx.Tools.handleList`          | Fetches all tools.                   |
 | GET    | /htmx/tools/edit         | `htmx.Tools.handleEdit`          | Renders the tool edit dialog.        |
 | POST   | /htmx/tools/edit         | `htmx.Tools.handleEditPOST`      | Creates a new tool.                  |
@@ -55,8 +103,8 @@
 
 ### Trouble Reports
 
-| Method | Path                                      | Handler                                                  | Description                   |
-| ------ | ----------------------------------------- | -------------------------------------------------------- | ----------------------------- |
+| Method | Path                                      | Handler                                           | Description                   |
+| ------ | ----------------------------------------- | ------------------------------------------------- | ----------------------------- |
 | GET    | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handleGetDialogEdit`         | Renders the edit dialog.      |
 | POST   | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handlePostDialogEdit`        | Creates a new trouble report. |
 | PUT    | /htmx/trouble-reports/dialog-edit         | `htmx.TroubleReports.handlePutDialogEdit`         | Updates a trouble report.     |

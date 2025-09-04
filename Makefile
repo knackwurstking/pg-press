@@ -6,6 +6,8 @@ SERVER_ADDR := :9020
 SERVER_PATH_PREFIX := /${BINARY_NAME}
 #SERVER_PATH_PREFIX :=
 
+
+
 clean:
 	git clean -xfd
 
@@ -28,6 +30,11 @@ dev:
 		gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
 
 build:
+	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
+
+# Build for production
+build-prod:
+	make generate
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
 
 count:
