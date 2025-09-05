@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
+
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )

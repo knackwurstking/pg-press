@@ -1,4 +1,4 @@
-package pages
+package components
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
-templ navProfileButton() {
+templ NavProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
@@ -18,13 +18,13 @@ templ navProfileButton() {
 	</a>
 }
 
-templ navHomeButton() {
+templ NavHomeButton() {
 	<a role="button" class="ghost contrast icon" href={ env.ServerPathPrefix + "/" } title="Startseite">
 		<i class="bi bi-house"></i>
 	</a>
 }
 
-templ navFeedButton() {
+templ NavFeedButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
