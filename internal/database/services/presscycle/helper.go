@@ -391,3 +391,9 @@ func (h *Helper) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
 	// Step 4: The difference is the cycles since regeneration.
 	return currentCycles - cyclesAtRegen, nil
 }
+
+func (h *Helper) GetPartialCycles(cycleID, toolID, pressNumber int64) int64 {
+	// TODO: Fecht total cycles from a previous entry matching the press number, no matter what the tool id is
+
+	return 0
+}

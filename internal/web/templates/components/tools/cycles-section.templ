@@ -70,6 +70,8 @@ templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
 		</tr>
 	} else {
 		for i, cycle := range cycles {
+			// TODO: Get total cycles from the nect cycle matching the press number
+			{{ partialCycles := cycle.PartialCycles() }}
 			{{ previousTotalCycles := int64(0) }}
 			if i+1 < len(cycles) {
 				{{ previousTotalCycles = cycles[i+1].TotalCycles }}
