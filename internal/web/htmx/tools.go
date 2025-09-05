@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/labstack/echo/v4"
 )
@@ -66,7 +66,7 @@ func (h *Tools) handleList(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	toolsListAll := toolscomp.List(tools)
+	toolsListAll := tooltemplates.List(tools)
 	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools list all: "+err.Error())
@@ -75,9 +75,9 @@ func (h *Tools) handleList(c echo.Context) error {
 }
 
 // handleEdit renders a dialog for editing or creating a tool
-func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
+func (h *Tools) handleEdit(c echo.Context, props *tooltemplates.EditDialogProps) error {
 	if props == nil {
-		props = &toolscomp.EditDialogProps{}
+		props = &tooltemplates.EditDialogProps{}
 		props.ToolID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
 		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
@@ -100,7 +100,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 		}
 	}
 
-	toolEdit := toolscomp.EditDialog(props)
+	toolEdit := tooltemplates.EditDialog(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool edit dialog: "+err.Error())
@@ -122,7 +122,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &toolscomp.EditDialogProps{
+	props := &tooltemplates.EditDialogProps{
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
 		InputHeight:         formData.Format.Height,
@@ -175,7 +175,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &toolscomp.EditDialogProps{
+	props := &tooltemplates.EditDialogProps{
 		ToolID:              toolID,
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
@@ -270,7 +270,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
 
 	// Render the component
-	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
+	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
 		User:          user,
 		ToolID:        toolID,
 		TotalCycles:   totalCycles,
@@ -303,7 +303,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 			"failed to get total cycles: "+err.Error())
 	}
 
-	return toolscomp.TotalCycles(
+	return tooltemplates.TotalCycles(
 		totalCycles,
 		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
 		colorClass,
@@ -311,9 +311,9 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 }
 
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
-func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
+func (h *Tools) handleCycleEditGET(props *tooltemplates.CycleEditDialogProps, c echo.Context) error {
 	if props == nil {
-		props = &toolscomp.CycleEditDialogProps{}
+		props = &tooltemplates.CycleEditDialogProps{}
 	}
 
 	if props.Tool == nil {
@@ -333,7 +333,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 	if close || props.Close {
 		props.Close = true
 
-		cycleEditDialog := toolscomp.CycleEditDialog(props)
+		cycleEditDialog := tooltemplates.CycleEditDialog(props)
 		if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError,
 				"failed to close cycle edit dialog: "+err.Error())
@@ -361,7 +361,7 @@ func (h *Tools) handleCycleEditGET(props *toolscomp.CycleEditDialogProps, c echo
 		props.Tool.ID, cycleID,
 	)
 
-	cycleEditDialog := toolscomp.CycleEditDialog(props)
+	cycleEditDialog := tooltemplates.CycleEditDialog(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render cycle edit dialog: "+err.Error())
@@ -390,7 +390,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	// Parse form data (type: PressCycle)
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            err.Error(),
 			InputPressNumber: nil, // Don't have form data to repopulate
@@ -403,7 +403,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	)
 
 	if !models.IsValidPressNumber(formData.PressNumber) {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
@@ -415,7 +415,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		models.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
 		user,
 	); err != nil {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
@@ -423,7 +423,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+	return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 		Tool:  tool,
 		Close: true,
 	}, c)
@@ -453,7 +453,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
 			Error:            err.Error(),
@@ -467,7 +467,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	)
 
 	if !models.IsValidPressNumber(formData.PressNumber) {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
@@ -478,7 +478,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	// Get existing cycle to preserve its original date
 	existingCycle, err := h.DB.PressCycles.Get(cycleID)
 	if err != nil {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
 			Error:            "Failed to get existing cycle: " + err.Error(),
@@ -497,7 +497,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		existingCycle.Date,
 	)
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
-		return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 			Tool:             tool,
 			CycleID:          cycleID,
 			Error:            err.Error(),
@@ -506,7 +506,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleCycleEditGET(&toolscomp.CycleEditDialogProps{
+	return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
 		Tool:  tool,
 		Close: true,
 	}, c)

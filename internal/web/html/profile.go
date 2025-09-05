@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
-	pagesprofile "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
+	profilepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
@@ -52,7 +52,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 		)
 	}
 
-	page := pagesprofile.Page(user)
+	page := profilepage.Page(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerProfile().Error("Failed to render profile page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

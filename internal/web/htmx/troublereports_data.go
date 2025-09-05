@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	troublereportscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
+	troublereporttemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
@@ -30,7 +30,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	logger.HTMXHandlerTroubleReports().Debug("Found %d trouble reports for user %s", len(trs), user.UserName)
 
-	troubleReportsList := troublereportscomp.List(user, trs)
+	troubleReportsList := troublereporttemplates.List(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to render trouble reports list component: "+err.Error())
@@ -147,7 +147,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.Troub
 	}
 
 	// Create a reversed copy of tr.Mods
-	trModifications := troublereportscomp.ListMods(
+	trModifications := troublereporttemplates.ListMods(
 		user,
 		tr.ID,
 		tr.Mods.First(),

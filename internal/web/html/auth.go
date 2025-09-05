@@ -13,7 +13,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-	pageslogin "github.com/knackwurstking/pgpress/internal/web/templates/pages/login"
+	loginpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/login"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
@@ -44,7 +44,7 @@ func (h *Auth) handleLogin(c echo.Context) error {
 		return nil
 	}
 
-	page := pageslogin.Page(apiKey, apiKey != "")
+	page := loginpage.Page(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render login page: "+err.Error())

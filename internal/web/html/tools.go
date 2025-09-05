@@ -10,9 +10,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
-	pagestools "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
-	pagespress "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
-	pagestool "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
+	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
+	toolpresspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
+	tooltoolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
@@ -48,7 +48,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	page := pagestools.Page(tools)
+	page := toolpage.Page(tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -67,7 +67,7 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tools active page for press %d", press)
 
-	page := pagespress.ToolsPressPage(press)
+	page := toolpresspage.ToolsPressPage(press)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools active page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -110,7 +110,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
 
-	page := pagestool.ToolPage(user, tool, metalSheets)
+	page := tooltoolpage.ToolPage(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tool page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

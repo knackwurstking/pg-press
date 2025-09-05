@@ -8,7 +8,7 @@ import (
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
-	pagesfeed "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
+	feedpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
@@ -31,7 +31,7 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 func (h *Feed) handleFeed(c echo.Context) error {
 	logger.HandlerFeed().Debug("Rendering feed page")
 
-	page := pagesfeed.Page()
+	page := feedpage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerFeed().Error("Failed to render feed page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

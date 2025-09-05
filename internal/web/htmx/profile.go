@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	profilecomp "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
+	profiletemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/profile"
 	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
@@ -44,7 +44,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 
 	logger.HTMXHandlerProfile().Debug("Found %d cookies for user %s", len(cookies), user.UserName)
 
-	cookiesTable := profilecomp.Cookies(cookie.SortCookies(cookies))
+	cookiesTable := profiletemplates.Cookies(cookie.SortCookies(cookies))
 	if err := cookiesTable.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HTMXHandlerProfile().Error("Failed to render cookies table: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
