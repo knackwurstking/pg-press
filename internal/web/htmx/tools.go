@@ -257,6 +257,13 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 			"failed to get press cycles: "+err.Error())
 	}
 
+	// Get partial cycles for the last entry in cycles
+	var lastPartialCycles int64
+	if len(cycles) > 0 {
+		lastCycle := cycles[len(cycles)-1]
+		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCycles(lastCycle)
+	}
+
 	// Get regenerations for this tool
 	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
 	if err != nil {
@@ -271,11 +278,12 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 
 	// Render the component
 	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
-		User:          user,
-		ToolID:        toolID,
-		TotalCycles:   totalCycles,
-		Cycles:        cycles,
-		Regenerations: regenerations,
+		User:              user,
+		ToolID:            toolID,
+		TotalCycles:       totalCycles,
+		Cycles:            cycles,
+		Regenerations:     regenerations,
+		LastPartialCycles: lastPartialCycles,
 	})
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,

@@ -392,8 +392,31 @@ func (h *Helper) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
 	return currentCycles - cyclesAtRegen, nil
 }
 
-func (h *Helper) GetPartialCycles(cycleID, toolID, pressNumber int64) int64 {
-	// TODO: Fecht total cycles from a previous entry matching the press number, no matter what the tool id is
+func (h *Helper) GetPartialCycles(cycle *models.PressCycle) int64 {
+	logger.DBPressCycles().Debug("Getting partial cycles: %#v", cycle)
 
-	return 0
+	// Get the total_cycles from the previous entry on the same press (regardless of tool_id)
+	previousQuery := `
+		SELECT total_cycles
+		FROM press_cycles
+		WHERE press_number = ? AND id < ?
+		ORDER BY id DESC
+		LIMIT 1
+	`
+	var previousTotalCycles int64
+	err := h.pressCycles.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ID).Scan(&previousTotalCycles)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No previous entry found, so partial cycles equals total cycles
+			logger.DBPressCycles().Debug("No previous entry found for press %d, partial cycles = total cycles (%d)", cycle.PressNumber, cycle.TotalCycles)
+		} else {
+			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d: %v", cycle.PressNumber, err)
+		}
+		return cycle.TotalCycles
+	}
+
+	partialCycles := cycle.TotalCycles - previousTotalCycles
+	logger.DBPressCycles().Debug("Partial cycles calculated: %d (current: %d - previous: %d)", partialCycles, cycle.TotalCycles, previousTotalCycles)
+
+	return partialCycles
 }
