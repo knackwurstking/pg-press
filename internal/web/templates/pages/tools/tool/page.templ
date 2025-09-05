@@ -5,11 +5,23 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
 templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+	{{
+		var slotName string
+		switch tool.Position {
+		case models.PositionTop:
+			slotName = constants.QueryParamSlotTop
+		case models.PositionTopCassette:
+			slotName = constants.QueryParamSlotTopCassette
+		case models.PositionBottom:
+			slotName = constants.QueryParamSlotBottom
+		}
+	}}
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -29,9 +41,9 @@ templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mod
 			@toolPageActions(user, tool)
 			@toolPageNotes(tool)
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-				@toolPageMetalSheets(user, tool, metalSheets)
+				@toolPageMetalSheets(user, metalSheets, tool, slotName)
 			}
-			@toolPageCylesList(tool)
+			@toolPageCylesList(tool, slotName)
 		</main>
 	}
 }
@@ -108,24 +120,26 @@ templ toolPageNotes(tool *models.ToolWithNotes) {
 }
 
 // TODO: Need some sorting logic here
-templ toolPageMetalSheets(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes, slotName string) {
 	<section class="metalsheets-section">
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
-			<button
-				hx-get={ fmt.Sprintf(
-					"%s/htmx/metal-sheets/add?tool_id=%d",
-					env.ServerPathPrefix, tool.ID,
-				) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				class="secondary small flex"
-				title="Neues Blech hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-			</button>
+			if slotName != "" {
+				<button
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/metal-sheets/add?%s=%d",
+						env.ServerPathPrefix, slotName, tool.ID,
+					) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					class="secondary small flex"
+					title="Neues Blech hinzufügen"
+				>
+					<i class="bi bi-plus-lg"></i>
+				</button>
+			}
 		</div>
 		<div class="table-container">
 			switch tool.Position {
@@ -303,7 +317,7 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 	</figure>
 }
 
-templ toolPageCylesList(tool *models.ToolWithNotes) {
+templ toolPageCylesList(tool *models.ToolWithNotes, slotName string) {
 	<section class="cycles-section flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="setatus">
@@ -332,16 +346,18 @@ templ toolPageCylesList(tool *models.ToolWithNotes) {
 					<span>{ tool.Status() }</span>
 			}
 		</section>
-		<section
-			class="cycles"
-			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?tool_id=%d",
-				env.ServerPathPrefix, tool.ID,
-			) }
-			hx-trigger="load"
-			hx-swap="innerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-		></section>
+		if slotName != "" {
+			<section
+				class="cycles"
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/cycles?%s=%d",
+					env.ServerPathPrefix, slotName, tool.ID,
+				) }
+				hx-trigger="load"
+				hx-swap="innerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			></section>
+		}
 	</section>
 }
 
