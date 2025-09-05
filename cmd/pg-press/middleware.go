@@ -80,6 +80,14 @@ func middlewareLogger() echo.MiddlewareFunc {
 			uri := req.RequestURI
 			remoteIP := c.RealIP()
 
+			if err != nil {
+				if he, ok := err.(*echo.HTTPError); ok {
+					status = he.Code
+				} else {
+					status = dberror.GetHTTPStatusCode(err)
+				}
+			}
+
 			// Get user info if available
 			userInfo := ""
 			if user, ok := c.Get("user").(*models.User); ok {
