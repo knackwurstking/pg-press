@@ -10,7 +10,9 @@ import (
 
 type CyclesSectionProps struct {
 	User              *models.User
-	ToolID            int64
+	SlotTop           int64
+	SlotTopCassette   int64
+	SlotBottom        int64
 	TotalCycles       int64
 	Cycles            []*models.PressCycle
 	Regenerations     []*models.ToolRegeneration
@@ -22,8 +24,8 @@ templ CyclesSection(props *CyclesSectionProps) {
 		<h5>Pressennutzungsverlauf</h5>
 		<button
 			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?tool_id=%d",
-				env.ServerPathPrefix, props.ToolID,
+				"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+				env.ServerPathPrefix, props.SlotTop, props.SlotTopCassette, props.SlotBottom,
 			) }
 			hx-trigger="click"
 			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
@@ -49,6 +51,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 				<tr>
 					<th name="press">Presse</th>
 					<th name="date">Datum</th>
+					<th name="slots">Werkzeuge</th>
 					<th name="total">Gesamtzyklen</th>
 					<th name="partial">Teilzyklen (berechnet)</th>
 					<th></th>
@@ -65,7 +68,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 templ cyclesTableRows(user *models.User, cycles []*models.PressCycle, lastPartialCycles int64) {
 	if len(cycles) == 0 {
 		<tr>
-			<td colspan="5" class="text-center">
+			<td colspan="6" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -98,6 +101,25 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
 		</td>
 		<td>
+			<div class="flex flex-col gap-xs text-xs">
+				if cycle.SlotTop > 0 {
+					<div class="text-xs text-muted">
+						O: { fmt.Sprintf("%d", cycle.SlotTop) }
+					</div>
+				}
+				if cycle.SlotTopCassette > 0 {
+					<div class="text-xs text-muted">
+						K: { fmt.Sprintf("%d", cycle.SlotTopCassette) }
+					</div>
+				}
+				if cycle.SlotBottom > 0 {
+					<div class="text-xs text-muted">
+						U: { fmt.Sprintf("%d", cycle.SlotBottom) }
+					</div>
+				}
+			</div>
+		</td>
+		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
 		<td>
@@ -108,8 +130,8 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 		<td class="button-group flex justify-end items-center">
 			<button
 				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
-					env.ServerPathPrefix, cycle.ToolID, cycle.ID,
+					"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d&cycle_id=%d",
+					env.ServerPathPrefix, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom, cycle.ID,
 				) }
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }

@@ -25,7 +25,41 @@ func (c *CycleEditDialogProps) HasActiveSlot() bool {
 	return c.SlotTop != nil || c.SlotTopCassette != nil || c.SlotBottom != nil
 }
 
-// TODO: Change dialog for the new slot system
+func (c *CycleEditDialogProps) GetSlotTopID() int64 {
+	if c.SlotTop == nil {
+		return 0
+	}
+	return c.SlotTop.ID
+}
+
+func (c *CycleEditDialogProps) GetSlotTopCassetteID() int64 {
+	if c.SlotTopCassette == nil {
+		return 0
+	}
+	return c.SlotTopCassette.ID
+}
+
+func (c *CycleEditDialogProps) GetSlotBottomID() int64 {
+	if c.SlotBottom == nil {
+		return 0
+	}
+	return c.SlotBottom.ID
+}
+
+// GetPressFromSlots returns the press number from the first active slot
+func (c *CycleEditDialogProps) GetPressFromSlots() *models.PressNumber {
+	if c.SlotTop != nil && c.SlotTop.Press != nil {
+		return c.SlotTop.Press
+	}
+	if c.SlotTopCassette != nil && c.SlotTopCassette.Press != nil {
+		return c.SlotTopCassette.Press
+	}
+	if c.SlotBottom != nil && c.SlotBottom.Press != nil {
+		return c.SlotBottom.Press
+	}
+	return nil
+}
+
 templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span
@@ -33,7 +67,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycles?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 				env.ServerPathPrefix,
-				props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID,
+				props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
 			) }
 			hx-trigger="load"
 			hx-target="section.cycles"
@@ -48,12 +82,13 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 						env.ServerPathPrefix,
-						props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID, props.CycleID,
+						props.CycleID,
+						props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
 					) }
 				} else {
 					hx-post={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
-						env.ServerPathPrefix, props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID,
+						env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
 					) }
 				}
 				hx-trigger="submit"
@@ -70,13 +105,36 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							</div>
 						</div>
 					}
+					<!-- Display active slots information -->
+					if props.HasActiveSlot() {
+						<section class="slots-info flex flex-col gap-sm">
+							<label>Aktive Werkzeuge</label>
+							<div class="flex flex-col gap-xs">
+								if props.SlotTop != nil {
+									<div class="text-sm">
+										<strong>Oberteil:</strong> { props.SlotTop.String() }
+									</div>
+								}
+								if props.SlotTopCassette != nil {
+									<div class="text-sm">
+										<strong>Kassette Oberteil:</strong> { props.SlotTopCassette.String() }
+									</div>
+								}
+								if props.SlotBottom != nil {
+									<div class="text-sm">
+										<strong>Unterteil:</strong> { props.SlotBottom.String() }
+									</div>
+								}
+							</div>
+						</section>
+					}
 					<section class="press flex flex-col gap-sm">
 						<label for="press">Presse</label>
 						<select id="press" name="press_number" required>
 							<option
 								value=""
 								disabled
-								selected?={ props.Tool.Press == nil && props.InputPressNumber == nil }
+								selected?={ props.GetPressFromSlots() == nil && props.InputPressNumber == nil }
 							>
 								Presse auswählen
 							</option>
@@ -84,9 +142,9 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 								<option
 									value={ fmt.Sprintf("%d", i) }
 									selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-										(props.InputPressNumber == nil && isSelectedPress(props.Tool.Press, i)) }
+										(props.InputPressNumber == nil && isSelectedPress(props.GetPressFromSlots(), i)) }
 								>
-									Presse { i }
+									Presse { fmt.Sprintf("%d", i) }
 								</option>
 							}
 						</select>
@@ -113,7 +171,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							name="total_cycles"
 							placeholder="Gesamtzyklen"
 							if props.InputTotalCycles != 0 {
-								value={ props.InputTotalCycles }
+								value={ fmt.Sprintf("%d", props.InputTotalCycles) }
 							}
 							required
 						/>
@@ -124,8 +182,8 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 						type="button"
 						class="secondary flex gap"
 						hx-get={ fmt.Sprintf(
-							"%s/htmx/tools/cycle/edit?close=true&tool_id=%d",
-							env.ServerPathPrefix, props.Tool.ID,
+							"%s/htmx/tools/cycle/edit?close=true&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+							env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
 						) }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }

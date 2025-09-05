@@ -40,10 +40,14 @@ func (p *Service) init() {
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			date DATETIME NOT NULL,
 			performed_by INTEGER NOT NULL,
-			FOREIGN KEY (tool_id) REFERENCES tools(id),
+			FOREIGN KEY (slot_top) REFERENCES tools(id),
+			FOREIGN KEY (slot_top_cassette) REFERENCES tools(id),
+			FOREIGN KEY (slot_bottom) REFERENCES tools(id),
 			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
 		);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top ON press_cycles(slot_top);
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top_cassette ON press_cycles(slot_top_cassette);
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_bottom ON press_cycles(slot_bottom);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 	`
 

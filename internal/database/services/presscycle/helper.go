@@ -26,13 +26,13 @@ func (h *Helper) GetPressCyclesForTool(toolID int64) ([]*models.PressCycle, erro
 	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
-		SELECT id, press_number, tool_id, total_cycles, date, performed_by
+		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
 		FROM press_cycles
-		WHERE tool_id = ?
+		WHERE slot_top = ? OR slot_top_cassette = ? OR slot_bottom = ?
 		ORDER BY id DESC
 	`
 
-	rows, err := h.pressCycles.db.Query(query, toolID)
+	rows, err := h.pressCycles.db.Query(query, toolID, toolID, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycles for tool %d: %w", toolID, err)
 	}
@@ -55,7 +55,7 @@ func (h *Helper) GetPressCycles(pressNumber models.PressNumber, limit, offset in
 	}
 
 	query := `
-		SELECT id, press_number, tool_id, total_cycles, date, performed_by
+		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY id DESC

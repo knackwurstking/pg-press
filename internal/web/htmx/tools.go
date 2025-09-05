@@ -241,51 +241,75 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 		return err
 	}
 
-	// Get tool ID from query parameter
-	toolID, err := webhelpers.ParseInt64Query(c, "tool_id")
+	// Get slot parameters
+	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid or missing tool_id parameter: "+err.Error())
+		slotTop = 0
+	}
+	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
+	if err != nil {
+		slotTopCassette = 0
+	}
+	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
+	if err != nil {
+		slotBottom = 0
 	}
 
-	logger.HTMXHandlerTools().Debug("Fetching cycles for tool %d", toolID)
-	// Get press cycles for this tool
-	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
+	// Validate that at least one slot is provided
+	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
+	}
+
+	logger.HTMXHandlerTools().Debug("Fetching cycles for slots: top=%d, top_cassette=%d, bottom=%d",
+		slotTop, slotTopCassette, slotBottom)
+
+	// Get all press cycles (we'll filter by slots in frontend for now)
+	// TODO: Add a new helper method to get cycles by slots
+	cycles, err := h.DB.PressCycles.List()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
 
+	// Filter cycles that match any of the provided slots
+	var filteredCycles []*models.PressCycle
+	for _, cycle := range cycles {
+		if (slotTop > 0 && cycle.SlotTop == slotTop) ||
+			(slotTopCassette > 0 && cycle.SlotTopCassette == slotTopCassette) ||
+			(slotBottom > 0 && cycle.SlotBottom == slotBottom) {
+			filteredCycles = append(filteredCycles, cycle)
+		}
+	}
+
 	// Get partial cycles for the last entry in cycles
 	var lastPartialCycles int64
-	if len(cycles) > 0 {
-		lastCycle := cycles[len(cycles)-1]
+	if len(filteredCycles) > 0 {
+		lastCycle := filteredCycles[len(filteredCycles)-1]
 		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
 	}
 
-	// Get regenerations for this tool
-	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
-	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get tool regenerations: "+err.Error())
-	}
-	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for tool %d",
-		len(cycles), len(regenerations), toolID)
+	// TODO: Get regenerations based on slots instead of single tool ID
+	var regenerations []*models.ToolRegeneration
+
+	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for slots",
+		len(filteredCycles), len(regenerations))
 
 	// FIXME: Wrong calculation of total cycles
 	// Calculate total cycles
 	var totalCycles int64
-	if len(cycles) > 0 {
-		totalCycles = cycles[0].TotalCycles - (cycles[len(cycles)-1].TotalCycles - lastPartialCycles)
+	if len(filteredCycles) > 0 {
+		totalCycles = filteredCycles[0].TotalCycles - (filteredCycles[len(filteredCycles)-1].TotalCycles - lastPartialCycles)
 	}
-	logger.HTMXHandlerTools().Debug("Calculated total cycles for tool %d: %d", toolID, totalCycles)
+	logger.HTMXHandlerTools().Debug("Calculated total cycles for slots: %d", totalCycles)
 
 	// Render the component
 	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
 		User:              user,
-		ToolID:            toolID,
+		SlotTop:           slotTop,
+		SlotTopCassette:   slotTopCassette,
+		SlotBottom:        slotBottom,
 		TotalCycles:       totalCycles,
-		Cycles:            cycles,
+		Cycles:            filteredCycles,
 		Regenerations:     regenerations,
 		LastPartialCycles: lastPartialCycles,
 	})
@@ -298,10 +322,23 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 }
 
 func (h *Tools) handleTotalCycles(c echo.Context) error {
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	// Get slot parameters
+	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid or missing tool_id parameter: "+err.Error())
+		slotTop = 0
+	}
+	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
+	if err != nil {
+		slotTopCassette = 0
+	}
+	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
+	if err != nil {
+		slotBottom = 0
+	}
+
+	// Validate that at least one slot is provided
+	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
 	}
 
 	colorClass, err := webhelpers.ParseStringQuery(c, constants.QueryParamColorClass)
@@ -309,10 +346,21 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
 	}
 
-	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
+	// Get all press cycles and filter by slots
+	allCycles, err := h.DB.PressCycles.List()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
+	}
+
+	// Filter cycles that match any of the provided slots
+	var cycles []*models.PressCycle
+	for _, cycle := range allCycles {
+		if (slotTop > 0 && cycle.SlotTop == slotTop) ||
+			(slotTopCassette > 0 && cycle.SlotTopCassette == slotTopCassette) ||
+			(slotBottom > 0 && cycle.SlotBottom == slotBottom) {
+			cycles = append(cycles, cycle)
+		}
 	}
 
 	// FIXME: Wrong calculation of total cycles
@@ -416,8 +464,19 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
+	var slotTopID, slotTopCassetteID, slotBottomID int64
+	if toolTop != nil {
+		slotTopID = toolTop.ID
+	}
+	if toolTopCassette != nil {
+		slotTopCassetteID = toolTopCassette.ID
+	}
+	if toolBottom != nil {
+		slotBottomID = toolBottom.ID
+	}
+
 	pressCycle := models.NewPressCycle(
-		toolTop.ID, toolTopCassette.ID, toolBottom.ID,
+		slotTopID, slotTopCassetteID, slotBottomID,
 		*formData.PressNumber,
 		formData.TotalCycles,
 		user.TelegramID,
@@ -496,10 +555,21 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
+	var slotTopID, slotTopCassetteID, slotBottomID int64
+	if toolTop != nil {
+		slotTopID = toolTop.ID
+	}
+	if toolTopCassette != nil {
+		slotTopCassetteID = toolTopCassette.ID
+	}
+	if toolBottom != nil {
+		slotBottomID = toolBottom.ID
+	}
+
 	// Update only the fields that should change, preserving the original date
 	pressCycle := models.NewPressCycleWithID(
 		cycleID,
-		toolTop.ID, toolTopCassette.ID, toolBottom.ID,
+		slotTopID, slotTopCassetteID, slotBottomID,
 		*formData.PressNumber,
 		formData.TotalCycles,
 		user.TelegramID,
@@ -643,21 +713,21 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 func (h *Tools) getSlotsFromQuery(c echo.Context) (toolTop, toolTopCassette, toolBottom *models.Tool, err error) {
 	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
 	if err != nil {
-		return nil, nil, nil, err
+		slotTop = 0
 	}
 
 	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
 	if err != nil {
-		return nil, nil, nil, err
+		slotTopCassette = 0
 	}
 
 	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
 	if err != nil {
-		return nil, nil, nil, err
+		slotBottom = 0
 	}
 
 	// Validate slots, at least one must be provided
-	if slotTop > 0 || slotTopCassette > 0 || slotBottom > 0 {
+	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
 		return nil, nil, nil, echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
 	}
 
