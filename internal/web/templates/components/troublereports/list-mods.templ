@@ -22,6 +22,7 @@ templ ListMods(
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				class="ghost secondary flex gap"
 			>
 				<i class="bi bi-arrow-left"></i>Zurück
@@ -107,6 +108,7 @@ templ ListMods(
 								) }
 								hx-trigger="click"
 								hx-swap="outerHTML"
+								hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 							>
 								<div class="attachments-preview-label">
 									<i class="bi bi-paperclip"></i>
@@ -135,6 +137,7 @@ templ ListMods(
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 									hx-swap="outerHTML"
 									hx-confirm="Möchten Sie wirklich zu dieser Version zurückkehren?"
+									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 									class="secondary flex gap"
 									style="font-size: 0.9em;"
 								>
@@ -151,6 +154,7 @@ templ ListMods(
 									hx-trigger="click"
 									hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 									hx-swap="outerHTML"
+									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 									class="secondary flex gap"
 									style="font-size: 0.9em;"
 									disabled

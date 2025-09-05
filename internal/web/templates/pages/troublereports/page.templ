@@ -37,6 +37,7 @@ templ Page() {
 					hx-trigger="click"
 					hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					class="flex flex-row gap justify-between items-center"
 				>
 					<i class="bi bi-plus-lg"></i>
@@ -49,6 +50,7 @@ templ Page() {
 					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					id={ constants.IDData }
 				></span>
 			</section>

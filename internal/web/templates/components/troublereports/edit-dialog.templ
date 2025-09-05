@@ -27,6 +27,7 @@ templ EditDialog(props *EditDialogProps) {
 			hx-trigger="load"
 			hx-target={ fmt.Sprintf("#%s", constants.IDData) }
 			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			id={ constants.IDTroubleReportEditDialog }
 		></span>
 	} else {
@@ -53,6 +54,7 @@ templ EditDialog(props *EditDialogProps) {
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				<!-- Hidden field for attachment order -->
@@ -199,6 +201,7 @@ templ EditDialog(props *EditDialogProps) {
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
 						hx-swap="outerHTML"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 						type="button"
 						class="secondary flex gap"
 					>

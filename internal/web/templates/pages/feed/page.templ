@@ -21,6 +21,7 @@ templ Page() {
 				hx-get={ env.ServerPathPrefix + "/htmx/feed/list" }
 				hx-trigger="load"
 				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			></span>
 		</main>
 	}

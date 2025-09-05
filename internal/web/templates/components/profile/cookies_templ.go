@@ -121,7 +121,7 @@ func Cookies(cookies []*models.Cookie) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -138,7 +138,7 @@ func Cookies(cookies []*models.Cookie) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDCookies)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 63, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 64, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {

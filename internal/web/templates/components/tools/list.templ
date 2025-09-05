@@ -53,6 +53,7 @@ templ listItem(id int64, tool *tool.ToolWithNotes) {
 					) }
 					hx-trigger="load"
 					hx-swap="innerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				></span>
 			</span>
 			<i class="bi bi-chevron-right"></i>

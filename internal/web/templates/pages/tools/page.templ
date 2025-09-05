@@ -145,6 +145,7 @@ templ sectionTools(tools []*tool.ToolWithNotes) {
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			>
 				<i class="bi bi-plus-lg"></i>
 				<span>Erstellen</span>
@@ -155,6 +156,7 @@ templ sectionTools(tools []*tool.ToolWithNotes) {
 			hx-get={ env.ServerPathPrefix + "/htmx/tools/list" }
 			hx-trigger="load,pageLoaded"
 			hx-swap="innerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="flex flex-col gap m-t p-0"
 			style="list-style: none;"
 		></ul>

@@ -27,6 +27,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			hx-trigger="click"
 			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="secondary small flex"
 			title="Neuen Eintrag hinzufügen"
 		>
@@ -106,6 +107,7 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				class="small ghost"
 				title="Bearbeiten"
 			>
@@ -117,6 +119,7 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 					env.ServerPathPrefix, cycle.ID,
 				) }
 				hx-trigger="click"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				class="destructive small ghost"
 				title="Löschen"
 				if !user.IsAdmin() {

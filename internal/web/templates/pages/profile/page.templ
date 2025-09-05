@@ -86,6 +86,7 @@ templ Page(user *models.User) {
 					hx-get={ env.ServerPathPrefix + "/htmx/profile/cookies" }
 					hx-trigger="load"
 					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				></span>
 			</div>
 			<!-- Dialog for changing the user name -->

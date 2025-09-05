@@ -36,6 +36,7 @@ templ Cookies(cookies []*models.Cookie) {
 										hx-target={ fmt.Sprintf("#%s", constants.IDCookies) }
 										hx-swap="outerHTML"
 										hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
+										hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 										role="button"
 										class="ghost destructive icon"
 										title="Sitzung beenden"

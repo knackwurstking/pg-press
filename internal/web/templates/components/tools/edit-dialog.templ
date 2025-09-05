@@ -46,6 +46,7 @@ templ EditDialog(props *EditDialogProps) {
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				if props.Error != "" {
@@ -197,6 +198,7 @@ templ EditDialog(props *EditDialogProps) {
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 						hx-swap="outerHTML"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					>
 						<i class="bi bi-x-circle"></i>
 						Schließen
