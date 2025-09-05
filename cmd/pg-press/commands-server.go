@@ -43,12 +43,12 @@ func serverCommand() cli.Command {
 
 				e := echo.New()
 				e.HideBanner = true
+				e.HTTPErrorHandler = createHTTPErrorHandler()
 
 				e.Use(middlewareLogger())
 				e.Use(conditionalCacheMiddleware())
 				e.Use(staticCacheMiddleware())
 				e.Use(middlewareKeyAuth(db))
-				e.HTTPErrorHandler = createHTTPErrorHandler()
 
 				router.Serve(e, db)
 
@@ -95,8 +95,15 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		// Only log here if we need additional context beyond the standard request log
 		if code >= 500 {
 			logger.Server().Debug("Error details: %s", message)
+		} else {
+			logger.Server().Warn("Error details (%d): %s", code, message)
 		}
 
+		// This line checks if the HTTP response headers have already been written and sent to the client.
+		// The `c.Response().Committed` property is true after the response headers are sent.
+		// This check is a crucial safeguard to prevent the server from trying to send a new
+		// error response if another response has already been started or completed.
+		// Attempting to write headers twice would cause a panic.
 		if !c.Response().Committed {
 			if c.Request().Header.Get("Accept") == "application/json" {
 				c.JSON(code, map[string]any{
@@ -105,8 +112,10 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 					"status": http.StatusText(code),
 				})
 			} else {
-				c.JSON(code, message)
+				c.String(code, message)
 			}
+		} else {
+			logger.Server().Error("Could not send error response because response was already committed")
 		}
 	}
 }
