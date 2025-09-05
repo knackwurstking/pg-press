@@ -1,6 +1,10 @@
 package htmx
 
-import "github.com/knackwurstking/pgpress/internal/database/models"
+import (
+	"time"
+
+	"github.com/knackwurstking/pgpress/internal/database/models"
+)
 
 type ToolEditFormData struct {
 	Position models.Position     // Position form field name "position"
@@ -13,4 +17,5 @@ type ToolEditFormData struct {
 type CycleEditFormData struct {
 	TotalCycles int64 // TotalCycles form field name "total_cycles"
 	PressNumber *models.PressNumber
+	Date        time.Time // OriginalDate form field name "original_date"
 }

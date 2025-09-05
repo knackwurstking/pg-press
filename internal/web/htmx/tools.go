@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
@@ -461,6 +462,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
+			OriginalDate:     &formData.Date,
 		}, c)
 	}
 
@@ -481,6 +483,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		formData.TotalCycles,
 		user.TelegramID,
 	)
+	pressCycle.Date = formData.Date
 
 	if _, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
@@ -490,6 +493,7 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
+			OriginalDate:     &formData.Date,
 		}, c)
 	}
 
@@ -538,20 +542,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
-		}, c)
-	}
-
-	// Get existing cycle to preserve its original date
-	existingCycle, err := h.DB.PressCycles.Get(cycleID)
-	if err != nil {
-		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
-			CycleID:          cycleID,
-			Error:            "Failed to get existing cycle: " + err.Error(),
-			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: formData.PressNumber,
+			OriginalDate:     &formData.Date,
 		}, c)
 	}
 
@@ -573,7 +564,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		*formData.PressNumber,
 		formData.TotalCycles,
 		user.TelegramID,
-		existingCycle.Date,
+		formData.Date,
 	)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
@@ -585,6 +576,7 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
+			OriginalDate:     &formData.Date,
 		}, c)
 	}
 
@@ -704,9 +696,21 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		pressNumber = &pn
 	}
 
+	var date time.Time
+	if dateString := c.FormValue(constants.QueryParamOriginalDate); dateString != "" {
+		// Create time (date) object from dateString
+		date, err = time.Parse(tooltemplates.DateFormat, dateString)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
+		}
+	} else {
+		date = time.Now()
+	}
+
 	return &CycleEditFormData{
 		TotalCycles: totalCycles,
 		PressNumber: pressNumber,
+		Date:        date,
 	}, nil
 }
 

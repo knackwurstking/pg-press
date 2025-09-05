@@ -13,4 +13,5 @@ const (
 	QueryParamSlotTop         = "slot_top"
 	QueryParamSlotTopCassette = "slot_top_cassette"
 	QueryParamSlotBottom      = "slot_bottom"
+	QueryParamOriginalDate    = "original_date"
 )

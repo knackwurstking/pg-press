@@ -9,6 +9,10 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
+const (
+	DateFormat = "02.01.2006"
+)
+
 type CycleEditDialogProps struct {
 	SlotTop          *models.Tool
 	SlotTopCassette  *models.Tool
@@ -149,18 +153,19 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							}
 						</select>
 					</section>
-					if props.CycleID > 0 && props.OriginalDate != nil {
-						<section class="original-date flex flex-col gap-sm">
-							<label>Ursprüngliches Datum</label>
-							<input
-								type="text"
-								value={ props.OriginalDate.Format("02.01.2006") }
-								readonly
-								class="muted"
-								title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
-							/>
-						</section>
-					}
+					<section class="original-date flex flex-col gap-sm">
+						<label>Ursprüngliches Datum</label>
+						<input
+							name="original_date"
+							type="text"
+							if props.OriginalDate == nil {
+								value={ time.Now().Format(DateFormat) }
+							} else {
+								value={ props.OriginalDate.Format(DateFormat) }
+							}
+							title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
+						/>
+					</section>
 					<section class="total-cycles flex flex-col gap-sm">
 						<label>Gesamtzyklen</label>
 						<input
