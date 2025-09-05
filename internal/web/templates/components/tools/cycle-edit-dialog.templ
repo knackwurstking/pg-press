@@ -10,7 +10,9 @@ import (
 )
 
 type CycleEditDialogProps struct {
-	Tool             *models.Tool
+	SlotTop          *models.Tool
+	SlotTopCassette  *models.Tool
+	SlotBottom       *models.Tool
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
@@ -19,14 +21,19 @@ type CycleEditDialogProps struct {
 	Error            string
 }
 
-// TODO: Prevent close dialog with escape
+func (c *CycleEditDialogProps) HasActiveSlot() bool {
+	return c.SlotTop != nil || c.SlotTopCassette != nil || c.SlotBottom != nil
+}
+
+// TODO: Change dialog for the new slot system
 templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolCycleEditDialog }
 			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID,
+				"%s/htmx/tools/cycles?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+				env.ServerPathPrefix,
+				props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID,
 			) }
 			hx-trigger="load"
 			hx-target="section.cycles"
@@ -39,13 +46,14 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 				class="container"
 				if props.CycleID > 0 {
 					hx-put={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
-						env.ServerPathPrefix, props.Tool.ID, props.CycleID,
+						"%s/htmx/tools/cycle/edit?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+						env.ServerPathPrefix,
+						props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID, props.CycleID,
 					) }
 				} else {
 					hx-post={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d",
-						env.ServerPathPrefix, props.Tool.ID,
+						"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+						env.ServerPathPrefix, props.SlotTop.ID, props.SlotTopCassette.ID, props.SlotBottom.ID,
 					) }
 				}
 				hx-trigger="submit"

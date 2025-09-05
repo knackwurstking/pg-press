@@ -30,10 +30,13 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 
 func (p *Service) init() {
 	query := `
-		CREATE TABLE IF NOT EXISTS press_cycles (
+			DROP TABLE IF EXISTS press_cycles;
+			CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
-			tool_id INTEGER NOT NULL,
+			slot_top INTEGER NOT NULL,
+			slot_top_cassette INTEGER NOT NULL,
+			slot_bottom INTEGER NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			date DATETIME NOT NULL,
 			performed_by INTEGER NOT NULL,
@@ -54,7 +57,9 @@ func (p *Service) Get(id int64) (*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
 	query := `
-		SELECT id, press_number, tool_id, total_cycles, date, performed_by FROM press_cycles WHERE id = ?
+		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE id = ?
 	`
 
 	row := p.db.QueryRow(query, id)
@@ -74,7 +79,9 @@ func (p *Service) List() ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Listing all press cycles")
 
 	query := `
-		SELECT id, press_number, tool_id, total_cycles, date, performed_by FROM press_cycles ORDER BY id DESC
+		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		FROM press_cycles
+		ORDER BY id DESC
 	`
 
 	rows, err := p.db.Query(query)
@@ -88,18 +95,27 @@ func (p *Service) List() ([]*models.PressCycle, error) {
 
 // Add creates a new press cycle entry in the database.
 func (p *Service) Add(cycle *models.PressCycle, user *models.User) (int64, error) {
-	logger.DBPressCycles().Info("Adding new cycle: tool_id=%d, press_number=%d, total_cycles=%d", cycle.ToolID, cycle.PressNumber, cycle.TotalCycles)
+	logger.DBPressCycles().Info(
+		"Adding new cycle: slot_top=%d, slot_top_cassette=%d, slot_bottom=%d, press_number=%d, total_cycles=%d",
+		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom, cycle.PressNumber, cycle.TotalCycles,
+	)
 
 	if cycle.Date.IsZero() {
 		cycle.Date = time.Now()
 	}
 
 	query := `
-		INSERT INTO press_cycles (press_number, tool_id, total_cycles, date, performed_by)
-		VALUES (?, ?, ?, ?, ?)
+		INSERT INTO press_cycles (press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := p.db.Exec(query, cycle.PressNumber, cycle.ToolID, cycle.TotalCycles, cycle.Date, user.TelegramID)
+	result, err := p.db.Exec(query,
+		cycle.PressNumber,
+		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
+		cycle.TotalCycles,
+		cycle.Date,
+		user.TelegramID,
+	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to add cycle: %w", err)
 	}
@@ -115,7 +131,7 @@ func (p *Service) Add(cycle *models.PressCycle, user *models.User) (int64, error
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleAdd,
 			&models.FeedPressCycleAdd{
-				ToolID:      cycle.ToolID,
+				ToolID:      -1, // TODO: Change feed type to use the new slot system
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,
 			},
@@ -135,11 +151,18 @@ func (p *Service) Update(cycle *models.PressCycle, user *models.User) error {
 
 	query := `
 		UPDATE press_cycles
-		SET total_cycles = ?, performed_by = ?, press_number = ?, date = ?
+		SET total_cycles = ?, slot_top = ?, slot_top_cassette = ?, slot_bottom = ?, performed_by = ?, press_number = ?, date = ?
 		WHERE id = ?
 	`
 
-	result, err := p.db.Exec(query, cycle.TotalCycles, user.TelegramID, cycle.PressNumber, cycle.Date, cycle.ID)
+	result, err := p.db.Exec(query,
+		cycle.TotalCycles,
+		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
+		user.TelegramID,
+		cycle.PressNumber,
+		cycle.Date,
+		cycle.ID,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to update press cycle with id %d: %w", cycle.ID, err)
 	}
@@ -158,7 +181,7 @@ func (p *Service) Update(cycle *models.PressCycle, user *models.User) error {
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleUpdate,
 			&models.FeedPressCycleUpdate{
-				ToolID:      cycle.ToolID,
+				ToolID:      -1, // TODO: Change feed type to use the new slot system
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,
 			},
@@ -199,8 +222,8 @@ func (p *Service) Delete(id int64, user *models.User) error {
 	if p.feeds != nil {
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleDelete,
-			&models.FeedPressCycleUpdate{ // Using Update here, as Delete doesn't exist
-				ToolID:      cycle.ToolID,
+			&models.FeedPressCycleUpdate{ // TODO: Create Delete type
+				ToolID:      -1, // TODO: Change feed type to use the new slot system
 				TotalCycles: cycle.TotalCycles,
 				ModifiedBy:  user,
 			},
@@ -230,7 +253,9 @@ func (p *Service) scanPressCycle(scanner interfaces.Scannable) (*models.PressCyc
 	err := scanner.Scan(
 		&cycle.ID,
 		&cycle.PressNumber,
-		&cycle.ToolID,
+		&cycle.SlotTop,
+		&cycle.SlotTopCassette,
+		&cycle.SlotBottom,
 		&cycle.TotalCycles,
 		&cycle.Date,
 		&performedBy,

@@ -249,7 +249,6 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	}
 
 	logger.HTMXHandlerTools().Debug("Fetching cycles for tool %d", toolID)
-
 	// Get press cycles for this tool
 	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
 	if err != nil {
@@ -261,7 +260,7 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	var lastPartialCycles int64
 	if len(cycles) > 0 {
 		lastCycle := cycles[len(cycles)-1]
-		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCycles(lastCycle)
+		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
 	}
 
 	// Get regenerations for this tool
@@ -270,11 +269,16 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool regenerations: "+err.Error())
 	}
-
 	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for tool %d",
 		len(cycles), len(regenerations), toolID)
 
-	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
+	// FIXME: Wrong calculation of total cycles
+	// Calculate total cycles
+	var totalCycles int64
+	if len(cycles) > 0 {
+		totalCycles = cycles[0].TotalCycles - (cycles[len(cycles)-1].TotalCycles - lastPartialCycles)
+	}
+	logger.HTMXHandlerTools().Debug("Calculated total cycles for tool %d: %d", toolID, totalCycles)
 
 	// Render the component
 	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
@@ -305,10 +309,17 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
 	}
 
-	totalCycles, err := h.DB.PressCyclesHelper.GetTotalCyclesSinceRegeneration(toolID)
+	cycles, err := h.DB.PressCyclesHelper.GetPressCyclesForTool(toolID)
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get total cycles: "+err.Error())
+			"failed to get press cycles: "+err.Error())
+	}
+
+	// FIXME: Wrong calculation of total cycles
+	// calculate total cycles
+	var totalCycles int64
+	for _, cycle := range cycles {
+		totalCycles += cycle.TotalCycles
 	}
 
 	return tooltemplates.TotalCycles(
@@ -324,17 +335,14 @@ func (h *Tools) handleCycleEditGET(props *tooltemplates.CycleEditDialogProps, c 
 		props = &tooltemplates.CycleEditDialogProps{}
 	}
 
-	if props.Tool == nil {
-		toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	if !props.HasActiveSlot() {
+		toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
 		if err != nil {
 			return err
 		}
-		tool, err := h.DB.Tools.Get(toolID)
-		if err != nil {
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-				"failed to get tool: "+err.Error())
-		}
-		props.Tool = tool
+		props.SlotTop = toolTop
+		props.SlotTopCassette = toolTopCassette
+		props.SlotBottom = toolBottom
 	}
 
 	close := webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
@@ -364,11 +372,6 @@ func (h *Tools) handleCycleEditGET(props *tooltemplates.CycleEditDialogProps, c 
 		}
 	}
 
-	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit GET request for tool %d and cycle %d",
-		props.Tool.ID, cycleID,
-	)
-
 	cycleEditDialog := tooltemplates.CycleEditDialog(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -385,46 +388,46 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 		return err
 	}
 
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
 	if err != nil {
 		return err
-	}
-	tool, err := h.DB.Tools.Get(toolID)
-	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
 	}
 
 	// Parse form data (type: PressCycle)
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			Error:            err.Error(),
 			InputPressNumber: nil, // Don't have form data to repopulate
 		}, c)
 	}
 
-	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit POST request for tool %d: formData=%#v",
-		toolID, formData,
-	)
-
 	if !models.IsValidPressNumber(formData.PressNumber) {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
 		}, c)
 	}
 
-	if _, err := h.DB.PressCycles.Add(
-		models.NewPressCycle(tool.ID, *formData.PressNumber, formData.TotalCycles, user.TelegramID),
-		user,
-	); err != nil {
+	pressCycle := models.NewPressCycle(
+		toolTop.ID, toolTopCassette.ID, toolBottom.ID,
+		*formData.PressNumber,
+		formData.TotalCycles,
+		user.TelegramID,
+	)
+
+	if _, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
@@ -432,8 +435,10 @@ func (h *Tools) handleCycleEditPOST(c echo.Context) error {
 	}
 
 	return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-		Tool:  tool,
-		Close: true,
+		SlotTop:         toolTop,
+		SlotTopCassette: toolTopCassette,
+		SlotBottom:      toolBottom,
+		Close:           true,
 	}, c)
 }
 
@@ -449,34 +454,28 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
 	if err != nil {
 		return err
-	}
-	tool, err := h.DB.Tools.Get(toolID)
-	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
 	}
 
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			CycleID:          cycleID,
 			Error:            err.Error(),
 			InputPressNumber: nil, // Don't have form data to repopulate
 		}, c)
 	}
 
-	logger.HTMXHandlerTools().Debug(
-		"Handling cycle edit PUT request for tool %d and cycle %d: formData=%#v",
-		toolID, cycleID, formData,
-	)
-
 	if !models.IsValidPressNumber(formData.PressNumber) {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: formData.TotalCycles,
 			InputPressNumber: formData.PressNumber,
@@ -487,7 +486,9 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	existingCycle, err := h.DB.PressCycles.Get(cycleID)
 	if err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			CycleID:          cycleID,
 			Error:            "Failed to get existing cycle: " + err.Error(),
 			InputTotalCycles: formData.TotalCycles,
@@ -498,15 +499,18 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	// Update only the fields that should change, preserving the original date
 	pressCycle := models.NewPressCycleWithID(
 		cycleID,
-		toolID,
+		toolTop.ID, toolTopCassette.ID, toolBottom.ID,
 		*formData.PressNumber,
 		formData.TotalCycles,
 		user.TelegramID,
 		existingCycle.Date,
 	)
+
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
 		return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-			Tool:             tool,
+			SlotTop:          toolTop,
+			SlotTopCassette:  toolTopCassette,
+			SlotBottom:       toolBottom,
 			CycleID:          cycleID,
 			Error:            err.Error(),
 			InputTotalCycles: formData.TotalCycles,
@@ -515,8 +519,10 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	}
 
 	return h.handleCycleEditGET(&tooltemplates.CycleEditDialogProps{
-		Tool:  tool,
-		Close: true,
+		SlotTop:         toolTop,
+		SlotTopCassette: toolTopCassette,
+		SlotBottom:      toolBottom,
+		Close:           true,
 	}, c)
 }
 
@@ -632,4 +638,53 @@ func (h *Tools) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		TotalCycles: totalCycles,
 		PressNumber: pressNumber,
 	}, nil
+}
+
+func (h *Tools) getSlotsFromQuery(c echo.Context) (toolTop, toolTopCassette, toolBottom *models.Tool, err error) {
+	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	// Validate slots, at least one must be provided
+	if slotTop > 0 || slotTopCassette > 0 || slotBottom > 0 {
+		return nil, nil, nil, echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
+	}
+
+	// Fetching tools for slots
+	if slotTop > 0 {
+		toolTop, err = h.DB.Tools.Get(slotTop)
+		if err != nil {
+			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				"failed to get tool for slot %d: "+err.Error(), slotTop)
+		}
+	}
+
+	if slotTopCassette > 0 {
+		toolTopCassette, err = h.DB.Tools.Get(slotTopCassette)
+		if err != nil {
+			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				"failed to get tool for slot %d: "+err.Error(), slotTopCassette)
+		}
+	}
+
+	if slotBottom > 0 {
+		toolBottom, err = h.DB.Tools.Get(slotBottom)
+		if err != nil {
+			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				"failed to get tool for slot %d: "+err.Error(), slotBottom)
+		}
+	}
+
+	return toolTop, toolTopCassette, toolBottom, nil
 }

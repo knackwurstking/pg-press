@@ -19,31 +19,38 @@ func IsValidPressNumber(n *PressNumber) bool {
 }
 
 type PressCycle struct {
-	ID          int64       `json:"id"`
-	PressNumber PressNumber `json:"press_number"` // PressNumber is optional
-	ToolID      int64       `json:"tool_id"`
-	Date        time.Time   `json:"date"`
-	TotalCycles int64       `json:"total_cycles"`
-	PerformedBy int64       `json:"performed_by"`
+	ID              int64       `json:"id"`
+	PressNumber     PressNumber `json:"press_number"` // PressNumber is optional
+	SlotTop         int64       `json:"slot_top"`
+	SlotTopCassette int64       `json:"slot_top_cassette"`
+	SlotBottom      int64       `json:"slot_bottom"`
+	Date            time.Time   `json:"date"`
+	TotalCycles     int64       `json:"total_cycles"`
+	PerformedBy     int64       `json:"performed_by"`
 }
 
-func NewPressCycle(toolID int64, press PressNumber, totalCycles, user int64) *PressCycle {
+// TODO: Need to create a new ID type sometime
+func NewPressCycle(slotTop, slotTopCassette, slotBottom int64, press PressNumber, totalCycles, user int64) *PressCycle {
 	return &PressCycle{
-		ToolID:      toolID,
-		PressNumber: press,
-		Date:        time.Now(),
-		TotalCycles: totalCycles,
-		PerformedBy: user,
+		SlotTop:         slotTop,
+		SlotTopCassette: slotTopCassette,
+		SlotBottom:      slotBottom,
+		PressNumber:     press,
+		Date:            time.Now(),
+		TotalCycles:     totalCycles,
+		PerformedBy:     user,
 	}
 }
 
-func NewPressCycleWithID(id, toolID int64, press PressNumber, totalCycles, user int64, date time.Time) *PressCycle {
+func NewPressCycleWithID(id, slotTop, slotTopCassette, slotBottom int64, press PressNumber, totalCycles, user int64, date time.Time) *PressCycle {
 	return &PressCycle{
-		ID:          id,
-		ToolID:      toolID,
-		PressNumber: press,
-		Date:        date,
-		TotalCycles: totalCycles,
-		PerformedBy: user,
+		SlotTop:         slotTop,
+		SlotTopCassette: slotTopCassette,
+		SlotBottom:      slotBottom,
+		ID:              id,
+		PressNumber:     press,
+		Date:            date,
+		TotalCycles:     totalCycles,
+		PerformedBy:     user,
 	}
 }
