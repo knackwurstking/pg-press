@@ -8,21 +8,21 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-// UsersHelper provides additional user-related database operations
+// Helper provides additional user-related database operations
 // that are not part of the generic DataOperations interface.
-type UsersHelper struct {
+type Helper struct {
 	db *sql.DB
 }
 
-// NewUsersHelper creates a new UsersHelper instance.
-func NewUsersHelper(db *sql.DB) *UsersHelper {
-	return &UsersHelper{
+// NewHelper creates a new Helper instance.
+func NewHelper(db *sql.DB) *Helper {
+	return &Helper{
 		db: db,
 	}
 }
 
 // GetUserFromApiKey retrieves a user by their API key.
-func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*models.User, error) {
+func (h *Helper) GetUserFromApiKey(apiKey string) (*models.User, error) {
 	logger.DBUsers().Debug("Getting user by API key")
 
 	if apiKey == "" {
@@ -30,7 +30,7 @@ func (uh *UsersHelper) GetUserFromApiKey(apiKey string) (*models.User, error) {
 	}
 
 	query := `SELECT * FROM users WHERE api_key = ?`
-	row := uh.db.QueryRow(query, apiKey)
+	row := h.db.QueryRow(query, apiKey)
 
 	user := &models.User{}
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)

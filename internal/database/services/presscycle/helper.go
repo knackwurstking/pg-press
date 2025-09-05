@@ -10,21 +10,21 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
-// PressCyclesHelper provides additional press cycle-related database operations
+// Helper provides additional press cycle-related database operations
 // that are not part of the generic DataOperations interface.
-type PressCyclesHelper struct {
+type Helper struct {
 	pressCycles *Service
 }
 
-// NewPressCyclesHelper creates a new PressCyclesHelper instance.
-func NewPressCyclesHelper(pressCycles *Service) *PressCyclesHelper {
-	return &PressCyclesHelper{
+// NewHelper creates a new PressCyclesHelper instance.
+func NewHelper(pressCycles *Service) *Helper {
+	return &Helper{
 		pressCycles: pressCycles,
 	}
 }
 
 // StartToolUsage records when a tool starts being used on a press
-func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.PressNumber, user *models.User) (*models.PressCycle, error) {
+func (h *Helper) StartToolUsage(toolID int64, pressNumber models.PressNumber, user *models.User) (*models.PressCycle, error) {
 	logger.DBPressCycles().Info("Starting tool usage: tool_id=%d, press_number=%d", toolID, pressNumber)
 
 	if !models.IsValidPressNumber(&pressNumber) {
@@ -43,8 +43,8 @@ func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.Pr
 		RETURNING id, press_number, tool_id, total_cycles, date, performed_by
 	`
 
-	row := pch.pressCycles.db.QueryRow(query, pressNumber, toolID, 0, time.Now(), performedBy)
-	cycle, err := pch.pressCycles.scanPressCycle(row)
+	row := h.pressCycles.db.QueryRow(query, pressNumber, toolID, 0, time.Now(), performedBy)
+	cycle, err := h.pressCycles.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound
@@ -54,8 +54,8 @@ func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.Pr
 	}
 
 	// Create feed entry
-	if pch.pressCycles.feeds != nil {
-		pch.pressCycles.feeds.Add(models.NewFeed(
+	if h.pressCycles.feeds != nil {
+		h.pressCycles.feeds.Add(models.NewFeed(
 			models.FeedTypeToolUpdate,
 			&models.FeedToolUpdate{
 				ID:         toolID,
@@ -70,14 +70,14 @@ func (pch *PressCyclesHelper) StartToolUsage(toolID int64, pressNumber models.Pr
 
 // EndToolUsage is deprecated - we no longer track end dates
 // Kept for backward compatibility but does nothing
-func (pch *PressCyclesHelper) EndToolUsage(toolID int64) error {
+func (h *Helper) EndToolUsage(toolID int64) error {
 	logger.DBPressCycles().Info("EndToolUsage called (deprecated): tool_id=%d", toolID)
 	// No-op - we don't track to_date anymore
 	return nil
 }
 
 // GetCurrentToolUsage gets the current active press cycle for a tool
-func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*models.PressCycle, error) {
+func (h *Helper) GetCurrentToolUsage(toolID int64) (*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting current tool usage: tool_id=%d", toolID)
 
 	query := `
@@ -88,8 +88,8 @@ func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*models.PressCy
 		LIMIT 1
 	`
 
-	row := pch.pressCycles.db.QueryRow(query, toolID)
-	cycle, err := pch.pressCycles.scanPressCycle(row)
+	row := h.pressCycles.db.QueryRow(query, toolID)
+	cycle, err := h.pressCycles.scanPressCycle(row)
 	if err == sql.ErrNoRows {
 		return nil, dberror.ErrNotFound
 	}
@@ -101,7 +101,7 @@ func (pch *PressCyclesHelper) GetCurrentToolUsage(toolID int64) (*models.PressCy
 }
 
 // GetToolHistory retrieves all press cycles for a specific tool
-func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([]*models.PressCycle, error) {
+func (h *Helper) GetToolHistory(toolID int64, limit, offset int) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting tool history: tool_id=%d, limit=%d, offset=%d", toolID, limit, offset)
 
 	query := `
@@ -112,13 +112,13 @@ func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := pch.pressCycles.db.Query(query, toolID, limit, offset)
+	rows, err := h.pressCycles.db.Query(query, toolID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tool history: %w", err)
 	}
 	defer rows.Close()
 
-	cycles, err := pch.pressCycles.scanPressCyclesRows(rows)
+	cycles, err := h.pressCycles.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -127,7 +127,7 @@ func (pch *PressCyclesHelper) GetToolHistory(toolID int64, limit, offset int) ([
 }
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
-func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*models.PressCycle, error) {
+func (h *Helper) GetPressCyclesForTool(toolID int64) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
@@ -137,13 +137,13 @@ func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*models.Pre
 		ORDER BY id DESC
 	`
 
-	rows, err := pch.pressCycles.db.Query(query, toolID)
+	rows, err := h.pressCycles.db.Query(query, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycles for tool %d: %w", toolID, err)
 	}
 	defer rows.Close()
 
-	cycles, err := pch.pressCycles.scanPressCyclesRows(rows)
+	cycles, err := h.pressCycles.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -152,7 +152,7 @@ func (pch *PressCyclesHelper) GetPressCyclesForTool(toolID int64) ([]*models.Pre
 }
 
 // GetPressCycles gets all press cycles (current and historical) for a specific press
-func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, limit, offset int) ([]*models.PressCycle, error) {
+func (h *Helper) GetPressCycles(pressNumber models.PressNumber, limit, offset int) ([]*models.PressCycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
 
 	if !models.IsValidPressNumber(&pressNumber) {
@@ -167,13 +167,13 @@ func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, lim
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := pch.pressCycles.db.Query(query, pressNumber, limit, offset)
+	rows, err := h.pressCycles.db.Query(query, pressNumber, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycles for press %d: %w", pressNumber, err)
 	}
 	defer rows.Close()
 
-	cycles, err := pch.pressCycles.scanPressCyclesRows(rows)
+	cycles, err := h.pressCycles.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
 	}
@@ -182,7 +182,7 @@ func (pch *PressCyclesHelper) GetPressCycles(pressNumber models.PressNumber, lim
 }
 
 // GetCurrentToolsOnPress gets all tools currently active on a specific press
-func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber models.PressNumber) ([]int64, error) {
+func (h *Helper) GetCurrentToolsOnPress(pressNumber models.PressNumber) ([]int64, error) {
 	logger.DBPressCycles().Debug("Getting current tools on press: press_number=%d", pressNumber)
 
 	if !models.IsValidPressNumber(&pressNumber) {
@@ -199,7 +199,7 @@ func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber models.PressNum
 		WHERE press_number = ? AND rn = 1
 	`
 
-	rows, err := pch.pressCycles.db.Query(query, pressNumber)
+	rows, err := h.pressCycles.db.Query(query, pressNumber)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current tools on press: %w", err)
 	}
@@ -218,7 +218,7 @@ func (pch *PressCyclesHelper) GetCurrentToolsOnPress(pressNumber models.PressNum
 }
 
 // GetPressUtilization gets current tool count for each press (0-5)
-func (pch *PressCyclesHelper) GetPressUtilization() (map[models.PressNumber][]int64, error) {
+func (h *Helper) GetPressUtilization() (map[models.PressNumber][]int64, error) {
 	logger.DBPressCycles().Debug("Getting press utilization for all presses")
 
 	utilization := map[models.PressNumber][]int64{}
@@ -238,7 +238,7 @@ func (pch *PressCyclesHelper) GetPressUtilization() (map[models.PressNumber][]in
 		ORDER BY press_number, tool_id
 	`
 
-	rows, err := pch.pressCycles.db.Query(query)
+	rows, err := h.pressCycles.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press utilization: %w", err)
 	}
@@ -263,7 +263,7 @@ type PressCycleStats struct {
 }
 
 // GetPressCycleStats gets statistics for all presses
-func (pch *PressCyclesHelper) GetPressCycleStats() (map[models.PressNumber]*PressCycleStats, error) {
+func (h *Helper) GetPressCycleStats() (map[models.PressNumber]*PressCycleStats, error) {
 	logger.DBPressCycles().Debug("Getting press cycle statistics for all presses")
 
 	stats := make(map[models.PressNumber]*PressCycleStats)
@@ -288,7 +288,7 @@ func (pch *PressCyclesHelper) GetPressCycleStats() (map[models.PressNumber]*Pres
 		GROUP BY press_number
 	`
 
-	rows, err := pch.pressCycles.db.Query(query)
+	rows, err := h.pressCycles.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycle stats: %w", err)
 	}
@@ -319,7 +319,7 @@ func (pch *PressCyclesHelper) GetPressCycleStats() (map[models.PressNumber]*Pres
 
 // GetCurrentTotalCycles gets the current total cycles for a specific tool.
 // It retrieves the `total_cycles` from the most recent press cycle entry for the given tool ID.
-func (pch *PressCyclesHelper) GetCurrentTotalCycles(toolID int64) (int64, error) {
+func (h *Helper) GetCurrentTotalCycles(toolID int64) (int64, error) {
 	logger.DBPressCycles().Debug("Getting current total cycles for tool: tool_id=%d", toolID)
 
 	query := `
@@ -331,7 +331,7 @@ func (pch *PressCyclesHelper) GetCurrentTotalCycles(toolID int64) (int64, error)
 	`
 
 	var totalCycles int64
-	err := pch.pressCycles.db.QueryRow(query, toolID).Scan(&totalCycles)
+	err := h.pressCycles.db.QueryRow(query, toolID).Scan(&totalCycles)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no rows are found, it means the tool has no cycle entries yet.
@@ -345,7 +345,7 @@ func (pch *PressCyclesHelper) GetCurrentTotalCycles(toolID int64) (int64, error)
 }
 
 // GetTotalCyclesSinceRegeneration calculates the total cycles of a tool since its last regeneration.
-func (pch *PressCyclesHelper) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
+func (h *Helper) GetTotalCyclesSinceRegeneration(toolID int64) (int64, error) {
 	logger.DBPressCycles().Debug("Getting total cycles since last regeneration for tool: tool_id=%d", toolID)
 
 	// Step 1: Get the cycle_id of the last regeneration for the tool.
@@ -357,11 +357,11 @@ func (pch *PressCyclesHelper) GetTotalCyclesSinceRegeneration(toolID int64) (int
 		LIMIT 1
 	`
 	var lastRegenCycleID int64
-	err := pch.pressCycles.db.QueryRow(lastRegenCycleIDQuery, toolID).Scan(&lastRegenCycleID)
+	err := h.pressCycles.db.QueryRow(lastRegenCycleIDQuery, toolID).Scan(&lastRegenCycleID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No regeneration found, so return all cycles.
-			return pch.GetCurrentTotalCycles(toolID)
+			return h.GetCurrentTotalCycles(toolID)
 		}
 		return 0, fmt.Errorf("failed to get last regeneration cycle for tool %d: %w", toolID, err)
 	}
@@ -373,7 +373,7 @@ func (pch *PressCyclesHelper) GetTotalCyclesSinceRegeneration(toolID int64) (int
 		WHERE id = ?
 	`
 	var cyclesAtRegen int64
-	err = pch.pressCycles.db.QueryRow(cyclesAtRegenQuery, lastRegenCycleID).Scan(&cyclesAtRegen)
+	err = h.pressCycles.db.QueryRow(cyclesAtRegenQuery, lastRegenCycleID).Scan(&cyclesAtRegen)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// This should not happen if the foreign key is set up correctly.
@@ -383,7 +383,7 @@ func (pch *PressCyclesHelper) GetTotalCyclesSinceRegeneration(toolID int64) (int
 	}
 
 	// Step 3: Get the current total cycles.
-	currentCycles, err := pch.GetCurrentTotalCycles(toolID)
+	currentCycles, err := h.GetCurrentTotalCycles(toolID)
 	if err != nil {
 		return 0, err
 	}

@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	"github.com/knackwurstking/pgpress/internal/database/services/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-templ ToolPage(user *models.User, tool *tool.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -37,7 +36,7 @@ templ ToolPage(user *models.User, tool *tool.ToolWithNotes, metalSheets []*model
 	}
 }
 
-templ toolPageActions(user *models.User, tool *tool.ToolWithNotes) {
+templ toolPageActions(user *models.User, tool *models.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
 			hx-get={ fmt.Sprintf(
@@ -73,7 +72,7 @@ templ toolPageActions(user *models.User, tool *tool.ToolWithNotes) {
 	</div>
 }
 
-templ toolPageNotes(tool *tool.ToolWithNotes) {
+templ toolPageNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section class="notes-section">
 			<h4>Notizen</h4>
@@ -109,7 +108,7 @@ templ toolPageNotes(tool *tool.ToolWithNotes) {
 }
 
 // TODO: Need some sorting logic here
-templ toolPageMetalSheets(user *models.User, tool *tool.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ toolPageMetalSheets(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	<section class="metalsheets-section">
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
@@ -304,7 +303,7 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 	</figure>
 }
 
-templ toolPageCylesList(tool *tool.ToolWithNotes) {
+templ toolPageCylesList(tool *models.ToolWithNotes) {
 	<section class="cycles-section flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="setatus">

@@ -7,17 +7,16 @@ import (
 
 	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	"github.com/knackwurstking/pgpress/internal/database/services/troublereport"
 )
 
 // Options contains common options for PDF generation
 type troubleReportOptions struct {
 	*imageOptions
-	Report *troublereport.TroubleReportWithAttachments
+	Report *models.TroubleReportWithAttachments
 }
 
 func GenerateTroubleReportPDF(
-	tr *troublereport.TroubleReportWithAttachments,
+	tr *models.TroubleReportWithAttachments,
 ) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetAutoPageBreak(true, 25)

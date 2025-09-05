@@ -160,3 +160,9 @@ func (tr *TroubleReport) Equals(other *TroubleReport) bool {
 	}
 	return true
 }
+
+// TroubleReportWithAttachments represents a trouble report with its attachments loaded.
+type TroubleReportWithAttachments struct {
+	*TroubleReport
+	LoadedAttachments []*Attachment `json:"loaded_attachments"`
+}

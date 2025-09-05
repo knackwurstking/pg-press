@@ -29,6 +29,16 @@ func (tf ToolFormat) String() string {
 	return fmt.Sprintf("%dx%d", tf.Width, tf.Height)
 }
 
+type ToolMod struct {
+	Position     Position     `json:"position"`
+	Format       ToolFormat   `json:"format"`
+	Type         string       `json:"type"`
+	Code         string       `json:"code"`
+	Regenerating bool         `json:"regenerating"`
+	Press        *PressNumber `json:"press"`
+	LinkedNotes  []int64      `json:"notes"`
+}
+
 // Tool represents a tool in the database.
 //
 // TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
@@ -130,12 +140,8 @@ func (t *Tool) GetPressString() string {
 	return fmt.Sprintf("Presse %d", *t.Press)
 }
 
-type ToolMod struct {
-	Position     Position     `json:"position"`
-	Format       ToolFormat   `json:"format"`
-	Type         string       `json:"type"`
-	Code         string       `json:"code"`
-	Regenerating bool         `json:"regenerating"`
-	Press        *PressNumber `json:"press"`
-	LinkedNotes  []int64      `json:"notes"`
+// ToolWithNotes represents a tool with its related notes loaded.
+type ToolWithNotes struct {
+	*Tool
+	LoadedNotes []*Note `json:"loaded_notes"`
 }

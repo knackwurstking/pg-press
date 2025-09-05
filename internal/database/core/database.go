@@ -36,10 +36,10 @@ type DB struct {
 	PressCycles    interfaces.DataOperations[*models.PressCycle]
 
 	// Helper
-	UsersHelper          *user.UsersHelper
-	TroubleReportsHelper *troublereport.TroubleReportsHelper
-	ToolsHelper          *tool.ToolsHelper
-	PressCyclesHelper    *presscycle.PressCyclesHelper
+	UsersHelper          *user.Helper
+	TroubleReportsHelper *troublereport.Helper
+	ToolsHelper          *tool.Helper
+	PressCyclesHelper    *presscycle.Helper
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -52,15 +52,15 @@ func New(db *sql.DB) *DB {
 	troubleReportsHelper := troublereport.NewTroubleReportsHelper(troubleReports, attachments)
 
 	pressCycles := presscycle.New(db, feeds)
-	pressCyclesHelper := presscycle.NewPressCyclesHelper(pressCycles)
+	pressCyclesHelper := presscycle.NewHelper(pressCycles)
 
 	notes := note.New(db)
 	tools := tool.New(db, feeds)
-	toolsHelper := tool.NewToolsHelper(tools, notes, pressCycles)
+	toolsHelper := tool.NewHelper(tools, notes, pressCycles)
 
 	metalSheets := metalsheet.New(db, feeds, notes)
 	toolRegenerations := regeneration.New(db, feeds, pressCyclesHelper)
-	usersHelper := user.NewUsersHelper(db)
+	usersHelper := user.NewHelper(db)
 
 	dbInstance := &DB{
 		Users:                user.New(db, feeds),
