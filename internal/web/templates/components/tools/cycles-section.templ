@@ -24,14 +24,18 @@ templ CyclesSection(props *CyclesSectionProps) {
 		<div class="card-header">
 			Entwicklernotiz
 		</div>
+
 		<div class="card-body">
 			Die Presszyklen sind nach ihrer ID und nicht nach Datum sortiert.
 			Eine niedrigere ID bedeutet einen älteren Eintrag (IDs sind einzigartig).
 		</div>
 	</div>
+
 	<div class="flex justify-between items-center mb">
 		<h5>Pressennutzungsverlauf</h5>
 		<button
+			class="secondary small flex"
+
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 				env.ServerPathPrefix, props.SlotTop, props.SlotTopCassette, props.SlotBottom,
@@ -40,12 +44,17 @@ templ CyclesSection(props *CyclesSectionProps) {
 			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 			hx-swap="outerHTML"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			class="secondary small flex"
+
 			title="Neuen Eintrag hinzufügen"
+
+			if !props.User.IsAdmin() {
+				disabled
+			}
 		>
 			<i class="bi bi-plus-lg"></i>
 		</button>
 	</div>
+
 	<section>
 		<h6 class="mb">
 			Gesamtzyklen:
@@ -54,6 +63,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			@TotalCycles(props.TotalCycles, true, "")
 		</span>
 	</section>
+
 	<figure class="w-full overflow-x-scroll">
 		<table name="tool-cycles-table" class="table borderless compact">
 			<thead>
@@ -67,11 +77,14 @@ templ CyclesSection(props *CyclesSectionProps) {
 					<th></th>
 				</tr>
 			</thead>
+
 			<tbody>
 				@cyclesTableRows(props.User, props.Cycles, props.LastPartialCycles)
 			</tbody>
 		</table>
 	</figure>
+
+	// Dialog placeholder
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
@@ -85,9 +98,14 @@ templ cyclesTableRows(user *models.User, cycles []*models.PressCycle, lastPartia
 	} else {
 		for i, cycle := range cycles {
 			{{ previousTotalCycles := int64(0) }}
+
 			if i+1 < len(cycles) {
-				{{ previousTotalCycles = cycles[i+1].TotalCycles }}
+				{{
+					// FIXME: This needs to search for the press cycle matching the press number not just the next index
+					previousTotalCycles = cycles[i+1].TotalCycles
+				}}
 			}
+
 			// check for last loop index
 			if i == len(cycles)-1 {
 				// Handle last cycle separately
@@ -107,12 +125,15 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 		<td>
 			<span>{ cycle.ID }</span>
 		</td>
+
 		<td>
 			<span>{ cycle.PressNumber }</span>
 		</td>
+
 		<td>
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
 		</td>
+
 		<td>
 			<div class="flex flex-col gap-xs text-xs">
 				if cycle.SlotTop > 0 {
@@ -132,17 +153,22 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 				}
 			</div>
 		</td>
+
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
+
 		<td>
 			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
 				{ fmt.Sprintf("%d", partialCycles) }
 			</span>
 		</td>
+
 		<td class="button-group flex justify-end items-center">
 			// HTMX Button: Goto: Edit cycle entry dialog
 			<button
+				class="small ghost"
+
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d&cycle_id=%d",
 					env.ServerPathPrefix, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom, cycle.ID,
@@ -151,14 +177,20 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				class="small ghost"
+
 				title="Bearbeiten"
+
+				if !user.IsAdmin() {
+					disabled
+				}
 			>
 				<i class="bi bi-pencil"></i>
 			</button>
+
 			// HTMX Button: Delete cycle from database table and reload section.cycles
 			<button
 				class="destructive small ghost"
+
 				hx-delete={ fmt.Sprintf(
 					"%s/htmx/tools/cycle/delete?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 					env.ServerPathPrefix, cycle.ID, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
@@ -168,7 +200,9 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 				hx-swap="innerHTML"
 				hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+
 				title="Löschen"
+
 				if !user.IsAdmin() {
 					disabled
 				}
