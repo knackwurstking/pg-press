@@ -20,6 +20,15 @@ type CyclesSectionProps struct {
 }
 
 templ CyclesSection(props *CyclesSectionProps) {
+	<div class="card compact info text-sm mb">
+		<div class="card-header">
+			Entwicklernotiz
+		</div>
+		<div class="card-body">
+			Die Presszyklen sind nach ihrer ID und nicht nach Datum sortiert.
+			Eine niedrigere ID bedeutet einen älteren Eintrag (IDs sind einzigartig).
+		</div>
+	</div>
 	<div class="flex justify-between items-center mb">
 		<h5>Pressennutzungsverlauf</h5>
 		<button
