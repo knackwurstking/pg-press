@@ -128,6 +128,7 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 			</span>
 		</td>
 		<td class="button-group flex justify-end items-center">
+			// HTMX Button: Goto: Edit cycle entry dialog
 			<button
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d&cycle_id=%d",
@@ -142,14 +143,18 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 			>
 				<i class="bi bi-pencil"></i>
 			</button>
+			// HTMX Button: Delete cycle from database table and reload section.cycles
 			<button
+				class="destructive small ghost"
 				hx-delete={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?cycle_id=%d",
-					env.ServerPathPrefix, cycle.ID,
+					"%s/htmx/tools/cycle/delete?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+					env.ServerPathPrefix, cycle.ID, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
 				) }
 				hx-trigger="click"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				class="destructive small ghost"
+				hx-target="section.cycles"
+				hx-swap="innerHTML"
+				hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
 				title="Löschen"
 				if !user.IsAdmin() {
 					disabled

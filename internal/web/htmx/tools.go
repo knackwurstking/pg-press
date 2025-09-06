@@ -604,7 +604,7 @@ func (h *Tools) handleCycleDELETE(c echo.Context) error {
 			"failed to delete press cycle: "+err.Error())
 	}
 
-	return nil
+	return h.handleCyclesSection(c)
 }
 
 // getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]

@@ -81,13 +81,13 @@ func (h *Helper) GetPartialCyclesForPress(cycle *models.PressCycle) int64 {
 
 	var query string
 	if cycle.SlotTop > 0 {
-		query += "AND slot_top = ?"
+		query += fmt.Sprintf("AND slot_top = %d", cycle.SlotTop)
 	}
 	if cycle.SlotTopCassette > 0 {
-		query += "AND slot_top_cassette = ?"
+		query += fmt.Sprintf("AND slot_top_cassette = %d", cycle.SlotTopCassette)
 	}
 	if cycle.SlotBottom > 0 {
-		query += "AND slot_bottom = ?"
+		query += fmt.Sprintf("AND slot_bottom = %d", cycle.SlotBottom)
 	}
 
 	// Get the total_cycles from the previous entry on the same press (regardless of tool_id)
