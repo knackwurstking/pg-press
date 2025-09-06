@@ -1,0 +1,18 @@
+package metalsheets
+
+type EditDialogProps struct {
+	ToolID              int64
+	Close               bool
+	Error               string
+}
+
+templ EditDialog(props *EditDialogProps) {
+	if props.Close {
+		<script>
+			// NOTE: For now, this will work just fine
+			window.location.reload();
+		</script>
+	} else {
+		// TODO: ...
+	}
+}
