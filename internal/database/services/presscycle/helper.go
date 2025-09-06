@@ -79,14 +79,32 @@ func (h *Helper) GetPressCycles(pressNumber models.PressNumber, limit, offset in
 func (h *Helper) GetPartialCyclesForPress(cycle *models.PressCycle) int64 {
 	logger.DBPressCycles().Debug("Getting partial cycles: %#v", cycle)
 
+	var query string
+	if cycle.SlotTop > 0 {
+		query += "AND slot_top = ?"
+	}
+	if cycle.SlotTopCassette > 0 {
+		query += "AND slot_top_cassette = ?"
+	}
+	if cycle.SlotBottom > 0 {
+		query += "AND slot_bottom = ?"
+	}
+
 	// Get the total_cycles from the previous entry on the same press (regardless of tool_id)
-	previousQuery := `
-		SELECT total_cycles
-		FROM press_cycles
-		WHERE press_number = ? AND id < ?
-		ORDER BY id DESC
+	previousQuery := fmt.Sprintf(`
+		SELECT
+			total_cycles
+		FROM
+	 		press_cycles
+		WHERE
+			press_number = ?
+			%s
+			AND id < ?
+		ORDER BY
+			id DESC
 		LIMIT 1
-	`
+	`, query)
+
 	var previousTotalCycles int64
 	err := h.pressCycles.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ID).Scan(&previousTotalCycles)
 	if err != nil {
