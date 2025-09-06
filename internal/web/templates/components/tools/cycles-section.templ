@@ -16,7 +16,6 @@ type CyclesSectionProps struct {
 	TotalCycles       int64
 	Cycles            []*models.PressCycle
 	Regenerations     []*models.ToolRegeneration
-	LastPartialCycles int64
 }
 
 templ CyclesSection(props *CyclesSectionProps) {
@@ -79,7 +78,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			</thead>
 
 			<tbody>
-				@cyclesTableRows(props.User, props.Cycles, props.LastPartialCycles)
+				@cyclesTableRows(props.User, props.Cycles)
 			</tbody>
 		</table>
 	</figure>
@@ -88,7 +87,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
-templ cyclesTableRows(user *models.User, cycles []*models.PressCycle, lastPartialCycles int64) {
+templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
 	if len(cycles) == 0 {
 		<tr>
 			<td colspan="7" class="text-center">

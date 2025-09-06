@@ -278,18 +278,17 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 	filteredCycles := models.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
 	// Get total cycles and lastPartialCycles from filtered cycles
-	totalCycles, lastPartialCycles := h.getTotalCycles(filteredCycles...)
+	totalCycles := h.getTotalCycles(filteredCycles...)
 
 	// Render the component
 	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
-		User:              user,
-		SlotTop:           slotTop,
-		SlotTopCassette:   slotTopCassette,
-		SlotBottom:        slotBottom,
-		TotalCycles:       totalCycles,
-		Cycles:            filteredCycles,
-		Regenerations:     regenerations,
-		LastPartialCycles: lastPartialCycles,
+		User:            user,
+		SlotTop:         slotTop,
+		SlotTopCassette: slotTopCassette,
+		SlotBottom:      slotBottom,
+		TotalCycles:     totalCycles,
+		Cycles:          filteredCycles,
+		Regenerations:   regenerations,
 	})
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -336,7 +335,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 	filteredCycles := models.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
 	// Get total cycles from filtered cycles
-	totalCycles, _ := h.getTotalCycles(filteredCycles...)
+	totalCycles := h.getTotalCycles(filteredCycles...)
 
 	return tooltemplates.TotalCycles(
 		totalCycles,
@@ -346,18 +345,14 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 }
 
 // NOTE: The database will always sort IDs DESC
-func (h *Tools) getTotalCycles(cycles ...*models.PressCycle) (totalCycles, lastPartialCycles int64) {
-	if len(cycles) > 0 {
-		lastCycle := cycles[len(cycles)-1]
-		lastPartialCycles = h.DB.PressCycles.GetPartialCycles(lastCycle)
+func (h *Tools) getTotalCycles(cycles ...*models.PressCycle) int64 {
+	var totalCycles int64
+
+	for _, cycle := range cycles {
+		totalCycles += cycle.PartialCycles
 	}
 
-	// calculate total cycles
-	if len(cycles) > 0 {
-		return cycles[0].TotalCycles - (cycles[len(cycles)-1].TotalCycles - lastPartialCycles), lastPartialCycles
-	}
-
-	return 0, 0
+	return totalCycles
 }
 
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
