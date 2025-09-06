@@ -37,8 +37,7 @@ script shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, ti
         showSuccess('<i class="bi bi-download"></i>');
     }
 
-    // FIXME: I need to use the serverPathPrefix variable to construct the URL
-    fetch(`./trouble-reports/share-pdf?id=${troubleReportId}`)
+    fetch(`${serverPathPrefix}/trouble-reports/share-pdf?id=${troubleReportId}`)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.blob();

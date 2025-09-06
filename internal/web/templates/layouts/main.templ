@@ -35,16 +35,44 @@ templ Main(options MainOptions) {
 			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
 			<link rel="apple-touch-icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
 			<link rel="mask-icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#3e3c49"/>
+
 			<!-- PWA Manifest -->
-			<link rel="manifest" href={ helpers.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
+			<link
+				rel="manifest"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/manifest.json") }
+			/>
+
 			<!-- Stylesheets -->
-			<link rel="stylesheet" href={ helpers.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
-			<link rel="stylesheet" href={ helpers.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
-			<link rel="stylesheet" href={ helpers.AssetURL(env.ServerPathPrefix, "/css/layout.css") }/>
+			<link
+				rel="stylesheet"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }
+			/>
+
+			<link
+				rel="stylesheet"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }
+			/>
+
+			<link
+				rel="stylesheet"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/layout.css") }
+			/>
+
 			<title>{ options.PageTitle }</title>
+
 			<!-- HTMX for dynamic content -->
-			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.6.min.js") }></script>
-			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
+			<script
+				src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.6.min.js") }
+			></script>
+
+			<script
+				src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }
+			></script>
+
+			<script>
+				const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant
+			</script>
+
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}
@@ -62,13 +90,16 @@ templ Main(options MainOptions) {
 					}
 				</nav>
 			</header>
+
 			{ children... }
+
 			<template name="image-viewer">
 				<dialog
 					name="image-viewer"
 					class="image-viewer fullscreen clean flex justify-center items-center"
 				>
 					<img alt="Attachment" class="attachment"/>
+
 					<button
 						type="button"
 						class="close icon secondary ghost"

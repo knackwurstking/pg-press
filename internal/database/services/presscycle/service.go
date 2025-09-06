@@ -118,6 +118,7 @@ func (p *Service) Get(id int64) (*models.PressCycle, error) {
 		}
 		return nil, fmt.Errorf("failed to get press cycle %d: %w", id, err)
 	}
+	cycle.PartialCycles = p.GetPartialCycles(cycle)
 
 	return cycle, nil
 }
@@ -344,6 +345,7 @@ func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.PressCycle, err
 		if err != nil {
 			return nil, err
 		}
+		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)
 	}
 	return cycles, nil

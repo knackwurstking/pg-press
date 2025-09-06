@@ -96,31 +96,15 @@ templ cyclesTableRows(user *models.User, cycles []*models.PressCycle, lastPartia
 			</td>
 		</tr>
 	} else {
-		for i, cycle := range cycles {
-			{{ previousTotalCycles := int64(0) }}
-
-			if i+1 < len(cycles) {
-				{{
-					// FIXME: This needs to search for the press cycle matching the press number not just the next index
-					previousTotalCycles = cycles[i+1].TotalCycles
-				}}
-			}
-
-			// check for last loop index
-			if i == len(cycles)-1 {
-				// Handle last cycle separately
-				{{ fmt.Println(lastPartialCycles) }}
-				@renderCycleRowWithPartialCalc(user, cycle, lastPartialCycles)
-			} else {
-				@renderCycleRowWithPartialCalc(user, cycle, cycle.TotalCycles-previousTotalCycles)
-			}
+		for _, cycle := range cycles {
+			@renderCycleRowWithPartialCalc(user, cycle)
 		}
 	}
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle, partialCycles int64) {
+templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle) {
 	<tr>
 		<td>
 			<span>{ cycle.ID }</span>
@@ -155,12 +139,12 @@ templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle,
 		</td>
 
 		<td>
-			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+			{ cycle.TotalCycles }
 		</td>
 
 		<td>
 			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ fmt.Sprintf("%d", partialCycles) }
+				{ cycle.PartialCycles }
 			</span>
 		</td>
 

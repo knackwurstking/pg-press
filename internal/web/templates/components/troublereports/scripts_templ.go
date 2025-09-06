@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, title string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_shareTroubleReportPDF_23e9`,
-		Function: `function __templ_shareTroubleReportPDF_23e9(event, troubleReportId, title){var button = event.target.closest("button");
+		Name: `__templ_shareTroubleReportPDF_2652`,
+		Function: `function __templ_shareTroubleReportPDF_2652(event, troubleReportId, title){var button = event.target.closest("button");
     if (!button) {
         alert("Fehler: Share-Button nicht gefunden.");
         return;
@@ -47,8 +47,7 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
         showSuccess('<i class="bi bi-download"></i>');
     }
 
-    // FIXME: I need to use the serverPathPrefix variable to construct the URL
-    fetch(` + "`" + `./trouble-reports/share-pdf?id=${troubleReportId}` + "`" + `)
+    fetch(` + "`" + `${serverPathPrefix}/trouble-reports/share-pdf?id=${troubleReportId}` + "`" + `)
         .then(response => {
             if (!response.ok) throw new Error(` + "`" + `HTTP error! status: ${response.status}` + "`" + `);
             return response.blob();
@@ -79,8 +78,8 @@ func shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, titl
             resetButton();
         });
 }`,
-		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_23e9`, event, troubleReportId, title),
-		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_23e9`, event, troubleReportId, title),
+		Call:       templ.SafeScript(`__templ_shareTroubleReportPDF_2652`, event, troubleReportId, title),
+		CallInline: templ.SafeScriptInline(`__templ_shareTroubleReportPDF_2652`, event, troubleReportId, title),
 	}
 }
 
