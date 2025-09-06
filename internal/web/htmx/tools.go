@@ -588,19 +588,25 @@ func (h *Tools) handleCycleEditPUT(c echo.Context) error {
 	}, c)
 }
 
-// TODO: Add "DELETE /htmx/tools/cycle/delete?cycle_id=%d"
 func (h *Tools) handleCycleDELETE(c echo.Context) error {
+	user, err := webhelpers.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
 	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Debug(
-		"Handling cycle delete request for cycle %d",
-		cycleID,
-	)
+	logger.HTMXHandlerTools().Debug("Handling cycle deletion request for ID %d", cycleID)
 
-	return errors.New("under construction")
+	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			"failed to delete press cycle: "+err.Error())
+	}
+
+	return nil
 }
 
 // getToolFormData parses the tool form data from the request context. [POST/PUT /tools/edit]
