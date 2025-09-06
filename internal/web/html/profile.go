@@ -11,7 +11,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	profilepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
 )
 
@@ -31,9 +30,6 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 			webhelpers.NewEchoRoute(http.MethodGet, "/profile", h.handleProfile),
 		},
 	)
-
-	htmxProfile := htmx.Profile{DB: h.DB}
-	htmxProfile.RegisterRoutes(e)
 }
 
 func (h *Profile) handleProfile(c echo.Context) error {

@@ -8,7 +8,6 @@ import (
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	feedpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
 )
 
@@ -23,9 +22,6 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 			webhelpers.NewEchoRoute(http.MethodGet, "/feed", h.handleFeed),
 		},
 	)
-
-	htmxFeed := htmx.Feed{DB: h.DB}
-	htmxFeed.RegisterRoutes(e)
 }
 
 func (h *Feed) handleFeed(c echo.Context) error {

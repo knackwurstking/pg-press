@@ -20,18 +20,28 @@ var (
 )
 
 func Serve(e *echo.Echo, db *database.DB) {
+	// Static File Server
 	e.StaticFS(serverPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
+	// WebSocket Handlers
 	wsh := startWebSocketHandlers(db)
 
-	(&htmx.Nav{DB: db, WSFeedHandler: wsh}).RegisterRoutes(e)
-
+	// HTML Handler
 	(&html.Auth{DB: db}).RegisterRoutes(e)
 	(&html.Home{}).RegisterRoutes(e)
 	(&html.Feed{DB: db}).RegisterRoutes(e)
 	(&html.Profile{DB: db}).RegisterRoutes(e)
 	(&html.TroubleReports{DB: db}).RegisterRoutes(e)
 	(&html.Tools{DB: db}).RegisterRoutes(e)
+
+	// HTMX Handler
+	(&htmx.Nav{DB: db, WSFeedHandler: wsh}).RegisterRoutes(e)
+	(&htmx.Feed{DB: db}).RegisterRoutes(e)
+	(&htmx.Profile{DB: db}).RegisterRoutes(e)
+	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e)
+	(&htmx.Tools{DB: db}).RegisterRoutes(e)
+	(&htmx.Cycles{DB: db}).RegisterRoutes(e)
+	(&htmx.MetalSheets{DB: db}).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type

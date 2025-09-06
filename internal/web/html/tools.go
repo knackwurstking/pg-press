@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
 	toolpresspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
 	tooltoolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
@@ -30,9 +29,6 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			webhelpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
 		},
 	)
-
-	htmxTroubleReports := htmx.Tools{DB: h.DB}
-	htmxTroubleReports.RegisterRoutes(e)
 }
 
 func (h *Tools) handleTools(c echo.Context) error {
