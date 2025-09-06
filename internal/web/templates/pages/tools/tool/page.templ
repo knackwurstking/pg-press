@@ -13,6 +13,7 @@ import (
 templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	{{
 		var slotName string
+
 		switch tool.Position {
 		case models.PositionTop:
 			slotName = constants.QueryParamSlotTop
@@ -22,6 +23,7 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 			slotName = constants.QueryParamSlotBottom
 		}
 	}}
+
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -38,11 +40,14 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 					</h4>
 				</div>
 			</div>
+
 			@sectionActions(user, tool)
 			@sectionNotes(tool)
+
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				@sectionMetalSheets(user, metalSheets, tool, slotName)
 			}
+
 			@sectionCycles(tool, slotName)
 		</main>
 	}
@@ -51,6 +56,8 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
+			class="primary flex gap"
+
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/edit?id=%d",
 				env.ServerPathPrefix, tool.ID,
@@ -59,12 +66,14 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			hx-target="body"
 			hx-swap="beforeend"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			class="primary flex gap"
 		>
 			<i class="bi bi-pencil"></i>
 			Bearbeiten
 		</button>
+
 		<button
+			class="destructive flex gap"
+
 			hx-delete={ fmt.Sprintf(
 				"%s/htmx/tools/delete?id=%d",
 				env.ServerPathPrefix, tool.ID,
@@ -74,6 +83,7 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="destructive flex gap"
+
 			if !user.IsAdmin() {
 				disabled
 			}
@@ -86,8 +96,9 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 
 templ sectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
-		<section class="notes-section">
+		<section>
 			<h4>Notizen</h4>
+
 			<div class="notes-list">
 				for _, note := range tool.LoadedNotes {
 					<div class="card">
@@ -105,10 +116,12 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 										<strong>Defekt</strong>
 								}
 							</span>
+
 							<span class="note-date">
 								{ note.CreatedAt.Format("2006-01-02 15:04") }
 							</span>
 						</div>
+
 						<div class="card-body">
 							<p>{ note.Content }</p>
 						</div>
@@ -121,11 +134,14 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 
 // TODO: Need some sorting logic here
 templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes, slotName string) {
-	<section class="metalsheets-section">
+	<section>
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
+
 			if slotName != "" {
 				<button
+					class="secondary small flex"
+
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/metal-sheets/edit?%s=%d",
 						env.ServerPathPrefix, slotName, tool.ID,
@@ -134,23 +150,20 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 					hx-target="body"
 					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					class="secondary small flex"
+
 					title="Neues Blech hinzufügen"
 				>
 					<i class="bi bi-plus-lg"></i>
 				</button>
 			}
 		</div>
+
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:
-					@metalSheetsTableForPositionBottom(
-						user, metalSheets,
-					)
+					@metalSheetsTableForPositionBottom(user, metalSheets)
 				case models.PositionTop:
-					@metalSheetsTableForPositionTop(
-						user, metalSheets,
-					)
+					@metalSheetsTableForPositionTop(user, metalSheets)
 			}
 		</div>
 	</section>
@@ -169,6 +182,7 @@ templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models
 					<th></th>
 				</tr>
 			</thead>
+
 			<tbody>
 				if len(metalSheets) == 0 {
 					<tr>
@@ -184,8 +198,11 @@ templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models
 							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
+
 							<td class="button-group flex justify-end items-center">
 								<button
+									class="info small ghost"
+
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/view?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -194,12 +211,14 @@ templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models
 									hx-target="body"
 									hx-swap="beforeend"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="info small ghost"
 									title="Details anzeigen"
 								>
 									<i class="bi bi-eye"></i>
 								</button>
+
 								<button
+									class="primary small ghost"
+
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -208,12 +227,15 @@ templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models
 									hx-target="body"
 									hx-swap="beforeend"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="primary small ghost"
+
 									title="Bearbeiten"
 								>
 									<i class="bi bi-pencil"></i>
 								</button>
+
 								<button
+									class="destructive small ghost"
+
 									hx-delete={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d", env.ServerPathPrefix, sheet.ID,
 									) }
@@ -222,8 +244,9 @@ templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models
 									hx-target="closest tr"
 									hx-swap="outerHTML"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="destructive small ghost"
+
 									title="Löschen"
+
 									if !user.IsAdmin() {
 										disabled
 									}
@@ -249,6 +272,7 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 					<th></th>
 				</tr>
 			</thead>
+
 			<tbody>
 				if len(metalSheets) == 0 {
 					<tr>
@@ -261,8 +285,11 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 						<tr>
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+
 							<td class="button-group flex justify-end items-center">
 								<button
+									class="info small ghost"
+
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/view?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -271,12 +298,15 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 									hx-target="body"
 									hx-swap="beforeend"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="info small ghost"
+
 									title="Details anzeigen"
 								>
 									<i class="bi bi-eye"></i>
 								</button>
+
 								<button
+									class="primary small ghost"
+
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -285,12 +315,15 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 									hx-target="body"
 									hx-swap="beforeend"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="primary small ghost"
+
 									title="Bearbeiten"
 								>
 									<i class="bi bi-pencil"></i>
 								</button>
+
 								<button
+									class="destructive small ghost"
+
 									hx-delete={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -300,8 +333,9 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 									hx-target="closest tr"
 									hx-swap="outerHTML"
 									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									class="destructive small ghost"
+
 									title="Löschen"
+
 									if !user.IsAdmin() {
 										disabled
 									}
@@ -320,8 +354,10 @@ templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.Me
 templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
+
 		<section class="setatus">
 			<h5>Aktueller Status</h5>
+
 			switch tool.Status() {
 				case models.ToolStatusActive:
 					<a
@@ -336,6 +372,7 @@ templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
 							<span class="contrast ghost">Presse { fmt.Sprintf("%d", *tool.Press) }</span>
 							<span class="primary ghost">Aktiv</span>
 						</span>
+
 						<i class="bi bi-chevron-right text-muted"></i>
 					</a>
 				case models.ToolStatusAvailable:
@@ -346,9 +383,11 @@ templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
 					<span>{ tool.Status() }</span>
 			}
 		</section>
+
 		if slotName != "" {
 			<section
 				class="cycles"
+
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/tools/cycles?%s=%d",
 					env.ServerPathPrefix, slotName, tool.ID,
