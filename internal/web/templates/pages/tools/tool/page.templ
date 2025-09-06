@@ -127,7 +127,7 @@ templ toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, t
 			if slotName != "" {
 				<button
 					hx-get={ fmt.Sprintf(
-						"%s/htmx/metal-sheets/add?%s=%d",
+						"%s/htmx/metal-sheets/edit?%s=%d",
 						env.ServerPathPrefix, slotName, tool.ID,
 					) }
 					hx-trigger="click"

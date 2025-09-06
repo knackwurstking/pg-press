@@ -295,7 +295,7 @@ func toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-				"%s/htmx/metal-sheets/add?%s=%d",
+				"%s/htmx/metal-sheets/edit?%s=%d",
 				env.ServerPathPrefix, slotName, tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
