@@ -54,3 +54,17 @@ func NewPressCycleWithID(id, slotTop, slotTopCassette, slotBottom int64, press P
 		PerformedBy:     user,
 	}
 }
+
+func FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom int64, cycles ...*PressCycle) []*PressCycle {
+	var filteredCycles []*PressCycle
+
+	for _, cycle := range cycles {
+		if (slotTop > 0 && cycle.SlotTop == slotTop) ||
+			(slotTopCassette > 0 && cycle.SlotTopCassette == slotTopCassette) ||
+			(slotBottom > 0 && cycle.SlotBottom == slotBottom) {
+			filteredCycles = append(filteredCycles, cycle)
+		}
+	}
+
+	return filteredCycles
+}

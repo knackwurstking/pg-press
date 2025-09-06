@@ -265,41 +265,20 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 		slotTop, slotTopCassette, slotBottom)
 
 	// Get all press cycles (we'll filter by slots in frontend for now)
-	cycles, err := h.DB.PressCycles.List()
+	allCycles, err := h.DB.PressCycles.List()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
 
-	// Filter cycles that match any of the provided slots
-	var filteredCycles []*models.PressCycle
-	for _, cycle := range cycles {
-		if (slotTop > 0 && cycle.SlotTop == slotTop) ||
-			(slotTopCassette > 0 && cycle.SlotTopCassette == slotTopCassette) ||
-			(slotBottom > 0 && cycle.SlotBottom == slotBottom) {
-			filteredCycles = append(filteredCycles, cycle)
-		}
-	}
-
-	// Get partial cycles for the last entry in cycles
-	var lastPartialCycles int64
-	if len(filteredCycles) > 0 {
-		lastCycle := filteredCycles[len(filteredCycles)-1]
-		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
-	}
-
+	// TODO: Need to handle regenerations here
 	var regenerations []*models.ToolRegeneration
 
-	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for slots",
-		len(filteredCycles), len(regenerations))
+	// Filter cycles that match any of the provided slots
+	filteredCycles := models.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
-	// FIXME: Wrong calculation of total cycles
-	// Calculate total cycles
-	var totalCycles int64
-	if len(filteredCycles) > 0 {
-		totalCycles = filteredCycles[0].TotalCycles - (filteredCycles[len(filteredCycles)-1].TotalCycles - lastPartialCycles)
-	}
-	logger.HTMXHandlerTools().Debug("Calculated total cycles for slots: %d", totalCycles)
+	// Get total cycles and lastPartialCycles from filtered cycles
+	totalCycles, lastPartialCycles := h.getTotalCycles(filteredCycles...)
 
 	// Render the component
 	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
@@ -351,29 +330,34 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
+	// TODO: Need to handle regenerations somehow
 
 	// Filter cycles that match any of the provided slots
-	var cycles []*models.PressCycle
-	for _, cycle := range allCycles {
-		if (slotTop > 0 && cycle.SlotTop == slotTop) ||
-			(slotTopCassette > 0 && cycle.SlotTopCassette == slotTopCassette) ||
-			(slotBottom > 0 && cycle.SlotBottom == slotBottom) {
-			cycles = append(cycles, cycle)
-		}
-	}
+	filteredCycles := models.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
-	// FIXME: Wrong calculation of total cycles
-	// calculate total cycles
-	var totalCycles int64
-	for _, cycle := range cycles {
-		totalCycles += cycle.TotalCycles
-	}
+	// Get total cycles from filtered cycles
+	totalCycles, _ := h.getTotalCycles(filteredCycles...)
 
 	return tooltemplates.TotalCycles(
 		totalCycles,
 		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
 		colorClass,
 	).Render(c.Request().Context(), c.Response())
+}
+
+// NOTE: The database will always sort IDs DESC
+func (h *Tools) getTotalCycles(cycles ...*models.PressCycle) (totalCycles, lastPartialCycles int64) {
+	if len(cycles) > 0 {
+		lastCycle := cycles[len(cycles)-1]
+		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
+	}
+
+	// calculate total cycles
+	if len(cycles) > 0 {
+		return cycles[0].TotalCycles - (cycles[len(cycles)-1].TotalCycles - lastPartialCycles), lastPartialCycles
+	}
+
+	return 0, 0
 }
 
 // handleCycleEditGET "/htmx/tools/cycle/edit?tool_id=%d?cycle_id=%d" cycle_id is optional and only required for editing a cycle
