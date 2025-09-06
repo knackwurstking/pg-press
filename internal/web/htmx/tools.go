@@ -349,7 +349,7 @@ func (h *Tools) handleTotalCycles(c echo.Context) error {
 func (h *Tools) getTotalCycles(cycles ...*models.PressCycle) (totalCycles, lastPartialCycles int64) {
 	if len(cycles) > 0 {
 		lastCycle := cycles[len(cycles)-1]
-		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
+		lastPartialCycles = h.DB.PressCycles.GetPartialCycles(lastCycle)
 	}
 
 	// calculate total cycles

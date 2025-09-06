@@ -26,6 +26,7 @@ type PressCycle struct {
 	SlotBottom      int64       `json:"slot_bottom"`
 	Date            time.Time   `json:"date"`
 	TotalCycles     int64       `json:"total_cycles"`
+	PartialCycles   int64       `json:"partial_cycles"`
 	PerformedBy     int64       `json:"performed_by"`
 }
 

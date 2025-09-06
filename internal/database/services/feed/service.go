@@ -17,6 +17,9 @@ type Service struct {
 	broadcaster interfaces.Broadcaster
 }
 
+// Just to make sure it fits TODO: Make it fit
+//var _ interfaces.DataOperations[*models.Feed] = (*Service)(nil)
+
 // New creates a new Service instance and initializes the database table
 func New(db *sql.DB) *Service {
 	query := `

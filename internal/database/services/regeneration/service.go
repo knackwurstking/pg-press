@@ -16,10 +16,13 @@ import (
 type Service struct {
 	db                *sql.DB
 	feeds             *feed.Service
-	pressCyclesHelper *presscycle.Helper
+	pressCyclesHelper *presscycle.Service
 }
 
-func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Helper) *Service {
+// Just to make sure it fits TODO: Make it fit
+//var _ interfaces.DataOperations[*models.ToolRegeneration] = (*Service)(nil)
+
+func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,

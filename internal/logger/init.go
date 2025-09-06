@@ -74,7 +74,7 @@ func DBMetalSheets() *Logger             { return GetComponentLogger("DB MetalSh
 func DBNotes() *Logger                   { return GetComponentLogger("DB Notes") }
 func DBTroubleReports() *Logger          { return GetComponentLogger("DB TroubleReports") }
 func DBToolsHelper() *Logger             { return GetComponentLogger("DB ToolsHelper") }
-func DBPressCycles() *Logger             { return GetComponentLogger("DB PressCycles") }
+func DBPressCycles() *Logger             { return GetComponentLogger("DB Service PressCycles") }
 func DBToolRegenerations() *Logger       { return GetComponentLogger("DB ToolRegenerations") }
 func HandlerAuth() *Logger               { return GetComponentLogger("Handler Auth") }
 func HandlerFeed() *Logger               { return GetComponentLogger("Handler Feed") }

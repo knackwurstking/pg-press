@@ -18,6 +18,9 @@ type Service struct {
 	db *sql.DB
 }
 
+// Just to make sure it fits TODO: Make it fit
+//var _ interfaces.DataOperations[*models.Cookie] = (*Service)(nil)
+
 // New creates a new Service instance and initializes the database table.
 func New(db *sql.DB) *Service {
 	query := `

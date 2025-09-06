@@ -3,8 +3,6 @@ package database
 import (
 	"database/sql"
 
-	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
@@ -21,25 +19,24 @@ import (
 type DB struct {
 	db *sql.DB
 
-	// Kind of DataOperations, TODO: Need to change this
+	// Kind of DataOperations
+	PressCycles    *presscycle.Service
+	Users          *user.Service
+	Attachments    *attachment.Service
+	TroubleReports *troublereport.Service
+	Notes          *note.Service
+	Tools          *tool.Service
+	MetalSheets    *metalsheet.Service
+
+	// TODO: Still need to make this services fit the `interfaces.DataOperations` interface
 	Cookies           *cookie.Service
 	ToolRegenerations *regeneration.Service
 	Feeds             *feed.Service
 
-	// DataOperations
-	Users          interfaces.DataOperations[*models.User]
-	Attachments    interfaces.DataOperations[*models.Attachment]
-	TroubleReports interfaces.DataOperations[*models.TroubleReport]
-	Notes          interfaces.DataOperations[*models.Note]
-	Tools          interfaces.DataOperations[*models.Tool]
-	MetalSheets    interfaces.DataOperations[*models.MetalSheet]
-	PressCycles    interfaces.DataOperations[*models.PressCycle]
-
-	// Helper
+	// Helper TODO: Merge helper with services like the PressCycles service
 	UsersHelper          *user.Helper
 	TroubleReportsHelper *troublereport.Helper
 	ToolsHelper          *tool.Helper
-	PressCyclesHelper    *presscycle.Helper
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -52,14 +49,13 @@ func New(db *sql.DB) *DB {
 	troubleReportsHelper := troublereport.NewTroubleReportsHelper(troubleReports, attachments)
 
 	pressCycles := presscycle.New(db, feeds)
-	pressCyclesHelper := presscycle.NewHelper(pressCycles)
 
 	notes := note.New(db)
 	tools := tool.New(db, feeds)
 	toolsHelper := tool.NewHelper(tools, notes, pressCycles)
 
 	metalSheets := metalsheet.New(db, feeds, notes)
-	toolRegenerations := regeneration.New(db, feeds, pressCyclesHelper)
+	toolRegenerations := regeneration.New(db, feeds, pressCycles)
 	usersHelper := user.NewHelper(db)
 
 	dbInstance := &DB{
@@ -74,7 +70,6 @@ func New(db *sql.DB) *DB {
 		ToolsHelper:          toolsHelper,
 		MetalSheets:          metalSheets,
 		PressCycles:          pressCycles,
-		PressCyclesHelper:    pressCyclesHelper,
 		ToolRegenerations:    toolRegenerations,
 
 		Feeds: feeds,
