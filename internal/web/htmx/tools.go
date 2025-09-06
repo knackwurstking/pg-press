@@ -12,7 +12,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,7 +53,7 @@ func (h *Tools) handleList(c echo.Context) error {
 
 	logger.HTMXHandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	toolsListAll := tooltemplates.List(tools)
+	toolsListAll := toolscomp.List(tools)
 	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools list all: "+err.Error())
@@ -60,9 +61,9 @@ func (h *Tools) handleList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEdit(c echo.Context, props *tooltemplates.EditDialogProps) error {
+func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
 	if props == nil {
-		props = &tooltemplates.EditDialogProps{}
+		props = &toolscomp.EditDialogProps{}
 		props.ToolID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
 		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
@@ -85,7 +86,7 @@ func (h *Tools) handleEdit(c echo.Context, props *tooltemplates.EditDialogProps)
 		}
 	}
 
-	toolEdit := tooltemplates.EditDialog(props)
+	toolEdit := toolscomp.EditDialog(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool edit dialog: "+err.Error())
@@ -107,7 +108,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &tooltemplates.EditDialogProps{
+	props := &toolscomp.EditDialogProps{
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
 		InputHeight:         formData.Format.Height,
@@ -160,7 +161,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &tooltemplates.EditDialogProps{
+	props := &toolscomp.EditDialogProps{
 		ToolID:              toolID,
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,

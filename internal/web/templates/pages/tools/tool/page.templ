@@ -1,4 +1,4 @@
-package tooltoolpage
+package tool
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	{{
 		var slotName string
 		switch tool.Position {
@@ -38,17 +38,17 @@ templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mod
 					</h4>
 				</div>
 			</div>
-			@toolPageActions(user, tool)
-			@toolPageNotes(tool)
+			@sectionActions(user, tool)
+			@sectionNotes(tool)
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-				@toolPageMetalSheets(user, metalSheets, tool, slotName)
+				@sectionMetalSheets(user, metalSheets, tool, slotName)
 			}
-			@toolPageCylesList(tool, slotName)
+			@sectionCycles(tool, slotName)
 		</main>
 	}
 }
 
-templ toolPageActions(user *models.User, tool *models.ToolWithNotes) {
+templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
 			hx-get={ fmt.Sprintf(
@@ -84,7 +84,7 @@ templ toolPageActions(user *models.User, tool *models.ToolWithNotes) {
 	</div>
 }
 
-templ toolPageNotes(tool *models.ToolWithNotes) {
+templ sectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section class="notes-section">
 			<h4>Notizen</h4>
@@ -120,7 +120,7 @@ templ toolPageNotes(tool *models.ToolWithNotes) {
 }
 
 // TODO: Need some sorting logic here
-templ toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes, slotName string) {
+templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes, slotName string) {
 	<section class="metalsheets-section">
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
@@ -144,11 +144,11 @@ templ toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, t
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:
-					@toolPageMetalSheetsTablePositionBottom(
+					@metalSheetsTableForPositionBottom(
 						user, metalSheets,
 					)
 				case models.PositionTop:
-					@toolPageMetalSheetsTablePositionTop(
+					@metalSheetsTableForPositionTop(
 						user, metalSheets,
 					)
 			}
@@ -156,7 +156,7 @@ templ toolPageMetalSheets(user *models.User, metalSheets []*models.MetalSheet, t
 	</section>
 }
 
-templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*models.MetalSheet) {
+templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -239,7 +239,7 @@ templ toolPageMetalSheetsTablePositionBottom(user *models.User, metalSheets []*m
 	</figure>
 }
 
-templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*models.MetalSheet) {
+templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.MetalSheet) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -317,8 +317,8 @@ templ toolPageMetalSheetsTablePositionTop(user *models.User, metalSheets []*mode
 	</figure>
 }
 
-templ toolPageCylesList(tool *models.ToolWithNotes, slotName string) {
-	<section class="cycles-section flex flex-col gap">
+templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
+	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="setatus">
 			<h5>Aktueller Status</h5>

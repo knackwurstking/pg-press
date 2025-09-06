@@ -16,7 +16,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	troublereportpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/troublereports"
+	troublereportspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/troublereports"
 )
 
 type TroubleReports struct {
@@ -37,7 +37,7 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 	logger.HandlerTroubleReports().Debug("Rendering trouble reports page")
 
-	page := troublereportpage.Page()
+	page := troublereportspage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTroubleReports().Error("Failed to render trouble reports page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

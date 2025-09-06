@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/labstack/echo/v4"
 )
 
@@ -85,7 +85,7 @@ func (h *Cycles) handle(c echo.Context) error {
 	totalCycles := h.getTotalCycles(filteredCycles...)
 
 	// Render the component
-	cyclesSection := tooltemplates.CyclesSection(&tooltemplates.CyclesSectionProps{
+	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
 		User:            user,
 		SlotTop:         slotTop,
 		SlotTopCassette: slotTopCassette,
@@ -141,16 +141,16 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(filteredCycles...)
 
-	return tooltemplates.TotalCycles(
+	return toolscomp.TotalCycles(
 		totalCycles,
 		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
 		colorClass,
 	).Render(c.Request().Context(), c.Response())
 }
 
-func (h *Cycles) handleEditGET(props *tooltemplates.CycleEditDialogProps, c echo.Context) error {
+func (h *Cycles) handleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
 	if props == nil {
-		props = &tooltemplates.CycleEditDialogProps{}
+		props = &toolscomp.CycleEditDialogProps{}
 	}
 
 	if !props.HasActiveSlot() {
@@ -167,7 +167,7 @@ func (h *Cycles) handleEditGET(props *tooltemplates.CycleEditDialogProps, c echo
 	if close || props.Close {
 		props.Close = true
 
-		cycleEditDialog := tooltemplates.CycleEditDialog(props)
+		cycleEditDialog := toolscomp.CycleEditDialog(props)
 		if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError,
 				"failed to close cycle edit dialog: "+err.Error())
@@ -190,7 +190,7 @@ func (h *Cycles) handleEditGET(props *tooltemplates.CycleEditDialogProps, c echo
 		}
 	}
 
-	cycleEditDialog := tooltemplates.CycleEditDialog(props)
+	cycleEditDialog := toolscomp.CycleEditDialog(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render cycle edit dialog: "+err.Error())
@@ -213,7 +213,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	// Parse form data (type: PressCycle)
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -223,7 +223,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}
 
 	if !models.IsValidPressNumber(formData.PressNumber) {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -254,7 +254,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	pressCycle.Date = formData.Date
 
 	if _, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -265,7 +265,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+	return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 		SlotTop:         toolTop,
 		SlotTopCassette: toolTopCassette,
 		SlotBottom:      toolBottom,
@@ -291,7 +291,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -302,7 +302,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	if !models.IsValidPressNumber(formData.PressNumber) {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -335,7 +335,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
-		return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -347,7 +347,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleEditGET(&tooltemplates.CycleEditDialogProps{
+	return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 		SlotTop:         toolTop,
 		SlotTopCassette: toolTopCassette,
 		SlotBottom:      toolBottom,
@@ -460,7 +460,7 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	var date time.Time
 	if dateString := c.FormValue(constants.QueryParamOriginalDate); dateString != "" {
 		// Create time (date) object from dateString
-		date, err = time.Parse(tooltemplates.DateFormat, dateString)
+		date, err = time.Parse(toolscomp.DateFormat, dateString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
 		}

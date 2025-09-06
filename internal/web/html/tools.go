@@ -9,9 +9,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
-	toolpresspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
-	tooltoolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
+	toolspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
+	presspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
+	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
 
 	"github.com/labstack/echo/v4"
 )
@@ -43,7 +43,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	page := toolpage.Page(tools)
+	page := toolspage.Page(tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -62,7 +62,7 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tools active page for press %d", press)
 
-	page := toolpresspage.ToolsPressPage(press)
+	page := presspage.Page(press)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools active page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -105,7 +105,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
 
-	page := tooltoolpage.ToolPage(user, tool, metalSheets)
+	page := toolpage.Page(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tool page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
