@@ -325,7 +325,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 				return templ_7745c5c3_Err
 			}
 		case models.PositionTop:
-			templ_7745c5c3_Err = metalsheetscomp.TableToolForPositionTop(
+			templ_7745c5c3_Err = metalsheetscomp.TableForToolPositionTop(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
