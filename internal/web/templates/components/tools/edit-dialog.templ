@@ -29,11 +29,12 @@ templ EditDialog(props *EditDialogProps) {
 	} else {
 		<dialog
 			name="tool-edit-dialog"
-			id={ constants.IDToolEditDialog }
 			class="fullscreen clean flex flex-col justify-center items-center"
+			id={ constants.IDToolEditDialog }
 		>
 			<form
 				class="flex flex-col gap max-w-full"
+
 				if props.ToolID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/edit?id=%d",
@@ -42,23 +43,32 @@ templ EditDialog(props *EditDialogProps) {
 				} else {
 					hx-post={ env.ServerPathPrefix + "/htmx/tools/edit" }
 				}
+
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolEditDialog) }
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+
 				enctype="multipart/form-data"
 			>
 				if props.Error != "" {
 					<div class="card compact destructive">
 						<div class="card-body">
 							{ props.Error }
+							kdsjflj;fkjf
 						</div>
 					</div>
 				}
-				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-					<span class="flex flex-row gap flex-wrap justify-between items-center">
+
+				<div
+					class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p"
+				>
+					<span
+						class="flex flex-row gap flex-wrap justify-between items-center"
+					>
 						<span class="flex flex-col gap-0">
 							<label for="position">Position</label>
+
 							<select
 								id={ constants.IDPosition }
 								name="position"
@@ -66,77 +76,119 @@ templ EditDialog(props *EditDialogProps) {
 							>
 								<option
 									value=""
+
 									if props.InputPosition == "" {
 										selected
 									}
-								>Position auswählen</option>
+								>
+									Position auswählen
+								</option>
+
 								<option
 									value={ models.PositionTop }
+
 									if models.Position(props.InputPosition) == models.PositionTop {
 										selected
 									}
-								>Oberteil</option>
+								>
+									Oberteil
+								</option>
+
 								<option
 									value={ models.PositionBottom }
+
 									if models.Position(props.InputPosition) == models.PositionBottom {
 										selected
 									}
-								>Unterteil</option>
+								>
+									Unterteil
+								</option>
+
 								<option
 									value={ models.PositionTopCassette }
+
 									if models.Position(props.InputPosition) == models.PositionTopCassette {
 										selected
 									}
-								>Cassette Oberteil</option>
+								>
+									Cassette Oberteil
+								</option>
 							</select>
 						</span>
+
 						<span class="flex flex-col gap-0 w-fit">
 							<label for="press">Presse</label>
+
 							<select
 								id={ constants.IDPressSelection }
 								name="press-selection"
 							>
 								<option
 									value=""
+
 									if !models.IsValidPressNumber(props.InputPressSelection) {
 										selected
 									}
-								>Nicht Eingebaut</option>
+								>
+									Nicht Eingebaut
+								</option>
+
 								<option
 									value="0"
+
 									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
 										selected
 									}
-								>Presse 0</option>
+								>
+									Presse 0
+								</option>
+
 								<option
 									value="2"
+
 									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
 										selected
 									}
-								>Presse 2</option>
+								>
+									Presse 2
+								</option>
+
 								<option
 									value="3"
+
 									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
 										selected
 									}
-								>Presse 3</option>
+								>
+									Presse 3
+								</option>
+
 								<option
 									value="4"
+
 									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
 										selected
 									}
-								>Presse 4</option>
+								>
+									Presse 4
+								</option>
+
 								<option
 									value="5"
+
 									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
 										selected
 									}
-								>Presse 5</option>
+								>
+									Presse 5
+								</option>
 							</select>
 						</span>
 					</span>
+
 					<span class="flex flex-col gap-0">
 						<label>Format</label>
+
 						<div class="flex gap-sm">
 							<input
 								type="number"
@@ -144,12 +196,15 @@ templ EditDialog(props *EditDialogProps) {
 								name="width"
 								class="w-full"
 								placeholder="z.B. 120"
+
 								if props.InputWidth != 0 {
 									value={ props.InputWidth }
 								}
+
 								required
 							/>
 							<span style="margin: auto 0;" class="text-xl">x</span>
+
 							<input
 								type="number"
 								id={ constants.IDHeight }
@@ -163,8 +218,10 @@ templ EditDialog(props *EditDialogProps) {
 							/>
 						</div>
 					</span>
+
 					<span class="flex flex-col gap-0">
 						<label for="type">Typ</label>
+
 						<input
 							type="text"
 							id={ constants.IDType }
@@ -174,8 +231,10 @@ templ EditDialog(props *EditDialogProps) {
 							required
 						/>
 					</span>
+
 					<span class="flex flex-col gap-0">
 						<label for="code">Code</label>
+
 						<input
 							type="text"
 							id={ constants.IDCode }
@@ -186,10 +245,12 @@ templ EditDialog(props *EditDialogProps) {
 						/>
 					</span>
 				</div>
+
 				<footer class="flex gap justify-end p">
 					<button
-						type="button"
 						class="secondary flex gap"
+						type="button"
+
 						hx-get={ fmt.Sprintf(
 							"%s/htmx/tools/edit?id=%d&close=true",
 							env.ServerPathPrefix, props.ToolID,
@@ -202,8 +263,10 @@ templ EditDialog(props *EditDialogProps) {
 						<i class="bi bi-x-circle"></i>
 						Schließen
 					</button>
+
 					<button type="submit" class="flex gap">
 						<i class="bi bi-check-circle"></i>
+
 						if props.ToolID > 0 {
 							Aktualisieren
 						} else {
@@ -212,6 +275,7 @@ templ EditDialog(props *EditDialogProps) {
 					</button>
 				</footer>
 			</form>
+
 			<script>
     			document.querySelector(`dialog[name="tool-edit-dialog"]`).showModal();
     		</script>

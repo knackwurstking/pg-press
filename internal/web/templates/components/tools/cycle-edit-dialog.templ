@@ -68,6 +68,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolCycleEditDialog }
+
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycles?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 				env.ServerPathPrefix,
@@ -82,6 +83,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 		<dialog class="fullscreen clean" id={ constants.IDToolCycleEditDialog }>
 			<form
 				class="container"
+
 				if props.CycleID > 0 {
 					hx-put={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
@@ -95,35 +97,44 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 						env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
 					) }
 				}
+
 				hx-trigger="submit"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+
 				enctype="multipart/form-data"
 			>
-				<div class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-					if props.Error != "" {
-						<div class="card compact destructive">
-							<div class="card-body">
-								{ props.Error }
-							</div>
+				if props.Error != "" {
+					<div class="card compact destructive">
+						<div class="card-body">
+							{ props.Error }
+							kfjsdodfdspkj
 						</div>
-					}
+					</div>
+				}
+
+				<div
+					class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p"
+				>
 					<!-- Display active slots information -->
 					if props.HasActiveSlot() {
 						<section class="slots-info flex flex-col gap-sm">
 							<label>Aktive Werkzeuge</label>
+
 							<div class="flex flex-col gap-xs">
 								if props.SlotTop != nil {
 									<div class="text-sm">
 										<strong>Oberteil:</strong> { props.SlotTop.String() }
 									</div>
 								}
+
 								if props.SlotTopCassette != nil {
 									<div class="text-sm">
 										<strong>Kassette Oberteil:</strong> { props.SlotTopCassette.String() }
 									</div>
 								}
+
 								if props.SlotBottom != nil {
 									<div class="text-sm">
 										<strong>Unterteil:</strong> { props.SlotBottom.String() }
@@ -132,8 +143,10 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							</div>
 						</section>
 					}
+
 					<section class="press flex flex-col gap-sm">
 						<label for="press">Presse</label>
+
 						<select id="press" name="press_number" required>
 							<option
 								value=""
@@ -142,6 +155,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							>
 								Presse auswählen
 							</option>
+
 							for _, i := range []int{0, 2, 3, 4, 5} {
 								<option
 									value={ fmt.Sprintf("%d", i) }
@@ -153,8 +167,10 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							}
 						</select>
 					</section>
+
 					<section class="original-date flex flex-col gap-sm">
 						<label>Ursprüngliches Datum</label>
+
 						<input
 							name="original_date"
 							type="text"
@@ -166,8 +182,10 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 						/>
 					</section>
+
 					<section class="total-cycles flex flex-col gap-sm">
 						<label>Gesamtzyklen</label>
+
 						<input
 							type="number"
 							min="0"
@@ -175,17 +193,21 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							id="total_cycles"
 							name="total_cycles"
 							placeholder="Gesamtzyklen"
+
 							if props.InputTotalCycles != 0 {
 								value={ fmt.Sprintf("%d", props.InputTotalCycles) }
 							}
+
 							required
 						/>
 					</section>
 				</div>
+
 				<footer class="flex gap justify-end">
 					<button
-						type="button"
 						class="secondary flex gap"
+						type="button"
+
 						hx-get={ fmt.Sprintf(
 							"%s/htmx/tools/cycle/edit?close=true&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
 							env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
@@ -198,8 +220,10 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 						<i class="bi bi-x-circle"></i>
 						Schließen
 					</button>
+
 					<button type="submit" class="flex gap">
 						<i class="bi bi-check-circle"></i>
+
 						if props.CycleID > 0 {
 							Aktualisieren
 						} else {
@@ -208,6 +232,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 					</button>
 				</footer>
 			</form>
+
 			<script defer>
                 document.querySelector("#toolCycleEditDialog").showModal();
             </script>
@@ -219,5 +244,6 @@ func isSelectedPress(p *models.PressNumber, v int) bool {
 	if p == nil {
 		return false
 	}
+
 	return int(*p) == v
 }
