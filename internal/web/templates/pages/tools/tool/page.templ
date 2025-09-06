@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	metalsheetscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/metalsheets"
 )
 
 templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
@@ -161,194 +162,16 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:
-					@metalSheetsTableForPositionBottom(user, metalSheets)
+					@metalsheetscomp.ToolTableForPositionBottom(
+						user, metalSheets,
+					)
 				case models.PositionTop:
-					@metalSheetsTableForPositionTop(user, metalSheets)
+					@metalsheetscomp.ToolTableForPositionTop(
+						user, metalSheets,
+					)
 			}
 		</div>
 	</section>
-}
-
-templ metalSheetsTableForPositionBottom(user *models.User, metalSheets []*models.MetalSheet) {
-	<figure class="w-full overflow-x-scroll">
-		<table class="table borderless compact">
-			<thead>
-				<tr>
-					<th>Stärke (mm)</th>
-					<th>Blech (mm)</th>
-					<th>Marke (mm)</th>
-					<th>Stf.</th>
-					<th>Stf. Max</th>
-					<th></th>
-				</tr>
-			</thead>
-
-			<tbody>
-				if len(metalSheets) == 0 {
-					<tr>
-						<td colspan="6" class="text-center">
-							Keine Bleche für dieses Werkzeug gefunden
-						</td>
-					</tr>
-				} else {
-					for _, sheet := range metalSheets {
-						<tr>
-							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-
-							<td class="button-group flex justify-end items-center">
-								<button
-									class="info small ghost"
-
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/view?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Details anzeigen"
-								>
-									<i class="bi bi-eye"></i>
-								</button>
-
-								<button
-									class="primary small ghost"
-
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/edit?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
-									title="Bearbeiten"
-								>
-									<i class="bi bi-pencil"></i>
-								</button>
-
-								<button
-									class="destructive small ghost"
-
-									hx-delete={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/delete?id=%d", env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
-									title="Löschen"
-
-									if !user.IsAdmin() {
-										disabled
-									}
-								>
-									<i class="bi bi-trash"></i>
-								</button>
-							</td>
-						</tr>
-					}
-				}
-			</tbody>
-		</table>
-	</figure>
-}
-
-templ metalSheetsTableForPositionTop(user *models.User, metalSheets []*models.MetalSheet) {
-	<figure class="w-full overflow-x-scroll">
-		<table class="table borderless compact">
-			<thead>
-				<tr>
-					<th>Stärke (mm)</th>
-					<th>Blech (mm)</th>
-					<th></th>
-				</tr>
-			</thead>
-
-			<tbody>
-				if len(metalSheets) == 0 {
-					<tr>
-						<td colspan="3" class="text-center">
-							Keine Bleche für dieses Werkzeug gefunden
-						</td>
-					</tr>
-				} else {
-					for _, sheet := range metalSheets {
-						<tr>
-							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-
-							<td class="button-group flex justify-end items-center">
-								<button
-									class="info small ghost"
-
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/view?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
-									title="Details anzeigen"
-								>
-									<i class="bi bi-eye"></i>
-								</button>
-
-								<button
-									class="primary small ghost"
-
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/edit?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
-									title="Bearbeiten"
-								>
-									<i class="bi bi-pencil"></i>
-								</button>
-
-								<button
-									class="destructive small ghost"
-
-									hx-delete={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/delete?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
-									title="Löschen"
-
-									if !user.IsAdmin() {
-										disabled
-									}
-								>
-									<i class="bi bi-trash"></i>
-								</button>
-							</td>
-						</tr>
-					}
-				}
-			</tbody>
-		</table>
-	</figure>
 }
 
 templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
