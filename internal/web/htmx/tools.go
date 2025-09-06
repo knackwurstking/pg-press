@@ -135,7 +135,6 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		}
 	} else {
 		props.Close = true
-		props.ReloadToolsList = true
 		props.ToolID = t.ID // Yeah, there is no need to set the tool ID here
 	}
 
