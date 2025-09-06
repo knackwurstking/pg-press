@@ -265,7 +265,6 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 		slotTop, slotTopCassette, slotBottom)
 
 	// Get all press cycles (we'll filter by slots in frontend for now)
-	// TODO: Add a new helper method to get cycles by slots
 	cycles, err := h.DB.PressCycles.List()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
@@ -289,7 +288,6 @@ func (h *Tools) handleCyclesSection(c echo.Context) error {
 		lastPartialCycles = h.DB.PressCyclesHelper.GetPartialCyclesForPress(lastCycle)
 	}
 
-	// TODO: Get regenerations based on slots instead of single tool ID
 	var regenerations []*models.ToolRegeneration
 
 	logger.HTMXHandlerTools().Debug("Found %d cycles and %d regenerations for slots",
