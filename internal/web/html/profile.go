@@ -10,9 +10,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	profilepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 const (

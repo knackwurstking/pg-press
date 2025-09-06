@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	feedtemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/feeds"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
 )

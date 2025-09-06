@@ -12,8 +12,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/labstack/echo/v4"
 )
 

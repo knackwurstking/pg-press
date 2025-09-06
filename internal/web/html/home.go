@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	homepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/home"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 	"github.com/labstack/echo/v4"
 )
 

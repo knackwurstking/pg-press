@@ -1,4 +1,4 @@
-package helpers
+package webhelpers
 
 import (
 	"crypto/md5"

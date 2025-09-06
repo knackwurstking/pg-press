@@ -13,8 +13,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	loginpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/login"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 type Auth struct {

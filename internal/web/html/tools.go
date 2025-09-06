@@ -9,11 +9,11 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/services/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
 	toolpresspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
 	tooltoolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 
 	"github.com/labstack/echo/v4"
 )

@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	helpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 )
 
 type MainOptions struct {

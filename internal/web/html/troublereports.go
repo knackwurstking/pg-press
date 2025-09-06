@@ -15,9 +15,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	troublereportpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/troublereports"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 type TroubleReports struct {

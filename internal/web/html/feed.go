@@ -7,9 +7,9 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	feedpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
-	"github.com/knackwurstking/pgpress/internal/web/webhelpers"
 )
 
 type Feed struct {
