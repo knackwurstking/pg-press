@@ -32,21 +32,38 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 		>
 			<span class="flex gap-sm w-full">
 				<span class="flex flex-col gap-sm">
-					<span class="text-sm text-normal">{ tool.Format.Width }x{ tool.Format.Height } { tool.Code } { tool.Type }</span>
-					<span>
-						@PositionBadge(tool.Position, "muted")
+					<span class="text-sm text-normal">
+						{ tool.Format.Width }x{ tool.Format.Height } { tool.Code } { tool.Type }
+					</span>
+
+					<span class="flex flex-row gap items center">
+						@PositionBadge(tool.Position, "muted text-bold")
+
 						switch tool.Status() {
 							case models.ToolStatusActive:
-								<small class="badge badge-sm badge-outline primary ml">Eingebaut</small>
+								<small
+									class="badge badge-sm badge-outline primary"
+								>
+									<span class="flex flex-col gap-0 justify-center items-center">
+										<span class="text-bold">Eingebaut</span>
+										<span>Presse { *tool.Press }</span>
+									</span>
+								</small>
 							case models.ToolStatusAvailable:
-								<small class="badge badge-sm badge-outline info ml">Verfügbar</small>
+								<small class="badge badge-sm badge-outline info">
+									Verfügbar
+								</small>
 							case models.ToolStatusRegenerating:
-								<small class="badge badge-sm badge-outline warning ml">Regenerierung</small>
+								<small class="badge badge-sm badge-outline warning">
+									Regenerierung
+								</small>
 						}
 					</span>
 				</span>
+
 				{{
 					var slotName string
+
 					switch tool.Position {
 					case models.PositionTop:
 						slotName = constants.QueryParamSlotTop
@@ -56,9 +73,11 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 						slotName = constants.QueryParamSlotBottom
 					}
 				}}
+
 				if slotName != "" {
 					<span
 						class="flex justify-end items-center w-full pr text-sm"
+
 						hx-get={ fmt.Sprintf(
 							"%s/htmx/tools/total-cycles?%s=%d&input=false&color_class=%s",
 							env.ServerPathPrefix, slotName, tool.ID, "muted",
@@ -69,6 +88,7 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 					></span>
 				}
 			</span>
+
 			<i class="bi bi-chevron-right"></i>
 		</a>
 	</li>
