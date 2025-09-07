@@ -23,6 +23,7 @@ type Service struct {
 //var _ interfaces.DataOperations[*models.ToolRegeneration] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service) *Service {
+	// DROP TABLE IF EXISTS tool_regenerations;
 	query := `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
