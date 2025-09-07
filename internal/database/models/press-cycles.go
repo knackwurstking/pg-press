@@ -1,10 +1,8 @@
 package models
 
-import "time"
-
-const (
-	MinPressNumber = 0
-	MaxPressNumber = 5
+import (
+	"slices"
+	"time"
 )
 
 type PressNumber int8
@@ -15,7 +13,7 @@ func IsValidPressNumber(n *PressNumber) bool {
 		return false
 	}
 
-	return *n >= MinPressNumber && *n <= MaxPressNumber
+	return slices.Contains([]PressNumber{0, 2, 3, 4, 5}, *n)
 }
 
 type PressCycle struct {
