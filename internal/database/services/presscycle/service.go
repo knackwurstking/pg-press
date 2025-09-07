@@ -21,7 +21,6 @@ type Service struct {
 var _ interfaces.DataOperations[*models.PressCycle] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
-	// DROP TABLE IF EXISTS press_cycles;
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
