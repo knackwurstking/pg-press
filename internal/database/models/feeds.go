@@ -259,15 +259,19 @@ func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAss
 
 // FeedPressCycleAdd represents a press cycle creation event.
 type FeedPressCycleAdd struct {
-	ToolID      int64 `json:"tool_id"`
-	TotalCycles int64 `json:"total_cycles"`
-	ModifiedBy  *User `json:"modified_by"`
+	SlotTop         int64 `json:"slot_top"`
+	SlotTopCassette int64 `json:"slot_top_cassette"`
+	SlotBottom      int64 `json:"slot_bottom"`
+	TotalCycles     int64 `json:"total_cycles"`
+	ModifiedBy      *User `json:"modified_by"`
 }
 
 func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
 	return &FeedPressCycleAdd{
-		ToolID:      int64(data["tool_id"].(float64)),
-		TotalCycles: int64(data["total_cycles"].(float64)),
+		SlotTop:         int64(data["slot_top"].(float64)),
+		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
+		SlotBottom:      int64(data["slot_bottom"].(float64)),
+		TotalCycles:     int64(data["total_cycles"].(float64)),
 		ModifiedBy: NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
@@ -276,15 +280,19 @@ func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
 
 // FeedPressCycleUpdate represents a press cycle update event.
 type FeedPressCycleUpdate struct {
-	ToolID      int64 `json:"tool_id"`
-	TotalCycles int64 `json:"total_cycles"`
-	ModifiedBy  *User `json:"modified_by"`
+	SlotTop         int64 `json:"slot_top"`
+	SlotTopCassette int64 `json:"slot_top_cassette"`
+	SlotBottom      int64 `json:"slot_bottom"`
+	TotalCycles     int64 `json:"total_cycles"`
+	ModifiedBy      *User `json:"modified_by"`
 }
 
 func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
 	return &FeedPressCycleUpdate{
-		ToolID:      int64(data["tool_id"].(float64)),
-		TotalCycles: int64(data["total_cycles"].(float64)),
+		SlotTop:         int64(data["slot_top"].(float64)),
+		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
+		SlotBottom:      int64(data["slot_bottom"].(float64)),
+		TotalCycles:     int64(data["total_cycles"].(float64)),
 		ModifiedBy: NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),

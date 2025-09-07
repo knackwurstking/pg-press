@@ -8,16 +8,54 @@ import (
 
 templ AddPressCycle(data *models.FeedPressCycleAdd) {
 	<div class="feed-item">
-		<div class="feed-item-content;" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat einen neuen Pressenzyklus für Werkzeug <a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ToolID)) } class="info">#{ data.ToolID }</a> mit <strong>{ fmt.Sprintf("%d", data.TotalCycles) }</strong> Zyklen hinzugefügt.
+		<div
+			class="feed-item-content;"
+			style="padding: var(--ui-spacing);"
+		>
+			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat einen neuen
+			Pressenzyklus für Werkzeug
+
+			for _, slot := range []int64{data.SlotTop, data.SlotTopCassette, data.SlotBottom} {
+				if slot > 0 {
+					<a
+						href={ templ.URL(fmt.Sprintf("./tools/tool/%d", slot)) }
+						class="info"
+					>
+						#{ slot }
+					</a>
+				}
+			}
+
+			mit <strong>{
+				fmt.Sprintf("%d", data.TotalCycles)
+			}</strong> Zyklen hinzugefügt.
 		</div>
 	</div>
 }
 
 templ UpdatePressCycle(data *models.FeedPressCycleUpdate) {
 	<div class="feed-item">
-		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat den Pressenzyklus für Werkzeug <a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ToolID)) } class="info">#{ data.ToolID }</a> auf <strong>{ fmt.Sprintf("%d", data.TotalCycles) }</strong> Zyklen aktualisiert.
+		<div
+			class="feed-item-content"
+			style="padding: var(--ui-spacing);"
+		>
+			Benutzer
+			<strong>{ data.ModifiedBy.UserName }</strong> hat
+			den Pressenzyklus für Werkzeug
+
+			for _, slot := range []int64{data.SlotTop, data.SlotTopCassette, data.SlotBottom} {
+				if slot > 0 {
+					<a
+						href={ templ.URL( fmt.Sprintf("./tools/tool/%d", slot)) }
+						class="info"
+					>
+						#{ slot }
+					</a>
+				}
+			}
+
+			auf <strong>{ fmt.Sprintf("%d", data.TotalCycles) }</strong>
+			Zyklen aktualisiert.
 		</div>
 	</div>
 }

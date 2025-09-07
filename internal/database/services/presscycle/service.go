@@ -180,9 +180,11 @@ func (p *Service) Add(cycle *models.PressCycle, user *models.User) (int64, error
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleAdd,
 			&models.FeedPressCycleAdd{
-				ToolID:      -1, // TODO: Change feed type to use the new slot system
-				TotalCycles: cycle.TotalCycles,
-				ModifiedBy:  user,
+				SlotTop:         cycle.SlotTop,
+				SlotTopCassette: cycle.SlotTopCassette,
+				SlotBottom:      cycle.SlotBottom,
+				TotalCycles:     cycle.TotalCycles,
+				ModifiedBy:      user,
 			},
 		))
 	}
@@ -230,9 +232,11 @@ func (p *Service) Update(cycle *models.PressCycle, user *models.User) error {
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleUpdate,
 			&models.FeedPressCycleUpdate{
-				ToolID:      -1, // TODO: Change feed type to use the new slot system
-				TotalCycles: cycle.TotalCycles,
-				ModifiedBy:  user,
+				SlotTop:         cycle.SlotTop,
+				SlotTopCassette: cycle.SlotTopCassette,
+				SlotBottom:      cycle.SlotBottom,
+				TotalCycles:     cycle.TotalCycles,
+				ModifiedBy:      user,
 			},
 		))
 	}
@@ -272,9 +276,11 @@ func (p *Service) Delete(id int64, user *models.User) error {
 		p.feeds.Add(models.NewFeed(
 			models.FeedTypePressCycleDelete,
 			&models.FeedPressCycleUpdate{ // TODO: Create Delete type
-				ToolID:      -1, // TODO: Change feed type to use the new slot system
-				TotalCycles: cycle.TotalCycles,
-				ModifiedBy:  user,
+				SlotTop:         cycle.SlotTop,
+				SlotTopCassette: cycle.SlotTopCassette,
+				SlotBottom:      cycle.SlotBottom,
+				TotalCycles:     cycle.TotalCycles,
+				ModifiedBy:      user,
 			},
 		))
 	}
