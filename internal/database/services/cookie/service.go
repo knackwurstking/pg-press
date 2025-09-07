@@ -5,7 +5,6 @@ package cookie
 
 import (
 	"database/sql"
-	"slices"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
@@ -288,26 +287,4 @@ func (c *Service) scanCookie(scanner interfaces.Scannable) (*models.Cookie, erro
 		return nil, dberror.NewDatabaseError("scan", "cookies", "failed to scan row", err)
 	}
 	return cookie, nil
-}
-
-// SortCookies sorts a slice of cookies by last login time in descending order.
-func SortCookies(cookies []*models.Cookie) []*models.Cookie {
-	if len(cookies) <= 1 {
-		return cookies
-	}
-
-	cookiesSorted := make([]*models.Cookie, 0, len(cookies))
-
-outer:
-	for _, cookie := range cookies {
-		for i, sortedCookie := range cookiesSorted {
-			if cookie.LastLogin > sortedCookie.LastLogin {
-				cookiesSorted = slices.Insert(cookiesSorted, i, cookie)
-				continue outer
-			}
-		}
-		cookiesSorted = append(cookiesSorted, cookie)
-	}
-
-	return cookiesSorted
 }

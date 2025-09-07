@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -166,4 +167,26 @@ func (c *Cookie) Equals(other *Cookie) bool {
 		c.Value == other.Value &&
 		c.ApiKey == other.ApiKey &&
 		c.LastLogin == other.LastLogin
+}
+
+// SortCookies sorts a slice of cookies by last login time in descending order.
+func SortCookies(cookies []*Cookie) []*Cookie {
+	if len(cookies) <= 1 {
+		return cookies
+	}
+
+	cookiesSorted := make([]*Cookie, 0, len(cookies))
+
+outer:
+	for _, cookie := range cookies {
+		for i, sortedCookie := range cookiesSorted {
+			if cookie.LastLogin > sortedCookie.LastLogin {
+				cookiesSorted = slices.Insert(cookiesSorted, i, cookie)
+				continue outer
+			}
+		}
+		cookiesSorted = append(cookiesSorted, cookie)
+	}
+
+	return cookiesSorted
 }

@@ -3,16 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
-	"github.com/knackwurstking/pgpress/internal/database/services/feed"
-	"github.com/knackwurstking/pgpress/internal/database/services/metalsheet"
-	"github.com/knackwurstking/pgpress/internal/database/services/note"
-	"github.com/knackwurstking/pgpress/internal/database/services/presscycle"
-	"github.com/knackwurstking/pgpress/internal/database/services/regeneration"
-	"github.com/knackwurstking/pgpress/internal/database/services/tool"
-	"github.com/knackwurstking/pgpress/internal/database/services/troublereport"
-	"github.com/knackwurstking/pgpress/internal/database/services/user"
+	"github.com/knackwurstking/pgpress/internal/database/services"
 )
 
 // DB represents the main database connection and provides access to all data access objects.
@@ -20,48 +11,48 @@ type DB struct {
 	db *sql.DB
 
 	// Kind of DataOperations
-	PressCycles    *presscycle.Service
-	Users          *user.Service
-	Attachments    *attachment.Service
-	TroubleReports *troublereport.Service
-	Notes          *note.Service
-	Tools          *tool.Service
-	MetalSheets    *metalsheet.Service
+	PressCycles    *services.PressCycle
+	Users          *services.User
+	Attachments    *services.Attachment
+	TroubleReports *services.TroubleReport
+	Notes          *services.Note
+	Tools          *services.Tool
+	MetalSheets    *services.MetalSheet
 
 	// TODO: Still need to make this services fit the `interfaces.DataOperations` interface
-	Cookies           *cookie.Service
-	ToolRegenerations *regeneration.Service
-	Feeds             *feed.Service
+	Cookies           *services.Cookie
+	ToolRegenerations *services.Regeneration
+	Feeds             *services.Feed
 
 	// Helper TODO: Merge helper with services like the PressCycles service
-	UsersHelper          *user.Helper
-	TroubleReportsHelper *troublereport.Helper
-	ToolsHelper          *tool.Helper
+	UsersHelper          *services.UserHelper
+	TroubleReportsHelper *services.TroubleReportHelper
+	ToolsHelper          *services.ToolHelper
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
 // Feeds must be created before Users and TroubleReports as they generate feed entries.
 func New(db *sql.DB) *DB {
-	feeds := feed.New(db)
+	feeds := services.NewFeed(db)
 
-	attachments := attachment.New(db)
-	troubleReports := troublereport.New(db, feeds)
-	troubleReportsHelper := troublereport.NewTroubleReportsHelper(troubleReports, attachments)
+	attachments := services.NewAttachment(db)
+	troubleReports := services.NewTroubleReport(db, feeds)
+	troubleReportsHelper := services.NewTroubleReportHelper(troubleReports, attachments)
 
-	pressCycles := presscycle.New(db, feeds)
+	pressCycles := services.NewPressCycle(db, feeds)
 
-	notes := note.New(db)
-	tools := tool.New(db, feeds)
-	toolsHelper := tool.NewHelper(tools, notes, pressCycles)
+	notes := services.NewNote(db)
+	tools := services.NewTool(db, feeds)
+	toolsHelper := services.NewToolHelper(tools, notes, pressCycles)
 
-	metalSheets := metalsheet.New(db, feeds, notes)
-	toolRegenerations := regeneration.New(db, feeds, pressCycles)
-	usersHelper := user.NewHelper(db)
+	metalSheets := services.NewMetalSheet(db, feeds, notes)
+	toolRegenerations := services.NewRegeneration(db, feeds, pressCycles)
+	usersHelper := services.NewUserHelper(db)
 
 	dbInstance := &DB{
-		Users:                user.New(db, feeds),
+		Users:                services.NewUser(db, feeds),
 		UsersHelper:          usersHelper,
-		Cookies:              cookie.New(db),
+		Cookies:              services.NewCookie(db),
 		Attachments:          attachments,
 		TroubleReports:       troubleReports,
 		TroubleReportsHelper: troubleReportsHelper,
