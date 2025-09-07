@@ -11,9 +11,11 @@ const (
 	PositionTopCassette = Position("cassette top")
 	PositionBottom      = Position("bottom")
 
-	ToolStatusActive       = ToolStatus("active")
-	ToolStatusAvailable    = ToolStatus("available")
-	ToolStatusRegenerating = ToolStatus("regenerating")
+	ToolStatusActive             = ToolStatus("active")
+	ToolStatusAvailable          = ToolStatus("available")
+	ToolStatusRegenerating       = ToolStatus("regenerating")
+	ToolCycleWarning       int64 = 800000  // Orange
+	ToolCycleError         int64 = 1000000 // Red
 )
 
 type ToolStatus string
