@@ -122,11 +122,6 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
 	}
 
-	colorClass, err := webhelpers.ParseStringQuery(c, constants.QueryParamColorClass)
-	if err != nil {
-		logger.HTMXHandlerTools().Warn("Failed to parse color class query parameter: %v", err)
-	}
-
 	// Get all press cycles and filter by slots
 	allCycles, err := h.DB.PressCycles.List()
 	if err != nil {
@@ -144,7 +139,6 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	return toolscomp.TotalCycles(
 		totalCycles,
 		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
-		colorClass,
 	).Render(c.Request().Context(), c.Response())
 }
 

@@ -213,8 +213,8 @@ func listItem(id int64, tool *models.ToolWithNotes) templ.Component {
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-				"%s/htmx/tools/total-cycles?%s=%d&input=false&color_class=%s",
-				env.ServerPathPrefix, slotName, tool.ID, "muted",
+				"%s/htmx/tools/total-cycles?%s=%d&input=false",
+				env.ServerPathPrefix, slotName, tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/list.templ`, Line: 84, Col: 7}

@@ -79,8 +79,8 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 						class="flex justify-end items-center w-full pr text-sm"
 
 						hx-get={ fmt.Sprintf(
-							"%s/htmx/tools/total-cycles?%s=%d&input=false&color_class=%s",
-							env.ServerPathPrefix, slotName, tool.ID, "muted",
+							"%s/htmx/tools/total-cycles?%s=%d&input=false",
+							env.ServerPathPrefix, slotName, tool.ID,
 						) }
 						hx-trigger="load"
 						hx-swap="innerHTML"

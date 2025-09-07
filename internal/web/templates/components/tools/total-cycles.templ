@@ -1,25 +1,34 @@
 package tools
 
-import "fmt"
+import (
+	"fmt"
+ 	"github.com/knackwurstking/pgpress/internal/database/models"
+)
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
-templ TotalCycles(totalCycles int64, input bool, colorClass string) {
+templ TotalCycles(totalCycles int64, input bool) {
+	{{
+		var colorClass = "contrast ghost"
+
+		if totalCycles > models.ToolCycleWarning {
+			colorClass = "warning ghost"
+		}
+
+		if totalCycles > models.ToolCycleError {
+			colorClass = "destructive ghost"
+		}
+	}}
+
 	if input {
 		<input
+			class={ colorClass }
 			type="number"
 			value={ fmt.Sprintf("%d", totalCycles) }
 			readonly
-			class="total-cycles-display"
 			title="Gesamtzyklen seit der letzten Regenerierung"
 		/>
 	} else {
-		<span
-			if colorClass != "" {
-				class={ fmt.Sprintf("card compact flat %s", colorClass) }
-			} else {
-				class="card compact flat muted"
-			}
-		>
+		<span class={ fmt.Sprintf("card compact flat %s", colorClass) }>
 			<span class="card-body">
 				{ totalCycles }
 			</span>
