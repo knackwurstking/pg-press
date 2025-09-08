@@ -4,12 +4,12 @@ package attachment
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
 	"github.com/knackwurstking/pgpress/internal/database/models/user"
-	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -115,7 +115,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 			WHERE id IN (%s)
 			ORDER BY id ASC
 		`,
-		dbutils.JoinStrings(placeholders, ","),
+		strings.Join(placeholders, ","),
 	)
 
 	rows, err := a.db.Query(query, args...)

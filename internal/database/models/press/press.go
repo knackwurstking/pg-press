@@ -1,4 +1,4 @@
-package presscycle
+package press
 
 import (
 	"slices"

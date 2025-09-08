@@ -3,12 +3,12 @@ package note
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
-	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -115,7 +115,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*notemodels.Note, error) {
 
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at FROM notes WHERE id IN (%s);`,
-		dbutils.JoinStrings(placeholders, ","),
+		strings.Join(placeholders, ","),
 	)
 
 	rows, err := n.db.Query(query, args...)
