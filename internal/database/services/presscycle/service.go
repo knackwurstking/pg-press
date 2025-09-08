@@ -55,9 +55,8 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 	}
 }
 
+// TODO: Update the query to take the regeneration into account
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
-	logger.DBPressCycles().Debug("Getting partial cycles: %#v", cycle)
-
 	var query string
 	if cycle.SlotTop > 0 {
 		query += "AND slot_top > 0"
@@ -87,17 +86,13 @@ func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	var previousTotalCycles int64
 	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ID).Scan(&previousTotalCycles)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			// No previous entry found, so partial cycles equals total cycles
-			logger.DBPressCycles().Debug("No previous entry found for press %d, partial cycles = total cycles (%d)", cycle.PressNumber, cycle.TotalCycles)
-		} else {
+		if err != sql.ErrNoRows {
 			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d: %v", cycle.PressNumber, err)
 		}
 		return cycle.TotalCycles
 	}
 
 	partialCycles := cycle.TotalCycles - previousTotalCycles
-	logger.DBPressCycles().Debug("Partial cycles calculated: %d (current: %d - previous: %d)", partialCycles, cycle.TotalCycles, previousTotalCycles)
 
 	return partialCycles
 }

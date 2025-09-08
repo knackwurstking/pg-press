@@ -12,7 +12,6 @@ import (
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
-	"github.com/knackwurstking/pgpress/internal/database/services/presscycle"
 	"github.com/knackwurstking/pgpress/internal/database/services/tool"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -25,7 +24,7 @@ type Service struct {
 	log *logger.Logger
 }
 
-func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service) *Service {
+func New(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
 	query := `
 		DROP TABLE IF EXISTS tool_regenerations;
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
@@ -48,6 +47,7 @@ func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service)
 
 	return &Service{
 		db:    db,
+		tools: tools,
 		feeds: feeds,
 		log:   logger.DBToolRegenerations(),
 	}

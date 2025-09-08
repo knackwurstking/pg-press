@@ -63,8 +63,8 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 }
 
 // NewRegeneration creates a new regeneration service.
-func NewRegeneration(db *sql.DB, feeds *Feed, pressCycles *PressCycle) *Regeneration {
-	return regeneration.New(db, feeds, pressCycles)
+func NewRegeneration(db *sql.DB, tools *Tool, feeds *Feed) *Regeneration {
+	return regeneration.New(db, tools, feeds)
 }
 
 // NewTool creates a new tool service.

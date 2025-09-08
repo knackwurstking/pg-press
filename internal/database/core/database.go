@@ -39,7 +39,7 @@ func New(db *sql.DB) *DB {
 	tools := services.NewTool(db, notes, feeds)
 
 	metalSheets := services.NewMetalSheet(db, feeds, notes)
-	toolRegenerations := services.NewRegeneration(db, feeds, pressCycles)
+	toolRegenerations := services.NewRegeneration(db, tools, feeds)
 
 	dbInstance := &DB{
 		Users:             services.NewUser(db, feeds),
