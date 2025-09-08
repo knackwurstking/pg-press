@@ -37,7 +37,7 @@ func NewTroubleReport(title, content string) *TroubleReport {
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              mod.Mods[TroubleReportMod]{},
+		Mods:              mod.NewMods[TroubleReportMod](),
 	}
 }
 

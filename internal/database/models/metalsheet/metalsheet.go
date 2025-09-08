@@ -9,17 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models/user"
 )
 
-// MetalSheetStatus represents the current status of a metal sheet
-type MetalSheetStatus string
-
-const (
-	MetalSheetStatusAvailable   MetalSheetStatus = "available"
-	MetalSheetStatusInUse       MetalSheetStatus = "in_use"
-	MetalSheetStatusMaintenance MetalSheetStatus = "maintenance"
-	MetalSheetStatusReserved    MetalSheetStatus = "reserved"
-	MetalSheetStatusDamaged     MetalSheetStatus = "damaged"
-)
-
 // TODO: Add a `MetalSheetList` type with sorting functionality
 
 // MetalSheet represents a metal sheet in the database
@@ -35,8 +24,8 @@ type MetalSheet struct {
 	Mods        mod.Mods[MetalSheetMod] `json:"mods"`
 }
 
-// NewMetalSheet creates a new MetalSheet with default values
-func NewMetalSheet(u *user.User) *MetalSheet {
+// New creates a new MetalSheet with default values
+func New(u *user.User) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,
@@ -45,11 +34,11 @@ func NewMetalSheet(u *user.User) *MetalSheet {
 		STFMax:      0,
 		ToolID:      nil,
 		LinkedNotes: make([]int64, 0),
-		Mods:        make(mod.Mods[MetalSheetMod], 0),
+		Mods:        mod.NewMods[MetalSheetMod](),
 	}
 
 	// Create initial mod entry
-	initialMod := mod.NewMod(u, MetalSheetMod{
+	sheet.Mods = append(sheet.Mods, mod.NewMod(u, MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -57,8 +46,7 @@ func NewMetalSheet(u *user.User) *MetalSheet {
 		STFMax:      sheet.STFMax,
 		ToolID:      sheet.ToolID,
 		LinkedNotes: sheet.LinkedNotes,
-	})
-	sheet.Mods = append(sheet.Mods, initialMod)
+	}))
 
 	return sheet
 }

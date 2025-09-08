@@ -69,7 +69,7 @@ func NewTool(position Position) *Tool {
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),
-		Mods:         make(mod.Mods[ToolMod], 0),
+		Mods:         mod.NewMods[ToolMod](),
 	}
 }
 

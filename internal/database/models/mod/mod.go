@@ -11,6 +11,12 @@ import (
 
 type Mods[T any] []*Mod[T]
 
+func NewMods[T any](mod ...*Mod[T]) Mods[T] {
+	m := Mods[T]{}
+	m = append(m, mod...)
+	return m
+}
+
 func (m *Mods[T]) Reversed() []*Mod[T] {
 	reversed := make([]*Mod[T], len(*m))
 	copy(reversed, *m)

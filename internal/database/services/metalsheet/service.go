@@ -239,7 +239,7 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 			ToolID:      sheet.ToolID,
 			LinkedNotes: sheet.LinkedNotes,
 		})
-		sheet.Mods = []*modmodels.Mod[metalsheetmodels.MetalSheetMod]{initialMod}
+		sheet.Mods = modmodels.NewMods(initialMod)
 	}
 
 	// Marshal JSON fields
@@ -321,8 +321,10 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 			ToolID:      current.ToolID,
 			LinkedNotes: current.LinkedNotes,
 		})
+
 		// Prepend new mod to keep most recent first
-		sheet.Mods = append([]*modmodels.Mod[metalsheetmodels.MetalSheetMod]{mod}, sheet.Mods...)
+		mods := modmodels.NewMods(mod)
+		sheet.Mods = append(mods, sheet.Mods...)
 	}
 
 	// Marshal JSON fields
@@ -390,8 +392,10 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 		ToolID:      sheet.ToolID,
 		LinkedNotes: sheet.LinkedNotes,
 	})
+
 	// Prepend new mod to keep most recent first
-	sheet.Mods = append(modmodels.Mods[metalsheetmodels.MetalSheetMod]{mod}, sheet.Mods...)
+	mods := modmodels.NewMods(mod)
+	sheet.Mods = append(mods, sheet.Mods...)
 
 	// Update the tool assignment
 	sheet.ToolID = toolID
