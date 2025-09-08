@@ -73,12 +73,12 @@ templ ListMods(
 							if first.Time == mod.Time {
 								<i class="bi bi-plus-circle" style="color: var(--ui-success);"></i>
 								<span>
-									Erstellt von <strong>{ mod.User.UserName }</strong> am { mod.GetTimeString() }
+									Erstellt von <strong>{ mod.User.Name }</strong> am { mod.GetTimeString() }
 								</span>
 							} else {
 								<i class="bi bi-pencil-square" style="color: var(--ui-warning);"></i>
 								<span>
-									Geändert von <strong>{ mod.User.UserName }</strong> am { mod.GetTimeString() }
+									Geändert von <strong>{ mod.User.Name }</strong> am { mod.GetTimeString() }
 								</span>
 							}
 						</div>

@@ -45,7 +45,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerFeed().Debug("Rendering feed data for user %s", user.UserName)
+	logger.HTMXHandlerFeed().Debug("Rendering feed data for user %s", user.Name)
 
 	feedData := feedscomp.List(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
@@ -59,7 +59,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
 		logger.HTMXHandlerFeed().Info("Updating user %s last feed from %d to %d",
-			user.UserName, oldLastFeed, user.LastFeed)
+			user.Name, oldLastFeed, user.LastFeed)
 
 		if err := h.DB.Users.Update(user, user); err != nil {
 			logger.HTMXHandlerFeed().Error("Failed to update user's last feed: %v", err)
@@ -67,7 +67,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 				"error updating user's last feed: "+err.Error())
 		}
 
-		logger.HTMXHandlerFeed().Debug("Successfully updated last feed for user %s", user.UserName)
+		logger.HTMXHandlerFeed().Debug("Successfully updated last feed for user %s", user.Name)
 	}
 
 	return nil

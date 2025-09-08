@@ -33,16 +33,16 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerProfile().Debug("Fetching cookies for user %s", user.UserName)
+	logger.HTMXHandlerProfile().Debug("Fetching cookies for user %s", user.Name)
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		logger.HTMXHandlerProfile().Error("Failed to list cookies for user %s: %v", user.UserName, err)
+		logger.HTMXHandlerProfile().Error("Failed to list cookies for user %s: %v", user.Name, err)
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to list cookies: "+err.Error())
 	}
 
-	logger.HTMXHandlerProfile().Debug("Found %d cookies for user %s", len(cookies), user.UserName)
+	logger.HTMXHandlerProfile().Debug("Found %d cookies for user %s", len(cookies), user.Name)
 
 	cookiesTable := profilecomp.Cookies(cookiemodels.Sort(cookies))
 	if err := cookiesTable.Render(c.Request().Context(), c.Response()); err != nil {

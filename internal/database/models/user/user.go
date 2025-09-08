@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	MinUserNameLength = 1
-	MaxUserNameLength = 100
+	MinNameLength = 1
+	MaxNameLength = 100
 )
 
 // User represents a system user with Telegram integration
 type User struct {
 	TelegramID int64  `json:"telegram_id"`
-	UserName   string `json:"user_name"`
+	Name       string `json:"user_name"`
 	ApiKey     string `json:"api_key"`
 	LastFeed   int64  `json:"last_feed"`
 }
@@ -28,7 +28,7 @@ type User struct {
 func NewUser(telegramID int64, userName, apiKey string) *User {
 	return &User{
 		TelegramID: telegramID,
-		UserName:   strings.TrimSpace(userName),
+		Name:       strings.TrimSpace(userName),
 		ApiKey:     strings.TrimSpace(apiKey),
 		LastFeed:   0,
 	}
@@ -37,7 +37,7 @@ func NewUser(telegramID int64, userName, apiKey string) *User {
 func NewUserFromInterfaceMap(modified map[string]any) *User {
 	user := &User{
 		TelegramID: int64(modified["telegram_id"].(float64)),
-		UserName:   modified["user_name"].(string),
+		Name:       modified["user_name"].(string),
 		ApiKey:     modified["api_key"].(string),
 		LastFeed:   int64(modified["last_feed"].(float64)),
 	}
@@ -51,14 +51,14 @@ func (u *User) Validate() error {
 		return dberror.NewValidationError("telegram_id", "must be positive", u.TelegramID)
 	}
 
-	if u.UserName == "" {
-		return dberror.NewValidationError("user_name", "cannot be empty", u.UserName)
+	if u.Name == "" {
+		return dberror.NewValidationError("user_name", "cannot be empty", u.Name)
 	}
-	if len(u.UserName) < MinUserNameLength {
-		return dberror.NewValidationError("user_name", "too short", len(u.UserName))
+	if len(u.Name) < MinNameLength {
+		return dberror.NewValidationError("user_name", "too short", len(u.Name))
 	}
-	if len(u.UserName) > MaxUserNameLength {
-		return dberror.NewValidationError("user_name", "too long", len(u.UserName))
+	if len(u.Name) > MaxNameLength {
+		return dberror.NewValidationError("user_name", "too long", len(u.Name))
 	}
 
 	if u.ApiKey == "" {
@@ -101,7 +101,7 @@ func (u *User) IsValidAPIKey(apiKey string) bool {
 func (u *User) GetDisplayInfo() map[string]any {
 	return map[string]any{
 		"telegram_id": u.TelegramID,
-		"user_name":   u.UserName,
+		"name":        u.Name,
 		"has_api_key": true,
 		"is_admin":    u.IsAdmin(),
 		"last_feed":   u.LastFeed,
@@ -116,14 +116,14 @@ func (u *User) String() string {
 	}
 
 	return fmt.Sprintf("User{ID: %d, Name: %s%s [has API key]}",
-		u.TelegramID, u.UserName, adminStatus)
+		u.TelegramID, u.Name, adminStatus)
 }
 
 // Clone creates a deep copy of the user
 func (u *User) Clone() *User {
 	return &User{
 		TelegramID: u.TelegramID,
-		UserName:   u.UserName,
+		Name:       u.Name,
 		ApiKey:     u.ApiKey,
 		LastFeed:   u.LastFeed,
 	}
@@ -143,7 +143,7 @@ func (u *User) Equals(other *User) bool {
 	}
 
 	return u.TelegramID == other.TelegramID &&
-		u.UserName == other.UserName &&
+		u.Name == other.Name &&
 		u.ApiKey == other.ApiKey &&
 		u.LastFeed == other.LastFeed
 }
@@ -155,5 +155,5 @@ func (u *User) EqualsBasic(other *User) bool {
 	}
 
 	return u.TelegramID == other.TelegramID &&
-		u.UserName == other.UserName
+		u.Name == other.Name
 }

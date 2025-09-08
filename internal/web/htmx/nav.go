@@ -39,20 +39,20 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		}
 
 		logger.HTMXHandlerNav().Info("User authenticated: %s (LastFeed: %d)",
-			user.UserName, user.LastFeed)
+			user.Name, user.LastFeed)
 
 		// Register the connection with the feed notifier
 		feedConn := h.WSFeedHandler.RegisterConnection(
 			user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
 			logger.HTMXHandlerNav().Error(
-				"Failed to register connection for user %s", user.UserName)
+				"Failed to register connection for user %s", user.Name)
 			ws.Close()
 			return
 		}
 
 		logger.HTMXHandlerNav().Info("Connection registered for user %s",
-			user.UserName)
+			user.Name)
 
 		// Start the write pump in a goroutine
 		go feedConn.WritePump()
@@ -61,7 +61,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 		feedConn.ReadPump(h.WSFeedHandler)
 
 		logger.HTMXHandlerNav().Info("Connection closed for user %s",
-			user.UserName)
+			user.Name)
 	})
 
 	// Serve the WebSocket connection

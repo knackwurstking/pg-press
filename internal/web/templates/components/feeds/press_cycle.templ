@@ -12,7 +12,7 @@ templ AddPressCycle(data *feedmodels.PressCycleAdd) {
 			class="feed-item-content;"
 			style="padding: var(--ui-spacing);"
 		>
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat einen neuen
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat einen neuen
 			Pressenzyklus für Werkzeug
 
 			for _, slot := range []int64{data.SlotTop, data.SlotTopCassette, data.SlotBottom} {
@@ -40,7 +40,7 @@ templ UpdatePressCycle(data *feedmodels.PressCycleUpdate) {
 			style="padding: var(--ui-spacing);"
 		>
 			Benutzer
-			<strong>{ data.ModifiedBy.UserName }</strong> hat
+			<strong>{ data.ModifiedBy.Name }</strong> hat
 			den Pressenzyklus für Werkzeug
 
 			for _, slot := range []int64{data.SlotTop, data.SlotTopCassette, data.SlotBottom} {

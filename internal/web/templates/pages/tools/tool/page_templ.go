@@ -369,7 +369,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes, slotName string) templ.Compon
 			return templ_7745c5c3_Err
 		}
 		switch tool.Status() {
-		case toolmodels.ToolStatusActive:
+		case toolmodels.StatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<a role=\"button\" class=\"secondary ghost flex gap justify-between w-full\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -403,12 +403,12 @@ func sectionCycles(tool *toolmodels.ToolWithNotes, slotName string) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.ToolStatusAvailable:
+		case toolmodels.StatusAvailable:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span class=\"info ghost\">Verfügbar</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.ToolStatusRegenerating:
+		case toolmodels.StatusRegenerating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<span class=\"warning ghost\">Regenerierung</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

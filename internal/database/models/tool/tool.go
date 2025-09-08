@@ -14,30 +14,31 @@ const (
 	PositionTopCassette = Position("cassette top")
 	PositionBottom      = Position("bottom")
 
-	ToolStatusActive       = ToolStatus("active")
-	ToolStatusAvailable    = ToolStatus("available")
-	ToolStatusRegenerating = ToolStatus("regenerating")
+	StatusActive       = Status("active")
+	StatusAvailable    = Status("available")
+	StatusRegenerating = Status("regenerating")
 
 	ToolCycleWarning int64 = 800000  // Orange
 	ToolCycleError   int64 = 1000000 // Red
 )
 
-type ToolStatus string
+type (
+	Status   string
+	Position string
+)
 
-type Position string
-
-type ToolFormat struct {
+type Format struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
 
-func (tf ToolFormat) String() string {
-	return fmt.Sprintf("%dx%d", tf.Width, tf.Height)
+func (f Format) String() string {
+	return fmt.Sprintf("%dx%d", f.Width, f.Height)
 }
 
 type ToolMod struct {
 	Position     Position                 `json:"position"`
-	Format       ToolFormat               `json:"format"`
+	Format       Format                   `json:"format"`
 	Type         string                   `json:"type"`
 	Code         string                   `json:"code"`
 	Regenerating bool                     `json:"regenerating"`
@@ -46,12 +47,11 @@ type ToolMod struct {
 }
 
 // Tool represents a tool in the database.
-//
-// TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
+// Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
 	ID           int64                    `json:"id"`
 	Position     Position                 `json:"position"`
-	Format       ToolFormat               `json:"format"`
+	Format       Format                   `json:"format"`
 	Type         string                   `json:"type"` // Ex: FC, GTC, MASS
 	Code         string                   `json:"code"` // Ex: G01, G02, ...
 	Regenerating bool                     `json:"regenerating"`
@@ -60,9 +60,9 @@ type Tool struct {
 	Mods         mod.Mods[ToolMod]        `json:"mods"`
 }
 
-func NewTool(position Position) *Tool {
+func New(position Position) *Tool {
 	return &Tool{
-		Format:       ToolFormat{},
+		Format:       Format{},
 		Position:     position,
 		Type:         "",
 		Code:         "",
@@ -73,14 +73,14 @@ func NewTool(position Position) *Tool {
 	}
 }
 
-func (t *Tool) Status() ToolStatus {
+func (t *Tool) Status() Status {
 	if t.Regenerating {
-		return ToolStatusRegenerating
+		return StatusRegenerating
 	}
 	if t.Press != nil {
-		return ToolStatusActive
+		return StatusActive
 	}
-	return ToolStatusAvailable
+	return StatusAvailable
 }
 
 func (t *Tool) String() string {
@@ -97,7 +97,7 @@ func (t *Tool) String() string {
 	}
 
 	// Add press information if tool is active
-	if t.Status() == ToolStatusActive && t.Press != nil {
+	if t.Status() == StatusActive && t.Press != nil {
 		base = fmt.Sprintf("%s - Presse %d", base, *t.Press)
 	}
 
@@ -127,7 +127,7 @@ func (t *Tool) ClearPress() {
 
 // IsActive checks if the tool is active on a press
 func (t *Tool) IsActive() bool {
-	return t.Status() == ToolStatusActive && t.Press != nil
+	return t.Status() == StatusActive && t.Press != nil
 }
 
 // GetPressString returns a formatted string of the press assignment

@@ -72,7 +72,7 @@ type Mod[T any] struct {
 // NewMod creates a new modification record with the current timestamp
 func NewMod[T any](u *user.User, data T) *Mod[T] {
 	if u == nil {
-		u = &user.User{UserName: "system"}
+		u = &user.User{Name: "system"}
 	}
 
 	return &Mod[T]{
@@ -96,7 +96,7 @@ func (m *Mod[T]) GetUserName() string {
 	if m.User == nil {
 		return "unknown"
 	}
-	return m.User.UserName
+	return m.User.Name
 }
 
 // IsModifiedBy checks if the modification was made by a specific user
@@ -104,7 +104,7 @@ func (m *Mod[T]) IsModifiedBy(userName string) bool {
 	if m.User == nil {
 		return userName == "unknown" || userName == ""
 	}
-	return m.User.UserName == userName
+	return m.User.Name == userName
 }
 
 // String returns a human-readable representation of the modification

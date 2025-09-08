@@ -9,7 +9,7 @@ import (
 
 type ToolEditFormData struct {
 	Position toolmodels.Position      // Position form field name "position"
-	Format   toolmodels.ToolFormat    // Format form field names "width" and "height"
+	Format   toolmodels.Format        // Format form field names "width" and "height"
 	Type     string                   // Type form field name "type"
 	Code     string                   // Code form field name "code"
 	Press    *pressmodels.PressNumber // Press form field name "press-selection"

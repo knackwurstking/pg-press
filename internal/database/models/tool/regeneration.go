@@ -1,7 +1,7 @@
-package regeneration
+package tool
 
-// ToolRegeneration represents a tool regeneration event
-type ToolRegeneration struct {
+// Regeneration represents a tool regeneration event
+type Regeneration struct {
 	ID          int64  `json:"id"`
 	ToolID      int64  `json:"tool_id"`
 	CycleID     int64  `json:"cycle_id"`
@@ -9,8 +9,8 @@ type ToolRegeneration struct {
 	PerformedBy *int64 `json:"performed_by"`
 }
 
-func NewToolRegeneration(toolID int64, cycleID int64, reason string, performedBy *int64) *ToolRegeneration {
-	return &ToolRegeneration{
+func NewRegeneration(toolID int64, cycleID int64, reason string, performedBy *int64) *Regeneration {
+	return &Regeneration{
 		ToolID:      toolID,
 		CycleID:     cycleID,
 		Reason:      reason,

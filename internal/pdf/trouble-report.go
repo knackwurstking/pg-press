@@ -99,7 +99,7 @@ func addTroubleReportMetadataSection(o *troubleReportOptions) {
 	createdText := fmt.Sprintf("Erstellt am: %s",
 		createdAt.Format("02.01.2006 15:04:05"))
 	if creator != nil {
-		createdText += fmt.Sprintf(" von %s", creator.UserName)
+		createdText += fmt.Sprintf(" von %s", creator.Name)
 	}
 	o.PDF.MultiCell(0, 6, o.Translator(createdText), "", "", false)
 
@@ -108,7 +108,7 @@ func addTroubleReportMetadataSection(o *troubleReportOptions) {
 		modifiedText := fmt.Sprintf("Zuletzt geändert: %s",
 			lastModifiedAt.Format("02.01.2006 15:04:05"))
 		if lastModifier != nil {
-			modifiedText += fmt.Sprintf(" von %s", lastModifier.UserName)
+			modifiedText += fmt.Sprintf(" von %s", lastModifier.Name)
 		}
 		o.PDF.MultiCell(0, 6, o.Translator(modifiedText), "", "", false)
 	}

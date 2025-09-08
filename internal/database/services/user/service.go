@@ -101,7 +101,7 @@ func (u *Service) Add(user *usermodels.User, actor *usermodels.User) (int64, err
 		return 0, dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
 
-	logger.DBUsers().Info("Adding user: %d, %s", user.TelegramID, user.UserName)
+	logger.DBUsers().Info("Adding user: %d, %s", user.TelegramID, user.Name)
 
 	if err := user.Validate(); err != nil {
 		return 0, err
@@ -125,7 +125,7 @@ func (u *Service) Add(user *usermodels.User, actor *usermodels.User) (int64, err
 	query = `INSERT INTO users
 		(telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
 	_, err = u.db.Exec(query,
-		user.TelegramID, user.UserName, user.ApiKey, user.LastFeed)
+		user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
 		return 0, dberror.NewDatabaseError("insert", "users",
 			"failed to insert user", err)
@@ -134,7 +134,7 @@ func (u *Service) Add(user *usermodels.User, actor *usermodels.User) (int64, err
 	// Create feed entry for the new user
 	feed := feedmodels.New(
 		feedmodels.TypeUserAdd,
-		feedmodels.UserAdd{ID: user.TelegramID, Name: user.UserName},
+		feedmodels.UserAdd{ID: user.TelegramID, Name: user.Name},
 	)
 	if err := u.feeds.Add(feed); err != nil {
 		return user.TelegramID, dberror.WrapError(err, "failed to add feed entry")
@@ -171,7 +171,7 @@ func (u *Service) Delete(telegramID int64, actor *usermodels.User) error {
 	if user != nil {
 		feed := feedmodels.New(
 			feedmodels.TypeUserRemove,
-			feedmodels.UserRemove{ID: user.TelegramID, Name: user.UserName},
+			feedmodels.UserRemove{ID: user.TelegramID, Name: user.Name},
 		)
 		if err := u.feeds.Add(feed); err != nil {
 			return dberror.WrapError(err, "failed to add feed entry")
@@ -184,15 +184,15 @@ func (u *Service) Delete(telegramID int64, actor *usermodels.User) error {
 // Update modifies an existing user and generates activity feed entries for changes.
 func (u *Service) Update(user, actor *usermodels.User) error {
 	telegramID := user.TelegramID
-	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
+	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.Name)
 
 	if user == nil {
 		return dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
 
-	if user.UserName == "" {
+	if user.Name == "" {
 		logger.DBUsers().Debug("Validation failed: empty username")
-		return dberror.NewValidationError("user_name", "username cannot be empty", user.UserName)
+		return dberror.NewValidationError("user_name", "username cannot be empty", user.Name)
 	}
 
 	if user.ApiKey == "" {
@@ -217,21 +217,21 @@ func (u *Service) Update(user, actor *usermodels.User) error {
 	query := `UPDATE users
 		SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
 	_, err = u.db.Exec(query,
-		user.UserName, user.ApiKey, user.LastFeed, telegramID)
+		user.Name, user.ApiKey, user.LastFeed, telegramID)
 	if err != nil {
 		return dberror.NewDatabaseError("update", "users",
 			fmt.Sprintf("failed to update user with Telegram ID %d", telegramID), err)
 	}
 
 	// Create feed entry if username changed
-	if prevUser.UserName != user.UserName {
-		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.UserName, user.UserName)
+	if prevUser.Name != user.Name {
+		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.Name, user.Name)
 		feed := feedmodels.New(
 			feedmodels.TypeUserNameChange,
 			&feedmodels.UserNameChange{
 				ID:  user.TelegramID,
-				Old: prevUser.UserName,
-				New: user.UserName,
+				Old: prevUser.Name,
+				New: user.Name,
 			},
 		)
 
@@ -245,7 +245,7 @@ func (u *Service) Update(user, actor *usermodels.User) error {
 
 func (u *Service) scanUser(scanner interfaces.Scannable) (*usermodels.User, error) {
 	user := &usermodels.User{}
-	err := scanner.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
+	err := scanner.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err

@@ -31,8 +31,8 @@ type TroubleReport struct {
 	Mods              mod.Mods[TroubleReportMod] `json:"mods"`
 }
 
-// NewTroubleReport creates a new trouble report with the provided details.
-func NewTroubleReport(title, content string) *TroubleReport {
+// New creates a new trouble report with the provided details.
+func New(title, content string) *TroubleReport {
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),

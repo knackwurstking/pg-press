@@ -9,7 +9,7 @@ import (
 templ AddTool(data *feedmodels.ToolAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat ein neues Werkzeug
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat ein neues Werkzeug
 			<a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ID)) } class="info">{ data.Tool }</a> zur <a href={ templ.URL(fmt.Sprintf("./tools/#tool-%d", data.ID)) } class="info">Werkzeugliste</a> hinzugefügt.
 		</div>
 	</div>
@@ -18,7 +18,7 @@ templ AddTool(data *feedmodels.ToolAdd) {
 templ UpdateTool(data *feedmodels.ToolUpdate) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat das Werkzeug
 			<a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", data.ID)) } class="info">{ data.Tool }</a> aktualisiert.
 		</div>
 	</div>
@@ -27,7 +27,7 @@ templ UpdateTool(data *feedmodels.ToolUpdate) {
 templ DeleteTool(data *feedmodels.ToolDelete) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat das Werkzeug
 			<strong style="color: var(--ui-secondary);">{ data.Tool }</strong> entfernt.
 		</div>
 	</div>

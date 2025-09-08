@@ -8,7 +8,6 @@ import (
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
-	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -78,7 +77,7 @@ func (h *Cycles) handle(c echo.Context) error {
 	}
 
 	// TODO: Need to handle regenerations here
-	var regenerations []*regenerationmodels.ToolRegeneration
+	var regenerations []*toolmodels.Regeneration
 
 	// Filter cycles that match any of the provided slots
 	filteredCycles := pressmodels.FilterSlots(slotTop, slotTopCassette, slotBottom, allCycles...)

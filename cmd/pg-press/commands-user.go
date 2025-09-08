@@ -42,7 +42,7 @@ func listUserCommand() cli.Command {
 
 				rows := []table.Row{}
 				for _, u := range users {
-					rows = append(rows, table.Row{u.TelegramID, u.UserName})
+					rows = append(rows, table.Row{u.TelegramID, u.Name})
 				}
 
 				t.AppendRows(rows)
@@ -93,7 +93,7 @@ func showUserCommand() cli.Command {
 
 				t.AppendHeader(table.Row{"Telegram ID", "User Name", "Api Key"})
 
-				row := table.Row{user.TelegramID, user.UserName, user.ApiKey}
+				row := table.Row{user.TelegramID, user.Name, user.ApiKey}
 
 				t.AppendRows([]table.Row{row})
 				t.SetStyle(table.StyleLight)
@@ -212,7 +212,7 @@ func modUserCommand() cli.Command {
 				}
 
 				if *userName != "" {
-					user.UserName = *userName
+					user.Name = *userName
 				}
 
 				if *apiKey != "" {

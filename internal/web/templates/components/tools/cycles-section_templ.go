@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
-	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -25,7 +25,7 @@ type CyclesSectionProps struct {
 	SlotBottom      int64
 	TotalCycles     int64
 	Cycles          []*pressmodels.Cycle
-	Regenerations   []*regenerationmodels.ToolRegeneration
+	Regenerations   []*toolmodels.Regeneration
 }
 
 func CyclesSection(props *CyclesSectionProps) templ.Component {

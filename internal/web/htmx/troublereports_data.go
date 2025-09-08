@@ -20,7 +20,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("User %s fetching trouble reports list", user.UserName)
+	logger.HTMXHandlerTroubleReports().Debug("User %s fetching trouble reports list", user.Name)
 
 	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
 	if err != nil {
@@ -28,7 +28,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 			"failed to load trouble reports: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Found %d trouble reports for user %s", len(trs), user.UserName)
+	logger.HTMXHandlerTroubleReports().Debug("Found %d trouble reports for user %s", len(trs), user.Name)
 
 	troubleReportsList := troublereportscomp.List(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
@@ -57,7 +57,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	}
 
 	logger.HTMXHandlerTroubleReports().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
-		user.UserName, user.TelegramID, id)
+		user.Name, user.TelegramID, id)
 
 	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)

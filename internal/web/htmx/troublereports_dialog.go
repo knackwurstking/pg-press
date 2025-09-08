@@ -84,7 +84,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("User %s is creating a new trouble report", user.UserName)
+	logger.HTMXHandlerTroubleReports().Info("User %s is creating a new trouble report", user.Name)
 
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
@@ -98,7 +98,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-		tr := trmodels.NewTroubleReport(title, content)
+		tr := trmodels.New(title, content)
 
 		logger.HTMXHandlerTroubleReports().Debug(
 			"Creating trouble report: title='%s', attachments=%d",

@@ -9,7 +9,7 @@ import (
 templ AddTroubleReport(data *feedmodels.TroubleReportAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat einen neuen Problembericht mit dem Titel
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat einen neuen Problembericht mit dem Titel
 			<a href={ templ.URL(fmt.Sprintf("./trouble-reports#trouble-report-%d", data.ID)) } class="info">{ data.Title }</a> hinzugefügt.
 		</div>
 	</div>
@@ -18,7 +18,7 @@ templ AddTroubleReport(data *feedmodels.TroubleReportAdd) {
 templ UpdateTroubleReport(data *feedmodels.TroubleReportUpdate) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat den Problembericht mit dem Titel
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat den Problembericht mit dem Titel
 			<a href={ templ.URL(fmt.Sprintf("./trouble-reports#trouble-report-%d", data.ID)) } class="info">{ data.Title }</a> aktualisiert.
 		</div>
 	</div>
@@ -27,7 +27,7 @@ templ UpdateTroubleReport(data *feedmodels.TroubleReportUpdate) {
 templ RemoveTroubleReport(data *feedmodels.TroubleReportRemove) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			User <strong>{ data.RemovedBy.UserName }</strong> hat den Problembericht mit dem Titel
+			User <strong>{ data.RemovedBy.Name }</strong> hat den Problembericht mit dem Titel
 			<strong style="color: var(--ui-secondary);">{ data.Title }</strong> entfernt.
 		</div>
 	</div>

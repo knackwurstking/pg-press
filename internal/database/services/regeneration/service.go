@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
-	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/database/services/presscycle"
@@ -60,7 +60,7 @@ func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service)
 }
 
 // Create records a new tool regeneration event
-func (t *Service) Create(toolID int64, cycleID int64, reason string, user *usermodels.User) (*regenerationmodels.ToolRegeneration, error) {
+func (t *Service) Create(toolID int64, cycleID int64, reason string, user *usermodels.User) (*toolmodels.Regeneration, error) {
 	logger.DBToolRegenerations().Info(
 		"Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s",
 		toolID, cycleID, reason,
@@ -71,7 +71,7 @@ func (t *Service) Create(toolID int64, cycleID int64, reason string, user *userm
 		performedBy = &user.TelegramID
 	}
 
-	regen := regenerationmodels.NewToolRegeneration(toolID, cycleID, reason, performedBy)
+	regen := toolmodels.NewRegeneration(toolID, cycleID, reason, performedBy)
 
 	query := `
 		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
@@ -108,7 +108,7 @@ func (t *Service) Create(toolID int64, cycleID int64, reason string, user *userm
 }
 
 // Update updates an existing regeneration record
-func (t *Service) Update(regen *regenerationmodels.ToolRegeneration, user *usermodels.User) error {
+func (t *Service) Update(regen *toolmodels.Regeneration, user *usermodels.User) error {
 	logger.DBToolRegenerations().Info("Updating tool regeneration: id=%d", regen.ID)
 
 	var performedBy *int64
@@ -135,7 +135,7 @@ func (t *Service) Update(regen *regenerationmodels.ToolRegeneration, user *userm
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
-func (t *Service) GetLastRegeneration(toolID int64) (*regenerationmodels.ToolRegeneration, error) {
+func (t *Service) GetLastRegeneration(toolID int64) (*toolmodels.Regeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting last regeneration for tool: tool_id=%d", toolID)
 
 	query := `
@@ -158,7 +158,7 @@ func (t *Service) GetLastRegeneration(toolID int64) (*regenerationmodels.ToolReg
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
-func (t *Service) GetRegenerationHistory(toolID int64) ([]*regenerationmodels.ToolRegeneration, error) {
+func (t *Service) GetRegenerationHistory(toolID int64) ([]*toolmodels.Regeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting regeneration history for tool: tool_id=%d", toolID)
 
 	query := `
@@ -173,7 +173,7 @@ func (t *Service) GetRegenerationHistory(toolID int64) ([]*regenerationmodels.To
 	}
 	defer rows.Close()
 
-	var regenerations []*regenerationmodels.ToolRegeneration
+	var regenerations []*toolmodels.Regeneration
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
@@ -204,7 +204,7 @@ func (t *Service) GetRegenerationCount(toolID int64) (int, error) {
 }
 
 // GetAllRegenerations gets all regenerations across all tools
-func (t *Service) GetAllRegenerations(limit, offset int) ([]*regenerationmodels.ToolRegeneration, error) {
+func (t *Service) GetAllRegenerations(limit, offset int) ([]*toolmodels.Regeneration, error) {
 	logger.DBToolRegenerations().Debug("Getting all regenerations: limit=%d, offset=%d", limit, offset)
 
 	query := `
@@ -219,7 +219,7 @@ func (t *Service) GetAllRegenerations(limit, offset int) ([]*regenerationmodels.
 	}
 	defer rows.Close()
 
-	var regenerations []*regenerationmodels.ToolRegeneration
+	var regenerations []*toolmodels.Regeneration
 	for rows.Next() {
 		regen, err := t.scanToolRegeneration(rows)
 		if err != nil {
@@ -302,8 +302,8 @@ func (t *Service) GetToolsWithMostRegenerations(limit int) ([]struct {
 	return results, nil
 }
 
-func (t *Service) scanToolRegeneration(scanner interfaces.Scannable) (*regenerationmodels.ToolRegeneration, error) {
-	regen := &regenerationmodels.ToolRegeneration{}
+func (t *Service) scanToolRegeneration(scanner interfaces.Scannable) (*toolmodels.Regeneration, error) {
+	regen := &toolmodels.Regeneration{}
 	var performedBy sql.NullInt64
 
 	err := scanner.Scan(

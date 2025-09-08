@@ -101,7 +101,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s is creating a new tool", user.UserName)
+	logger.HTMXHandlerTools().Info("User %s is creating a new tool", user.Name)
 
 	formData, err := h.getToolFormData(c)
 	if err != nil {
@@ -118,7 +118,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := toolmodels.NewTool(formData.Position)
+	tool := toolmodels.New(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -148,7 +148,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s is updating a tool", user.UserName)
+	logger.HTMXHandlerTools().Info("User %s is updating a tool", user.Name)
 
 	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
@@ -171,7 +171,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := toolmodels.NewTool(formData.Position)
+	tool := toolmodels.New(formData.Position)
 	tool.ID = toolID
 	tool.Format = formData.Format
 	tool.Type = formData.Type
@@ -208,7 +208,7 @@ func (h *Tools) handleDelete(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s is deleting tool %d", user.UserName, toolID)
+	logger.HTMXHandlerTools().Info("User %s is deleting tool %d", user.Name, toolID)
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {

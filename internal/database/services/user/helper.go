@@ -33,7 +33,7 @@ func (h *Helper) GetUserFromApiKey(apiKey string) (*usermodels.User, error) {
 	row := h.db.QueryRow(query, apiKey)
 
 	user := &usermodels.User{}
-	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
+	err := row.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound

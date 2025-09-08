@@ -57,7 +57,7 @@ templ Page(user *usermodels.User) {
 					class="flex flex-row justify-between items-center"
 				>
 					<h1 style="margin: 0; color: var(--ui-text); font-size: 2.25rem;">
-						{ user.UserName }
+						{ user.Name }
 					</h1>
 					<button
 						class="secondary icon"
@@ -102,7 +102,7 @@ templ Page(user *usermodels.User) {
 						<input
 							name="user-name"
 							type="text"
-							value={ user.UserName }
+							value={ user.Name }
 							placeholder="Neuer Benutzername"
 							required
 						/>

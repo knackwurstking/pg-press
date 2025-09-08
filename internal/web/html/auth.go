@@ -86,7 +86,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	logger.HandlerAuth().Info("Creating new session for user %s (Telegram ID: %d)",
-		user.UserName, user.TelegramID)
+		user.Name, user.TelegramID)
 
 	cookieValue := uuid.New().String()
 	cookie := &http.Cookie{

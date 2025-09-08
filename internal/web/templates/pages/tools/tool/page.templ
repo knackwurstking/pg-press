@@ -185,7 +185,7 @@ templ sectionCycles(tool *toolmodels.ToolWithNotes, slotName string) {
 			<h5>Aktueller Status</h5>
 
 			switch tool.Status() {
-				case toolmodels.ToolStatusActive:
+				case toolmodels.StatusActive:
 					<a
 						role="button"
 						class="secondary ghost flex gap justify-between w-full"
@@ -201,9 +201,9 @@ templ sectionCycles(tool *toolmodels.ToolWithNotes, slotName string) {
 
 						<i class="bi bi-chevron-right text-muted"></i>
 					</a>
-				case toolmodels.ToolStatusAvailable:
+				case toolmodels.StatusAvailable:
 					<span class="info ghost">Verfügbar</span>
-				case toolmodels.ToolStatusRegenerating:
+				case toolmodels.StatusRegenerating:
 					<span class="warning ghost">Regenerierung</span>
 				default:
 					<span>{ tool.Status() }</span>

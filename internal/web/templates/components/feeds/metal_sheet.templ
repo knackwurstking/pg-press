@@ -9,7 +9,7 @@ import (
 templ AddMetalSheet(data *feedmodels.MetalSheetAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat ein neues Blech
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat ein neues Blech
 			<a href={ templ.URL(fmt.Sprintf("./metal-sheets/%d", data.ID)) } class="info">{ data.MetalSheet }</a> hinzugefügt.
 		</div>
 	</div>
@@ -18,7 +18,7 @@ templ AddMetalSheet(data *feedmodels.MetalSheetAdd) {
 templ UpdateMetalSheet(data *feedmodels.MetalSheetUpdate) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Blech
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat das Blech
 			<a href={ templ.URL(fmt.Sprintf("./metal-sheets/%d", data.ID)) } class="info">{ data.MetalSheet }</a> aktualisiert.
 		</div>
 	</div>
@@ -27,7 +27,7 @@ templ UpdateMetalSheet(data *feedmodels.MetalSheetUpdate) {
 templ DeleteMetalSheet(data *feedmodels.MetalSheetDelete) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Blech mit ID
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat das Blech mit ID
 			<strong style="color: var(--ui-secondary);">{ fmt.Sprintf("%d", data.ID) }</strong> entfernt.
 		</div>
 	</div>
@@ -50,7 +50,7 @@ templ MetalSheetStatusChange(data *feedmodels.MetalSheetStatusChange) {
 	}
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat den Status von Blech
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat den Status von Blech
 			<a href={ templ.URL(fmt.Sprintf("./metal-sheets/%d", data.ID)) } class="info">#{ data.ID }</a> zu <strong>{ status }</strong> geändert.
 		</div>
 	</div>
@@ -59,7 +59,7 @@ templ MetalSheetStatusChange(data *feedmodels.MetalSheetStatusChange) {
 templ MetalSheetToolAssignment(data *feedmodels.MetalSheetToolAssignment) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
-			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat Blech
+			Benutzer <strong>{ data.ModifiedBy.Name }</strong> hat Blech
 			<a href={ templ.URL(fmt.Sprintf("./metal-sheets/%d", data.SheetID)) } class="info">#{ data.SheetID }</a>
 			if data.ToolID != nil {
 				dem Werkzeug <a href={ templ.URL(fmt.Sprintf("./tools/tool/%d", *data.ToolID)) } class="info">#{ *data.ToolID }</a> zugewiesen.

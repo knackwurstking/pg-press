@@ -162,7 +162,7 @@ func listItem(id int64, tool *toolmodels.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch tool.Status() {
-		case toolmodels.ToolStatusActive:
+		case toolmodels.StatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<small class=\"badge badge-sm badge-outline primary\"><span class=\"flex flex-col gap-0 justify-center items-center\"><span class=\"text-bold\">Eingebaut</span> <span>Presse ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -180,12 +180,12 @@ func listItem(id int64, tool *toolmodels.ToolWithNotes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.ToolStatusAvailable:
+		case toolmodels.StatusAvailable:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<small class=\"badge badge-sm badge-outline info\">Verfügbar</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.ToolStatusRegenerating:
+		case toolmodels.StatusRegenerating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<small class=\"badge badge-sm badge-outline warning\">Regenerierung</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -40,7 +40,7 @@ templ listItem(id int64, tool *toolmodels.ToolWithNotes) {
 						@PositionBadge(tool.Position, "muted text-bold")
 
 						switch tool.Status() {
-							case toolmodels.ToolStatusActive:
+							case toolmodels.StatusActive:
 								<small
 									class="badge badge-sm badge-outline primary"
 								>
@@ -49,11 +49,11 @@ templ listItem(id int64, tool *toolmodels.ToolWithNotes) {
 										<span>Presse { *tool.Press }</span>
 									</span>
 								</small>
-							case toolmodels.ToolStatusAvailable:
+							case toolmodels.StatusAvailable:
 								<small class="badge badge-sm badge-outline info">
 									Verfügbar
 								</small>
-							case toolmodels.ToolStatusRegenerating:
+							case toolmodels.StatusRegenerating:
 								<small class="badge badge-sm badge-outline warning">
 									Regenerierung
 								</small>
