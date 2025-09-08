@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/env"
@@ -24,7 +24,7 @@ type CyclesSectionProps struct {
 	SlotTopCassette int64
 	SlotBottom      int64
 	TotalCycles     int64
-	Cycles          []*presscyclemodels.PressCycle
+	Cycles          []*pressmodels.Cycle
 	Regenerations   []*regenerationmodels.ToolRegeneration
 }
 
@@ -125,7 +125,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 	})
 }
 
-func cyclesTableRows(user *usermodels.User, cycles []*presscyclemodels.PressCycle) templ.Component {
+func cyclesTableRows(user *usermodels.User, cycles []*pressmodels.Cycle) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -165,7 +165,7 @@ func cyclesTableRows(user *usermodels.User, cycles []*presscyclemodels.PressCycl
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-func renderCycleRowWithPartialCalc(user *usermodels.User, cycle *presscyclemodels.PressCycle) templ.Component {
+func renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cycle) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

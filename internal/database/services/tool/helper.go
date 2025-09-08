@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
@@ -123,8 +123,8 @@ func (h *Helper) AddWithNotes(tool *toolmodels.Tool, user *usermodels.User, note
 }
 
 // GetByPress returns all active tools for a specific press (0-5).
-func (h *Helper) GetByPress(pressNumber *presscyclemodels.PressNumber) ([]*toolmodels.Tool, error) {
-	if !presscyclemodels.IsValidPressNumber(pressNumber) {
+func (h *Helper) GetByPress(pressNumber *pressmodels.PressNumber) ([]*toolmodels.Tool, error) {
+	if !pressmodels.IsValidPressNumber(pressNumber) {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
@@ -212,7 +212,7 @@ func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *userm
 }
 
 // UpdatePress updates only the press field of a tool.
-func (h *Helper) UpdatePress(toolID int64, press *presscyclemodels.PressNumber, user *usermodels.User) error {
+func (h *Helper) UpdatePress(toolID int64, press *pressmodels.PressNumber, user *usermodels.User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -264,7 +264,7 @@ func (h *Helper) UpdatePress(toolID int64, press *presscyclemodels.PressNumber, 
 }
 
 // equalPressNumbers compares two press number pointers for equality
-func equalPressNumbers(a, b *presscyclemodels.PressNumber) bool {
+func equalPressNumbers(a, b *pressmodels.PressNumber) bool {
 	if a == nil && b == nil {
 		return true
 	}

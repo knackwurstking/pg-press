@@ -16,9 +16,9 @@ func IsValidPressNumber(n *PressNumber) bool {
 	return slices.Contains([]PressNumber{0, 2, 3, 4, 5}, *n)
 }
 
-type PressCycle struct {
+type Cycle struct {
 	ID              int64       `json:"id"`
-	PressNumber     PressNumber `json:"press_number"` // PressNumber is optional
+	PressNumber     PressNumber `json:"press_number"`
 	SlotTop         int64       `json:"slot_top"`
 	SlotTopCassette int64       `json:"slot_top_cassette"`
 	SlotBottom      int64       `json:"slot_bottom"`
@@ -28,34 +28,33 @@ type PressCycle struct {
 	PerformedBy     int64       `json:"performed_by"`
 }
 
-// TODO: Need to create a new ID type sometime
-func NewPressCycle(slotTop, slotTopCassette, slotBottom int64, press PressNumber, totalCycles, user int64) *PressCycle {
-	return &PressCycle{
+func NewCycle(press PressNumber, slotTop, slotTopCassette, slotBottom, totalCycles, user int64) *Cycle {
+	return &Cycle{
+		PressNumber:     press,
 		SlotTop:         slotTop,
 		SlotTopCassette: slotTopCassette,
 		SlotBottom:      slotBottom,
-		PressNumber:     press,
 		Date:            time.Now(),
 		TotalCycles:     totalCycles,
 		PerformedBy:     user,
 	}
 }
 
-func NewPressCycleWithID(id, slotTop, slotTopCassette, slotBottom int64, press PressNumber, totalCycles, user int64, date time.Time) *PressCycle {
-	return &PressCycle{
+func NewPressCycleWithID(id int64, press PressNumber, slotTop, slotTopCassette, slotBottom, totalCycles, user int64, date time.Time) *Cycle {
+	return &Cycle{
+		ID:              id,
+		PressNumber:     press,
 		SlotTop:         slotTop,
 		SlotTopCassette: slotTopCassette,
 		SlotBottom:      slotBottom,
-		ID:              id,
-		PressNumber:     press,
 		Date:            date,
 		TotalCycles:     totalCycles,
 		PerformedBy:     user,
 	}
 }
 
-func FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom int64, cycles ...*PressCycle) []*PressCycle {
-	var filteredCycles []*PressCycle
+func FilterSlots(slotTop, slotTopCassette, slotBottom int64, cycles ...*Cycle) []*Cycle {
+	var filteredCycles []*Cycle
 
 	for _, cycle := range cycles {
 		if (slotTop > 0 && cycle.SlotTop == slotTop) ||

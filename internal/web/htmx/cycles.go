@@ -7,7 +7,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -81,7 +81,7 @@ func (h *Cycles) handle(c echo.Context) error {
 	var regenerations []*regenerationmodels.ToolRegeneration
 
 	// Filter cycles that match any of the provided slots
-	filteredCycles := presscyclemodels.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
+	filteredCycles := pressmodels.FilterSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
 	// Get total cycles and lastPartialCycles from filtered cycles
 	totalCycles := h.getTotalCycles(filteredCycles...)
@@ -133,7 +133,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// TODO: Need to handle regenerations somehow
 
 	// Filter cycles that match any of the provided slots
-	filteredCycles := presscyclemodels.FilterPressCycleSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
+	filteredCycles := pressmodels.FilterSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
 
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(filteredCycles...)
@@ -218,7 +218,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	if !presscyclemodels.IsValidPressNumber(formData.PressNumber) {
+	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
 		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
@@ -241,9 +241,9 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		slotBottomID = toolBottom.ID
 	}
 
-	pressCycle := presscyclemodels.NewPressCycle(
-		slotTopID, slotTopCassetteID, slotBottomID,
+	pressCycle := pressmodels.NewCycle(
 		*formData.PressNumber,
+		slotTopID, slotTopCassetteID, slotBottomID,
 		formData.TotalCycles,
 		user.TelegramID,
 	)
@@ -297,7 +297,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if !presscyclemodels.IsValidPressNumber(formData.PressNumber) {
+	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
 		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
@@ -321,10 +321,10 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	// Update only the fields that should change, preserving the original date
-	pressCycle := presscyclemodels.NewPressCycleWithID(
+	pressCycle := pressmodels.NewPressCycleWithID(
 		cycleID,
-		slotTopID, slotTopCassetteID, slotBottomID,
 		*formData.PressNumber,
+		slotTopID, slotTopCassetteID, slotBottomID,
 		formData.TotalCycles,
 		user.TelegramID,
 		formData.Date,
@@ -373,7 +373,7 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 }
 
 // NOTE: The database will always sort IDs DESC
-func (h *Cycles) getTotalCycles(cycles ...*presscyclemodels.PressCycle) int64 {
+func (h *Cycles) getTotalCycles(cycles ...*pressmodels.Cycle) int64 {
 	var totalCycles int64
 
 	for _, cycle := range cycles {
@@ -442,14 +442,14 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
 	}
 
-	var pressNumber *presscyclemodels.PressNumber
+	var pressNumber *pressmodels.PressNumber
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
 		}
 
-		pn := presscyclemodels.PressNumber(press)
+		pn := pressmodels.PressNumber(press)
 		pressNumber = &pn
 	}
 

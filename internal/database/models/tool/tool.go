@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models/mod"
 	"github.com/knackwurstking/pgpress/internal/database/models/note"
-	"github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 )
 
 const (
@@ -36,28 +36,28 @@ func (tf ToolFormat) String() string {
 }
 
 type ToolMod struct {
-	Position     Position                `json:"position"`
-	Format       ToolFormat              `json:"format"`
-	Type         string                  `json:"type"`
-	Code         string                  `json:"code"`
-	Regenerating bool                    `json:"regenerating"`
-	Press        *presscycle.PressNumber `json:"press"`
-	LinkedNotes  []int64                 `json:"notes"`
+	Position     Position                 `json:"position"`
+	Format       ToolFormat               `json:"format"`
+	Type         string                   `json:"type"`
+	Code         string                   `json:"code"`
+	Regenerating bool                     `json:"regenerating"`
+	Press        *pressmodels.PressNumber `json:"press"`
+	LinkedNotes  []int64                  `json:"notes"`
 }
 
 // Tool represents a tool in the database.
 //
 // TODO: Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
-	ID           int64                   `json:"id"`
-	Position     Position                `json:"position"`
-	Format       ToolFormat              `json:"format"`
-	Type         string                  `json:"type"` // Ex: FC, GTC, MASS
-	Code         string                  `json:"code"` // Ex: G01, G02, ...
-	Regenerating bool                    `json:"regenerating"`
-	Press        *presscycle.PressNumber `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes  []int64                 `json:"notes"` // Contains note ids from the "notes" table
-	Mods         mod.Mods[ToolMod]       `json:"mods"`
+	ID           int64                    `json:"id"`
+	Position     Position                 `json:"position"`
+	Format       ToolFormat               `json:"format"`
+	Type         string                   `json:"type"` // Ex: FC, GTC, MASS
+	Code         string                   `json:"code"` // Ex: G01, G02, ...
+	Regenerating bool                     `json:"regenerating"`
+	Press        *pressmodels.PressNumber `json:"press"` // Press number (0-5) when status is active
+	LinkedNotes  []int64                  `json:"notes"` // Contains note ids from the "notes" table
+	Mods         mod.Mods[ToolMod]        `json:"mods"`
 }
 
 func NewTool(position Position) *Tool {
@@ -105,13 +105,13 @@ func (t *Tool) String() string {
 }
 
 // SetPress sets the press for the tool with validation (0-5)
-func (t *Tool) SetPress(pressNumber *presscycle.PressNumber) error {
+func (t *Tool) SetPress(pressNumber *pressmodels.PressNumber) error {
 	if pressNumber == nil {
 		t.Press = nil
 		return nil
 	}
 
-	if !presscycle.IsValidPressNumber(pressNumber) {
+	if !pressmodels.IsValidPressNumber(pressNumber) {
 		return dberror.NewValidationError("press", "invalid press number", pressNumber)
 	}
 
@@ -131,7 +131,7 @@ func (t *Tool) IsActive() bool {
 }
 
 // GetPressString returns a formatted string of the press assignment
-func (t *Tool) GetPress() presscycle.PressNumber {
+func (t *Tool) GetPress() pressmodels.PressNumber {
 	if t.Press == nil {
 		return -1
 	}

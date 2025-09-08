@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"time"
 
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -29,7 +29,7 @@ type CycleEditDialogProps struct {
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
-	InputPressNumber *presscyclemodels.PressNumber
+	InputPressNumber *pressmodels.PressNumber
 	OriginalDate     *time.Time
 	Error            string
 }
@@ -60,7 +60,7 @@ func (c *CycleEditDialogProps) GetSlotBottomID() int64 {
 }
 
 // GetPressFromSlots returns the press number from the first active slot
-func (c *CycleEditDialogProps) GetPressFromSlots() *presscyclemodels.PressNumber {
+func (c *CycleEditDialogProps) GetPressFromSlots() *pressmodels.PressNumber {
 	if c.SlotTop != nil && c.SlotTop.Press != nil {
 		return c.SlotTop.Press
 	}
@@ -473,7 +473,7 @@ func CycleEditDialog(props *CycleEditDialogProps) templ.Component {
 	})
 }
 
-func isSelectedPress(p *presscyclemodels.PressNumber, v int) bool {
+func isSelectedPress(p *pressmodels.PressNumber, v int) bool {
 	if p == nil {
 		return false
 	}

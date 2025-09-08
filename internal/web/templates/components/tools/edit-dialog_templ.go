@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -25,7 +25,7 @@ type EditDialogProps struct {
 	InputHeight         int
 	InputType           string
 	InputCode           string
-	InputPressSelection *presscyclemodels.PressNumber
+	InputPressSelection *pressmodels.PressNumber
 	Error               string
 }
 
@@ -258,7 +258,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if !presscyclemodels.IsValidPressNumber(props.InputPressSelection) {
+			if !pressmodels.IsValidPressNumber(props.InputPressSelection) {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -268,7 +268,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
+			if pressmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -278,7 +278,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
+			if pressmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -288,7 +288,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
+			if pressmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -298,7 +298,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
+			if pressmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -308,7 +308,7 @@ func EditDialog(props *EditDialogProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
+			if pressmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

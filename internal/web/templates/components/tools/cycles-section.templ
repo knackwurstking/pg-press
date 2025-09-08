@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
-	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -16,7 +16,7 @@ type CyclesSectionProps struct {
 	SlotTopCassette   int64
 	SlotBottom        int64
 	TotalCycles       int64
-	Cycles            []*presscyclemodels.PressCycle
+	Cycles            []*pressmodels.Cycle
 	Regenerations     []*regenerationmodels.ToolRegeneration
 }
 
@@ -89,7 +89,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
-templ cyclesTableRows(user *usermodels.User, cycles []*presscyclemodels.PressCycle) {
+templ cyclesTableRows(user *usermodels.User, cycles []*pressmodels.Cycle) {
 	if len(cycles) == 0 {
 		<tr>
 			<td colspan="7" class="text-center">
@@ -105,7 +105,7 @@ templ cyclesTableRows(user *usermodels.User, cycles []*presscyclemodels.PressCyc
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *presscyclemodels.PressCycle) {
+templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cycle) {
 	<tr>
 		<td>
 			<span>{ cycle.ID }</span>
