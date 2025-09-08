@@ -19,7 +19,7 @@ type DB struct {
 	Tools          *services.Tool
 	MetalSheets    *services.MetalSheet
 
-	// NOTE: Maybe i should make this fit the `interfaces.DataOperations` interface
+	// Not fitting the `interfaces.DataOperations` interface
 	Cookies           *services.Cookie
 	ToolRegenerations *services.Regeneration
 	Feeds             *services.Feed

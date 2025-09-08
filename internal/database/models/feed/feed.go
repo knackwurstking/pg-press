@@ -27,6 +27,10 @@ const (
 	TypePressCycleAdd            = "press_cycle_add"
 	TypePressCycleUpdate         = "press_cycle_update"
 	TypePressCycleDelete         = "press_cycle_delete"
+
+	TypeRegenerationAdd    = "regeneration_add"
+	TypeRegenerationUpdate = "regeneration_update"
+	TypeRegenerationDelete = "regeneration_delete"
 )
 
 // Feed represents a feed entry in the system that tracks activity events.

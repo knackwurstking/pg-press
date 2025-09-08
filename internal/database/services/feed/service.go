@@ -1,4 +1,4 @@
-// TODO: Need to fix this type to fit the `interfaces.DataOperations[*cookie.Cookie]` type
+// TODO: Need to rewrite the feed service a bit to simplify it
 package feed
 
 import (

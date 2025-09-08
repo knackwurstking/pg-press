@@ -267,26 +267,8 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 					continue
 				}
 
-				r, err := h.DB.ToolRegenerations.Create(id, cycleID, "", user)
-				if err != nil {
-					logger.HTMXHandlerTools().Error(
-						"Failed to create a tool regenerion entry for %d: %#v",
-						id, err,
-					)
-					continue
-				}
-
-				logger.HTMXHandlerTools().Debug(
-					"Set the tool %d to regenerating: regeneration=%#v",
-					id, r,
-				)
-
-				err = h.DB.Tools.UpdateRegenerating(id, form.Regenerating, user)
-				if err != nil {
-					logger.HTMXHandlerTools().Error(
-						"Failed to switch too state to regenerating: %#v",
-						err,
-					)
+				if _, err := h.DB.ToolRegenerations.Start(cycleID, id, "", user); err != nil {
+					return err
 				}
 			}
 		}
@@ -382,19 +364,13 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 					continue
 				}
 
-				r, err := h.DB.ToolRegenerations.Create(id, cycleID, "", user)
-				if err != nil {
-					logger.HTMXHandlerTools().Error(
-						"Failed to create a tool regenerion entry for %d: %#v",
-						id, err,
-					)
-					continue
+				if _, err := h.DB.ToolRegenerations.Start(cycleID, id, "", user); err != nil {
+					return err
 				}
 
-				logger.HTMXHandlerTools().Debug(
-					"Set the tool %d to regenerating: regeneration=%#v",
-					id, r,
-				)
+				if err := h.DB.ToolRegenerations.Stop(id); err != nil {
+					return err
+				}
 			}
 		}
 	}
