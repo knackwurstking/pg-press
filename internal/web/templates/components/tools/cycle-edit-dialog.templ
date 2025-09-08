@@ -65,6 +65,7 @@ func (c *CycleEditDialogProps) GetPressFromSlots() *pressmodels.PressNumber {
 	return nil
 }
 
+// TODO: Add a checkbox, or whatever, for adding a new regenerating entry belonging to this specific cycle
 templ CycleEditDialog(props *CycleEditDialogProps) {
 	if props.Close {
 		<span

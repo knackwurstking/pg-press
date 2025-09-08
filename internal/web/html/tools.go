@@ -34,7 +34,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 func (h *Tools) handleTools(c echo.Context) error {
 	logger.HandlerTools().Debug("Rendering tools page")
 
-	tools, err := h.DB.ToolsHelper.ListWithNotes()
+	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
 		logger.HandlerTools().Error("Failed to fetch tools: %v", err)
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
@@ -86,7 +86,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Fetching tool %d with notes", id)
 
-	tool, err := h.DB.ToolsHelper.GetWithNotes(id)
+	tool, err := h.DB.Tools.GetWithNotes(id)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to fetch tool %d: %v", id, err)
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),

@@ -30,7 +30,6 @@ type (
 	PressCycle          = presscycle.Service
 	Regeneration        = regeneration.Service
 	Tool                = tool.Service
-	ToolHelper          = tool.Helper
 	TroubleReport       = troublereport.Service
 	TroubleReportHelper = troublereport.Helper
 	User                = user.Service
@@ -73,13 +72,8 @@ func NewRegeneration(db *sql.DB, feeds *Feed, pressCycles *PressCycle) *Regenera
 }
 
 // NewTool creates a new tool service.
-func NewTool(db *sql.DB, feeds *Feed) *Tool {
-	return tool.New(db, feeds)
-}
-
-// NewToolHelper creates a new tool helper.
-func NewToolHelper(tools *Tool, notes *Note, pressCycles *PressCycle) *ToolHelper {
-	return tool.NewHelper(tools, notes, pressCycles)
+func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
+	return tool.New(db, notes, feeds)
 }
 
 // NewTroubleReport creates a new trouble report service.

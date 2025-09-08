@@ -23,6 +23,7 @@ type Service struct {
 var _ interfaces.DataOperations[*pressmodels.Cycle] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
+	// NOTE: I changed "users(id)" to "users(telegram_id)", but without dropping the existing table or do any migrations, for now everything is working just fine
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +37,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 			FOREIGN KEY (slot_top) REFERENCES tools(id),
 			FOREIGN KEY (slot_top_cassette) REFERENCES tools(id),
 			FOREIGN KEY (slot_bottom) REFERENCES tools(id),
-			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL
+			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top ON press_cycles(slot_top);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top_cassette ON press_cycles(slot_top_cassette);

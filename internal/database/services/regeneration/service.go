@@ -25,17 +25,17 @@ type Service struct {
 //var _ interfaces.DataOperations[*models.ToolRegeneration] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service) *Service {
-	// DROP TABLE IF EXISTS tool_regenerations;
 	query := `
+		DROP TABLE IF EXISTS tool_regenerations;
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,
 			cycle_id INTEGER NOT NULL,
 			reason TEXT,
-			performed_by INTEGER,
+			performed_by INTEGER NOT NULL,
 			FOREIGN KEY (tool_id) REFERENCES tools(id) ON DELETE CASCADE,
-			FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL,
-			FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE CASCADE
+			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL,
+			FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_cycle_id ON tool_regenerations(cycle_id);

@@ -46,7 +46,7 @@ func (h *Tools) handleList(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Fetching all tools with notes")
 
 	// Get tools from database
-	tools, err := h.DB.ToolsHelper.ListWithNotes()
+	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tools from database: "+err.Error())
@@ -70,7 +70,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 
 		if props.ToolID > 0 {
 			logger.HTMXHandlerTools().Debug("Editing tool with ID %d", props.ToolID)
-			tool, err := h.DB.ToolsHelper.GetWithNotes(props.ToolID)
+			tool, err := h.DB.Tools.GetWithNotes(props.ToolID)
 			if err != nil {
 				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
@@ -127,7 +127,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Adding tool: Type=%s, Code=%s, Position=%s",
 		tool.Type, tool.Code, tool.Position)
 
-	if t, err := h.DB.ToolsHelper.AddWithNotes(tool, user); err != nil {
+	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
 		if err == dberror.ErrAlreadyExists {
 			props.Error = "Tool bereits vorhanden"
 		} else {
