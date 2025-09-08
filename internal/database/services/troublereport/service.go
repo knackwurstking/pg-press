@@ -257,7 +257,7 @@ func (tr *Service) Delete(id int64, user *usermodels.User) error {
 func (s *Service) GetWithAttachments(
 	id int64,
 ) (*trmodels.TroubleReportWithAttachments, error) {
-	logger.DBTroubleReportsHelper().Debug(
+	logger.DBTroubleReports().Debug(
 		"Getting trouble report with attachments, id: %d", id)
 
 	// Get the trouble report
@@ -280,7 +280,7 @@ func (s *Service) GetWithAttachments(
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
 func (s *Service) ListWithAttachments() ([]*trmodels.TroubleReportWithAttachments, error) {
-	logger.DBTroubleReportsHelper().Debug("Listing trouble reports with attachments")
+	logger.DBTroubleReports().Debug("Listing trouble reports with attachments")
 
 	// Get all trouble reports
 	reports, err := s.List()
@@ -313,7 +313,7 @@ func (s *Service) AddWithAttachments(
 	troubleReport *trmodels.TroubleReport,
 	attachments []*attachmentmodels.Attachment,
 ) error {
-	logger.DBTroubleReportsHelper().Info("Adding trouble report with %d attachments", len(attachments))
+	logger.DBTroubleReports().Info("Adding trouble report with %d attachments", len(attachments))
 
 	if troubleReport == nil {
 		return dberror.NewValidationError("report", "trouble report cannot be nil", nil)
@@ -359,7 +359,7 @@ func (s *Service) UpdateWithAttachments(
 	troubleReport *trmodels.TroubleReport,
 	newAttachments []*attachmentmodels.Attachment,
 ) error {
-	logger.DBTroubleReportsHelper().Info(
+	logger.DBTroubleReports().Info(
 		"Updating trouble report %d with %d new attachments", id, len(newAttachments))
 
 	if troubleReport == nil {
@@ -403,7 +403,7 @@ func (s *Service) UpdateWithAttachments(
 
 // RemoveWithAttachments removes a trouble report and its attachments.
 func (s *Service) RemoveWithAttachments(id int64, user *usermodels.User) (*trmodels.TroubleReport, error) {
-	logger.DBTroubleReportsHelper().Info("Removing trouble report %d with attachments", id)
+	logger.DBTroubleReports().Info("Removing trouble report %d with attachments", id)
 
 	// Get the trouble report to find its attachments
 	tr, err := s.Get(id)
@@ -419,7 +419,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *usermodels.User) (*trmod
 	// Remove associated attachments
 	for _, attachmentID := range tr.LinkedAttachments {
 		if err := s.attachments.Delete(attachmentID, user); err != nil {
-			logger.DBTroubleReportsHelper().Warn("Failed to remove attachment %d: %v", attachmentID, err)
+			logger.DBTroubleReports().Warn("Failed to remove attachment %d: %v", attachmentID, err)
 		}
 	}
 
@@ -428,7 +428,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *usermodels.User) (*trmod
 
 // LoadAttachments loads attachments for a trouble report.
 func (s *Service) LoadAttachments(tr *trmodels.TroubleReport) ([]*attachmentmodels.Attachment, error) {
-	logger.DBTroubleReportsHelper().Debug("Loading attachments for trouble report")
+	logger.DBTroubleReports().Debug("Loading attachments for trouble report")
 
 	if tr == nil {
 		return nil, dberror.NewValidationError("report", "trouble report cannot be nil", nil)
@@ -439,7 +439,7 @@ func (s *Service) LoadAttachments(tr *trmodels.TroubleReport) ([]*attachmentmode
 
 // GetAttachment retrieves a specific attachment by ID.
 func (s *Service) GetAttachment(id int64) (*attachmentmodels.Attachment, error) {
-	logger.DBTroubleReportsHelper().Debug("Getting attachment with ID %d", id)
+	logger.DBTroubleReports().Debug("Getting attachment with ID %d", id)
 	return s.attachments.Get(id)
 }
 

@@ -281,7 +281,7 @@ func (t *Service) Delete(id int64, user *usermodels.User) error {
 }
 
 func (s *Service) GetWithNotes(id int64) (*toolmodels.ToolWithNotes, error) {
-	logger.DBToolsHelper().Debug(
+	logger.DBTools().Debug(
 		"Getting tools with notes, id: %d", id)
 
 	// Get the tool
@@ -304,7 +304,7 @@ func (s *Service) GetWithNotes(id int64) (*toolmodels.ToolWithNotes, error) {
 
 // ListWithNotes retrieves all tools and loads their associated notes.
 func (s *Service) ListWithNotes() ([]*toolmodels.ToolWithNotes, error) {
-	logger.DBToolsHelper().Debug("Listing tools with notes")
+	logger.DBTools().Debug("Listing tools with notes")
 
 	// Get all tools
 	tools, err := s.List()
@@ -333,7 +333,7 @@ func (s *Service) ListWithNotes() ([]*toolmodels.ToolWithNotes, error) {
 
 // AddWithNotes creates a new tool and its associated notes in a single transaction.
 func (s *Service) AddWithNotes(tool *toolmodels.Tool, user *usermodels.User, notes ...*notemodels.Note) (*toolmodels.ToolWithNotes, error) {
-	logger.DBToolsHelper().Debug("Adding tool with notes")
+	logger.DBTools().Debug("Adding tool with notes")
 
 	// First, add all notes and collect their IDs
 	var noteIDs []int64

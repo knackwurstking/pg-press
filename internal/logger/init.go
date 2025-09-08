@@ -67,13 +67,10 @@ func DBAttachments() *Logger             { return GetComponentLogger("DB Attachm
 func DBCookies() *Logger                 { return GetComponentLogger("DB Cookies") }
 func DBFeeds() *Logger                   { return GetComponentLogger("DB Feeds") }
 func DBTools() *Logger                   { return GetComponentLogger("DB Tools") }
-func DBToolCyclesHelper() *Logger        { return GetComponentLogger("DB ToolCyclesHelper") }
 func DBUsers() *Logger                   { return GetComponentLogger("DB Users") }
-func DBTroubleReportsHelper() *Logger    { return GetComponentLogger("DB TroubleReportsHelper") }
 func DBMetalSheets() *Logger             { return GetComponentLogger("DB MetalSheets") }
 func DBNotes() *Logger                   { return GetComponentLogger("DB Notes") }
 func DBTroubleReports() *Logger          { return GetComponentLogger("DB TroubleReports") }
-func DBToolsHelper() *Logger             { return GetComponentLogger("DB ToolsHelper") }
 func DBPressCycles() *Logger             { return GetComponentLogger("DB Service PressCycles") }
 func DBToolRegenerations() *Logger       { return GetComponentLogger("DB ToolRegenerations") }
 func HandlerAuth() *Logger               { return GetComponentLogger("Handler Auth") }
