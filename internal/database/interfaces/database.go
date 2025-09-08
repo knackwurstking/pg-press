@@ -1,6 +1,8 @@
 package interfaces
 
-import "github.com/knackwurstking/pgpress/internal/database/models"
+import (
+	"github.com/knackwurstking/pgpress/internal/database/models/user"
+)
 
 // Scannable is an interface that abstracts sql.Row and sql.Rows for scanning.
 type Scannable interface {
@@ -21,13 +23,13 @@ type DataOperations[T any] interface {
 	List() ([]T, error)
 	// Add creates a new record for the given model.
 	// It may take a user for auditing purposes and may return the ID of the new record.
-	Add(model T, user *models.User) (int64, error)
+	Add(model T, user *user.User) (int64, error)
 
 	// Update modifies an existing record.
 	// It may take a user for auditing purposes. The model should contain its ID.
-	Update(model T, user *models.User) error
+	Update(model T, user *user.User) error
 
 	// Delete removes a record from the database by its ID.
 	// It may take a user for auditing purposes.
-	Delete(id int64, user *models.User) error
+	Delete(id int64, user *user.User) error
 }

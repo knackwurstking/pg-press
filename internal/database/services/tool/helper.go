@@ -5,7 +5,11 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
+	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
 	"github.com/knackwurstking/pgpress/internal/database/services/presscycle"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -31,7 +35,7 @@ func NewHelper(
 }
 
 // GetWithNotes retrieves a tool by its ID and loads its associated notes.
-func (h *Helper) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
+func (h *Helper) GetWithNotes(id int64) (*toolmodels.ToolWithNotes, error) {
 	logger.DBToolsHelper().Debug(
 		"Getting tools with notes, id: %d", id)
 
@@ -47,14 +51,14 @@ func (h *Helper) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 		return nil, dberror.WrapError(err, "failed to load attachments for trouble report")
 	}
 
-	return &models.ToolWithNotes{
+	return &toolmodels.ToolWithNotes{
 		Tool:        tool,
 		LoadedNotes: notes,
 	}, nil
 }
 
 // ListWithNotes retrieves all tools and loads their associated notes.
-func (h *Helper) ListWithNotes() ([]*models.ToolWithNotes, error) {
+func (h *Helper) ListWithNotes() ([]*toolmodels.ToolWithNotes, error) {
 	logger.DBToolsHelper().Debug("Listing tools with notes")
 
 	// Get all tools
@@ -63,7 +67,7 @@ func (h *Helper) ListWithNotes() ([]*models.ToolWithNotes, error) {
 		return nil, err
 	}
 
-	var result []*models.ToolWithNotes
+	var result []*toolmodels.ToolWithNotes
 
 	for _, tool := range tools {
 		// Load notes for each tool
@@ -73,7 +77,7 @@ func (h *Helper) ListWithNotes() ([]*models.ToolWithNotes, error) {
 				fmt.Sprintf("failed to load notes for tool %d", tool.ID))
 		}
 
-		result = append(result, &models.ToolWithNotes{
+		result = append(result, &toolmodels.ToolWithNotes{
 			Tool:        tool,
 			LoadedNotes: notes,
 		})
@@ -83,7 +87,7 @@ func (h *Helper) ListWithNotes() ([]*models.ToolWithNotes, error) {
 }
 
 // AddWithNotes creates a new tool and its associated notes in a single transaction.
-func (h *Helper) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
+func (h *Helper) AddWithNotes(tool *toolmodels.Tool, user *usermodels.User, notes ...*notemodels.Note) (*toolmodels.ToolWithNotes, error) {
 	logger.DBToolsHelper().Debug("Adding tool with notes")
 
 	// First, add all notes and collect their IDs
@@ -112,15 +116,15 @@ func (h *Helper) AddWithNotes(tool *models.Tool, user *models.User, notes ...*mo
 	tool.ID = toolID
 
 	// Return the tool with loaded notes
-	return &models.ToolWithNotes{
+	return &toolmodels.ToolWithNotes{
 		Tool:        tool,
 		LoadedNotes: notes,
 	}, nil
 }
 
 // GetByPress returns all active tools for a specific press (0-5).
-func (h *Helper) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
-	if !models.IsValidPressNumber(pressNumber) {
+func (h *Helper) GetByPress(pressNumber *presscyclemodels.PressNumber) ([]*toolmodels.Tool, error) {
+	if !presscyclemodels.IsValidPressNumber(pressNumber) {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
@@ -140,7 +144,7 @@ func (h *Helper) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, er
 	}
 	defer rows.Close()
 
-	var tools []*models.Tool
+	var tools []*toolmodels.Tool
 
 	for rows.Next() {
 		tool, err := h.tools.scanTool(rows)
@@ -159,7 +163,7 @@ func (h *Helper) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, er
 }
 
 // UpdateRegenerating updates only the regenerating field of a tool.
-func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
+func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *usermodels.User) error {
 	logger.DBTools().Info("Updating tool regenerating status: %d to %v", toolID, regenerating)
 
 	// Get current tool to track changes
@@ -194,9 +198,9 @@ func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *model
 
 	// Trigger feed update
 	if h.tools.feeds != nil {
-		h.tools.feeds.Add(models.NewFeed(
-			models.FeedTypeToolUpdate,
-			&models.FeedToolUpdate{
+		h.tools.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeToolUpdate,
+			&feedmodels.FeedToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -208,7 +212,7 @@ func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *model
 }
 
 // UpdatePress updates only the press field of a tool.
-func (h *Helper) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
+func (h *Helper) UpdatePress(toolID int64, press *presscyclemodels.PressNumber, user *usermodels.User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -246,9 +250,9 @@ func (h *Helper) UpdatePress(toolID int64, press *models.PressNumber, user *mode
 	// Trigger feed update
 	if h.tools.feeds != nil {
 		tool.Press = press // Update press for correct display
-		h.tools.feeds.Add(models.NewFeed(
-			models.FeedTypeToolUpdate,
-			&models.FeedToolUpdate{
+		h.tools.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeToolUpdate,
+			&feedmodels.FeedToolUpdate{
 				ID:         toolID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -260,7 +264,7 @@ func (h *Helper) UpdatePress(toolID int64, press *models.PressNumber, user *mode
 }
 
 // equalPressNumbers compares two press number pointers for equality
-func equalPressNumbers(a, b *models.PressNumber) bool {
+func equalPressNumbers(a, b *presscyclemodels.PressNumber) bool {
 	if a == nil && b == nil {
 		return true
 	}

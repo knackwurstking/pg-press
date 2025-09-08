@@ -11,11 +11,11 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 )
 
-func GetUserFromContext(ctx echo.Context) (*models.User, error) {
-	user, ok := ctx.Get("user").(*models.User)
+func GetUserFromContext(ctx echo.Context) (*usermodels.User, error) {
+	user, ok := ctx.Get("user").(*usermodels.User)
 	if !ok {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,

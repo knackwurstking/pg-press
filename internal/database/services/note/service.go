@@ -6,7 +6,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -15,7 +16,7 @@ type Service struct {
 	db *sql.DB
 }
 
-var _ interfaces.DataOperations[*models.Note] = (*Service)(nil)
+var _ interfaces.DataOperations[*notemodels.Note] = (*Service)(nil)
 
 func New(db *sql.DB) *Service {
 	query := `
@@ -44,7 +45,7 @@ func New(db *sql.DB) *Service {
 	}
 }
 
-func (n *Service) List() ([]*models.Note, error) {
+func (n *Service) List() ([]*notemodels.Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
 	query := `
@@ -58,7 +59,7 @@ func (n *Service) List() ([]*models.Note, error) {
 	}
 	defer rows.Close()
 
-	var notes []*models.Note
+	var notes []*notemodels.Note
 
 	for rows.Next() {
 		note, err := n.scanNote(rows)
@@ -76,7 +77,7 @@ func (n *Service) List() ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Service) Get(id int64) (*models.Note, error) {
+func (n *Service) Get(id int64) (*notemodels.Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	query := `
@@ -97,9 +98,9 @@ func (n *Service) Get(id int64) (*models.Note, error) {
 	return note, nil
 }
 
-func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Service) GetByIDs(ids []int64) ([]*notemodels.Note, error) {
 	if len(ids) == 0 {
-		return []*models.Note{}, nil
+		return []*notemodels.Note{}, nil
 	}
 
 	logger.DBNotes().Debug("Getting notes by IDs: %v", ids)
@@ -125,7 +126,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	noteMap := make(map[int64]*models.Note)
+	noteMap := make(map[int64]*notemodels.Note)
 
 	for rows.Next() {
 		note, err := n.scanNote(rows)
@@ -141,7 +142,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	}
 
 	// Return attachments in the order of the requested IDs
-	var notes []*models.Note
+	var notes []*notemodels.Note
 	for _, id := range ids {
 		if note, exists := noteMap[id]; exists {
 			notes = append(notes, note)
@@ -151,7 +152,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Service) Add(note *models.Note, _ *models.User) (int64, error) {
+func (n *Service) Add(note *notemodels.Note, _ *usermodels.User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -173,16 +174,16 @@ func (n *Service) Add(note *models.Note, _ *models.User) (int64, error) {
 	return id, nil
 }
 
-func (n *Service) Update(note *models.Note, user *models.User) error {
+func (n *Service) Update(note *notemodels.Note, user *usermodels.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Service) Delete(id int64, user *models.User) error {
+func (n *Service) Delete(id int64, user *usermodels.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Service) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
-	note := &models.Note{}
+func (n *Service) scanNote(scanner interfaces.Scannable) (*notemodels.Note, error) {
+	note := &notemodels.Note{}
 
 	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {

@@ -3,12 +3,12 @@ package tools
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
-templ List(tools []*models.ToolWithNotes) {
+templ List(tools []*toolmodels.ToolWithNotes) {
 	if len(tools) == 0 {
 		<div class="flex justify-center items-center mt">
 			<div class="text-center muted ghost">
@@ -23,7 +23,7 @@ templ List(tools []*models.ToolWithNotes) {
 }
 
 // TODO: Add icons previewing notes (warning, error, info or whatever)
-templ listItem(id int64, tool *models.ToolWithNotes) {
+templ listItem(id int64, tool *toolmodels.ToolWithNotes) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a
 			role="button"
@@ -40,7 +40,7 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 						@PositionBadge(tool.Position, "muted text-bold")
 
 						switch tool.Status() {
-							case models.ToolStatusActive:
+							case toolmodels.ToolStatusActive:
 								<small
 									class="badge badge-sm badge-outline primary"
 								>
@@ -49,11 +49,11 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 										<span>Presse { *tool.Press }</span>
 									</span>
 								</small>
-							case models.ToolStatusAvailable:
+							case toolmodels.ToolStatusAvailable:
 								<small class="badge badge-sm badge-outline info">
 									Verfügbar
 								</small>
-							case models.ToolStatusRegenerating:
+							case toolmodels.ToolStatusRegenerating:
 								<small class="badge badge-sm badge-outline warning">
 									Regenerierung
 								</small>
@@ -65,11 +65,11 @@ templ listItem(id int64, tool *models.ToolWithNotes) {
 					var slotName string
 
 					switch tool.Position {
-					case models.PositionTop:
+					case toolmodels.PositionTop:
 						slotName = constants.QueryParamSlotTop
-					case models.PositionTopCassette:
+					case toolmodels.PositionTopCassette:
 						slotName = constants.QueryParamSlotTopCassette
-					case models.PositionBottom:
+					case toolmodels.PositionBottom:
 						slotName = constants.QueryParamSlotBottom
 					}
 				}}

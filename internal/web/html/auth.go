@@ -10,7 +10,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -96,7 +96,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 	ctx.SetCookie(cookie)
 
-	sessionCookie := models.NewCookie(
+	sessionCookie := cookiemodels.NewCookie(
 		ctx.Request().UserAgent(), cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
 		logger.HandlerAuth().Error("Failed to create session: %v", err)

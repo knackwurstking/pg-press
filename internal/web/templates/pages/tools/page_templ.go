@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
@@ -17,7 +17,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-func Page(tools []*models.ToolWithNotes) templ.Component {
+func Page(tools []*toolmodels.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -274,7 +274,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionBottom, "muted").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionBottom, "muted").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -295,7 +295,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionTop, "muted").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionTop, "muted").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -321,7 +321,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionTopCassette, "muted").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionTopCassette, "muted").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -351,7 +351,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 	})
 }
 
-func sectionTools(tools []*models.ToolWithNotes) templ.Component {
+func sectionTools(tools []*toolmodels.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

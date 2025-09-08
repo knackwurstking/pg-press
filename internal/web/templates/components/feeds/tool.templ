@@ -3,10 +3,10 @@ package feeds
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-templ AddTool(data *models.FeedToolAdd) {
+templ AddTool(data *feedmodels.FeedToolAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat ein neues Werkzeug
@@ -15,7 +15,7 @@ templ AddTool(data *models.FeedToolAdd) {
 	</div>
 }
 
-templ UpdateTool(data *models.FeedToolUpdate) {
+templ UpdateTool(data *feedmodels.FeedToolUpdate) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug
@@ -24,7 +24,7 @@ templ UpdateTool(data *models.FeedToolUpdate) {
 	</div>
 }
 
-templ DeleteTool(data *models.FeedToolDelete) {
+templ DeleteTool(data *feedmodels.FeedToolDelete) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Werkzeug

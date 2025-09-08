@@ -3,7 +3,8 @@ package tools
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
@@ -16,7 +17,7 @@ type EditDialogProps struct {
 	InputHeight         int
 	InputType           string
 	InputCode           string
-	InputPressSelection *models.PressNumber
+	InputPressSelection *presscyclemodels.PressNumber
 	Error               string
 }
 
@@ -85,9 +86,9 @@ templ EditDialog(props *EditDialogProps) {
 								</option>
 
 								<option
-									value={ models.PositionTop }
+									value={ toolmodels.PositionTop }
 
-									if models.Position(props.InputPosition) == models.PositionTop {
+									if toolmodels.Position(props.InputPosition) == toolmodels.PositionTop {
 										selected
 									}
 								>
@@ -95,9 +96,9 @@ templ EditDialog(props *EditDialogProps) {
 								</option>
 
 								<option
-									value={ models.PositionBottom }
+									value={ toolmodels.PositionBottom }
 
-									if models.Position(props.InputPosition) == models.PositionBottom {
+									if toolmodels.Position(props.InputPosition) == toolmodels.PositionBottom {
 										selected
 									}
 								>
@@ -105,9 +106,9 @@ templ EditDialog(props *EditDialogProps) {
 								</option>
 
 								<option
-									value={ models.PositionTopCassette }
+									value={ toolmodels.PositionTopCassette }
 
-									if models.Position(props.InputPosition) == models.PositionTopCassette {
+									if toolmodels.Position(props.InputPosition) == toolmodels.PositionTopCassette {
 										selected
 									}
 								>
@@ -126,7 +127,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value=""
 
-									if !models.IsValidPressNumber(props.InputPressSelection) {
+									if !presscyclemodels.IsValidPressNumber(props.InputPressSelection) {
 										selected
 									}
 								>
@@ -136,7 +137,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value="0"
 
-									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
+									if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
 										selected
 									}
 								>
@@ -146,7 +147,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value="2"
 
-									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
+									if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
 										selected
 									}
 								>
@@ -156,7 +157,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value="3"
 
-									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
+									if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
 										selected
 									}
 								>
@@ -166,7 +167,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value="4"
 
-									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
+									if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
 										selected
 									}
 								>
@@ -176,7 +177,7 @@ templ EditDialog(props *EditDialogProps) {
 								<option
 									value="5"
 
-									if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
+									if presscyclemodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
 										selected
 									}
 								>

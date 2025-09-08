@@ -5,7 +5,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -100,7 +100,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
 		logger.HandlerTools().Error("Failed to fetch metal sheets: %v", err)
-		metalSheets = []*models.MetalSheet{}
+		metalSheets = []*metalsheetmodels.MetalSheet{}
 	}
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))

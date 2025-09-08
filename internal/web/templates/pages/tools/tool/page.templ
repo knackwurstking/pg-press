@@ -3,7 +3,10 @@ package tool
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
@@ -11,16 +14,16 @@ import (
 	metalsheetscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/metalsheets"
 )
 
-templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ Page(user *usermodels.User, tool *toolmodels.ToolWithNotes, metalSheets []*metalsheetmodels.MetalSheet) {
 	{{
 		var slotName string
 
 		switch tool.Position {
-		case models.PositionTop:
+		case toolmodels.PositionTop:
 			slotName = constants.QueryParamSlotTop
-		case models.PositionTopCassette:
+		case toolmodels.PositionTopCassette:
 			slotName = constants.QueryParamSlotTopCassette
-		case models.PositionBottom:
+		case toolmodels.PositionBottom:
 			slotName = constants.QueryParamSlotBottom
 		}
 	}}
@@ -45,7 +48,7 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 			@sectionActions(user, tool)
 			@sectionNotes(tool)
 
-			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
+			if tool.Position == toolmodels.PositionTop || tool.Position == toolmodels.PositionBottom {
 				@sectionMetalSheets(user, metalSheets, tool, slotName)
 			}
 
@@ -54,7 +57,7 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 	}
 }
 
-templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
+templ sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
 			class="primary flex gap"
@@ -95,7 +98,7 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 	</div>
 }
 
-templ sectionNotes(tool *models.ToolWithNotes) {
+templ sectionNotes(tool *toolmodels.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section>
 			<h4>Notizen</h4>
@@ -106,13 +109,13 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 						<div class="card-header">
 							<span class="note-importance">
 								switch note.Level {
-									case models.INFO:
+									case notemodels.INFO:
 										<i class="bi bi-info-circle"></i>
 										Info
-									case models.ATTENTION:
+									case notemodels.ATTENTION:
 										<i class="bi bi-exclamation-triangle text-warning"></i>
 										<strong>Achtung</strong>
-									case models.BROKEN:
+									case notemodels.BROKEN:
 										<i class="bi bi-x-circle text-danger"></i>
 										<strong>Defekt</strong>
 								}
@@ -134,7 +137,7 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 }
 
 // TODO: Need some sorting logic here
-templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes, slotName string) {
+templ sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.MetalSheet, tool *toolmodels.ToolWithNotes, slotName string) {
 	<section>
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
@@ -161,11 +164,11 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 
 		<div class="table-container">
 			switch tool.Position {
-				case models.PositionBottom:
+				case toolmodels.PositionBottom:
 					@metalsheetscomp.TableForToolPositionBottom(
 						user, metalSheets,
 					)
-				case models.PositionTop:
+				case toolmodels.PositionTop:
 					@metalsheetscomp.TableForToolPositionTop(
 						user, metalSheets,
 					)
@@ -174,7 +177,7 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 	</section>
 }
 
-templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
+templ sectionCycles(tool *toolmodels.ToolWithNotes, slotName string) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
 
@@ -182,7 +185,7 @@ templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
 			<h5>Aktueller Status</h5>
 
 			switch tool.Status() {
-				case models.ToolStatusActive:
+				case toolmodels.ToolStatusActive:
 					<a
 						role="button"
 						class="secondary ghost flex gap justify-between w-full"
@@ -198,9 +201,9 @@ templ sectionCycles(tool *models.ToolWithNotes, slotName string) {
 
 						<i class="bi bi-chevron-right text-muted"></i>
 					</a>
-				case models.ToolStatusAvailable:
+				case toolmodels.ToolStatusAvailable:
 					<span class="info ghost">Verfügbar</span>
-				case models.ToolStatusRegenerating:
+				case toolmodels.ToolStatusRegenerating:
 					<span class="warning ghost">Regenerierung</span>
 				default:
 					<span>{ tool.Status() }</span>

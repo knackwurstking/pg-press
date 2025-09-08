@@ -1,4 +1,4 @@
-package models
+package cookie
 
 import (
 	"fmt"
@@ -169,8 +169,8 @@ func (c *Cookie) Equals(other *Cookie) bool {
 		c.LastLogin == other.LastLogin
 }
 
-// SortCookies sorts a slice of cookies by last login time in descending order.
-func SortCookies(cookies []*Cookie) []*Cookie {
+// Sort sorts a slice of cookies by last login time in descending order.
+func Sort(cookies []*Cookie) []*Cookie {
 	if len(cookies) <= 1 {
 		return cookies
 	}

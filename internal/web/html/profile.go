@@ -7,7 +7,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -57,7 +57,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	return nil
 }
 
-func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
+func (h *Profile) handleUserNameChange(c echo.Context, user *usermodels.User) error {
 	formParams, _ := c.FormParams()
 	userName := webhelpers.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
@@ -75,7 +75,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
 		user.UserName, user.TelegramID, userName)
 
-	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
+	updatedUser := usermodels.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
 	if err := h.DB.Users.Update(updatedUser, user); err != nil {

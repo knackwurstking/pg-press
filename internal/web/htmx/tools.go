@@ -7,7 +7,8 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -117,7 +118,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := models.NewTool(formData.Position)
+	tool := toolmodels.NewTool(formData.Position)
 	tool.Format = formData.Format
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -170,7 +171,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := models.NewTool(formData.Position)
+	tool := toolmodels.NewTool(formData.Position)
 	tool.ID = toolID
 	tool.Format = formData.Format
 	tool.Type = formData.Type
@@ -223,14 +224,14 @@ func (h *Tools) handleDelete(c echo.Context) error {
 func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 	logger.HTMXHandlerTools().Debug("Parsing tool form data")
 
-	var position models.Position
-	switch positionFormValue := c.FormValue("position"); models.Position(positionFormValue) {
-	case models.PositionTop:
-		position = models.PositionTop
-	case models.PositionTopCassette:
-		position = models.PositionTopCassette
-	case models.PositionBottom:
-		position = models.PositionBottom
+	var position toolmodels.Position
+	switch positionFormValue := c.FormValue("position"); toolmodels.Position(positionFormValue) {
+	case toolmodels.PositionTop:
+		position = toolmodels.PositionTop
+	case toolmodels.PositionTopCassette:
+		position = toolmodels.PositionTopCassette
+	case toolmodels.PositionBottom:
+		position = toolmodels.PositionBottom
 	default:
 		return nil, errors.New("invalid position")
 	}
@@ -278,9 +279,9 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 			return nil, errors.New("invalid press number: " + err.Error())
 		}
 
-		pn := models.PressNumber(press)
+		pn := presscyclemodels.PressNumber(press)
 		data.Press = &pn
-		if !models.IsValidPressNumber(data.Press) {
+		if !presscyclemodels.IsValidPressNumber(data.Press) {
 			return nil, errors.New("invalid press number")
 		}
 	}

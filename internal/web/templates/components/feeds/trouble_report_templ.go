@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-func AddTroubleReport(data *models.FeedTroubleReportAdd) templ.Component {
+func AddTroubleReport(data *feedmodels.FeedTroubleReportAdd) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -82,7 +82,7 @@ func AddTroubleReport(data *models.FeedTroubleReportAdd) templ.Component {
 	})
 }
 
-func UpdateTroubleReport(data *models.FeedTroubleReportUpdate) templ.Component {
+func UpdateTroubleReport(data *feedmodels.FeedTroubleReportUpdate) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -150,7 +150,7 @@ func UpdateTroubleReport(data *models.FeedTroubleReportUpdate) templ.Component {
 	})
 }
 
-func RemoveTroubleReport(data *models.FeedTroubleReportRemove) templ.Component {
+func RemoveTroubleReport(data *feedmodels.FeedTroubleReportRemove) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

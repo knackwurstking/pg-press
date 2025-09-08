@@ -3,19 +3,21 @@ package tools
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	presscyclemodels "github.com/knackwurstking/pgpress/internal/database/models/presscycle"
+	regenerationmodels "github.com/knackwurstking/pgpress/internal/database/models/regeneration"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 type CyclesSectionProps struct {
-	User              *models.User
+	User              *usermodels.User
 	SlotTop           int64
 	SlotTopCassette   int64
 	SlotBottom        int64
 	TotalCycles       int64
-	Cycles            []*models.PressCycle
-	Regenerations     []*models.ToolRegeneration
+	Cycles            []*presscyclemodels.PressCycle
+	Regenerations     []*regenerationmodels.ToolRegeneration
 }
 
 templ CyclesSection(props *CyclesSectionProps) {
@@ -87,7 +89,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
-templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
+templ cyclesTableRows(user *usermodels.User, cycles []*presscyclemodels.PressCycle) {
 	if len(cycles) == 0 {
 		<tr>
 			<td colspan="7" class="text-center">
@@ -103,7 +105,7 @@ templ cyclesTableRows(user *models.User, cycles []*models.PressCycle) {
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(user *models.User, cycle *models.PressCycle) {
+templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *presscyclemodels.PressCycle) {
 	<tr>
 		<td>
 			<span>{ cycle.ID }</span>

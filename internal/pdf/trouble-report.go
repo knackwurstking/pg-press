@@ -6,17 +6,19 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf/v2"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	attachmentmodels "github.com/knackwurstking/pgpress/internal/database/models/attachment"
+	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 )
 
 // Options contains common options for PDF generation
 type troubleReportOptions struct {
 	*imageOptions
-	Report *models.TroubleReportWithAttachments
+	Report *trmodels.TroubleReportWithAttachments
 }
 
 func GenerateTroubleReportPDF(
-	tr *models.TroubleReportWithAttachments,
+	tr *trmodels.TroubleReportWithAttachments,
 ) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetAutoPageBreak(true, 25)
@@ -139,35 +141,35 @@ func addTroubleReportImagesSection(o *troubleReportOptions) {
 
 func getTroubleReportMetadataInfo(o *troubleReportOptions) (
 	earliestTime, latestTime int64,
-	creator *models.User, lastModifier *models.User,
+	creator *usermodels.User, lastModifier *usermodels.User,
 ) {
 	earliestTime, latestTime = o.Report.Mods[0].Time, o.Report.Mods[0].Time
 
-	for _, mod := range o.Report.Mods {
-		if mod.Time < earliestTime {
-			earliestTime = mod.Time
-			creator = mod.User
+	for _, m := range o.Report.Mods {
+		if m.Time < earliestTime {
+			earliestTime = m.Time
+			creator = m.User
 		}
-		if mod.Time > latestTime {
-			latestTime = mod.Time
-			lastModifier = mod.User
+		if m.Time > latestTime {
+			latestTime = m.Time
+			lastModifier = m.User
 		}
 	}
 
 	return earliestTime, latestTime, creator, lastModifier
 }
 
-func getTroubleReportImageAttachments(attachments []*models.Attachment) []*models.Attachment {
-	var images []*models.Attachment
-	for _, attachment := range attachments {
-		if attachment.IsImage() {
-			images = append(images, attachment)
+func getTroubleReportImageAttachments(attachments []*attachmentmodels.Attachment) []*attachmentmodels.Attachment {
+	var images []*attachmentmodels.Attachment
+	for _, a := range attachments {
+		if a.IsImage() {
+			images = append(images, a)
 		}
 	}
 	return images
 }
 
-func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*models.Attachment) {
+func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*attachmentmodels.Attachment) {
 	pageWidth, _ := o.PDF.GetPageSize()
 	leftMargin, _, rightMargin, _ := o.PDF.GetMargins()
 	usableWidth := pageWidth - leftMargin - rightMargin

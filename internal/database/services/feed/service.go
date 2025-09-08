@@ -1,4 +1,4 @@
-// TODO: Need to fix this type to fit the `interfaces.DataOperations[*models.Cookie]` type
+// TODO: Need to fix this type to fit the `interfaces.DataOperations[*cookie.Cookie]` type
 package feed
 
 import (
@@ -7,7 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/models/feed"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -18,7 +18,7 @@ type Service struct {
 }
 
 // Just to make sure it fits TODO: Make it fit
-//var _ interfaces.DataOperations[*models.Feed] = (*Service)(nil)
+//var _ interfaces.DataOperations[*feed.Feed] = (*Service)(nil)
 
 // New creates a new Service instance and initializes the database table
 func New(db *sql.DB) *Service {
@@ -49,7 +49,7 @@ func (s *Service) SetBroadcaster(notifier interfaces.Broadcaster) {
 }
 
 // List retrieves all feeds ordered by ID in descending order
-func (s *Service) List() ([]*models.Feed, error) {
+func (s *Service) List() ([]*feed.Feed, error) {
 	logger.DBFeeds().Info("Listing all feeds")
 
 	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
@@ -63,7 +63,7 @@ func (s *Service) List() ([]*models.Feed, error) {
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
-func (s *Service) ListRange(offset, limit int) ([]*models.Feed, error) {
+func (s *Service) ListRange(offset, limit int) ([]*feed.Feed, error) {
 	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
 
 	if offset < 0 {
@@ -88,7 +88,7 @@ func (s *Service) ListRange(offset, limit int) ([]*models.Feed, error) {
 }
 
 // Add creates a new feed entry in the database
-func (s *Service) Add(feed *models.Feed) error {
+func (s *Service) Add(feed *feed.Feed) error {
 	logger.DBFeeds().Info("Adding feed: %+v", feed)
 
 	if feed == nil {
@@ -163,7 +163,7 @@ func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (s *Service) Get(id int) (*models.Feed, error) {
+func (s *Service) Get(id int) (*feed.Feed, error) {
 	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
@@ -214,8 +214,8 @@ func (s *Service) Delete(id int) error {
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
-func (s *Service) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
-	var feeds []*models.Feed
+func (s *Service) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
+	var feeds []*feed.Feed
 	for rows.Next() {
 		feed, err := s.scanFeed(rows)
 		if err != nil {
@@ -234,8 +234,8 @@ func (s *Service) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	return feeds, nil
 }
 
-func (s *Service) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
-	feed := &models.Feed{}
+func (s *Service) scanFeed(scanner interfaces.Scannable) (*feed.Feed, error) {
+	feed := &feed.Feed{}
 	var data []byte
 
 	if err := scanner.Scan(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {

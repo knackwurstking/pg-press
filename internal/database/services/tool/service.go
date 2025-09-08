@@ -7,7 +7,9 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -17,7 +19,7 @@ type Service struct {
 	feeds *feed.Service
 }
 
-var _ interfaces.DataOperations[*models.Tool] = (*Service)(nil)
+var _ interfaces.DataOperations[*toolmodels.Tool] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
@@ -51,7 +53,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 	}
 }
 
-func (t *Service) List() ([]*models.Tool, error) {
+func (t *Service) List() ([]*toolmodels.Tool, error) {
 	logger.DBTools().Info("Listing tools")
 
 	query := `
@@ -64,7 +66,7 @@ func (t *Service) List() ([]*models.Tool, error) {
 	}
 	defer rows.Close()
 
-	var tools []*models.Tool
+	var tools []*toolmodels.Tool
 
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
@@ -83,7 +85,7 @@ func (t *Service) List() ([]*models.Tool, error) {
 	return tools, nil
 }
 
-func (t *Service) Get(id int64) (*models.Tool, error) {
+func (t *Service) Get(id int64) (*toolmodels.Tool, error) {
 	logger.DBTools().Info("Getting tool, id: %d", id)
 
 	query := `
@@ -103,7 +105,7 @@ func (t *Service) Get(id int64) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
+func (t *Service) Add(tool *toolmodels.Tool, user *usermodels.User) (int64, error) {
 	logger.DBTools().Info("Adding tool: %s", tool.String())
 
 	// Marshal format for the existence check and insert
@@ -163,9 +165,9 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(models.NewFeed(
-			models.FeedTypeToolAdd,
-			&models.FeedToolAdd{
+		t.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeToolAdd,
+			&feedmodels.FeedToolAdd{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -176,7 +178,7 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	return id, nil
 }
 
-func (t *Service) Update(tool *models.Tool, user *models.User) error {
+func (t *Service) Update(tool *toolmodels.Tool, user *usermodels.User) error {
 	logger.DBTools().Info("Updating tool: %d", tool.ID)
 
 	// Marshal format for the existence check and update
@@ -227,9 +229,9 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(models.NewFeed(
-			models.FeedTypeToolUpdate,
-			&models.FeedToolUpdate{
+		t.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeToolUpdate,
+			&feedmodels.FeedToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -240,7 +242,7 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 	return nil
 }
 
-func (t *Service) Delete(id int64, user *models.User) error {
+func (t *Service) Delete(id int64, user *usermodels.User) error {
 	logger.DBTools().Info("Deleting tool: %d", id)
 
 	// Get tool info before deletion for feed
@@ -260,9 +262,9 @@ func (t *Service) Delete(id int64, user *models.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(models.NewFeed(
-			models.FeedTypeToolDelete,
-			&models.FeedToolDelete{
+		t.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeToolDelete,
+			&feedmodels.FeedToolDelete{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -273,8 +275,8 @@ func (t *Service) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (t *Service) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
-	tool := &models.Tool{}
+func (t *Service) scanTool(scanner interfaces.Scannable) (*toolmodels.Tool, error) {
+	tool := &toolmodels.Tool{}
 
 	var (
 		format      []byte
@@ -308,12 +310,12 @@ func (t *Service) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Service) updateMods(user *models.User, tool *models.Tool) {
+func (t *Service) updateMods(user *usermodels.User, tool *toolmodels.Tool) {
 	if user == nil {
 		return
 	}
 
-	tool.Mods.Add(user, models.ToolMod{
+	tool.Mods.Add(user, toolmodels.ToolMod{
 		Position:     tool.Position,
 		Format:       tool.Format,
 		Type:         tool.Type,

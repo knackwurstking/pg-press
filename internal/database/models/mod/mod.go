@@ -1,4 +1,4 @@
-package models
+package mod
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/models/user"
 )
 
 type Mods[T any] []*Mod[T]
@@ -17,7 +18,7 @@ func (m *Mods[T]) Reversed() []*Mod[T] {
 	return reversed
 }
 
-func (m *Mods[T]) Add(user *User, data T) {
+func (m *Mods[T]) Add(user *user.User, data T) {
 	*m = append(*m, NewMod(user, data))
 }
 
@@ -56,20 +57,20 @@ func (m *Mods[T]) Get(time int64) (*Mod[T], error) {
 
 // Mod represents a modification record that tracks changes made to any type T
 type Mod[T any] struct {
-	User *User `json:"user"`
-	Time int64 `json:"time"` // Time of modification in milliseconds since Unix epoch,
+	User *user.User `json:"user"`
+	Time int64      `json:"time"` // Time of modification in milliseconds since Unix epoch,
 	// should be unique
 	Data T `json:"data"`
 }
 
 // NewMod creates a new modification record with the current timestamp
-func NewMod[T any](user *User, data T) *Mod[T] {
-	if user == nil {
-		user = &User{UserName: "system"}
+func NewMod[T any](u *user.User, data T) *Mod[T] {
+	if u == nil {
+		u = &user.User{UserName: "system"}
 	}
 
 	return &Mod[T]{
-		User: user,
+		User: u,
 		Time: time.Now().UnixMilli(),
 		Data: data,
 	}

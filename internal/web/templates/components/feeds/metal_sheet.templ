@@ -3,10 +3,10 @@ package feeds
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-templ AddMetalSheet(data *models.FeedMetalSheetAdd) {
+templ AddMetalSheet(data *feedmodels.FeedMetalSheetAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat ein neues Blech
@@ -15,7 +15,7 @@ templ AddMetalSheet(data *models.FeedMetalSheetAdd) {
 	</div>
 }
 
-templ UpdateMetalSheet(data *models.FeedMetalSheetUpdate) {
+templ UpdateMetalSheet(data *feedmodels.FeedMetalSheetUpdate) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Blech
@@ -24,7 +24,7 @@ templ UpdateMetalSheet(data *models.FeedMetalSheetUpdate) {
 	</div>
 }
 
-templ DeleteMetalSheet(data *models.FeedMetalSheetDelete) {
+templ DeleteMetalSheet(data *feedmodels.FeedMetalSheetDelete) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat das Blech mit ID
@@ -33,7 +33,7 @@ templ DeleteMetalSheet(data *models.FeedMetalSheetDelete) {
 	</div>
 }
 
-templ MetalSheetStatusChange(data *models.FeedMetalSheetStatusChange) {
+templ MetalSheetStatusChange(data *feedmodels.FeedMetalSheetStatusChange) {
 	{{
 		var status string
 		statusTranslation := map[string]string{
@@ -56,7 +56,7 @@ templ MetalSheetStatusChange(data *models.FeedMetalSheetStatusChange) {
 	</div>
 }
 
-templ MetalSheetToolAssignment(data *models.FeedMetalSheetToolAssignment) {
+templ MetalSheetToolAssignment(data *feedmodels.FeedMetalSheetToolAssignment) {
 	<div class="feed-item">
 		<div class="feed-item-content" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.ModifiedBy.UserName }</strong> hat Blech

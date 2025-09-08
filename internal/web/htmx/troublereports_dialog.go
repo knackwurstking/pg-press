@@ -12,7 +12,8 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	attachmentmodels "github.com/knackwurstking/pgpress/internal/database/models/attachment"
+	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -97,7 +98,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 	if !props.InvalidTitle && !props.InvalidContent {
 		props.Attachments = attachments
-		tr := models.NewTroubleReport(title, content)
+		tr := trmodels.NewTroubleReport(title, content)
 
 		logger.HTMXHandlerTroubleReports().Debug(
 			"Creating trouble report: title='%s', attachments=%d",
@@ -177,7 +178,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
-	var newAttachments []*models.Attachment
+	var newAttachments []*attachmentmodels.Attachment
 	for _, a := range props.Attachments {
 		if a.GetID() > 0 {
 			existingAttachmentIDs = append(existingAttachmentIDs, a.GetID())
@@ -218,7 +219,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 // TODO: Do somehtings like the `get*FormData` method in "tools.go"
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
-	attachments []*models.Attachment,
+	attachments []*attachmentmodels.Attachment,
 	err error,
 ) {
 	logger.HTMXHandlerTroubleReports().Debug("Validating dialog edit form data")
@@ -251,9 +252,9 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	return title, content, attachments, nil
 }
 
-func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
+func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*attachmentmodels.Attachment, error) {
 	logger.HTMXHandlerTroubleReports().Debug("Processing attachments")
-	var attachments []*models.Attachment
+	var attachments []*attachmentmodels.Attachment
 
 	// Get existing attachments if editing
 	if idStr := ctx.QueryParam(constants.QueryParamID); idStr != "" {
@@ -262,7 +263,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
 				if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(
 					existingTR); err == nil {
-					attachments = make([]*models.Attachment, len(loadedAttachments))
+					attachments = make([]*attachmentmodels.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
 					logger.HTMXHandlerTroubleReports().Debug("Loaded %d existing attachments for trouble report %d", len(loadedAttachments), id)
 				}
@@ -319,11 +320,11 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 func (h *TroubleReports) processFileUpload(
 	fileHeader *multipart.FileHeader,
 	index int,
-) (*models.Attachment, error) {
+) (*attachmentmodels.Attachment, error) {
 	logger.HTMXHandlerTroubleReports().Debug("Processing file upload: %s (size: %d bytes)", fileHeader.Filename, fileHeader.Size)
 
-	if fileHeader.Size > models.MaxAttachmentDataSize {
-		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, models.MaxAttachmentDataSize)
+	if fileHeader.Size > attachmentmodels.MaxAttachmentDataSize {
+		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, attachmentmodels.MaxAttachmentDataSize)
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
 	}
@@ -345,8 +346,8 @@ func (h *TroubleReports) processFileUpload(
 	attachmentID := fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
 
 	// Ensure ID doesn't exceed maximum length
-	if len(attachmentID) > models.MaxAttachmentIDLength {
-		maxFilenameLen := models.MaxAttachmentIDLength - len(timestamp) -
+	if len(attachmentID) > attachmentmodels.MaxAttachmentIDLength {
+		maxFilenameLen := attachmentmodels.MaxAttachmentIDLength - len(timestamp) -
 			len(fmt.Sprintf("temp_%d", index)) - 2
 		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
 			sanitizedFilename = sanitizedFilename[:maxFilenameLen]
@@ -374,7 +375,7 @@ func (h *TroubleReports) processFileUpload(
 		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
 	}
 
-	attachment := &models.Attachment{
+	attachment := &attachmentmodels.Attachment{
 		ID:       attachmentID,
 		MimeType: mimeType,
 		Data:     data,

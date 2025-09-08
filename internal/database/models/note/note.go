@@ -1,4 +1,4 @@
-package models
+package note
 
 import "time"
 

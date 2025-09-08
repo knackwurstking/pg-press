@@ -7,7 +7,11 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
+	modmodels "github.com/knackwurstking/pgpress/internal/database/models/mod"
+	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -20,7 +24,7 @@ type Service struct {
 	notes *note.Service
 }
 
-var _ interfaces.DataOperations[*models.MetalSheet] = (*Service)(nil)
+var _ interfaces.DataOperations[*metalsheetmodels.MetalSheet] = (*Service)(nil)
 
 // NewMetalSheets creates a new MetalSheets instance
 func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
@@ -61,7 +65,7 @@ func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 }
 
 // List returns all metal sheets
-func (s *Service) List() ([]*models.MetalSheet, error) {
+func (s *Service) List() ([]*metalsheetmodels.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
@@ -76,7 +80,7 @@ func (s *Service) List() ([]*models.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*models.MetalSheet
+	var sheets []*metalsheetmodels.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -96,7 +100,7 @@ func (s *Service) List() ([]*models.MetalSheet, error) {
 }
 
 // Get returns a metal sheet by ID
-func (s *Service) Get(id int64) (*models.MetalSheet, error) {
+func (s *Service) Get(id int64) (*metalsheetmodels.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
@@ -119,7 +123,7 @@ func (s *Service) Get(id int64) (*models.MetalSheet, error) {
 }
 
 // GetWithNotes returns a metal sheet with its related notes loaded
-func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
+func (s *Service) GetWithNotes(id int64) (*metalsheetmodels.MetalSheetWithNotes, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := s.Get(id)
@@ -127,9 +131,9 @@ func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 		return nil, err
 	}
 
-	result := &models.MetalSheetWithNotes{
+	result := &metalsheetmodels.MetalSheetWithNotes{
 		MetalSheet:  sheet,
-		LoadedNotes: []*models.Note{},
+		LoadedNotes: []*notemodels.Note{},
 	}
 
 	// Load notes if there are any linked
@@ -148,7 +152,7 @@ func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 }
 
 // GetByToolID returns all metal sheets assigned to a specific tool
-func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
+func (s *Service) GetByToolID(toolID int64) ([]*metalsheetmodels.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
@@ -164,7 +168,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*models.MetalSheet
+	var sheets []*metalsheetmodels.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -184,7 +188,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 }
 
 // GetAvailable returns all available metal sheets
-func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
+func (s *Service) GetAvailable() ([]*metalsheetmodels.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
@@ -201,7 +205,7 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*models.MetalSheet
+	var sheets []*metalsheetmodels.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -221,12 +225,12 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
+func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
-		initialMod := models.NewMod(user, models.MetalSheetMod{
+		initialMod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
 			TileHeight:  sheet.TileHeight,
 			Value:       sheet.Value,
 			MarkeHeight: sheet.MarkeHeight,
@@ -235,7 +239,7 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 			ToolID:      sheet.ToolID,
 			LinkedNotes: sheet.LinkedNotes,
 		})
-		sheet.Mods = []*models.Mod[models.MetalSheetMod]{initialMod}
+		sheet.Mods = []*modmodels.Mod[metalsheetmodels.MetalSheetMod]{initialMod}
 	}
 
 	// Marshal JSON fields
@@ -276,9 +280,9 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(models.NewFeed(
-			models.FeedTypeMetalSheetAdd,
-			&models.FeedMetalSheetAdd{
+		s.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeMetalSheetAdd,
+			&feedmodels.FeedMetalSheetAdd{
 				ID:         id,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -290,7 +294,7 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 }
 
 // Update updates an existing metal sheet
-func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
+func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
@@ -308,7 +312,7 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 		!equalToolIDs(current.ToolID, sheet.ToolID) ||
 		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
 
-		mod := models.NewMod(user, models.MetalSheetMod{
+		mod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
 			TileHeight:  current.TileHeight,
 			Value:       current.Value,
 			MarkeHeight: current.MarkeHeight,
@@ -318,7 +322,7 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 			LinkedNotes: current.LinkedNotes,
 		})
 		// Prepend new mod to keep most recent first
-		sheet.Mods = append([]*models.Mod[models.MetalSheetMod]{mod}, sheet.Mods...)
+		sheet.Mods = append([]*modmodels.Mod[metalsheetmodels.MetalSheetMod]{mod}, sheet.Mods...)
 	}
 
 	// Marshal JSON fields
@@ -353,9 +357,9 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(models.NewFeed(
-			models.FeedTypeMetalSheetUpdate,
-			&models.FeedMetalSheetUpdate{
+		s.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeMetalSheetUpdate,
+			&feedmodels.FeedMetalSheetUpdate{
 				ID:         sheet.ID,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -367,7 +371,7 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
+func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -377,7 +381,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 	}
 
 	// Add modification record before changing
-	mod := models.NewMod(user, models.MetalSheetMod{
+	mod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -387,7 +391,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 		LinkedNotes: sheet.LinkedNotes,
 	})
 	// Prepend new mod to keep most recent first
-	sheet.Mods = append(models.Mods[models.MetalSheetMod]{mod}, sheet.Mods...)
+	sheet.Mods = append(modmodels.Mods[metalsheetmodels.MetalSheetMod]{mod}, sheet.Mods...)
 
 	// Update the tool assignment
 	sheet.ToolID = toolID
@@ -415,9 +419,9 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(models.NewFeed(
-			models.FeedTypeMetalSheetToolAssignment,
-			&models.FeedMetalSheetToolAssignment{
+		s.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeMetalSheetToolAssignment,
+			&feedmodels.FeedMetalSheetToolAssignment{
 				SheetID:    sheetID,
 				ToolID:     toolID,
 				ModifiedBy: user,
@@ -429,7 +433,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 }
 
 // Delete deletes a metal sheet
-func (s *Service) Delete(id int64, user *models.User) error {
+func (s *Service) Delete(id int64, user *usermodels.User) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	query := `
@@ -445,9 +449,9 @@ func (s *Service) Delete(id int64, user *models.User) error {
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(models.NewFeed(
-			models.FeedTypeMetalSheetDelete,
-			&models.FeedMetalSheetDelete{
+		s.feeds.Add(feedmodels.NewFeed(
+			feedmodels.FeedTypeMetalSheetDelete,
+			&feedmodels.FeedMetalSheetDelete{
 				ID:         id,
 				ModifiedBy: user,
 			},
@@ -457,9 +461,9 @@ func (s *Service) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
+func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*metalsheetmodels.MetalSheet, error) {
 	logger.DBMetalSheets().Debug("Scanning metal sheet")
-	sheet := &models.MetalSheet{}
+	sheet := &metalsheetmodels.MetalSheet{}
 
 	var (
 		linkedNotes []byte

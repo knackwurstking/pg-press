@@ -7,7 +7,9 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -17,7 +19,7 @@ type Service struct {
 	feeds *feed.Service
 }
 
-var _ interfaces.DataOperations[*models.TroubleReport] = (*Service)(nil)
+var _ interfaces.DataOperations[*trmodels.TroubleReport] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
@@ -46,7 +48,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 }
 
 // List retrieves all trouble reports ordered by ID descending.
-func (tr *Service) List() ([]*models.TroubleReport, error) {
+func (tr *Service) List() ([]*trmodels.TroubleReport, error) {
 	logger.DBTroubleReports().Info("Listing trouble reports")
 
 	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
@@ -57,7 +59,7 @@ func (tr *Service) List() ([]*models.TroubleReport, error) {
 	}
 	defer rows.Close()
 
-	var reports []*models.TroubleReport
+	var reports []*trmodels.TroubleReport
 
 	for rows.Next() {
 		report, err := tr.scanTroubleReport(rows)
@@ -76,7 +78,7 @@ func (tr *Service) List() ([]*models.TroubleReport, error) {
 }
 
 // Get retrieves a specific trouble report by ID.
-func (tr *Service) Get(id int64) (*models.TroubleReport, error) {
+func (tr *Service) Get(id int64) (*trmodels.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report, id: %d", id)
 
 	query := `SELECT * FROM trouble_reports WHERE id = ?`
@@ -95,7 +97,7 @@ func (tr *Service) Get(id int64) (*models.TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
+func (tr *Service) Add(troubleReport *trmodels.TroubleReport, user *usermodels.User) (int64, error) {
 	logger.DBTroubleReports().Info("Adding trouble report: %+v", troubleReport)
 
 	if troubleReport == nil {
@@ -137,9 +139,9 @@ func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (
 	}
 	troubleReport.ID = id
 
-	feed := models.NewFeed(
-		models.FeedTypeTroubleReportAdd,
-		&models.FeedTroubleReportAdd{
+	feed := feedmodels.NewFeed(
+		feedmodels.FeedTypeTroubleReportAdd,
+		&feedmodels.FeedTroubleReportAdd{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -153,7 +155,7 @@ func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User) error {
+func (tr *Service) Update(troubleReport *trmodels.TroubleReport, user *usermodels.User) error {
 	id := troubleReport.ID
 	logger.DBTroubleReports().Info("Updating trouble report, id: %d, data: %+v", id, troubleReport)
 
@@ -188,9 +190,9 @@ func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
-	feed := models.NewFeed(
-		models.FeedTypeTroubleReportUpdate,
-		&models.FeedTroubleReportUpdate{
+	feed := feedmodels.NewFeed(
+		feedmodels.FeedTypeTroubleReportUpdate,
+		&feedmodels.FeedTroubleReportUpdate{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -204,7 +206,7 @@ func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User
 }
 
 // Delete deletes a trouble report by ID and generates an activity feed entry.
-func (tr *Service) Delete(id int64, user *models.User) error {
+func (tr *Service) Delete(id int64, user *usermodels.User) error {
 	logger.DBTroubleReports().Info("Removing trouble report, id: %d", id)
 
 	// Get the user before deleting for the feed entry
@@ -232,9 +234,9 @@ func (tr *Service) Delete(id int64, user *models.User) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := models.NewFeed(
-			models.FeedTypeTroubleReportRemove,
-			&models.FeedTroubleReportRemove{
+		feed := feedmodels.NewFeed(
+			feedmodels.FeedTypeTroubleReportRemove,
+			&feedmodels.FeedTroubleReportRemove{
 				ID:        report.ID,
 				Title:     report.Title,
 				RemovedBy: user,
@@ -248,8 +250,8 @@ func (tr *Service) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
-	report := &models.TroubleReport{}
+func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*trmodels.TroubleReport, error) {
+	report := &trmodels.TroubleReport{}
 	var linkedAttachments string
 	var mods []byte
 
@@ -274,12 +276,12 @@ func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*models.Trou
 	return report, nil
 }
 
-func (tr *Service) updateMods(user *models.User, report *models.TroubleReport) {
+func (tr *Service) updateMods(user *usermodels.User, report *trmodels.TroubleReport) {
 	if user == nil {
 		return
 	}
 
-	report.Mods.Add(user, models.TroubleReportMod{
+	report.Mods.Add(user, trmodels.TroubleReportMod{
 		Title:             report.Title,
 		Content:           report.Content,
 		LinkedAttachments: report.LinkedAttachments,

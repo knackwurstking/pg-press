@@ -1,10 +1,12 @@
-package models
+// TODO: I really need to refactor this, Find a better way to handle feeds if possible
+package feed
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/models/user"
 )
 
 const (
@@ -70,16 +72,16 @@ func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
 
 // FeedTroubleReportAdd represents a trouble report creation event.
 type FeedTroubleReportAdd struct {
-	ID         int64  `json:"id"`
-	Title      string `json:"title"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	Title      string     `json:"title"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 	return &FeedTroubleReportAdd{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -87,16 +89,16 @@ func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
 
 // FeedTroubleReportUpdate represents a trouble report update event.
 type FeedTroubleReportUpdate struct {
-	ID         int64  `json:"id"`
-	Title      string `json:"title"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	Title      string     `json:"title"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 	return &FeedTroubleReportUpdate{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -104,16 +106,16 @@ func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
 
 // FeedTroubleReportRemove represents a trouble report removal event.
 type FeedTroubleReportRemove struct {
-	ID        int64  `json:"id"`
-	Title     string `json:"title"`
-	RemovedBy *User  `json:"removed_by"`
+	ID        int64      `json:"id"`
+	Title     string     `json:"title"`
+	RemovedBy *user.User `json:"removed_by"`
 }
 
 func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 	return &FeedTroubleReportRemove{
 		ID:    int64(data["id"].(float64)),
 		Title: data["title"].(string),
-		RemovedBy: NewUserFromInterfaceMap(
+		RemovedBy: user.NewUserFromInterfaceMap(
 			data["removed_by"].(map[string]any),
 		),
 	}
@@ -121,16 +123,16 @@ func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
 
 // FeedToolAdd represents a tool addition event.
 type FeedToolAdd struct {
-	ID         int64  `json:"id"`
-	Tool       string `json:"tool"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
 	return &FeedToolAdd{
 		ID:   int64(data["id"].(float64)),
 		Tool: data["tool"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -138,16 +140,16 @@ func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
 
 // FeedToolUpdate represents a tool update event.
 type FeedToolUpdate struct {
-	ID         int64  `json:"id"`
-	Tool       string `json:"tool"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedToolUpdate(data map[string]any) *FeedToolUpdate {
 	return &FeedToolUpdate{
 		ID:   int64(data["id"].(float64)),
 		Tool: data["tool"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -155,16 +157,16 @@ func NewFeedToolUpdate(data map[string]any) *FeedToolUpdate {
 
 // FeedToolDelete represents a tool deletion event.
 type FeedToolDelete struct {
-	ID         int64  `json:"id"`
-	Tool       string `json:"tool"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedToolDelete(data map[string]any) *FeedToolDelete {
 	return &FeedToolDelete{
 		ID:   int64(data["id"].(float64)),
 		Tool: data["tool"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -172,16 +174,16 @@ func NewFeedToolDelete(data map[string]any) *FeedToolDelete {
 
 // FeedMetalSheetAdd represents a metal sheet addition event.
 type FeedMetalSheetAdd struct {
-	ID         int64  `json:"id"`
-	MetalSheet string `json:"metal_sheet"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	MetalSheet string     `json:"metal_sheet"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedMetalSheetAdd(data map[string]any) *FeedMetalSheetAdd {
 	return &FeedMetalSheetAdd{
 		ID:         int64(data["id"].(float64)),
 		MetalSheet: data["metal_sheet"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -189,16 +191,16 @@ func NewFeedMetalSheetAdd(data map[string]any) *FeedMetalSheetAdd {
 
 // FeedMetalSheetUpdate represents a metal sheet update event.
 type FeedMetalSheetUpdate struct {
-	ID         int64  `json:"id"`
-	MetalSheet string `json:"metal_sheet"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	MetalSheet string     `json:"metal_sheet"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedMetalSheetUpdate(data map[string]any) *FeedMetalSheetUpdate {
 	return &FeedMetalSheetUpdate{
 		ID:         int64(data["id"].(float64)),
 		MetalSheet: data["metal_sheet"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -206,14 +208,14 @@ func NewFeedMetalSheetUpdate(data map[string]any) *FeedMetalSheetUpdate {
 
 // FeedMetalSheetDelete represents a metal sheet deletion event.
 type FeedMetalSheetDelete struct {
-	ID         int64 `json:"id"`
-	ModifiedBy *User `json:"modified_by"`
+	ID         int64      `json:"id"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedMetalSheetDelete(data map[string]any) *FeedMetalSheetDelete {
 	return &FeedMetalSheetDelete{
 		ID: int64(data["id"].(float64)),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -221,16 +223,16 @@ func NewFeedMetalSheetDelete(data map[string]any) *FeedMetalSheetDelete {
 
 // FeedMetalSheetStatusChange represents a metal sheet status change event.
 type FeedMetalSheetStatusChange struct {
-	ID         int64  `json:"id"`
-	NewStatus  string `json:"new_status"`
-	ModifiedBy *User  `json:"modified_by"`
+	ID         int64      `json:"id"`
+	NewStatus  string     `json:"new_status"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedMetalSheetStatusChange(data map[string]any) *FeedMetalSheetStatusChange {
 	return &FeedMetalSheetStatusChange{
 		ID:        int64(data["id"].(float64)),
 		NewStatus: data["new_status"].(string),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -238,15 +240,15 @@ func NewFeedMetalSheetStatusChange(data map[string]any) *FeedMetalSheetStatusCha
 
 // FeedMetalSheetToolAssignment represents a metal sheet tool assignment event.
 type FeedMetalSheetToolAssignment struct {
-	SheetID    int64  `json:"sheet_id"`
-	ToolID     *int64 `json:"tool_id"`
-	ModifiedBy *User  `json:"modified_by"`
+	SheetID    int64      `json:"sheet_id"`
+	ToolID     *int64     `json:"tool_id"`
+	ModifiedBy *user.User `json:"modified_by"`
 }
 
 func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAssignment {
 	assignment := &FeedMetalSheetToolAssignment{
 		SheetID: int64(data["sheet_id"].(float64)),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -259,11 +261,11 @@ func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAss
 
 // FeedPressCycleAdd represents a press cycle creation event.
 type FeedPressCycleAdd struct {
-	SlotTop         int64 `json:"slot_top"`
-	SlotTopCassette int64 `json:"slot_top_cassette"`
-	SlotBottom      int64 `json:"slot_bottom"`
-	TotalCycles     int64 `json:"total_cycles"`
-	ModifiedBy      *User `json:"modified_by"`
+	SlotTop         int64      `json:"slot_top"`
+	SlotTopCassette int64      `json:"slot_top_cassette"`
+	SlotBottom      int64      `json:"slot_bottom"`
+	TotalCycles     int64      `json:"total_cycles"`
+	ModifiedBy      *user.User `json:"modified_by"`
 }
 
 func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
@@ -272,7 +274,7 @@ func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
 		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
 		SlotBottom:      int64(data["slot_bottom"].(float64)),
 		TotalCycles:     int64(data["total_cycles"].(float64)),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}
@@ -280,11 +282,11 @@ func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
 
 // FeedPressCycleUpdate represents a press cycle update event.
 type FeedPressCycleUpdate struct {
-	SlotTop         int64 `json:"slot_top"`
-	SlotTopCassette int64 `json:"slot_top_cassette"`
-	SlotBottom      int64 `json:"slot_bottom"`
-	TotalCycles     int64 `json:"total_cycles"`
-	ModifiedBy      *User `json:"modified_by"`
+	SlotTop         int64      `json:"slot_top"`
+	SlotTopCassette int64      `json:"slot_top_cassette"`
+	SlotBottom      int64      `json:"slot_bottom"`
+	TotalCycles     int64      `json:"total_cycles"`
+	ModifiedBy      *user.User `json:"modified_by"`
 }
 
 func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
@@ -293,7 +295,7 @@ func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
 		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
 		SlotBottom:      int64(data["slot_bottom"].(float64)),
 		TotalCycles:     int64(data["total_cycles"].(float64)),
-		ModifiedBy: NewUserFromInterfaceMap(
+		ModifiedBy: user.NewUserFromInterfaceMap(
 			data["modified_by"].(map[string]any),
 		),
 	}

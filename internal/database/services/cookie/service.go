@@ -1,6 +1,6 @@
 // Package database provides cookie and session management.
 //
-// TODO: Need to fix this type to fit the `interfaces.DataOperations[*models.Cookie]` type
+// TODO: Need to fix this type to fit the `interfaces.DataOperations[*cookie.Cookie]` type
 package cookie
 
 import (
@@ -8,7 +8,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/models/cookie"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -18,7 +18,7 @@ type Service struct {
 }
 
 // Just to make sure it fits TODO: Make it fit
-//var _ interfaces.DataOperations[*models.Cookie] = (*Service)(nil)
+//var _ interfaces.DataOperations[*cookie.Cookie] = (*Service)(nil)
 
 // New creates a new Service instance and initializes the database table.
 func New(db *sql.DB) *Service {
@@ -40,7 +40,7 @@ func New(db *sql.DB) *Service {
 }
 
 // List retrieves all cookies ordered by last login time (most recent first).
-func (c *Service) List() ([]*models.Cookie, error) {
+func (c *Service) List() ([]*cookie.Cookie, error) {
 	logger.DBCookies().Info("Listing all cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
@@ -50,7 +50,7 @@ func (c *Service) List() ([]*models.Cookie, error) {
 	}
 	defer rows.Close()
 
-	var cookies []*models.Cookie
+	var cookies []*cookie.Cookie
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
@@ -68,7 +68,7 @@ func (c *Service) List() ([]*models.Cookie, error) {
 }
 
 // ListApiKey retrieves all cookies associated with a specific API key.
-func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
+func (c *Service) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 	logger.DBCookies().Info("Listing cookies by API key")
 
 	if apiKey == "" {
@@ -84,7 +84,7 @@ func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 	}
 	defer rows.Close()
 
-	var cookies []*models.Cookie
+	var cookies []*cookie.Cookie
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
@@ -102,7 +102,7 @@ func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 }
 
 // Get retrieves a specific cookie by its value.
-func (c *Service) Get(value string) (*models.Cookie, error) {
+func (c *Service) Get(value string) (*cookie.Cookie, error) {
 	logger.DBCookies().Debug("Getting cookie by value")
 
 	if value == "" {
@@ -124,7 +124,7 @@ func (c *Service) Get(value string) (*models.Cookie, error) {
 }
 
 // Add creates a new cookie session in the database.
-func (c *Service) Add(cookie *models.Cookie) error {
+func (c *Service) Add(cookie *cookie.Cookie) error {
 	logger.DBCookies().Info("Adding cookie: %+v", cookie)
 
 	if cookie == nil {
@@ -169,7 +169,7 @@ func (c *Service) Add(cookie *models.Cookie) error {
 }
 
 // Update modifies an existing cookie session.
-func (c *Service) Update(value string, cookie *models.Cookie) error {
+func (c *Service) Update(value string, cookie *cookie.Cookie) error {
 	logger.DBCookies().Info("Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
@@ -277,8 +277,8 @@ func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (c *Service) scanCookie(scanner interfaces.Scannable) (*models.Cookie, error) {
-	cookie := &models.Cookie{}
+func (c *Service) scanCookie(scanner interfaces.Scannable) (*cookie.Cookie, error) {
+	cookie := &cookie.Cookie{}
 	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 	if err != nil {
 		if err == sql.ErrNoRows {

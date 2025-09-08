@@ -12,7 +12,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -23,7 +24,7 @@ type Service struct {
 	feeds *feed.Service
 }
 
-var _ interfaces.DataOperations[*models.User] = (*Service)(nil)
+var _ interfaces.DataOperations[*usermodels.User] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
@@ -47,7 +48,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 }
 
 // List retrieves all users from the database.
-func (u *Service) List() ([]*models.User, error) {
+func (u *Service) List() ([]*usermodels.User, error) {
 	logger.DBUsers().Info("Listing all users")
 
 	query := `SELECT * FROM users`
@@ -58,7 +59,7 @@ func (u *Service) List() ([]*models.User, error) {
 	}
 	defer rows.Close()
 
-	var users []*models.User
+	var users []*usermodels.User
 	for rows.Next() {
 		user, err := u.scanUser(rows)
 		if err != nil {
@@ -76,7 +77,7 @@ func (u *Service) List() ([]*models.User, error) {
 }
 
 // Get retrieves a specific user by Telegram ID.
-func (u *Service) Get(telegramID int64) (*models.User, error) {
+func (u *Service) Get(telegramID int64) (*usermodels.User, error) {
 	logger.DBUsers().Debug("Getting user by Telegram ID: %d", telegramID)
 
 	query := `SELECT * FROM users WHERE telegram_id = ?`
@@ -95,7 +96,7 @@ func (u *Service) Get(telegramID int64) (*models.User, error) {
 }
 
 // Add creates a new user and generates a corresponding activity feed entry.
-func (u *Service) Add(user *models.User, actor *models.User) (int64, error) {
+func (u *Service) Add(user *usermodels.User, actor *usermodels.User) (int64, error) {
 	if user == nil {
 		return 0, dberror.NewValidationError("user", "user cannot be nil", nil)
 	}
@@ -131,9 +132,9 @@ func (u *Service) Add(user *models.User, actor *models.User) (int64, error) {
 	}
 
 	// Create feed entry for the new user
-	feed := models.NewFeed(
-		models.FeedTypeUserAdd,
-		models.FeedUserAdd{ID: user.TelegramID, Name: user.UserName},
+	feed := feedmodels.NewFeed(
+		feedmodels.FeedTypeUserAdd,
+		feedmodels.FeedUserAdd{ID: user.TelegramID, Name: user.UserName},
 	)
 	if err := u.feeds.Add(feed); err != nil {
 		return user.TelegramID, dberror.WrapError(err, "failed to add feed entry")
@@ -143,7 +144,7 @@ func (u *Service) Add(user *models.User, actor *models.User) (int64, error) {
 }
 
 // Delete deletes a user by Telegram ID and generates an activity feed entry.
-func (u *Service) Delete(telegramID int64, actor *models.User) error {
+func (u *Service) Delete(telegramID int64, actor *usermodels.User) error {
 	logger.DBUsers().Info("Removing user: %d", telegramID)
 
 	// Get the user before deleting for the feed entry
@@ -168,9 +169,9 @@ func (u *Service) Delete(telegramID int64, actor *models.User) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := models.NewFeed(
-			models.FeedTypeUserRemove,
-			models.FeedUserRemove{ID: user.TelegramID, Name: user.UserName},
+		feed := feedmodels.NewFeed(
+			feedmodels.FeedTypeUserRemove,
+			feedmodels.FeedUserRemove{ID: user.TelegramID, Name: user.UserName},
 		)
 		if err := u.feeds.Add(feed); err != nil {
 			return dberror.WrapError(err, "failed to add feed entry")
@@ -181,7 +182,7 @@ func (u *Service) Delete(telegramID int64, actor *models.User) error {
 }
 
 // Update modifies an existing user and generates activity feed entries for changes.
-func (u *Service) Update(user, actor *models.User) error {
+func (u *Service) Update(user, actor *usermodels.User) error {
 	telegramID := user.TelegramID
 	logger.DBUsers().Info("Updating user: telegram_id=%d, new_name=%s", telegramID, user.UserName)
 
@@ -225,9 +226,9 @@ func (u *Service) Update(user, actor *models.User) error {
 	// Create feed entry if username changed
 	if prevUser.UserName != user.UserName {
 		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.UserName, user.UserName)
-		feed := models.NewFeed(
-			models.FeedTypeUserNameChange,
-			&models.FeedUserNameChange{
+		feed := feedmodels.NewFeed(
+			feedmodels.FeedTypeUserNameChange,
+			&feedmodels.FeedUserNameChange{
 				ID:  user.TelegramID,
 				Old: prevUser.UserName,
 				New: user.UserName,
@@ -242,8 +243,8 @@ func (u *Service) Update(user, actor *models.User) error {
 	return nil
 }
 
-func (u *Service) scanUser(scanner interfaces.Scannable) (*models.User, error) {
-	user := &models.User{}
+func (u *Service) scanUser(scanner interfaces.Scannable) (*usermodels.User, error) {
+	user := &usermodels.User{}
 	err := scanner.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {

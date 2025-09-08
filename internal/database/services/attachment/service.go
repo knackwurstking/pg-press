@@ -7,7 +7,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
+	"github.com/knackwurstking/pgpress/internal/database/models/user"
 	dbutils "github.com/knackwurstking/pgpress/internal/database/utils"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
@@ -17,7 +18,7 @@ type Service struct {
 	db *sql.DB
 }
 
-var _ interfaces.DataOperations[*models.Attachment] = (*Service)(nil)
+var _ interfaces.DataOperations[*attachment.Attachment] = (*Service)(nil)
 
 // New creates a new Service instance and initializes the database table.
 func New(db *sql.DB) *Service {
@@ -45,7 +46,7 @@ func New(db *sql.DB) *Service {
 }
 
 // List retrieves all attachments ordered by ID ascending.
-func (a *Service) List() ([]*models.Attachment, error) {
+func (a *Service) List() ([]*attachment.Attachment, error) {
 	logger.DBAttachments().Debug("Listing all attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
@@ -56,7 +57,7 @@ func (a *Service) List() ([]*models.Attachment, error) {
 	}
 	defer rows.Close()
 
-	var attachments []*models.Attachment
+	var attachments []*attachment.Attachment
 
 	for rows.Next() {
 		attachment, err := a.scan(rows)
@@ -75,7 +76,7 @@ func (a *Service) List() ([]*models.Attachment, error) {
 }
 
 // Get retrieves a specific attachment by ID.
-func (a *Service) Get(id int64) (*models.Attachment, error) {
+func (a *Service) Get(id int64) (*attachment.Attachment, error) {
 	logger.DBAttachments().Debug("Getting attachment, id: %d", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
@@ -93,9 +94,9 @@ func (a *Service) Get(id int64) (*models.Attachment, error) {
 }
 
 // GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
+func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 	if len(ids) == 0 {
-		return []*models.Attachment{}, nil
+		return []*attachment.Attachment{}, nil
 	}
 
 	logger.DBAttachments().Debug("Getting attachments by IDs: %v", ids)
@@ -125,7 +126,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachmentMap := make(map[int64]*models.Attachment)
+	attachmentMap := make(map[int64]*attachment.Attachment)
 
 	for rows.Next() {
 		attachment, err := a.scan(rows)
@@ -141,7 +142,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	}
 
 	// Return attachments in the order of the requested IDs
-	var attachments []*models.Attachment
+	var attachments []*attachment.Attachment
 	for _, id := range ids {
 		if attachment, exists := attachmentMap[id]; exists {
 			attachments = append(attachments, attachment)
@@ -152,7 +153,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Service) Add(attachment *models.Attachment, _ *models.User) (int64, error) {
+func (a *Service) Add(attachment *attachment.Attachment, _ *user.User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -180,7 +181,7 @@ func (a *Service) Add(attachment *models.Attachment, _ *models.User) (int64, err
 }
 
 // Update modifies an existing attachment.
-func (a *Service) Update(attachment *models.Attachment, _ *models.User) error {
+func (a *Service) Update(attachment *attachment.Attachment, _ *user.User) error {
 	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
@@ -213,7 +214,7 @@ func (a *Service) Update(attachment *models.Attachment, _ *models.User) error {
 }
 
 // Delete deletes an attachment by ID.
-func (a *Service) Delete(id int64, _ *models.User) error {
+func (a *Service) Delete(id int64, _ *user.User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
@@ -236,8 +237,8 @@ func (a *Service) Delete(id int64, _ *models.User) error {
 	return nil
 }
 
-func (a *Service) scan(scanner interfaces.Scannable) (*models.Attachment, error) {
-	attachment := &models.Attachment{}
+func (a *Service) scan(scanner interfaces.Scannable) (*attachment.Attachment, error) {
+	attachment := &attachment.Attachment{}
 	var id int64
 
 	if err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {

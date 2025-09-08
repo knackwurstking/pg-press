@@ -10,7 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+
+	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 )
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
@@ -38,11 +39,11 @@ func TotalCycles(totalCycles int64, input bool) templ.Component {
 
 		var colorClass = "contrast ghost"
 
-		if totalCycles > models.ToolCycleWarning {
+		if totalCycles > toolmodels.ToolCycleWarning {
 			colorClass = "warning ghost"
 		}
 
-		if totalCycles > models.ToolCycleError {
+		if totalCycles > toolmodels.ToolCycleError {
 			colorClass = "destructive ghost"
 		}
 		if input {
@@ -71,7 +72,7 @@ func TotalCycles(totalCycles int64, input bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", totalCycles))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/total-cycles.templ`, Line: 26, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/total-cycles.templ`, Line: 27, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +108,7 @@ func TotalCycles(totalCycles int64, input bool) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(totalCycles)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/total-cycles.templ`, Line: 33, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/total-cycles.templ`, Line: 34, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

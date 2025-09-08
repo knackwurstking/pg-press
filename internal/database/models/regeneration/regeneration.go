@@ -1,4 +1,4 @@
-package models
+package regeneration
 
 // ToolRegeneration represents a tool regeneration event
 type ToolRegeneration struct {

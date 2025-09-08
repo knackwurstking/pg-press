@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/database/models/cookie"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -74,7 +74,7 @@ func autoCleanCookiesCommand() cli.Command {
 				}
 
 				t := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
-				isExpired := func(cookie *models.Cookie) bool {
+				isExpired := func(cookie *cookie.Cookie) bool {
 					return t >= cookie.LastLogin
 				}
 

@@ -11,7 +11,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -85,7 +85,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 func (h *TroubleReports) shareResponse(
 	c echo.Context,
-	tr *models.TroubleReportWithAttachments,
+	tr *trmodels.TroubleReportWithAttachments,
 	buf *bytes.Buffer,
 ) error {
 	filename := fmt.Sprintf("fehlerbericht_%d_%s.pdf",

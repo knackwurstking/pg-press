@@ -1,4 +1,4 @@
-package models
+package presscycle
 
 import (
 	"slices"

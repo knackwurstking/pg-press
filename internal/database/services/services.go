@@ -7,7 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
@@ -88,7 +88,7 @@ func NewTroubleReport(db *sql.DB, feeds *Feed) *TroubleReport {
 }
 
 // NewTroubleReportHelper creates a new trouble report helper.
-func NewTroubleReportHelper(tr interfaces.DataOperations[*models.TroubleReport], a *Attachment) *TroubleReportHelper {
+func NewTroubleReportHelper(tr interfaces.DataOperations[*trmodels.TroubleReport], a *Attachment) *TroubleReportHelper {
 	return troublereport.NewTroubleReportsHelper(tr, a)
 }
 

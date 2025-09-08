@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/logger"
 )
 
@@ -22,7 +22,7 @@ func NewHelper(db *sql.DB) *Helper {
 }
 
 // GetUserFromApiKey retrieves a user by their API key.
-func (h *Helper) GetUserFromApiKey(apiKey string) (*models.User, error) {
+func (h *Helper) GetUserFromApiKey(apiKey string) (*usermodels.User, error) {
 	logger.DBUsers().Debug("Getting user by API key")
 
 	if apiKey == "" {
@@ -32,7 +32,7 @@ func (h *Helper) GetUserFromApiKey(apiKey string) (*models.User, error) {
 	query := `SELECT * FROM users WHERE api_key = ?`
 	row := h.db.QueryRow(query, apiKey)
 
-	user := &models.User{}
+	user := &usermodels.User{}
 	err := row.Scan(&user.TelegramID, &user.UserName, &user.ApiKey, &user.LastFeed)
 	if err != nil {
 		if err == sql.ErrNoRows {
