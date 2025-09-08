@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -262,10 +261,33 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	} else {
 		if form.Regenerating {
-			toolIDs := []int64{toolTop.ID, toolTopCassette.ID, toolBottom.ID}
-			h.setRegenerationForCycle(cycleID, user, toolIDs...)
+			toolIDs := []int64{slotTopID, slotTopCassetteID, slotBottomID}
 			for _, id := range toolIDs {
-				h.DB.Tools.UpdateRegenerating(id, form.Regenerating, user)
+				if id <= 0 {
+					continue
+				}
+
+				r, err := h.DB.ToolRegenerations.Create(id, cycleID, "", user)
+				if err != nil {
+					logger.HTMXHandlerTools().Error(
+						"Failed to create a tool regenerion entry for %d: %#v",
+						id, err,
+					)
+					continue
+				}
+
+				logger.HTMXHandlerTools().Debug(
+					"Set the tool %d to regenerating: regeneration=%#v",
+					id, r,
+				)
+
+				err = h.DB.Tools.UpdateRegenerating(id, form.Regenerating, user)
+				if err != nil {
+					logger.HTMXHandlerTools().Error(
+						"Failed to switch too state to regenerating: %#v",
+						err,
+					)
+				}
 			}
 		}
 	}
@@ -353,9 +375,28 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	if form.Regenerating {
-		h.setRegenerationForCycle(
-			cycleID, user, toolTop.ID, toolTopCassette.ID, toolBottom.ID,
-		)
+		if form.Regenerating {
+			toolIDs := []int64{slotTopID, slotTopCassetteID, slotBottomID}
+			for _, id := range toolIDs {
+				if id <= 0 {
+					continue
+				}
+
+				r, err := h.DB.ToolRegenerations.Create(id, cycleID, "", user)
+				if err != nil {
+					logger.HTMXHandlerTools().Error(
+						"Failed to create a tool regenerion entry for %d: %#v",
+						id, err,
+					)
+					continue
+				}
+
+				logger.HTMXHandlerTools().Debug(
+					"Set the tool %d to regenerating: regeneration=%#v",
+					id, r,
+				)
+			}
+		}
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
@@ -484,21 +525,4 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	}
 
 	return form, nil
-}
-
-func (h *Cycles) setRegenerationForCycle(cycleID int64, user *usermodels.User, tools ...int64) {
-	for _, toolID := range tools {
-		// NOTE: Reason not implemented yet, so just set to ""
-		r, err := h.DB.ToolRegenerations.Create(toolID, cycleID, "", user)
-
-		if err != nil {
-			logger.HTMXHandlerTools().Error(
-				"Failed to create a tool regenerion entry for %d: %#v",
-				toolID, err,
-			)
-		}
-
-		logger.HTMXHandlerTools().Info("Set the tool %d to regenerating.", toolID)
-		logger.HTMXHandlerTools().Debug("Tool %d regenerating: %#v", toolID, r)
-	}
 }
