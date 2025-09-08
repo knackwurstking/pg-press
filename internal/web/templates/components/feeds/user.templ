@@ -4,7 +4,7 @@ import (
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-templ AddUser(data *feedmodels.FeedUserAdd) {
+templ AddUser(data *feedmodels.UserAdd) {
 	<div class="feed-item">
 		<div class="feed-item-content;" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.Name }</strong> wurde hinzugefügt.
@@ -12,7 +12,7 @@ templ AddUser(data *feedmodels.FeedUserAdd) {
 	</div>
 }
 
-templ RemoveUser(data *feedmodels.FeedUserRemove) {
+templ RemoveUser(data *feedmodels.UserRemove) {
 	<div class="feed-item">
 		<div class="feed-item-content;" style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.Name }</strong> wurde entfernt.
@@ -20,7 +20,7 @@ templ RemoveUser(data *feedmodels.FeedUserRemove) {
 	</div>
 }
 
-templ ChangeUserName(data *feedmodels.FeedUserNameChange) {
+templ ChangeUserName(data *feedmodels.UserNameChange) {
 	<div class="feed-item">
 		<div class="feed-item-content " style="padding: var(--ui-spacing);">
 			Benutzer <strong>{ data.Old }</strong> hat den Namen zu <strong>{ data.New }</strong> geändert.

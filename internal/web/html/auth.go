@@ -96,7 +96,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 	ctx.SetCookie(cookie)
 
-	sessionCookie := cookiemodels.NewCookie(
+	sessionCookie := cookiemodels.New(
 		ctx.Request().UserAgent(), cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
 		logger.HandlerAuth().Error("Failed to create session: %v", err)

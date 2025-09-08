@@ -178,9 +178,9 @@ func (p *Service) Add(cycle *presscyclemodels.PressCycle, user *usermodels.User)
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypePressCycleAdd,
-			&feedmodels.FeedPressCycleAdd{
+		p.feeds.Add(feedmodels.New(
+			feedmodels.TypePressCycleAdd,
+			&feedmodels.PressCycleAdd{
 				SlotTop:         cycle.SlotTop,
 				SlotTopCassette: cycle.SlotTopCassette,
 				SlotBottom:      cycle.SlotBottom,
@@ -230,9 +230,9 @@ func (p *Service) Update(cycle *presscyclemodels.PressCycle, user *usermodels.Us
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypePressCycleUpdate,
-			&feedmodels.FeedPressCycleUpdate{
+		p.feeds.Add(feedmodels.New(
+			feedmodels.TypePressCycleUpdate,
+			&feedmodels.PressCycleUpdate{
 				SlotTop:         cycle.SlotTop,
 				SlotTopCassette: cycle.SlotTopCassette,
 				SlotBottom:      cycle.SlotBottom,
@@ -274,9 +274,9 @@ func (p *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Create feed entry
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypePressCycleDelete,
-			&feedmodels.FeedPressCycleUpdate{ // TODO: Create Delete type
+		p.feeds.Add(feedmodels.New(
+			feedmodels.TypePressCycleDelete,
+			&feedmodels.PressCycleUpdate{ // TODO: Create Delete type
 				SlotTop:         cycle.SlotTop,
 				SlotTopCassette: cycle.SlotTopCassette,
 				SlotBottom:      cycle.SlotBottom,

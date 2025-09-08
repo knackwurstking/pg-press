@@ -139,9 +139,9 @@ func (tr *Service) Add(troubleReport *trmodels.TroubleReport, user *usermodels.U
 	}
 	troubleReport.ID = id
 
-	feed := feedmodels.NewFeed(
-		feedmodels.FeedTypeTroubleReportAdd,
-		&feedmodels.FeedTroubleReportAdd{
+	feed := feedmodels.New(
+		feedmodels.TypeTroubleReportAdd,
+		&feedmodels.TroubleReportAdd{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -190,9 +190,9 @@ func (tr *Service) Update(troubleReport *trmodels.TroubleReport, user *usermodel
 			fmt.Sprintf("failed to update trouble report with ID %d", id), err)
 	}
 
-	feed := feedmodels.NewFeed(
-		feedmodels.FeedTypeTroubleReportUpdate,
-		&feedmodels.FeedTroubleReportUpdate{
+	feed := feedmodels.New(
+		feedmodels.TypeTroubleReportUpdate,
+		&feedmodels.TroubleReportUpdate{
 			ID:         id,
 			Title:      troubleReport.Title,
 			ModifiedBy: troubleReport.Mods.Current().User,
@@ -234,9 +234,9 @@ func (tr *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Create feed entry for the removed user
 	if user != nil {
-		feed := feedmodels.NewFeed(
-			feedmodels.FeedTypeTroubleReportRemove,
-			&feedmodels.FeedTroubleReportRemove{
+		feed := feedmodels.New(
+			feedmodels.TypeTroubleReportRemove,
+			&feedmodels.TroubleReportRemove{
 				ID:        report.ID,
 				Title:     report.Title,
 				RemovedBy: user,

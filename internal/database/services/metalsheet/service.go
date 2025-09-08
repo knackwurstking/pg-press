@@ -280,9 +280,9 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeMetalSheetAdd,
-			&feedmodels.FeedMetalSheetAdd{
+		s.feeds.Add(feedmodels.New(
+			feedmodels.TypeMetalSheetAdd,
+			&feedmodels.MetalSheetAdd{
 				ID:         id,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -357,9 +357,9 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeMetalSheetUpdate,
-			&feedmodels.FeedMetalSheetUpdate{
+		s.feeds.Add(feedmodels.New(
+			feedmodels.TypeMetalSheetUpdate,
+			&feedmodels.MetalSheetUpdate{
 				ID:         sheet.ID,
 				MetalSheet: sheet.String(),
 				ModifiedBy: user,
@@ -419,9 +419,9 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeMetalSheetToolAssignment,
-			&feedmodels.FeedMetalSheetToolAssignment{
+		s.feeds.Add(feedmodels.New(
+			feedmodels.TypeMetalSheetToolAssignment,
+			&feedmodels.MetalSheetToolAssignment{
 				SheetID:    sheetID,
 				ToolID:     toolID,
 				ModifiedBy: user,
@@ -449,9 +449,9 @@ func (s *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeMetalSheetDelete,
-			&feedmodels.FeedMetalSheetDelete{
+		s.feeds.Add(feedmodels.New(
+			feedmodels.TypeMetalSheetDelete,
+			&feedmodels.MetalSheetDelete{
 				ID:         id,
 				ModifiedBy: user,
 			},

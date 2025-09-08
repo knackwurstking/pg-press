@@ -14,7 +14,7 @@ import (
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-func AddPressCycle(data *feedmodels.FeedPressCycleAdd) templ.Component {
+func AddPressCycle(data *feedmodels.PressCycleAdd) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -108,7 +108,7 @@ func AddPressCycle(data *feedmodels.FeedPressCycleAdd) templ.Component {
 	})
 }
 
-func UpdatePressCycle(data *feedmodels.FeedPressCycleUpdate) templ.Component {
+func UpdatePressCycle(data *feedmodels.PressCycleUpdate) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

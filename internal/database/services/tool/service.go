@@ -165,9 +165,9 @@ func (t *Service) Add(tool *toolmodels.Tool, user *usermodels.User) (int64, erro
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolAdd,
-			&feedmodels.FeedToolAdd{
+		t.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolAdd,
+			&feedmodels.ToolAdd{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -229,9 +229,9 @@ func (t *Service) Update(tool *toolmodels.Tool, user *usermodels.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolUpdate,
-			&feedmodels.FeedToolUpdate{
+		t.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolUpdate,
+			&feedmodels.ToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -262,9 +262,9 @@ func (t *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolDelete,
-			&feedmodels.FeedToolDelete{
+		t.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolDelete,
+			&feedmodels.ToolDelete{
 				ID:         id,
 				Tool:       tool.String(),
 				ModifiedBy: user,

@@ -10,299 +10,26 @@ import (
 )
 
 const (
-	FeedTypeUserAdd                  = "user_add"
-	FeedTypeUserRemove               = "user_remove"
-	FeedTypeUserNameChange           = "user_name_change"
-	FeedTypeTroubleReportAdd         = "trouble_report_add"
-	FeedTypeTroubleReportUpdate      = "trouble_report_update"
-	FeedTypeTroubleReportRemove      = "trouble_report_remove"
-	FeedTypeToolAdd                  = "tool_add"
-	FeedTypeToolUpdate               = "tool_update"
-	FeedTypeToolDelete               = "tool_delete"
-	FeedTypeMetalSheetAdd            = "metal_sheet_add"
-	FeedTypeMetalSheetUpdate         = "metal_sheet_update"
-	FeedTypeMetalSheetDelete         = "metal_sheet_delete"
-	FeedTypeMetalSheetStatusChange   = "metal_sheet_status_change"
-	FeedTypeMetalSheetToolAssignment = "metal_sheet_tool_assignment"
-	FeedTypePressCycleAdd            = "press_cycle_add"
-	FeedTypePressCycleUpdate         = "press_cycle_update"
-	FeedTypePressCycleDelete         = "press_cycle_delete"
+	TypeUserAdd                  = "user_add"
+	TypeUserRemove               = "user_remove"
+	TypeUserNameChange           = "user_name_change"
+	TypeTroubleReportAdd         = "trouble_report_add"
+	TypeTroubleReportUpdate      = "trouble_report_update"
+	TypeTroubleReportRemove      = "trouble_report_remove"
+	TypeToolAdd                  = "tool_add"
+	TypeToolUpdate               = "tool_update"
+	TypeToolDelete               = "tool_delete"
+	TypeMetalSheetAdd            = "metal_sheet_add"
+	TypeMetalSheetUpdate         = "metal_sheet_update"
+	TypeMetalSheetDelete         = "metal_sheet_delete"
+	TypeMetalSheetStatusChange   = "metal_sheet_status_change"
+	TypeMetalSheetToolAssignment = "metal_sheet_tool_assignment"
+	TypePressCycleAdd            = "press_cycle_add"
+	TypePressCycleUpdate         = "press_cycle_update"
+	TypePressCycleDelete         = "press_cycle_delete"
 )
 
-// FeedUserAdd represents a user addition event.
-type FeedUserAdd struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
-func NewFeedUserAdd(data map[string]any) *FeedUserAdd {
-	return &FeedUserAdd{
-		ID:   int64(data["id"].(float64)),
-		Name: data["name"].(string),
-	}
-}
-
-// FeedUserRemove represents a user removal event.
-type FeedUserRemove struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-}
-
-func NewFeedUserRemove(data map[string]any) *FeedUserRemove {
-	return &FeedUserRemove{
-		ID:   int64(data["id"].(float64)),
-		Name: data["name"].(string),
-	}
-}
-
-// FeedUserNameChange represents a user name change event.
-type FeedUserNameChange struct {
-	ID  int64  `json:"id"`
-	Old string `json:"old"`
-	New string `json:"new"`
-}
-
-func NewFeedUserNameChange(data map[string]any) *FeedUserNameChange {
-	return &FeedUserNameChange{
-		ID:  int64(data["id"].(float64)),
-		Old: data["old"].(string),
-		New: data["new"].(string),
-	}
-}
-
-// FeedTroubleReportAdd represents a trouble report creation event.
-type FeedTroubleReportAdd struct {
-	ID         int64      `json:"id"`
-	Title      string     `json:"title"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedTroubleReportAdd(data map[string]any) *FeedTroubleReportAdd {
-	return &FeedTroubleReportAdd{
-		ID:    int64(data["id"].(float64)),
-		Title: data["title"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedTroubleReportUpdate represents a trouble report update event.
-type FeedTroubleReportUpdate struct {
-	ID         int64      `json:"id"`
-	Title      string     `json:"title"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedTroubleReportUpdate(data map[string]any) *FeedTroubleReportUpdate {
-	return &FeedTroubleReportUpdate{
-		ID:    int64(data["id"].(float64)),
-		Title: data["title"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedTroubleReportRemove represents a trouble report removal event.
-type FeedTroubleReportRemove struct {
-	ID        int64      `json:"id"`
-	Title     string     `json:"title"`
-	RemovedBy *user.User `json:"removed_by"`
-}
-
-func NewFeedTroubleReportRemove(data map[string]any) *FeedTroubleReportRemove {
-	return &FeedTroubleReportRemove{
-		ID:    int64(data["id"].(float64)),
-		Title: data["title"].(string),
-		RemovedBy: user.NewUserFromInterfaceMap(
-			data["removed_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedToolAdd represents a tool addition event.
-type FeedToolAdd struct {
-	ID         int64      `json:"id"`
-	Tool       string     `json:"tool"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedToolAdd(data map[string]any) *FeedToolAdd {
-	return &FeedToolAdd{
-		ID:   int64(data["id"].(float64)),
-		Tool: data["tool"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedToolUpdate represents a tool update event.
-type FeedToolUpdate struct {
-	ID         int64      `json:"id"`
-	Tool       string     `json:"tool"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedToolUpdate(data map[string]any) *FeedToolUpdate {
-	return &FeedToolUpdate{
-		ID:   int64(data["id"].(float64)),
-		Tool: data["tool"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedToolDelete represents a tool deletion event.
-type FeedToolDelete struct {
-	ID         int64      `json:"id"`
-	Tool       string     `json:"tool"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedToolDelete(data map[string]any) *FeedToolDelete {
-	return &FeedToolDelete{
-		ID:   int64(data["id"].(float64)),
-		Tool: data["tool"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedMetalSheetAdd represents a metal sheet addition event.
-type FeedMetalSheetAdd struct {
-	ID         int64      `json:"id"`
-	MetalSheet string     `json:"metal_sheet"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedMetalSheetAdd(data map[string]any) *FeedMetalSheetAdd {
-	return &FeedMetalSheetAdd{
-		ID:         int64(data["id"].(float64)),
-		MetalSheet: data["metal_sheet"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedMetalSheetUpdate represents a metal sheet update event.
-type FeedMetalSheetUpdate struct {
-	ID         int64      `json:"id"`
-	MetalSheet string     `json:"metal_sheet"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedMetalSheetUpdate(data map[string]any) *FeedMetalSheetUpdate {
-	return &FeedMetalSheetUpdate{
-		ID:         int64(data["id"].(float64)),
-		MetalSheet: data["metal_sheet"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedMetalSheetDelete represents a metal sheet deletion event.
-type FeedMetalSheetDelete struct {
-	ID         int64      `json:"id"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedMetalSheetDelete(data map[string]any) *FeedMetalSheetDelete {
-	return &FeedMetalSheetDelete{
-		ID: int64(data["id"].(float64)),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedMetalSheetStatusChange represents a metal sheet status change event.
-type FeedMetalSheetStatusChange struct {
-	ID         int64      `json:"id"`
-	NewStatus  string     `json:"new_status"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedMetalSheetStatusChange(data map[string]any) *FeedMetalSheetStatusChange {
-	return &FeedMetalSheetStatusChange{
-		ID:        int64(data["id"].(float64)),
-		NewStatus: data["new_status"].(string),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedMetalSheetToolAssignment represents a metal sheet tool assignment event.
-type FeedMetalSheetToolAssignment struct {
-	SheetID    int64      `json:"sheet_id"`
-	ToolID     *int64     `json:"tool_id"`
-	ModifiedBy *user.User `json:"modified_by"`
-}
-
-func NewFeedMetalSheetToolAssignment(data map[string]any) *FeedMetalSheetToolAssignment {
-	assignment := &FeedMetalSheetToolAssignment{
-		SheetID: int64(data["sheet_id"].(float64)),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-	if toolID, ok := data["tool_id"]; ok && toolID != nil {
-		id := int64(toolID.(float64))
-		assignment.ToolID = &id
-	}
-	return assignment
-}
-
-// FeedPressCycleAdd represents a press cycle creation event.
-type FeedPressCycleAdd struct {
-	SlotTop         int64      `json:"slot_top"`
-	SlotTopCassette int64      `json:"slot_top_cassette"`
-	SlotBottom      int64      `json:"slot_bottom"`
-	TotalCycles     int64      `json:"total_cycles"`
-	ModifiedBy      *user.User `json:"modified_by"`
-}
-
-func NewFeedPressCycleAdd(data map[string]any) *FeedPressCycleAdd {
-	return &FeedPressCycleAdd{
-		SlotTop:         int64(data["slot_top"].(float64)),
-		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
-		SlotBottom:      int64(data["slot_bottom"].(float64)),
-		TotalCycles:     int64(data["total_cycles"].(float64)),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
-// FeedPressCycleUpdate represents a press cycle update event.
-type FeedPressCycleUpdate struct {
-	SlotTop         int64      `json:"slot_top"`
-	SlotTopCassette int64      `json:"slot_top_cassette"`
-	SlotBottom      int64      `json:"slot_bottom"`
-	TotalCycles     int64      `json:"total_cycles"`
-	ModifiedBy      *user.User `json:"modified_by"`
-}
-
-func NewFeedPressCycleUpdate(data map[string]any) *FeedPressCycleUpdate {
-	return &FeedPressCycleUpdate{
-		SlotTop:         int64(data["slot_top"].(float64)),
-		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
-		SlotBottom:      int64(data["slot_bottom"].(float64)),
-		TotalCycles:     int64(data["total_cycles"].(float64)),
-		ModifiedBy: user.NewUserFromInterfaceMap(
-			data["modified_by"].(map[string]any),
-		),
-	}
-}
-
 // Feed represents a feed entry in the system that tracks activity events.
-
 type Feed struct {
 	ID       int64  `json:"id"`
 	Time     int64  `json:"time"`
@@ -310,8 +37,8 @@ type Feed struct {
 	Data     any    `json:"data"`
 }
 
-// NewFeed creates a new feed entry with the current timestamp.
-func NewFeed(dataType string, data any) *Feed {
+// New creates a new feed entry with the current timestamp.
+func New(dataType string, data any) *Feed {
 	return &Feed{
 		Time:     time.Now().UnixMilli(),
 		DataType: dataType,
@@ -360,5 +87,281 @@ func (f *Feed) Clone() *Feed {
 		ID:   f.ID,
 		Time: f.Time,
 		Data: f.Data,
+	}
+}
+
+/*************
+ * Data Types
+ *************/
+
+// UserAdd represents a user addition event.
+type UserAdd struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+func NewUserAdd(data map[string]any) *UserAdd {
+	return &UserAdd{
+		ID:   int64(data["id"].(float64)),
+		Name: data["name"].(string),
+	}
+}
+
+// UserRemove represents a user removal event.
+type UserRemove struct {
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+func NewUserRemove(data map[string]any) *UserRemove {
+	return &UserRemove{
+		ID:   int64(data["id"].(float64)),
+		Name: data["name"].(string),
+	}
+}
+
+// UserNameChange represents a user name change event.
+type UserNameChange struct {
+	ID  int64  `json:"id"`
+	Old string `json:"old"`
+	New string `json:"new"`
+}
+
+func NewUserNameChange(data map[string]any) *UserNameChange {
+	return &UserNameChange{
+		ID:  int64(data["id"].(float64)),
+		Old: data["old"].(string),
+		New: data["new"].(string),
+	}
+}
+
+// TroubleReportAdd represents a trouble report creation event.
+type TroubleReportAdd struct {
+	ID         int64      `json:"id"`
+	Title      string     `json:"title"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewTroubleReportAdd(data map[string]any) *TroubleReportAdd {
+	return &TroubleReportAdd{
+		ID:    int64(data["id"].(float64)),
+		Title: data["title"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// TroubleReportUpdate represents a trouble report update event.
+type TroubleReportUpdate struct {
+	ID         int64      `json:"id"`
+	Title      string     `json:"title"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewTroubleReportUpdate(data map[string]any) *TroubleReportUpdate {
+	return &TroubleReportUpdate{
+		ID:    int64(data["id"].(float64)),
+		Title: data["title"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// TroubleReportRemove represents a trouble report removal event.
+type TroubleReportRemove struct {
+	ID        int64      `json:"id"`
+	Title     string     `json:"title"`
+	RemovedBy *user.User `json:"removed_by"`
+}
+
+func NewTroubleReportRemove(data map[string]any) *TroubleReportRemove {
+	return &TroubleReportRemove{
+		ID:    int64(data["id"].(float64)),
+		Title: data["title"].(string),
+		RemovedBy: user.NewUserFromInterfaceMap(
+			data["removed_by"].(map[string]any),
+		),
+	}
+}
+
+// ToolAdd represents a tool addition event.
+type ToolAdd struct {
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewToolAdd(data map[string]any) *ToolAdd {
+	return &ToolAdd{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// ToolUpdate represents a tool update event.
+type ToolUpdate struct {
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewToolUpdate(data map[string]any) *ToolUpdate {
+	return &ToolUpdate{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// ToolDelete represents a tool deletion event.
+type ToolDelete struct {
+	ID         int64      `json:"id"`
+	Tool       string     `json:"tool"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewToolDelete(data map[string]any) *ToolDelete {
+	return &ToolDelete{
+		ID:   int64(data["id"].(float64)),
+		Tool: data["tool"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// MetalSheetAdd represents a metal sheet addition event.
+type MetalSheetAdd struct {
+	ID         int64      `json:"id"`
+	MetalSheet string     `json:"metal_sheet"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewMetalSheetAdd(data map[string]any) *MetalSheetAdd {
+	return &MetalSheetAdd{
+		ID:         int64(data["id"].(float64)),
+		MetalSheet: data["metal_sheet"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// MetalSheetUpdate represents a metal sheet update event.
+type MetalSheetUpdate struct {
+	ID         int64      `json:"id"`
+	MetalSheet string     `json:"metal_sheet"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewMetalSheetUpdate(data map[string]any) *MetalSheetUpdate {
+	return &MetalSheetUpdate{
+		ID:         int64(data["id"].(float64)),
+		MetalSheet: data["metal_sheet"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// MetalSheetDelete represents a metal sheet deletion event.
+type MetalSheetDelete struct {
+	ID         int64      `json:"id"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewMetalSheetDelete(data map[string]any) *MetalSheetDelete {
+	return &MetalSheetDelete{
+		ID: int64(data["id"].(float64)),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// MetalSheetStatusChange represents a metal sheet status change event.
+type MetalSheetStatusChange struct {
+	ID         int64      `json:"id"`
+	NewStatus  string     `json:"new_status"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewMetalSheetStatusChange(data map[string]any) *MetalSheetStatusChange {
+	return &MetalSheetStatusChange{
+		ID:        int64(data["id"].(float64)),
+		NewStatus: data["new_status"].(string),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// MetalSheetToolAssignment represents a metal sheet tool assignment event.
+type MetalSheetToolAssignment struct {
+	SheetID    int64      `json:"sheet_id"`
+	ToolID     *int64     `json:"tool_id"`
+	ModifiedBy *user.User `json:"modified_by"`
+}
+
+func NewMetalSheetToolAssignment(data map[string]any) *MetalSheetToolAssignment {
+	assignment := &MetalSheetToolAssignment{
+		SheetID: int64(data["sheet_id"].(float64)),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+	if toolID, ok := data["tool_id"]; ok && toolID != nil {
+		id := int64(toolID.(float64))
+		assignment.ToolID = &id
+	}
+	return assignment
+}
+
+// PressCycleAdd represents a press cycle creation event.
+type PressCycleAdd struct {
+	SlotTop         int64      `json:"slot_top"`
+	SlotTopCassette int64      `json:"slot_top_cassette"`
+	SlotBottom      int64      `json:"slot_bottom"`
+	TotalCycles     int64      `json:"total_cycles"`
+	ModifiedBy      *user.User `json:"modified_by"`
+}
+
+func NewPressCycleAdd(data map[string]any) *PressCycleAdd {
+	return &PressCycleAdd{
+		SlotTop:         int64(data["slot_top"].(float64)),
+		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
+		SlotBottom:      int64(data["slot_bottom"].(float64)),
+		TotalCycles:     int64(data["total_cycles"].(float64)),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
+	}
+}
+
+// PressCycleUpdate represents a press cycle update event.
+type PressCycleUpdate struct {
+	SlotTop         int64      `json:"slot_top"`
+	SlotTopCassette int64      `json:"slot_top_cassette"`
+	SlotBottom      int64      `json:"slot_bottom"`
+	TotalCycles     int64      `json:"total_cycles"`
+	ModifiedBy      *user.User `json:"modified_by"`
+}
+
+func NewPressCycleUpdate(data map[string]any) *PressCycleUpdate {
+	return &PressCycleUpdate{
+		SlotTop:         int64(data["slot_top"].(float64)),
+		SlotTopCassette: int64(data["slot_top_cassette"].(float64)),
+		SlotBottom:      int64(data["slot_bottom"].(float64)),
+		TotalCycles:     int64(data["total_cycles"].(float64)),
+		ModifiedBy: user.NewUserFromInterfaceMap(
+			data["modified_by"].(map[string]any),
+		),
 	}
 }

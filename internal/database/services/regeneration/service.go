@@ -94,9 +94,9 @@ func (t *Service) Create(toolID int64, cycleID int64, reason string, user *userm
 
 	// Create feed entry
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolUpdate,
-			&feedmodels.FeedToolUpdate{
+		t.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolUpdate,
+			&feedmodels.ToolUpdate{
 				ID:         toolID,
 				Tool:       fmt.Sprintf("Werkzeug #%d wurde regeneriert (Grund: %s)", toolID, reason),
 				ModifiedBy: user,

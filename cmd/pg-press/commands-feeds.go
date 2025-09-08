@@ -250,17 +250,17 @@ func formatFeedData(data any, dataType string) string {
 	}
 
 	switch dataType {
-	case feedmodels.FeedTypeUserAdd, feedmodels.FeedTypeUserRemove:
+	case feedmodels.TypeUserAdd, feedmodels.TypeUserRemove:
 		if name, exists := dataMap["name"]; exists {
 			return fmt.Sprintf("User: %v", name)
 		}
-	case feedmodels.FeedTypeUserNameChange:
+	case feedmodels.TypeUserNameChange:
 		if old, exists := dataMap["old"]; exists {
 			if new, exists := dataMap["new"]; exists {
 				return fmt.Sprintf("User: %v -> %v", old, new)
 			}
 		}
-	case feedmodels.FeedTypeTroubleReportAdd, feedmodels.FeedTypeTroubleReportUpdate, feedmodels.FeedTypeTroubleReportRemove:
+	case feedmodels.TypeTroubleReportAdd, feedmodels.TypeTroubleReportUpdate, feedmodels.TypeTroubleReportRemove:
 		if title, exists := dataMap["title"]; exists {
 			return fmt.Sprintf("Report: %v", title)
 		}

@@ -198,9 +198,9 @@ func (h *Helper) UpdateRegenerating(toolID int64, regenerating bool, user *userm
 
 	// Trigger feed update
 	if h.tools.feeds != nil {
-		h.tools.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolUpdate,
-			&feedmodels.FeedToolUpdate{
+		h.tools.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolUpdate,
+			&feedmodels.ToolUpdate{
 				ID:         tool.ID,
 				Tool:       tool.String(),
 				ModifiedBy: user,
@@ -250,9 +250,9 @@ func (h *Helper) UpdatePress(toolID int64, press *presscyclemodels.PressNumber, 
 	// Trigger feed update
 	if h.tools.feeds != nil {
 		tool.Press = press // Update press for correct display
-		h.tools.feeds.Add(feedmodels.NewFeed(
-			feedmodels.FeedTypeToolUpdate,
-			&feedmodels.FeedToolUpdate{
+		h.tools.feeds.Add(feedmodels.New(
+			feedmodels.TypeToolUpdate,
+			&feedmodels.ToolUpdate{
 				ID:         toolID,
 				Tool:       tool.String(),
 				ModifiedBy: user,

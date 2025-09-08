@@ -14,7 +14,7 @@ import (
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 )
 
-func AddMetalSheet(data *feedmodels.FeedMetalSheetAdd) templ.Component {
+func AddMetalSheet(data *feedmodels.MetalSheetAdd) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -82,7 +82,7 @@ func AddMetalSheet(data *feedmodels.FeedMetalSheetAdd) templ.Component {
 	})
 }
 
-func UpdateMetalSheet(data *feedmodels.FeedMetalSheetUpdate) templ.Component {
+func UpdateMetalSheet(data *feedmodels.MetalSheetUpdate) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -150,7 +150,7 @@ func UpdateMetalSheet(data *feedmodels.FeedMetalSheetUpdate) templ.Component {
 	})
 }
 
-func DeleteMetalSheet(data *feedmodels.FeedMetalSheetDelete) templ.Component {
+func DeleteMetalSheet(data *feedmodels.MetalSheetDelete) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -205,7 +205,7 @@ func DeleteMetalSheet(data *feedmodels.FeedMetalSheetDelete) templ.Component {
 	})
 }
 
-func MetalSheetStatusChange(data *feedmodels.FeedMetalSheetStatusChange) templ.Component {
+func MetalSheetStatusChange(data *feedmodels.MetalSheetStatusChange) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -302,7 +302,7 @@ func MetalSheetStatusChange(data *feedmodels.FeedMetalSheetStatusChange) templ.C
 	})
 }
 
-func MetalSheetToolAssignment(data *feedmodels.FeedMetalSheetToolAssignment) templ.Component {
+func MetalSheetToolAssignment(data *feedmodels.MetalSheetToolAssignment) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

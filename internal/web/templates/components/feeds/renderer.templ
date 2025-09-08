@@ -12,42 +12,42 @@ func RenderFeed(feed *feedmodels.Feed) templ.Component {
 
 	switch feed.DataType {
 	// User Types
-	case feedmodels.FeedTypeUserAdd:
-		feedContent = AddUser(feedmodels.NewFeedUserAdd(data))
-	case feedmodels.FeedTypeUserNameChange:
-		feedContent = ChangeUserName(feedmodels.NewFeedUserNameChange(data))
-	case feedmodels.FeedTypeUserRemove:
-		feedContent = RemoveUser(feedmodels.NewFeedUserRemove(data))
+	case feedmodels.TypeUserAdd:
+		feedContent = AddUser(feedmodels.NewUserAdd(data))
+	case feedmodels.TypeUserNameChange:
+		feedContent = ChangeUserName(feedmodels.NewUserNameChange(data))
+	case feedmodels.TypeUserRemove:
+		feedContent = RemoveUser(feedmodels.NewUserRemove(data))
 	// Trouble Report Types
-	case feedmodels.FeedTypeTroubleReportAdd:
-		feedContent = AddTroubleReport(feedmodels.NewFeedTroubleReportAdd(data))
-	case feedmodels.FeedTypeTroubleReportUpdate:
-		feedContent = UpdateTroubleReport(feedmodels.NewFeedTroubleReportUpdate(data))
-	case feedmodels.FeedTypeTroubleReportRemove:
-		feedContent = RemoveTroubleReport(feedmodels.NewFeedTroubleReportRemove(data))
+	case feedmodels.TypeTroubleReportAdd:
+		feedContent = AddTroubleReport(feedmodels.NewTroubleReportAdd(data))
+	case feedmodels.TypeTroubleReportUpdate:
+		feedContent = UpdateTroubleReport(feedmodels.NewTroubleReportUpdate(data))
+	case feedmodels.TypeTroubleReportRemove:
+		feedContent = RemoveTroubleReport(feedmodels.NewTroubleReportRemove(data))
 	// Tool Types
-	case feedmodels.FeedTypeToolAdd:
-		feedContent = AddTool(feedmodels.NewFeedToolAdd(data))
-	case feedmodels.FeedTypeToolUpdate:
-		feedContent = UpdateTool(feedmodels.NewFeedToolUpdate(data))
-	case feedmodels.FeedTypeToolDelete:
-		feedContent = DeleteTool(feedmodels.NewFeedToolDelete(data))
+	case feedmodels.TypeToolAdd:
+		feedContent = AddTool(feedmodels.NewToolAdd(data))
+	case feedmodels.TypeToolUpdate:
+		feedContent = UpdateTool(feedmodels.NewToolUpdate(data))
+	case feedmodels.TypeToolDelete:
+		feedContent = DeleteTool(feedmodels.NewToolDelete(data))
 	// Metal Sheet Types
-	case feedmodels.FeedTypeMetalSheetAdd:
-		feedContent = AddMetalSheet(feedmodels.NewFeedMetalSheetAdd(data))
-	case feedmodels.FeedTypeMetalSheetUpdate:
-		feedContent = UpdateMetalSheet(feedmodels.NewFeedMetalSheetUpdate(data))
-	case feedmodels.FeedTypeMetalSheetDelete:
-		feedContent = DeleteMetalSheet(feedmodels.NewFeedMetalSheetDelete(data))
-	case feedmodels.FeedTypeMetalSheetStatusChange:
-		feedContent = MetalSheetStatusChange(feedmodels.NewFeedMetalSheetStatusChange(data))
-	case feedmodels.FeedTypeMetalSheetToolAssignment:
-		feedContent = MetalSheetToolAssignment(feedmodels.NewFeedMetalSheetToolAssignment(data))
+	case feedmodels.TypeMetalSheetAdd:
+		feedContent = AddMetalSheet(feedmodels.NewMetalSheetAdd(data))
+	case feedmodels.TypeMetalSheetUpdate:
+		feedContent = UpdateMetalSheet(feedmodels.NewMetalSheetUpdate(data))
+	case feedmodels.TypeMetalSheetDelete:
+		feedContent = DeleteMetalSheet(feedmodels.NewMetalSheetDelete(data))
+	case feedmodels.TypeMetalSheetStatusChange:
+		feedContent = MetalSheetStatusChange(feedmodels.NewMetalSheetStatusChange(data))
+	case feedmodels.TypeMetalSheetToolAssignment:
+		feedContent = MetalSheetToolAssignment(feedmodels.NewMetalSheetToolAssignment(data))
 	// Press Cycle Types
-	case feedmodels.FeedTypePressCycleAdd:
-		feedContent = AddPressCycle(feedmodels.NewFeedPressCycleAdd(data))
-	case feedmodels.FeedTypePressCycleUpdate:
-		feedContent = UpdatePressCycle(feedmodels.NewFeedPressCycleUpdate(data))
+	case feedmodels.TypePressCycleAdd:
+		feedContent = AddPressCycle(feedmodels.NewPressCycleAdd(data))
+	case feedmodels.TypePressCycleUpdate:
+		feedContent = UpdatePressCycle(feedmodels.NewPressCycleUpdate(data))
 	// Fallback
 	default:
 		feedContent = templ.Raw(fmt.Sprintf(`<pre>%#v</pre>`, feed.Data))

@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	DefaultCookieExpiration = 6 * 30 * 24 * time.Hour
-	MinCookieValueLength    = 16
-	MaxUserAgentLength      = 1000
+	DefaultExpiration  = 6 * 30 * 24 * time.Hour
+	MinValueLength     = 16
+	MaxUserAgentLength = 1000
 )
 
 // Cookie represents a user session with authentication information.
@@ -24,8 +24,8 @@ type Cookie struct {
 	LastLogin int64  `json:"last_login"`
 }
 
-// NewCookie creates a new cookie with the current timestamp.
-func NewCookie(userAgent, value, apiKey string) *Cookie {
+// New creates a new cookie with the current timestamp.
+func New(userAgent, value, apiKey string) *Cookie {
 	return &Cookie{
 		UserAgent: strings.TrimSpace(userAgent),
 		Value:     strings.TrimSpace(value),
@@ -46,7 +46,7 @@ func (c *Cookie) Validate() error {
 	if c.Value == "" {
 		return dberror.NewValidationError("value", "cannot be empty", c.Value)
 	}
-	if len(c.Value) < MinCookieValueLength {
+	if len(c.Value) < MinValueLength {
 		return dberror.NewValidationError("value", "too short for security", len(c.Value))
 	}
 
@@ -86,7 +86,7 @@ func (c *Cookie) Age() time.Duration {
 
 // IsExpired checks if the cookie has expired based on the default expiration time.
 func (c *Cookie) IsExpired() bool {
-	return c.IsExpiredAfter(DefaultCookieExpiration)
+	return c.IsExpiredAfter(DefaultExpiration)
 }
 
 // IsExpiredAfter checks if the cookie has expired after a specific duration.
