@@ -61,7 +61,6 @@ func (c *EditPressCycleProps) GetPressFromSlots() *pressmodels.PressNumber {
 	return nil
 }
 
-// TODO: Add a checkbox, or whatever, for adding a new regenerating entry belonging to this specific cycle
 templ EditPressCycle(props *EditPressCycleProps) {
 	if props.Close {
 		<span
@@ -198,6 +197,39 @@ templ EditPressCycle(props *EditPressCycleProps) {
 
 							required
 						/>
+					</section>
+
+					<section class="regeneration">
+						<label class="flex flex-row justify-between items-center">
+							<span class="flex flex-col gap-0">
+								<span>
+									Werkzeug in den Regenerationszustand versetzen
+									if props.CycleID > 0 {
+										(Rückwirkend)
+									}
+								</span>
+
+								if props.CycleID > 0 {
+									<small>Diese Aktion setzt die Gesamtzyklen auf 0 zurück</small>
+								}
+							</span>
+
+							<script>
+								function checkboxOnChangeHandler(e) {
+    								if (e.checked) {
+                                        if (!confirm("Sicher, diesen Zustand ändern?")) {
+                                            e.checked = false
+                                        };
+                                    }
+								}
+							</script>
+
+							<input
+								name="regenerating"
+								type="checkbox"
+								onchange='checkboxOnChangeHandler(this);'
+							/>
+						</label>
 					</section>
 				</div>
 
