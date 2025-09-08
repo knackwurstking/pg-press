@@ -195,6 +195,7 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 	return nil
 }
 
+// TODO: Handle `input[name="regenerating"]` checkbox element
 func (h *Cycles) handleEditPOST(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
@@ -269,6 +270,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}, c)
 }
 
+// TODO: Handle `input[name="regenerating"]` checkbox element
 func (h *Cycles) handleEditPUT(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
@@ -433,16 +435,9 @@ func (h *Cycles) getSlotsFromQuery(c echo.Context) (toolTop, toolTopCassette, to
 }
 
 func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
-	totalCyclesString := c.FormValue("total_cycles")
-	if totalCyclesString == "" {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles is required")
-	}
-	totalCycles, err := strconv.ParseInt(totalCyclesString, 10, 64)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
-	}
+	var err error
+	formData := &CycleEditFormData{}
 
-	var pressNumber *pressmodels.PressNumber
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)
 		if err != nil {
@@ -450,23 +445,30 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		}
 
 		pn := pressmodels.PressNumber(press)
-		pressNumber = &pn
+		formData.PressNumber = &pn
 	}
 
-	var date time.Time
-	if dateString := c.FormValue(constants.QueryParamOriginalDate); dateString != "" {
+	if dateString := c.FormValue("original_date"); dateString != "" {
 		// Create time (date) object from dateString
-		date, err = time.Parse(constants.DateFormat, dateString)
+		formData.Date, err = time.Parse(constants.DateFormat, dateString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
 		}
 	} else {
-		date = time.Now()
+		formData.Date = time.Now()
 	}
 
-	return &CycleEditFormData{
-		TotalCycles: totalCycles,
-		PressNumber: pressNumber,
-		Date:        date,
-	}, nil
+	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles is required")
+	} else {
+		if formData.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64); err != nil {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
+		}
+	}
+
+	if r := c.FormValue("regenerating"); r != "" {
+		formData.Regenerating = true
+	}
+
+	return formData, nil
 }

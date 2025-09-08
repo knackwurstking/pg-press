@@ -16,7 +16,8 @@ type ToolEditFormData struct {
 }
 
 type CycleEditFormData struct {
-	TotalCycles int64 // TotalCycles form field name "total_cycles"
-	PressNumber *pressmodels.PressNumber
-	Date        time.Time // OriginalDate form field name "original_date"
+	TotalCycles  int64 // TotalCycles form field name "total_cycles"
+	PressNumber  *pressmodels.PressNumber
+	Date         time.Time // OriginalDate form field name "original_date"
+	Regenerating bool
 }
