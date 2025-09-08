@@ -10,7 +10,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/feed"
+	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -65,7 +65,7 @@ func listFeedsCommand() cli.Command {
 					return err
 				}
 
-				var feeds []*feed.Feed
+				var feeds []*feedmodels.Feed
 
 				// Get feeds based on parameters
 				if *limit > 0 {
@@ -186,8 +186,8 @@ func removeFeedsCommand() cli.Command {
 
 // Helper functions
 
-func filterFeedsByDate(feeds []*feed.Feed, since, before string) []*feed.Feed {
-	var filtered []*feed.Feed
+func filterFeedsByDate(feeds []*feedmodels.Feed, since, before string) []*feedmodels.Feed {
+	var filtered []*feedmodels.Feed
 
 	var sinceTime, beforeTime time.Time
 	var err error
@@ -250,17 +250,17 @@ func formatFeedData(data any, dataType string) string {
 	}
 
 	switch dataType {
-	case feed.FeedTypeUserAdd, feed.FeedTypeUserRemove:
+	case feedmodels.FeedTypeUserAdd, feedmodels.FeedTypeUserRemove:
 		if name, exists := dataMap["name"]; exists {
 			return fmt.Sprintf("User: %v", name)
 		}
-	case feed.FeedTypeUserNameChange:
+	case feedmodels.FeedTypeUserNameChange:
 		if old, exists := dataMap["old"]; exists {
 			if new, exists := dataMap["new"]; exists {
 				return fmt.Sprintf("User: %v -> %v", old, new)
 			}
 		}
-	case feed.FeedTypeTroubleReportAdd, feed.FeedTypeTroubleReportUpdate, feed.FeedTypeTroubleReportRemove:
+	case feedmodels.FeedTypeTroubleReportAdd, feedmodels.FeedTypeTroubleReportUpdate, feedmodels.FeedTypeTroubleReportRemove:
 		if title, exists := dataMap["title"]; exists {
 			return fmt.Sprintf("Report: %v", title)
 		}

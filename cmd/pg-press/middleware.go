@@ -9,7 +9,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/user"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 
@@ -90,7 +90,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 
 			// Get user info if available
 			userInfo := ""
-			if user, ok := c.Get("user").(*user.User); ok {
+			if user, ok := c.Get("user").(*usermodels.User); ok {
 				userInfo = " " + user.String()
 			}
 
@@ -143,7 +143,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *database.DB) (*user.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *database.DB) (*usermodels.User, error) {
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
