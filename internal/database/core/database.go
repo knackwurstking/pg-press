@@ -19,14 +19,10 @@ type DB struct {
 	Tools          *services.Tool
 	MetalSheets    *services.MetalSheet
 
-	// TODO: Still need to make this services fit the `interfaces.DataOperations` interface
+	// NOTE: Maybe i should make this fit the `interfaces.DataOperations` interface
 	Cookies           *services.Cookie
 	ToolRegenerations *services.Regeneration
 	Feeds             *services.Feed
-
-	// Helper TODO: Merge helper with services like the PressCycles service
-	UsersHelper          *services.UserHelper
-	TroubleReportsHelper *services.TroubleReportHelper
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -35,8 +31,7 @@ func New(db *sql.DB) *DB {
 	feeds := services.NewFeed(db)
 
 	attachments := services.NewAttachment(db)
-	troubleReports := services.NewTroubleReport(db, feeds)
-	troubleReportsHelper := services.NewTroubleReportHelper(troubleReports, attachments)
+	troubleReports := services.NewTroubleReport(db, attachments, feeds)
 
 	pressCycles := services.NewPressCycle(db, feeds)
 
@@ -45,20 +40,17 @@ func New(db *sql.DB) *DB {
 
 	metalSheets := services.NewMetalSheet(db, feeds, notes)
 	toolRegenerations := services.NewRegeneration(db, feeds, pressCycles)
-	usersHelper := services.NewUserHelper(db)
 
 	dbInstance := &DB{
-		Users:                services.NewUser(db, feeds),
-		UsersHelper:          usersHelper,
-		Cookies:              services.NewCookie(db),
-		Attachments:          attachments,
-		TroubleReports:       troubleReports,
-		TroubleReportsHelper: troubleReportsHelper,
-		Notes:                notes,
-		Tools:                tools,
-		MetalSheets:          metalSheets,
-		PressCycles:          pressCycles,
-		ToolRegenerations:    toolRegenerations,
+		Users:             services.NewUser(db, feeds),
+		Cookies:           services.NewCookie(db),
+		Attachments:       attachments,
+		TroubleReports:    troubleReports,
+		Notes:             notes,
+		Tools:             tools,
+		MetalSheets:       metalSheets,
+		PressCycles:       pressCycles,
+		ToolRegenerations: toolRegenerations,
 
 		Feeds: feeds,
 		db:    db,

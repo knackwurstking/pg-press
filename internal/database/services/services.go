@@ -6,8 +6,6 @@ package services
 import (
 	"database/sql"
 
-	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
 	"github.com/knackwurstking/pgpress/internal/database/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
@@ -22,18 +20,16 @@ import (
 
 // Type Aliases to expose service types directly
 type (
-	Attachment          = attachment.Service
-	Cookie              = cookie.Service
-	Feed                = feed.Service
-	MetalSheet          = metalsheet.Service
-	Note                = note.Service
-	PressCycle          = presscycle.Service
-	Regeneration        = regeneration.Service
-	Tool                = tool.Service
-	TroubleReport       = troublereport.Service
-	TroubleReportHelper = troublereport.Helper
-	User                = user.Service
-	UserHelper          = user.Helper
+	Attachment    = attachment.Service
+	Cookie        = cookie.Service
+	Feed          = feed.Service
+	MetalSheet    = metalsheet.Service
+	Note          = note.Service
+	PressCycle    = presscycle.Service
+	Regeneration  = regeneration.Service
+	Tool          = tool.Service
+	TroubleReport = troublereport.Service
+	User          = user.Service
 )
 
 // NewAttachment creates a new attachment service.
@@ -77,21 +73,11 @@ func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 }
 
 // NewTroubleReport creates a new trouble report service.
-func NewTroubleReport(db *sql.DB, feeds *Feed) *TroubleReport {
-	return troublereport.New(db, feeds)
-}
-
-// NewTroubleReportHelper creates a new trouble report helper.
-func NewTroubleReportHelper(tr interfaces.DataOperations[*trmodels.TroubleReport], a *Attachment) *TroubleReportHelper {
-	return troublereport.NewTroubleReportsHelper(tr, a)
+func NewTroubleReport(db *sql.DB, a *Attachment, feeds *Feed) *TroubleReport {
+	return troublereport.New(db, a, feeds)
 }
 
 // NewUser creates a new user service.
 func NewUser(db *sql.DB, feeds *Feed) *User {
 	return user.New(db, feeds)
-}
-
-// NewUserHelper creates a new user helper.
-func NewUserHelper(db *sql.DB) *UserHelper {
-	return user.NewHelper(db)
 }

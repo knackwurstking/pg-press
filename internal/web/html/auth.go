@@ -70,7 +70,7 @@ func (h *Auth) handleLogout(c echo.Context) error {
 
 // processApiKeyLogin processes API key authentication and creates a session.
 func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
-	user, err := h.DB.UsersHelper.GetUserFromApiKey(apiKey)
+	user, err := h.DB.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
 		if !errors.Is(err, dberror.ErrNotFound) {
 			logger.HandlerAuth().Error("Failed to get user from API key: %v", err)

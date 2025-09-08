@@ -22,7 +22,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	logger.HTMXHandlerTroubleReports().Debug("User %s fetching trouble reports list", user.Name)
 
-	trs, err := h.DB.TroubleReportsHelper.ListWithAttachments()
+	trs, err := h.DB.TroubleReports.ListWithAttachments()
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to load trouble reports: "+err.Error())
@@ -59,7 +59,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 	logger.HTMXHandlerTroubleReports().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.Name, user.TelegramID, id)
 
-	if removedReport, err := h.DB.TroubleReportsHelper.RemoveWithAttachments(id, user); err != nil {
+	if removedReport, err := h.DB.TroubleReports.RemoveWithAttachments(id, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to delete trouble report: "+err.Error())
@@ -78,7 +78,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	logger.HTMXHandlerTroubleReports().Debug("Fetching attachments preview for trouble report %d", id)
 
-	tr, err := h.DB.TroubleReportsHelper.GetWithAttachments(id)
+	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to load trouble report: "+err.Error())
@@ -99,7 +99,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				}
 
 				// Load attachments for the modified data
-				loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(modifiedTr)
+				loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(modifiedTr)
 				if err != nil {
 					logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for modified trouble report %d: %v", id, err)
 					return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),

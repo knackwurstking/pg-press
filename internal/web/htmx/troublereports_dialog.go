@@ -55,7 +55,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 			props.Content = tr.Content
 
 			// Load attachments for display
-			if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(tr); err == nil {
+			if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr); err == nil {
 				props.Attachments = loadedAttachments
 				logger.HTMXHandlerTroubleReports().Debug("Loaded %d attachments for trouble report %d", len(loadedAttachments), id)
 			} else {
@@ -105,7 +105,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 			title, len(attachments),
 		)
 
-		err := h.DB.TroubleReportsHelper.AddWithAttachments(user, tr, attachments)
+		err := h.DB.TroubleReports.AddWithAttachments(user, tr, attachments)
 		if err != nil {
 			logger.HTMXHandlerTroubleReports().Error(
 				"Failed to add trouble report: %v",
@@ -197,7 +197,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	tr.Content = content
 	tr.LinkedAttachments = existingAttachmentIDs
 
-	err = h.DB.TroubleReportsHelper.UpdateWithAttachments(user, id, tr, newAttachments)
+	err = h.DB.TroubleReports.UpdateWithAttachments(user, id, tr, newAttachments)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error(
 			"Failed to update trouble report %d: %v",
@@ -261,7 +261,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*attachmentmode
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err == nil {
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
-				if loadedAttachments, err := h.DB.TroubleReportsHelper.LoadAttachments(
+				if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(
 					existingTR); err == nil {
 					attachments = make([]*attachmentmodels.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)

@@ -243,6 +243,30 @@ func (u *Service) Update(user, actor *usermodels.User) error {
 	return nil
 }
 
+// GetUserFromApiKey retrieves a user by their API key.
+func (s *Service) GetUserFromApiKey(apiKey string) (*usermodels.User, error) {
+	logger.DBUsers().Debug("Getting user by API key")
+
+	if apiKey == "" {
+		return nil, dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
+	}
+
+	query := `SELECT * FROM users WHERE api_key = ?`
+	row := s.db.QueryRow(query, apiKey)
+
+	user := &usermodels.User{}
+	err := row.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, dberror.ErrNotFound
+		}
+		return nil, dberror.NewDatabaseError("select", "users",
+			"failed to get user by API key", err)
+	}
+
+	return user, nil
+}
+
 func (u *Service) scanUser(scanner interfaces.Scannable) (*usermodels.User, error) {
 	user := &usermodels.User{}
 	err := scanner.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
