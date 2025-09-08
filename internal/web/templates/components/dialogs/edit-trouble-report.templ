@@ -1,4 +1,4 @@
-package troublereports
+package dialogs
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-type EditDialogProps struct {
+type EditTroubleReportProps struct {
 	ID              int64
 	Title           string
 	Content         string
@@ -20,7 +20,7 @@ type EditDialogProps struct {
 	Attachments     []*attachmentmodels.Attachment
 }
 
-templ EditDialog(props *EditDialogProps) {
+templ EditTroubleReport(props *EditTroubleReportProps) {
 	if props.Close {
 		<span
 			hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
@@ -39,6 +39,71 @@ templ EditDialog(props *EditDialogProps) {
                 function updateExistingAttachmentsRemoval() {
                     var input = document.getElementById('existing-attachments-removal');
                     input.value = existingAttachmentsRemoval.join(',');
+                }
+
+                function onAttachments(event) {
+                    selectedFiles = Array.from(event.target.files);
+
+                    function formatFileSize(bytes) {
+                        if (bytes === 0) return "0 Bytes";
+                        var k = 1024;
+                        var sizes = ["Bytes", "KB", "MB", "GB"];
+                        var i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+                    }
+
+                    var previewArea = document.getElementById("file-preview");
+                    var container = document.getElementById("new-attachments");
+                    container.innerHTML = "";
+
+                    if (selectedFiles.length > 0) {
+                        previewArea.style.display = "block";
+
+                        selectedFiles.forEach((file, index) => {
+                            var sizeClass =
+                                file.size > 10 * 1024 * 1024
+                                    ? "attachment-error"
+                                    : "muted text-sm";
+                            var sizeText =
+                                file.size > 10 * 1024 * 1024
+                                    ? "ZU GROSS!"
+                                    : formatFileSize(file.size);
+
+                            /** @type {HTMLTemplateElement} */
+                            var t = previewArea.querySelector(
+                                `template[name="attachment-item"]`,
+                            );
+
+                            /** @type {HTMLElement} */
+                            var item = t.content.cloneNode(true);
+
+                            item.querySelector(`.name`).innerText = file.name;
+
+                            var sizeTextElement = item.querySelector(`.size-text`);
+                            sizeTextElement.innerText = sizeText;
+                            sizeTextElement.className += sizeClass;
+
+                            item.querySelector(`button.delete`).onclick = () => {
+                                selectedFiles.splice(index, 1);
+
+                                // Update the file input
+                                var fileInput = document.getElementById("attachments");
+                                var dt = new DataTransfer();
+                                selectedFiles.forEach((file) => dt.items.add(file));
+                                fileInput.files = dt.files;
+
+                                onAttachments();
+                            };
+
+                            container.appendChild(item);
+                        });
+
+                        setTimeout(() => {
+                            previewArea.scrollIntoView({behavior: "smooth", block: "start"});
+                        }, 100);
+                    } else {
+                        previewArea.style.display = "none";
+                    }
                 }
             </script>
 			<form
@@ -135,7 +200,7 @@ templ EditDialog(props *EditDialogProps) {
 												<button
 													type="button"
 													class="destructive flex gap items-center"
-													onclick={ editDialogDeleteAttachment(attachment.GetID()) }
+													onclick={ deleteAttachment(attachment.GetID()) }
 												>
 													<small class="flex gap items-center">
 														<i class="bi bi-trash"></i>
@@ -151,7 +216,7 @@ templ EditDialog(props *EditDialogProps) {
 						<!-- File Upload Area -->
 						<div
 							class="file-input-area flex flex-col justify-center items-center"
-							onclick={ clickAttachmentsInput() }
+							onclick='document.getElementById("attachments").click();'
 							ondrop="window.dialogEditFunctions.handleFileDrop(event)"
 							ondragover="window.dialogEditFunctions.handleDragOver(event)"
 							ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
@@ -164,7 +229,7 @@ templ EditDialog(props *EditDialogProps) {
 								id={ constants.IDAttachments }
 								multiple
 								accept="image/*"
-								onchange={ editDialogFileInputOnChange(templ.JSExpression("event")) }
+								onchange='onAttachments(this.event)'
 							/>
 						</div>
 						<!-- File Preview Area -->
@@ -224,108 +289,4 @@ templ EditDialog(props *EditDialogProps) {
             </script>
 		</dialog>
 	}
-}
-
-script editDialogDeleteAttachment(attachmentId int64) {
-    if (!confirm(
-        "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
-    )) return;
-
-    // Find and remove the attachment item from DOM
-    var attachmentItem = document.querySelector(
-        `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
-    );
-
-    if (attachmentItem) {
-        // Remove the DOM element
-        attachmentItem.remove();
-
-        // Add the attachment ID to the removal list
-        existingAttachmentsRemoval.push(attachmentId);
-        updateExistingAttachmentsRemoval();
-
-        // Check if no attachments left and hide the details section
-        var existingAttachments = document.getElementById(
-            "existing-attachments",
-        );
-        if (
-            existingAttachments &&
-            existingAttachments.children.length === 0
-        ) {
-            var detailsSection =
-                existingAttachments.closest("details");
-            if (detailsSection) {
-                detailsSection.style.display = "none";
-            }
-        }
-    }
-}
-
-script editDialogFileInputOnChange(event templ.JSExpression) {
-    selectedFiles = Array.from(event.target.files);
-
-    function formatFileSize(bytes) {
-        if (bytes === 0) return "0 Bytes";
-        var k = 1024;
-        var sizes = ["Bytes", "KB", "MB", "GB"];
-        var i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-    }
-
-    var previewArea = document.getElementById("file-preview");
-    var container = document.getElementById("new-attachments");
-    container.innerHTML = "";
-
-    if (selectedFiles.length > 0) {
-        previewArea.style.display = "block";
-
-        selectedFiles.forEach((file, index) => {
-            var sizeClass =
-                file.size > 10 * 1024 * 1024
-                    ? "attachment-error"
-                    : "muted text-sm";
-            var sizeText =
-                file.size > 10 * 1024 * 1024
-                    ? "ZU GROSS!"
-                    : formatFileSize(file.size);
-
-            /** @type {HTMLTemplateElement} */
-            var t = previewArea.querySelector(
-                `template[name="attachment-item"]`,
-            );
-
-            /** @type {HTMLElement} */
-            var item = t.content.cloneNode(true);
-
-            item.querySelector(`.name`).innerText = file.name;
-
-            var sizeTextElement = item.querySelector(`.size-text`);
-            sizeTextElement.innerText = sizeText;
-            sizeTextElement.className += sizeClass;
-
-            item.querySelector(`button.delete`).onclick = () => {
-                selectedFiles.splice(index, 1);
-
-                // Update the file input
-                var fileInput = document.getElementById("attachments");
-                var dt = new DataTransfer();
-                selectedFiles.forEach((file) => dt.items.add(file));
-                fileInput.files = dt.files;
-
-                editDialogFileInputOnChange();
-            };
-
-            container.appendChild(item);
-        });
-
-        setTimeout(() => {
-            previewArea.scrollIntoView({behavior: "smooth", block: "start"});
-        }, 100);
-    } else {
-        previewArea.style.display = "none";
-    }
-}
-
-script clickAttachmentsInput() {
-	document.getElementById("attachments").click();
 }

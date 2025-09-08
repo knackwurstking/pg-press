@@ -1,12 +1,12 @@
-package metalsheets
+package dialogs
 
-type EditDialogProps struct {
+type EditMetalSheetProps struct {
 	ToolID              int64
 	Close               bool
 	Error               string
 }
 
-templ EditDialog(props *EditDialogProps) {
+templ EditMetalSheet(props *EditMetalSheetProps) {
 	if props.Close {
 		<script>
 			// NOTE: For now, this will work just fine
