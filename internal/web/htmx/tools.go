@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 
 	"github.com/labstack/echo/v4"
@@ -62,9 +63,9 @@ func (h *Tools) handleList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) error {
+func (h *Tools) handleEdit(c echo.Context, props *dialogs.EditToolProps) error {
 	if props == nil {
-		props = &toolscomp.EditDialogProps{}
+		props = &dialogs.EditToolProps{}
 		props.ToolID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
 		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
@@ -87,7 +88,7 @@ func (h *Tools) handleEdit(c echo.Context, props *toolscomp.EditDialogProps) err
 		}
 	}
 
-	toolEdit := toolscomp.EditDialog(props)
+	toolEdit := dialogs.EditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool edit dialog: "+err.Error())
@@ -109,7 +110,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &toolscomp.EditDialogProps{
+	props := &dialogs.EditToolProps{
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
 		InputHeight:         formData.Format.Height,
@@ -161,7 +162,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &toolscomp.EditDialogProps{
+	props := &dialogs.EditToolProps{
 		ToolID:              toolID,
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,

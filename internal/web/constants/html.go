@@ -29,3 +29,7 @@ const (
 	IDFilePreview                = "file-preview"
 	IDTroubleReportPrefix        = "trouble-report-%d"
 )
+
+const (
+	DateFormat = "02.01.2006"
+)

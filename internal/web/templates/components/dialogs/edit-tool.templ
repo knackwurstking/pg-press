@@ -1,4 +1,4 @@
-package tools
+package dialogs
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
-type EditDialogProps struct {
+type EditToolProps struct {
 	ToolID              int64
 	Close               bool
 	InputPosition       string
@@ -22,7 +22,7 @@ type EditDialogProps struct {
 }
 
 // TODO: Add a regeneration section to this dialog, Set tool as regenerating true/false
-templ EditDialog(props *EditDialogProps) {
+templ EditTool(props *EditToolProps) {
 	if props.Close {
 		<script>
 			// NOTE: For now, this will work just fine

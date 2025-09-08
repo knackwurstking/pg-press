@@ -1,4 +1,4 @@
-package tools
+package dialogs
 
 import (
 	"fmt"
@@ -10,11 +10,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
-const (
-	DateFormat = "02.01.2006"
-)
-
-type CycleEditDialogProps struct {
+type EditPressCycleProps struct {
 	SlotTop          *toolmodels.Tool
 	SlotTopCassette  *toolmodels.Tool
 	SlotBottom       *toolmodels.Tool
@@ -26,25 +22,25 @@ type CycleEditDialogProps struct {
 	Error            string
 }
 
-func (c *CycleEditDialogProps) HasActiveSlot() bool {
+func (c *EditPressCycleProps) HasActiveSlot() bool {
 	return c.SlotTop != nil || c.SlotTopCassette != nil || c.SlotBottom != nil
 }
 
-func (c *CycleEditDialogProps) GetSlotTopID() int64 {
+func (c *EditPressCycleProps) GetSlotTopID() int64 {
 	if c.SlotTop == nil {
 		return 0
 	}
 	return c.SlotTop.ID
 }
 
-func (c *CycleEditDialogProps) GetSlotTopCassetteID() int64 {
+func (c *EditPressCycleProps) GetSlotTopCassetteID() int64 {
 	if c.SlotTopCassette == nil {
 		return 0
 	}
 	return c.SlotTopCassette.ID
 }
 
-func (c *CycleEditDialogProps) GetSlotBottomID() int64 {
+func (c *EditPressCycleProps) GetSlotBottomID() int64 {
 	if c.SlotBottom == nil {
 		return 0
 	}
@@ -52,7 +48,7 @@ func (c *CycleEditDialogProps) GetSlotBottomID() int64 {
 }
 
 // GetPressFromSlots returns the press number from the first active slot
-func (c *CycleEditDialogProps) GetPressFromSlots() *pressmodels.PressNumber {
+func (c *EditPressCycleProps) GetPressFromSlots() *pressmodels.PressNumber {
 	if c.SlotTop != nil && c.SlotTop.Press != nil {
 		return c.SlotTop.Press
 	}
@@ -66,7 +62,7 @@ func (c *CycleEditDialogProps) GetPressFromSlots() *pressmodels.PressNumber {
 }
 
 // TODO: Add a checkbox, or whatever, for adding a new regenerating entry belonging to this specific cycle
-templ CycleEditDialog(props *CycleEditDialogProps) {
+templ EditPressCycle(props *EditPressCycleProps) {
 	if props.Close {
 		<span
 			id={ constants.IDToolCycleEditDialog }
@@ -162,7 +158,7 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 								<option
 									value={ fmt.Sprintf("%d", i) }
 									selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-										(props.InputPressNumber == nil && isSelectedPress(props.GetPressFromSlots(), i)) }
+										(props.InputPressNumber == nil && isPress(props.GetPressFromSlots(), i)) }
 								>
 									Presse { fmt.Sprintf("%d", i) }
 								</option>
@@ -177,9 +173,9 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
 							name="original_date"
 							type="text"
 							if props.OriginalDate == nil {
-								value={ time.Now().Format(DateFormat) }
+								value={ time.Now().Format(constants.DateFormat) }
 							} else {
-								value={ props.OriginalDate.Format(DateFormat) }
+								value={ props.OriginalDate.Format(constants.DateFormat) }
 							}
 							title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 						/>
@@ -240,12 +236,4 @@ templ CycleEditDialog(props *CycleEditDialogProps) {
             </script>
 		</dialog>
 	}
-}
-
-func isSelectedPress(p *pressmodels.PressNumber, v int) bool {
-	if p == nil {
-		return false
-	}
-
-	return int(*p) == v
 }

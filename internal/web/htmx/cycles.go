@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/labstack/echo/v4"
 )
@@ -143,9 +144,9 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	).Render(c.Request().Context(), c.Response())
 }
 
-func (h *Cycles) handleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Context) error {
+func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Context) error {
 	if props == nil {
-		props = &toolscomp.CycleEditDialogProps{}
+		props = &dialogs.EditPressCycleProps{}
 	}
 
 	if !props.HasActiveSlot() {
@@ -162,7 +163,7 @@ func (h *Cycles) handleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Con
 	if close || props.Close {
 		props.Close = true
 
-		cycleEditDialog := toolscomp.CycleEditDialog(props)
+		cycleEditDialog := dialogs.EditPressCycle(props)
 		if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError,
 				"failed to close cycle edit dialog: "+err.Error())
@@ -185,7 +186,7 @@ func (h *Cycles) handleEditGET(props *toolscomp.CycleEditDialogProps, c echo.Con
 		}
 	}
 
-	cycleEditDialog := toolscomp.CycleEditDialog(props)
+	cycleEditDialog := dialogs.EditPressCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render cycle edit dialog: "+err.Error())
@@ -208,7 +209,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	// Parse form data (type: PressCycle)
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -218,7 +219,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}
 
 	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -249,7 +250,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	pressCycle.Date = formData.Date
 
 	if _, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -260,7 +261,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+	return h.handleEditGET(&dialogs.EditPressCycleProps{
 		SlotTop:         toolTop,
 		SlotTopCassette: toolTopCassette,
 		SlotBottom:      toolBottom,
@@ -286,7 +287,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 
 	formData, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -297,7 +298,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -330,7 +331,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
-		return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
@@ -342,7 +343,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	return h.handleEditGET(&toolscomp.CycleEditDialogProps{
+	return h.handleEditGET(&dialogs.EditPressCycleProps{
 		SlotTop:         toolTop,
 		SlotTopCassette: toolTopCassette,
 		SlotBottom:      toolBottom,
@@ -455,7 +456,7 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	var date time.Time
 	if dateString := c.FormValue(constants.QueryParamOriginalDate); dateString != "" {
 		// Create time (date) object from dateString
-		date, err = time.Parse(toolscomp.DateFormat, dateString)
+		date, err = time.Parse(constants.DateFormat, dateString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
 		}
