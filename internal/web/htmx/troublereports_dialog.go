@@ -323,8 +323,8 @@ func (h *TroubleReports) processFileUpload(
 ) (*attachmentmodels.Attachment, error) {
 	logger.HTMXHandlerTroubleReports().Debug("Processing file upload: %s (size: %d bytes)", fileHeader.Filename, fileHeader.Size)
 
-	if fileHeader.Size > attachmentmodels.MaxAttachmentDataSize {
-		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, attachmentmodels.MaxAttachmentDataSize)
+	if fileHeader.Size > attachmentmodels.MaxDataSize {
+		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, attachmentmodels.MaxDataSize)
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
 	}
@@ -346,8 +346,8 @@ func (h *TroubleReports) processFileUpload(
 	attachmentID := fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
 
 	// Ensure ID doesn't exceed maximum length
-	if len(attachmentID) > attachmentmodels.MaxAttachmentIDLength {
-		maxFilenameLen := attachmentmodels.MaxAttachmentIDLength - len(timestamp) -
+	if len(attachmentID) > attachmentmodels.MaxIDLength {
+		maxFilenameLen := attachmentmodels.MaxIDLength - len(timestamp) -
 			len(fmt.Sprintf("temp_%d", index)) - 2
 		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
 			sanitizedFilename = sanitizedFilename[:maxFilenameLen]

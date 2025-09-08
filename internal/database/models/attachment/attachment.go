@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	MinAttachmentIDLength = 1
-	MaxAttachmentIDLength = 255
-	MaxAttachmentDataSize = 10 * 1024 * 1024 // 10MB
+	MinIDLength = 1
+	MaxIDLength = 255
+	MaxDataSize = 10 * 1024 * 1024 // 10MB
 )
 
 var (
@@ -38,10 +38,12 @@ func (a *Attachment) Validate() error {
 	if a.ID == "" {
 		return dberror.NewValidationError("id", "cannot be empty", a.ID)
 	}
-	if len(a.ID) < MinAttachmentIDLength {
+
+	if len(a.ID) < MinIDLength {
 		return dberror.NewValidationError("id", "too short", len(a.ID))
 	}
-	if len(a.ID) > MaxAttachmentIDLength {
+
+	if len(a.ID) > MaxIDLength {
 		return dberror.NewValidationError("id", "too long", len(a.ID))
 	}
 
@@ -56,7 +58,8 @@ func (a *Attachment) Validate() error {
 	if a.Data == nil {
 		return dberror.NewValidationError("data", "cannot be nil", a.Data)
 	}
-	if len(a.Data) > MaxAttachmentDataSize {
+
+	if len(a.Data) > MaxDataSize {
 		return dberror.NewValidationError("data", "too large", len(a.Data))
 	}
 
@@ -112,15 +115,19 @@ func (a *Attachment) Clone() *Attachment {
 // UpdateID updates the attachment's ID with validation.
 func (a *Attachment) UpdateID(newID string) error {
 	newID = strings.TrimSpace(newID)
+
 	if newID == "" {
 		return dberror.NewValidationError("id", "cannot be empty", newID)
 	}
-	if len(newID) < MinAttachmentIDLength {
+
+	if len(newID) < MinIDLength {
 		return dberror.NewValidationError("id", "too short", len(newID))
 	}
-	if len(newID) > MaxAttachmentIDLength {
+
+	if len(newID) > MaxIDLength {
 		return dberror.NewValidationError("id", "too long", len(newID))
 	}
+
 	a.ID = newID
 	return nil
 }
@@ -140,9 +147,11 @@ func (a *Attachment) UpdateData(newData []byte) error {
 	if newData == nil {
 		return dberror.NewValidationError("data", "cannot be nil", newData)
 	}
-	if len(newData) > MaxAttachmentDataSize {
+
+	if len(newData) > MaxDataSize {
 		return dberror.NewValidationError("data", "too large", len(newData))
 	}
+
 	a.Data = make([]byte, len(newData))
 	copy(a.Data, newData)
 	return nil
@@ -153,16 +162,20 @@ func (a *Attachment) Equals(other *Attachment) bool {
 	if other == nil {
 		return false
 	}
+
 	if a.ID != other.ID || a.MimeType != other.MimeType {
 		return false
 	}
+
 	if len(a.Data) != len(other.Data) {
 		return false
 	}
+
 	for i := range a.Data {
 		if a.Data[i] != other.Data[i] {
 			return false
 		}
 	}
+
 	return true
 }
