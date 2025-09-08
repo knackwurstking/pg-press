@@ -16,9 +16,8 @@ import (
 )
 
 type Service struct {
-	db                *sql.DB
-	feeds             *feed.Service
-	pressCyclesHelper *presscycle.Service
+	db    *sql.DB
+	feeds *feed.Service
 }
 
 // Just to make sure it fits TODO: Make it fit
@@ -53,9 +52,8 @@ func New(db *sql.DB, feeds *feed.Service, pressCyclesHelper *presscycle.Service)
 	}
 
 	return &Service{
-		db:                db,
-		feeds:             feeds,
-		pressCyclesHelper: pressCyclesHelper,
+		db:    db,
+		feeds: feeds,
 	}
 }
 

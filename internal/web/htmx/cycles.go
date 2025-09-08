@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -195,7 +196,6 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 	return nil
 }
 
-// TODO: Handle `input[name="regenerating"]` checkbox element
 func (h *Cycles) handleEditPOST(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
@@ -208,7 +208,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}
 
 	// Parse form data (type: PressCycle)
-	formData, err := h.getCycleFormData(c)
+	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
@@ -219,15 +219,15 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
+	if !pressmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
 			Error:            "press_number must be a valid integer",
-			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: formData.PressNumber,
-			OriginalDate:     &formData.Date,
+			InputTotalCycles: form.TotalCycles,
+			InputPressNumber: form.PressNumber,
+			OriginalDate:     &form.Date,
 		}, c)
 	}
 
@@ -243,23 +243,31 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}
 
 	pressCycle := pressmodels.NewCycle(
-		*formData.PressNumber,
+		*form.PressNumber,
 		slotTopID, slotTopCassetteID, slotBottomID,
-		formData.TotalCycles,
+		form.TotalCycles,
 		user.TelegramID,
 	)
-	pressCycle.Date = formData.Date
+	pressCycle.Date = form.Date
 
-	if _, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
+	if cycleID, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
 			Error:            err.Error(),
-			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: formData.PressNumber,
-			OriginalDate:     &formData.Date,
+			InputTotalCycles: form.TotalCycles,
+			InputPressNumber: form.PressNumber,
+			OriginalDate:     &form.Date,
 		}, c)
+	} else {
+		if form.Regenerating {
+			toolIDs := []int64{toolTop.ID, toolTopCassette.ID, toolBottom.ID}
+			h.setRegenerationForCycle(cycleID, user, toolIDs...)
+			for _, id := range toolIDs {
+				h.DB.Tools.UpdateRegenerating(id, form.Regenerating, user)
+			}
+		}
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
@@ -270,7 +278,6 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}, c)
 }
 
-// TODO: Handle `input[name="regenerating"]` checkbox element
 func (h *Cycles) handleEditPUT(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
@@ -287,7 +294,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	formData, err := h.getCycleFormData(c)
+	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
@@ -299,15 +306,15 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if !pressmodels.IsValidPressNumber(formData.PressNumber) {
+	if !pressmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			SlotTop:          toolTop,
 			SlotTopCassette:  toolTopCassette,
 			SlotBottom:       toolBottom,
 			Error:            "press_number must be a valid integer",
-			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: formData.PressNumber,
-			OriginalDate:     &formData.Date,
+			InputTotalCycles: form.TotalCycles,
+			InputPressNumber: form.PressNumber,
+			OriginalDate:     &form.Date,
 		}, c)
 	}
 
@@ -325,11 +332,11 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	// Update only the fields that should change, preserving the original date
 	pressCycle := pressmodels.NewPressCycleWithID(
 		cycleID,
-		*formData.PressNumber,
+		*form.PressNumber,
 		slotTopID, slotTopCassetteID, slotBottomID,
-		formData.TotalCycles,
+		form.TotalCycles,
 		user.TelegramID,
-		formData.Date,
+		form.Date,
 	)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
@@ -339,10 +346,16 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 			SlotBottom:       toolBottom,
 			CycleID:          cycleID,
 			Error:            err.Error(),
-			InputTotalCycles: formData.TotalCycles,
-			InputPressNumber: formData.PressNumber,
-			OriginalDate:     &formData.Date,
+			InputTotalCycles: form.TotalCycles,
+			InputPressNumber: form.PressNumber,
+			OriginalDate:     &form.Date,
 		}, c)
+	}
+
+	if form.Regenerating {
+		h.setRegenerationForCycle(
+			cycleID, user, toolTop.ID, toolTopCassette.ID, toolBottom.ID,
+		)
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
@@ -436,7 +449,7 @@ func (h *Cycles) getSlotsFromQuery(c echo.Context) (toolTop, toolTopCassette, to
 
 func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	var err error
-	formData := &CycleEditFormData{}
+	form := &CycleEditFormData{}
 
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)
@@ -445,30 +458,47 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		}
 
 		pn := pressmodels.PressNumber(press)
-		formData.PressNumber = &pn
+		form.PressNumber = &pn
 	}
 
 	if dateString := c.FormValue("original_date"); dateString != "" {
 		// Create time (date) object from dateString
-		formData.Date, err = time.Parse(constants.DateFormat, dateString)
+		form.Date, err = time.Parse(constants.DateFormat, dateString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
 		}
 	} else {
-		formData.Date = time.Now()
+		form.Date = time.Now()
 	}
 
 	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles is required")
 	} else {
-		if formData.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64); err != nil {
+		if form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64); err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
 		}
 	}
 
 	if r := c.FormValue("regenerating"); r != "" {
-		formData.Regenerating = true
+		form.Regenerating = true
 	}
 
-	return formData, nil
+	return form, nil
+}
+
+func (h *Cycles) setRegenerationForCycle(cycleID int64, user *usermodels.User, tools ...int64) {
+	for _, toolID := range tools {
+		// NOTE: Reason not implemented yet, so just set to ""
+		r, err := h.DB.ToolRegenerations.Create(toolID, cycleID, "", user)
+
+		if err != nil {
+			logger.HTMXHandlerTools().Error(
+				"Failed to create a tool regenerion entry for %d: %#v",
+				toolID, err,
+			)
+		}
+
+		logger.HTMXHandlerTools().Info("Set the tool %d to regenerating.", toolID)
+		logger.HTMXHandlerTools().Debug("Tool %d regenerating: %#v", toolID, r)
+	}
 }

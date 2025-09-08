@@ -202,15 +202,21 @@ templ EditPressCycle(props *EditPressCycleProps) {
 					<section class="regeneration">
 						<label class="flex flex-row justify-between items-center">
 							<span class="flex flex-col gap-0">
-								<span>
-									Werkzeug in den Regenerationszustand versetzen
-									if props.CycleID > 0 {
-										(Rückwirkend)
-									}
-								</span>
-
 								if props.CycleID > 0 {
-									<small>Diese Aktion setzt die Gesamtzyklen auf 0 zurück</small>
+									<span>
+										Werkzeug nach diesem cycluse eintrag als regeneriert markieren.
+										if props.CycleID > 0 {
+											(Rückwirkend)
+										}
+									</span>
+
+									<small>
+										Diese Aktion setzt die Gesamtzyklen auf 0 zurück
+									</small>
+								} else {
+									<span>
+										Werkzeug in den Regenerationszustand versetzen
+									</span>
 								}
 							</span>
 
