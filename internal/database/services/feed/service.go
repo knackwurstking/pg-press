@@ -2,6 +2,7 @@ package feed
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
@@ -17,10 +18,10 @@ type Service struct {
 
 // New creates a new Service instance and initializes the database table
 func New(db *sql.DB) *Service {
-	//dropQuery := `DROP TABLE IF EXISTS feeds;`
-	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop feeds table: %w", err))
-	//}
+	dropQuery := `DROP TABLE IF EXISTS feeds;`
+	if _, err := db.Exec(dropQuery); err != nil {
+		panic(fmt.Errorf("failed to drop feeds table: %w", err))
+	}
 
 	query := `
 		CREATE TABLE IF NOT EXISTS feeds (
