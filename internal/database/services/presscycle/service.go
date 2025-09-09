@@ -56,6 +56,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 }
 
 // TODO: Update the query to take the regeneration into account
+// TODO: There should be one slot per cycle, maybe add a slot_position column (tool, tool_position)
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	var query string
 	if cycle.SlotTop > 0 {
@@ -173,17 +174,14 @@ func (p *Service) Add(cycle *pressmodels.Cycle, user *usermodels.User) (int64, e
 	cycle.ID = id
 
 	// Create feed entry
+	// Trigger feed update
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.New(
-			feedmodels.TypePressCycleAdd,
-			&feedmodels.PressCycleAdd{
-				SlotTop:         cycle.SlotTop,
-				SlotTopCassette: cycle.SlotTopCassette,
-				SlotBottom:      cycle.SlotBottom,
-				TotalCycles:     cycle.TotalCycles,
-				ModifiedBy:      user,
-			},
-		))
+		feed := feedmodels.New(
+			"Neuer Pressenzyklus",
+			fmt.Sprintf("Benutzer %s hat einen neuen Pressenzyklus mit %d Zyklen hinzugefügt.", user.Name, cycle.TotalCycles),
+			user.TelegramID,
+		)
+		p.feeds.Add(feed)
 	}
 
 	return id, nil
@@ -225,17 +223,14 @@ func (p *Service) Update(cycle *pressmodels.Cycle, user *usermodels.User) error 
 	}
 
 	// Create feed entry
+	// Trigger feed update
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.New(
-			feedmodels.TypePressCycleUpdate,
-			&feedmodels.PressCycleUpdate{
-				SlotTop:         cycle.SlotTop,
-				SlotTopCassette: cycle.SlotTopCassette,
-				SlotBottom:      cycle.SlotBottom,
-				TotalCycles:     cycle.TotalCycles,
-				ModifiedBy:      user,
-			},
-		))
+		feed := feedmodels.New(
+			"Pressenzyklus aktualisiert",
+			fmt.Sprintf("Benutzer %s hat den Pressenzyklus auf %d Zyklen aktualisiert.", user.Name, cycle.TotalCycles),
+			user.TelegramID,
+		)
+		p.feeds.Add(feed)
 	}
 
 	return nil
@@ -245,11 +240,7 @@ func (p *Service) Update(cycle *pressmodels.Cycle, user *usermodels.User) error 
 func (p *Service) Delete(id int64, user *usermodels.User) error {
 	logger.DBPressCycles().Info("Deleting press cycle: id=%d", id)
 
-	// Get cycle for feed before deleting
-	cycle, err := p.Get(id)
-	if err != nil {
-		return fmt.Errorf("failed to get press cycle for deletion: %w", err)
-	}
+	// No need to get cycle data for simplified feed system
 
 	query := `
 		DELETE FROM press_cycles WHERE id = ?
@@ -269,17 +260,14 @@ func (p *Service) Delete(id int64, user *usermodels.User) error {
 	}
 
 	// Create feed entry
+	// Trigger feed update
 	if p.feeds != nil {
-		p.feeds.Add(feedmodels.New(
-			feedmodels.TypePressCycleDelete,
-			&feedmodels.PressCycleUpdate{ // TODO: Create Delete type
-				SlotTop:         cycle.SlotTop,
-				SlotTopCassette: cycle.SlotTopCassette,
-				SlotBottom:      cycle.SlotBottom,
-				TotalCycles:     cycle.TotalCycles,
-				ModifiedBy:      user,
-			},
-		))
+		feed := feedmodels.New(
+			"Pressenzyklus entfernt",
+			fmt.Sprintf("Benutzer %s hat den Pressenzyklus entfernt.", user.Name),
+			user.TelegramID,
+		)
+		p.feeds.Add(feed)
 	}
 
 	return nil

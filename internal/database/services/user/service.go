@@ -133,8 +133,9 @@ func (u *Service) Add(user *usermodels.User, actor *usermodels.User) (int64, err
 
 	// Create feed entry for the new user
 	feed := feedmodels.New(
-		feedmodels.TypeUserAdd,
-		feedmodels.UserAdd{ID: user.TelegramID, Name: user.Name},
+		"Neuer Benutzer",
+		fmt.Sprintf("Benutzer %s wurde hinzugefügt.", user.Name),
+		user.TelegramID,
 	)
 	if err := u.feeds.Add(feed); err != nil {
 		return user.TelegramID, dberror.WrapError(err, "failed to add feed entry")
@@ -170,8 +171,9 @@ func (u *Service) Delete(telegramID int64, actor *usermodels.User) error {
 	// Create feed entry for the removed user
 	if user != nil {
 		feed := feedmodels.New(
-			feedmodels.TypeUserRemove,
-			feedmodels.UserRemove{ID: user.TelegramID, Name: user.Name},
+			"Benutzer entfernt",
+			fmt.Sprintf("Benutzer %s wurde entfernt.", user.Name),
+			user.TelegramID,
 		)
 		if err := u.feeds.Add(feed); err != nil {
 			return dberror.WrapError(err, "failed to add feed entry")
@@ -227,12 +229,9 @@ func (u *Service) Update(user, actor *usermodels.User) error {
 	if prevUser.Name != user.Name {
 		logger.DBUsers().Debug("Username changed from '%s' to '%s'", prevUser.Name, user.Name)
 		feed := feedmodels.New(
-			feedmodels.TypeUserNameChange,
-			&feedmodels.UserNameChange{
-				ID:  user.TelegramID,
-				Old: prevUser.Name,
-				New: user.Name,
-			},
+			"Benutzername geändert",
+			fmt.Sprintf("Benutzer %s hat den Namen zu %s geändert.", prevUser.Name, user.Name),
+			user.TelegramID,
 		)
 
 		if err := u.feeds.Add(feed); err != nil {

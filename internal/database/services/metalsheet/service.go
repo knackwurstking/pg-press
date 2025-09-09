@@ -280,14 +280,12 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeMetalSheetAdd,
-			&feedmodels.MetalSheetAdd{
-				ID:         id,
-				MetalSheet: sheet.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Neues Blech hinzugefügt",
+			fmt.Sprintf("Benutzer %s hat ein neues Blech %s hinzugefügt.", user.Name, sheet.String()),
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return id, nil
@@ -359,14 +357,12 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeMetalSheetUpdate,
-			&feedmodels.MetalSheetUpdate{
-				ID:         sheet.ID,
-				MetalSheet: sheet.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Blech aktualisiert",
+			fmt.Sprintf("Benutzer %s hat das Blech %s aktualisiert.", user.Name, sheet.String()),
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return nil
@@ -423,14 +419,18 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeMetalSheetToolAssignment,
-			&feedmodels.MetalSheetToolAssignment{
-				SheetID:    sheetID,
-				ToolID:     toolID,
-				ModifiedBy: user,
-			},
-		))
+		var content string
+		if toolID != nil {
+			content = fmt.Sprintf("Benutzer %s hat Blech #%d dem Werkzeug #%d zugewiesen.", user.Name, sheetID, *toolID)
+		} else {
+			content = fmt.Sprintf("Benutzer %s hat Blech #%d vom Werkzeug getrennt.", user.Name, sheetID)
+		}
+		feed := feedmodels.New(
+			"Blech-Werkzeug Zuordnung",
+			content,
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return nil
@@ -453,13 +453,12 @@ func (s *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeMetalSheetDelete,
-			&feedmodels.MetalSheetDelete{
-				ID:         id,
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Blech entfernt",
+			fmt.Sprintf("Benutzer %s hat das Blech mit ID %d entfernt.", user.Name, id),
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return nil

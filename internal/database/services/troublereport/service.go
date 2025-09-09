@@ -143,12 +143,10 @@ func (tr *Service) Add(troubleReport *trmodels.TroubleReport, user *usermodels.U
 	troubleReport.ID = id
 
 	feed := feedmodels.New(
-		feedmodels.TypeTroubleReportAdd,
-		&feedmodels.TroubleReportAdd{
-			ID:         id,
-			Title:      troubleReport.Title,
-			ModifiedBy: troubleReport.Mods.Current().User,
-		},
+		"Neuer Problembericht",
+		fmt.Sprintf("Benutzer %s hat einen neuen Problembericht '%s' hinzugefügt.",
+			troubleReport.Mods.Current().User.Name, troubleReport.Title),
+		troubleReport.Mods.Current().User.TelegramID,
 	)
 	if err := tr.feeds.Add(feed); err != nil {
 		return id, dberror.WrapError(err, "failed to add feed entry")
@@ -194,12 +192,10 @@ func (tr *Service) Update(troubleReport *trmodels.TroubleReport, user *usermodel
 	}
 
 	feed := feedmodels.New(
-		feedmodels.TypeTroubleReportUpdate,
-		&feedmodels.TroubleReportUpdate{
-			ID:         id,
-			Title:      troubleReport.Title,
-			ModifiedBy: troubleReport.Mods.Current().User,
-		},
+		"Problembericht aktualisiert",
+		fmt.Sprintf("Benutzer %s hat den Problembericht '%s' aktualisiert.",
+			troubleReport.Mods.Current().User.Name, troubleReport.Title),
+		troubleReport.Mods.Current().User.TelegramID,
 	)
 	if err := tr.feeds.Add(feed); err != nil {
 		return dberror.WrapError(err, "failed to add feed entry")
@@ -238,12 +234,10 @@ func (tr *Service) Delete(id int64, user *usermodels.User) error {
 	// Create feed entry for the removed user
 	if user != nil {
 		feed := feedmodels.New(
-			feedmodels.TypeTroubleReportRemove,
-			&feedmodels.TroubleReportRemove{
-				ID:        report.ID,
-				Title:     report.Title,
-				RemovedBy: user,
-			},
+			"Problembericht entfernt",
+			fmt.Sprintf("Benutzer %s hat den Problembericht '%s' entfernt.",
+				user.Name, report.Title),
+			user.TelegramID,
 		)
 		if err := tr.feeds.Add(feed); err != nil {
 			return dberror.WrapError(err, "failed to add feed entry")

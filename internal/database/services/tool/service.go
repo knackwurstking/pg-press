@@ -170,14 +170,12 @@ func (t *Service) Add(tool *toolmodels.Tool, user *usermodels.User) (int64, erro
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.New(
-			feedmodels.TypeToolAdd,
-			&feedmodels.ToolAdd{
-				ID:         id,
-				Tool:       tool.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Neues Werkzeug hinzugefügt",
+			fmt.Sprintf("Benutzer %s hat ein neues Werkzeug %s zur Werkzeugliste hinzugefügt.", user.Name, tool.String()),
+			user.TelegramID,
+		)
+		t.feeds.Add(feed)
 	}
 
 	return id, nil
@@ -234,14 +232,12 @@ func (t *Service) Update(tool *toolmodels.Tool, user *usermodels.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.New(
-			feedmodels.TypeToolUpdate,
-			&feedmodels.ToolUpdate{
-				ID:         tool.ID,
-				Tool:       tool.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Werkzeug aktualisiert",
+			fmt.Sprintf("Benutzer %s hat das Werkzeug %s aktualisiert.", user.Name, tool.String()),
+			user.TelegramID,
+		)
+		t.feeds.Add(feed)
 	}
 
 	return nil
@@ -267,14 +263,12 @@ func (t *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Trigger feed update
 	if t.feeds != nil {
-		t.feeds.Add(feedmodels.New(
-			feedmodels.TypeToolDelete,
-			&feedmodels.ToolDelete{
-				ID:         id,
-				Tool:       tool.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Werkzeug entfernt",
+			fmt.Sprintf("Benutzer %s hat das Werkzeug %s entfernt.", user.Name, tool.String()),
+			user.TelegramID,
+		)
+		t.feeds.Add(feed)
 	}
 
 	return nil
@@ -443,14 +437,12 @@ func (s *Service) UpdateRegenerating(toolID int64, regenerating bool, user *user
 
 	// Trigger feed update
 	if s.feeds != nil {
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeToolUpdate,
-			&feedmodels.ToolUpdate{
-				ID:         tool.ID,
-				Tool:       tool.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Werkzeug Regenerierung aktualisiert",
+			fmt.Sprintf("Benutzer %s hat die Regenerierung für Werkzeug %s aktualisiert.", user.Name, tool.String()),
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return nil
@@ -495,14 +487,12 @@ func (s *Service) UpdatePress(toolID int64, press *pressmodels.PressNumber, user
 	// Trigger feed update
 	if s.feeds != nil {
 		tool.Press = press // Update press for correct display
-		s.feeds.Add(feedmodels.New(
-			feedmodels.TypeToolUpdate,
-			&feedmodels.ToolUpdate{
-				ID:         toolID,
-				Tool:       tool.String(),
-				ModifiedBy: user,
-			},
-		))
+		feed := feedmodels.New(
+			"Werkzeug Pressendaten aktualisiert",
+			fmt.Sprintf("Benutzer %s hat die Pressendaten für Werkzeug %s aktualisiert.", user.Name, tool.String()),
+			user.TelegramID,
+		)
+		s.feeds.Add(feed)
 	}
 
 	return nil

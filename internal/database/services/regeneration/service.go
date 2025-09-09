@@ -90,7 +90,14 @@ func (s *Service) Add(regeneration *toolmodels.Regeneration, user *usermodels.Us
 	}
 
 	// Create feed entry
-	s.feeds.Add(feedmodels.New(feedmodels.TypeRegenerationAdd, r))
+	if s.feeds != nil {
+		feed := feedmodels.New(
+			"Regenerierung hinzugefügt",
+			"Eine neue Regenerierung wurde hinzugefügt.",
+			0, // No specific user for regeneration entries
+		)
+		s.feeds.Add(feed)
+	}
 
 	return r, nil
 }

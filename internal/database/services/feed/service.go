@@ -1,9 +1,7 @@
-// TODO: Need to rewrite the feed service a bit to simplify it
 package feed
 
 import (
 	"database/sql"
-	"encoding/json"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
@@ -17,19 +15,20 @@ type Service struct {
 	broadcaster interfaces.Broadcaster
 }
 
-// Just to make sure it fits TODO: Make it fit
-//var _ interfaces.DataOperations[*feed.Feed] = (*Service)(nil)
-
 // New creates a new Service instance and initializes the database table
 func New(db *sql.DB) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,
-			time INTEGER NOT NULL,
-			data_type TEXT NOT NULL,
-			data BLOB NOT NULL,
+			title TEXT NOT NULL,
+			content TEXT NOT NULL,
+			user_id INTEGER NOT NULL,
+			created_at INTEGER NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
+
+		CREATE INDEX IF NOT EXISTS idx_feeds_created_at ON feeds(created_at);
+		CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id);
 	`
 	if _, err := db.Exec(query); err != nil {
 		panic(dberror.NewDatabaseError(
@@ -42,17 +41,17 @@ func New(db *sql.DB) *Service {
 	return &Service{db: db}
 }
 
-// SetNotifier sets the feed notifier for real-time updates
-func (s *Service) SetBroadcaster(notifier interfaces.Broadcaster) {
+// SetBroadcaster sets the feed notifier for real-time updates
+func (s *Service) SetBroadcaster(broadcaster interfaces.Broadcaster) {
 	logger.DBFeeds().Debug("Setting broadcaster for real-time updates")
-	s.broadcaster = notifier
+	s.broadcaster = broadcaster
 }
 
-// List retrieves all feeds ordered by ID in descending order
+// List retrieves all feeds ordered by creation time in descending order
 func (s *Service) List() ([]*feed.Feed, error) {
 	logger.DBFeeds().Info("Listing all feeds")
 
-	query := `SELECT id, time, data_type, data FROM feeds ORDER BY id DESC`
+	query := `SELECT id, title, content, user_id, created_at FROM feeds ORDER BY created_at DESC`
 	rows, err := s.db.Query(query)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds", err)
@@ -76,8 +75,8 @@ func (s *Service) ListRange(offset, limit int) ([]*feed.Feed, error) {
 		return nil, dberror.NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
-	query := `SELECT id, time, data_type, data FROM feeds
-		ORDER BY id DESC LIMIT ? OFFSET ?`
+	query := `SELECT id, title, content, user_id, created_at FROM feeds
+		ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := s.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds range", err)
@@ -87,39 +86,69 @@ func (s *Service) ListRange(offset, limit int) ([]*feed.Feed, error) {
 	return s.scanAllRows(rows)
 }
 
-// Add creates a new feed entry in the database
-func (s *Service) Add(feed *feed.Feed) error {
-	logger.DBFeeds().Info("Adding feed: %+v", feed)
+// ListByUser retrieves feeds created by a specific user
+func (s *Service) ListByUser(userID int64, offset, limit int) ([]*feed.Feed, error) {
+	logger.DBFeeds().Info("Listing feeds for user %d, offset: %d, limit: %d", userID, offset, limit)
 
-	if feed == nil {
+	if userID <= 0 {
+		return nil, dberror.NewValidationError("user_id", "must be positive", userID)
+	}
+	if offset < 0 {
+		return nil, dberror.NewValidationError("offset", "must be non-negative", offset)
+	}
+	if limit <= 0 {
+		return nil, dberror.NewValidationError("limit", "must be positive", limit)
+	}
+	if limit > 1000 {
+		return nil, dberror.NewValidationError("limit", "must not exceed 1000", limit)
+	}
+
+	query := `SELECT id, title, content, user_id, created_at FROM feeds
+		WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	rows, err := s.db.Query(query, userID, limit, offset)
+	if err != nil {
+		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds by user", err)
+	}
+	defer rows.Close()
+
+	return s.scanAllRows(rows)
+}
+
+// Add creates a new feed entry in the database
+func (s *Service) Add(feedData *feed.Feed) error {
+	logger.DBFeeds().Info("Adding feed: %+v", feedData)
+
+	if feedData == nil {
 		logger.DBFeeds().Debug("Validation failed: feed is nil")
 		return dberror.NewValidationError("feed", "cannot be nil", nil)
 	}
-	if err := feed.Validate(); err != nil {
+	if err := feedData.Validate(); err != nil {
 		logger.DBFeeds().Debug("Feed validation failed: %v", err)
 		return err
 	}
 
-	data, err := json.Marshal(feed.Data)
-	if err != nil {
-		logger.DBFeeds().Error("Failed to marshal feed data: %v", err)
-		return dberror.WrapError(err, "failed to marshal feed data")
-	}
-
-	query := `INSERT INTO feeds (time, data_type, data) VALUES (?, ?, ?)`
-	_, err = s.db.Exec(query, feed.Time, feed.DataType, data)
+	query := `INSERT INTO feeds (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`
+	result, err := s.db.Exec(query, feedData.Title, feedData.Content, feedData.UserID, feedData.CreatedAt)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to insert feed: %v", err)
 		return dberror.NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
 
-	// Notify about new feed if notifier is set
+	// Get the generated ID
+	id, err := result.LastInsertId()
+	if err != nil {
+		logger.DBFeeds().Error("Failed to get last insert ID: %v", err)
+		return dberror.NewDatabaseError("insert", "feeds", "failed to get insert ID", err)
+	}
+	feedData.ID = id
+
+	// Notify about new feed if broadcaster is set
 	if s.broadcaster != nil {
 		logger.DBFeeds().Debug("Broadcasting new feed notification")
 		s.broadcaster.Broadcast()
 	}
 
-	logger.DBFeeds().Debug("Successfully added feed with data type: %s", feed.DataType)
+	logger.DBFeeds().Debug("Successfully added feed with ID: %d", feedData.ID)
 	return nil
 }
 
@@ -136,6 +165,23 @@ func (s *Service) Count() (int, error) {
 	return count, nil
 }
 
+// CountByUser returns the number of feeds created by a specific user
+func (s *Service) CountByUser(userID int64) (int, error) {
+	logger.DBFeeds().Debug("Counting feeds for user %d", userID)
+
+	if userID <= 0 {
+		return 0, dberror.NewValidationError("user_id", "must be positive", userID)
+	}
+
+	var count int
+	query := `SELECT COUNT(*) FROM feeds WHERE user_id = ?`
+	err := s.db.QueryRow(query, userID).Scan(&count)
+	if err != nil {
+		return 0, dberror.NewDatabaseError("count", "feeds", "failed to count feeds by user", err)
+	}
+	return count, nil
+}
+
 // DeleteBefore removes all feeds created before the specified timestamp
 func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
 	logger.DBFeeds().Info("Deleting feeds before timestamp: %d", timestamp)
@@ -145,7 +191,7 @@ func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
 		return 0, dberror.NewValidationError("timestamp", "must be positive", timestamp)
 	}
 
-	query := `DELETE FROM feeds WHERE time < ?`
+	query := `DELETE FROM feeds WHERE created_at < ?`
 	result, err := s.db.Exec(query, timestamp)
 	if err != nil {
 		logger.DBFeeds().Error("Failed to delete feeds by timestamp: %v", err)
@@ -163,27 +209,27 @@ func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (s *Service) Get(id int) (*feed.Feed, error) {
+func (s *Service) Get(id int64) (*feed.Feed, error) {
 	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
 
 	if id <= 0 {
 		return nil, dberror.NewValidationError("id", "must be positive", id)
 	}
 
-	query := `SELECT id, time, data_type, data FROM feeds WHERE id = ?`
+	query := `SELECT id, title, content, user_id, created_at FROM feeds WHERE id = ?`
 	row := s.db.QueryRow(query, id)
-	feed, err := s.scanFeed(row)
+	feedData, err := s.scanFeed(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound
 		}
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to get feed by ID", err)
 	}
-	return feed, nil
+	return feedData, nil
 }
 
 // Delete removes a specific feed by ID
-func (s *Service) Delete(id int) error {
+func (s *Service) Delete(id int64) error {
 	logger.DBFeeds().Info("Deleting feed by ID: %d", id)
 
 	if id <= 0 {
@@ -217,12 +263,12 @@ func (s *Service) Delete(id int) error {
 func (s *Service) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
 	var feeds []*feed.Feed
 	for rows.Next() {
-		feed, err := s.scanFeed(rows)
+		feedData, err := s.scanFeed(rows)
 		if err != nil {
 			logger.DBFeeds().Error("Failed to scan feed row: %v", err)
 			return nil, dberror.NewDatabaseError("scan", "feeds", "failed to scan feed row", err)
 		}
-		feeds = append(feeds, feed)
+		feeds = append(feeds, feedData)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -235,22 +281,14 @@ func (s *Service) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
 }
 
 func (s *Service) scanFeed(scanner interfaces.Scannable) (*feed.Feed, error) {
-	feed := &feed.Feed{}
-	var data []byte
+	feedData := &feed.Feed{}
 
-	if err := scanner.Scan(&feed.ID, &feed.Time, &feed.DataType, &data); err != nil {
+	if err := scanner.Scan(&feedData.ID, &feedData.Title, &feedData.Content, &feedData.UserID, &feedData.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
 		return nil, dberror.NewDatabaseError("scan", "feeds", "failed to scan row", err)
 	}
 
-	if len(data) > 0 {
-		if err := json.Unmarshal(data, &feed.Data); err != nil {
-			logger.DBFeeds().Error("Failed to unmarshal feed data for ID %d: %v", feed.ID, err)
-			return nil, dberror.WrapError(err, "failed to unmarshal feed data")
-		}
-	}
-
-	return feed, nil
+	return feedData, nil
 }

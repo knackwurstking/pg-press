@@ -91,18 +91,17 @@ func listFeedsCommand() cli.Command {
 				// Create table
 				t := table.NewWriter()
 				t.SetOutputMirror(os.Stdout)
-				t.AppendHeader(table.Row{"ID", "Time", "Age", "Type", "Data"})
+				t.AppendHeader(table.Row{"ID", "Time", "Age", "Title", "Content"})
 
 				// Add rows
 				for _, feed := range feeds {
 					age := formatAge(feed.Age())
-					dataStr := formatFeedData(feed.Data, feed.DataType)
 					t.AppendRow(table.Row{
 						feed.ID,
-						feed.GetTime().Format("2006-01-02 15:04:05"),
+						feed.GetCreatedTime().Format("2006-01-02 15:04:05"),
 						age,
-						feed.DataType,
-						dataStr,
+						feed.Title,
+						feed.Content,
 					})
 				}
 
@@ -209,7 +208,7 @@ func filterFeedsByDate(feeds []*feedmodels.Feed, since, before string) []*feedmo
 	}
 
 	for _, feed := range feeds {
-		feedTime := feed.GetTime()
+		feedTime := feed.GetCreatedTime()
 
 		if since != "" && feedTime.Before(sinceTime) {
 			continue
@@ -239,35 +238,8 @@ func formatAge(duration time.Duration) string {
 	return fmt.Sprintf("%dm", minutes)
 }
 
-func formatFeedData(data any, dataType string) string {
-	if data == nil {
-		return ""
-	}
-
-	dataMap, ok := data.(map[string]any)
-	if !ok {
-		return fmt.Sprintf("%v", data)
-	}
-
-	switch dataType {
-	case feedmodels.TypeUserAdd, feedmodels.TypeUserRemove:
-		if name, exists := dataMap["name"]; exists {
-			return fmt.Sprintf("User: %v", name)
-		}
-	case feedmodels.TypeUserNameChange:
-		if old, exists := dataMap["old"]; exists {
-			if new, exists := dataMap["new"]; exists {
-				return fmt.Sprintf("User: %v -> %v", old, new)
-			}
-		}
-	case feedmodels.TypeTroubleReportAdd, feedmodels.TypeTroubleReportUpdate, feedmodels.TypeTroubleReportRemove:
-		if title, exists := dataMap["title"]; exists {
-			return fmt.Sprintf("Report: %v", title)
-		}
-	}
-
-	return fmt.Sprintf("%v", data)
-}
+// This function is no longer needed with the simplified feed structure
+// Content is now directly accessible as feed.Content
 
 func removeFeedsByIDs(db *database.DB, ids []string) error {
 	var failed []string
@@ -280,7 +252,7 @@ func removeFeedsByIDs(db *database.DB, ids []string) error {
 			continue
 		}
 
-		err = db.Feeds.Delete(id)
+		err = db.Feeds.Delete(int64(id))
 		if err != nil {
 			if errors.Is(err, dberror.ErrNotFound) {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
