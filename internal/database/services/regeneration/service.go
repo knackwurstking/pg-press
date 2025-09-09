@@ -25,10 +25,10 @@ type Service struct {
 }
 
 func New(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
-	dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
-	if _, err := db.Exec(dropQuery); err != nil {
-		panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
-	}
+	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
+	//if _, err := db.Exec(dropQuery); err != nil {
+	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
+	//}
 
 	query := `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (

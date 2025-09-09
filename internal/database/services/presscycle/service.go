@@ -24,10 +24,10 @@ type Service struct {
 var _ interfaces.DataOperations[*cyclemodels.Cycle] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
-	dropQuery := `DROP TABLE IF EXISTS press_cycles;`
-	if _, err := db.Exec(dropQuery); err != nil {
-		panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
-	}
+	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
+	//if _, err := db.Exec(dropQuery); err != nil {
+	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
+	//}
 
 	// Create new table with tool_id and tool_position instead of slot fields
 	query := `
