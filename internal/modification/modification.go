@@ -1,3 +1,17 @@
+// TOOD: Create a modification service to store modifications
+// Data:
+//   - id (int64)
+
+//   - type (string) Modification type, for example: (in short the database table names)
+//	   	- "trouble_reports"
+//	   	- "tool_regenerations"
+//	   	- "users"
+//	   	- "tools"
+//	   	- "press_cycles"
+
+// - data (any)
+// - created at (time.Time)
+// - user id (int64)
 package modification
 
 import (
