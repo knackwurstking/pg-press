@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive logging improvements made across the pg-press application to enhance debugging, monitoring, and troubleshooting capabilities.
+This document outlines the comprehensive logging improvements made across the pg-press application to enhance debugging, monitoring, and troubleshooting capabilities. The improvements focus on meaningful, actionable logging while avoiding excessive debug noise.
 
 ## Key Improvements
 
@@ -22,8 +22,9 @@ This document outlines the comprehensive logging improvements made across the pg
 
 ```
 [INFO ] 2024/01/15 10:30:15 [Middleware] Admin action: POST /htmx/tools/edit by AdminUser
+[INFO ] 2024/01/15 10:30:15 [Middleware] API key authentication successful for user TestUser from 192.168.1.1
 [WARN ] 2024/01/15 10:30:16 [Middleware] Slow request: GET /tools took 1.2s (user-agent: Mozilla/5.0...)
-[WARN ] 2024/01/15 10:30:17 [Middleware] User agent mismatch for user TestUser from 192.168.1.1
+[WARN ] 2024/01/15 10:30:17 [Middleware] Authentication failed from 192.168.1.1: invalid credentials
 ```
 
 ### 2. Server Command Enhancements
@@ -32,18 +33,18 @@ This document outlines the comprehensive logging improvements made across the pg
 
 #### Improvements Made:
 
-- **Startup Sequence**: Detailed logging of server initialization steps
-- **Database Connection**: Log database path and connection status
+- **Startup Sequence**: Key server initialization milestones
 - **Error Context**: Enhanced error messages with common causes and troubleshooting hints
-- **Configuration Logging**: Log file redirection and middleware setup progress
+- **Log File Redirection**: Status of log output redirection
+- **Critical Failures**: Server startup failures with diagnostic information
 
 #### Example Log Entries:
 
 ```
-[INFO ] 2024/01/15 10:25:00 [Server] Opening database at: /path/to/database.db
-[INFO ] 2024/01/15 10:25:01 [Server] Database opened successfully
-[INFO ] 2024/01/15 10:25:02 [Server] Starting HTTP server on localhost:8080
-[ERROR] 2024/01/15 10:25:03 [Server] Server startup failed on localhost:8080: address already in use
+[INFO ] 2024/01/15 10:25:00 [Server] Redirected logs to file: /var/log/pgpress.log
+[INFO ] 2024/01/15 10:25:01 [Server] Starting HTTP server on localhost:8080
+[ERROR] 2024/01/15 10:25:02 [Server] Server startup failed on localhost:8080: address already in use
+[ERROR] 2024/01/15 10:25:02 [Server] Common causes: port already in use, permission denied, invalid address format
 ```
 
 ### 3. Database Service Logging
@@ -53,14 +54,14 @@ This document outlines the comprehensive logging improvements made across the pg
 **Performance Monitoring:**
 
 - Query execution timing with warnings for slow operations (>100ms)
-- Detailed operation tracking with elapsed time measurements
-- Row count and data size logging
+- Focus on operations that impact user experience
+- Bulk operation performance tracking
 
 **Enhanced Error Context:**
 
-- User identification in all operations
-- Validation failure details with field-specific information
-- Transaction rollback logging with cleanup status
+- User identification in critical operations
+- Clear validation failure messages
+- Transaction state information when relevant
 
 **Security and Audit Trail:**
 
@@ -110,10 +111,10 @@ This document outlines the comprehensive logging improvements made across the pg
 #### Example Log Entries:
 
 ```
-[INFO ] 2024/01/15 11:00:00 [HTMX Handler Tools] User TestUser (ID: 123) creating new tool from 192.168.1.1
-[INFO ] 2024/01/15 11:00:01 [HTMX Handler Tools] Creating tool: Type=FC, Code=G01, Position=top, Format=100x50 by user TestUser
-[INFO ] 2024/01/15 11:00:02 [HTMX Handler Tools] Successfully created tool ID 456 in 250ms (db: 200ms)
-[WARN ] 2024/01/15 11:00:03 [HTMX Handler Tools] Invalid width value from 192.168.1.1: abc
+[INFO ] 2024/01/15 11:00:00 [HTMX Handler Tools] User TestUser creating new tool
+[INFO ] 2024/01/15 11:00:01 [HTMX Handler Tools] Created tool ID 456 (Type=FC, Code=G01) by user TestUser
+[INFO ] 2024/01/15 11:00:02 [HTMX Handler Tools] User TestUser deleting tool 789
+[WARN ] 2024/01/15 11:00:03 [HTMX Handler Tools] Slow tools query took 250ms for 150 tools
 ```
 
 ### 5. Authentication Handler Improvements
@@ -130,10 +131,10 @@ This document outlines the comprehensive logging improvements made across the pg
 #### Example Log Entries:
 
 ```
-[INFO ] 2024/01/15 09:00:00 [Handler Auth] Login page request from 192.168.1.1
-[INFO ] 2024/01/15 09:00:01 [Handler Auth] Processing login attempt from 192.168.1.1 with API key (length: 32)
-[INFO ] 2024/01/15 09:00:02 [Handler Auth] User TestUser (ID: 123) authenticated from 192.168.1.1 (db lookup: 50ms)
-[INFO ] 2024/01/15 09:00:03 [Handler Auth] Successfully created session for user TestUser in 100ms
+[INFO ] 2024/01/15 09:00:00 [Handler Auth] Successful login for user from 192.168.1.1
+[INFO ] 2024/01/15 09:00:01 [Handler Auth] User TestUser logging out
+[WARN ] 2024/01/15 09:00:02 [Handler Auth] Failed login attempt from 192.168.1.1
+[INFO ] 2024/01/15 09:00:03 [Handler Auth] Administrator AdminUser logged in from 192.168.1.1
 ```
 
 ### 6. WebSocket Connection Logging
@@ -150,9 +151,9 @@ This document outlines the comprehensive logging improvements made across the pg
 #### Example Log Entries:
 
 ```
-[INFO ] 2024/01/15 12:00:00 [HTMX Handler Nav] WebSocket upgrade request from 192.168.1.1
-[INFO ] 2024/01/15 12:00:01 [HTMX Handler Nav] WebSocket user authenticated: TestUser (ID: 123, LastFeed: 456) from 192.168.1.1
-[INFO ] 2024/01/15 12:00:02 [HTMX Handler Nav] WebSocket connection registered for user TestUser in 50ms
+[INFO ] 2024/01/15 12:00:00 [HTMX Handler Nav] WebSocket connection established for user TestUser from 192.168.1.1
+[INFO ] 2024/01/15 12:00:01 [HTMX Handler Nav] WebSocket connection closed for user TestUser from 192.168.1.1
+[ERROR] 2024/01/15 12:00:02 [HTMX Handler Nav] WebSocket authentication failed from 192.168.1.100: invalid user
 ```
 
 ## Performance Monitoring
@@ -190,19 +191,19 @@ The logging system now includes performance warnings for operations exceeding th
 [WARN ] 2024/01/15 10:30:15 [Middleware] Authentication failed from 192.168.1.100: invalid credentials
 [INFO ] 2024/01/15 10:30:16 [Handler Auth] Administrator TestAdmin logged in from 192.168.1.1
 [WARN ] 2024/01/15 10:30:17 [Middleware] Unauthenticated POST request to /htmx/tools/edit from 192.168.1.200
+[INFO ] 2024/01/15 10:30:18 [Handler Auth] Successful login for user from 192.168.1.1
 ```
 
 ## Error Handling Improvements
 
 ### Context-Rich Error Messages
 
-All error logs now include:
+Error logs now include:
 
 - **Operation Context**: What was being attempted
-- **User Information**: Who initiated the operation
-- **Timing Information**: How long the operation took before failing
-- **System State**: Relevant system information at time of error
-- **Recovery Actions**: What cleanup or rollback occurred
+- **User Information**: Who initiated the operation (when relevant)
+- **System State**: Key information for troubleshooting
+- **Recovery Actions**: Cleanup or rollback status when applicable
 
 ### Error Log Format
 
@@ -219,12 +220,12 @@ All error logs now include:
 - **WebSocket Connections**: Track complete connection lifecycle
 - **File Operations**: Include user context and operation timing
 
-### Debug Log Levels
+### Log Level Guidelines
 
-- **DEBUG**: Detailed operation flow and state changes
-- **INFO**: Successful operations and significant events
-- **WARN**: Performance issues and recoverable errors
-- **ERROR**: Operation failures and system errors
+- **DEBUG**: Reserved for development troubleshooting (minimal use in production)
+- **INFO**: Successful operations, user actions, and significant events
+- **WARN**: Performance issues, recoverable errors, and potential problems
+- **ERROR**: Operation failures, system errors, and critical issues
 
 ## Configuration
 
@@ -249,10 +250,11 @@ Logs can be directed to:
 ### Log Message Guidelines
 
 1. **Be Specific**: Include relevant IDs, names, and context
-2. **Include Timing**: Log operation duration for performance monitoring
-3. **Add User Context**: Include user information for audit trails
-4. **Provide Actionability**: Include enough information for troubleshooting
+2. **Focus on Value**: Only log information that aids troubleshooting or monitoring
+3. **User Context**: Include user information for important operations and security events
+4. **Performance Awareness**: Log timing for operations that could impact user experience
 5. **Maintain Consistency**: Use consistent log formats across components
+6. **Avoid Noise**: Minimize debug logging in production environments
 
 ### Security Considerations
 
@@ -264,9 +266,10 @@ Logs can be directed to:
 ### Performance Impact
 
 1. **Early Exit**: Use early exit patterns for filtered log levels
-2. **Lazy Evaluation**: Use format strings instead of string concatenation
-3. **Structured Logging**: Consider structured formats for high-volume logging
+2. **Selective Logging**: Focus on meaningful events rather than verbose debugging
+3. **Performance Thresholds**: Only log timing when operations exceed expected durations
 4. **Log Rotation**: Implement log rotation for file-based logging
+5. **Resource Awareness**: Avoid excessive logging that could impact application performance
 
 ## Monitoring and Alerting
 
