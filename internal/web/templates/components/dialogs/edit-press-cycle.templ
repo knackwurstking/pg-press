@@ -40,19 +40,9 @@ func (c *EditPressCycleProps) GetPressFromTool() *toolmodels.PressNumber {
 
 templ EditPressCycle(props *EditPressCycleProps) {
 	if props.Close {
-		<span
-			id={ constants.IDToolCycleEditDialog }
-
-			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?tool_id=%d",
-				env.ServerPathPrefix,
-				props.GetToolID(),
-			) }
-			hx-trigger="load"
-			hx-target="section.cycles"
-			hx-swap="innerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-		></span>
+		<script>
+			window.location.reload();
+		</script>
 	} else {
 		<dialog class="fullscreen clean" id={ constants.IDToolCycleEditDialog }>
 			<form

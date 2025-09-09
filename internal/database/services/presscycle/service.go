@@ -326,7 +326,7 @@ func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit *int,
 		}
 	}
 
-	var args []interface{}
+	var args []any
 	args = append(args, pressNumber)
 	if queryLimit.Valid {
 		args = append(args, queryLimit.Int64)

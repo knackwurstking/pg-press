@@ -142,10 +142,10 @@ templ renderCycle(props PageProps, cycle *models.Cycle) {
 					env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 				) }
 				hx-trigger="click"
-				hx-target="section.cycles"
-				hx-swap="innerHTML"
+				hx-swap="none"
 				hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+				hx-on:htmx:after-request='window.location.reload();'
 
 				title="Löschen"
 
