@@ -90,12 +90,25 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 			"failed to get press cycles: "+err.Error())
 	}
 
+	// Get tools
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get tools map: "+err.Error())
+	}
+	// Convert tools to map[int64]*Tool
+	toolsMap := make(map[int64]*models.Tool)
+	for _, tool := range tools {
+		toolsMap[tool.ID] = tool
+	}
+
 	// Render page
 	logger.HandlerTools().Debug("Rendering page for press %d", pn)
 	page := presspage.Page(presspage.PageProps{
-		Press:  pn,
-		Cycles: cycles,
-		User:   user,
+		Press:    pn,
+		Cycles:   cycles,
+		User:     user,
+		ToolsMap: toolsMap,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {

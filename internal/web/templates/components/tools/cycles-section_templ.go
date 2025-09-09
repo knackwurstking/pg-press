@@ -324,8 +324,8 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodels
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s&cycle_id=%d",
-			env.ServerPathPrefix, props.Tool.ID, props.ToolPosition, cycle.ID,
+			"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+			env.ServerPathPrefix, props.Tool.ID, cycle.ID,
 		))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/cycles-section.templ`, Line: 160, Col: 5}
@@ -363,8 +363,8 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodels
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d&tool_position=%s",
-			env.ServerPathPrefix, cycle.ID, props.Tool.ID, props.ToolPosition,
+			"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+			env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/tools/cycles-section.templ`, Line: 182, Col: 5}

@@ -3,6 +3,7 @@ package cycle
 import (
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/database/models/tool"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 )
 
@@ -15,6 +16,8 @@ type Cycle struct {
 	TotalCycles   int64                  `json:"total_cycles"`
 	PartialCycles int64                  `json:"partial_cycles"`
 	PerformedBy   int64                  `json:"performed_by"`
+
+	tool *tool.Tool
 }
 
 func NewCycle(press toolmodels.PressNumber, toolID int64, toolPosition toolmodels.Position, totalCycles, user int64) *Cycle {
@@ -38,6 +41,14 @@ func NewPressCycleWithID(id int64, press toolmodels.PressNumber, toolID int64, t
 		TotalCycles:  totalCycles,
 		PerformedBy:  user,
 	}
+}
+
+func (c *Cycle) SetTool(tool *tool.Tool) {
+	c.tool = tool
+}
+
+func (c *Cycle) GetTool() *tool.Tool {
+	return c.tool
 }
 
 func FilterByTool(toolID int64, cycles ...*Cycle) []*Cycle {
