@@ -98,16 +98,24 @@ templ cyclesTableRows(props *CyclesSectionProps) {
 			</td>
 		</tr>
 	} else {
+		{{
+			lastRegenerationID := props.Regenerations[len(props.Regenerations)-1].CycleID
+		}}
+
 		for _, cycle := range props.Cycles {
-			@renderCycleRowWithPartialCalc(props, cycle)
+			@renderCycleRowWithPartialCalc(props, cycle, cycle.ID <= lastRegenerationID)
 		}
 	}
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodels.Cycle) {
-	<tr>
+templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodels.Cycle, beforeRegeneration bool) {
+	<tr
+		if beforeRegeneration {
+			style="color: var(--ui-muted);"
+		}
+	>
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
 		</td>
