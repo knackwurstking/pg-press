@@ -10,11 +10,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/router"
-
-	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 )
 
@@ -34,30 +33,60 @@ func serverCommand() cli.Command {
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 			*addr = serverAddress
 
+			logFile := cli.String(cmd, "log-file",
+				cli.WithShort("l"),
+				cli.Usage("Path to log file"),
+				cli.Optional)
+
 			return func(cmd *cli.Command) error {
-				db, err := openDB(*customDBPath)
-				if err != nil {
-					logger.Server().Error("Failed to open database: %v", err)
-					return err
+				if *logFile != "" {
+					logger.Server().Info("Opening log file: %s", *logFile)
+					f, err := os.OpenFile(*logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+					if err != nil {
+						logger.AppLogger.Error("Failed to open log file %s: %v", *logFile, err)
+						return err
+					} else {
+						logger.SetOutput(f)
+						logger.Server().Info("Successfully redirected logs to file: %s", *logFile)
+					}
 				}
 
+				dbPath := *customDBPath
+				if dbPath == "" {
+					dbPath = "default location"
+				}
+				logger.Server().Info("Opening database at: %s", dbPath)
+
+				db, err := openDB(*customDBPath)
+				if err != nil {
+					logger.Server().Error("Failed to open database at %s: %v", dbPath, err)
+					return err
+				}
+				logger.Server().Info("Database opened successfully")
+
+				logger.Server().Info("Initializing Echo web server")
 				e := echo.New()
 				e.HideBanner = true
 				e.HTTPErrorHandler = createHTTPErrorHandler()
 
+				logger.Server().Debug("Configuring middleware stack")
 				e.Use(middlewareLogger())
 				e.Use(conditionalCacheMiddleware())
 				e.Use(staticCacheMiddleware())
 				e.Use(middlewareKeyAuth(db))
 
+				logger.Server().Debug("Configuring routes")
 				router.Serve(e, db)
 
-				logger.Server().Info("Server listening on %s", *addr)
+				logger.Server().Info("Starting HTTP server on %s", *addr)
+				logger.Server().Info("Server ready to accept connections")
 				if err := e.Start(*addr); err != nil &&
 					err != http.ErrServerClosed {
-					logger.Server().Error("Server startup failed: %v", err)
+					logger.Server().Error("Server startup failed on %s: %v", *addr, err)
+					logger.Server().Error("Common causes: port already in use, permission denied, invalid address format")
 					os.Exit(exitCodeServerStart)
 				}
+				logger.Server().Info("Server shutdown complete")
 
 				return nil
 			}
@@ -70,6 +99,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		// NOTE: I hope there will never be a nil error again, but if it does, we'll handle it gracefully
 		if err == nil {
+			logger.Server().Error("HTTP error handler called with nil error - this should not happen")
 			err = errors.New("unexpected nil error")
 		}
 
@@ -89,14 +119,19 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		} else {
 			code = dberror.GetHTTPStatusCode(err)
 			message = err.Error()
+			logger.Server().Debug("Non-HTTP error converted to status %d: %v", code, err)
 		}
 
 		// Note: Request logging is handled by the logger middleware
 		// Only log here if we need additional context beyond the standard request log
 		if code >= 500 {
-			logger.Server().Debug("Error details: %s", message)
-		} else {
-			logger.Server().Warn("Error details (%d): %s", code, message)
+			logger.Server().Error("Internal server error (%d): %s", code, message)
+			// Log additional context for server errors
+			if he, ok := err.(*echo.HTTPError); ok && he.Internal != nil {
+				logger.Server().Error("Internal error cause: %v", he.Internal)
+			}
+		} else if code >= 400 {
+			logger.Server().Debug("Client error (%d): %s", code, message)
 		}
 
 		// This line checks if the HTTP response headers have already been written and sent to the client.
@@ -115,7 +150,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				c.String(code, message)
 			}
 		} else {
-			logger.Server().Error("Could not send error response because response was already committed")
+			logger.Server().Error("Could not send error response because response was already committed (status: %d, error: %s)", code, message)
 		}
 	}
 }

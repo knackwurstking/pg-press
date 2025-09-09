@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
-
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/labstack/gommon/color"
 )
 
@@ -99,7 +99,7 @@ func showUserCommand() cli.Command {
 				t.Render()
 
 				if cookies, err := db.Cookies.ListApiKey(user.ApiKey); err != nil {
-					fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
+					logger.AppLogger.Error("Failed to get cookies from the database: %s", err.Error())
 				} else {
 					if len(cookies) > 0 {
 						fmt.Printf(

@@ -79,12 +79,19 @@ func middlewareLogger() echo.MiddlewareFunc {
 			method := req.Method
 			uri := req.RequestURI
 			remoteIP := c.RealIP()
+			userAgent := req.UserAgent()
+			contentLength := req.ContentLength
 
 			if err != nil {
 				if he, ok := err.(*echo.HTTPError); ok {
 					status = he.Code
+					// Log error details for server errors
+					if status >= 500 {
+						logger.Server().Error("Server error in request %s %s: %v", method, uri, err)
+					}
 				} else {
 					status = dberror.GetHTTPStatusCode(err)
+					logger.Server().Warn("Request error %s %s: %v", method, uri, err)
 				}
 			}
 
@@ -92,6 +99,25 @@ func middlewareLogger() echo.MiddlewareFunc {
 			userInfo := ""
 			if user, ok := c.Get("user").(*usermodels.User); ok {
 				userInfo = " " + user.String()
+				// Log security-relevant actions for admin users
+				if user.IsAdmin() && (method == "POST" || method == "PUT" || method == "DELETE") {
+					logger.Server().Info("Admin action: %s %s by %s", method, uri, user.Name)
+				}
+			} else {
+				// Log unauthenticated requests to sensitive endpoints
+				if method != "GET" && !keyAuthSkipper(c) {
+					logger.Server().Warn("Unauthenticated %s request to %s from %s", method, uri, remoteIP)
+				}
+			}
+
+			// Log slow requests for performance monitoring
+			if latency > 1*time.Second {
+				logger.Server().Warn("Slow request: %s %s took %v (user-agent: %s)", method, uri, latency, userAgent)
+			}
+
+			// Log large request bodies
+			if contentLength > 10*1024*1024 { // 10MB
+				logger.Server().Info("Large request body: %s %s (%d bytes) from %s", method, uri, contentLength, remoteIP)
 			}
 
 			// Log using internal logger with special HTTP highlighting
@@ -128,15 +154,23 @@ func keyAuthSkipper(ctx echo.Context) bool {
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
+	remoteIP := ctx.RealIP()
+	userAgent := ctx.Request().UserAgent()
+
 	user, err := validateUserFromCookie(ctx, db)
-	logger.Middleware().Debug("Received login request, apiKey: %#v, user: %#v, err: %v", auth, user, err)
+	logger.Middleware().Debug("Authentication attempt from %s (user-agent: %s)", remoteIP, userAgent)
+
 	if err != nil {
-		logger.Middleware().Warn("failed to validate user from cookie: %v", err)
+		logger.Middleware().Debug("Cookie validation failed, trying API key authentication: %v", err)
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
+			logger.Middleware().Warn("Authentication failed from %s: invalid credentials (user-agent: %s)", remoteIP, userAgent)
 			return false, echo.NewHTTPError(
 				dberror.GetHTTPStatusCode(dberror.ErrInvalidCredentials),
 				"failed to validate user from API key: "+err.Error())
 		}
+		logger.Middleware().Info("API key authentication successful for user %s from %s", user.Name, remoteIP)
+	} else {
+		logger.Middleware().Debug("Cookie authentication successful for user %s from %s", user.Name, remoteIP)
 	}
 
 	ctx.Set("user", user)
@@ -144,38 +178,54 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 }
 
 func validateUserFromCookie(ctx echo.Context, db *database.DB) (*usermodels.User, error) {
+	remoteIP := ctx.RealIP()
+
 	cookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
+		logger.Middleware().Debug("No authentication cookie found from %s", remoteIP)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
 	c, err := db.Cookies.Get(cookie.Value)
 	if err != nil {
+		logger.Middleware().Warn("Invalid cookie value from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
 	// Check if cookie has expired
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if c.LastLogin < expirationTime {
+		logger.Middleware().Info("Expired cookie from %s (last login: %s)", remoteIP, c.TimeString())
 		return nil, dberror.NewValidationError("cookie", "cookie has expired", nil)
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)
 	if err != nil {
+		logger.Middleware().Error("Failed to get user for cookie from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}
 
+	// Log user agent mismatch as potential security concern
+	requestUserAgent := ctx.Request().UserAgent()
+	if c.UserAgent != requestUserAgent {
+		logger.Middleware().Warn("User agent mismatch for user %s from %s: cookie=%s, request=%s",
+			user.Name, remoteIP, c.UserAgent, requestUserAgent)
+	}
+
 	if slices.Contains(pages, ctx.Request().URL.Path) {
-		logger.Middleware().Info(
-			"Updating cookies last login timestamp for user %s", user)
+		logger.Middleware().Debug("Updating cookie last login timestamp for user %s from %s", user.Name, remoteIP)
 
 		now := time.Now()
+		oldLastLogin := c.LastLogin
 		c.LastLogin = now.UnixMilli()
 		cookie.Expires = now.Add(constants.CookieExpirationDuration)
 
 		if err := db.Cookies.Update(c.Value, c); err != nil {
-			logger.Middleware().Error(
-				"Failed to update cookie for user %s: %v", user, err)
+			logger.Middleware().Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
+		} else {
+			logger.Middleware().Debug("Cookie updated for user %s: %s -> %s",
+				user.Name, time.UnixMilli(oldLastLogin).Format("2006-01-02 15:04:05"),
+				time.UnixMilli(c.LastLogin).Format("2006-01-02 15:04:05"))
 		}
 	}
 

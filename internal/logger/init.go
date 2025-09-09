@@ -4,6 +4,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"sync"
@@ -12,10 +13,16 @@ import (
 // AppLogger is the global logger instance for the application
 var AppLogger *Logger
 
+var (
+	logOutput        io.Writer = os.Stderr
+	componentLoggers           = make(map[string]*Logger)
+	componentMutex   sync.RWMutex
+)
+
 // Initialize sets up the application logger with appropriate defaults
 func Initialize() {
 	// Create logger with sensible defaults
-	AppLogger = New(os.Stderr, WARN, true)
+	AppLogger = New(logOutput, WARN, true)
 
 	// Configure based on environment
 	configureFromEnvironment()
@@ -24,14 +31,21 @@ func Initialize() {
 	InitializeFromStandardLog()
 }
 
-var (
-	componentLoggers = make(map[string]*Logger)
-	componentMutex   sync.RWMutex
-)
+// SetOutput sets the output for all loggers.
+func SetOutput(output io.Writer) {
+	logOutput = output
+	AppLogger.SetOutput(output)
+
+	componentMutex.Lock()
+	defer componentMutex.Unlock()
+	for _, l := range componentLoggers {
+		l.SetOutput(output)
+	}
+}
 
 // NewComponentLogger creates a new logger for a specific component
 func NewComponentLogger(component string) *Logger {
-	logger := New(os.Stderr, AppLogger.level, AppLogger.enableColors)
+	logger := New(logOutput, AppLogger.level, AppLogger.colorPreference)
 	logger.SetPrefix(fmt.Sprintf("[%s]", component))
 	return logger
 }
@@ -113,7 +127,7 @@ func configureFromEnvironment() {
 
 	// Check FORCE_COLOR environment variable
 	if os.Getenv("FORCE_COLOR") != "" {
-		AppLogger.SetColors(true)
+		AppLogger.ForceColors(true)
 	}
 
 	// Set application prefix

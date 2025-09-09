@@ -2,15 +2,14 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
+	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-
-	"github.com/SuperPaintman/nice/cli"
 )
 
 func removeCookiesCommand() cli.Command {
@@ -43,7 +42,7 @@ func removeCookiesCommand() cli.Command {
 				}
 
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Removing cookies from database failed: %s", err.Error())
+					logger.AppLogger.Error("Removing cookies from database failed: %s", err.Error())
 					os.Exit(exitCodeGeneric)
 				}
 
@@ -86,13 +85,13 @@ func autoCleanCookiesCommand() cli.Command {
 							os.Exit(exitCodeNotFound)
 						}
 
-						fmt.Fprintf(os.Stderr, "Get user \"%d\" failed: %s", *telegramID, err.Error())
+						logger.AppLogger.Error("Get user \"%d\" failed: %s", *telegramID, err.Error())
 						os.Exit(exitCodeGeneric)
 					}
 
 					cookies, err := db.Cookies.ListApiKey(u.ApiKey)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "List cookies for user \"%d\" failed: %s", *telegramID, err.Error())
+						logger.AppLogger.Error("List cookies for user \"%d\" failed: %s", *telegramID, err.Error())
 						os.Exit(exitCodeGeneric)
 					}
 
@@ -100,7 +99,7 @@ func autoCleanCookiesCommand() cli.Command {
 						if isExpired(cookie) {
 							if err = db.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
-								fmt.Fprintf(os.Stderr,
+								logger.AppLogger.Error(
 									"Removing cookie with value \"%s\" failed: %s",
 									cookie.Value, err.Error())
 							}
@@ -113,7 +112,7 @@ func autoCleanCookiesCommand() cli.Command {
 				// Clean up all cookies
 				cookies, err := db.Cookies.List()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s", err.Error())
+					logger.AppLogger.Error("List cookies from database failed: %s", err.Error())
 					os.Exit(exitCodeGeneric)
 				}
 
@@ -121,7 +120,7 @@ func autoCleanCookiesCommand() cli.Command {
 					if isExpired(cookie) {
 						if err = db.Cookies.Remove(cookie.Value); err != nil {
 							// Print out error and continue
-							fmt.Fprintf(os.Stderr,
+							logger.AppLogger.Error(
 								"Removing cookie with value \"%s\" failed: %s",
 								cookie.Value, err.Error())
 						}

@@ -11,6 +11,7 @@ import (
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	"github.com/knackwurstking/pgpress/internal/logger"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -84,7 +85,7 @@ func listFeedsCommand() cli.Command {
 				}
 
 				if len(feeds) == 0 {
-					fmt.Fprintln(os.Stderr, "No feeds found")
+					logger.AppLogger.Info("No feeds found")
 					return nil
 				}
 
@@ -194,7 +195,7 @@ func filterFeedsByDate(feeds []*feedmodels.Feed, since, before string) []*feedmo
 	if since != "" {
 		sinceTime, err = parseDateTime(since)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid since date format: %s\n", err)
+			logger.AppLogger.Warn("Invalid since date format: %s", err)
 			return feeds
 		}
 	}
@@ -202,7 +203,7 @@ func filterFeedsByDate(feeds []*feedmodels.Feed, since, before string) []*feedmo
 	if before != "" {
 		beforeTime, err = parseDateTime(before)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid before date format: %s\n", err)
+			logger.AppLogger.Warn("Invalid before date format: %s", err)
 			return feeds
 		}
 	}
@@ -324,8 +325,7 @@ func removeFeedsByDate(db *database.DB, dateStr string) error {
 		return fmt.Errorf("failed to remove feeds: %s", err)
 	}
 
-	fmt.Printf("Removed %d feed(s) before %s\n",
-		rowsAffected, cutoffTime.Format("2006-01-02 15:04:05"))
+	fmt.Printf("Removed %d feed(s) before %s\n", rowsAffected, cutoffTime.Format("2006-01-02 15:04:05"))
 
 	return nil
 }

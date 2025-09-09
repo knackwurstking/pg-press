@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/williepotgieter/keymaker"
 )
 
@@ -16,12 +16,10 @@ func apiKeyCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				apiKey, err := keymaker.NewApiKey("pgp", 32)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Generating a new api key failed: %s\n", err.Error())
+					logger.AppLogger.Error("Generating a new api key failed: %s", err.Error())
 				}
 
-				fmt.Print(apiKey)
-				fmt.Fprintf(os.Stderr, "\n")
-
+				fmt.Print(apiKey) // Yes, no newline at the end
 				return nil
 			}
 		}),

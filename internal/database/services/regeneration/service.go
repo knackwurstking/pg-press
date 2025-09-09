@@ -46,7 +46,7 @@ func New(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create tool_regenerations table: %w", err))
+		panic(dberror.NewDatabaseError("create_table", "tool_regenerations", "failed to create table", err))
 	}
 
 	return &Service{
@@ -62,15 +62,15 @@ func (s *Service) Add(regeneration *toolmodels.Regeneration, user *usermodels.Us
 	s.log.Info("Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
 	if user == nil {
-		return nil, fmt.Errorf("user is required")
+		return nil, dberror.NewValidationError("user", "user is required", nil)
 	}
 
 	if regeneration.ToolID <= 0 {
-		return nil, fmt.Errorf("tool_id is required")
+		return nil, dberror.NewValidationError("tool_id", "tool_id is required", regeneration.ToolID)
 	}
 
 	if regeneration.CycleID <= 0 {
-		return nil, fmt.Errorf("cycle_id is required")
+		return nil, dberror.NewValidationError("cycle_id", "cycle_id is required", regeneration.CycleID)
 	}
 
 	query := `
@@ -90,7 +90,7 @@ func (s *Service) Add(regeneration *toolmodels.Regeneration, user *usermodels.Us
 			return nil, dberror.ErrNotFound
 		}
 
-		return nil, fmt.Errorf("failed to create regeneration record: %w", err)
+		return nil, dberror.NewDatabaseError("insert", "tool_regenerations", "failed to create regeneration record", err)
 	}
 
 	// Create feed entry
@@ -111,7 +111,7 @@ func (s *Service) Update(regeneration *toolmodels.Regeneration, user *usermodels
 	s.log.Info("Updating tool regeneration: id=%d", regeneration.ID)
 
 	if user == nil {
-		return fmt.Errorf("user is required")
+		return dberror.NewValidationError("user", "user is required", nil)
 	}
 
 	query := `
@@ -127,7 +127,7 @@ func (s *Service) Update(regeneration *toolmodels.Regeneration, user *usermodels
 		regeneration.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update regeneration: %w", err)
+		return dberror.NewDatabaseError("update", "tool_regenerations", "failed to update regeneration", err)
 	}
 
 	return nil
@@ -140,7 +140,7 @@ func (s *Service) Delete(id int64) error {
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	_, err := s.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete regeneration record: %w", err)
+		return dberror.NewDatabaseError("delete", "tool_regenerations", "failed to delete regeneration record", err)
 	}
 
 	return nil
@@ -209,7 +209,7 @@ func (s *Service) GetLastRegeneration(toolID int64) (*toolmodels.Regeneration, e
 			return nil, dberror.ErrNotFound
 		}
 
-		return nil, fmt.Errorf("failed to get last regeneration: %w", err)
+		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get last regeneration", err)
 	}
 
 	return regen, nil
@@ -227,7 +227,7 @@ func (s *Service) GetRegenerationHistory(toolID int64) ([]*toolmodels.Regenerati
 	`
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get regeneration history: %w", err)
+		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get regeneration history", err)
 	}
 	defer rows.Close()
 
@@ -255,7 +255,7 @@ func (s *Service) GetRegenerationCount(toolID int64) (int, error) {
 	`
 	err := s.db.QueryRow(query, toolID).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get regeneration count: %w", err)
+		return 0, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get regeneration count", err)
 	}
 
 	return count, nil
@@ -274,7 +274,7 @@ func (s *Service) GetAllRegenerations(limit, offset int) ([]*toolmodels.Regenera
 
 	rows, err := s.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get all regenerations: %w", err)
+		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get all regenerations", err)
 	}
 	defer rows.Close()
 
@@ -282,7 +282,7 @@ func (s *Service) GetAllRegenerations(limit, offset int) ([]*toolmodels.Regenera
 	for rows.Next() {
 		regen, err := s.scanToolRegeneration(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan tool regeneration: %w", err)
+			return nil, dberror.WrapError(err, "failed to scan tool regeneration")
 		}
 
 		regenerations = append(regenerations, regen)
@@ -313,7 +313,7 @@ func (s *Service) GetToolsWithMostRegenerations(limit int) ([]struct {
 
 	rows, err := s.db.Query(query, limit)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tools with most regenerations: %w", err)
+		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get tools with most regenerations", err)
 	}
 	defer rows.Close()
 
@@ -333,7 +333,7 @@ func (s *Service) GetToolsWithMostRegenerations(limit int) ([]struct {
 
 		err := rows.Scan(&result.ToolID, &result.RegCount, &lastRegen)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan result: %w", err)
+			return nil, dberror.NewDatabaseError("scan", "tool_regenerations", "failed to scan result", err)
 		}
 
 		if lastRegen.Valid {

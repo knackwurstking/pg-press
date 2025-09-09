@@ -2,6 +2,7 @@ package feed
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
@@ -54,29 +55,48 @@ func (s *Service) SetBroadcaster(broadcaster interfaces.Broadcaster) {
 
 // List retrieves all feeds ordered by creation time in descending order
 func (s *Service) List() ([]*feed.Feed, error) {
-	logger.DBFeeds().Info("Listing all feeds")
+	logger.DBFeeds().Debug("Starting feed list query")
+	start := time.Now()
 
 	query := `SELECT id, title, content, user_id, created_at FROM feeds ORDER BY created_at DESC`
 	rows, err := s.db.Query(query)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to execute feed list query: %v", err)
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds", err)
 	}
 	defer rows.Close()
 
-	return s.scanAllRows(rows)
+	feeds, err := s.scanAllRows(rows)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		logger.DBFeeds().Error("Failed to scan feed rows in %v: %v", elapsed, err)
+		return nil, err
+	}
+
+	logger.DBFeeds().Info("Listed %d feeds in %v", len(feeds), elapsed)
+	if elapsed > 100*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed list query took %v for %d feeds", elapsed, len(feeds))
+	}
+
+	return feeds, nil
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
 func (s *Service) ListRange(offset, limit int) ([]*feed.Feed, error) {
-	logger.DBFeeds().Info("Listing range of feeds, offset: %d, limit: %d", offset, limit)
+	logger.DBFeeds().Debug("Starting feed range query: offset=%d, limit=%d", offset, limit)
+	start := time.Now()
 
 	if offset < 0 {
+		logger.DBFeeds().Warn("Invalid offset parameter: %d", offset)
 		return nil, dberror.NewValidationError("offset", "must be non-negative", offset)
 	}
 	if limit <= 0 {
+		logger.DBFeeds().Warn("Invalid limit parameter: %d", limit)
 		return nil, dberror.NewValidationError("limit", "must be positive", limit)
 	}
 	if limit > 1000 {
+		logger.DBFeeds().Warn("Limit too large: %d (max: 1000)", limit)
 		return nil, dberror.NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
@@ -84,27 +104,46 @@ func (s *Service) ListRange(offset, limit int) ([]*feed.Feed, error) {
 		ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := s.db.Query(query, limit, offset)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to execute feed range query (offset=%d, limit=%d): %v", offset, limit, err)
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds range", err)
 	}
 	defer rows.Close()
 
-	return s.scanAllRows(rows)
+	feeds, err := s.scanAllRows(rows)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		logger.DBFeeds().Error("Failed to scan feed range rows in %v: %v", elapsed, err)
+		return nil, err
+	}
+
+	logger.DBFeeds().Info("Listed %d feeds (offset=%d, limit=%d) in %v", len(feeds), offset, limit, elapsed)
+	if elapsed > 100*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed range query took %v (offset=%d, limit=%d, returned=%d)", elapsed, offset, limit, len(feeds))
+	}
+
+	return feeds, nil
 }
 
 // ListByUser retrieves feeds created by a specific user
 func (s *Service) ListByUser(userID int64, offset, limit int) ([]*feed.Feed, error) {
-	logger.DBFeeds().Info("Listing feeds for user %d, offset: %d, limit: %d", userID, offset, limit)
+	logger.DBFeeds().Debug("Starting user feeds query: userID=%d, offset=%d, limit=%d", userID, offset, limit)
+	start := time.Now()
 
 	if userID <= 0 {
+		logger.DBFeeds().Warn("Invalid user ID parameter: %d", userID)
 		return nil, dberror.NewValidationError("user_id", "must be positive", userID)
 	}
 	if offset < 0 {
+		logger.DBFeeds().Warn("Invalid offset parameter for user %d: %d", userID, offset)
 		return nil, dberror.NewValidationError("offset", "must be non-negative", offset)
 	}
 	if limit <= 0 {
+		logger.DBFeeds().Warn("Invalid limit parameter for user %d: %d", userID, limit)
 		return nil, dberror.NewValidationError("limit", "must be positive", limit)
 	}
 	if limit > 1000 {
+		logger.DBFeeds().Warn("Limit too large for user %d: %d (max: 1000)", userID, limit)
 		return nil, dberror.NewValidationError("limit", "must not exceed 1000", limit)
 	}
 
@@ -112,69 +151,107 @@ func (s *Service) ListByUser(userID int64, offset, limit int) ([]*feed.Feed, err
 		WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := s.db.Query(query, userID, limit, offset)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to execute user feeds query (userID=%d, offset=%d, limit=%d): %v", userID, offset, limit, err)
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to query feeds by user", err)
 	}
 	defer rows.Close()
 
-	return s.scanAllRows(rows)
+	feeds, err := s.scanAllRows(rows)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		logger.DBFeeds().Error("Failed to scan user feeds rows in %v: %v", elapsed, err)
+		return nil, err
+	}
+
+	logger.DBFeeds().Info("Listed %d feeds for user %d (offset=%d, limit=%d) in %v", len(feeds), userID, offset, limit, elapsed)
+	if elapsed > 100*time.Millisecond {
+		logger.DBFeeds().Warn("Slow user feeds query took %v (userID=%d, offset=%d, limit=%d, returned=%d)", elapsed, userID, offset, limit, len(feeds))
+	}
+
+	return feeds, nil
 }
 
 // Add creates a new feed entry in the database
 func (s *Service) Add(feedData *feed.Feed) error {
-	logger.DBFeeds().Info("Adding feed: %+v", feedData)
-
 	if feedData == nil {
-		logger.DBFeeds().Debug("Validation failed: feed is nil")
+		logger.DBFeeds().Error("Attempted to add nil feed")
 		return dberror.NewValidationError("feed", "cannot be nil", nil)
 	}
+
+	logger.DBFeeds().Info("Adding feed: title='%s', userID=%d", feedData.Title, feedData.UserID)
+	start := time.Now()
+
 	if err := feedData.Validate(); err != nil {
-		logger.DBFeeds().Debug("Feed validation failed: %v", err)
+		logger.DBFeeds().Warn("Feed validation failed for user %d: %v", feedData.UserID, err)
 		return err
 	}
 
+	dbStart := time.Now()
 	query := `INSERT INTO feeds (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`
 	result, err := s.db.Exec(query, feedData.Title, feedData.Content, feedData.UserID, feedData.CreatedAt)
 	if err != nil {
-		logger.DBFeeds().Error("Failed to insert feed: %v", err)
+		dbElapsed := time.Since(dbStart)
+		logger.DBFeeds().Error("Failed to insert feed for user %d in %v: %v", feedData.UserID, dbElapsed, err)
 		return dberror.NewDatabaseError("insert", "feeds", "failed to insert feed", err)
 	}
+	dbElapsed := time.Since(dbStart)
 
 	// Get the generated ID
 	id, err := result.LastInsertId()
 	if err != nil {
-		logger.DBFeeds().Error("Failed to get last insert ID: %v", err)
+		logger.DBFeeds().Error("Failed to get last insert ID for user %d: %v", feedData.UserID, err)
 		return dberror.NewDatabaseError("insert", "feeds", "failed to get insert ID", err)
 	}
 	feedData.ID = id
 
 	// Notify about new feed if broadcaster is set
 	if s.broadcaster != nil {
-		logger.DBFeeds().Debug("Broadcasting new feed notification")
+		logger.DBFeeds().Debug("Broadcasting new feed notification for ID %d", feedData.ID)
 		s.broadcaster.Broadcast()
 	}
 
-	logger.DBFeeds().Debug("Successfully added feed with ID: %d", feedData.ID)
+	totalElapsed := time.Since(start)
+	logger.DBFeeds().Info("Successfully added feed ID %d for user %d in %v (db: %v)",
+		feedData.ID, feedData.UserID, totalElapsed, dbElapsed)
+
+	if totalElapsed > 50*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed insert took %v for user %d", totalElapsed, feedData.UserID)
+	}
+
 	return nil
 }
 
 // Count returns the total number of feeds in the database
 func (s *Service) Count() (int, error) {
-	logger.DBFeeds().Debug("Counting feeds")
+	logger.DBFeeds().Debug("Starting feed count query")
+	start := time.Now()
 
 	var count int
 	query := `SELECT COUNT(*) FROM feeds`
 	err := s.db.QueryRow(query).Scan(&count)
 	if err != nil {
+		logger.DBFeeds().Error("Failed to execute feed count query: %v", err)
 		return 0, dberror.NewDatabaseError("count", "feeds", "failed to count feeds", err)
 	}
+
+	elapsed := time.Since(start)
+	logger.DBFeeds().Debug("Counted %d feeds in %v", count, elapsed)
+
+	if elapsed > 50*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed count query took %v (result: %d)", elapsed, count)
+	}
+
 	return count, nil
 }
 
 // CountByUser returns the number of feeds created by a specific user
 func (s *Service) CountByUser(userID int64) (int, error) {
-	logger.DBFeeds().Debug("Counting feeds for user %d", userID)
+	logger.DBFeeds().Debug("Starting feed count query for user %d", userID)
+	start := time.Now()
 
 	if userID <= 0 {
+		logger.DBFeeds().Warn("Invalid user ID for count: %d", userID)
 		return 0, dberror.NewValidationError("user_id", "must be positive", userID)
 	}
 
@@ -182,42 +259,63 @@ func (s *Service) CountByUser(userID int64) (int, error) {
 	query := `SELECT COUNT(*) FROM feeds WHERE user_id = ?`
 	err := s.db.QueryRow(query, userID).Scan(&count)
 	if err != nil {
+		elapsed := time.Since(start)
+		logger.DBFeeds().Error("Failed to execute feed count query for user %d in %v: %v", userID, elapsed, err)
 		return 0, dberror.NewDatabaseError("count", "feeds", "failed to count feeds by user", err)
 	}
+
+	elapsed := time.Since(start)
+	logger.DBFeeds().Debug("Counted %d feeds for user %d in %v", count, userID, elapsed)
+
+	if elapsed > 50*time.Millisecond {
+		logger.DBFeeds().Warn("Slow user feed count query took %v (userID=%d, result=%d)", elapsed, userID, count)
+	}
+
 	return count, nil
 }
 
 // DeleteBefore removes all feeds created before the specified timestamp
 func (s *Service) DeleteBefore(timestamp int64) (int64, error) {
-	logger.DBFeeds().Info("Deleting feeds before timestamp: %d", timestamp)
+	logger.DBFeeds().Info("Starting feed deletion before timestamp: %d", timestamp)
+	start := time.Now()
 
 	if timestamp <= 0 {
-		logger.DBFeeds().Debug("Validation failed: timestamp must be positive, got %d", timestamp)
+		logger.DBFeeds().Warn("Invalid timestamp for deletion: %d", timestamp)
 		return 0, dberror.NewValidationError("timestamp", "must be positive", timestamp)
 	}
 
 	query := `DELETE FROM feeds WHERE created_at < ?`
 	result, err := s.db.Exec(query, timestamp)
 	if err != nil {
-		logger.DBFeeds().Error("Failed to delete feeds by timestamp: %v", err)
+		elapsed := time.Since(start)
+		logger.DBFeeds().Error("Failed to delete feeds by timestamp %d in %v: %v", timestamp, elapsed, err)
 		return 0, dberror.NewDatabaseError("delete", "feeds", "failed to delete feeds by timestamp", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		logger.DBFeeds().Error("Failed to get rows affected: %v", err)
+		elapsed := time.Since(start)
+		logger.DBFeeds().Error("Failed to get rows affected for timestamp deletion in %v: %v", elapsed, err)
 		return 0, dberror.NewDatabaseError("delete", "feeds", "failed to get rows affected", err)
 	}
 
-	logger.DBFeeds().Debug("Deleted %d feeds before timestamp %d", rowsAffected, timestamp)
+	elapsed := time.Since(start)
+	logger.DBFeeds().Info("Deleted %d feeds before timestamp %d in %v", rowsAffected, timestamp, elapsed)
+
+	if elapsed > 100*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed deletion took %v (timestamp=%d, deleted=%d)", elapsed, timestamp, rowsAffected)
+	}
+
 	return rowsAffected, nil
 }
 
 // Get retrieves a specific feed by ID
 func (s *Service) Get(id int64) (*feed.Feed, error) {
 	logger.DBFeeds().Debug("Getting feed by ID: %d", id)
+	start := time.Now()
 
 	if id <= 0 {
+		logger.DBFeeds().Warn("Invalid feed ID: %d", id)
 		return nil, dberror.NewValidationError("id", "must be positive", id)
 	}
 
@@ -225,63 +323,86 @@ func (s *Service) Get(id int64) (*feed.Feed, error) {
 	row := s.db.QueryRow(query, id)
 	feedData, err := s.scanFeed(row)
 	if err != nil {
+		elapsed := time.Since(start)
 		if err == sql.ErrNoRows {
+			logger.DBFeeds().Debug("Feed not found for ID %d (query time: %v)", id, elapsed)
 			return nil, dberror.ErrNotFound
 		}
+		logger.DBFeeds().Error("Failed to get feed %d in %v: %v", id, elapsed, err)
 		return nil, dberror.NewDatabaseError("select", "feeds", "failed to get feed by ID", err)
 	}
+
+	elapsed := time.Since(start)
+	logger.DBFeeds().Debug("Retrieved feed %d (title='%s') in %v", id, feedData.Title, elapsed)
+
 	return feedData, nil
 }
 
 // Delete removes a specific feed by ID
 func (s *Service) Delete(id int64) error {
-	logger.DBFeeds().Info("Deleting feed by ID: %d", id)
+	logger.DBFeeds().Info("Starting feed deletion for ID: %d", id)
+	start := time.Now()
 
 	if id <= 0 {
-		logger.DBFeeds().Debug("Validation failed: id must be positive, got %d", id)
+		logger.DBFeeds().Warn("Invalid feed ID for deletion: %d", id)
 		return dberror.NewValidationError("id", "must be positive", id)
 	}
 
 	query := `DELETE FROM feeds WHERE id = ?`
 	result, err := s.db.Exec(query, id)
 	if err != nil {
-		logger.DBFeeds().Error("Failed to delete feed with ID %d: %v", id, err)
+		elapsed := time.Since(start)
+		logger.DBFeeds().Error("Failed to delete feed %d in %v: %v", id, elapsed, err)
 		return dberror.NewDatabaseError("delete", "feeds", "failed to delete feed", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		logger.DBFeeds().Error("Failed to get rows affected: %v", err)
+		elapsed := time.Since(start)
+		logger.DBFeeds().Error("Failed to get rows affected for feed deletion %d in %v: %v", id, elapsed, err)
 		return dberror.NewDatabaseError("delete", "feeds", "failed to get rows affected", err)
 	}
 
+	elapsed := time.Since(start)
 	if rowsAffected == 0 {
-		logger.DBFeeds().Debug("No feed found with ID %d", id)
+		logger.DBFeeds().Debug("No feed found with ID %d (deletion time: %v)", id, elapsed)
 		return dberror.ErrNotFound
 	}
 
-	logger.DBFeeds().Debug("Successfully deleted feed with ID %d", id)
+	logger.DBFeeds().Info("Successfully deleted feed %d in %v", id, elapsed)
 	return nil
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
 func (s *Service) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
 	var feeds []*feed.Feed
+	scanStart := time.Now()
+	rowCount := 0
+
 	for rows.Next() {
 		feedData, err := s.scanFeed(rows)
 		if err != nil {
-			logger.DBFeeds().Error("Failed to scan feed row: %v", err)
+			scanElapsed := time.Since(scanStart)
+			logger.DBFeeds().Error("Failed to scan feed row %d in %v: %v", rowCount, scanElapsed, err)
 			return nil, dberror.NewDatabaseError("scan", "feeds", "failed to scan feed row", err)
 		}
 		feeds = append(feeds, feedData)
+		rowCount++
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBFeeds().Error("Error iterating over feed rows: %v", err)
+		scanElapsed := time.Since(scanStart)
+		logger.DBFeeds().Error("Error iterating over %d feed rows in %v: %v", rowCount, scanElapsed, err)
 		return nil, dberror.NewDatabaseError("scan", "feeds", "error iterating over rows", err)
 	}
 
-	logger.DBFeeds().Debug("Scanned %d feeds from query result", len(feeds))
+	scanElapsed := time.Since(scanStart)
+	logger.DBFeeds().Debug("Scanned %d feeds from query result in %v", len(feeds), scanElapsed)
+
+	if scanElapsed > 50*time.Millisecond {
+		logger.DBFeeds().Warn("Slow feed row scanning took %v for %d rows", scanElapsed, len(feeds))
+	}
+
 	return feeds, nil
 }
 
@@ -292,6 +413,7 @@ func (s *Service) scanFeed(scanner interfaces.Scannable) (*feed.Feed, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
+		logger.DBFeeds().Debug("Failed to scan feed row: %v", err)
 		return nil, dberror.NewDatabaseError("scan", "feeds", "failed to scan row", err)
 	}
 

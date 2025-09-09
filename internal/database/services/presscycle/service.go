@@ -48,7 +48,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create press_cycles table: %w", err))
+		panic(dberror.NewDatabaseError("create_table", "press_cycles", "failed to create table", err))
 	}
 
 	return &Service{
@@ -108,7 +108,7 @@ func (p *Service) Get(id int64) (*cyclemodels.Cycle, error) {
 		if err == sql.ErrNoRows {
 			return nil, dberror.ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get press cycle %d: %w", id, err)
+		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycle %d", id), err)
 	}
 	cycle.PartialCycles = p.GetPartialCycles(cycle)
 
@@ -127,7 +127,7 @@ func (p *Service) List() ([]*cyclemodels.Cycle, error) {
 
 	rows, err := p.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list press cycles: %w", err)
+		return nil, dberror.NewDatabaseError("select", "press_cycles", "failed to list press cycles", err)
 	}
 	defer rows.Close()
 
@@ -159,12 +159,12 @@ func (p *Service) Add(cycle *cyclemodels.Cycle, user *usermodels.User) (int64, e
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("failed to add cycle: %w", err)
+		return 0, dberror.NewDatabaseError("insert", "press_cycles", "failed to add cycle", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("failed to get last insert id for cycle: %w", err)
+		return 0, dberror.NewDatabaseError("insert", "press_cycles", "failed to get last insert id for cycle", err)
 	}
 	cycle.ID = id
 
@@ -206,16 +206,16 @@ func (p *Service) Update(cycle *cyclemodels.Cycle, user *usermodels.User) error 
 		cycle.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to update press cycle with id %d: %w", cycle.ID, err)
+		return dberror.NewDatabaseError("update", "press_cycles", fmt.Sprintf("failed to update press cycle with id %d", cycle.ID), err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return dberror.NewDatabaseError("update", "press_cycles", "failed to get rows affected", err)
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no press cycle found with id %d", cycle.ID)
+		return dberror.ErrNotFound
 	}
 
 	// Create feed entry
@@ -244,12 +244,12 @@ func (p *Service) Delete(id int64, user *usermodels.User) error {
 
 	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete press cycle with id %d: %w", id, err)
+		return dberror.NewDatabaseError("delete", "press_cycles", fmt.Sprintf("failed to delete press cycle with id %d", id), err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected for delete: %w", err)
+		return dberror.NewDatabaseError("delete", "press_cycles", "failed to get rows affected for delete", err)
 	}
 	if rows == 0 {
 		return dberror.ErrNotFound
@@ -282,13 +282,13 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*cyclemodels.Cycle, err
 
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get press cycles for tool %d: %w", toolID, err)
+		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycles for tool %d", toolID), err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
+		return nil, err
 	}
 
 	return cycles, nil
@@ -299,7 +299,7 @@ func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit, offs
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
 
 	if !toolmodels.IsValidPressNumber(&pressNumber) {
-		return nil, fmt.Errorf("invalid press number %d: must be between 0 and 5", pressNumber)
+		return nil, dberror.NewValidationError("press_number", "invalid press number", pressNumber)
 	}
 
 	query := `
@@ -312,13 +312,13 @@ func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit, offs
 
 	rows, err := s.db.Query(query, pressNumber, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get press cycles for press %d: %w", pressNumber, err)
+		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycles for press %d", pressNumber), err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan press cycles: %w", err)
+		return nil, err
 	}
 
 	return cycles, nil
@@ -330,7 +330,7 @@ func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*cyclemodels.Cycle, err
 	for rows.Next() {
 		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
-			return nil, err
+			return nil, dberror.WrapError(err, "failed to scan press cycle")
 		}
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)

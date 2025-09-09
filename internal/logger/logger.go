@@ -42,11 +42,12 @@ const (
 
 // Logger represents a colored logger instance
 type Logger struct {
-	mu           sync.Mutex
-	output       io.Writer
-	level        LogLevel
-	enableColors bool
-	prefix       string
+	mu              sync.Mutex
+	output          io.Writer
+	level           LogLevel
+	enableColors    bool
+	colorPreference bool
+	prefix          string
 }
 
 // Default logger instance
@@ -58,16 +59,13 @@ func init() {
 
 // New creates a new Logger instance
 func New(output io.Writer, level LogLevel, enableColors bool) *Logger {
-	// Auto-detect if we should enable colors based on terminal support
-	if enableColors {
-		enableColors = isTerminal(output)
+	l := &Logger{
+		output:          output,
+		level:           level,
+		colorPreference: enableColors,
 	}
-
-	return &Logger{
-		output:       output,
-		level:        level,
-		enableColors: enableColors,
-	}
+	l.SetColors(enableColors)
+	return l
 }
 
 // isTerminal checks if the output is a terminal
@@ -86,10 +84,19 @@ func (l *Logger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
+// SetOutput sets the output destination for the logger.
+func (l *Logger) SetOutput(output io.Writer) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.output = output
+	l.enableColors = l.colorPreference && isTerminal(l.output)
+}
+
 // SetColors enables or disables colored output
 func (l *Logger) SetColors(enabled bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	l.colorPreference = enabled
 	l.enableColors = enabled && isTerminal(l.output)
 }
 
@@ -97,6 +104,7 @@ func (l *Logger) SetColors(enabled bool) {
 func (l *Logger) ForceColors(enabled bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	l.colorPreference = enabled
 	l.enableColors = enabled
 }
 
@@ -289,21 +297,25 @@ func (l *Logger) HTTPRequest(status int, method, uri, remoteIP string, latency t
 			methodColor = Cyan + Bold
 		}
 
-		logLine = fmt.Sprintf("%s %s[HTTP]%s %s %s %s%d%s %s%s%s %s%s%s (%s%s%s) %s%v%s%s\n",
-			httpIcon,
-			Bold+Cyan, Reset,
-			timestamp,
-			prefix,
-			statusColor, status, Reset,
-			methodColor, method, Reset,
-			Underline+Cyan, uri, Reset,
-			Gray, remoteIP, Reset,
-			Bold+Purple, latency, Reset,
-			userInfo)
+		var sb strings.Builder
+		sb.WriteString(fmt.Sprintf("%s %s ", httpIcon, timestamp))
+		if prefix != "" {
+			sb.WriteString(fmt.Sprintf("%s ", prefix))
+		}
+		sb.WriteString(fmt.Sprintf("%s%3d%s ", statusColor, status, Reset))
+		sb.WriteString(fmt.Sprintf("%s%-7s%s ", methodColor, method, Reset))
+		sb.WriteString(fmt.Sprintf("%s%s%s ", Underline+Cyan, uri, Reset))
+		sb.WriteString(fmt.Sprintf("(%s%s%s) ", Gray, remoteIP, Reset))
+		sb.WriteString(fmt.Sprintf("%s%v%s", Bold+Purple, latency, Reset))
+		if userInfo != "" {
+			sb.WriteString(userInfo)
+		}
+		sb.WriteString("\n")
+		logLine = sb.String()
 	} else {
 		// Plain text version for when colors are disabled
 		levelStr := l.levelToString(level)
-		logLine = fmt.Sprintf("[%-5s] %s %s [HTTP] %d %s %s (%s) %v%s\n",
+		logLine = fmt.Sprintf("[%-5s] %s %s %d %-7s %s (%s) %v%s\n",
 			levelStr, timestamp, prefix, status, method, uri, remoteIP, latency, userInfo)
 	}
 
