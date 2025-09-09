@@ -99,7 +99,10 @@ templ cyclesTableRows(props *CyclesSectionProps) {
 		</tr>
 	} else {
 		{{
-			lastRegenerationID := props.Regenerations[len(props.Regenerations)-1].CycleID
+			var lastRegenerationID int64
+			if len(props.Regenerations) > 0 {
+				lastRegenerationID = props.Regenerations[len(props.Regenerations)-1].CycleID
+			}
 		}}
 
 		for _, cycle := range props.Cycles {
