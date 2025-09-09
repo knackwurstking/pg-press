@@ -11,13 +11,12 @@ import (
 )
 
 type CyclesSectionProps struct {
-	User              *usermodels.User
-	SlotTop           int64
-	SlotTopCassette   int64
-	SlotBottom        int64
-	TotalCycles       int64
-	Cycles            []*pressmodels.Cycle
-	Regenerations     []*toolmodels.Regeneration
+	User          *usermodels.User
+	Tool          *toolmodels.Tool
+	ToolPosition  string
+	TotalCycles   int64
+	Cycles        []*pressmodels.Cycle
+	Regenerations []*toolmodels.Regeneration
 }
 
 templ CyclesSection(props *CyclesSectionProps) {
@@ -38,8 +37,8 @@ templ CyclesSection(props *CyclesSectionProps) {
 			class="secondary small flex"
 
 			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
-				env.ServerPathPrefix, props.SlotTop, props.SlotTopCassette, props.SlotBottom,
+				"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s",
+				env.ServerPathPrefix, props.Tool.ID, props.ToolPosition,
 			) }
 			hx-trigger="click"
 			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
@@ -58,7 +57,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 
 	<section>
 		<h6 class="mb">
-			Gesamtzyklen:
+			Gesamtzyklen für { props.Tool.String() } (Position: { props.ToolPosition }):
 		</h6>
 		<span>
 			@TotalCycles(props.TotalCycles, true)
@@ -72,7 +71,8 @@ templ CyclesSection(props *CyclesSectionProps) {
 					<th name="id">ID</th>
 					<th name="press">Presse</th>
 					<th name="date">Datum</th>
-					<th name="slots">Werkzeuge</th>
+					<th name="tool">Werkzeug</th>
+					<th name="position">Position</th>
 					<th name="total">Gesamtzyklen</th>
 					<th name="partial">Teilzyklen (berechnet)</th>
 					<th></th>
@@ -80,7 +80,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			</thead>
 
 			<tbody>
-				@cyclesTableRows(props.User, props.Cycles)
+				@cyclesTableRows(props.User, props.Tool.ID, props.ToolPosition, props.Cycles)
 			</tbody>
 		</table>
 	</figure>
@@ -89,30 +89,30 @@ templ CyclesSection(props *CyclesSectionProps) {
 	<span id={ constants.IDToolCycleEditDialog }></span>
 }
 
-templ cyclesTableRows(user *usermodels.User, cycles []*pressmodels.Cycle) {
+templ cyclesTableRows(user *usermodels.User, toolID int64, toolPosition string, cycles []*pressmodels.Cycle) {
 	if len(cycles) == 0 {
 		<tr>
-			<td colspan="7" class="text-center">
+			<td colspan="8" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
 	} else {
 		for _, cycle := range cycles {
-			@renderCycleRowWithPartialCalc(user, cycle)
+			@renderCycleRowWithPartialCalc(user, toolID, toolPosition, cycle)
 		}
 	}
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cycle) {
+templ renderCycleRowWithPartialCalc(user *usermodels.User, toolID int64, toolPosition string, cycle *pressmodels.Cycle) {
 	<tr>
 		<td>
-			<span>{ cycle.ID }</span>
+			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
 		</td>
 
 		<td>
-			<span>{ cycle.PressNumber }</span>
+			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>
 
 		<td>
@@ -120,32 +120,20 @@ templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cy
 		</td>
 
 		<td>
-			<div class="flex flex-col gap-xs text-xs">
-				if cycle.SlotTop > 0 {
-					<div class="text-xs text-muted">
-						O: { fmt.Sprintf("%d", cycle.SlotTop) }
-					</div>
-				}
-				if cycle.SlotTopCassette > 0 {
-					<div class="text-xs text-muted">
-						K: { fmt.Sprintf("%d", cycle.SlotTopCassette) }
-					</div>
-				}
-				if cycle.SlotBottom > 0 {
-					<div class="text-xs text-muted">
-						U: { fmt.Sprintf("%d", cycle.SlotBottom) }
-					</div>
-				}
-			</div>
+			<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
 		</td>
 
 		<td>
-			{ cycle.TotalCycles }
+			<span class="text-xs">{ cycle.ToolPosition }</span>
+		</td>
+
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
 
 		<td>
 			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ cycle.PartialCycles }
+				{ fmt.Sprintf("%d", cycle.PartialCycles) }
 			</span>
 		</td>
 
@@ -155,8 +143,8 @@ templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cy
 				class="small ghost"
 
 				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d&cycle_id=%d",
-					env.ServerPathPrefix, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom, cycle.ID,
+					"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s&cycle_id=%d",
+					env.ServerPathPrefix, toolID, toolPosition, cycle.ID,
 				) }
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
@@ -177,8 +165,8 @@ templ renderCycleRowWithPartialCalc(user *usermodels.User, cycle *pressmodels.Cy
 				class="destructive small ghost"
 
 				hx-delete={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
-					env.ServerPathPrefix, cycle.ID, cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
+					"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d&tool_position=%s",
+					env.ServerPathPrefix, cycle.ID, toolID, toolPosition,
 				) }
 				hx-trigger="click"
 				hx-target="section.cycles"

@@ -11,9 +11,8 @@ import (
 )
 
 type EditPressCycleProps struct {
-	SlotTop          *toolmodels.Tool
-	SlotTopCassette  *toolmodels.Tool
-	SlotBottom       *toolmodels.Tool
+	Tool             *toolmodels.Tool
+	ToolPosition     string
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
@@ -22,41 +21,21 @@ type EditPressCycleProps struct {
 	Error            string
 }
 
-func (c *EditPressCycleProps) HasActiveSlot() bool {
-	return c.SlotTop != nil || c.SlotTopCassette != nil || c.SlotBottom != nil
+func (c *EditPressCycleProps) HasActiveTool() bool {
+	return c.Tool != nil && c.ToolPosition != ""
 }
 
-func (c *EditPressCycleProps) GetSlotTopID() int64 {
-	if c.SlotTop == nil {
+func (c *EditPressCycleProps) GetToolID() int64 {
+	if c.Tool == nil {
 		return 0
 	}
-	return c.SlotTop.ID
+	return c.Tool.ID
 }
 
-func (c *EditPressCycleProps) GetSlotTopCassetteID() int64 {
-	if c.SlotTopCassette == nil {
-		return 0
-	}
-	return c.SlotTopCassette.ID
-}
-
-func (c *EditPressCycleProps) GetSlotBottomID() int64 {
-	if c.SlotBottom == nil {
-		return 0
-	}
-	return c.SlotBottom.ID
-}
-
-// GetPressFromSlots returns the press number from the first active slot
-func (c *EditPressCycleProps) GetPressFromSlots() *pressmodels.PressNumber {
-	if c.SlotTop != nil && c.SlotTop.Press != nil {
-		return c.SlotTop.Press
-	}
-	if c.SlotTopCassette != nil && c.SlotTopCassette.Press != nil {
-		return c.SlotTopCassette.Press
-	}
-	if c.SlotBottom != nil && c.SlotBottom.Press != nil {
-		return c.SlotBottom.Press
+// GetPressFromTool returns the press number from the active tool
+func (c *EditPressCycleProps) GetPressFromTool() *pressmodels.PressNumber {
+	if c.Tool != nil && c.Tool.Press != nil {
+		return c.Tool.Press
 	}
 	return nil
 }
@@ -67,9 +46,9 @@ templ EditPressCycle(props *EditPressCycleProps) {
 			id={ constants.IDToolCycleEditDialog }
 
 			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+				"%s/htmx/tools/cycles?tool_id=%d&tool_position=%s",
 				env.ServerPathPrefix,
-				props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
+				props.GetToolID(), props.ToolPosition,
 			) }
 			hx-trigger="load"
 			hx-target="section.cycles"
@@ -83,15 +62,15 @@ templ EditPressCycle(props *EditPressCycleProps) {
 
 				if props.CycleID > 0 {
 					hx-put={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?cycle_id=%d&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
+						"%s/htmx/tools/cycle/edit?cycle_id=%d&tool_id=%d&tool_position=%s",
 						env.ServerPathPrefix,
 						props.CycleID,
-						props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
+						props.GetToolID(), props.ToolPosition,
 					) }
 				} else {
 					hx-post={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
-						env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
+						"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s",
+						env.ServerPathPrefix, props.GetToolID(), props.ToolPosition,
 					) }
 				}
 
@@ -106,7 +85,6 @@ templ EditPressCycle(props *EditPressCycleProps) {
 					<div class="card compact destructive">
 						<div class="card-body">
 							{ props.Error }
-							kfjsdodfdspkj
 						</div>
 					</div>
 				}
@@ -114,29 +92,18 @@ templ EditPressCycle(props *EditPressCycleProps) {
 				<div
 					class="form-content flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p"
 				>
-					<!-- Display active slots information -->
-					if props.HasActiveSlot() {
-						<section class="slots-info flex flex-col gap-sm">
-							<label>Aktive Werkzeuge</label>
+					<!-- Display active tool information -->
+					if props.HasActiveTool() {
+						<section class="tool-info flex flex-col gap-sm">
+							<label>Aktives Werkzeug</label>
 
 							<div class="flex flex-col gap-xs">
-								if props.SlotTop != nil {
-									<div class="text-sm">
-										<strong>Oberteil:</strong> { props.SlotTop.String() }
-									</div>
-								}
-
-								if props.SlotTopCassette != nil {
-									<div class="text-sm">
-										<strong>Kassette Oberteil:</strong> { props.SlotTopCassette.String() }
-									</div>
-								}
-
-								if props.SlotBottom != nil {
-									<div class="text-sm">
-										<strong>Unterteil:</strong> { props.SlotBottom.String() }
-									</div>
-								}
+								<div class="text-sm">
+									<strong>Werkzeug:</strong> { props.Tool.String() }
+								</div>
+								<div class="text-sm">
+									<strong>Position:</strong> { props.ToolPosition }
+								</div>
 							</div>
 						</section>
 					}
@@ -148,7 +115,7 @@ templ EditPressCycle(props *EditPressCycleProps) {
 							<option
 								value=""
 								disabled
-								selected?={ props.GetPressFromSlots() == nil && props.InputPressNumber == nil }
+								selected?={ props.GetPressFromTool() == nil && props.InputPressNumber == nil }
 							>
 								Presse auswählen
 							</option>
@@ -157,7 +124,7 @@ templ EditPressCycle(props *EditPressCycleProps) {
 								<option
 									value={ fmt.Sprintf("%d", i) }
 									selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-										(props.InputPressNumber == nil && isPress(props.GetPressFromSlots(), i)) }
+										(props.InputPressNumber == nil && isPress(props.GetPressFromTool(), i)) }
 								>
 									Presse { fmt.Sprintf("%d", i) }
 								</option>
@@ -204,7 +171,7 @@ templ EditPressCycle(props *EditPressCycleProps) {
 							<span class="flex flex-col gap-0">
 								if props.CycleID > 0 {
 									<span>
-										Werkzeug nach diesem cycluse eintrag als regeneriert markieren.
+										Werkzeug nach diesem Zyklus-Eintrag als regeneriert markieren.
 										if props.CycleID > 0 {
 											(Rückwirkend)
 										}
@@ -245,8 +212,8 @@ templ EditPressCycle(props *EditPressCycleProps) {
 						type="button"
 
 						hx-get={ fmt.Sprintf(
-							"%s/htmx/tools/cycle/edit?close=true&slot_top=%d&slot_top_cassette=%d&slot_bottom=%d",
-							env.ServerPathPrefix, props.GetSlotTopID(), props.GetSlotTopCassetteID(), props.GetSlotBottomID(),
+							"%s/htmx/tools/cycle/edit?close=true&tool_id=%d&tool_position=%s",
+							env.ServerPathPrefix, props.GetToolID(), props.ToolPosition,
 						) }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }

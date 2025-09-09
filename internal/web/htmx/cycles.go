@@ -48,53 +48,54 @@ func (h *Cycles) handle(c echo.Context) error {
 		return err
 	}
 
-	// Get slot parameters
-	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
+	// Get tool and position parameters
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
-		slotTop = 0
-	}
-	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
-	if err != nil {
-		slotTopCassette = 0
-	}
-	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
-	if err != nil {
-		slotBottom = 0
+		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	// Validate that at least one slot is provided
-	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
+	toolPosition := c.QueryParam("tool_position")
+	if toolPosition == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
 	}
 
-	logger.HTMXHandlerTools().Debug("Fetching cycles for slots: top=%d, top_cassette=%d, bottom=%d",
-		slotTop, slotTopCassette, slotBottom)
+	logger.HTMXHandlerTools().Debug("Fetching cycles for tool: id=%d, position=%s", toolID, toolPosition)
 
-	// Get all press cycles (we'll filter by slots in frontend for now)
-	allCycles, err := h.DB.PressCycles.List()
+	// Get tool information
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
+	}
+
+	// Get cycles for this specific tool
+	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
 
-	// TODO: Need to handle regenerations here
-	var regenerations []*toolmodels.Regeneration
+	// Filter cycles by position
+	filteredCycles := pressmodels.FilterByToolPosition(toolPosition, toolCycles...)
 
-	// Filter cycles that match any of the provided slots
-	filteredCycles := pressmodels.FilterSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
+	// Get regenerations for this tool
+	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
+	if err != nil {
+		logger.HTMXHandlerTools().Error("Failed to get regenerations for tool %d: %v", toolID, err)
+		regenerations = []*toolmodels.Regeneration{} // Continue with empty regenerations
+	}
 
-	// Get total cycles and lastPartialCycles from filtered cycles
+	// Get total cycles
 	totalCycles := h.getTotalCycles(filteredCycles...)
 
 	// Render the component
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
-		User:            user,
-		SlotTop:         slotTop,
-		SlotTopCassette: slotTopCassette,
-		SlotBottom:      slotBottom,
-		TotalCycles:     totalCycles,
-		Cycles:          filteredCycles,
-		Regenerations:   regenerations,
+		User:          user,
+		Tool:          tool,
+		ToolPosition:  toolPosition,
+		TotalCycles:   totalCycles,
+		Cycles:        filteredCycles,
+		Regenerations: regenerations,
 	})
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -105,35 +106,26 @@ func (h *Cycles) handle(c echo.Context) error {
 }
 
 func (h *Cycles) handleTotalCycles(c echo.Context) error {
-	// Get slot parameters
-	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
+	// Get tool and position parameters
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
-		slotTop = 0
-	}
-	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
-	if err != nil {
-		slotTopCassette = 0
-	}
-	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
-	if err != nil {
-		slotBottom = 0
+		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	// Validate that at least one slot is provided
-	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
+	toolPosition := c.QueryParam("tool_position")
+	if toolPosition == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
 	}
 
-	// Get all press cycles and filter by slots
-	allCycles, err := h.DB.PressCycles.List()
+	// Get cycles for this specific tool
+	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
-	// TODO: Need to handle regenerations somehow
 
-	// Filter cycles that match any of the provided slots
-	filteredCycles := pressmodels.FilterSlots(slotTop, slotTopCassette, slotBottom, allCycles...)
+	// Filter cycles by position
+	filteredCycles := pressmodels.FilterByToolPosition(toolPosition, toolCycles...)
 
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(filteredCycles...)
@@ -149,14 +141,14 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 		props = &dialogs.EditPressCycleProps{}
 	}
 
-	if !props.HasActiveSlot() {
-		toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
+	// Get tool and position from query if not already set
+	if !props.HasActiveTool() {
+		tool, toolPosition, err := h.getToolFromQuery(c)
 		if err != nil {
 			return err
 		}
-		props.SlotTop = toolTop
-		props.SlotTopCassette = toolTopCassette
-		props.SlotBottom = toolBottom
+		props.Tool = tool
+		props.ToolPosition = toolPosition
 	}
 
 	close := webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
@@ -201,28 +193,25 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		return err
 	}
 
-	toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
+	tool, toolPosition, err := h.getToolFromQuery(c)
 	if err != nil {
 		return err
 	}
 
-	// Parse form data (type: PressCycle)
+	// Parse form data
 	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
-			Error:            err.Error(),
-			InputPressNumber: nil, // Don't have form data to repopulate
+			Tool:         tool,
+			ToolPosition: toolPosition,
+			Error:        err.Error(),
 		}, c)
 	}
 
 	if !pressmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
+			Tool:             tool,
+			ToolPosition:     toolPosition,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: form.TotalCycles,
 			InputPressNumber: form.PressNumber,
@@ -230,55 +219,38 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	var slotTopID, slotTopCassetteID, slotBottomID int64
-	if toolTop != nil {
-		slotTopID = toolTop.ID
-	}
-	if toolTopCassette != nil {
-		slotTopCassetteID = toolTopCassette.ID
-	}
-	if toolBottom != nil {
-		slotBottomID = toolBottom.ID
-	}
-
 	pressCycle := pressmodels.NewCycle(
 		*form.PressNumber,
-		slotTopID, slotTopCassetteID, slotBottomID,
+		tool.ID,
+		toolPosition,
 		form.TotalCycles,
 		user.TelegramID,
 	)
 	pressCycle.Date = form.Date
 
-	if cycleID, err := h.DB.PressCycles.Add(pressCycle, user); err != nil {
+	cycleID, err := h.DB.PressCycles.Add(pressCycle, user)
+	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
+			Tool:             tool,
+			ToolPosition:     toolPosition,
 			Error:            err.Error(),
 			InputTotalCycles: form.TotalCycles,
 			InputPressNumber: form.PressNumber,
 			OriginalDate:     &form.Date,
 		}, c)
-	} else {
-		if form.Regenerating {
-			toolIDs := []int64{slotTopID, slotTopCassetteID, slotBottomID}
-			for _, id := range toolIDs {
-				if id <= 0 {
-					continue
-				}
+	}
 
-				if _, err := h.DB.ToolRegenerations.Start(cycleID, id, "", user); err != nil {
-					return err
-				}
-			}
+	// Handle regeneration if requested
+	if form.Regenerating {
+		if _, err := h.DB.ToolRegenerations.Start(cycleID, tool.ID, "", user); err != nil {
+			logger.HTMXHandlerTools().Error("Failed to start regeneration for tool %d: %v", tool.ID, err)
 		}
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		SlotTop:         toolTop,
-		SlotTopCassette: toolTopCassette,
-		SlotBottom:      toolBottom,
-		Close:           true,
+		Tool:         tool,
+		ToolPosition: toolPosition,
+		Close:        true,
 	}, c)
 }
 
@@ -293,7 +265,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	toolTop, toolTopCassette, toolBottom, err := h.getSlotsFromQuery(c)
+	tool, toolPosition, err := h.getToolFromQuery(c)
 	if err != nil {
 		return err
 	}
@@ -301,20 +273,18 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
-			CycleID:          cycleID,
-			Error:            err.Error(),
-			InputPressNumber: nil, // Don't have form data to repopulate
+			Tool:         tool,
+			ToolPosition: toolPosition,
+			CycleID:      cycleID,
+			Error:        err.Error(),
 		}, c)
 	}
 
 	if !pressmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
+			Tool:             tool,
+			ToolPosition:     toolPosition,
+			CycleID:          cycleID,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: form.TotalCycles,
 			InputPressNumber: form.PressNumber,
@@ -322,22 +292,12 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	var slotTopID, slotTopCassetteID, slotBottomID int64
-	if toolTop != nil {
-		slotTopID = toolTop.ID
-	}
-	if toolTopCassette != nil {
-		slotTopCassetteID = toolTopCassette.ID
-	}
-	if toolBottom != nil {
-		slotBottomID = toolBottom.ID
-	}
-
-	// Update only the fields that should change, preserving the original date
+	// Update the cycle
 	pressCycle := pressmodels.NewPressCycleWithID(
 		cycleID,
 		*form.PressNumber,
-		slotTopID, slotTopCassetteID, slotBottomID,
+		tool.ID,
+		toolPosition,
 		form.TotalCycles,
 		user.TelegramID,
 		form.Date,
@@ -345,9 +305,8 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			SlotTop:          toolTop,
-			SlotTopCassette:  toolTopCassette,
-			SlotBottom:       toolBottom,
+			Tool:             tool,
+			ToolPosition:     toolPosition,
 			CycleID:          cycleID,
 			Error:            err.Error(),
 			InputTotalCycles: form.TotalCycles,
@@ -356,30 +315,20 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
+	// Handle regeneration if requested
 	if form.Regenerating {
-		if form.Regenerating {
-			toolIDs := []int64{slotTopID, slotTopCassetteID, slotBottomID}
-			for _, id := range toolIDs {
-				if id <= 0 {
-					continue
-				}
-
-				if _, err := h.DB.ToolRegenerations.Start(cycleID, id, "", user); err != nil {
-					return err
-				}
-
-				if err := h.DB.ToolRegenerations.Stop(id); err != nil {
-					return err
-				}
-			}
+		if _, err := h.DB.ToolRegenerations.Start(cycleID, tool.ID, "", user); err != nil {
+			logger.HTMXHandlerTools().Error("Failed to start regeneration for tool %d: %v", tool.ID, err)
+		}
+		if err := h.DB.ToolRegenerations.Stop(tool.ID); err != nil {
+			logger.HTMXHandlerTools().Error("Failed to stop regeneration for tool %d: %v", tool.ID, err)
 		}
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		SlotTop:         toolTop,
-		SlotTopCassette: toolTopCassette,
-		SlotBottom:      toolBottom,
-		Close:           true,
+		Tool:         tool,
+		ToolPosition: toolPosition,
+		Close:        true,
 	}, c)
 }
 
@@ -404,68 +353,38 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 	return h.handle(c)
 }
 
-// NOTE: The database will always sort IDs DESC
+// getTotalCycles calculates total cycles from a list of cycles
 func (h *Cycles) getTotalCycles(cycles ...*pressmodels.Cycle) int64 {
 	var totalCycles int64
-
 	for _, cycle := range cycles {
 		totalCycles += cycle.PartialCycles
 	}
-
 	return totalCycles
 }
 
-func (h *Cycles) getSlotsFromQuery(c echo.Context) (toolTop, toolTopCassette, toolBottom *toolmodels.Tool, err error) {
-	slotTop, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTop)
+// getToolFromQuery extracts tool and tool position from query parameters
+func (h *Cycles) getToolFromQuery(c echo.Context) (*toolmodels.Tool, string, error) {
+	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
-		slotTop = 0
+		return nil, "", echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	slotTopCassette, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotTopCassette)
+	toolPosition := c.QueryParam("tool_position")
+	if toolPosition == "" {
+		return nil, "", echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
+	}
+
+	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		slotTopCassette = 0
+		return nil, "", echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			"failed to get tool: "+err.Error())
 	}
 
-	slotBottom, err := webhelpers.ParseInt64Query(c, constants.QueryParamSlotBottom)
-	if err != nil {
-		slotBottom = 0
-	}
-
-	// Validate slots, at least one must be provided
-	if slotTop == 0 && slotTopCassette == 0 && slotBottom == 0 {
-		return nil, nil, nil, echo.NewHTTPError(http.StatusBadRequest, "at least one slot must be provided")
-	}
-
-	// Fetching tools for slots
-	if slotTop > 0 {
-		toolTop, err = h.DB.Tools.Get(slotTop)
-		if err != nil {
-			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-				"failed to get tool for slot %d: "+err.Error(), slotTop)
-		}
-	}
-
-	if slotTopCassette > 0 {
-		toolTopCassette, err = h.DB.Tools.Get(slotTopCassette)
-		if err != nil {
-			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-				"failed to get tool for slot %d: "+err.Error(), slotTopCassette)
-		}
-	}
-
-	if slotBottom > 0 {
-		toolBottom, err = h.DB.Tools.Get(slotBottom)
-		if err != nil {
-			return nil, nil, nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-				"failed to get tool for slot %d: "+err.Error(), slotBottom)
-		}
-	}
-
-	return toolTop, toolTopCassette, toolBottom, nil
+	return tool, toolPosition, nil
 }
 
+// getCycleFormData parses form data for cycle operations
 func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
-	var err error
 	form := &CycleEditFormData{}
 
 	if pressString := c.FormValue("press_number"); pressString != "" {
@@ -473,13 +392,12 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
 		}
-
 		pn := pressmodels.PressNumber(press)
 		form.PressNumber = &pn
 	}
 
 	if dateString := c.FormValue("original_date"); dateString != "" {
-		// Create time (date) object from dateString
+		var err error
 		form.Date, err = time.Parse(constants.DateFormat, dateString)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid date format: "+err.Error())
@@ -491,14 +409,14 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles is required")
 	} else {
-		if form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64); err != nil {
+		var err error
+		form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
+		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "total_cycles must be an integer")
 		}
 	}
 
-	if r := c.FormValue("regenerating"); r != "" {
-		form.Regenerating = true
-	}
+	form.Regenerating = c.FormValue("regenerating") != ""
 
 	return form, nil
 }
