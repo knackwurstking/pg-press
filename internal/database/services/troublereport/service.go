@@ -45,8 +45,9 @@ func New(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *Serv
 	}
 
 	return &Service{
-		db:    db,
-		feeds: feeds,
+		db:          db,
+		attachments: attachments,
+		feeds:       feeds,
 	}
 }
 
