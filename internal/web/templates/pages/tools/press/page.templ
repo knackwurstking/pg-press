@@ -6,11 +6,14 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 type PageProps struct {
 	Press models.PressNumber
 	Cycles []*models.Cycle
+	User *models.User
 }
 
 templ Page(props PageProps) {
@@ -51,6 +54,9 @@ templ Page(props PageProps) {
                     </table>
                 </figure>
             </section>
+
+            // Dialog placeholder
+			<span id={ constants.IDToolCycleEditDialog }></span>
         </main>
     }
 }
@@ -63,8 +69,87 @@ templ renderCycles(props PageProps) {
 			</td>
         </tr>
     } else {
-    	// TODO: Render rows
+		for _, cycle := range props.Cycles {
+			@renderCycle(props, cycle)
+		}
     }
+}
+
+templ renderCycle(props PageProps, cycle *models.Cycle) {
+	<tr>
+		<td>
+			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
+		</td>
+
+		<td>
+			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
+		</td>
+
+		<td>
+			<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
+		</td>
+
+		<td>
+			<span class="text-xs">{ cycle.ToolPosition }</span>
+		</td>
+
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+
+		<td>
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
+				{ fmt.Sprintf("%d", cycle.PartialCycles) }
+			</span>
+		</td>
+
+		<td class="button-group flex justify-end items-center">
+			// TODO: HTMX Button: Goto: Edit cycle entry dialog
+			<button
+				class="small ghost"
+
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+					env.ServerPathPrefix, cycle.ToolID, cycle.ID,
+				) }
+				hx-trigger="click"
+				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+
+				title="Bearbeiten"
+
+				if !props.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-pencil"></i>
+			</button>
+
+			// TODO: HTMX Button: Delete cycle from database table and reload section.cycles
+			<button
+				class="destructive small ghost"
+
+				hx-delete={ fmt.Sprintf(
+					"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+					env.ServerPathPrefix, cycle.ID, cycle.ToolID,
+				) }
+				hx-trigger="click"
+				hx-target="section.cycles"
+				hx-swap="innerHTML"
+				hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+
+				title="Löschen"
+
+				if !props.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-trash"></i>
+			</button>
+		</td>
+	</tr>
 }
 
 templ navContent() {

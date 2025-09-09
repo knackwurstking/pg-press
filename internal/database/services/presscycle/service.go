@@ -292,11 +292,21 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*cyclemodels.Cycle, err
 }
 
 // GetPressCycles gets all press cycles (current and historical) for a specific press
-func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit, offset int) ([]*cyclemodels.Cycle, error) {
-	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
+func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit *int, offset *int) ([]*cyclemodels.Cycle, error) {
+	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%v, offset=%v", pressNumber, limit, offset)
 
 	if !toolmodels.IsValidPressNumber(&pressNumber) {
 		return nil, dberror.NewValidationError("press_number", "invalid press number", pressNumber)
+	}
+
+	var queryLimit, queryOffset sql.NullInt64
+	if limit != nil {
+		queryLimit.Int64 = int64(*limit)
+		queryLimit.Valid = true
+	}
+	if offset != nil {
+		queryOffset.Int64 = int64(*offset)
+		queryOffset.Valid = true
 	}
 
 	query := `
@@ -304,10 +314,28 @@ func (s *Service) GetPressCycles(pressNumber toolmodels.PressNumber, limit, offs
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY id DESC
-		LIMIT ? OFFSET ?
 	`
+	if queryLimit.Valid {
+		query += " LIMIT ?"
+	}
+	if queryOffset.Valid {
+		if queryLimit.Valid {
+			query += " OFFSET ?"
+		} else {
+			query += " LIMIT 0 OFFSET ?"
+		}
+	}
 
-	rows, err := s.db.Query(query, pressNumber, limit, offset)
+	var args []interface{}
+	args = append(args, pressNumber)
+	if queryLimit.Valid {
+		args = append(args, queryLimit.Int64)
+	}
+	if queryOffset.Valid {
+		args = append(args, queryOffset.Int64)
+	}
+
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycles for press %d", pressNumber), err)
 	}

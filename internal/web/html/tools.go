@@ -62,8 +62,15 @@ func (h *Tools) handleTools(c echo.Context) error {
 }
 
 func (h *Tools) handlePressPage(c echo.Context) error {
-	var pn models.PressNumber
+	// Get user from context
+	user, err := webhelpers.GetUserFromContext(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get user from context: "+err.Error())
+	}
 
+	// Get press number from param
+	var pn models.PressNumber
 	// Parsing & validating press number from query parameter
 	if pns, err := webhelpers.ParseInt64Param(c, "press"); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
@@ -76,10 +83,19 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 		}
 	}
 
+	// Get cycles for this press
+	cycles, err := h.DB.PressCycles.GetPressCycles(pn, nil, nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get press cycles: "+err.Error())
+	}
+
 	// Render page
 	logger.HandlerTools().Debug("Rendering page for press %d", pn)
 	page := presspage.Page(presspage.PageProps{
-		Press: pn,
+		Press:  pn,
+		Cycles: cycles,
+		User:   user,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {

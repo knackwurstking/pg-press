@@ -155,8 +155,8 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodel
 				class="small ghost"
 
 				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s&cycle_id=%d",
-					env.ServerPathPrefix, props.Tool.ID, props.ToolPosition, cycle.ID,
+					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+					env.ServerPathPrefix, props.Tool.ID, cycle.ID,
 				) }
 				hx-trigger="click"
 				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
@@ -177,8 +177,8 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodel
 				class="destructive small ghost"
 
 				hx-delete={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d&tool_position=%s",
-					env.ServerPathPrefix, cycle.ID, props.Tool.ID, props.ToolPosition,
+					"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 				) }
 				hx-trigger="click"
 				hx-target="section.cycles"
