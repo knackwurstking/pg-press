@@ -13,13 +13,12 @@ type DB struct {
 	// Kind of DataOperations
 	PressCycles    *services.PressCycle
 	Users          *services.User
-	Attachments    *services.Attachment
 	TroubleReports *services.TroubleReport
 	Notes          *services.Note
 	Tools          *services.Tool
 	MetalSheets    *services.MetalSheet
 
-	// Not fitting the `interfaces.DataOperations` interface
+	Attachments       *services.Attachment
 	Cookies           *services.Cookie
 	ToolRegenerations *services.Regeneration
 	Feeds             *services.Feed
