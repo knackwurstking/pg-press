@@ -53,7 +53,7 @@ func Page(props PageProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-body\"><span>In Bearbeitung</span></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-body\"><span>In Bearbeitung</span></div></div><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt-4\"><h5>Pressennutzungsverlauf</h5><figure class=\"w-full overflow-x-scroll\"><table name=\"additional-cycles-table\" class=\"table borderless compact\"><thead><tr><th>ID</th><th>Presse</th><th>Datum</th><th>Werkzeug</th><th>Position</th><th>Gesamtzyklen</th><th>Teilzyklen (berechnet)</th><th></th></tr></thead><!-- TODO: Render rows next --><tbody><div class=\"flex justify-center items-center\"><div class=\"text-center muted ghost\"><i class=\"bi bi-inbox mb text-4xl\"></i><p class=\"m-0\">Keine Zyklen gefunden.</p></div></div></tbody></table></figure></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

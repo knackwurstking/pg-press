@@ -26,8 +26,39 @@ templ Page(props PageProps) {
 					<span>In Bearbeitung</span>
 				</div>
 			</div>
-		</main>
-	}
+
+            <!-- Press Cycles Table -->
+            <section id="cycle-table-section" class="mt-4">
+                <h5>Pressennutzungsverlauf</h5>
+                <figure class="w-full overflow-x-scroll">
+                    <table name="additional-cycles-table" class="table borderless compact">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Presse</th>
+                                <th>Datum</th>
+                                <th>Werkzeug</th>
+                                <th>Position</th>
+                                <th>Gesamtzyklen</th>
+                                <th>Teilzyklen (berechnet)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <!-- TODO: Render rows next -->
+                        <tbody>
+                            <div class="flex justify-center items-center">
+								<div class="text-center muted ghost">
+									<i class="bi bi-inbox mb text-4xl"></i>
+									<p class="m-0">Keine Zyklen gefunden.</p>
+								</div>
+							</div>
+                        </tbody>
+                    </table>
+                </figure>
+            </section>
+        </main>
+    }
 }
 
 templ navContent() {
