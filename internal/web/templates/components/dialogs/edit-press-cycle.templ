@@ -5,7 +5,6 @@ import (
 	"time"
 
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
-	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
@@ -16,7 +15,7 @@ type EditPressCycleProps struct {
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
-	InputPressNumber *pressmodels.PressNumber
+	InputPressNumber *toolmodels.PressNumber
 	OriginalDate     *time.Time
 	Error            string
 }
@@ -33,7 +32,7 @@ func (c *EditPressCycleProps) GetToolID() int64 {
 }
 
 // GetPressFromTool returns the press number from the active tool
-func (c *EditPressCycleProps) GetPressFromTool() *pressmodels.PressNumber {
+func (c *EditPressCycleProps) GetPressFromTool() *toolmodels.PressNumber {
 	if c.Tool != nil && c.Tool.Press != nil {
 		return c.Tool.Press
 	}

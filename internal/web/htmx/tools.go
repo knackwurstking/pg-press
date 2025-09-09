@@ -7,7 +7,6 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -280,9 +279,9 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 			return nil, errors.New("invalid press number: " + err.Error())
 		}
 
-		pn := pressmodels.PressNumber(press)
+		pn := toolmodels.PressNumber(press)
 		data.Press = &pn
-		if !pressmodels.IsValidPressNumber(data.Press) {
+		if !toolmodels.IsValidPressNumber(data.Press) {
 			return nil, errors.New("invalid press number")
 		}
 	}

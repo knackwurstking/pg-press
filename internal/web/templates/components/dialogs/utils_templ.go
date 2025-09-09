@@ -8,9 +8,9 @@ package dialogs
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
+import toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 
-func isPress(p *pressmodels.PressNumber, v int) bool {
+func isPress(p *toolmodels.PressNumber, v int) bool {
 	if p == nil {
 		return false
 	}

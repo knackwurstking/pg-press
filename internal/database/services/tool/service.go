@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
-	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
@@ -362,8 +361,8 @@ func (s *Service) AddWithNotes(tool *toolmodels.Tool, user *usermodels.User, not
 }
 
 // GetByPress returns all active tools for a specific press (0-5).
-func (s *Service) GetByPress(pressNumber *pressmodels.PressNumber) ([]*toolmodels.Tool, error) {
-	if !pressmodels.IsValidPressNumber(pressNumber) {
+func (s *Service) GetByPress(pressNumber *toolmodels.PressNumber) ([]*toolmodels.Tool, error) {
+	if !toolmodels.IsValidPressNumber(pressNumber) {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
@@ -449,7 +448,7 @@ func (s *Service) UpdateRegenerating(toolID int64, regenerating bool, user *user
 }
 
 // UpdatePress updates only the press field of a tool.
-func (s *Service) UpdatePress(toolID int64, press *pressmodels.PressNumber, user *usermodels.User) error {
+func (s *Service) UpdatePress(toolID int64, press *toolmodels.PressNumber, user *usermodels.User) error {
 	logger.DBTools().Info("Updating tool press: %d", toolID)
 
 	// Get current tool to track changes
@@ -550,7 +549,7 @@ func (t *Service) updateMods(user *usermodels.User, tool *toolmodels.Tool) {
 }
 
 // equalPressNumbers compares two press number pointers for equality
-func equalPressNumbers(a, b *pressmodels.PressNumber) bool {
+func equalPressNumbers(a, b *toolmodels.PressNumber) bool {
 	if a == nil && b == nil {
 		return true
 	}

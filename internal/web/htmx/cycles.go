@@ -7,7 +7,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	pressmodels "github.com/knackwurstking/pgpress/internal/database/models/press"
+	cyclemodels "github.com/knackwurstking/pgpress/internal/database/models/cycle"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
@@ -54,13 +54,6 @@ func (h *Cycles) handleSection(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	toolPosition := c.QueryParam("tool_position")
-	if toolPosition == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
-	}
-
-	logger.HTMXHandlerTools().Debug("Fetching cycles for tool: id=%d, position=%s", toolID, toolPosition)
-
 	// Get tool information
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
@@ -76,7 +69,7 @@ func (h *Cycles) handleSection(c echo.Context) error {
 	}
 
 	// Filter cycles by position
-	filteredCycles := pressmodels.FilterByToolPosition(toolPosition, toolCycles...)
+	filteredCycles := cyclemodels.FilterByToolPosition(tool.Position, toolCycles...)
 
 	// Get regenerations for this tool
 	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
@@ -92,7 +85,6 @@ func (h *Cycles) handleSection(c echo.Context) error {
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
 		User:          user,
 		Tool:          tool,
-		ToolPosition:  toolPosition,
 		TotalCycles:   totalCycles,
 		Cycles:        filteredCycles,
 		Regenerations: regenerations,
@@ -111,10 +103,9 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
-
-	toolPosition := c.QueryParam("tool_position")
-	if toolPosition == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to get tool")
 	}
 
 	// Get cycles for this specific tool
@@ -125,7 +116,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	}
 
 	// Filter cycles by position
-	filteredCycles := pressmodels.FilterByToolPosition(toolPosition, toolCycles...)
+	filteredCycles := cyclemodels.FilterByToolPosition(tool.Position, toolCycles...)
 
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
@@ -208,7 +199,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	if !pressmodels.IsValidPressNumber(form.PressNumber) {
+	if !toolmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
 			ToolPosition:     toolPosition,
@@ -219,10 +210,10 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	pressCycle := pressmodels.NewCycle(
+	pressCycle := cyclemodels.NewCycle(
 		*form.PressNumber,
 		tool.ID,
-		toolPosition,
+		tool.Position,
 		form.TotalCycles,
 		user.TelegramID,
 	)
@@ -280,7 +271,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}, c)
 	}
 
-	if !pressmodels.IsValidPressNumber(form.PressNumber) {
+	if !toolmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
 			ToolPosition:     toolPosition,
@@ -293,11 +284,11 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	// Update the cycle
-	pressCycle := pressmodels.NewPressCycleWithID(
+	pressCycle := cyclemodels.NewPressCycleWithID(
 		cycleID,
 		*form.PressNumber,
 		tool.ID,
-		toolPosition,
+		tool.Position,
 		form.TotalCycles,
 		user.TelegramID,
 		form.Date,
@@ -350,11 +341,11 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 			"failed to delete press cycle: "+err.Error())
 	}
 
-	return h.handle(c)
+	return h.handleSection(c)
 }
 
 // getTotalCycles calculates total cycles from a list of cycles
-func (h *Cycles) getTotalCycles(toolID int64, cycles ...*pressmodels.Cycle) int64 {
+func (h *Cycles) getTotalCycles(toolID int64, cycles ...*cyclemodels.Cycle) int64 {
 	// Get regeneration for this tool
 	var startCycleID int64
 	if r, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
@@ -404,7 +395,7 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
 		}
-		pn := pressmodels.PressNumber(press)
+		pn := toolmodels.PressNumber(press)
 		form.PressNumber = &pn
 	}
 
