@@ -23,25 +23,27 @@ type Service struct {
 var _ interfaces.DataOperations[*pressmodels.Cycle] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
-	// NOTE: I changed "users(id)" to "users(telegram_id)", but without dropping the existing table or do any migrations, for now everything is working just fine
+	// Drop existing table for migration to new structure
+	dropQuery := `DROP TABLE IF EXISTS press_cycles;`
+	if _, err := db.Exec(dropQuery); err != nil {
+		panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
+	}
+
+	// Create new table with tool_id and tool_position instead of slot fields
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
-			slot_top INTEGER NOT NULL,
-			slot_top_cassette INTEGER NOT NULL,
-			slot_bottom INTEGER NOT NULL,
+			tool_id INTEGER NOT NULL,
+			tool_position TEXT NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			date DATETIME NOT NULL,
 			performed_by INTEGER NOT NULL,
-			FOREIGN KEY (slot_top) REFERENCES tools(id),
-			FOREIGN KEY (slot_top_cassette) REFERENCES tools(id),
-			FOREIGN KEY (slot_bottom) REFERENCES tools(id),
+			FOREIGN KEY (tool_id) REFERENCES tools(id),
 			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL
 		);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top ON press_cycles(slot_top);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_top_cassette ON press_cycles(slot_top_cassette);
-		CREATE INDEX IF NOT EXISTS idx_press_cycles_slot_bottom ON press_cycles(slot_bottom);
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
+		CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_position ON press_cycles(tool_position);
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 	`
 
@@ -55,40 +57,29 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 	}
 }
 
-// TODO: Update the query to take the regeneration into account
-// TODO: There should be one slot per cycle, maybe add a slot_position column (tool, tool_position)
+// GetPartialCycles calculates the partial cycles for a given cycle
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
-	var query string
-	if cycle.SlotTop > 0 {
-		query += "AND slot_top > 0"
-	}
-	if cycle.SlotTopCassette > 0 {
-		query += "AND slot_top_cassette > 0"
-	}
-	if cycle.SlotBottom > 0 {
-		query += "AND slot_bottom > 0"
-	}
-
-	// Get the total_cycles from the previous entry on the same press (regardless of tool_id)
-	previousQuery := fmt.Sprintf(`
+	// Get the total_cycles from the previous entry on the same press and tool position
+	previousQuery := `
 		SELECT
 			total_cycles
 		FROM
 	 		press_cycles
 		WHERE
 			press_number = ?
-			%s
+			AND tool_id = ?
+			AND tool_position = ?
 			AND id < ?
 		ORDER BY
 			id DESC
 		LIMIT 1
-	`, query)
+	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ID).Scan(&previousTotalCycles)
+	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d: %v", cycle.PressNumber, err)
+			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d, tool %d, position %s: %v", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err)
 		}
 		return cycle.TotalCycles
 	}
@@ -103,7 +94,7 @@ func (p *Service) Get(id int64) (*pressmodels.Cycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
 	query := `
-		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE id = ?
 	`
@@ -126,7 +117,7 @@ func (p *Service) List() ([]*pressmodels.Cycle, error) {
 	logger.DBPressCycles().Debug("Listing all press cycles")
 
 	query := `
-		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		ORDER BY id DESC
 	`
@@ -143,8 +134,8 @@ func (p *Service) List() ([]*pressmodels.Cycle, error) {
 // Add creates a new press cycle entry in the database.
 func (p *Service) Add(cycle *pressmodels.Cycle, user *usermodels.User) (int64, error) {
 	logger.DBPressCycles().Info(
-		"Adding new cycle: slot_top=%d, slot_top_cassette=%d, slot_bottom=%d, press_number=%d, total_cycles=%d",
-		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom, cycle.PressNumber, cycle.TotalCycles,
+		"Adding new cycle: tool_id=%d, tool_position=%s, press_number=%d, total_cycles=%d",
+		cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
 	)
 
 	if cycle.Date.IsZero() {
@@ -152,13 +143,14 @@ func (p *Service) Add(cycle *pressmodels.Cycle, user *usermodels.User) (int64, e
 	}
 
 	query := `
-		INSERT INTO press_cycles (press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO press_cycles (press_number, tool_id, tool_position, total_cycles, date, performed_by)
+		VALUES (?, ?, ?, ?, ?, ?)
 	`
 
 	result, err := p.db.Exec(query,
 		cycle.PressNumber,
-		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
+		cycle.ToolID,
+		cycle.ToolPosition,
 		cycle.TotalCycles,
 		cycle.Date,
 		user.TelegramID,
@@ -197,13 +189,14 @@ func (p *Service) Update(cycle *pressmodels.Cycle, user *usermodels.User) error 
 
 	query := `
 		UPDATE press_cycles
-		SET total_cycles = ?, slot_top = ?, slot_top_cassette = ?, slot_bottom = ?, performed_by = ?, press_number = ?, date = ?
+		SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
 		WHERE id = ?
 	`
 
 	result, err := p.db.Exec(query,
 		cycle.TotalCycles,
-		cycle.SlotTop, cycle.SlotTopCassette, cycle.SlotBottom,
+		cycle.ToolID,
+		cycle.ToolPosition,
 		user.TelegramID,
 		cycle.PressNumber,
 		cycle.Date,
@@ -278,13 +271,13 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*pressmodels.Cycle, err
 	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
-		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
-		WHERE slot_top = ? OR slot_top_cassette = ? OR slot_bottom = ?
+		WHERE tool_id = ?
 		ORDER BY id DESC
 	`
 
-	rows, err := s.db.Query(query, toolID, toolID, toolID)
+	rows, err := s.db.Query(query, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get press cycles for tool %d: %w", toolID, err)
 	}
@@ -298,7 +291,7 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*pressmodels.Cycle, err
 	return cycles, nil
 }
 
-// GetPressCycles gets all press cycles (current and historical) for a specific presForPresss
+// GetPressCycles gets all press cycles (current and historical) for a specific press
 func (s *Service) GetPressCycles(pressNumber pressmodels.PressNumber, limit, offset int) ([]*pressmodels.Cycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%d, offset=%d", pressNumber, limit, offset)
 
@@ -307,7 +300,7 @@ func (s *Service) GetPressCycles(pressNumber pressmodels.PressNumber, limit, off
 	}
 
 	query := `
-		SELECT id, press_number, slot_top, slot_top_cassette, slot_bottom, total_cycles, date, performed_by
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
 		ORDER BY id DESC
@@ -349,9 +342,8 @@ func (p *Service) scanPressCycle(scanner interfaces.Scannable) (*pressmodels.Cyc
 	err := scanner.Scan(
 		&cycle.ID,
 		&cycle.PressNumber,
-		&cycle.SlotTop,
-		&cycle.SlotTopCassette,
-		&cycle.SlotBottom,
+		&cycle.ToolID,
+		&cycle.ToolPosition,
 		&cycle.TotalCycles,
 		&cycle.Date,
 		&performedBy,
