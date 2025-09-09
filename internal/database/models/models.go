@@ -21,13 +21,15 @@ type Feed = feed.Feed
 
 // Tool model types
 type (
-	Tool          = tool.Tool
-	ToolWithNotes = tool.ToolWithNotes
-	ToolMod       = tool.ToolMod
-	Format        = tool.Format
-	Position      = tool.Position
-	Status        = tool.Status
-	PressNumber   = tool.PressNumber
+	Tool                = tool.Tool
+	ToolWithNotes       = tool.ToolWithNotes
+	ToolMod             = tool.ToolMod
+	Format              = tool.Format
+	Position            = tool.Position
+	Status              = tool.Status
+	PressNumber         = tool.PressNumber
+	PressUtilization    = tool.PressUtilization
+	PressUtilizationMap = tool.PressUtilizationMap
 )
 
 // Tool constants
