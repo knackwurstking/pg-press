@@ -5,8 +5,8 @@ import (
 	"slices"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/mod"
 	"github.com/knackwurstking/pgpress/internal/database/models/note"
+	"github.com/knackwurstking/pgpress/internal/modification"
 )
 
 const (
@@ -59,15 +59,15 @@ type ToolMod struct {
 // Tool represents a tool in the database.
 // Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
-	ID           int64             `json:"id"`
-	Position     Position          `json:"position"`
-	Format       Format            `json:"format"`
-	Type         string            `json:"type"` // Ex: FC, GTC, MASS
-	Code         string            `json:"code"` // Ex: G01, G02, ...
-	Regenerating bool              `json:"regenerating"`
-	Press        *PressNumber      `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes  []int64           `json:"notes"` // Contains note ids from the "notes" table
-	Mods         mod.Mods[ToolMod] `json:"mods"`
+	ID           int64                      `json:"id"`
+	Position     Position                   `json:"position"`
+	Format       Format                     `json:"format"`
+	Type         string                     `json:"type"` // Ex: FC, GTC, MASS
+	Code         string                     `json:"code"` // Ex: G01, G02, ...
+	Regenerating bool                       `json:"regenerating"`
+	Press        *PressNumber               `json:"press"` // Press number (0-5) when status is active
+	LinkedNotes  []int64                    `json:"notes"` // Contains note ids from the "notes" table
+	Mods         modification.Mods[ToolMod] `json:"mods"`
 }
 
 func New(position Position) *Tool {
@@ -79,7 +79,7 @@ func New(position Position) *Tool {
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),
-		Mods:         mod.NewMods[ToolMod](),
+		Mods:         modification.NewMods[ToolMod](),
 	}
 }
 

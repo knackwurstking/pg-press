@@ -6,7 +6,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/models/mod"
+	"github.com/knackwurstking/pgpress/internal/modification"
 )
 
 const (
@@ -24,11 +24,11 @@ type TroubleReportMod struct {
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64                      `json:"id"`
-	Title             string                     `json:"title"`
-	Content           string                     `json:"content"`
-	LinkedAttachments []int64                    `json:"linked_attachments"`
-	Mods              mod.Mods[TroubleReportMod] `json:"mods"`
+	ID                int64                               `json:"id"`
+	Title             string                              `json:"title"`
+	Content           string                              `json:"content"`
+	LinkedAttachments []int64                             `json:"linked_attachments"`
+	Mods              modification.Mods[TroubleReportMod] `json:"mods"`
 }
 
 // New creates a new trouble report with the provided details.
@@ -37,7 +37,7 @@ func New(title, content string) *TroubleReport {
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              mod.NewMods[TroubleReportMod](),
+		Mods:              modification.NewMods[TroubleReportMod](),
 	}
 }
 

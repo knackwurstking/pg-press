@@ -9,12 +9,12 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
 	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
-	modmodels "github.com/knackwurstking/pgpress/internal/database/models/mod"
 	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/modification"
 )
 
 // Service represents a collection of metal sheets in the database.
@@ -230,7 +230,7 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
-		initialMod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
+		initialMod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
 			TileHeight:  sheet.TileHeight,
 			Value:       sheet.Value,
 			MarkeHeight: sheet.MarkeHeight,
@@ -239,7 +239,7 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 			ToolID:      sheet.ToolID,
 			LinkedNotes: sheet.LinkedNotes,
 		})
-		sheet.Mods = modmodels.NewMods(initialMod)
+		sheet.Mods = modification.NewMods(initialMod)
 	}
 
 	// Marshal JSON fields
@@ -310,7 +310,7 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 		!equalToolIDs(current.ToolID, sheet.ToolID) ||
 		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
 
-		mod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
+		mod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
 			TileHeight:  current.TileHeight,
 			Value:       current.Value,
 			MarkeHeight: current.MarkeHeight,
@@ -321,7 +321,7 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 		})
 
 		// Prepend new mod to keep most recent first
-		mods := modmodels.NewMods(mod)
+		mods := modification.NewMods(mod)
 		sheet.Mods = append(mods, sheet.Mods...)
 	}
 
@@ -379,7 +379,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 	}
 
 	// Add modification record before changing
-	mod := modmodels.NewMod(user, metalsheetmodels.MetalSheetMod{
+	mod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -390,7 +390,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 	})
 
 	// Prepend new mod to keep most recent first
-	mods := modmodels.NewMods(mod)
+	mods := modification.NewMods(mod)
 	sheet.Mods = append(mods, sheet.Mods...)
 
 	// Update the tool assignment

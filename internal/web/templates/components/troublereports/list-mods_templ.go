@@ -11,19 +11,19 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	modmodels "github.com/knackwurstking/pgpress/internal/database/models/mod"
 	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/modification"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 func ListMods(
 	user *usermodels.User,
 	id int64,
-	first *modmodels.Mod[trmodels.TroubleReportMod],
-	current *modmodels.Mod[trmodels.TroubleReportMod],
-	mods modmodels.Mods[trmodels.TroubleReportMod],
+	first *modification.Mod[trmodels.TroubleReportMod],
+	current *modification.Mod[trmodels.TroubleReportMod],
+	mods modification.Mods[trmodels.TroubleReportMod],
 ) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

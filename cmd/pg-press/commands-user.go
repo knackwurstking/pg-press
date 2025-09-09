@@ -6,8 +6,7 @@ import (
 	"os"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -108,7 +107,7 @@ func showUserCommand() cli.Command {
 							color.Underline(color.Bold("Cookies:")),
 						)
 
-						for _, c := range cookiemodels.Sort(cookies) {
+						for _, c := range models.SortCookies(cookies) {
 							fmt.Printf(
 								"%s - %s - %s - \"%s\"\n",
 								c.TimeString(),
@@ -145,7 +144,7 @@ func addUserCommand() cli.Command {
 					return err
 				}
 
-				user := usermodels.NewUser(*telegramID, *userName, *apiKey)
+				user := models.NewUser(*telegramID, *userName, *apiKey)
 				if _, err = db.Users.Add(user, nil); errors.Is(err, dberror.ErrAlreadyExists) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
