@@ -43,7 +43,11 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 	logger.HandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	page := toolspage.Page(tools)
+	// TODO: Press Utilization
+	page := toolspage.Page(&toolspage.PageProps{
+		Tools: tools,
+	})
+
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerTools().Error("Failed to render tools page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,

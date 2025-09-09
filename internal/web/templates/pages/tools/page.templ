@@ -9,7 +9,12 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-templ Page(tools []*toolmodels.ToolWithNotes) {
+// TODO: Create props struct, pass press utilization to the press section (templ) function
+type PageProps struct {
+	Tools []*toolmodels.ToolWithNotes
+}
+
+templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Werkzeuge",
@@ -19,8 +24,8 @@ templ Page(tools []*toolmodels.ToolWithNotes) {
 	) {
 		<main class="container fluid">
 			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
-				@sectionPress()
-				@sectionTools(tools)
+				@sectionPress(props)
+				@sectionTools(props)
 			</div>
 		</main>
 	}
@@ -34,7 +39,7 @@ templ navContent() {
 	</div>
 }
 
-templ sectionPress() {
+templ sectionPress(props *PageProps) {
 	<details class="active-tools">
 		<summary class="mb">
 			<h4>
@@ -130,7 +135,7 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 	</li>
 }
 
-templ sectionTools(tools []*toolmodels.ToolWithNotes) {
+templ sectionTools(props *PageProps) {
 	<div class="all-tools p">
 		<h4 class="mb p">
 			<i class="bi bi-archive mr"></i>
