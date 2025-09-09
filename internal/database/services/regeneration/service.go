@@ -60,7 +60,7 @@ func New(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
 
 // Create records a new tool regeneration event
 func (s *Service) Add(regeneration *toolmodels.Regeneration, user *usermodels.User) (*toolmodels.Regeneration, error) {
-	s.log.Debug("Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
+	s.log.Info("Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
 	if user == nil {
 		return nil, fmt.Errorf("user is required")
@@ -109,7 +109,7 @@ func (s *Service) Add(regeneration *toolmodels.Regeneration, user *usermodels.Us
 
 // Update updates an existing regeneration record
 func (s *Service) Update(regeneration *toolmodels.Regeneration, user *usermodels.User) error {
-	s.log.Debug("Updating tool regeneration: id=%d", regeneration.ID)
+	s.log.Info("Updating tool regeneration: id=%d", regeneration.ID)
 
 	if user == nil {
 		return fmt.Errorf("user is required")
@@ -136,7 +136,7 @@ func (s *Service) Update(regeneration *toolmodels.Regeneration, user *usermodels
 
 // Delete removes a regeneration record (should be used carefully)
 func (s *Service) Delete(id int64) error {
-	s.log.Debug("Deleting regeneration record: id=%d", id)
+	s.log.Info("Deleting regeneration record: id=%d", id)
 
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	_, err := s.db.Exec(query, id)
@@ -148,7 +148,7 @@ func (s *Service) Delete(id int64) error {
 }
 
 func (s *Service) Start(cycleID, toolID int64, reason string, user *usermodels.User) (*toolmodels.Regeneration, error) {
-	s.log.Debug("Starting tool regeneration: tool_id=%d", toolID)
+	s.log.Info("Starting tool regeneration: tool_id=%d", toolID)
 
 	// Get the tool from the database
 	s.log.Debug("Getting tool from database: tool_id=%d", toolID)
@@ -158,12 +158,12 @@ func (s *Service) Start(cycleID, toolID int64, reason string, user *usermodels.U
 	}
 
 	// Check tools status and verify that this tool is not currently active
-	if status := tool.Status(); status != toolmodels.StatusActive {
-		return nil, err
+	if tool.Status() == toolmodels.StatusRegenerating {
+		return nil, fmt.Errorf("tool is already regenerating")
 	}
 
 	// Update the tool's regeneration status
-	s.log.Debug("Updating tool regeneration status: tool_id=%d", toolID)
+	s.log.Debug("Updating tool regeneration status to regenerating: tool_id=%d", toolID)
 	if err = s.tools.UpdateRegenerating(toolID, true, user); err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (s *Service) Start(cycleID, toolID int64, reason string, user *usermodels.U
 
 // TODO: ...
 func (s *Service) Stop(toolID int64) error {
-	s.log.Debug("Stopping tool regeneration: tool_id=%d", toolID)
+	s.log.Info("Stopping tool regeneration: tool_id=%d", toolID)
 
 	if toolID <= 0 {
 		return errors.New("invalid tool ID")
@@ -194,7 +194,7 @@ func (s *Service) Stop(toolID int64) error {
 
 // GetLastRegeneration gets the most recent regeneration for a tool
 func (s *Service) GetLastRegeneration(toolID int64) (*toolmodels.Regeneration, error) {
-	s.log.Debug("Getting last regeneration for tool: tool_id=%d", toolID)
+	s.log.Info("Getting last regeneration for tool: tool_id=%d", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -218,7 +218,7 @@ func (s *Service) GetLastRegeneration(toolID int64) (*toolmodels.Regeneration, e
 
 // GetRegenerationHistory gets all regenerations for a tool
 func (s *Service) GetRegenerationHistory(toolID int64) ([]*toolmodels.Regeneration, error) {
-	s.log.Debug("Getting regeneration history for tool: tool_id=%d", toolID)
+	s.log.Info("Getting regeneration history for tool: tool_id=%d", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -248,7 +248,7 @@ func (s *Service) GetRegenerationHistory(toolID int64) ([]*toolmodels.Regenerati
 
 // GetRegenerationCount gets the total number of regenerations for a tool
 func (s *Service) GetRegenerationCount(toolID int64) (int, error) {
-	s.log.Debug("Getting regeneration count for tool: tool_id=%d", toolID)
+	s.log.Info("Getting regeneration count for tool: tool_id=%d", toolID)
 
 	var count int
 	query := `
@@ -264,7 +264,7 @@ func (s *Service) GetRegenerationCount(toolID int64) (int, error) {
 
 // GetAllRegenerations gets all regenerations across all tools
 func (s *Service) GetAllRegenerations(limit, offset int) ([]*toolmodels.Regeneration, error) {
-	s.log.Debug("Getting all regenerations: limit=%d offset=%d", limit, offset)
+	s.log.Info("Getting all regenerations: limit=%d offset=%d", limit, offset)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -298,7 +298,7 @@ func (s *Service) GetToolsWithMostRegenerations(limit int) ([]struct {
 	RegCount    int
 	LastRegenAt *time.Time
 }, error) {
-	s.log.Debug("Getting tools with most regenerations: limit=%d", limit)
+	s.log.Info("Getting tools with most regenerations: limit=%d", limit)
 
 	query := `
 		SELECT

@@ -26,7 +26,7 @@ func (h *Cycles) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*webhelpers.EchoRoute{
 			// Cycles table rows
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handle),
+			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleSection),
 			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
 
 			// Get, add or edit a cycles table entry
@@ -42,7 +42,7 @@ func (h *Cycles) RegisterRoutes(e *echo.Echo) {
 	)
 }
 
-func (h *Cycles) handle(c echo.Context) error {
+func (h *Cycles) handleSection(c echo.Context) error {
 	user, err := webhelpers.GetUserFromContext(c)
 	if err != nil {
 		return err
