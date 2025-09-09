@@ -28,7 +28,6 @@ dev:
 		gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
 
 build:
-	make generate
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
 
 count:
