@@ -11,7 +11,6 @@ import (
 
 type EditPressCycleProps struct {
 	Tool             *toolmodels.Tool
-	ToolPosition     string
 	CycleID          int64
 	Close            bool
 	InputTotalCycles int64
@@ -21,7 +20,7 @@ type EditPressCycleProps struct {
 }
 
 func (c *EditPressCycleProps) HasActiveTool() bool {
-	return c.Tool != nil && c.ToolPosition != ""
+	return c.Tool != nil
 }
 
 func (c *EditPressCycleProps) GetToolID() int64 {
@@ -45,9 +44,9 @@ templ EditPressCycle(props *EditPressCycleProps) {
 			id={ constants.IDToolCycleEditDialog }
 
 			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?tool_id=%d&tool_position=%s",
+				"%s/htmx/tools/cycles?tool_id=%d",
 				env.ServerPathPrefix,
-				props.GetToolID(), props.ToolPosition,
+				props.GetToolID(),
 			) }
 			hx-trigger="load"
 			hx-target="section.cycles"
@@ -64,12 +63,12 @@ templ EditPressCycle(props *EditPressCycleProps) {
 						"%s/htmx/tools/cycle/edit?cycle_id=%d&tool_id=%d&tool_position=%s",
 						env.ServerPathPrefix,
 						props.CycleID,
-						props.GetToolID(), props.ToolPosition,
+						props.GetToolID(), props.Tool.Position,
 					) }
 				} else {
 					hx-post={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d&tool_position=%s",
-						env.ServerPathPrefix, props.GetToolID(), props.ToolPosition,
+						"%s/htmx/tools/cycle/edit?tool_id=%d",
+						env.ServerPathPrefix, props.GetToolID(),
 					) }
 				}
 
@@ -101,7 +100,7 @@ templ EditPressCycle(props *EditPressCycleProps) {
 									<strong>Werkzeug:</strong> { props.Tool.String() }
 								</div>
 								<div class="text-sm">
-									<strong>Position:</strong> { props.ToolPosition }
+									<strong>Position:</strong> { props.Tool.Position }
 								</div>
 							</div>
 						</section>
@@ -212,7 +211,7 @@ templ EditPressCycle(props *EditPressCycleProps) {
 
 						hx-get={ fmt.Sprintf(
 							"%s/htmx/tools/cycle/edit?close=true&tool_id=%d&tool_position=%s",
-							env.ServerPathPrefix, props.GetToolID(), props.ToolPosition,
+							env.ServerPathPrefix, props.GetToolID(), props.Tool.Position,
 						) }
 						hx-trigger="click"
 						hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }

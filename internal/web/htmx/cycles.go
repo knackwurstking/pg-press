@@ -134,12 +134,11 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 
 	// Get tool and position from query if not already set
 	if !props.HasActiveTool() {
-		tool, toolPosition, err := h.getToolFromQuery(c)
+		tool, err := h.getToolFromQuery(c)
 		if err != nil {
 			return err
 		}
 		props.Tool = tool
-		props.ToolPosition = toolPosition
 	}
 
 	close := webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
@@ -184,7 +183,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		return err
 	}
 
-	tool, toolPosition, err := h.getToolFromQuery(c)
+	tool, err := h.getToolFromQuery(c)
 	if err != nil {
 		return err
 	}
@@ -193,16 +192,14 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			Tool:         tool,
-			ToolPosition: toolPosition,
-			Error:        err.Error(),
+			Tool:  tool,
+			Error: err.Error(),
 		}, c)
 	}
 
 	if !toolmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
-			ToolPosition:     toolPosition,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: form.TotalCycles,
 			InputPressNumber: form.PressNumber,
@@ -223,7 +220,6 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
-			ToolPosition:     toolPosition,
 			Error:            err.Error(),
 			InputTotalCycles: form.TotalCycles,
 			InputPressNumber: form.PressNumber,
@@ -239,9 +235,8 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		Tool:         tool,
-		ToolPosition: toolPosition,
-		Close:        true,
+		Tool:  tool,
+		Close: true,
 	}, c)
 }
 
@@ -256,7 +251,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	tool, toolPosition, err := h.getToolFromQuery(c)
+	tool, err := h.getToolFromQuery(c)
 	if err != nil {
 		return err
 	}
@@ -264,17 +259,15 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	form, err := h.getCycleFormData(c)
 	if err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
-			Tool:         tool,
-			ToolPosition: toolPosition,
-			CycleID:      cycleID,
-			Error:        err.Error(),
+			Tool:    tool,
+			CycleID: cycleID,
+			Error:   err.Error(),
 		}, c)
 	}
 
 	if !toolmodels.IsValidPressNumber(form.PressNumber) {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
-			ToolPosition:     toolPosition,
 			CycleID:          cycleID,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: form.TotalCycles,
@@ -297,7 +290,6 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
 		return h.handleEditGET(&dialogs.EditPressCycleProps{
 			Tool:             tool,
-			ToolPosition:     toolPosition,
 			CycleID:          cycleID,
 			Error:            err.Error(),
 			InputTotalCycles: form.TotalCycles,
@@ -317,9 +309,8 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		Tool:         tool,
-		ToolPosition: toolPosition,
-		Close:        true,
+		Tool:  tool,
+		Close: true,
 	}, c)
 }
 
@@ -366,24 +357,19 @@ func (h *Cycles) getTotalCycles(toolID int64, cycles ...*cyclemodels.Cycle) int6
 }
 
 // getToolFromQuery extracts tool and tool position from query parameters
-func (h *Cycles) getToolFromQuery(c echo.Context) (*toolmodels.Tool, string, error) {
+func (h *Cycles) getToolFromQuery(c echo.Context) (*toolmodels.Tool, error) {
 	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
-		return nil, "", echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
-	}
-
-	toolPosition := c.QueryParam("tool_position")
-	if toolPosition == "" {
-		return nil, "", echo.NewHTTPError(http.StatusBadRequest, "tool_position parameter is required")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return nil, "", echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())
 	}
 
-	return tool, toolPosition, nil
+	return tool, nil
 }
 
 // getCycleFormData parses form data for cycle operations
