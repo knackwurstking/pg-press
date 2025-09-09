@@ -5,9 +5,9 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	toolspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
 	presspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
@@ -62,21 +62,31 @@ func (h *Tools) handleTools(c echo.Context) error {
 }
 
 func (h *Tools) handlePressPage(c echo.Context) error {
-	press, err := webhelpers.ParseInt64Param(c, constants.QueryParamPress)
-	if err != nil {
-		logger.HandlerTools().Error("Failed to parse press parameter: %v", err)
+	var pn models.PressNumber
+
+	// Parsing & validating press number from query parameter
+	if pns, err := webhelpers.ParseInt64Param(c, "press"); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to parse id: "+err.Error())
+	} else {
+		pn = models.PressNumber(pns)
+		if !models.IsValidPressNumber(&pn) {
+			return echo.NewHTTPError(http.StatusBadRequest,
+				"invalid press number")
+		}
 	}
 
-	logger.HandlerTools().Debug("Rendering tools active page for press %d", press)
+	// Render page
+	logger.HandlerTools().Debug("Rendering page for press %d", pn)
+	page := presspage.Page(presspage.PageProps{
+		Press: pn,
+	})
 
-	page := presspage.Page(press)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerTools().Error("Failed to render tools active page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render tools active page: "+err.Error())
+			"failed to render press page: "+err.Error())
 	}
+
 	return nil
 }
 
@@ -86,15 +96,13 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 		return err
 	}
 
-	id, err := webhelpers.ParseInt64Param(c, constants.QueryParamID)
+	id, err := webhelpers.ParseInt64Param(c, "id")
 	if err != nil {
-		logger.HandlerTools().Error("Failed to parse tool id parameter: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to parse id: "+err.Error())
+			"failed to parse id from query parameter: "+err.Error())
 	}
 
 	logger.HandlerTools().Debug("Fetching tool %d with notes", id)
-
 	tool, err := h.DB.Tools.GetWithNotes(id)
 	if err != nil {
 		logger.HandlerTools().Error("Failed to fetch tool %d: %v", id, err)
@@ -116,9 +124,9 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 
 	page := toolpage.Page(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerTools().Error("Failed to render tool page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render tools all page: "+err.Error())
+			"failed to render tool page: "+err.Error())
 	}
+
 	return nil
 }

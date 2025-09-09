@@ -11,11 +11,16 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
-func Page(press int64) templ.Component {
+type PageProps struct {
+	Press models.PressNumber
+}
+
+func Page(props PageProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,7 +53,7 @@ func Page(press int64) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-header\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> <span>Work in Progress</span></h4></div><div class=\"card-body\"><ul><!-- TODO: ... --><li>Display the metal sheets table for the lower and upper tool.</li><li>Show notes with levels (INFO, WARNING, ERROR) or something like this.</li><li>Show Zyklen made with these tools, allow editing, reset after regeneration but keep the data.</li></ul></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"card warning\"><div class=\"card-body\"><span>In Bearbeitung</span></div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -56,8 +61,8 @@ func Page(press int64) templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
-				PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", press),
-				AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", press),
+				PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", props.Press),
+				AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", props.Press),
 				NavContent:  navContent(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
