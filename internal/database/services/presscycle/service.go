@@ -24,10 +24,10 @@ var _ interfaces.DataOperations[*pressmodels.Cycle] = (*Service)(nil)
 
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	// Drop existing table for migration to new structure
-	dropQuery := `DROP TABLE IF EXISTS press_cycles;`
-	if _, err := db.Exec(dropQuery); err != nil {
-		panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
-	}
+	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
+	//if _, err := db.Exec(dropQuery); err != nil {
+	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
+	//}
 
 	// Create new table with tool_id and tool_position instead of slot fields
 	query := `
@@ -59,6 +59,8 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
+	//logger.DBPressCycles().Debug("Getting partial cycles for press %d, tool %d, position %s", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition)
+
 	// Get the total_cycles from the previous entry on the same press and tool position
 	previousQuery := `
 		SELECT
@@ -67,7 +69,7 @@ func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	 		press_cycles
 		WHERE
 			press_number = ?
-			AND tool_id = ?
+			AND tool_id > 0
 			AND tool_position = ?
 			AND id < ?
 		ORDER BY
@@ -76,7 +78,7 @@ func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
+	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d, tool %d, position %s: %v", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err)
