@@ -43,56 +43,6 @@ func New(db *sql.DB, notes *note.Service, feeds *feed.Service) *Service {
 	return &Service{db: db, notes: notes, feeds: feeds}
 }
 
-func (s *Service) List() ([]*models.Tool, error) {
-	logger.DBTools().Debug("Listing all tools")
-
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools`
-	rows, err := s.db.Query(query)
-	if err != nil {
-		logger.DBTools().Error("Failed to query tools: %v", err)
-		return nil, dberror.NewDatabaseError("select", "tools", "failed to query tools", err)
-	}
-	defer rows.Close()
-
-	var tools []*models.Tool
-	for rows.Next() {
-		tool, err := s.scanTool(rows)
-		if err != nil {
-			logger.DBTools().Error("Failed to scan tool: %v", err)
-			return nil, dberror.WrapError(err, "failed to scan tool")
-		}
-		tools = append(tools, tool)
-	}
-
-	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
-		return nil, dberror.NewDatabaseError("select", "tools", "error iterating over rows", err)
-	}
-
-	logger.DBTools().Debug("Successfully listed %d tools", len(tools))
-	return tools, nil
-}
-
-func (s *Service) Get(id int64) (*models.Tool, error) {
-	logger.DBTools().Debug("Getting tool with ID: %d", id)
-
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1`
-	row := s.db.QueryRow(query, id)
-
-	tool, err := s.scanTool(row)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			logger.DBTools().Debug("Tool not found: %d", id)
-			return nil, dberror.ErrNotFound
-		}
-		logger.DBTools().Error("Failed to get tool %d: %v", id, err)
-		return nil, dberror.NewDatabaseError("select", "tools", fmt.Sprintf("failed to get tool with ID %d", id), err)
-	}
-
-	logger.DBTools().Debug("Successfully retrieved tool: %s", tool.String())
-	return tool, nil
-}
-
 func (s *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding new tool: %s (user: %s)", tool.String(), user.Name)
 
@@ -132,36 +82,28 @@ func (s *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	return id, nil
 }
 
-func (s *Service) Update(tool *models.Tool, user *models.User) error {
-	logger.DBTools().Info("Updating tool ID %d: %s (user: %s)", tool.ID, tool.String(), user.Name)
+func (s *Service) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
+	logger.DBTools().Debug("Adding tool with %d notes (user: %s)", len(notes), user.Name)
 
-	if err := s.validateToolUniqueness(tool, tool.ID); err != nil {
-		logger.DBTools().Warn("Tool update validation failed: %v", err)
-		return err
+	var noteIDs []int64
+	for _, note := range notes {
+		noteID, err := s.notes.Add(note, user)
+		if err != nil {
+			logger.DBTools().Error("Failed to add note: %v", err)
+			return nil, dberror.WrapError(err, "failed to add note")
+		}
+		noteIDs = append(noteIDs, noteID)
 	}
 
-	formatBytes, notesBytes, modsBytes, err := s.marshalToolData(tool, user)
+	tool.LinkedNotes = noteIDs
+	toolID, err := s.Add(tool, user)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal tool data for update: %v", err)
-		return err
+		return nil, dberror.WrapError(err, "failed to add tool")
 	}
 
-	const updateQuery = `
-		UPDATE tools SET position = $1, format = $2, type = $3, code = $4,
-		regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9
-	`
-	_, err = s.db.Exec(updateQuery, tool.Position, formatBytes, tool.Type, tool.Code,
-		tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
-	if err != nil {
-		logger.DBTools().Error("Failed to update tool %d: %v", tool.ID, err)
-		return dberror.NewDatabaseError("update", "tools", fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
-	}
-
-	s.createFeedUpdate("Werkzeug aktualisiert",
-		fmt.Sprintf("Benutzer %s hat das Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
-
-	logger.DBTools().Info("Successfully updated tool ID: %d", tool.ID)
-	return nil
+	tool.ID = toolID
+	logger.DBTools().Debug("Successfully added tool with notes, ID: %d", toolID)
+	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
 func (s *Service) Delete(id int64, user *models.User) error {
@@ -187,69 +129,53 @@ func (s *Service) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (s *Service) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Getting tool with notes, ID: %d", id)
+func (s *Service) Get(id int64) (*models.Tool, error) {
+	logger.DBTools().Debug("Getting tool with ID: %d", id)
 
-	tool, err := s.Get(id)
+	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1`
+	row := s.db.QueryRow(query, id)
+
+	tool, err := s.scanTool(row)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			logger.DBTools().Debug("Tool not found: %d", id)
+			return nil, dberror.ErrNotFound
+		}
+		logger.DBTools().Error("Failed to get tool %d: %v", id, err)
+		return nil, dberror.NewDatabaseError("select", "tools", fmt.Sprintf("failed to get tool with ID %d", id), err)
 	}
 
-	notes, err := s.notes.GetByIDs(tool.LinkedNotes)
-	if err != nil {
-		logger.DBTools().Error("Failed to load notes for tool %d: %v", id, err)
-		return nil, dberror.WrapError(err, "failed to load notes for tool")
-	}
-
-	logger.DBTools().Debug("Successfully retrieved tool with %d notes", len(notes))
-	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
+	logger.DBTools().Debug("Successfully retrieved tool: %s", tool.String())
+	return tool, nil
 }
 
-func (s *Service) ListWithNotes() ([]*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Listing all tools with notes")
-
-	tools, err := s.List()
+func (s *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
+	const query = `
+		SELECT id, position, format, type, code, regenerating, press, notes, mods
+		FROM tools WHERE regenerating = 0 AND press = ?
+	`
+	rows, err := s.db.Query(query, pressNumber)
 	if err != nil {
-		return nil, err
+		logger.DBTools().Error("Failed to query active tools: %v", err)
+		return nil
 	}
+	defer rows.Close()
 
-	var result []*models.ToolWithNotes
-	for _, tool := range tools {
-		notes, err := s.notes.GetByIDs(tool.LinkedNotes)
+	var tools []*models.Tool
+	for rows.Next() {
+		tool, err := s.scanTool(rows)
 		if err != nil {
-			logger.DBTools().Error("Failed to load notes for tool %d: %v", tool.ID, err)
-			return nil, dberror.WrapError(err, fmt.Sprintf("failed to load notes for tool %d", tool.ID))
+			logger.DBTools().Error("Failed to scan tool: %v", err)
+			return nil
 		}
-
-		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
+		tools = append(tools, tool)
 	}
 
-	logger.DBTools().Debug("Successfully listed %d tools with notes", len(result))
-	return result, nil
-}
-
-func (s *Service) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Adding tool with %d notes (user: %s)", len(notes), user.Name)
-
-	var noteIDs []int64
-	for _, note := range notes {
-		noteID, err := s.notes.Add(note, user)
-		if err != nil {
-			logger.DBTools().Error("Failed to add note: %v", err)
-			return nil, dberror.WrapError(err, "failed to add note")
-		}
-		noteIDs = append(noteIDs, noteID)
+	if err := rows.Err(); err != nil {
+		logger.DBTools().Error("Error iterating over tool rows: %v", err)
+		return nil
 	}
-
-	tool.LinkedNotes = noteIDs
-	toolID, err := s.Add(tool, user)
-	if err != nil {
-		return nil, dberror.WrapError(err, "failed to add tool")
-	}
-
-	tool.ID = toolID
-	logger.DBTools().Debug("Successfully added tool with notes, ID: %d", toolID)
-	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
+	return tools
 }
 
 func (s *Service) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
@@ -294,40 +220,130 @@ func (s *Service) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, e
 	return tools, nil
 }
 
-func (s *Service) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
-	logger.DBTools().Info("Updating regenerating status for tool %d to %v (user: %s)", toolID, regenerating, user.Name)
+// GetPressUtilization returns a complete overview of press utilization across all presses
+func (s *Service) GetPressUtilization() ([]models.PressUtilization, error) {
+	logger.DBTools().Info("Generating press utilization map")
 
-	tool, err := s.Get(toolID)
+	var utilization []models.PressUtilization
+
+	// Valid press numbers: 0, 2, 3, 4, 5
+	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
+
+	for _, pressNum := range validPresses {
+		tools := s.GetActiveToolsForPress(pressNum)
+		count := len(tools)
+
+		utilization = append(utilization, models.PressUtilization{
+			PressNumber: pressNum,
+			Tools:       tools,
+			Count:       count,
+			Available:   count == 0,
+		})
+	}
+
+	return utilization, nil
+}
+
+func (s *Service) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
+	logger.DBTools().Debug("Getting tool with notes, ID: %d", id)
+
+	tool, err := s.Get(id)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for regenerating status update: %w", err)
+		return nil, err
 	}
 
-	if tool.Regenerating == regenerating {
-		logger.DBTools().Debug("Tool %d regenerating status unchanged: %v", toolID, regenerating)
-		return nil
-	}
-
-	tool.Regenerating = regenerating
-	s.updateMods(user, tool)
-
-	modsBytes, err := json.Marshal(tool.Mods)
+	notes, err := s.notes.GetByIDs(tool.LinkedNotes)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal mods: %v", err)
-		return dberror.NewDatabaseError("update", "tools", "failed to marshal mods", err)
+		logger.DBTools().Error("Failed to load notes for tool %d: %v", id, err)
+		return nil, dberror.WrapError(err, "failed to load notes for tool")
 	}
 
-	const query = `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
-	_, err = s.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
+	logger.DBTools().Debug("Successfully retrieved tool with %d notes", len(notes))
+	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
+}
+
+func (s *Service) List() ([]*models.Tool, error) {
+	logger.DBTools().Debug("Listing all tools")
+
+	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools`
+	rows, err := s.db.Query(query)
 	if err != nil {
-		logger.DBTools().Error("Failed to update regenerating status: %v", err)
-		return dberror.NewDatabaseError("update", "tools",
-			fmt.Sprintf("failed to update regenerating for tool %d", tool.ID), err)
+		logger.DBTools().Error("Failed to query tools: %v", err)
+		return nil, dberror.NewDatabaseError("select", "tools", "failed to query tools", err)
+	}
+	defer rows.Close()
+
+	var tools []*models.Tool
+	for rows.Next() {
+		tool, err := s.scanTool(rows)
+		if err != nil {
+			logger.DBTools().Error("Failed to scan tool: %v", err)
+			return nil, dberror.WrapError(err, "failed to scan tool")
+		}
+		tools = append(tools, tool)
 	}
 
-	s.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
-		fmt.Sprintf("Benutzer %s hat die Regenerierung für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
+	if err := rows.Err(); err != nil {
+		logger.DBTools().Error("Error iterating over tool rows: %v", err)
+		return nil, dberror.NewDatabaseError("select", "tools", "error iterating over rows", err)
+	}
 
-	logger.DBTools().Info("Successfully updated regenerating status for tool %d", toolID)
+	logger.DBTools().Debug("Successfully listed %d tools", len(tools))
+	return tools, nil
+}
+
+func (s *Service) ListWithNotes() ([]*models.ToolWithNotes, error) {
+	logger.DBTools().Debug("Listing all tools with notes")
+
+	tools, err := s.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*models.ToolWithNotes
+	for _, tool := range tools {
+		notes, err := s.notes.GetByIDs(tool.LinkedNotes)
+		if err != nil {
+			logger.DBTools().Error("Failed to load notes for tool %d: %v", tool.ID, err)
+			return nil, dberror.WrapError(err, fmt.Sprintf("failed to load notes for tool %d", tool.ID))
+		}
+
+		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
+	}
+
+	logger.DBTools().Debug("Successfully listed %d tools with notes", len(result))
+	return result, nil
+}
+
+func (s *Service) Update(tool *models.Tool, user *models.User) error {
+	logger.DBTools().Info("Updating tool ID %d: %s (user: %s)", tool.ID, tool.String(), user.Name)
+
+	if err := s.validateToolUniqueness(tool, tool.ID); err != nil {
+		logger.DBTools().Warn("Tool update validation failed: %v", err)
+		return err
+	}
+
+	formatBytes, notesBytes, modsBytes, err := s.marshalToolData(tool, user)
+	if err != nil {
+		logger.DBTools().Error("Failed to marshal tool data for update: %v", err)
+		return err
+	}
+
+	const updateQuery = `
+		UPDATE tools SET position = $1, format = $2, type = $3, code = $4,
+		regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9
+	`
+	_, err = s.db.Exec(updateQuery, tool.Position, formatBytes, tool.Type, tool.Code,
+		tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
+	if err != nil {
+		logger.DBTools().Error("Failed to update tool %d: %v", tool.ID, err)
+		return dberror.NewDatabaseError("update", "tools", fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
+	}
+
+	s.createFeedUpdate("Werkzeug aktualisiert",
+		fmt.Sprintf("Benutzer %s hat das Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
+
+	logger.DBTools().Info("Successfully updated tool ID: %d", tool.ID)
 	return nil
 }
 
@@ -372,60 +388,72 @@ func (s *Service) UpdatePress(toolID int64, press *models.PressNumber, user *mod
 	return nil
 }
 
-// GetPressUtilization returns a complete overview of press utilization across all presses
-func (s *Service) GetPressUtilization() ([]models.PressUtilization, error) {
-	logger.DBTools().Info("Generating press utilization map")
+func (s *Service) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
+	logger.DBTools().Info("Updating regenerating status for tool %d to %v (user: %s)", toolID, regenerating, user.Name)
 
-	var utilization []models.PressUtilization
-
-	// Valid press numbers: 0, 2, 3, 4, 5
-	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
-
-	for _, pressNum := range validPresses {
-		tools := s.GetActiveToolsForPress(pressNum)
-		count := len(tools)
-
-		utilization = append(utilization, models.PressUtilization{
-			PressNumber: pressNum,
-			Tools:       tools,
-			Count:       count,
-			Available:   count == 0,
-		})
-	}
-
-	return utilization, nil
-}
-
-func (s *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
-	const query = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods
-		FROM tools WHERE regenerating = 0 AND press = ?
-	`
-	rows, err := s.db.Query(query, pressNumber)
+	tool, err := s.Get(toolID)
 	if err != nil {
-		logger.DBTools().Error("Failed to query active tools: %v", err)
-		return nil
-	}
-	defer rows.Close()
-
-	var tools []*models.Tool
-	for rows.Next() {
-		tool, err := s.scanTool(rows)
-		if err != nil {
-			logger.DBTools().Error("Failed to scan tool: %v", err)
-			return nil
-		}
-		tools = append(tools, tool)
+		return fmt.Errorf("failed to get tool for regenerating status update: %w", err)
 	}
 
-	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
+	if tool.Regenerating == regenerating {
+		logger.DBTools().Debug("Tool %d regenerating status unchanged: %v", toolID, regenerating)
 		return nil
 	}
-	return tools
+
+	tool.Regenerating = regenerating
+	s.updateMods(user, tool)
+
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		logger.DBTools().Error("Failed to marshal mods: %v", err)
+		return dberror.NewDatabaseError("update", "tools", "failed to marshal mods", err)
+	}
+
+	const query = `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
+	_, err = s.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
+	if err != nil {
+		logger.DBTools().Error("Failed to update regenerating status: %v", err)
+		return dberror.NewDatabaseError("update", "tools",
+			fmt.Sprintf("failed to update regenerating for tool %d", tool.ID), err)
+	}
+
+	s.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
+		fmt.Sprintf("Benutzer %s hat die Regenerierung für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
+
+	logger.DBTools().Info("Successfully updated regenerating status for tool %d", toolID)
+	return nil
 }
 
-// Helper methods
+func (s *Service) createFeedUpdate(title, message string, user *models.User) {
+	if s.feeds != nil {
+		feed := models.NewFeed(title, message, user.TelegramID)
+		if err := s.feeds.Add(feed); err != nil {
+			logger.DBTools().Warn("Failed to create feed update: %v", err)
+		}
+	}
+}
+
+func (s *Service) marshalToolData(tool *models.Tool, user *models.User) ([]byte, []byte, []byte, error) {
+	s.updateMods(user, tool)
+
+	formatBytes, err := json.Marshal(tool.Format)
+	if err != nil {
+		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal format", err)
+	}
+
+	notesBytes, err := json.Marshal(tool.LinkedNotes)
+	if err != nil {
+		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal notes", err)
+	}
+
+	modsBytes, err := json.Marshal(tool.Mods)
+	if err != nil {
+		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal mods", err)
+	}
+
+	return formatBytes, notesBytes, modsBytes, nil
+}
 
 func (s *Service) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
@@ -451,6 +479,22 @@ func (s *Service) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	return tool, nil
 }
 
+func (s *Service) updateMods(user *models.User, tool *models.Tool) {
+	if user == nil {
+		return
+	}
+
+	tool.Mods.Add(user, models.ToolMod{
+		Position:     tool.Position,
+		Format:       tool.Format,
+		Type:         tool.Type,
+		Code:         tool.Code,
+		Regenerating: tool.Regenerating,
+		Press:        tool.Press,
+		LinkedNotes:  tool.LinkedNotes,
+	})
+}
+
 func (s *Service) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
@@ -472,52 +516,6 @@ func (s *Service) validateToolUniqueness(tool *models.Tool, excludeID int64) err
 	}
 
 	return nil
-}
-
-func (s *Service) marshalToolData(tool *models.Tool, user *models.User) ([]byte, []byte, []byte, error) {
-	s.updateMods(user, tool)
-
-	formatBytes, err := json.Marshal(tool.Format)
-	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal format", err)
-	}
-
-	notesBytes, err := json.Marshal(tool.LinkedNotes)
-	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal notes", err)
-	}
-
-	modsBytes, err := json.Marshal(tool.Mods)
-	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal mods", err)
-	}
-
-	return formatBytes, notesBytes, modsBytes, nil
-}
-
-func (s *Service) updateMods(user *models.User, tool *models.Tool) {
-	if user == nil {
-		return
-	}
-
-	tool.Mods.Add(user, models.ToolMod{
-		Position:     tool.Position,
-		Format:       tool.Format,
-		Type:         tool.Type,
-		Code:         tool.Code,
-		Regenerating: tool.Regenerating,
-		Press:        tool.Press,
-		LinkedNotes:  tool.LinkedNotes,
-	})
-}
-
-func (s *Service) createFeedUpdate(title, message string, user *models.User) {
-	if s.feeds != nil {
-		feed := models.NewFeed(title, message, user.TelegramID)
-		if err := s.feeds.Add(feed); err != nil {
-			logger.DBTools().Warn("Failed to create feed update: %v", err)
-		}
-	}
 }
 
 func equalPressNumbers(a, b *models.PressNumber) bool {
