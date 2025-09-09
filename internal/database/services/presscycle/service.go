@@ -58,6 +58,7 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 }
 
 // GetPartialCycles calculates the partial cycles for a given cycle
+// TODO: Take into account the last regeneration record for this specific tool
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	//logger.DBPressCycles().Debug("Getting partial cycles for press %d, tool %d, position %s", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition)
 
