@@ -20,9 +20,6 @@ type Service struct {
 	feeds *feed.Service
 }
 
-// Just to make sure it fits
-var _ interfaces.DataOperations[*cyclemodels.Cycle] = (*Service)(nil)
-
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
 	//if _, err := db.Exec(dropQuery); err != nil {

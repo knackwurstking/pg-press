@@ -24,8 +24,6 @@ type Service struct {
 	feeds *feed.Service
 }
 
-var _ interfaces.DataOperations[*models.User] = (*Service)(nil)
-
 func New(db *sql.DB, feeds *feed.Service) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (

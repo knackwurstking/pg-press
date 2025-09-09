@@ -16,8 +16,6 @@ type Service struct {
 	db *sql.DB
 }
 
-var _ interfaces.DataOperations[*notemodels.Note] = (*Service)(nil)
-
 func New(db *sql.DB) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS notes (

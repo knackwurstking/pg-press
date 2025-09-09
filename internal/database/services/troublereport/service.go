@@ -23,8 +23,6 @@ type Service struct {
 	feeds       *feed.Service
 }
 
-var _ interfaces.DataOperations[*trmodels.TroubleReport] = (*Service)(nil)
-
 func New(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *Service {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (

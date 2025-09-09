@@ -24,8 +24,6 @@ type Service struct {
 	notes *note.Service
 }
 
-var _ interfaces.DataOperations[*metalsheetmodels.MetalSheet] = (*Service)(nil)
-
 // NewMetalSheets creates a new MetalSheets instance
 func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 	query := `
