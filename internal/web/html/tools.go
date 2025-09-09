@@ -32,27 +32,32 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Tools) handleTools(c echo.Context) error {
-	logger.HandlerTools().Debug("Rendering tools page")
+	logger.HandlerTools().Info("Rendering tools page")
 
 	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
-		logger.HandlerTools().Error("Failed to fetch tools: %v", err)
 		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 			"failed to get tools: "+err.Error())
 	}
 
 	logger.HandlerTools().Debug("Retrieved %d tools", len(tools))
 
-	// TODO: Press Utilization
+	pressUtilization, err := h.DB.Tools.GetPressUtilization()
+	if err != nil {
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			"failed to get press utilization: "+err.Error())
+	}
+
 	page := toolspage.Page(&toolspage.PageProps{
-		Tools: tools,
+		Tools:            tools,
+		PressUtilization: pressUtilization,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerTools().Error("Failed to render tools page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools page: "+err.Error())
 	}
+
 	return nil
 }
 
