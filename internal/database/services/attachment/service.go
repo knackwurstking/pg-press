@@ -18,8 +18,6 @@ type Service struct {
 	db *sql.DB
 }
 
-var _ interfaces.DataOperations[*attachment.Attachment] = (*Service)(nil)
-
 // New creates a new Service instance and initializes the database table.
 func New(db *sql.DB) *Service {
 	query := `
@@ -94,7 +92,7 @@ func (a *Service) Get(id int64) (*attachment.Attachment, error) {
 }
 
 // GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
+func (s *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 	if len(ids) == 0 {
 		return []*attachment.Attachment{}, nil
 	}
@@ -103,7 +101,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
-	args := make([]interface{}, len(ids))
+	args := make([]any, len(ids))
 	for i, id := range ids {
 		placeholders[i] = "?"
 		args[i] = id
@@ -118,7 +116,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 		strings.Join(placeholders, ","),
 	)
 
-	rows, err := a.db.Query(query, args...)
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return nil, dberror.NewDatabaseError("select", "attachments",
 			"failed to query attachments by IDs", err)
@@ -129,7 +127,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 	attachmentMap := make(map[int64]*attachment.Attachment)
 
 	for rows.Next() {
-		attachment, err := a.scan(rows)
+		attachment, err := s.scan(rows)
 		if err != nil {
 			return nil, dberror.WrapError(err, "failed to scan attachment")
 		}
@@ -237,7 +235,7 @@ func (a *Service) Delete(id int64, _ *user.User) error {
 	return nil
 }
 
-func (a *Service) scan(scanner interfaces.Scannable) (*attachment.Attachment, error) {
+func (s *Service) scan(scanner interfaces.Scannable) (*attachment.Attachment, error) {
 	attachment := &attachment.Attachment{}
 	var id int64
 
