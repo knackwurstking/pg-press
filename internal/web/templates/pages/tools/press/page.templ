@@ -10,6 +10,7 @@ import (
 
 type PageProps struct {
 	Press models.PressNumber
+	Cycles []*models.Cycle
 }
 
 templ Page(props PageProps) {
@@ -44,13 +45,25 @@ templ Page(props PageProps) {
                             </tr>
                         </thead>
 
-                        <!-- TODO: Render rows next -->
                         <tbody>
+                        	@renderCycles(props)
                         </tbody>
                     </table>
                 </figure>
             </section>
         </main>
+    }
+}
+
+templ renderCycles(props PageProps) {
+	if len(props.Cycles) == 0 {
+        <tr>
+            <td colspan="7" class="text-center">
+				Kein Pressenverlauf verfügbar
+			</td>
+        </tr>
+    } else {
+    	// TODO: Render rows
     }
 }
 
