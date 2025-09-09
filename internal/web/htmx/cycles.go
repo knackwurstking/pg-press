@@ -86,7 +86,7 @@ func (h *Cycles) handle(c echo.Context) error {
 	}
 
 	// Get total cycles
-	totalCycles := h.getTotalCycles(filteredCycles...)
+	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
 	// Render the component
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
@@ -128,7 +128,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	filteredCycles := pressmodels.FilterByToolPosition(toolPosition, toolCycles...)
 
 	// Get total cycles from filtered cycles
-	totalCycles := h.getTotalCycles(filteredCycles...)
+	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
 	return toolscomp.TotalCycles(
 		totalCycles,
@@ -354,11 +354,23 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 }
 
 // getTotalCycles calculates total cycles from a list of cycles
-func (h *Cycles) getTotalCycles(cycles ...*pressmodels.Cycle) int64 {
+func (h *Cycles) getTotalCycles(toolID int64, cycles ...*pressmodels.Cycle) int64 {
+	// Get regeneration for this tool
+	var startCycleID int64
+	if r, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
+		startCycleID = r.CycleID
+	}
+
 	var totalCycles int64
+
 	for _, cycle := range cycles {
+		if cycle.ID <= startCycleID {
+			continue
+		}
+
 		totalCycles += cycle.PartialCycles
 	}
+
 	return totalCycles
 }
 

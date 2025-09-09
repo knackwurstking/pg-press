@@ -58,16 +58,16 @@ func New(db *sql.DB, feeds *feed.Service) *Service {
 }
 
 // GetPartialCycles calculates the partial cycles for a given cycle
-// TODO: Take into account the last regeneration record for this specific tool
 func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	//logger.DBPressCycles().Debug("Getting partial cycles for press %d, tool %d, position %s", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition)
 
 	// Get the total_cycles from the previous entry on the same press and tool position
-	previousQuery := `
+	// IDs must be greater than start cycle ID and less than current cycle ID
+	query := `
 		SELECT
 			total_cycles
 		FROM
-	 		press_cycles
+			press_cycles
 		WHERE
 			press_number = ?
 			AND tool_id > 0
@@ -79,7 +79,7 @@ func (s *Service) GetPartialCycles(cycle *pressmodels.Cycle) int64 {
 	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(previousQuery, cycle.PressNumber, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
+	err := s.db.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d, tool %d, position %s: %v", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err)
