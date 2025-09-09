@@ -1,0 +1,75 @@
+// TODO: Use this new dialog base for all the dialogs in the application, this will maybe clean up things a bit
+package dialogs
+
+const (
+	DialogContentID = "dialog-content"
+)
+
+type BaseProps struct {
+	Type 				string // Type like "POST", "PUT"
+	Href 				string
+	Target 				string
+	Swap 				string
+	Error 				string
+	SubmitButtonText 	string
+}
+
+templ Base(props BaseProps) {
+	<dialog
+		class="fullscreen clean"
+		onclose='
+			console.debug("Dialog closed"); // TOOD: Remove this if this closing thing is working
+			this.parentElement.removeChild(this);
+		'
+	>
+		<form
+			if props.Type == "POST" {
+				hx-post={ props.Href }
+			} else if props.Type == "PUT" {
+				hx-put={ props.Href }
+			}
+
+			if props.Target != "" {
+				hx-target={ props.Target }
+			}
+
+			if props.Swap != "" {
+				hx-swap={ props.Swap }
+			}
+
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			enctype="multipart/form-data"
+		>
+			if props.Error != "" {
+				<div class="card compact destructive">
+					<div class="card-body">
+						{ props.Error }
+					</div>
+				</div>
+			}
+
+			// Content
+			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+				<!-- Content goes here -->
+			</div>
+
+			// TODO: Dialog Actions
+			<footer class="flex gap justify-end">
+				<button
+					name="close"
+					class="secondary flex gap"
+					type="button"
+					onclick="this.closest('dialog').close()"
+				>
+					<i class="bi bi-x-circle"></i>
+					Schließen
+				</button>
+
+				<button type="submit" class="flex gap">
+					<i class="bi bi-check-circle"></i>
+					{ props.SubmitButtonText }
+				</button>
+			</footer>
+		</form>
+	</dialog>
+}
