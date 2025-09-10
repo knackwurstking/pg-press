@@ -1,5 +1,6 @@
 package constants
 
+// TODO: Remove this
 const (
 	QueryParamID           = "id"
 	QueryParamClose        = "close"

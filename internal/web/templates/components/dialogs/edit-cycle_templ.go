@@ -60,7 +60,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 		if props.CycleID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?cycle_id=%d&tool_id=%d",
+				"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
 				env.ServerPathPrefix,
 				props.CycleID,
 				props.Tool.ID,
@@ -270,7 +270,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 		templ_7745c5c3_Err = Base(BaseProps{
 			Type:             baseType,
 			Href:             baseHref,
-			ID:               constants.CycleEditDialogID,
+			ID:               "cycle-edit-dialog",
 			Error:            props.Error,
 			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

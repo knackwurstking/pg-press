@@ -2,11 +2,8 @@
 package constants
 
 const (
-	CycleEditDialogID = "cycle-edit-dialog"
-
 	IDDialogLogin                = "dialogLogin"
 	IDDialogEditUserName         = "dialogEditUserName"
-	IDToolEditDialog             = "toolEditDialog"
 	IDTroubleReportEditDialog    = "troubleReportEditDialog"
 	IDTitle                      = "title"
 	IDContent                    = "content"

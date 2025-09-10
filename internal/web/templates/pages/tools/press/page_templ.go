@@ -283,7 +283,7 @@ func renderCycle(props PageProps, cycle *models.Cycle) templ.Component {
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+			"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {

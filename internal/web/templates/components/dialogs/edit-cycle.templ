@@ -32,7 +32,7 @@ templ EditCycle(props *EditCycleProps) {
 		if props.CycleID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?cycle_id=%d&tool_id=%d",
+				"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
 				env.ServerPathPrefix,
 				props.CycleID,
 				props.Tool.ID,
@@ -44,7 +44,7 @@ templ EditCycle(props *EditCycleProps) {
 	@Base(BaseProps{
 		Type: 				baseType,
 		Href: 				baseHref,
-		ID: 			constants.CycleEditDialogID,
+		ID: 				"cycle-edit-dialog",
 		Error: 				props.Error,
 		SubmitButtonText: 	submitButtonText,
 	}){

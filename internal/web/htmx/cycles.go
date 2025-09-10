@@ -146,7 +146,7 @@ func (h *Cycles) handleEditGET(props *dialogs.EditCycleProps, c echo.Context) er
 		props.Tool = tool
 	}
 
-	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, "id")
 	if err == nil {
 		props.CycleID = cycleID
 		// Get cycle data from the database
@@ -229,7 +229,7 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}
@@ -292,7 +292,7 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 		return err
 	}
 
-	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}

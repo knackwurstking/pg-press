@@ -14,8 +14,6 @@ import (
 )
 
 templ Page(user *usermodels.User, tool *toolmodels.ToolWithNotes, metalSheets []*metalsheetmodels.MetalSheet) {
-
-
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -50,10 +48,7 @@ templ sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) {
 		<button
 			class="primary flex gap"
 
-			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/edit?id=%d",
-				env.ServerPathPrefix, tool.ID,
-			) }
+			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -124,7 +119,6 @@ templ sectionNotes(tool *toolmodels.ToolWithNotes) {
 	}
 }
 
-// TODO: Need some sorting logic here
 templ sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.MetalSheet, tool *toolmodels.ToolWithNotes) {
 	<section>
 		<div class="flex justify-between items-center mb">
@@ -134,8 +128,8 @@ templ sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.
 				class="secondary small flex"
 
 				hx-get={ fmt.Sprintf(
-					"%s/htmx/metal-sheets/edit?tool_id=%d&tool_position=%s",
-					env.ServerPathPrefix, tool.ID, tool.Position,
+					"%s/htmx/metal-sheets/edit?tool_id=%d",
+					env.ServerPathPrefix, tool.ID,
 				) }
 				hx-trigger="click"
 				hx-target="body"

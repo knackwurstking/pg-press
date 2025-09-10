@@ -12,7 +12,6 @@ import (
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
@@ -32,7 +31,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 
 			// Get, Post or Edit a tool
 			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
-				return h.handleEdit(c, nil)
+				return h.handleEditGET(c, nil)
 			}),
 
 			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
@@ -67,14 +66,13 @@ func (h *Tools) handleList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEdit(c echo.Context, props *dialogs.EditToolProps) error {
+func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) error {
 	if props == nil {
 		props = &dialogs.EditToolProps{}
-		props.ToolID, _ = webhelpers.ParseInt64Query(c, constants.QueryParamID)
-		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
 
-		if props.ToolID > 0 {
-			tool, err := h.DB.Tools.GetWithNotes(props.ToolID)
+		toolID, _ := webhelpers.ParseInt64Query(c, "id")
+		if toolID > 0 {
+			tool, err := h.DB.Tools.GetWithNotes(toolID)
 			if err != nil {
 				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
@@ -90,10 +88,12 @@ func (h *Tools) handleEdit(c echo.Context, props *dialogs.EditToolProps) error {
 	}
 
 	toolEdit := dialogs.EditTool(props)
+
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool edit dialog: "+err.Error())
 	}
+
 	return nil
 }
 
@@ -120,27 +120,26 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := toolmodels.New(formData.Position)
-	tool.Format = formData.Format
-	tool.Type = formData.Type
-	tool.Code = formData.Code
-	tool.Press = formData.Press
+	props.Tool = toolmodels.New(formData.Position)
+	props.Tool.Format = formData.Format
+	props.Tool.Type = formData.Type
+	props.Tool.Code = formData.Code
+	props.Tool.Press = formData.Press
 
-	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
+	if t, err := h.DB.Tools.AddWithNotes(props.Tool, user); err != nil {
 		if err == dberror.ErrAlreadyExists {
 			props.Error = "Tool bereits vorhanden"
+			return h.handleEditGET(c, props)
 		} else {
 			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 				"failed to add tool: "+err.Error())
 		}
 	} else {
 		logger.HTMXHandlerTools().Info("Created tool ID %d (Type=%s, Code=%s) by user %s",
-			t.ID, tool.Type, tool.Code, user.Name)
-		props.Close = true
-		props.ToolID = t.ID
+			t.ID, props.Tool.Type, props.Tool.Code, user.Name)
 	}
 
-	return h.handleEdit(c, props)
+	return nil
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
@@ -149,7 +148,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	toolID, err := webhelpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}
@@ -163,7 +162,6 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	}
 
 	props := &dialogs.EditToolProps{
-		ToolID:              toolID,
 		InputPosition:       string(formData.Position),
 		InputWidth:          formData.Format.Width,
 		InputHeight:         formData.Format.Height,
@@ -172,32 +170,32 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	tool := toolmodels.New(formData.Position)
-	tool.ID = toolID
-	tool.Format = formData.Format
-	tool.Type = formData.Type
-	tool.Code = formData.Code
-	tool.Press = formData.Press
+	props.Tool = toolmodels.New(formData.Position)
+	props.Tool.ID = toolID
+	props.Tool.Format = formData.Format
+	props.Tool.Type = formData.Type
+	props.Tool.Code = formData.Code
+	props.Tool.Press = formData.Press
 
-	if err := h.DB.Tools.Update(tool, user); err != nil {
+	if err := h.DB.Tools.Update(props.Tool, user); err != nil {
 		if err == dberror.ErrAlreadyExists {
 			props.Error = "Tool bereits vorhanden"
+			return h.handleEditGET(c, props)
 		} else {
 			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
 				"failed to update tool: "+err.Error())
 		}
 	} else {
 		logger.HTMXHandlerTools().Info("Updated tool %d (Type=%s, Code=%s) by user %s",
-			toolID, tool.Type, tool.Code, user.Name)
-		props.Close = true
+			props.Tool.ID, props.Tool.Type, props.Tool.Code, user.Name)
 	}
 
-	return h.handleEdit(c, props)
+	return nil
 }
 
 func (h *Tools) handleDelete(c echo.Context) error {
 	// Get tool ID from query parameter
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	toolID, err := webhelpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"invalid or missing id parameter: "+err.Error())

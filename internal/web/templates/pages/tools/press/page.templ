@@ -135,7 +135,7 @@ templ renderCycle(props PageProps, cycle *models.Cycle) {
 					class="destructive small ghost"
 
 					hx-delete={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 					) }
 					hx-trigger="click"
