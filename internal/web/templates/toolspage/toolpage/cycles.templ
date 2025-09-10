@@ -5,8 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/models"
-
-	toolstemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 )
 
 type CyclesSectionProps struct {
@@ -59,7 +58,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			Gesamtzyklen für { props.Tool.String() } (Position: { props.ToolPosition }):
 		</h6>
 		<span>
-			@toolstemplates.TotalCycles(props.TotalCycles, true)
+			@components.TotalCycles(props.TotalCycles, true)
 		</span>
 	</section>
 

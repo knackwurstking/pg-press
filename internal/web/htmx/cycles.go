@@ -11,10 +11,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
-
-	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 
 	"github.com/labstack/echo/v4"
 )
@@ -126,7 +125,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
-	return toolscomp.TotalCycles(
+	return components.TotalCycles(
 		totalCycles,
 		helpers.ParseBoolQuery(c, constants.QueryParamInput),
 	).Render(c.Request().Context(), c.Response())
