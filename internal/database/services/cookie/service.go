@@ -1,6 +1,4 @@
 // Package database provides cookie and session management.
-//
-// TODO: Need to fix this type to fit the `interfaces.DataOperations[*cookie.Cookie]` type
 package cookie
 
 import (
@@ -16,9 +14,6 @@ import (
 type Service struct {
 	db *sql.DB
 }
-
-// Just to make sure it fits TODO: Make it fit
-//var _ interfaces.DataOperations[*cookie.Cookie] = (*Service)(nil)
 
 // New creates a new Service instance and initializes the database table.
 func New(db *sql.DB) *Service {

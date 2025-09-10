@@ -21,7 +21,6 @@ templ List(tools []*models.ToolWithNotes) {
 	}
 }
 
-// TODO: Add icons previewing notes (warning, error, info or whatever)
 templ listItem(id int64, tool *models.ToolWithNotes) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		<a

@@ -178,7 +178,7 @@ func (s *Service) Start(cycleID, toolID int64, reason string, user *models.User)
 	return r, nil
 }
 
-// TODO: ...
+// TODO: Stop tool regeneration
 func (s *Service) Stop(toolID int64) error {
 	s.log.Info("Stopping tool regeneration: tool_id=%d", toolID)
 
