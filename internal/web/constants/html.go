@@ -3,7 +3,7 @@ package constants
 
 const (
 	// TODO: Remove this
-	IDDialogLogin = "dialogLogin"
+	//IDDialogLogin = "dialogLogin"
 
 	IDTitle                      = "title"
 	IDContent                    = "content"

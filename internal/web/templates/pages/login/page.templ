@@ -1,7 +1,6 @@
 package login
 
 import (
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
@@ -15,7 +14,7 @@ templ Page(apiKey string, invalidApiKey bool) {
 		},
 	) {
 		<main class="container">
-			<dialog id={ constants.IDDialogLogin } class="clean" oncancel="event.preventDefault();">
+			<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
 				<form>
 					<label class="flex flex-col">
 						API-Schlüssel
@@ -35,13 +34,12 @@ templ Page(apiKey string, invalidApiKey bool) {
 					</footer>
 				</form>
 			</dialog>
-			@mainScript()
+
+			<script>
+				document.querySelector("#login-dialog").showModal();
+			</script>
 		</main>
 	}
-}
-
-script mainScript() {
-    document.querySelector("#dialogLogin").showModal();
 }
 
 templ navContent() {

@@ -62,7 +62,7 @@ func Page(user *usermodels.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><!-- Edit user namne button, open the dialog --><button class=\"secondary icon\" onclick='document.querySelector(\"#dialogEditUserName\").showModal();' title=\"Benutzername bearbeiten\"><i class=\"bi bi-pen\"></i></button></div><!-- Profile Telegram ID and a Logout button --><div class=\"flex flex-row gap flex-wrap justify-between items-center\"><div class=\"telegram-id\"><i class=\"bi bi-telegram\"></i> Telegram ID: ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><!-- Edit user namne button, open the dialog --><button class=\"secondary icon\" onclick='document.querySelector(\"#edit-user-name-dialog\").showModal();' title=\"Benutzername bearbeiten\"><i class=\"bi bi-pen\"></i></button></div><!-- Profile Telegram ID and a Logout button --><div class=\"flex flex-row gap flex-wrap justify-between items-center\"><div class=\"telegram-id\"><i class=\"bi bi-telegram\"></i> Telegram ID: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
