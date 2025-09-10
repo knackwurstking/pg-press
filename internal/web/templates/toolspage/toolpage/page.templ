@@ -141,11 +141,11 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:
-					@TableForToolPositionBottom(
+					@MetalSheetTableBottom(
 						user, metalSheets,
 					)
 				case models.PositionTop:
-					@TableForToolPositionTop(
+					@MetalSheetTableTop(
 						user, metalSheets,
 					)
 			}

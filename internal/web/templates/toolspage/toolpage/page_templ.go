@@ -291,14 +291,14 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 		}
 		switch tool.Position {
 		case models.PositionBottom:
-			templ_7745c5c3_Err = TableForToolPositionBottom(
+			templ_7745c5c3_Err = MetalSheetTableBottom(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case models.PositionTop:
-			templ_7745c5c3_Err = TableForToolPositionTop(
+			templ_7745c5c3_Err = MetalSheetTableTop(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
