@@ -1,4 +1,4 @@
-// TOOD: Create a modification service to store modifications
+// TOOD: Create a modification service to store modifications and move types to models
 // Data:
 //   - id (int64)
 
@@ -19,8 +19,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/utils"
-	"github.com/knackwurstking/pgpress/pkg/models/user"
+	"github.com/knackwurstking/pgpress/pkg/utils"
+
+	models "github.com/knackwurstking/pgpress/pkg/models/user"
 )
 
 type Mods[T any] []*Mod[T]
@@ -38,7 +39,7 @@ func (m *Mods[T]) Reversed() []*Mod[T] {
 	return reversed
 }
 
-func (m *Mods[T]) Add(user *user.User, data T) {
+func (m *Mods[T]) Add(user *models.User, data T) {
 	*m = append(*m, NewMod(user, data))
 }
 
@@ -63,14 +64,14 @@ func (m *Mods[T]) Get(time int64) (*Mod[T], error) {
 }
 
 type Mod[T any] struct {
-	User *user.User `json:"user"`
-	Time int64      `json:"time"`
-	Data T          `json:"data"`
+	User *models.User `json:"user"`
+	Time int64        `json:"time"`
+	Data T            `json:"data"`
 }
 
-func NewMod[T any](u *user.User, data T) *Mod[T] {
+func NewMod[T any](u *models.User, data T) *Mod[T] {
 	if u == nil {
-		u = &user.User{Name: "system"}
+		u = &models.User{Name: "system"}
 	}
 
 	return &Mod[T]{

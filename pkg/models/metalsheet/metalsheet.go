@@ -3,10 +3,10 @@ package metalsheet
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/modification"
 	"github.com/knackwurstking/pgpress/pkg/models/note"
 	"github.com/knackwurstking/pgpress/pkg/models/tool"
 	"github.com/knackwurstking/pgpress/pkg/models/user"
+	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
 // TODO: Add a `MetalSheetList` type with sorting functionality

@@ -4,7 +4,6 @@
 package services
 
 import (
-	"github.com/knackwurstking/pgpress/internal/services/cookie"
 	"github.com/knackwurstking/pgpress/internal/services/feed"
 	"github.com/knackwurstking/pgpress/internal/services/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/services/note"
@@ -17,7 +16,6 @@ import (
 
 // Type Aliases to expose service types directly
 type (
-	Cookie        = cookie.Service
 	Feed          = feed.Service
 	MetalSheet    = metalsheet.Service
 	Note          = note.Service
@@ -29,7 +27,6 @@ type (
 )
 
 var (
-	NewCookie        = cookie.New
 	NewFeed          = feed.New
 	NewMetalSheet    = metalsheet.New
 	NewNote          = note.New

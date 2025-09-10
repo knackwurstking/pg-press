@@ -1,5 +1,5 @@
 // Package database provides cookie and session management.
-package cookie
+package services
 
 import (
 	"database/sql"
@@ -8,15 +8,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models/cookie"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Service provides database operations for managing authentication cookies and sessions.
-type Service struct {
+type Cookie struct {
 	db *sql.DB
 }
 
-// New creates a new Service instance and initializes the database table.
-func New(db *sql.DB) *Service {
+// NewCookie creates a new Service instance and initializes the database table.
+func NewCookie(db *sql.DB) *Cookie {
 	query := `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
@@ -30,17 +31,17 @@ func New(db *sql.DB) *Service {
 		panic(fmt.Errorf("failed to create cookies table: %w", err))
 	}
 
-	return &Service{db: db}
+	return &Cookie{db: db}
 }
 
 // List retrieves all cookies ordered by last login time (most recent first).
-func (c *Service) List() ([]*cookie.Cookie, error) {
+func (c *Cookie) List() ([]*cookie.Cookie, error) {
 	logger.DBCookies().Info("Listing all cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.db.Query(query)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "cookies", "failed to query cookies", err)
+		return nil, utils.NewDatabaseError("select", "cookies", err)
 	}
 	defer rows.Close()
 
@@ -48,13 +49,13 @@ func (c *Service) List() ([]*cookie.Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan cookie")
+			return nil, utils.NewDatabaseError("scan", "cookies", err)
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "cookies", "error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Listed %d cookies", len(cookies))
@@ -62,19 +63,19 @@ func (c *Service) List() ([]*cookie.Cookie, error) {
 }
 
 // ListApiKey retrieves all cookies associated with a specific API key.
-func (c *Service) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
+func (c *Cookie) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 	logger.DBCookies().Info("Listing cookies by API key")
 
 	if apiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return nil, dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
+		return nil, utils.NewValidationError("api_key: API key cannot be empty")
 	}
 
 	query := `SELECT * FROM cookies
 		WHERE api_key = ? ORDER BY last_login DESC`
 	rows, err := c.db.Query(query, apiKey)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "cookies", "failed to query cookies by API key", err)
+		return nil, utils.NewDatabaseError("select", "cookies", err)
 	}
 	defer rows.Close()
 
@@ -82,13 +83,13 @@ func (c *Service) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan cookie")
+			return nil, utils.NewDatabaseError("scan", "cookies", err)
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "cookies", "error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Found %d cookies for API key", len(cookies))
@@ -96,12 +97,12 @@ func (c *Service) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 }
 
 // Get retrieves a specific cookie by its value.
-func (c *Service) Get(value string) (*cookie.Cookie, error) {
+func (c *Cookie) Get(value string) (*cookie.Cookie, error) {
 	logger.DBCookies().Debug("Getting cookie by value")
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return nil, dberror.NewValidationError("value", "cookie value cannot be empty", value)
+		return nil, utils.NewValidationError("value: cookie value cannot be empty")
 	}
 
 	query := `SELECT * FROM cookies WHERE value = ?`
@@ -109,45 +110,48 @@ func (c *Service) Get(value string) (*cookie.Cookie, error) {
 	cookie, err := c.scanCookie(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, dberror.ErrNotFound
+			return nil, utils.NewNotFoundError(value)
 		}
-		return nil, dberror.NewDatabaseError("select", "cookies", "failed to get cookie by value", err)
+
+		return nil, utils.NewDatabaseError("select", "cookies", err)
 	}
 
 	return cookie, nil
 }
 
 // Add creates a new cookie session in the database.
-func (c *Service) Add(cookie *cookie.Cookie) error {
+func (c *Cookie) Add(cookie *cookie.Cookie) error {
 	logger.DBCookies().Info("Adding cookie: %+v", cookie)
 
 	if cookie == nil {
 		logger.DBCookies().Debug("Validation failed: cookie is nil")
-		return dberror.NewValidationError("cookie", "cookie cannot be nil", nil)
+		return utils.NewValidationError("cookie: cookie cannot be nil")
 	}
+
 	if cookie.Value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return dberror.NewValidationError("value", "cookie value cannot be empty", cookie.Value)
+		return utils.NewValidationError("value: cookie value cannot be empty")
 	}
+
 	if cookie.ApiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return dberror.NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
+		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
+
 	if cookie.LastLogin <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
-		return dberror.NewValidationError("last_login",
-			"last login timestamp must be positive", cookie.LastLogin)
+		return utils.NewValidationError("last_login: last login timestamp must be positive")
 	}
 
 	var count int
 	query := `SELECT COUNT(*) FROM cookies WHERE value = ?`
 	err := c.db.QueryRow(query, cookie.Value).Scan(&count)
 	if err != nil {
-		return dberror.NewDatabaseError("select", "cookies", "failed to check cookie existence", err)
+		return utils.NewDatabaseError("select", "cookies", err)
 	}
 	if count > 0 {
 		logger.DBCookies().Debug("Cookie already exists with value")
-		return dberror.ErrAlreadyExists
+		return utils.NewAlreadyExistsError("cookie already exists")
 	}
 
 	query = `INSERT INTO cookies
@@ -155,7 +159,7 @@ func (c *Service) Add(cookie *cookie.Cookie) error {
 	_, err = c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return dberror.NewDatabaseError("insert", "cookies", "failed to insert cookie", err)
+		return utils.NewDatabaseError("insert", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Successfully added cookie")
@@ -163,29 +167,28 @@ func (c *Service) Add(cookie *cookie.Cookie) error {
 }
 
 // Update modifies an existing cookie session.
-func (c *Service) Update(value string, cookie *cookie.Cookie) error {
+func (c *Cookie) Update(value string, cookie *cookie.Cookie) error {
 	logger.DBCookies().Info("Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty current cookie value")
-		return dberror.NewValidationError("value", "current cookie value cannot be empty", value)
+		return utils.NewValidationError("value: current cookie value cannot be empty")
 	}
 	if cookie == nil {
 		logger.DBCookies().Debug("Validation failed: cookie is nil")
-		return dberror.NewValidationError("cookie", "cookie cannot be nil", nil)
+		return utils.NewValidationError("cookie: cookie cannot be nil")
 	}
 	if cookie.Value == "" {
 		logger.DBCookies().Debug("Validation failed: empty new cookie value")
-		return dberror.NewValidationError("value", "new cookie value cannot be empty", cookie.Value)
+		return utils.NewValidationError("value: new cookie value cannot be empty")
 	}
 	if cookie.ApiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return dberror.NewValidationError("api_key", "API key cannot be empty", cookie.ApiKey)
+		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
 	if cookie.LastLogin <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
-		return dberror.NewValidationError("last_login",
-			"last login timestamp must be positive", cookie.LastLogin)
+		return utils.NewValidationError("last_login: last login timestamp must be positive")
 	}
 
 	query := `UPDATE cookies
@@ -193,16 +196,16 @@ func (c *Service) Update(value string, cookie *cookie.Cookie) error {
 	result, err := c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "cookies", "failed to update cookie", err)
+		return utils.NewDatabaseError("update", "cookies", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return dberror.NewDatabaseError("update", "cookies", "failed to get rows affected", err)
+		return utils.NewDatabaseError("update", "cookies", err)
 	}
 	if rowsAffected == 0 {
 		logger.DBCookies().Debug("No cookie found to update")
-		return dberror.ErrNotFound
+		return utils.NewNotFoundError(value)
 	}
 
 	logger.DBCookies().Debug("Successfully updated cookie")
@@ -210,18 +213,18 @@ func (c *Service) Update(value string, cookie *cookie.Cookie) error {
 }
 
 // Remove deletes a cookie session by its value.
-func (c *Service) Remove(value string) error {
+func (c *Cookie) Remove(value string) error {
 	logger.DBCookies().Info("Removing cookie, value: %s", value)
 
 	if value == "" {
 		logger.DBCookies().Debug("Validation failed: empty cookie value")
-		return dberror.NewValidationError("value", "cookie value cannot be empty", value)
+		return utils.NewValidationError("value: cookie value cannot be empty")
 	}
 
 	query := `DELETE FROM cookies WHERE value = ?`
 	_, err := c.db.Exec(query, value)
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "cookies", "failed to delete cookie", err)
+		return utils.NewDatabaseError("delete", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookie")
@@ -229,18 +232,18 @@ func (c *Service) Remove(value string) error {
 }
 
 // RemoveApiKey removes all cookie sessions associated with a specific API key.
-func (c *Service) RemoveApiKey(apiKey string) error {
+func (c *Cookie) RemoveApiKey(apiKey string) error {
 	logger.DBCookies().Info("Removing cookies by API key")
 
 	if apiKey == "" {
 		logger.DBCookies().Debug("Validation failed: empty API key")
-		return dberror.NewValidationError("api_key", "API key cannot be empty", apiKey)
+		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
 
 	query := `DELETE FROM cookies WHERE api_key = ?`
 	_, err := c.db.Exec(query, apiKey)
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "cookies", "failed to delete cookies by API key", err)
+		return utils.NewDatabaseError("delete", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookies for API key")
@@ -248,37 +251,37 @@ func (c *Service) RemoveApiKey(apiKey string) error {
 }
 
 // RemoveExpired removes all cookie sessions that are older than the specified timestamp.
-func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
+func (c *Cookie) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	logger.DBCookies().Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	if beforeTimestamp <= 0 {
 		logger.DBCookies().Debug("Validation failed: invalid timestamp %d", beforeTimestamp)
-		return 0, dberror.NewValidationError("timestamp", "timestamp must be positive", beforeTimestamp)
+		return 0, utils.NewValidationError("timestamp: timestamp must be positive")
 	}
 
 	query := `DELETE FROM cookies WHERE last_login < ?`
 	result, err := c.db.Exec(query, beforeTimestamp)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("delete", "cookies", "failed to delete expired cookies", err)
+		return 0, utils.NewDatabaseError("delete", "cookies", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, dberror.NewDatabaseError("delete", "cookies", "failed to get rows affected", err)
+		return 0, utils.NewDatabaseError("delete", "cookies", err)
 	}
 
 	logger.DBCookies().Debug("Removed %d expired cookies", rowsAffected)
 	return rowsAffected, nil
 }
 
-func (c *Service) scanCookie(scanner interfaces.Scannable) (*cookie.Cookie, error) {
+func (c *Cookie) scanCookie(scanner interfaces.Scannable) (*cookie.Cookie, error) {
 	cookie := &cookie.Cookie{}
 	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, dberror.NewDatabaseError("scan", "cookies", "failed to scan row", err)
+		return nil, err
 	}
 	return cookie, nil
 }

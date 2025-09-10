@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/modification"
 	"github.com/knackwurstking/pgpress/pkg/models/note"
+	"github.com/knackwurstking/pgpress/pkg/modification"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 const (
@@ -122,7 +122,7 @@ func (t *Tool) SetPress(pressNumber *PressNumber) error {
 	}
 
 	if !IsValidPressNumber(pressNumber) {
-		return dberror.NewValidationError("press", "invalid press number", pressNumber)
+		return utils.NewValidationError("invalid press number")
 	}
 
 	t.Press = pressNumber

@@ -8,8 +8,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/utils"
 	"github.com/knackwurstking/pgpress/pkg/models/attachment"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Service provides database operations for managing attachments with lazy loading.
@@ -53,7 +53,7 @@ func (a *Attachment) List() ([]*attachment.Attachment, error) {
 	for rows.Next() {
 		attachment, err := a.scan(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan attachment: %w", err)
+			return nil, utils.NewDatabaseError("scan", "attachments", err)
 		}
 		attachments = append(attachments, attachment)
 	}
@@ -120,7 +120,7 @@ func (s *Attachment) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 	for rows.Next() {
 		attachment, err := s.scan(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan attachment: %w", err)
+			return nil, utils.NewDatabaseError("scan", "attachments", err)
 		}
 		attachmentMap[attachment.GetID()] = attachment
 	}
@@ -155,14 +155,12 @@ func (a *Attachment) Add(attachment *attachment.Attachment, _ *user.User) (int64
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "attachments",
-			"failed to insert attachment", err)
+		return 0, utils.NewDatabaseError("insert", "attachments", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "attachments",
-			"failed to get last insert ID", err)
+		return 0, utils.NewDatabaseError("insert", "attachments", err)
 	}
 
 	return id, nil
@@ -174,7 +172,7 @@ func (a *Attachment) Update(attachment *attachment.Attachment, _ *user.User) err
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
 	if attachment == nil {
-		return dberror.NewValidationError("attachment", "attachment cannot be nil", nil)
+		return utils.NewValidationError("attachment: attachment cannot be nil")
 	}
 
 	if err := attachment.Validate(); err != nil {
@@ -184,18 +182,16 @@ func (a *Attachment) Update(attachment *attachment.Attachment, _ *user.User) err
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "attachments",
-			fmt.Sprintf("failed to update attachment with ID %d", id), err)
+		return utils.NewDatabaseError("update", "attachments", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return dberror.NewDatabaseError("update", "attachments",
-			"failed to get rows affected", err)
+		return utils.NewDatabaseError("update", "attachments", err)
 	}
 
 	if rowsAffected == 0 {
-		return dberror.ErrNotFound
+		return utils.NewNotFoundError(fmt.Sprintf("id: %d", id))
 	}
 
 	return nil
@@ -208,18 +204,16 @@ func (a *Attachment) Delete(id int64, _ *user.User) error {
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.db.Exec(query, id)
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "attachments",
-			fmt.Sprintf("failed to delete attachment with ID %d", id), err)
+		return utils.NewDatabaseError("delete", "attachments", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "attachments",
-			"failed to get rows affected", err)
+		return utils.NewDatabaseError("delete", "attachments", err)
 	}
 
 	if rowsAffected == 0 {
-		return dberror.ErrNotFound
+		return utils.NewNotFoundError(fmt.Sprintf("id: %d", id))
 	}
 
 	return nil
@@ -234,7 +228,7 @@ func (s *Attachment) scan(scanner interfaces.Scannable) (*attachment.Attachment,
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, dberror.NewDatabaseError("scan", "attachments", "failed to scan row", err)
+		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
 
 	// Set the ID using string conversion to maintain compatibility

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/modification"
 	"github.com/knackwurstking/pgpress/pkg/models/attachment"
+	"github.com/knackwurstking/pgpress/pkg/modification"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 const (
@@ -55,34 +55,34 @@ func (tr *TroubleReport) Validate() error {
 
 func (tr *TroubleReport) validateTitle(title string) error {
 	if title == "" {
-		return dberror.NewValidationError("title", "cannot be empty", title)
+		return utils.NewValidationError("cannot be empty")
 	}
 	if len(title) < MinTitleLength {
-		return dberror.NewValidationError("title", "too short", len(title))
+		return utils.NewValidationError("title too short")
 	}
 	if len(title) > MaxTitleLength {
-		return dberror.NewValidationError("title", "too long", len(title))
+		return utils.NewValidationError("title too long")
 	}
 	return nil
 }
 
 func (tr *TroubleReport) validateContent(content string) error {
 	if content == "" {
-		return dberror.NewValidationError("content", "cannot be empty", content)
+		return utils.NewValidationError("content cannot be empty")
 	}
 	if len(content) < MinContentLength {
-		return dberror.NewValidationError("content", "too short", len(content))
+		return utils.NewValidationError("content too short")
 	}
 	if len(content) > MaxContentLength {
-		return dberror.NewValidationError("content", "too long", len(content))
+		return utils.NewValidationError("content too long")
 	}
 	return nil
 }
 
 func (tr *TroubleReport) validateAttachments() error {
-	for i, attachmentID := range tr.LinkedAttachments {
+	for _, attachmentID := range tr.LinkedAttachments {
 		if attachmentID <= 0 {
-			return dberror.NewValidationError("linked_attachments", "attachment ID must be positive", i)
+			return utils.NewValidationError("linked_attachments: attachment ID must be positive")
 		}
 	}
 	return nil
@@ -91,7 +91,7 @@ func (tr *TroubleReport) validateAttachments() error {
 // AddAttachment adds a new attachment ID to the trouble report.
 func (tr *TroubleReport) AddAttachment(attachmentID int64) error {
 	if attachmentID <= 0 {
-		return dberror.NewValidationError("attachment_id", "must be positive", attachmentID)
+		return utils.NewValidationError("linked_attachments: attachment ID must be positive")
 	}
 	if tr.LinkedAttachments == nil {
 		tr.LinkedAttachments = make([]int64, 0)
@@ -103,10 +103,10 @@ func (tr *TroubleReport) AddAttachment(attachmentID int64) error {
 // RemoveAttachment removes an attachment by index.
 func (tr *TroubleReport) RemoveAttachment(index int) error {
 	if len(tr.LinkedAttachments) == 0 {
-		return dberror.NewValidationError("index", "no attachments to remove", index)
+		return utils.NewValidationError("index: no attachments to remove")
 	}
 	if index < 0 || index >= len(tr.LinkedAttachments) {
-		return dberror.NewValidationError("index", "out of range", index)
+		return utils.NewValidationError("index: out of range")
 	}
 	tr.LinkedAttachments = append(tr.LinkedAttachments[:index], tr.LinkedAttachments[index+1:]...)
 	return nil

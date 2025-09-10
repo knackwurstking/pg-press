@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/knackwurstking/pgpress/pkg/models"
+
+	"github.com/jung-kurt/gofpdf/v2"
 )
 
 // Options contains common options for PDF generation
