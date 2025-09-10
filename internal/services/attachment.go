@@ -74,7 +74,7 @@ func (a *Attachment) Get(id int64) (*attachment.Attachment, error) {
 	attachment, err := a.scan(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError(fmt.Sprintf("attachment with ID %d not found"))
+			return nil, utils.NewNotFoundError(fmt.Sprintf("attachment with ID %d not found", id))
 		}
 
 		return nil, utils.NewDatabaseError("select", "attachments", err)

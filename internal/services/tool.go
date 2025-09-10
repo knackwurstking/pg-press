@@ -506,7 +506,7 @@ func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error 
 	if count > 0 {
 		return utils.NewAlreadyExistsError(
 			fmt.Sprintf(
-				"tool with position %d, format %s, type %s, and code %s already exists",
+				"tool with position %s, format %s, type %s, and code %s already exists",
 				tool.Position, tool.Format, tool.Type, tool.Code,
 			),
 		)
