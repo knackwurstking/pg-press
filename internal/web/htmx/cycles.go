@@ -53,7 +53,7 @@ func (h *Cycles) handleSection(c echo.Context) error {
 		return err
 	}
 
-	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := helpers.ParseInt64Query(c, "tool_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
@@ -103,7 +103,7 @@ func (h *Cycles) handleSection(c echo.Context) error {
 
 func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// Get tool and position parameters
-	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := helpers.ParseInt64Query(c, "tool_id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
@@ -127,7 +127,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 
 	return components.TotalCycles(
 		totalCycles,
-		helpers.ParseBoolQuery(c, constants.QueryParamInput),
+		helpers.ParseBoolQuery(c, "input"),
 	).Render(c.Request().Context(), c.Response())
 }
 
@@ -329,7 +329,7 @@ func (h *Cycles) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
 
 // getToolFromQuery extracts tool and tool position from query parameters
 func (h *Cycles) getToolFromQuery(c echo.Context) (*models.Tool, error) {
-	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := helpers.ParseInt64Query(c, "tool_id")
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}

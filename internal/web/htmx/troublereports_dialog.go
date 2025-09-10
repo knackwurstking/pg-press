@@ -30,12 +30,12 @@ func (h *TroubleReports) handleGetDialogEdit(
 	}
 
 	if !props.Close {
-		props.Close = helpers.ParseBoolQuery(c, constants.QueryParamClose)
+		props.Close = helpers.ParseBoolQuery(c, "close")
 	}
 
 	if !props.Close && !props.InvalidTitle && !props.InvalidContent {
-		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
-			id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
+		if idStr := c.QueryParam("id"); idStr != "" {
+			id, err := helpers.ParseInt64Query(c, "id")
 			if err != nil {
 				return err
 			}
@@ -128,7 +128,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get ID from query parameter
-	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}
@@ -256,7 +256,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	var attachments []*models.Attachment
 
 	// Get existing attachments if editing
-	if idStr := ctx.QueryParam(constants.QueryParamID); idStr != "" {
+	if idStr := ctx.QueryParam("id"); idStr != "" {
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err == nil {
 			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {

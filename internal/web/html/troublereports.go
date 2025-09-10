@@ -9,7 +9,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
@@ -47,7 +46,7 @@ func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
-	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Invalid trouble report ID parameter: %v", err)
 		return err
@@ -101,7 +100,7 @@ func (h *TroubleReports) shareResponse(
 }
 
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	attachmentID, err := helpers.ParseInt64Query(c, constants.QueryParamAttachmentID)
+	attachmentID, err := helpers.ParseInt64Query(c, "attachment_id")
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
 		return err
