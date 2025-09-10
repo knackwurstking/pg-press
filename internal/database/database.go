@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"github.com/knackwurstking/pgpress/internal/database/services"
+	"github.com/knackwurstking/pgpress/internal/services"
 )
 
 // DB represents the main database connection and provides access to all data access objects.
