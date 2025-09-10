@@ -2,8 +2,9 @@
 package constants
 
 const (
-	IDDialogLogin                = "dialogLogin"
-	IDDialogEditUserName         = "dialogEditUserName"
+	// TODO: Remove this
+	IDDialogLogin = "dialogLogin"
+
 	IDTitle                      = "title"
 	IDContent                    = "content"
 	IDPosition                   = "position"
