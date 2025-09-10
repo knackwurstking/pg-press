@@ -60,8 +60,8 @@ templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAt
 								env.ServerPathPrefix, tr.ID,
 							) }
 							hx-trigger="click"
-							hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
-							hx-swap="outerHTML"
+							hx-target="body"
+							hx-swap="beforeend"
 							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 							class="ghost icon"
 						>

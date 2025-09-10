@@ -4,7 +4,6 @@ package constants
 const (
 	IDDialogLogin                = "dialogLogin"
 	IDDialogEditUserName         = "dialogEditUserName"
-	IDTroubleReportEditDialog    = "troubleReportEditDialog"
 	IDTitle                      = "title"
 	IDContent                    = "content"
 	IDPosition                   = "position"

@@ -9,8 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
@@ -57,65 +55,39 @@ func Page() templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 36, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 35, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"click\" hx-target=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 38, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 50, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section><span hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/data")
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDData)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 50, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 54, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDData)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 54, Col: 26}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"></span></section><!-- Placeholder for the edit trouble report dialog --><span id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDTroubleReportEditDialog)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 58, Col: 49}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"></span></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"></span></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -152,12 +124,12 @@ func navContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -173,7 +145,7 @@ func navContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,38 +169,38 @@ func additionalHead() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<link rel=\"stylesheet\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<link rel=\"stylesheet\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 templ.SafeURL
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css")
+		var templ_7745c5c3_Var8 templ.SafeURL
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 72, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 70, Col: 92}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><link rel=\"stylesheet\" href=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 templ.SafeURL
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/data.css")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 73, Col: 85}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><link rel=\"stylesheet\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><script>\n    \t// Initialize search timer variable\n    \tvar searchTimer;\n\n    \t// Search function with debouncing and client-side filtering\n    \tfunction search(event) {\n    \t\tvar searchValue = event.target.value.toLowerCase().trim();\n\n    \t\t// Clear existing timer\n    \t\tclearTimeout(searchTimer);\n\n    \t\t// Set new timer for lazy search (300ms delay)\n    \t\tsearchTimer = setTimeout(function() {\n    \t\t\t// Split search value on spaces to get individual search terms\n    \t\t\tvar searchTerms = searchValue.split(/\\s+/).filter(function(term) {\n    \t\t\t\treturn term.length > 0;\n    \t\t\t});\n\n    \t\t\t// Get all trouble report elements\n    \t\t\tvar troubleReports = document.querySelectorAll('span.trouble-report');\n\n    \t\t\tfor (var i = 0; i < troubleReports.length; i++) {\n    \t\t\t\tvar report = troubleReports[i];\n    \t\t\t\tif (searchTerms.length === 0) {\n    \t\t\t\t\t// Show all if search is empty\n    \t\t\t\t\treport.style.display = '';\n    \t\t\t\t} else {\n    \t\t\t\t\t// Get the text content from the summary and pre elements\n    \t\t\t\t\tvar summary = report.querySelector('summary');\n    \t\t\t\t\tvar content = report.querySelector('pre');\n\n    \t\t\t\t\tvar summaryText = summary ? summary.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar contentText = content ? content.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar combinedText = summaryText + ' ' + contentText;\n\n    \t\t\t\t\t// Check if ALL search terms are found in either summary or content\n    \t\t\t\t\tvar allTermsFound = true;\n    \t\t\t\t\tfor (var j = 0; j < searchTerms.length; j++) {\n    \t\t\t\t\t\tif (!combinedText.includes(searchTerms[j])) {\n    \t\t\t\t\t\t\tallTermsFound = false;\n    \t\t\t\t\t\t\tbreak;\n    \t\t\t\t\t\t}\n    \t\t\t\t\t}\n\n    \t\t\t\t\tif (allTermsFound) {\n    \t\t\t\t\t\treport.style.display = '';\n    \t\t\t\t\t} else {\n    \t\t\t\t\t\treport.style.display = 'none';\n    \t\t\t\t\t}\n    \t\t\t\t}\n    \t\t\t}\n    \t\t}, 300);\n    \t}\n\n    \t// Clear timer on page unload to prevent memory leaks\n    \twindow.addEventListener('beforeunload', function() {\n    \t\tclearTimeout(searchTimer);\n    \t});\n\n    \t// Make search function available globally\n    \twindow.search = search;\n\t</script>")
+		var templ_7745c5c3_Var9 templ.SafeURL
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/data.css")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/troublereports/page.templ`, Line: 71, Col: 85}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><script>\n    \t// Initialize search timer variable\n    \tvar searchTimer;\n\n    \t// Search function with debouncing and client-side filtering\n    \tfunction search(event) {\n    \t\tvar searchValue = event.target.value.toLowerCase().trim();\n\n    \t\t// Clear existing timer\n    \t\tclearTimeout(searchTimer);\n\n    \t\t// Set new timer for lazy search (300ms delay)\n    \t\tsearchTimer = setTimeout(function() {\n    \t\t\t// Split search value on spaces to get individual search terms\n    \t\t\tvar searchTerms = searchValue.split(/\\s+/).filter(function(term) {\n    \t\t\t\treturn term.length > 0;\n    \t\t\t});\n\n    \t\t\t// Get all trouble report elements\n    \t\t\tvar troubleReports = document.querySelectorAll('span.trouble-report');\n\n    \t\t\tfor (var i = 0; i < troubleReports.length; i++) {\n    \t\t\t\tvar report = troubleReports[i];\n    \t\t\t\tif (searchTerms.length === 0) {\n    \t\t\t\t\t// Show all if search is empty\n    \t\t\t\t\treport.style.display = '';\n    \t\t\t\t} else {\n    \t\t\t\t\t// Get the text content from the summary and pre elements\n    \t\t\t\t\tvar summary = report.querySelector('summary');\n    \t\t\t\t\tvar content = report.querySelector('pre');\n\n    \t\t\t\t\tvar summaryText = summary ? summary.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar contentText = content ? content.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar combinedText = summaryText + ' ' + contentText;\n\n    \t\t\t\t\t// Check if ALL search terms are found in either summary or content\n    \t\t\t\t\tvar allTermsFound = true;\n    \t\t\t\t\tfor (var j = 0; j < searchTerms.length; j++) {\n    \t\t\t\t\t\tif (!combinedText.includes(searchTerms[j])) {\n    \t\t\t\t\t\t\tallTermsFound = false;\n    \t\t\t\t\t\t\tbreak;\n    \t\t\t\t\t\t}\n    \t\t\t\t\t}\n\n    \t\t\t\t\tif (allTermsFound) {\n    \t\t\t\t\t\treport.style.display = '';\n    \t\t\t\t\t} else {\n    \t\t\t\t\t\treport.style.display = 'none';\n    \t\t\t\t\t}\n    \t\t\t\t}\n    \t\t\t}\n    \t\t}, 300);\n    \t}\n\n    \t// Clear timer on page unload to prevent memory leaks\n    \twindow.addEventListener('beforeunload', function() {\n    \t\tclearTimeout(searchTimer);\n    \t});\n\n    \t// Make search function available globally\n    \twindow.search = search;\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

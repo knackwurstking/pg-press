@@ -1,8 +1,6 @@
 package troublereports
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
@@ -30,13 +28,14 @@ templ Page() {
 					oninput="window.search(event)"
 				/>
 			</section>
+
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<button
 					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
 					hx-trigger="click"
-					hx-target={ fmt.Sprintf("#%s", constants.IDTroubleReportEditDialog) }
-					hx-swap="outerHTML"
+					hx-target="body"
+					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					class="flex flex-row gap justify-between items-center"
 				>
@@ -44,6 +43,7 @@ templ Page() {
 					Erstellen
 				</button>
 			</section>
+
 			<!-- Trouble Reports Entries -->
 			<section>
 				<span
@@ -54,8 +54,6 @@ templ Page() {
 					id={ constants.IDData }
 				></span>
 			</section>
-			<!-- Placeholder for the edit trouble report dialog -->
-			<span id={ constants.IDTroubleReportEditDialog }></span>
 		</main>
 	}
 }
@@ -71,6 +69,7 @@ templ navContent() {
 templ additionalHead() {
 	<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css" }/>
 	<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/trouble-reports/data.css" }/>
+
 	<script>
     	// Initialize search timer variable
     	var searchTimer;
