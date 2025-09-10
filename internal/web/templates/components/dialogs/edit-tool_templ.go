@@ -56,7 +56,7 @@ func EditTool(props *EditToolProps) templ.Component {
 			submitButtonText = "Erstellen"
 		)
 
-		if props.Tool.ID > 0 {
+		if props.Tool != nil && props.Tool.ID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, props.Tool.ID)
 			submitButtonText = "Aktualisieren"

@@ -16,16 +16,17 @@ type BaseProps struct {
 templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
-		class="fullscreen clean"
-		onclose='
-			console.debug("Dialog closed"); // TOOD: Remove this if this closing thing is working
-			this.parentElement.removeChild(this);
-		'
+		class="fullscreen clean flex flex-col justify-center items-center"
+		onclose='this.parentElement.removeChild(this);'
 	>
 		<form
+			class="flex flex-col gap"
+
 			if props.Type == "POST" {
 				hx-post={ props.Href }
-			} else if props.Type == "PUT" {
+			}
+
+			if props.Type == "PUT" {
 				hx-put={ props.Href }
 			}
 
@@ -44,7 +45,7 @@ templ Base(props BaseProps) {
 			}
 
 			// Content
-			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
+			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
 				{ children... }
 			</div>
 
