@@ -1,16 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
-	"github.com/SuperPaintman/nice/cli"
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 	"github.com/labstack/gommon/color"
+
+	"github.com/SuperPaintman/nice/cli"
 )
 
 func listUserCommand() cli.Command {
@@ -33,20 +31,11 @@ func listUserCommand() cli.Command {
 					return err
 				}
 
-				t := table.NewWriter()
-
-				t.SetOutputMirror(os.Stdout)
-
-				t.AppendHeader(table.Row{"Telegram ID", "User Name"})
-
-				rows := []table.Row{}
+				fmt.Printf("%-15s %s\n", "Telegram ID", "User Name")
+				fmt.Printf("%-15s %s\n", "-----------", "---------")
 				for _, u := range users {
-					rows = append(rows, table.Row{u.TelegramID, u.Name})
+					fmt.Printf("%-15d %s\n", u.TelegramID, u.Name)
 				}
-
-				t.AppendRows(rows)
-				t.SetStyle(table.StyleLight)
-				t.Render()
 
 				return nil
 			}
@@ -75,7 +64,7 @@ func showUserCommand() cli.Command {
 
 				user, err := db.Users.Get(*telegramID)
 				if err != nil {
-					if errors.Is(err, dberror.ErrNotFound) {
+					if utils.IsNotFoundError(err) {
 						os.Exit(exitCodeNotFound)
 					}
 
@@ -87,34 +76,18 @@ func showUserCommand() cli.Command {
 					return nil
 				}
 
-				t := table.NewWriter()
-				t.SetOutputMirror(os.Stdout)
-
-				t.AppendHeader(table.Row{"Telegram ID", "User Name", "Api Key"})
-
-				row := table.Row{user.TelegramID, user.Name, user.ApiKey}
-
-				t.AppendRows([]table.Row{row})
-				t.SetStyle(table.StyleLight)
-				t.Render()
+				fmt.Printf("%-15s %-20s %s\n", "Telegram ID", "User Name", "Api Key")
+				fmt.Printf("%-15s %-20s %s\n", "-----------", "---------", "-------")
+				fmt.Printf("%-15d %-20s %s\n", user.TelegramID, user.Name, user.ApiKey)
 
 				if cookies, err := db.Cookies.ListApiKey(user.ApiKey); err != nil {
-					logger.AppLogger.Error("Failed to get cookies from the database: %s", err.Error())
+					fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
 				} else {
 					if len(cookies) > 0 {
-						fmt.Printf(
-							"\n%s <last-login> - <api-key> - <value> - <user-agent>\n\n",
-							color.Underline(color.Bold("Cookies:")),
-						)
+						fmt.Printf("\n%s <last-login> - <api-key> - <value> - <user-agent>\n\n", color.Underline(color.Bold("Cookies:")))
 
 						for _, c := range models.SortCookies(cookies) {
-							fmt.Printf(
-								"%s - %s - %s - \"%s\"\n",
-								c.TimeString(),
-								color.Bold(c.ApiKey),
-								c.Value,
-								color.Italic(c.UserAgent),
-							)
+							fmt.Printf("%s - %s - %s - \"%s\"\n", c.TimeString(), color.Bold(c.ApiKey), c.Value, color.Italic(c.UserAgent))
 						}
 					}
 				}
@@ -145,7 +118,7 @@ func addUserCommand() cli.Command {
 				}
 
 				user := models.NewUser(*telegramID, *userName, *apiKey)
-				if _, err = db.Users.Add(user, nil); errors.Is(err, dberror.ErrAlreadyExists) {
+				if _, err = db.Users.Add(user, nil); utils.IsAlreadyExistsError(err) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
 				}

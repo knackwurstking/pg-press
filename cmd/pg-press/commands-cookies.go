@@ -1,14 +1,13 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"os"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
-	"github.com/knackwurstking/pgpress/pkg/logger"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -43,7 +42,7 @@ func removeCookiesCommand() cli.Command {
 				}
 
 				if err != nil {
-					logger.AppLogger.Error("Removing cookies from database failed: %s", err.Error())
+					fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 					os.Exit(exitCodeGeneric)
 				}
 
@@ -82,17 +81,17 @@ func autoCleanCookiesCommand() cli.Command {
 				if *telegramID != 0 {
 					u, err := db.Users.Get(*telegramID)
 					if err != nil {
-						if errors.Is(err, dberror.ErrNotFound) {
+						if utils.IsNotFoundError(err) {
 							os.Exit(exitCodeNotFound)
 						}
 
-						logger.AppLogger.Error("Get user \"%d\" failed: %s", *telegramID, err.Error())
+						fmt.Fprintf(os.Stderr, "Get user \"%d\" failed: %s\n", *telegramID, err.Error())
 						os.Exit(exitCodeGeneric)
 					}
 
 					cookies, err := db.Cookies.ListApiKey(u.ApiKey)
 					if err != nil {
-						logger.AppLogger.Error("List cookies for user \"%d\" failed: %s", *telegramID, err.Error())
+						fmt.Fprintf(os.Stderr, "List cookies for user \"%d\" failed: %s\n", *telegramID, err.Error())
 						os.Exit(exitCodeGeneric)
 					}
 
@@ -100,9 +99,7 @@ func autoCleanCookiesCommand() cli.Command {
 						if isExpired(cookie) {
 							if err = db.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
-								logger.AppLogger.Error(
-									"Removing cookie with value \"%s\" failed: %s",
-									cookie.Value, err.Error())
+								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s\n", cookie.Value, err.Error())
 							}
 						}
 					}
@@ -113,7 +110,7 @@ func autoCleanCookiesCommand() cli.Command {
 				// Clean up all cookies
 				cookies, err := db.Cookies.List()
 				if err != nil {
-					logger.AppLogger.Error("List cookies from database failed: %s", err.Error())
+					fmt.Fprintf(os.Stderr, "List cookies from database failed: %s\n", err.Error())
 					os.Exit(exitCodeGeneric)
 				}
 
@@ -121,9 +118,7 @@ func autoCleanCookiesCommand() cli.Command {
 					if isExpired(cookie) {
 						if err = db.Cookies.Remove(cookie.Value); err != nil {
 							// Print out error and continue
-							logger.AppLogger.Error(
-								"Removing cookie with value \"%s\" failed: %s",
-								cookie.Value, err.Error())
+							fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s\n", cookie.Value, err.Error())
 						}
 					}
 				}

@@ -10,10 +10,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/router"
+	"github.com/knackwurstking/pgpress/pkg/utils"
+
+	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 )
 
@@ -103,7 +104,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				message = http.StatusText(code)
 			}
 		} else {
-			code = dberror.GetHTTPStatusCode(err)
+			code = utils.GetHTTPStatusCode(err)
 			message = err.Error()
 		}
 

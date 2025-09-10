@@ -7,11 +7,11 @@ import (
 	"slices"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -90,7 +90,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 						logger.Server().Error("Server error in request %s %s: %v", method, uri, err)
 					}
 				} else {
-					status = dberror.GetHTTPStatusCode(err)
+					status = utils.GetHTTPStatusCode(err)
 					logger.Server().Warn("Request error %s %s: %v", method, uri, err)
 				}
 			}
@@ -161,9 +161,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
 			logger.Middleware().Warn("Authentication failed from %s: invalid credentials (user-agent: %s)", remoteIP, userAgent)
-			return false, echo.NewHTTPError(
-				dberror.GetHTTPStatusCode(dberror.ErrInvalidCredentials),
-				"failed to validate user from API key: "+err.Error())
+			return false, echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
 		}
 		logger.Middleware().Info("API key authentication successful for user %s from %s", user.Name, remoteIP)
 	}
@@ -189,7 +187,7 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if c.LastLogin < expirationTime {
 		logger.Middleware().Info("Expired cookie from %s (last login: %s)", remoteIP, c.TimeString())
-		return nil, dberror.NewValidationError("cookie", "cookie has expired", nil)
+		return nil, utils.NewValidationError("cookie: cookie has expired")
 	}
 
 	user, err := db.Users.GetUserFromApiKey(c.ApiKey)

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -9,12 +8,10 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 // listFeedsCommand creates a CLI command for listing feeds from the database.
@@ -85,29 +82,33 @@ func listFeedsCommand() cli.Command {
 				}
 
 				if len(feeds) == 0 {
-					logger.AppLogger.Info("No feeds found")
+					fmt.Fprintln(os.Stderr, "No feeds found")
 					return nil
 				}
 
-				// Create table
-				t := table.NewWriter()
-				t.SetOutputMirror(os.Stdout)
-				t.AppendHeader(table.Row{"ID", "Time", "Age", "Title", "Content"})
+				// Print header
+				fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "ID", "Time", "Age", "Title", "Content")
+				fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "------", "-------------------", "--------", "------------------------------", "-------")
 
-				// Add rows
+				// Print feeds line by line
 				for _, feed := range feeds {
 					age := formatAge(feed.Age())
-					t.AppendRow(table.Row{
+					title := feed.Title
+					if len(title) > 30 {
+						title = title[:27] + "..."
+					}
+					content := feed.Content
+					if len(content) > 50 {
+						content = content[:47] + "..."
+					}
+					fmt.Printf("%-6d %-19s %-8s %-30s %s\n",
 						feed.ID,
 						feed.GetCreatedTime().Format("2006-01-02 15:04:05"),
 						age,
-						feed.Title,
-						feed.Content,
-					})
+						title,
+						content,
+					)
 				}
-
-				t.SetStyle(table.StyleLight)
-				t.Render()
 
 				fmt.Printf("\nTotal: %d feed(s)\n", len(feeds))
 
@@ -195,7 +196,7 @@ func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Fee
 	if since != "" {
 		sinceTime, err = parseDateTime(since)
 		if err != nil {
-			logger.AppLogger.Warn("Invalid since date format: %s", err)
+			fmt.Fprintf(os.Stderr, "Invalid since date format: %s\n", err)
 			return feeds
 		}
 	}
@@ -203,7 +204,7 @@ func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Fee
 	if before != "" {
 		beforeTime, err = parseDateTime(before)
 		if err != nil {
-			logger.AppLogger.Warn("Invalid before date format: %s", err)
+			fmt.Fprintf(os.Stderr, "Invalid before date format: %s\n", err)
 			return feeds
 		}
 	}
@@ -255,7 +256,7 @@ func removeFeedsByIDs(db *database.DB, ids []string) error {
 
 		err = db.Feeds.Delete(int64(id))
 		if err != nil {
-			if errors.Is(err, dberror.ErrNotFound) {
+			if utils.IsNotFoundError(err) {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
 			} else {
 				failed = append(failed, fmt.Sprintf("failed to remove feed ID %d: %s", id, err))
