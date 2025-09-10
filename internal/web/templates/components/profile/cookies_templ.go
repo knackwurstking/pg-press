@@ -9,11 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
-
 	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 func Cookies(cookies []*cookiemodels.Cookie) templ.Component {
@@ -38,12 +35,12 @@ func Cookies(cookies []*cookiemodels.Cookie) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(cookies) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<details id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<details id=\"cookies\" class=\"cookies-details\" open><summary class=\"cookies-summary\"><i class=\"bi bi-cookie\"></i> Aktive Sitzungen ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDCookies)
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(len(cookies))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 13, Col: 35}
 			}
@@ -51,100 +48,61 @@ func Cookies(cookies []*cookiemodels.Cookie) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"cookies-details\" open><summary class=\"cookies-summary\"><i class=\"bi bi-cookie\"></i> Aktive Sitzungen ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(len(cookies))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 16, Col: 35}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</summary><figure class=\"overflow-auto\"><table class=\"cookies-table borderless\"><thead><tr><th style=\"width: fit-content;\">Letzte Anmeldung</th><th style=\"width: 100%;\" class=\"left\">Benutzeragent</th><th style=\"width: fit-content;\"></th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</summary><figure class=\"overflow-auto\"><table class=\"cookies-table borderless\"><thead><tr><th style=\"width: fit-content;\">Letzte Anmeldung</th><th style=\"width: 100%;\" class=\"left\">Benutzeragent</th><th style=\"width: fit-content;\"></th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, cookie := range cookies {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<tr><td class=\"time-cell\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr><td class=\"time-cell\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.TimeString())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 27, Col: 51}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</td><td class=\"left user-agent-cell\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.TimeString())
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.UserAgent)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 30, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 28, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"left user-agent-cell\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</td><td class=\"right select-none\"><a hx-delete=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.UserAgent)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 31, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 31, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</td><td class=\"right select-none\"><a hx-delete=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 34, Col: 90}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"click\" hx-target=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", constants.IDCookies))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 36, Col: 61}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"click\" hx-target=\"#cookies\" hx-swap=\"outerHTML\" hx-confirm=\"Sind Sie sicher, dass Sie dieses Cookie löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" role=\"button\" class=\"ghost destructive icon\" title=\"Sitzung beenden\"><i class=\"bi bi-trash\"></i></a></td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</tbody></table></figure></details>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</tbody></table></figure></details>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<style>\n            .no-cookies {\n                text-align: center;\n                color: var(--ui-color-600);\n                padding: calc(var(--ui-spacing) * 2);\n                background: var(--ui-color-100);\n                border-radius: var(--ui-radius);\n                font-style: italic;\n            }\n        </style> <div id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDCookies)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/profile/cookies.templ`, Line: 64, Col: 31}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"no-cookies\"><i class=\"bi bi-info-circle\"></i> Keine aktiven Sitzungen gefunden</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<style>\n            .no-cookies {\n                text-align: center;\n                color: var(--ui-color-600);\n                padding: calc(var(--ui-spacing) * 2);\n                background: var(--ui-color-100);\n                border-radius: var(--ui-radius);\n                font-style: italic;\n            }\n        </style> <div id=\"cookies\" class=\"no-cookies\"><i class=\"bi bi-info-circle\"></i> Keine aktiven Sitzungen gefunden</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

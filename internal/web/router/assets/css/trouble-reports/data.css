@@ -18,7 +18,7 @@ details[id^="trouble-report-"] {
 }
 
 /* Vote button styling */
-#voteForDelete {
+#vote-for-delete {
     transform: scale(0.75);
 }
 

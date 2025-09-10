@@ -1,7 +1,5 @@
 package components
 
-import "github.com/knackwurstking/pgpress/internal/web/constants"
-
 templ FeedCounter(count int) {
 	if count > 0 {
 		<span
@@ -16,7 +14,7 @@ templ FeedCounter(count int) {
                 font-size: 0.75rem;
                 border-radius: 50%;
             "
-			id={ constants.IDFeedCounter }
+			id="feed-counter"
 			class="flex justify-center items-center"
 		>
 			if count > 9 {
@@ -26,6 +24,6 @@ templ FeedCounter(count int) {
 			}
 		</span>
 	} else {
-		<span id={ constants.IDFeedCounter }></span>
+		<span id="feed-counter"></span>
 	}
 }

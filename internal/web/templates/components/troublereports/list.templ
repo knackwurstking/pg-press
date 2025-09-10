@@ -6,16 +6,15 @@ import (
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAttachments) {
 	if len(troubleReports) > 0 {
-		<ul id={ constants.IDData }>
+		<ul id="data">
 			for _, tr := range troubleReports {
 				<span class="trouble-report">
 					<details
-						id={ fmt.Sprintf(constants.IDTroubleReportPrefix, tr.ID) }
+						id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
 					>
 						<summary>{ tr.Title }</summary>
 						<pre>{ tr.Content }</pre>
@@ -47,7 +46,7 @@ templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAt
 								env.ServerPathPrefix, tr.ID,
 							) }
 							hx-trigger="click"
-							hx-target={ fmt.Sprintf("#%s", constants.IDData) }
+							hx-target="#data"
 							hx-swap="outerHTML"
 							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 							class="ghost secondary icon"
@@ -82,7 +81,7 @@ templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAt
 									env.ServerPathPrefix, tr.ID,
 								) }
 								hx-trigger="click"
-								hx-target={ fmt.Sprintf("#%s", constants.IDData) }
+								hx-target="#data"
 								hx-swap="outerHTML"
 								hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
 								hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -93,7 +92,7 @@ templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAt
 						} else {
 							<!-- TODO: Benutzer ist kein Administrator, Abstimmungssystem zum Löschen von Problemberichten hinzufügen, noch nicht implementiert -->
 							<button
-								id={ constants.IDVoteForDelete }
+								id="vote-for-delete"
 								hx-post={ fmt.Sprintf(
 									"%s/htmx/trouble-reports/vote?id=%d&mode=delete",
 									env.ServerPathPrefix, tr.ID,
@@ -115,7 +114,7 @@ templ List(user *usermodels.User, troubleReports []*trmodels.TroubleReportWithAt
 			@listScript()
 		</ul>
 	} else {
-		<span id={ constants.IDData }></span>
+		<span id="data"></span>
 	}
 }
 

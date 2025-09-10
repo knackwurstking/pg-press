@@ -14,7 +14,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
@@ -225,7 +224,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 91, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 90, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -238,7 +237,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var7 templ.SafeURL
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 94, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 93, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -251,7 +250,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 98, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 97, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -282,7 +281,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(top)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 107, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 106, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -309,7 +308,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(topCassette)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 114, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 113, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -341,7 +340,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(bottom)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 124, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 123, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -388,39 +387,26 @@ func sectionTools(props *PageProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/edit")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 144, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 143, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"><i class=\"bi bi-plus-lg\"></i> <span>Erstellen</span></button></div><ul id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"><i class=\"bi bi-plus-lg\"></i> <span>Erstellen</span></button></div><ul id=\"all-tools-list\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAllToolsList)
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/list")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 155, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 155, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-get=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/list")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/page.templ`, Line: 156, Col: 53}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" hx-trigger=\"load,pageLoaded\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"flex flex-col gap m-t p-0\" style=\"list-style: none;\"></ul><script>\n\t\t\twindow.addEventListener(\"visibilitychange\", function() {\n    \t\t\tif (document.visibilityState === 'visible') {\n                    console.debug(\"Reload #allToolsList because of a visibility change\")\n    \t\t\t\thtmx.trigger(\"#allToolsList\", 'pageLoaded');\n    \t\t\t}\n    \t\t});\n\t\t</script></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-trigger=\"load,pageLoaded\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"flex flex-col gap m-t p-0\" style=\"list-style: none;\"></ul><script>\n\t\t\twindow.addEventListener(\"visibilitychange\", function() {\n    \t\t\tif (document.visibilityState === 'visible') {\n                    console.debug(\"Reload #all-tools-list because of a visibility change\")\n    \t\t\t\thtmx.trigger(\"#all-tools-list\", 'pageLoaded');\n    \t\t\t}\n    \t\t});\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

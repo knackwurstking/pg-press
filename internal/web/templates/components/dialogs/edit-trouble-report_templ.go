@@ -13,7 +13,6 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
@@ -76,209 +75,144 @@ func EditTroubleReport(props *EditTroubleReportProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n            var selectedFiles = []; // Used by the file input change event handler\n            var existingAttachmentsRemoval = [];\n\n            function updateExistingAttachmentsRemoval() {\n                var input = document.getElementById('existing-attachments-removal');\n                input.value = existingAttachmentsRemoval.join(',');\n            }\n\n            function onAttachments(event) {\n                selectedFiles = Array.from(event.target.files);\n\n                function formatFileSize(bytes) {\n                    if (bytes === 0) return \"0 Bytes\";\n                    var k = 1024;\n                    var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                    var i = Math.floor(Math.log(bytes) / Math.log(k));\n                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n                }\n\n                var previewArea = document.getElementById(\"file-preview\");\n                var container = document.getElementById(\"new-attachments\");\n                container.innerHTML = \"\";\n\n                if (selectedFiles.length > 0) {\n                    previewArea.style.display = \"block\";\n\n                    selectedFiles.forEach((file, index) => {\n                        var sizeClass =\n                            file.size > 10 * 1024 * 1024\n                                ? \"attachment-error\"\n                                : \"muted text-sm\";\n                        var sizeText =\n                            file.size > 10 * 1024 * 1024\n                                ? \"ZU GROSS!\"\n                                : formatFileSize(file.size);\n\n                        /** @type {HTMLTemplateElement} */\n                        var t = previewArea.querySelector(\n                            `template[name=\"attachment-item\"]`,\n                        );\n\n                        /** @type {HTMLElement} */\n                        var item = t.content.cloneNode(true);\n\n                        item.querySelector(`.name`).innerText = file.name;\n\n                        var sizeTextElement = item.querySelector(`.size-text`);\n                        sizeTextElement.innerText = sizeText;\n                        sizeTextElement.className += sizeClass;\n\n                        item.querySelector(`button.delete`).onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments();\n                        };\n\n                        container.appendChild(item);\n                    });\n\n                    setTimeout(() => {\n                        previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                    }, 100);\n                } else {\n                    previewArea.style.display = \"none\";\n                }\n            }\n        </script> <!-- Hidden field for attachment order --> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n            var selectedFiles = []; // Used by the file input change event handler\n            var existingAttachmentsRemoval = [];\n\n            function updateExistingAttachmentsRemoval() {\n                var input = document.getElementById('existing-attachments-removal');\n                input.value = existingAttachmentsRemoval.join(',');\n            }\n\n            function onAttachments(event) {\n                selectedFiles = Array.from(event.target.files);\n\n                function formatFileSize(bytes) {\n                    if (bytes === 0) return \"0 Bytes\";\n                    var k = 1024;\n                    var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                    var i = Math.floor(Math.log(bytes) / Math.log(k));\n                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n                }\n\n                var previewArea = document.getElementById(\"file-preview\");\n                var container = document.getElementById(\"new-attachments\");\n                container.innerHTML = \"\";\n\n                if (selectedFiles.length > 0) {\n                    previewArea.style.display = \"block\";\n\n                    selectedFiles.forEach((file, index) => {\n                        var sizeClass =\n                            file.size > 10 * 1024 * 1024\n                                ? \"attachment-error\"\n                                : \"muted text-sm\";\n                        var sizeText =\n                            file.size > 10 * 1024 * 1024\n                                ? \"ZU GROSS!\"\n                                : formatFileSize(file.size);\n\n                        /** @type {HTMLTemplateElement} */\n                        var t = previewArea.querySelector(\n                            `template[name=\"attachment-item\"]`,\n                        );\n\n                        /** @type {HTMLElement} */\n                        var item = t.content.cloneNode(true);\n\n                        item.querySelector(`.name`).innerText = file.name;\n\n                        var sizeTextElement = item.querySelector(`.size-text`);\n                        sizeTextElement.innerText = sizeText;\n                        sizeTextElement.className += sizeClass;\n\n                        item.querySelector(`button.delete`).onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments();\n                        };\n\n                        container.appendChild(item);\n                    });\n\n                    setTimeout(() => {\n                        previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                    }, 100);\n                } else {\n                    previewArea.style.display = \"none\";\n                }\n            }\n        </script> <!-- Hidden field for attachment order --> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"existing-attachments-removal\" value=\"\"> <label for=\"title\" class=\"flex flex-col\">Titel <input name=\"title\" id=\"title\" placeholder=\"Titel\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDExistingAttachmentsRemoval)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 123, Col: 102}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 130, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" value=\"\"> <label for=\"title\" class=\"flex flex-col\">Titel <input name=\"title\" id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDTitle)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 129, Col: 26}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" placeholder=\"Titel\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 131, Col: 23}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.InvalidTitle {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " aria-invalid=\"true\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "></label> <label for=\"content\" class=\"flex flex-col\">Bericht <textarea name=\"content\" id=\"content\" placeholder=\"Bericht\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.InvalidContent {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " aria-invalid=\"true\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "></label> <label for=\"content\" class=\"flex flex-col\">Bericht <textarea name=\"content\" id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDContent)
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 142, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 148, Col: 19}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" placeholder=\"Bericht\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.InvalidContent {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " aria-invalid=\"true\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, ">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 147, Col: 19}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</textarea></label><!-- Attachments Section --> <div id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAttachmentsSection)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 151, Col: 42}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></label><!-- Attachments Section --> <div id=\"attachments-section\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.InvalidTitle || props.InvalidContent {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"attachment-error\"><i class=\"bi bi-exclamation-triangle\"></i> Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"attachment-error\"><i class=\"bi bi-exclamation-triangle\"></i> Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if props.AttachmentError != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"attachment-error\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"attachment-error\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 164, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 165, Col: 57}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Existing Attachments -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Existing Attachments -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(props.Attachments) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\tif(this.open) setTimeout(() => {\n\t\t\t\t\t\t\tthis.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t}, 100);\n\t\t\t\t\t'><summary class=\"attachments-label flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\tif(this.open) setTimeout(() => {\n\t\t\t\t\t\t\tthis.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t}, 100);\n\t\t\t\t\t'><summary class=\"attachments-label flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var10 string
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 179, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 180, Col: 49}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ")</summary><div id=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDExistingAttachments)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 182, Col: 46}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"flex flex-col gap\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ")</summary><div id=\"existing-attachments\" class=\"flex flex-col gap\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for attachmentIndex, attachment := range props.Attachments {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"attachment-item flex gap justify-between items-center border\" data-id=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"attachment-item flex gap justify-between items-center border\" data-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var12 string
-					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
+					var templ_7745c5c3_Var7 string
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 186, Col: 50}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 187, Col: 50}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><div class=\"attachment-info flex gap items-center\"><span class=\"ellipsis\">Anhang ")
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var13 string
-					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 189, Col: 58}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><div class=\"attachment-info flex gap items-center\"><span class=\"ellipsis\">Anhang ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</span> <span class=\"muted text-sm ellipsis\">(")
+					var templ_7745c5c3_Var8 string
+					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 190, Col: 58}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var14 string
-					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 190, Col: 73}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <span class=\"muted text-sm ellipsis\">(")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, ")</span></div><div class=\"attachment-actions flex gap\">")
+					var templ_7745c5c3_Var9 string
+					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 191, Col: 73}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ")</span></div><div class=\"attachment-actions flex gap\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -286,16 +220,16 @@ func EditTroubleReport(props *EditTroubleReportProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button type=\"button\" class=\"secondary flex gap items-center\" onclick=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<button type=\"button\" class=\"secondary flex gap items-center\" onclick=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var15 templ.ComponentScript = layouts.OpenImageViewer(attachment.GetID())
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15.Call)
+					var templ_7745c5c3_Var10 templ.ComponentScript = layouts.OpenImageViewer(attachment.GetID())
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10.Call)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-eye\"></i> Anzeigen</small></button> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-eye\"></i> Anzeigen</small></button> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -303,65 +237,26 @@ func EditTroubleReport(props *EditTroubleReportProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<button type=\"button\" class=\"destructive flex gap items-center\" onclick=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button type=\"button\" class=\"destructive flex gap items-center\" onclick=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var16 templ.ComponentScript = deleteAttachment(attachment.GetID())
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16.Call)
+					var templ_7745c5c3_Var11 templ.ComponentScript = deleteAttachment(attachment.GetID())
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11.Call)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Löschen</small></button></div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Löschen</small></button></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></details>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></details>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<!-- File Upload Area --><div class=\"file-input-area flex flex-col justify-center items-center\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div><input type=\"file\" name=\"attachments\" id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDAttachments)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 237, Col: 33}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" multiple accept=\"image/*\" onchange=\"onAttachments(this.event)\"></div><!-- File Preview Area --><div id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDFilePreview)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 245, Col: 36}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDNewAttachments)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/components/dialogs/edit-trouble-report.templ`, Line: 248, Col: 40}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- File Upload Area --><div class=\"file-input-area flex flex-col justify-center items-center\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div><input type=\"file\" name=\"attachments\" id=\"attachments\" multiple accept=\"image/*\" onchange=\"onAttachments(this.event)\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

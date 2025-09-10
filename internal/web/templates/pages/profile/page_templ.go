@@ -11,7 +11,6 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
@@ -56,7 +55,7 @@ func Page(user *usermodels.User) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 61, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 60, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -69,7 +68,7 @@ func Page(user *usermodels.User) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.TelegramID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 78, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 77, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -82,65 +81,52 @@ func Page(user *usermodels.User) templ.Component {
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/logout")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 83, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 82, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"ghost destructive flex flex-row gap\"><i class=\"bi bi-box-arrow-right\"></i> Abmelden</a></div></div><!-- User cookies table, requested via HTMX --><div style=\"overflow: hidden; background: var(--ui-color-50);\" class=\"border\"><span id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"ghost destructive flex flex-row gap\"><i class=\"bi bi-box-arrow-right\"></i> Abmelden</a></div></div><!-- User cookies table, requested via HTMX --><div style=\"overflow: hidden; background: var(--ui-color-50);\" class=\"border\"><span id=\"cookies\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(constants.IDCookies)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 94, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 94, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></span></div><!-- Dialog for changing the user name --><dialog id=\"edit-user-name-dialog\" class=\"profile-dialog border clean\" oncancel=\"event.preventDefault()\"><form action=\"./profile\"><!-- User name --><label class=\"flex flex-col\"><strong>Benutzername ändern</strong> <input name=\"user-name\" type=\"text\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies")
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 95, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 115, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"load\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></span></div><!-- Dialog for changing the user name --><dialog id=\"edit-user-name-dialog\" class=\"profile-dialog border clean\" oncancel=\"event.preventDefault()\"><form action=\"./profile\"><!-- User name --><label class=\"flex flex-col\"><strong>Benutzername ändern</strong> <input name=\"user-name\" type=\"text\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" placeholder=\"Neuer Benutzername\" required></label><footer style=\"margin-top: calc(var(--ui-spacing) * 2);\" class=\"flex flex-row gap justify-end\"><!-- Cancel button --><a role=\"button\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
+			var templ_7745c5c3_Var8 templ.SafeURL
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/profile")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 116, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 128, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" placeholder=\"Neuer Benutzername\" required></label><footer style=\"margin-top: calc(var(--ui-spacing) * 2);\" class=\"flex flex-row gap justify-end\"><!-- Cancel button --><a role=\"button\" href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 templ.SafeURL
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/profile")
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/profile/page.templ`, Line: 129, Col: 47}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"secondary flex flex-row gap\"><i class=\"bi bi-x-circle\"></i> Schließen</a><!-- Submit button --><button type=\"submit\" class=\"primary flex flex-row gap\"><i class=\"bi bi-check-circle\"></i> Ändern</button></footer></form></dialog></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"secondary flex flex-row gap\"><i class=\"bi bi-x-circle\"></i> Schließen</a><!-- Submit button --><button type=\"submit\" class=\"primary flex flex-row gap\"><i class=\"bi bi-check-circle\"></i> Ändern</button></footer></form></dialog></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -176,12 +162,12 @@ func navContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,7 +183,7 @@ func navContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

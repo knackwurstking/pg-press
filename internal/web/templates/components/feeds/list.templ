@@ -5,12 +5,11 @@ import (
 	"time"
 
 	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 templ List(feeds []*feedmodels.Feed, lastFeedID int64) {
 	if len(feeds) > 0 {
-		<ul id={ constants.IDData }>
+		<ul id="data">
 			for _, feed := range feeds {
 				<section style="position: relative;">
 					if feed.ID > lastFeedID {
@@ -23,7 +22,7 @@ templ List(feeds []*feedmodels.Feed, lastFeedID int64) {
 			}
 		</ul>
 	} else {
-		<span id={ constants.IDData }></span>
+		<span id="data"></span>
 	}
 }
 
