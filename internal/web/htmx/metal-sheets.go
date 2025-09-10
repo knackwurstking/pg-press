@@ -5,8 +5,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,10 +15,10 @@ type MetalSheets struct {
 }
 
 func (h *MetalSheets) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/metal-sheets/edit", h.handleEditGET),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/metal-sheets/edit", h.handleEditGET),
 		},
 	)
 }

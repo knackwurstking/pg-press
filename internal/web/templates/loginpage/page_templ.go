@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/layouts"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
 func Page(apiKey string, invalidApiKey bool) templ.Component {

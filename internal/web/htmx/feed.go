@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	feedscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/feeds"
 
 	"github.com/labstack/echo/v4"
@@ -19,10 +19,10 @@ type Feed struct {
 }
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/feed/list", h.handleListGET),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/feed/list", h.handleListGET),
 		},
 	)
 }
@@ -41,7 +41,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	logger.HTMXHandlerFeed().Debug("Retrieved %d feed items", len(feeds))
 
 	// Update user's last feed
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}

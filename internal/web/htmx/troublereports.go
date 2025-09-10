@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 
 	"github.com/labstack/echo/v4"
 )
@@ -15,28 +14,28 @@ type TroubleReports struct {
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
+		[]*helpers.EchoRoute{
 			// Dialog edit routes
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/dialog-edit", func(c echo.Context) error {
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/dialog-edit", func(c echo.Context) error {
 				return h.handleGetDialogEdit(c, nil)
 			}),
-			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/dialog-edit", h.handlePostDialogEdit),
-			webhelpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/dialog-edit", h.handlePutDialogEdit),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/dialog-edit", h.handlePostDialogEdit),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/dialog-edit", h.handlePutDialogEdit),
 
 			// Data routes
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data", h.handleGetData),
-			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data", h.handleDeleteData),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data", h.handleGetData),
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data", h.handleDeleteData),
 
 			// Attachments preview routes
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview", h.handleGetAttachmentsPreview),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview", h.handleGetAttachmentsPreview),
 
 			// Modifications routes
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/modifications/:id", func(c echo.Context) error {
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/modifications/:id", func(c echo.Context) error {
 				return h.handleGetModifications(c, nil)
 			}),
-			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/modifications/:id", h.handlePostModifications),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/modifications/:id", h.handlePostModifications),
 		},
 	)
 }

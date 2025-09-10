@@ -5,9 +5,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
@@ -19,10 +18,10 @@ type Nav struct {
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.handleFeedCounterWebSocketEcho),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.handleFeedCounterWebSocketEcho),
 		},
 	)
 }
@@ -34,7 +33,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 	// Create a WebSocket handler that can work with Echo
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 		// Get user from echo context
-		user, err := webhelpers.GetUserFromContext(c)
+		user, err := helpers.GetUserFromContext(c)
 		if err != nil {
 			logger.HTMXHandlerNav().Error("WebSocket authentication failed from %s: %v", remoteIP, err)
 			ws.Close()

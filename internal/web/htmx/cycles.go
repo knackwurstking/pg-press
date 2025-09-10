@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"

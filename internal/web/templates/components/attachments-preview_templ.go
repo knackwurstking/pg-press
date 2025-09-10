@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/layouts"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
 func AttachmentsPreview(attachments []*models.Attachment) templ.Component {

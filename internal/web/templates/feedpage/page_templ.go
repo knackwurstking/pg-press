@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/layouts"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 )
 
 func Page() templ.Component {

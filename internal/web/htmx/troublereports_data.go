@@ -7,16 +7,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	troublereportscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
 
 	"github.com/labstack/echo/v4"
 )
 
 func (h *TroubleReports) handleGetData(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -40,12 +40,12 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleDeleteData(c echo.Context) error {
-	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
 
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
-	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	}
 
 	// If "time" query is provided, return modified data attachments for "id"
-	timeQuery, err := webhelpers.ParseInt64Query(c, constants.QueryParamTime)
+	timeQuery, err := helpers.ParseInt64Query(c, constants.QueryParamTime)
 	if err == nil {
 		logger.HTMXHandlerTroubleReports().Debug("Loading modified attachments for trouble report %d at time %d", id, timeQuery)
 		for _, mod := range tr.Mods {
@@ -126,7 +126,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.TroubleReport) error {
-	id, err := webhelpers.ParseInt64Param(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.Troub
 		}
 	}
 
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -163,19 +163,19 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.Troub
 }
 
 func (h *TroubleReports) handlePostModifications(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	id, err := webhelpers.ParseInt64Param(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
 
 	logger.HTMXHandlerTroubleReports().Info("Processing modification restore for trouble report %d", id)
 
-	timeQuery, err := webhelpers.ParseInt64Query(c, constants.QueryParamTime)
+	timeQuery, err := helpers.ParseInt64Query(c, constants.QueryParamTime)
 	if err != nil {
 		return err
 	}

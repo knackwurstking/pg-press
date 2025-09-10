@@ -15,9 +15,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,12 +30,12 @@ func (h *TroubleReports) handleGetDialogEdit(
 	}
 
 	if !props.Close {
-		props.Close = webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
+		props.Close = helpers.ParseBoolQuery(c, constants.QueryParamClose)
 	}
 
 	if !props.Close && !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam(constants.QueryParamID); idStr != "" {
-			id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+			id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
 			if err != nil {
 				return err
 			}
@@ -78,7 +77,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		Close: true,
 	}
 
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
@@ -129,7 +128,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get ID from query parameter
-	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		return err
 	}
@@ -137,7 +136,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	logger.HTMXHandlerTroubleReports().Info("Updating trouble report %d", id)
 
 	// Get user from context
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -230,7 +229,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			dberror.WrapError(err, "invalid title form value"))
 	}
-	title = webhelpers.SanitizeInput(title)
+	title = helpers.SanitizeInput(title)
 
 	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
 	if err != nil {
@@ -238,7 +237,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			dberror.WrapError(err, "invalid content form value"))
 	}
-	content = webhelpers.SanitizeInput(content)
+	content = helpers.SanitizeInput(content)
 
 	// Process existing attachments and their order
 	attachments, err = h.processAttachments(ctx)

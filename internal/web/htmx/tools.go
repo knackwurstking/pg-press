@@ -12,10 +12,9 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,21 +24,21 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
 
 			// Get, Post or Edit a tool
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
 				return h.handleEditGET(c, nil)
 			}),
 
-			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
-			webhelpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
 
 			// Delete a tool
-			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
 		},
 	)
 }
@@ -58,8 +57,8 @@ func (h *Tools) handleList(c echo.Context) error {
 		logger.HTMXHandlerTools().Warn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
 	}
 
-	toolsListAll := toolscomp.List(tools)
-	if err := toolsListAll.Render(c.Request().Context(), c.Response()); err != nil {
+	toolsList := toolspage.ListTools(tools)
+	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tools list all: "+err.Error())
 	}
@@ -71,7 +70,7 @@ func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) erro
 	if props == nil {
 		props = &dialogs.EditToolProps{}
 
-		toolID, _ := webhelpers.ParseInt64Query(c, "id")
+		toolID, _ := helpers.ParseInt64Query(c, "id")
 		if toolID > 0 {
 			tool, err := h.DB.Tools.GetWithNotes(toolID)
 			if err != nil {
@@ -99,7 +98,7 @@ func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) erro
 }
 
 func (h *Tools) handleEditPOST(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -144,12 +143,12 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 }
 
 func (h *Tools) handleEditPUT(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	toolID, err := webhelpers.ParseInt64Query(c, "id")
+	toolID, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}
@@ -196,14 +195,14 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 
 func (h *Tools) handleDelete(c echo.Context) error {
 	// Get tool ID from query parameter
-	toolID, err := webhelpers.ParseInt64Query(c, "id")
+	toolID, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"invalid or missing id parameter: "+err.Error())
 	}
 
 	// Get user from context for audit trail
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
