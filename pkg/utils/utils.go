@@ -21,6 +21,18 @@ func (de *DatabaseError) Error() string {
 	return de.message + ": " + de.table + ": " + de.err.Error()
 }
 
+func IsNotDatabaseError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if _, ok := err.(*DatabaseError); ok {
+		return true
+	}
+
+	return false
+}
+
 type ValidationError struct {
 	message string
 }
@@ -31,6 +43,18 @@ func NewValidationError(message string) *ValidationError {
 
 func (v *ValidationError) Error() string {
 	return "validation error: " + v.message
+}
+
+func IsNotValidationError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if _, ok := err.(*ValidationError); ok {
+		return true
+	}
+
+	return false
 }
 
 type NotFoundError struct {
@@ -45,6 +69,18 @@ func (nf *NotFoundError) Error() string {
 	return "not found: " + nf.message
 }
 
+func IsNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if _, ok := err.(*NotFoundError); ok {
+		return true
+	}
+
+	return false
+}
+
 type AlreadyExistsError struct {
 	message string
 }
@@ -55,6 +91,18 @@ func NewAlreadyExistsError(message string) *AlreadyExistsError {
 
 func (ae *AlreadyExistsError) Error() string {
 	return "already exists: " + ae.message
+}
+
+func IsAlreadyExistsError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if _, ok := err.(*AlreadyExistsError); ok {
+		return true
+	}
+
+	return false
 }
 
 type InvalidCredentialsError struct {
@@ -69,20 +117,32 @@ func (ic *InvalidCredentialsError) Error() string {
 	return "invalid credentials: " + ic.message
 }
 
+func IsInvalidCredentialsError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if _, ok := err.(*InvalidCredentialsError); ok {
+		return true
+	}
+
+	return false
+}
+
 func GetHTTPStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
 
-	if err, ok := err.(*NotFoundError); ok && strings.Contains(err.Error(), "not found") {
+	if IsNotFoundError(err) {
 		return http.StatusNotFound
 	}
 
-	if err, ok := err.(*AlreadyExistsError); ok && strings.Contains(err.Error(), "already exists") {
+	if IsAlreadyExistsError(err) {
 		return http.StatusConflict
 	}
 
-	if err, ok := err.(*InvalidCredentialsError); ok && strings.Contains(err.Error(), "invalid credentials") {
+	if IsInvalidCredentialsError(err) {
 		return http.StatusUnauthorized
 	}
 

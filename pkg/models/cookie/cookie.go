@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -14,7 +15,7 @@ const (
 	DefaultExpiration  = 6 * 30 * 24 * time.Hour
 	MinValueLength     = 16
 	MaxUserAgentLength = 1000
-	MinAPIKeyLength    = 32
+	MinAPIKeyLength    = constants.MinAPIKeyLength
 )
 
 // Cookie represents a user session with authentication information.

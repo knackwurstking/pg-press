@@ -11,7 +11,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/services/regeneration"
 	"github.com/knackwurstking/pgpress/internal/services/tool"
 	"github.com/knackwurstking/pgpress/internal/services/troublereport"
-	"github.com/knackwurstking/pgpress/internal/services/user"
 )
 
 // Type Aliases to expose service types directly
@@ -23,7 +22,6 @@ type (
 	Regeneration  = regeneration.Service
 	Tool          = tool.Service
 	TroubleReport = troublereport.Service
-	User          = user.Service
 )
 
 var (
@@ -34,5 +32,4 @@ var (
 	NewRegeneration  = regeneration.New
 	NewTool          = tool.New
 	NewTroubleReport = troublereport.New
-	NewUser          = user.New
 )

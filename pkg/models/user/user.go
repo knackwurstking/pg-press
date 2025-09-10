@@ -7,15 +7,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/pkg/models/cookie"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 const (
 	MinNameLength   = 1
 	MaxNameLength   = 100
-	MinAPIKeyLength = cookie.MinAPIKeyLength
+	MinAPIKeyLength = constants.MinAPIKeyLength
 )
 
 // User represents a system user with Telegram integration
