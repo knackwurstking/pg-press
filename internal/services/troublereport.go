@@ -1,4 +1,4 @@
-package troublereport
+package services
 
 import (
 	"database/sql"
@@ -6,21 +6,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/services/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/services/feed"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/pkg/interfaces"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type Service struct {
+type TroubleReport struct {
 	db          *sql.DB
 	attachments *attachment.Service
 	feeds       *feed.Service
 }
 
-func New(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *Service {
+func NewTroubleReport(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *TroubleReport {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -40,7 +37,7 @@ func New(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *Serv
 		))
 	}
 
-	return &Service{
+	return &TroubleReport{
 		db:          db,
 		attachments: attachments,
 		feeds:       feeds,
@@ -48,7 +45,7 @@ func New(db *sql.DB, attachments *attachment.Service, feeds *feed.Service) *Serv
 }
 
 // List retrieves all trouble reports ordered by ID descending.
-func (tr *Service) List() ([]*models.TroubleReport, error) {
+func (tr *TroubleReport) List() ([]*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Starting trouble reports list query")
 	start := time.Now()
 
@@ -91,7 +88,7 @@ func (tr *Service) List() ([]*models.TroubleReport, error) {
 }
 
 // Get retrieves a specific trouble report by ID.
-func (tr *Service) Get(id int64) (*models.TroubleReport, error) {
+func (tr *TroubleReport) Get(id int64) (*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report by ID: %d", id)
 	start := time.Now()
 
@@ -116,7 +113,7 @@ func (tr *Service) Get(id int64) (*models.TroubleReport, error) {
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
-func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
+func (tr *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
 	if troubleReport == nil {
 		logger.DBTroubleReports().Error("Attempted to add nil trouble report")
 		return 0, dberror.NewValidationError("report", "trouble report cannot be nil", nil)
@@ -201,7 +198,7 @@ func (tr *Service) Add(troubleReport *models.TroubleReport, user *models.User) (
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
-func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User) error {
+func (tr *TroubleReport) Update(troubleReport *models.TroubleReport, user *models.User) error {
 	if troubleReport == nil {
 		logger.DBTroubleReports().Error("Attempted to update nil trouble report")
 		return dberror.NewValidationError("report", "trouble report cannot be nil", nil)
@@ -279,7 +276,7 @@ func (tr *Service) Update(troubleReport *models.TroubleReport, user *models.User
 }
 
 // Delete deletes a trouble report by ID and generates an activity feed entry.
-func (tr *Service) Delete(id int64, user *models.User) error {
+func (tr *TroubleReport) Delete(id int64, user *models.User) error {
 	userInfo := "unknown user"
 	if user != nil {
 		userInfo = fmt.Sprintf("%s (ID: %d)", user.Name, user.TelegramID)
@@ -349,7 +346,7 @@ func (tr *Service) Delete(id int64, user *models.User) error {
 }
 
 // GetWithAttachments retrieves a trouble report and loads its attachments.
-func (s *Service) GetWithAttachments(
+func (tr *TroubleReport) GetWithAttachments(
 	id int64,
 ) (*models.TroubleReportWithAttachments, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report with attachments, id: %d", id)
@@ -357,7 +354,7 @@ func (s *Service) GetWithAttachments(
 
 	// Get the trouble report
 	trStart := time.Now()
-	tr, err := s.Get(id)
+	tr, err := tr.Get(id)
 	if err != nil {
 		trElapsed := time.Since(trStart)
 		logger.DBTroubleReports().Error("Failed to get trouble report %d with attachments in %v: %v", id, trElapsed, err)
@@ -367,7 +364,7 @@ func (s *Service) GetWithAttachments(
 
 	// Load attachments
 	attachStart := time.Now()
-	attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
+	attachments, err := tr.attachments.GetByIDs(tr.LinkedAttachments)
 	if err != nil {
 		attachElapsed := time.Since(attachStart)
 		logger.DBTroubleReports().Error("Failed to load %d attachments for trouble report %d in %v: %v", len(tr.LinkedAttachments), id, attachElapsed, err)
@@ -390,13 +387,13 @@ func (s *Service) GetWithAttachments(
 }
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
-func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
+func (tr *TroubleReport) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
 	logger.DBTroubleReports().Debug("Starting trouble reports with attachments list query")
 	start := time.Now()
 
 	// Get all trouble reports
 	listStart := time.Now()
-	reports, err := s.List()
+	reports, err := tr.List()
 	if err != nil {
 		listElapsed := time.Since(listStart)
 		logger.DBTroubleReports().Error("Failed to list trouble reports in %v: %v", listElapsed, err)
@@ -410,7 +407,7 @@ func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments,
 	attachStart := time.Now()
 	for i, tr := range reports {
 		// Load attachments for each report
-		attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
+		attachments, err := tr.attachments.GetByIDs(tr.LinkedAttachments)
 		if err != nil {
 			logger.DBTroubleReports().Error("Failed to load %d attachments for trouble report %d (report %d/%d): %v",
 				len(tr.LinkedAttachments), tr.ID, i+1, len(reports), err)
@@ -438,7 +435,7 @@ func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments,
 }
 
 // AddWithAttachments creates a new trouble report and its attachments.
-func (s *Service) AddWithAttachments(
+func (tr *TroubleReport) AddWithAttachments(
 	user *models.User,
 	troubleReport *models.TroubleReport,
 	attachments []*models.Attachment,
@@ -469,13 +466,13 @@ func (s *Service) AddWithAttachments(
 		logger.DBTroubleReports().Debug("Adding attachment %d/%d (size: %d bytes) for %s",
 			i+1, len(attachments), len(attachment.Data), userInfo)
 
-		id, err := s.attachments.Add(attachment, user)
+		id, err := tr.attachments.Add(attachment, user)
 		if err != nil {
 			// Cleanup already added attachments on failure
 			logger.DBTroubleReports().Error("Failed to add attachment %d for %s, cleaning up %d existing: %v",
 				i+1, userInfo, len(attachmentIDs), err)
 			for _, addedID := range attachmentIDs {
-				if cleanupErr := s.attachments.Delete(addedID, user); cleanupErr != nil {
+				if cleanupErr := tr.attachments.Delete(addedID, user); cleanupErr != nil {
 					logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", addedID, cleanupErr)
 				}
 			}
@@ -490,13 +487,13 @@ func (s *Service) AddWithAttachments(
 
 	// Add the trouble report
 	reportStart := time.Now()
-	if _, err := s.Add(troubleReport, user); err != nil {
+	if _, err := tr.Add(troubleReport, user); err != nil {
 		reportElapsed := time.Since(reportStart)
 		logger.DBTroubleReports().Error("Failed to add trouble report for %s in %v, cleaning up %d attachments: %v",
 			userInfo, reportElapsed, len(attachmentIDs), err)
 		// Cleanup attachments on failure
 		for _, id := range attachmentIDs {
-			if cleanupErr := s.attachments.Delete(id, user); cleanupErr != nil {
+			if cleanupErr := tr.attachments.Delete(id, user); cleanupErr != nil {
 				logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", id, cleanupErr)
 			}
 		}
@@ -516,7 +513,7 @@ func (s *Service) AddWithAttachments(
 }
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
-func (s *Service) UpdateWithAttachments(
+func (tr *TroubleReport) UpdateWithAttachments(
 	user *models.User,
 	id int64,
 	troubleReport *models.TroubleReport,
@@ -548,13 +545,13 @@ func (s *Service) UpdateWithAttachments(
 		logger.DBTroubleReports().Debug("Adding new attachment %d/%d (size: %d bytes) for update %d by %s",
 			i+1, len(newAttachments), len(attachment.Data), id, userInfo)
 
-		attachmentID, err := s.attachments.Add(attachment, user)
+		attachmentID, err := tr.attachments.Add(attachment, user)
 		if err != nil {
 			// Cleanup already added attachments on failure
 			logger.DBTroubleReports().Error("Failed to add new attachment %d for update %d by %s, cleaning up %d existing: %v",
 				i+1, id, userInfo, len(newAttachmentIDs), err)
 			for _, addedID := range newAttachmentIDs {
-				if cleanupErr := s.attachments.Delete(addedID, user); cleanupErr != nil {
+				if cleanupErr := tr.attachments.Delete(addedID, user); cleanupErr != nil {
 					logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", addedID, cleanupErr)
 				}
 			}
@@ -575,13 +572,13 @@ func (s *Service) UpdateWithAttachments(
 
 	// Update the trouble report
 	updateStart := time.Now()
-	if err := s.Update(troubleReport, user); err != nil {
+	if err := tr.Update(troubleReport, user); err != nil {
 		updateElapsed := time.Since(updateStart)
 		logger.DBTroubleReports().Error("Failed to update trouble report %d by %s in %v, cleaning up %d new attachments: %v",
 			id, userInfo, updateElapsed, len(newAttachmentIDs), err)
 		// Cleanup new attachments on failure
 		for _, attachmentID := range newAttachmentIDs {
-			if cleanupErr := s.attachments.Delete(attachmentID, user); cleanupErr != nil {
+			if cleanupErr := tr.attachments.Delete(attachmentID, user); cleanupErr != nil {
 				logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", attachmentID, cleanupErr)
 			}
 		}
@@ -601,7 +598,7 @@ func (s *Service) UpdateWithAttachments(
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
-func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.TroubleReport, error) {
+func (tr *TroubleReport) RemoveWithAttachments(id int64, user *models.User) (*models.TroubleReport, error) {
 	userInfo := "unknown user"
 	if user != nil {
 		userInfo = fmt.Sprintf("%s (ID: %d)", user.Name, user.TelegramID)
@@ -612,7 +609,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 
 	// Get the trouble report to find its attachments
 	getStart := time.Now()
-	tr, err := s.Get(id)
+	tr, err := tr.Get(id)
 	if err != nil {
 		getElapsed := time.Since(getStart)
 		logger.DBTroubleReports().Error("Failed to get trouble report %d for removal by %s in %v: %v", id, userInfo, getElapsed, err)
@@ -625,7 +622,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 
 	// Remove the trouble report first
 	deleteStart := time.Now()
-	if err := s.Delete(id, user); err != nil {
+	if err := tr.Delete(id); err != nil {
 		deleteElapsed := time.Since(deleteStart)
 		logger.DBTroubleReports().Error("Failed to remove trouble report %d by %s in %v: %v", id, userInfo, deleteElapsed, err)
 		return tr, dberror.WrapError(err, "failed to remove trouble report")
@@ -637,7 +634,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 	successfulAttachmentDeletes := 0
 	failedAttachmentDeletes := 0
 	for _, attachmentID := range tr.LinkedAttachments {
-		if err := s.attachments.Delete(attachmentID, user); err != nil {
+		if err := tr.attachments.Delete(attachmentID, user); err != nil {
 			logger.DBTroubleReports().Warn("Failed to remove attachment %d for trouble report %d by %s: %v", attachmentID, id, userInfo, err)
 			failedAttachmentDeletes++
 		} else {
@@ -662,7 +659,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 }
 
 // LoadAttachments loads attachments for a trouble report.
-func (s *Service) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachment, error) {
+func (tr *TroubleReport) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachment, error) {
 	if tr == nil {
 		logger.DBTroubleReports().Error("Attempted to load attachments for nil trouble report")
 		return nil, dberror.NewValidationError("report", "trouble report cannot be nil", nil)
@@ -672,7 +669,7 @@ func (s *Service) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachmen
 		len(tr.LinkedAttachments), tr.ID, tr.Title)
 	start := time.Now()
 
-	attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
+	attachments, err := tr.attachments.GetByIDs(tr.LinkedAttachments)
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -693,11 +690,11 @@ func (s *Service) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachmen
 }
 
 // GetAttachment retrieves a specific attachment by ID.
-func (s *Service) GetAttachment(id int64) (*models.Attachment, error) {
+func (tr *TroubleReport) GetAttachment(id int64) (*models.Attachment, error) {
 	logger.DBTroubleReports().Debug("Getting attachment with ID %d", id)
 	start := time.Now()
 
-	attachment, err := s.attachments.Get(id)
+	attachment, err := tr.attachments.Get(id)
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -715,7 +712,7 @@ func (s *Service) GetAttachment(id int64) (*models.Attachment, error) {
 	return attachment, nil
 }
 
-func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
+func (tr *TroubleReport) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
 	report := &models.TroubleReport{}
 	var linkedAttachments string
 	var mods []byte
@@ -744,7 +741,7 @@ func (tr *Service) scanTroubleReport(scanner interfaces.Scannable) (*models.Trou
 	return report, nil
 }
 
-func (tr *Service) updateMods(user *models.User, report *models.TroubleReport) {
+func (tr *TroubleReport) updateMods(user *models.User, report *models.TroubleReport) {
 	if user == nil {
 		return
 	}

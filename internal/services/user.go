@@ -14,17 +14,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/services/feed"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type User struct {
 	db    *sql.DB
-	feeds *feed.Service
+	feeds *Feed
 }
 
-func NewUser(db *sql.DB, feeds *feed.Service) *User {
+func NewUser(db *sql.DB, feeds *Feed) *User {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			telegram_id INTEGER NOT NULL,

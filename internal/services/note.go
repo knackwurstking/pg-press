@@ -1,21 +1,21 @@
-package note
+package services
 
 import (
 	"database/sql"
 	"fmt"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/pkg/interfaces"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type Service struct {
+type Note struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) *Service {
+func NewNote(db *sql.DB) *Note {
 	query := `
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
@@ -27,22 +27,15 @@ func New(db *sql.DB) *Service {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(
-			dberror.NewDatabaseError(
-				"create_table",
-				"notes",
-				"failed to create notes table",
-				err,
-			),
-		)
+		panic(fmt.Errorf("failed to create notes table: %w", err))
 	}
 
-	return &Service{
+	return &Note{
 		db: db,
 	}
 }
 
-func (n *Service) List() ([]*models.Note, error) {
+func (n *Note) List() ([]*models.Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
 	query := `
@@ -51,8 +44,7 @@ func (n *Service) List() ([]*models.Note, error) {
 
 	rows, err := n.db.Query(query)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "notes",
-			"failed to query notes", err)
+		return nil, utils.NewDatabaseError("select", "notes", err)
 	}
 	defer rows.Close()
 
@@ -61,20 +53,19 @@ func (n *Service) List() ([]*models.Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan note")
+			return nil, fmt.Errorf("failed to scan note: %w", err)
 		}
 		notes = append(notes, note)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "notes",
-			"error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "notes", err)
 	}
 
 	return notes, nil
 }
 
-func (n *Service) Get(id int64) (*models.Note, error) {
+func (n *Note) Get(id int64) (*models.Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	query := `
@@ -86,16 +77,15 @@ func (n *Service) Get(id int64) (*models.Note, error) {
 	note, err := n.scanNote(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, dberror.ErrNotFound
+			return nil, utils.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
 		}
-		return nil, dberror.NewDatabaseError("select", "notes",
-			fmt.Sprintf("failed to get note with ID %d", id), err)
+		return nil, utils.NewDatabaseError("select", "notes", err)
 	}
 
 	return note, nil
 }
 
-func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Note) GetByIDs(ids []int64) ([]*models.Note, error) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -117,8 +107,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 
 	rows, err := n.db.Query(query, args...)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "notes",
-			"failed to query notes by IDs", err)
+		return nil, utils.NewDatabaseError("select", "notes", err)
 	}
 	defer rows.Close()
 
@@ -128,14 +117,13 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan attachment")
+			return nil, fmt.Errorf("failed to scan attachment: %w", err)
 		}
 		noteMap[note.ID] = note
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "notes",
-			"error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "notes", err)
 	}
 
 	// Return attachments in the order of the requested IDs
@@ -149,7 +137,7 @@ func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Service) Add(note *models.Note, _ *models.User) (int64, error) {
+func (n *Note) Add(note *models.Note, _ *models.User) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -158,36 +146,34 @@ func (n *Service) Add(note *models.Note, _ *models.User) (int64, error) {
 
 	result, err := n.db.Exec(query, note.Level, note.Content)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "notes",
-			"failed to insert note", err)
+		return 0, utils.NewDatabaseError("insert", "notes", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "notes",
-			"failed to get last insert ID", err)
+		return 0, utils.NewDatabaseError("insert", "notes", err)
 	}
 
 	return id, nil
 }
 
-func (n *Service) Update(note *models.Note, user *models.User) error {
+func (n *Note) Update(note *models.Note, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Service) Delete(id int64, user *models.User) error {
+func (n *Note) Delete(id int64, user *models.User) error {
 	return fmt.Errorf("operation not supported")
 }
 
-func (n *Service) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
+func (n *Note) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
 
 	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, dberror.NewDatabaseError("scan", "notes",
-			"failed to scan row", err)
+
+		return nil, utils.NewDatabaseError("scan", "notes", err)
 	}
 
 	return note, nil

@@ -1,28 +1,26 @@
-package metalsheet
+package services
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/services/feed"
-	"github.com/knackwurstking/pgpress/internal/database/services/note"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/modification"
-	"github.com/knackwurstking/pgpress/pkg/interfaces"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/modification"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// Service represents a collection of metal sheets in the database.
-type Service struct {
+// MetalSheet represents a collection of metal sheets in the database.
+type MetalSheet struct {
 	db    *sql.DB
-	feeds *feed.Service
-	notes *note.Service
+	feeds *Feed
+	notes *Note
 }
 
-// NewMetalSheets creates a new MetalSheets instance
-func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
+// NewMetalSheet creates a new MetalSheet instance
+func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
 	query := `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
@@ -42,17 +40,10 @@ func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(
-			dberror.NewDatabaseError(
-				"create_table",
-				"metal_sheets",
-				"failed to create metal_sheets table",
-				err,
-			),
-		)
+		panic(fmt.Errorf("failed to create metal_sheets table: %w", err))
 	}
 
-	return &Service{
+	return &MetalSheet{
 		db:    db,
 		feeds: feeds,
 		notes: notes,
@@ -60,7 +51,7 @@ func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 }
 
 // List returns all metal sheets
-func (s *Service) List() ([]*models.MetalSheet, error) {
+func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
@@ -70,8 +61,7 @@ func (s *Service) List() ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			"failed to query metal sheets", err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 	defer rows.Close()
 
@@ -80,14 +70,13 @@ func (s *Service) List() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan metal sheet")
+			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			"error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Listed %d metal sheets", len(sheets))
@@ -95,7 +84,7 @@ func (s *Service) List() ([]*models.MetalSheet, error) {
 }
 
 // Get returns a metal sheet by ID
-func (s *Service) Get(id int64) (*models.MetalSheet, error) {
+func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
@@ -108,17 +97,16 @@ func (s *Service) Get(id int64) (*models.MetalSheet, error) {
 	sheet, err := s.scanMetalSheet(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, dberror.ErrNotFound
+			return nil, utils.NewNotFoundError(fmt.Sprintf("metal sheet with ID %d", id))
 		}
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			fmt.Sprintf("failed to get metal sheet with ID %d", id), err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 
 	return sheet, nil
 }
 
 // GetWithNotes returns a metal sheet with its related notes loaded
-func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
+func (s *MetalSheet) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := s.Get(id)
@@ -147,7 +135,7 @@ func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 }
 
 // GetByToolID returns all metal sheets assigned to a specific tool
-func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
+func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
@@ -158,8 +146,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			fmt.Sprintf("failed to query metal sheets for tool ID %d", toolID), err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 	defer rows.Close()
 
@@ -168,14 +155,13 @@ func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan metal sheet")
+			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			"error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
@@ -183,7 +169,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 }
 
 // GetAvailable returns all available metal sheets
-func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
+func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
@@ -195,8 +181,7 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			"failed to query available metal sheets", err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 	defer rows.Close()
 
@@ -205,14 +190,13 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan metal sheet")
+			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, dberror.NewDatabaseError("select", "metal_sheets",
-			"error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d available metal sheets", len(sheets))
@@ -220,7 +204,7 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
+func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
@@ -240,14 +224,12 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "metal_sheets",
-			"failed to marshal notes", err)
+		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
 	}
 
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "metal_sheets",
-			"failed to marshal mods", err)
+		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
 	}
 
 	query := `
@@ -259,13 +241,12 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "metal_sheets",
-			"failed to insert metal sheet", err)
+		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "metal_sheets", "failed to get last insert ID", err)
+		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
 	}
 
 	// Set sheet ID for return
@@ -287,7 +268,7 @@ func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error
 }
 
 // Update updates an existing metal sheet
-func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
+func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
@@ -323,20 +304,18 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "metal_sheets",
-			"failed to marshal notes", err)
+		return utils.NewDatabaseError("update", "metal_sheets", err)
 	}
 
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "metal_sheets",
-			"failed to marshal mods", err)
+		return utils.NewDatabaseError("update", "metal_sheets", err)
 	}
 
 	query := `
 		UPDATE metal_sheets
 		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
-		    tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
+						tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $9;
 	`
 
@@ -344,8 +323,7 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "metal_sheets",
-			fmt.Sprintf("failed to update metal sheet with ID %d", sheet.ID), err)
+		return utils.NewDatabaseError("update", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
@@ -364,7 +342,7 @@ func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
+func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -394,8 +372,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "metal_sheets",
-			"failed to marshal mods", err)
+		return utils.NewDatabaseError("update", "metal_sheets", err)
 	}
 
 	// Update both tool_id and mods in database
@@ -406,8 +383,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 		toolID, modsBytes, sheetID,
 	)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "metal_sheets",
-			fmt.Sprintf("failed to assign tool to metal sheet ID %d", sheetID), err)
+		return utils.NewDatabaseError("update", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
@@ -432,7 +408,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) er
 }
 
 // Delete deletes a metal sheet
-func (s *Service) Delete(id int64, user *models.User) error {
+func (s *MetalSheet) Delete(id int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	query := `
@@ -440,8 +416,7 @@ func (s *Service) Delete(id int64, user *models.User) error {
 	`
 	_, err := s.db.Exec(query, id)
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "metal_sheets",
-			fmt.Sprintf("failed to delete metal sheet with ID %d", id), err)
+		return utils.NewDatabaseError("delete", "metal_sheets", err)
 	}
 
 	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
@@ -459,7 +434,7 @@ func (s *Service) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
+func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Debug("Scanning metal sheet")
 	sheet := &models.MetalSheet{}
 
@@ -474,8 +449,7 @@ func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalShe
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, dberror.NewDatabaseError("scan", "metal_sheets",
-			"failed to scan row", err)
+		return nil, utils.NewDatabaseError("scan", "metal_sheets", err)
 	}
 
 	// Handle nullable tool_id
@@ -484,12 +458,11 @@ func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalShe
 	}
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
-		return nil, dberror.NewDatabaseError("scan", "metal_sheets",
-			"failed to unmarshal notes", err)
+		return nil, utils.NewDatabaseError("scan", "metal_sheets", err)
 	}
 
 	if err := json.Unmarshal(mods, &sheet.Mods); err != nil {
-		return nil, dberror.WrapError(err, "failed to unmarshal mods data")
+		return nil, fmt.Errorf("failed to unmarshal mods: %w", err)
 	}
 
 	return sheet, nil

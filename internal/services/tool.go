@@ -1,16 +1,13 @@
-package tool
+package services
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/services/feed"
-	"github.com/knackwurstking/pgpress/internal/database/services/note"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/pkg/interfaces"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 type Service struct {
@@ -19,7 +16,7 @@ type Service struct {
 	feeds *feed.Service
 }
 
-func New(db *sql.DB, notes *note.Service, feeds *feed.Service) *Service {
+func NewTool(db *sql.DB, notes *note.Service, feeds *feed.Service) *Service {
 	const createTableQuery = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,

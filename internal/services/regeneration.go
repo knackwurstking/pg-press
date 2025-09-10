@@ -1,16 +1,14 @@
-package regeneration
+package services
 
 import (
 	"database/sql"
 	"errors"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/services/feed"
-	"github.com/knackwurstking/pgpress/internal/database/services/tool"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/pkg/interfaces"
+	"github.com/knackwurstking/pgpress/internal/services/tool"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 type Service struct {
@@ -21,7 +19,7 @@ type Service struct {
 	log *logger.Logger
 }
 
-func New(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
+func NewRegeneration(db *sql.DB, tools *tool.Service, feeds *feed.Service) *Service {
 	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
 	//if _, err := db.Exec(dropQuery); err != nil {
 	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
