@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
