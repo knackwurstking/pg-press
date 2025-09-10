@@ -1,3 +1,4 @@
+// TODO: Use the new base component
 package dialogs
 
 import (
@@ -289,4 +290,39 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
             </script>
 		</dialog>
 	}
+}
+
+script deleteAttachment(attachmentId int64) {
+    if (!confirm(
+        "Sind Sie sicher, dass Sie diesen Anhang löschen möchten?",
+    )) return;
+
+    // Find and remove the attachment item from DOM
+    var attachmentItem = document.querySelector(
+        `#existing-attachments .attachment-item[data-id="${attachmentId}"]`,
+    );
+
+    if (attachmentItem) {
+        // Remove the DOM element
+        attachmentItem.remove();
+
+        // Add the attachment ID to the removal list
+        existingAttachmentsRemoval.push(attachmentId);
+        updateExistingAttachmentsRemoval();
+
+        // Check if no attachments left and hide the details section
+        var existingAttachments = document.getElementById(
+            "existing-attachments",
+        );
+        if (
+            existingAttachments &&
+            existingAttachments.children.length === 0
+        ) {
+            var detailsSection =
+                existingAttachments.closest("details");
+            if (detailsSection) {
+                detailsSection.style.display = "none";
+            }
+        }
+    }
 }

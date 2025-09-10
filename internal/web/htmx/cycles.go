@@ -5,15 +5,16 @@ import (
 	"strconv"
 	"time"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	cyclemodels "github.com/knackwurstking/pgpress/internal/database/models/cycle"
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,66 +23,67 @@ type Cycles struct {
 }
 
 func (h *Cycles) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
+		[]*helpers.EchoRoute{
 			// Cycles table rows
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleSection),
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles", h.handleSection),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles", h.handleTotalCycles),
 
 			// Get, add or edit a cycles table entry
-			webhelpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit", func(c echo.Context) error {
-				return h.handleEditGET(nil, c)
-			}),
-			webhelpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleEditPOST),
-			webhelpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleEditPUT),
+			helpers.NewEchoRoute(
+				http.MethodGet, "/htmx/tools/cycle/edit",
+				func(c echo.Context) error {
+					return h.handleEditGET(nil, c)
+				},
+			),
+
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit", h.handleEditPOST),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit", h.handleEditPUT),
 
 			// Delete a cycle table entry
-			webhelpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete", h.handleDELETE),
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete", h.handleDELETE),
 		},
 	)
 }
 
 func (h *Cycles) handleSection(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	// Get tool and position parameters
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	// Get tool information
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
 	}
 
-	// Get cycles for this specific tool
 	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get press cycles: "+err.Error())
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get press cycles: "+err.Error())
 	}
 
-	// Filter cycles by position
-	filteredCycles := cyclemodels.FilterByToolPosition(tool.Position, toolCycles...)
+	filteredCycles := models.FilterByToolPosition(
+		tool.Position,
+		toolCycles...,
+	)
 
-	// Get regenerations for this tool
 	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
 	if err != nil {
 		logger.HTMXHandlerTools().Error("Failed to get regenerations for tool %d: %v", toolID, err)
-		regenerations = []*toolmodels.Regeneration{} // Continue with empty regenerations
+		regenerations = []*models.Regeneration{}
 	}
 
-	// Get total cycles
-	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
+	totalCycles := h.getTotalCycles(
+		toolID,
+		filteredCycles...,
+	)
 
-	// Render the component
 	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
 		User:          user,
 		Tool:          tool,
@@ -89,9 +91,12 @@ func (h *Cycles) handleSection(c echo.Context) error {
 		Cycles:        filteredCycles,
 		Regenerations: regenerations,
 	})
-	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render tool cycles: "+err.Error())
+
+	if err := cyclesSection.Render(
+		c.Request().Context(),
+		c.Response(),
+	); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to render tool cycles: "+err.Error())
 	}
 
 	return nil
@@ -99,7 +104,7 @@ func (h *Cycles) handleSection(c echo.Context) error {
 
 func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// Get tool and position parameters
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
@@ -116,24 +121,24 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	}
 
 	// Filter cycles by position
-	filteredCycles := cyclemodels.FilterByToolPosition(tool.Position, toolCycles...)
+	filteredCycles := models.FilterByToolPosition(tool.Position, toolCycles...)
 
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
 	return toolscomp.TotalCycles(
 		totalCycles,
-		webhelpers.ParseBoolQuery(c, constants.QueryParamInput),
+		helpers.ParseBoolQuery(c, constants.QueryParamInput),
 	).Render(c.Request().Context(), c.Response())
 }
 
-func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Context) error {
+func (h *Cycles) handleEditGET(props *dialogs.EditCycleProps, c echo.Context) error {
 	if props == nil {
-		props = &dialogs.EditPressCycleProps{}
+		props = &dialogs.EditCycleProps{}
 	}
 
 	// Get tool and position from query if not already set
-	if !props.HasActiveTool() {
+	if props.Tool == nil {
 		tool, err := h.getToolFromQuery(c)
 		if err != nil {
 			return err
@@ -141,19 +146,7 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 		props.Tool = tool
 	}
 
-	close := webhelpers.ParseBoolQuery(c, constants.QueryParamClose)
-	if close || props.Close {
-		props.Close = true
-
-		cycleEditDialog := dialogs.EditPressCycle(props)
-		if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError,
-				"failed to close cycle edit dialog: "+err.Error())
-		}
-		return nil
-	}
-
-	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err == nil {
 		props.CycleID = cycleID
 		// Get cycle data from the database
@@ -168,17 +161,16 @@ func (h *Cycles) handleEditGET(props *dialogs.EditPressCycleProps, c echo.Contex
 		}
 	}
 
-	cycleEditDialog := dialogs.EditPressCycle(props)
+	cycleEditDialog := dialogs.EditCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render cycle edit dialog: "+err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to render cycle edit dialog: "+err.Error())
 	}
 
 	return nil
 }
 
 func (h *Cycles) handleEditPOST(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
@@ -191,14 +183,14 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 	// Parse form data
 	form, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:  tool,
 			Error: err.Error(),
 		}, c)
 	}
 
-	if !toolmodels.IsValidPressNumber(form.PressNumber) {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+	if !models.IsValidPressNumber(form.PressNumber) {
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:             tool,
 			Error:            "press_number must be a valid integer",
 			InputTotalCycles: form.TotalCycles,
@@ -207,18 +199,12 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}, c)
 	}
 
-	pressCycle := cyclemodels.NewCycle(
-		*form.PressNumber,
-		tool.ID,
-		tool.Position,
-		form.TotalCycles,
-		user.TelegramID,
-	)
+	pressCycle := models.NewCycle(*form.PressNumber, tool.ID, tool.Position, form.TotalCycles, user.TelegramID)
 	pressCycle.Date = form.Date
 
 	cycleID, err := h.DB.PressCycles.Add(pressCycle, user)
 	if err != nil {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:             tool,
 			Error:            err.Error(),
 			InputTotalCycles: form.TotalCycles,
@@ -234,19 +220,16 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 		}
 	}
 
-	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		Tool:  tool,
-		Close: true,
-	}, c)
+	return nil
 }
 
 func (h *Cycles) handleEditPUT(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
@@ -258,15 +241,15 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 
 	form, err := h.getCycleFormData(c)
 	if err != nil {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:    tool,
 			CycleID: cycleID,
 			Error:   err.Error(),
 		}, c)
 	}
 
-	if !toolmodels.IsValidPressNumber(form.PressNumber) {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+	if !models.IsValidPressNumber(form.PressNumber) {
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:             tool,
 			CycleID:          cycleID,
 			Error:            "press_number must be a valid integer",
@@ -277,18 +260,10 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 	}
 
 	// Update the cycle
-	pressCycle := cyclemodels.NewPressCycleWithID(
-		cycleID,
-		*form.PressNumber,
-		tool.ID,
-		tool.Position,
-		form.TotalCycles,
-		user.TelegramID,
-		form.Date,
-	)
+	pressCycle := models.NewPressCycleWithID(cycleID, *form.PressNumber, tool.ID, tool.Position, form.TotalCycles, user.TelegramID, form.Date)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
-		return h.handleEditGET(&dialogs.EditPressCycleProps{
+		return h.handleEditGET(&dialogs.EditCycleProps{
 			Tool:             tool,
 			CycleID:          cycleID,
 			Error:            err.Error(),
@@ -308,19 +283,16 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 		}
 	}
 
-	return h.handleEditGET(&dialogs.EditPressCycleProps{
-		Tool:  tool,
-		Close: true,
-	}, c)
+	return nil
 }
 
 func (h *Cycles) handleDELETE(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	cycleID, err := webhelpers.ParseInt64Query(c, constants.QueryParamCycleID)
+	cycleID, err := helpers.ParseInt64Query(c, constants.QueryParamCycleID)
 	if err != nil {
 		return err
 	}
@@ -328,15 +300,14 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Handling cycle deletion request for ID %d", cycleID)
 
 	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to delete press cycle: "+err.Error())
+		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to delete press cycle: "+err.Error())
 	}
 
 	return h.handleSection(c)
 }
 
 // getTotalCycles calculates total cycles from a list of cycles
-func (h *Cycles) getTotalCycles(toolID int64, cycles ...*cyclemodels.Cycle) int64 {
+func (h *Cycles) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
 	// Get regeneration for this tool
 	var startCycleID int64
 	if r, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
@@ -357,16 +328,15 @@ func (h *Cycles) getTotalCycles(toolID int64, cycles ...*cyclemodels.Cycle) int6
 }
 
 // getToolFromQuery extracts tool and tool position from query parameters
-func (h *Cycles) getToolFromQuery(c echo.Context) (*toolmodels.Tool, error) {
-	toolID, err := webhelpers.ParseInt64Query(c, constants.QueryParamToolID)
+func (h *Cycles) getToolFromQuery(c echo.Context) (*models.Tool, error) {
+	toolID, err := helpers.ParseInt64Query(c, constants.QueryParamToolID)
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
+		return nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
 	}
 
 	return tool, nil
@@ -381,7 +351,7 @@ func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusBadRequest, "press_number must be an integer")
 		}
-		pn := toolmodels.PressNumber(press)
+		pn := models.PressNumber(press)
 		form.PressNumber = &pn
 	}
 

@@ -29,6 +29,7 @@ type (
 	Status           = tool.Status
 	PressNumber      = tool.PressNumber
 	PressUtilization = tool.PressUtilization
+	Regeneration     = tool.Regeneration
 )
 
 // Tool constants
@@ -119,6 +120,7 @@ var NewFeed = feed.New
 // Constructor functions - Tool
 var NewTool = tool.New
 var IsValidPressNumber = tool.IsValidPressNumber
+var NewRegeneration = tool.NewRegeneration
 
 // Constructor functions - Note
 var NewNote = note.New

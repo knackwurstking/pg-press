@@ -2,10 +2,11 @@
 package constants
 
 const (
+	CycleEditDialogID = "cycle-edit-dialog"
+
 	IDDialogLogin                = "dialogLogin"
 	IDDialogEditUserName         = "dialogEditUserName"
 	IDToolEditDialog             = "toolEditDialog"
-	IDToolCycleEditDialog        = "toolCycleEditDialog"
 	IDTroubleReportEditDialog    = "troubleReportEditDialog"
 	IDTitle                      = "title"
 	IDContent                    = "content"
@@ -31,5 +32,5 @@ const (
 )
 
 const (
-	DateFormat = "02.01.2006"
+	DateFormat string = "02.01.2006"
 )

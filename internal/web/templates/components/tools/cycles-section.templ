@@ -19,7 +19,6 @@ type CyclesSectionProps struct {
 	Regenerations []*toolmodels.Regeneration
 }
 
-// TODO: Handle regenerations highlighting
 templ CyclesSection(props *CyclesSectionProps) {
 	<div class="card compact info text-sm mb">
 		<div class="card-header">
@@ -42,7 +41,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 				env.ServerPathPrefix, props.Tool.ID, props.ToolPosition,
 			) }
 			hx-trigger="click"
-			hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
+			hx-target={ fmt.Sprintf("#%s", constants.CycleEditDialogID) }
 			hx-swap="outerHTML"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 
@@ -87,7 +86,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 	</figure>
 
 	// Dialog placeholder
-	<span id={ constants.IDToolCycleEditDialog }></span>
+	<span id={ constants.CycleEditDialogID }></span>
 }
 
 templ cyclesTableRows(props *CyclesSectionProps) {
@@ -149,51 +148,53 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *cyclemodel
 			</span>
 		</td>
 
-		<td class="button-group flex justify-end items-center">
-			// HTMX Button: Goto: Edit cycle entry dialog
-			<button
-				class="small ghost"
+		<td>
+			<span class="button-group flex justify-end items-center">
+				// HTMX Button: Goto: Edit cycle entry dialog
+				<button
+					class="small ghost"
 
-				hx-get={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
-					env.ServerPathPrefix, props.Tool.ID, cycle.ID,
-				) }
-				hx-trigger="click"
-				hx-target={ fmt.Sprintf("#%s", constants.IDToolCycleEditDialog) }
-				hx-swap="outerHTML"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
+						env.ServerPathPrefix, props.Tool.ID, cycle.ID,
+					) }
+					hx-trigger="click"
+					hx-target={ fmt.Sprintf("#%s", constants.CycleEditDialogID) }
+					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 
-				title="Bearbeiten"
+					title="Bearbeiten"
 
-				if !props.User.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-pencil"></i>
-			</button>
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-pencil"></i>
+				</button>
 
-			// HTMX Button: Delete cycle from database table and reload section.cycles
-			<button
-				class="destructive small ghost"
+				// HTMX Button: Delete cycle from database table and reload section.cycles
+				<button
+					class="destructive small ghost"
 
-				hx-delete={ fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
-					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
-				) }
-				hx-trigger="click"
-				hx-target="section.cycles"
-				hx-swap="innerHTML"
-				hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+					hx-delete={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/delete?cycle_id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
+					) }
+					hx-trigger="click"
+					hx-target="section.cycles"
+					hx-swap="innerHTML"
+					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
 
-				title="Löschen"
+					title="Löschen"
 
-				if !props.User.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-trash"></i>
-			</button>
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</span>
 		</td>
 	</tr>
 }

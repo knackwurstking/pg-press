@@ -1,4 +1,3 @@
-// TODO: Use this new dialog base for all the dialogs in the application, this will maybe clean up things a bit
 package dialogs
 
 const (
@@ -6,16 +5,17 @@ const (
 )
 
 type BaseProps struct {
+	ID string
+
 	Type 				string // Type like "POST", "PUT"
 	Href 				string
-	Target 				string
-	Swap 				string
 	Error 				string
 	SubmitButtonText 	string
 }
 
 templ Base(props BaseProps) {
 	<dialog
+		id={ props.ID }
 		class="fullscreen clean"
 		onclose='
 			console.debug("Dialog closed"); // TOOD: Remove this if this closing thing is working
@@ -29,13 +29,8 @@ templ Base(props BaseProps) {
 				hx-put={ props.Href }
 			}
 
-			if props.Target != "" {
-				hx-target={ props.Target }
-			}
-
-			if props.Swap != "" {
-				hx-swap={ props.Swap }
-			}
+			hx-target="body"
+			hx-swap="beforeend"
 
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			enctype="multipart/form-data"
@@ -50,10 +45,9 @@ templ Base(props BaseProps) {
 
 			// Content
 			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p">
-				<!-- Content goes here -->
+				{ children... }
 			</div>
 
-			// TODO: Dialog Actions
 			<footer class="flex gap justify-end">
 				<button
 					name="close"
@@ -65,11 +59,19 @@ templ Base(props BaseProps) {
 					Schließen
 				</button>
 
-				<button type="submit" class="flex gap">
+				<button
+					type="submit"
+					class="flex gap"
+					onclick="this.closest('dialog').close()"
+				>
 					<i class="bi bi-check-circle"></i>
 					{ props.SubmitButtonText }
 				</button>
 			</footer>
 		</form>
+
+		<script defer>
+            document.querySelector('#{{ props.ID }}').showModal();
+        </script>
 	</dialog>
 }
