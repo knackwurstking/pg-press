@@ -12,8 +12,8 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/modification"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
 func ListMods(

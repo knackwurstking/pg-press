@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 func MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet) templ.Component {

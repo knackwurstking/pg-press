@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 func AttachmentsPreview(attachments []*models.Attachment) templ.Component {

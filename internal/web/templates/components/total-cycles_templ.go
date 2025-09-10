@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration

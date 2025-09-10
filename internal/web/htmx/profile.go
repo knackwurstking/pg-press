@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/profilepage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -38,7 +38,7 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		logger.HTMXHandlerProfile().Error("Failed to list cookies for user %s: %v", user.Name, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to list cookies: "+err.Error())
 	}
 
@@ -65,7 +65,7 @@ func (h *Profile) handleDeleteCookies(c echo.Context) error {
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
 		logger.HTMXHandlerProfile().Error("Failed to delete cookie: %v", err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to delete cookie: "+err.Error())
 	}
 

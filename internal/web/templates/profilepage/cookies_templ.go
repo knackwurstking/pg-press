@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 func Cookies(cookies []*models.Cookie) templ.Component {

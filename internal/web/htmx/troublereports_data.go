@@ -3,13 +3,13 @@ package htmx
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,7 +24,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	trs, err := h.DB.TroubleReports.ListWithAttachments()
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to load trouble reports: "+err.Error())
 	}
 
@@ -32,7 +32,7 @@ func (h *TroubleReports) handleGetData(c echo.Context) error {
 
 	troubleReportsList := troublereportspage.List(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to render trouble reports list component: "+err.Error())
 	}
 	return nil
@@ -61,7 +61,7 @@ func (h *TroubleReports) handleDeleteData(c echo.Context) error {
 
 	if removedReport, err := h.DB.TroubleReports.RemoveWithAttachments(id, user); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to delete trouble report: "+err.Error())
 	} else {
 		logger.HTMXHandlerTroubleReports().Info("Successfully deleted trouble report %d (%s)", removedReport.ID, removedReport.Title)
@@ -80,7 +80,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to load trouble report: "+err.Error())
 	}
 
@@ -102,7 +102,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 				loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(modifiedTr)
 				if err != nil {
 					logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for modified trouble report %d: %v", id, err)
-					return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+					return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 						"failed to load attachments for modified trouble report: "+err.Error())
 				}
 
@@ -136,7 +136,7 @@ func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.Troub
 		var err error
 		tr, err = h.DB.TroubleReports.Get(id)
 		if err != nil {
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"failed to load trouble report: "+err.Error())
 		}
 	}
@@ -184,7 +184,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to load trouble report %d: %v", id, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to load trouble report: "+err.Error())
 	}
 
@@ -196,7 +196,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 			timeQuery, id, err,
 		)
 
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get modification: "+err.Error())
 	}
 
@@ -216,7 +216,7 @@ func (h *TroubleReports) handlePostModifications(c echo.Context) error {
 			id, err,
 		)
 
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 

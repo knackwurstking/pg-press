@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -46,7 +46,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 			tr, err := h.DB.TroubleReports.Get(id)
 			if err != nil {
 				logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
-				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 					"failed to get trouble report: "+err.Error())
 			}
 
@@ -111,7 +111,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 				err,
 			)
 
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"failed to add trouble report: "+err.Error())
 		}
 
@@ -171,7 +171,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get trouble report: "+err.Error())
 	}
 
@@ -203,7 +203,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 			id, err,
 		)
 
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 
@@ -227,7 +227,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Invalid title form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			dberror.WrapError(err, "invalid title form value"))
+			fmt.Errorf("invalid title form value: %w", err))
 	}
 	title = helpers.SanitizeInput(title)
 
@@ -235,7 +235,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Invalid content form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			dberror.WrapError(err, "invalid content form value"))
+			fmt.Errorf("invalid content form value: %w", err))
 	}
 	content = helpers.SanitizeInput(content)
 
@@ -244,7 +244,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to process attachments: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			dberror.WrapError(err, "failed to process attachments"))
+			fmt.Errorf("failed to process attachments: %w", err))
 	}
 
 	logger.HTMXHandlerTroubleReports().Debug("Form validation successful: title='%s', attachments=%d", title, len(attachments))

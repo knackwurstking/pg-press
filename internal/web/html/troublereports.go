@@ -9,14 +9,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/pdf"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type TroubleReports struct {
@@ -61,7 +61,7 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 			"Failed to retrieve trouble report %d for PDF generation: %v",
 			id, err,
 		)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve trouble report: "+err.Error())
 	}
 
@@ -113,7 +113,7 @@ func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get attachment: "+err.Error())
 	}
 

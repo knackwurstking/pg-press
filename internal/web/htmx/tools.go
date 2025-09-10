@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -48,7 +48,7 @@ func (h *Tools) handleList(c echo.Context) error {
 	// Get tools from database
 	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get tools from database: "+err.Error())
 	}
 
@@ -74,7 +74,7 @@ func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) erro
 		if toolID > 0 {
 			tool, err := h.DB.Tools.GetWithNotes(toolID)
 			if err != nil {
-				return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+				return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
 			}
 
@@ -127,11 +127,11 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	props.Tool.Press = formData.Press
 
 	if t, err := h.DB.Tools.AddWithNotes(props.Tool, user); err != nil {
-		if err == dberror.ErrAlreadyExists {
+		if utils.IsAlreadyExistsError(err) {
 			props.Error = "Tool bereits vorhanden"
 			return h.handleEditGET(c, props)
 		} else {
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"failed to add tool: "+err.Error())
 		}
 	} else {
@@ -178,11 +178,11 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	props.Tool.Press = formData.Press
 
 	if err := h.DB.Tools.Update(props.Tool, user); err != nil {
-		if err == dberror.ErrAlreadyExists {
+		if utils.IsAlreadyExistsError(err) {
 			props.Error = "Tool bereits vorhanden"
 			return h.handleEditGET(c, props)
 		} else {
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"failed to update tool: "+err.Error())
 		}
 	} else {
@@ -211,7 +211,7 @@ func (h *Tools) handleDelete(c echo.Context) error {
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to delete tool: "+err.Error())
 	}
 

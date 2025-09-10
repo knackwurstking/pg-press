@@ -5,15 +5,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -60,12 +60,12 @@ func (h *Cycles) handleSection(c echo.Context) error {
 
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
 	}
 
 	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get press cycles: "+err.Error())
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to get press cycles: "+err.Error())
 	}
 
 	filteredCycles := models.FilterByToolPosition(
@@ -115,7 +115,7 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 	// Get cycles for this specific tool
 	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get press cycles: "+err.Error())
 	}
 
@@ -300,7 +300,7 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Handling cycle deletion request for ID %d", cycleID)
 
 	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to delete press cycle: "+err.Error())
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to delete press cycle: "+err.Error())
 	}
 
 	return h.handleSection(c)
@@ -336,7 +336,7 @@ func (h *Cycles) getToolFromQuery(c echo.Context) (*models.Tool, error) {
 
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return nil, echo.NewHTTPError(dberror.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
+		return nil, echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to get tool: "+err.Error())
 	}
 
 	return tool, nil

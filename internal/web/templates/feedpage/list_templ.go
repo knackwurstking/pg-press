@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 func List(feeds []*models.Feed, lastFeedID int64) templ.Component {

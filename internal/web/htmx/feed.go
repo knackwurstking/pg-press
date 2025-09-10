@@ -3,12 +3,12 @@ package htmx
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/feedpage"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -33,7 +33,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	feeds, err := h.DB.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
 		logger.HTMXHandlerFeed().Error("Failed to fetch feeds: %v", err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"error getting feeds: "+err.Error())
 	}
 
@@ -63,7 +63,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 
 		if err := h.DB.Users.Update(user, user); err != nil {
 			logger.HTMXHandlerFeed().Error("Failed to update user's last feed: %v", err)
-			return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())
 		}
 
