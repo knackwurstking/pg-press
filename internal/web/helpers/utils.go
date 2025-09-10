@@ -1,4 +1,3 @@
-// TODO: Continue here...
 package helpers
 
 import (
@@ -9,8 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/models"
+	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
 )
@@ -96,14 +94,14 @@ func HandleTemplate(
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			dberror.WrapError(err, "failed to parse templates"),
+			fmt.Errorf("failed to parse templates: %w", err),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			dberror.WrapError(err, "failed to render page"),
+			fmt.Errorf("failed to render page: %w", err),
 		)
 	}
 

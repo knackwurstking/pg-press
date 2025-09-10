@@ -3,13 +3,13 @@ package html
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/profilepage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -43,7 +43,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	if err = h.handleUserNameChange(c, user); err != nil {
 		logger.HandlerProfile().Error("Failed to update username for user %s: %v", user.Name, err)
 		return echo.NewHTTPError(
-			dberror.GetHTTPStatusCode(err),
+			utils.GetHTTPStatusCode(err),
 			"error updating username: "+err.Error(),
 		)
 	}
@@ -66,10 +66,10 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	}
 
 	if len(userName) < UserNameMinLength || len(userName) > UserNameMaxLength {
-		logger.HandlerProfile().Warn("Invalid username length for user %s: %d characters (attempted: %s)",
-			user.Name, len(userName), userName)
-		return dberror.NewValidationError(constants.UserNameFormField,
-			"username must be between 1 and 100 characters", len(userName))
+		return utils.NewValidationError(
+			constants.UserNameFormField + ": " +
+				"username must be between 1 and 100 characters",
+		)
 	}
 
 	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
@@ -79,7 +79,6 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	updatedUser.LastFeed = user.LastFeed
 
 	if err := h.DB.Users.Update(updatedUser, user); err != nil {
-		logger.HandlerProfile().Error("Failed to update username in database: %v", err)
 		return err
 	}
 

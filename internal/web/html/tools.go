@@ -4,13 +4,13 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,7 +35,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get tools: "+err.Error())
 	}
 
@@ -43,7 +43,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 	pressUtilization, err := h.DB.Tools.GetPressUtilization()
 	if err != nil {
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get press utilization: "+err.Error())
 	}
 
@@ -133,8 +133,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	logger.HandlerTools().Debug("Fetching tool %d with notes", id)
 	tool, err := h.DB.Tools.GetWithNotes(id)
 	if err != nil {
-		logger.HandlerTools().Error("Failed to fetch tool %d: %v", id, err)
-		return echo.NewHTTPError(dberror.GetHTTPStatusCode(err),
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get tool: "+err.Error())
 	}
 

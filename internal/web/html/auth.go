@@ -1,18 +1,17 @@
 package html
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/loginpage"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -106,7 +105,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	user, err := h.DB.Users.GetUserFromApiKey(apiKey)
 
 	if err != nil {
-		if !errors.Is(err, dberror.ErrNotFound) {
+		if !utils.IsNotFoundError(err) {
 			logger.HandlerAuth().Error("Database error during authentication from %s: %v", remoteIP, err)
 		}
 		return false
