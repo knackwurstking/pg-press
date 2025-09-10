@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf/v2"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // Options contains common options for PDF generation

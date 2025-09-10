@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/note"
+	"github.com/knackwurstking/pgpress/internal/models/note"
 	"github.com/knackwurstking/pgpress/internal/modification"
 )
 

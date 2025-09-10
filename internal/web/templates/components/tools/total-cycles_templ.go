@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
@@ -39,11 +39,11 @@ func TotalCycles(totalCycles int64, input bool) templ.Component {
 
 		var colorClass = "contrast ghost"
 
-		if totalCycles > toolmodels.ToolCycleWarning {
+		if totalCycles > models.ToolCycleWarning {
 			colorClass = "warning ghost"
 		}
 
-		if totalCycles > toolmodels.ToolCycleError {
+		if totalCycles > models.ToolCycleError {
 			colorClass = "destructive ghost"
 		}
 		if input {

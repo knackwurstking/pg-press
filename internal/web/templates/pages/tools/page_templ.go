@@ -11,16 +11,16 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+
+	tooltemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 )
 
 type PageProps struct {
-	Tools            []*toolmodels.ToolWithNotes
+	Tools            []*models.ToolWithNotes
 	PressUtilization []models.PressUtilization
 }
 
@@ -270,7 +270,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionTop, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionTop, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -297,7 +297,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionTopCassette, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionTopCassette, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -329,7 +329,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = tooltemplates.PositionBadge(toolmodels.PositionBottom, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = tooltemplates.PositionBadge(models.PositionBottom, "primary text-bold").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

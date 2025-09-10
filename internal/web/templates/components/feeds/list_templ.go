@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"time"
 
-	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func List(feeds []*feedmodels.Feed, lastFeedID int64) templ.Component {
+func List(feeds []*models.Feed, lastFeedID int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -75,7 +75,7 @@ func List(feeds []*feedmodels.Feed, lastFeedID int64) templ.Component {
 	})
 }
 
-func RenderFeed(feed *feedmodels.Feed) templ.Component {
+func RenderFeed(feed *models.Feed) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

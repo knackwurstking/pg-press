@@ -7,9 +7,9 @@ import (
 	"database/sql"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models/cookie"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models/cookie"
 )
 
 // Service provides database operations for managing authentication cookies and sessions.

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/jung-kurt/gofpdf/v2"
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type imageOptions struct {

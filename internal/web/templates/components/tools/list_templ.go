@@ -11,11 +11,11 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func List(tools []*toolmodels.ToolWithNotes) templ.Component {
+func List(tools []*models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -53,7 +53,7 @@ func List(tools []*toolmodels.ToolWithNotes) templ.Component {
 }
 
 // TODO: Add icons previewing notes (warning, error, info or whatever)
-func listItem(id int64, tool *toolmodels.ToolWithNotes) templ.Component {
+func listItem(id int64, tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -161,7 +161,7 @@ func listItem(id int64, tool *toolmodels.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch tool.Status() {
-		case toolmodels.StatusActive:
+		case models.StatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<small class=\"badge badge-sm badge-outline primary\"><span class=\"flex flex-col gap-0 justify-center items-center\"><span class=\"text-bold\">Eingebaut</span> <span>Presse ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -179,12 +179,12 @@ func listItem(id int64, tool *toolmodels.ToolWithNotes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.StatusAvailable:
+		case models.StatusAvailable:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<small class=\"badge badge-sm badge-outline info\">Verfügbar</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.StatusRegenerating:
+		case models.StatusRegenerating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<small class=\"badge badge-sm badge-outline warning\">Regenerierung</small>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/models/user"
 )
 
 type Mods[T any] []*Mod[T]

@@ -2,15 +2,15 @@ package models
 
 // Re-export all model types from their respective packages
 import (
-	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/models/cookie"
-	"github.com/knackwurstking/pgpress/internal/database/models/cycle"
-	"github.com/knackwurstking/pgpress/internal/database/models/feed"
-	"github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
-	"github.com/knackwurstking/pgpress/internal/database/models/note"
-	"github.com/knackwurstking/pgpress/internal/database/models/tool"
-	"github.com/knackwurstking/pgpress/internal/database/models/troublereport"
-	"github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/models/attachment"
+	"github.com/knackwurstking/pgpress/internal/models/cookie"
+	"github.com/knackwurstking/pgpress/internal/models/cycle"
+	"github.com/knackwurstking/pgpress/internal/models/feed"
+	"github.com/knackwurstking/pgpress/internal/models/metalsheet"
+	"github.com/knackwurstking/pgpress/internal/models/note"
+	"github.com/knackwurstking/pgpress/internal/models/tool"
+	"github.com/knackwurstking/pgpress/internal/models/troublereport"
+	"github.com/knackwurstking/pgpress/internal/models/user"
 )
 
 // User model types

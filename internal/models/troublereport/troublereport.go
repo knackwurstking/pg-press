@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
+	"github.com/knackwurstking/pgpress/internal/models/attachment"
 	"github.com/knackwurstking/pgpress/internal/modification"
 )
 

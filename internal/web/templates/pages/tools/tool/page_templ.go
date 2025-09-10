@@ -11,17 +11,15 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
-	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	metalsheetscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/metalsheets"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+
+	metalsheetscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/metalsheets"
 )
 
-func Page(user *usermodels.User, tool *toolmodels.ToolWithNotes, metalSheets []*metalsheetmodels.MetalSheet) templ.Component {
+func Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -66,7 +64,7 @@ func Page(user *usermodels.User, tool *toolmodels.ToolWithNotes, metalSheets []*
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if tool.Position == toolmodels.PositionTop || tool.Position == toolmodels.PositionBottom {
+			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				templ_7745c5c3_Err = sectionMetalSheets(user, metalSheets, tool).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -96,7 +94,7 @@ func Page(user *usermodels.User, tool *toolmodels.ToolWithNotes, metalSheets []*
 	})
 }
 
-func sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) templ.Component {
+func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -124,7 +122,7 @@ func sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) templ
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 51, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 49, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -140,7 +138,7 @@ func sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) templ
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 67, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 65, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -164,7 +162,7 @@ func sectionActions(user *usermodels.User, tool *toolmodels.ToolWithNotes) templ
 	})
 }
 
-func sectionNotes(tool *toolmodels.ToolWithNotes) templ.Component {
+func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -196,17 +194,17 @@ func sectionNotes(tool *toolmodels.ToolWithNotes) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				switch note.Level {
-				case notemodels.INFO:
+				case models.INFO:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<i class=\"bi bi-info-circle\"></i> Info")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case notemodels.ATTENTION:
+				case models.ATTENTION:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<i class=\"bi bi-exclamation-triangle text-warning\"></i> <strong>Achtung</strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				case notemodels.BROKEN:
+				case models.BROKEN:
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<i class=\"bi bi-x-circle text-danger\"></i> <strong>Defekt</strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -219,7 +217,7 @@ func sectionNotes(tool *toolmodels.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 108, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 106, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -232,7 +230,7 @@ func sectionNotes(tool *toolmodels.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 113, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 111, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -252,7 +250,7 @@ func sectionNotes(tool *toolmodels.ToolWithNotes) templ.Component {
 	})
 }
 
-func sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.MetalSheet, tool *toolmodels.ToolWithNotes) templ.Component {
+func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -283,7 +281,7 @@ func sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.M
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 133, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 131, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -294,14 +292,14 @@ func sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.M
 			return templ_7745c5c3_Err
 		}
 		switch tool.Position {
-		case toolmodels.PositionBottom:
+		case models.PositionBottom:
 			templ_7745c5c3_Err = metalsheetscomp.TableForToolPositionBottom(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.PositionTop:
+		case models.PositionTop:
 			templ_7745c5c3_Err = metalsheetscomp.TableForToolPositionTop(
 				user, metalSheets,
 			).Render(ctx, templ_7745c5c3_Buffer)
@@ -317,7 +315,7 @@ func sectionMetalSheets(user *usermodels.User, metalSheets []*metalsheetmodels.M
 	})
 }
 
-func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
+func sectionCycles(tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -343,7 +341,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch tool.Status() {
-		case toolmodels.StatusActive:
+		case models.StatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a role=\"button\" class=\"secondary ghost flex gap justify-between w-full\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -354,7 +352,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 				env.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 175, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 173, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -367,7 +365,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 178, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 176, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -377,12 +375,12 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.StatusAvailable:
+		case models.StatusAvailable:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<span class=\"info ghost\">Verfügbar</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.StatusRegenerating:
+		case models.StatusRegenerating:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<span class=\"warning ghost\">Regenerierung</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -395,7 +393,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Status())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 189, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 187, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -416,7 +414,7 @@ func sectionCycles(tool *toolmodels.ToolWithNotes) templ.Component {
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 199, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/pages/tools/tool/page.templ`, Line: 197, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {

@@ -9,12 +9,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	troublereportspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/troublereports"
 )

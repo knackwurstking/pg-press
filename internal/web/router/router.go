@@ -5,10 +5,11 @@ import (
 	"embed"
 	"os"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/html"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
+
 	"github.com/labstack/echo/v4"
 )
 

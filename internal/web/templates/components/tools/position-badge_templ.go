@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
-func PositionBadge(position toolmodels.Position, classNames string) templ.Component {
+func PositionBadge(position models.Position, classNames string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -36,7 +36,7 @@ func PositionBadge(position toolmodels.Position, classNames string) templ.Compon
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch position {
-		case toolmodels.PositionTop:
+		case models.PositionTop:
 			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
@@ -59,7 +59,7 @@ func PositionBadge(position toolmodels.Position, classNames string) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.PositionTopCassette:
+		case models.PositionTopCassette:
 			var templ_7745c5c3_Var4 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
@@ -82,7 +82,7 @@ func PositionBadge(position toolmodels.Position, classNames string) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case toolmodels.PositionBottom:
+		case models.PositionBottom:
 			var templ_7745c5c3_Var6 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {

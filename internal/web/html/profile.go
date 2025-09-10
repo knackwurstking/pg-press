@@ -3,12 +3,12 @@ package html
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	profilepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
 

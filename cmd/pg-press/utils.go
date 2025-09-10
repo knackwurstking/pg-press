@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"path/filepath"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 
 	_ "github.com/mattn/go-sqlite3"

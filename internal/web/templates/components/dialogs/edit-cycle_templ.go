@@ -12,16 +12,16 @@ import (
 	"fmt"
 	"time"
 
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 )
 
 type EditCycleProps struct {
-	Tool             *toolmodels.Tool
+	Tool             *models.Tool
 	CycleID          int64
 	InputTotalCycles int64
-	InputPressNumber *toolmodels.PressNumber
+	InputPressNumber *models.PressNumber
 	OriginalDate     *time.Time
 	Error            string
 }

@@ -3,10 +3,11 @@ package htmx
 import (
 	"net/http"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
+
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"

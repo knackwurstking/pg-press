@@ -3,9 +3,9 @@ package metalsheet
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/database/models/note"
-	"github.com/knackwurstking/pgpress/internal/database/models/tool"
-	"github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/models/note"
+	"github.com/knackwurstking/pgpress/internal/models/tool"
+	"github.com/knackwurstking/pgpress/internal/models/user"
 	"github.com/knackwurstking/pgpress/internal/modification"
 )
 

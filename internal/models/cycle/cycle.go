@@ -3,8 +3,8 @@ package cycle
 import (
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/models/tool"
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	"github.com/knackwurstking/pgpress/internal/models/tool"
+	toolmodels "github.com/knackwurstking/pgpress/internal/models/tool"
 )
 
 type Cycle struct {

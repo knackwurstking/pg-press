@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
+
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 
 	"github.com/labstack/echo/v4"

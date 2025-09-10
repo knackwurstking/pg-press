@@ -3,7 +3,7 @@ package htmx
 import (
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/models"
+	"github.com/knackwurstking/pgpress/internal/models"
 )
 
 type ToolEditFormData struct {

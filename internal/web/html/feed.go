@@ -5,8 +5,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
+
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	feedpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
 )

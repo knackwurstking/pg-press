@@ -4,8 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
+	"github.com/knackwurstking/pgpress/internal/database"
+
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
+
 	"github.com/labstack/echo/v4"
 )
 

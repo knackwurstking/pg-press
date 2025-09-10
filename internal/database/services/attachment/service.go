@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	"github.com/knackwurstking/pgpress/internal/database/models/attachment"
-	"github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/models/attachment"
+	"github.com/knackwurstking/pgpress/internal/models/user"
 )
 
 // Service provides database operations for managing attachments with lazy loading.
