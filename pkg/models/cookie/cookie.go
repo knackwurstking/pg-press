@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
+	"github.com/knackwurstking/pgpress/pkg/constants"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
