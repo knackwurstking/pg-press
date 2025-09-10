@@ -13,7 +13,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/models"
-	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components/layouts"
 )
 
 type EditTroubleReportProps struct {

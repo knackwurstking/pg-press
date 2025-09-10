@@ -15,9 +15,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	troublereportspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/troublereports"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
 )
 
 type TroubleReports struct {
@@ -25,12 +24,12 @@ type TroubleReports struct {
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/trouble-reports", h.handleTroubleReports),
-			webhelpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.handleGetSharePdf),
-			webhelpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.handleGetAttachment),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports", h.handleTroubleReports),
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.handleGetSharePdf),
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.handleGetAttachment),
 		},
 	)
 }
@@ -48,7 +47,7 @@ func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 }
 
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
-	id, err := webhelpers.ParseInt64Query(c, constants.QueryParamID)
+	id, err := helpers.ParseInt64Query(c, constants.QueryParamID)
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Invalid trouble report ID parameter: %v", err)
 		return err
@@ -102,7 +101,7 @@ func (h *TroubleReports) shareResponse(
 }
 
 func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	attachmentID, err := webhelpers.ParseInt64Query(c, constants.QueryParamAttachmentID)
+	attachmentID, err := helpers.ParseInt64Query(c, constants.QueryParamAttachmentID)
 	if err != nil {
 		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
 		return err

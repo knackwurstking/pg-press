@@ -1,10 +1,12 @@
-package tools
+package toolpage
 
 import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/models"
+
+	toolstemplates "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 )
 
 type CyclesSectionProps struct {
@@ -13,7 +15,7 @@ type CyclesSectionProps struct {
 	ToolPosition  string
 	TotalCycles   int64
 	Cycles        []*models.Cycle
-	Regenerations []*models.Regeneration
+	LastRegeneration *models.Regeneration
 }
 
 templ CyclesSection(props *CyclesSectionProps) {
@@ -57,7 +59,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			Gesamtzyklen für { props.Tool.String() } (Position: { props.ToolPosition }):
 		</h6>
 		<span>
-			@TotalCycles(props.TotalCycles, true)
+			@toolstemplates.TotalCycles(props.TotalCycles, true)
 		</span>
 	</section>
 
@@ -91,24 +93,17 @@ templ cyclesTableRows(props *CyclesSectionProps) {
 			</td>
 		</tr>
 	} else {
-		{{
-			var lastRegenerationID int64
-			if len(props.Regenerations) > 0 {
-				lastRegenerationID = props.Regenerations[len(props.Regenerations)-1].CycleID
-			}
-		}}
-
 		for _, cycle := range props.Cycles {
-			@renderCycleRowWithPartialCalc(props, cycle, cycle.ID <= lastRegenerationID)
+			@renderCycleRowWithPartialCalc(props, cycle)
 		}
 	}
 }
 
 // renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
 // Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycle, beforeRegeneration bool) {
+templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycle) {
 	<tr
-		if beforeRegeneration {
+		if props.LastRegeneration != nil && props.LastRegeneration.CycleID == cycle.ID {
 			style="color: var(--ui-muted);"
 		}
 	>

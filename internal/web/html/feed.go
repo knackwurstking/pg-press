@@ -7,9 +7,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	feedpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/feed"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/feedpage"
 )
 
 type Feed struct {
@@ -17,10 +16,10 @@ type Feed struct {
 }
 
 func (h *Feed) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/feed", h.handleFeed),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/feed", h.handleFeed),
 		},
 	)
 }

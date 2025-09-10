@@ -4,18 +4,18 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	homepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/home"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/homepage"
 	"github.com/labstack/echo/v4"
 )
 
 type Home struct{}
 
 func (h *Home) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "", h.handleHome),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "", h.handleHome),
 		},
 	)
 }

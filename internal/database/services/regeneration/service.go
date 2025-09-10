@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
@@ -144,25 +143,13 @@ func (s *Service) Delete(id int64) error {
 	return nil
 }
 
-func (s *Service) Start(cycleID, toolID int64, reason string, user *models.User) (*models.Regeneration, error) {
+func (s *Service) AddToolRegeneration(cycleID, toolID int64, reason string, user *models.User) (*models.Regeneration, error) {
 	s.log.Info("Starting tool regeneration: tool_id=%d", toolID)
-
-	// Get the tool from the database
-	s.log.Debug("Getting tool from database: tool_id=%d", toolID)
-	tool, err := s.tools.Get(toolID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check tools status and verify that this tool is not currently active
-	if tool.Status() == models.StatusRegenerating {
-		return nil, fmt.Errorf("tool is already regenerating")
-	}
 
 	// Update the tool's regeneration status
 	s.log.Debug("Updating tool regeneration status to regenerating: tool_id=%d", toolID)
-	if err = s.tools.UpdateRegenerating(toolID, true, user); err != nil {
-		return nil, err
+	if err := s.tools.UpdateRegenerating(toolID, true, user); err != nil {
+		return nil, fmt.Errorf("failed to update tool regeneration status: %w", err)
 	}
 
 	// After this, create a new regeneration record
@@ -178,15 +165,22 @@ func (s *Service) Start(cycleID, toolID int64, reason string, user *models.User)
 	return r, nil
 }
 
-// TODO: Stop tool regeneration
-func (s *Service) Stop(toolID int64) error {
+// Stop stops the tool regeneration process for the given tool ID
+func (s *Service) StopToolRegeneration(toolID int64, user *models.User) error {
 	s.log.Info("Stopping tool regeneration: tool_id=%d", toolID)
 
 	if toolID <= 0 {
 		return errors.New("invalid tool ID")
 	}
 
-	return errors.New("under construction")
+	// Just set the tool's regeneration status to false
+	s.log.Debug("Undoing tool regeneration status: tool_id=%d", toolID)
+	if err := s.tools.UpdateRegenerating(toolID, false, user); err != nil {
+		return fmt.Errorf("failed to update tool regeneration status: %w", err)
+	}
+
+	s.log.Info("Tool regeneration stopped: tool_id=%d", toolID)
+	return nil
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
@@ -241,107 +235,6 @@ func (s *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, 
 	}
 
 	return regenerations, nil
-}
-
-// GetRegenerationCount gets the total number of regenerations for a tool
-func (s *Service) GetRegenerationCount(toolID int64) (int, error) {
-	s.log.Info("Getting regeneration count for tool: tool_id=%d", toolID)
-
-	var count int
-	query := `
-		SELECT COUNT(*) FROM tool_regenerations WHERE tool_id = ?
-	`
-	err := s.db.QueryRow(query, toolID).Scan(&count)
-	if err != nil {
-		return 0, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get regeneration count", err)
-	}
-
-	return count, nil
-}
-
-// GetAllRegenerations gets all regenerations across all tools
-func (s *Service) GetAllRegenerations(limit, offset int) ([]*models.Regeneration, error) {
-	s.log.Info("Getting all regenerations: limit=%d offset=%d", limit, offset)
-
-	query := `
-		SELECT id, tool_id, cycle_id, reason, performed_by
-		FROM tool_regenerations
-		ORDER BY id DESC
-		LIMIT ? OFFSET ?
-	`
-
-	rows, err := s.db.Query(query, limit, offset)
-	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get all regenerations", err)
-	}
-	defer rows.Close()
-
-	var regenerations []*models.Regeneration
-	for rows.Next() {
-		regen, err := s.scanToolRegeneration(rows)
-		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan tool regeneration")
-		}
-
-		regenerations = append(regenerations, regen)
-	}
-
-	return regenerations, nil
-}
-
-// GetToolsWithMostRegenerations gets tools sorted by regeneration count
-func (s *Service) GetToolsWithMostRegenerations(limit int) ([]struct {
-	ToolID      int64
-	RegCount    int
-	LastRegenAt *time.Time
-}, error) {
-	s.log.Info("Getting tools with most regenerations: limit=%d", limit)
-
-	query := `
-		SELECT
-			t.tool_id,
-			COUNT(t.id) as regen_count,
-			MAX(p.date) as last_regen
-		FROM tool_regenerations t
-		JOIN press_cycles p ON t.cycle_id = p.id
-		GROUP BY t.tool_id
-		ORDER BY regen_count DESC
-		LIMIT ?
-	`
-
-	rows, err := s.db.Query(query, limit)
-	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "tool_regenerations", "failed to get tools with most regenerations", err)
-	}
-	defer rows.Close()
-
-	var results []struct {
-		ToolID      int64
-		RegCount    int
-		LastRegenAt *time.Time
-	}
-
-	for rows.Next() {
-		var result struct {
-			ToolID      int64
-			RegCount    int
-			LastRegenAt *time.Time
-		}
-		var lastRegen sql.NullTime
-
-		err := rows.Scan(&result.ToolID, &result.RegCount, &lastRegen)
-		if err != nil {
-			return nil, dberror.NewDatabaseError("scan", "tool_regenerations", "failed to scan result", err)
-		}
-
-		if lastRegen.Valid {
-			result.LastRegenAt = &lastRegen.Time
-		}
-
-		results = append(results, result)
-	}
-
-	return results, nil
 }
 
 func (t *Service) scanToolRegeneration(scanner interfaces.Scannable) (*models.Regeneration, error) {

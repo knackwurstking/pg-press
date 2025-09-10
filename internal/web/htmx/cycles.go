@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/constants"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	toolscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/tools"
 
@@ -73,10 +74,9 @@ func (h *Cycles) handleSection(c echo.Context) error {
 		toolCycles...,
 	)
 
-	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
+	regeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
 	if err != nil {
 		logger.HTMXHandlerTools().Error("Failed to get regenerations for tool %d: %v", toolID, err)
-		regenerations = []*models.Regeneration{}
 	}
 
 	totalCycles := h.getTotalCycles(
@@ -84,12 +84,12 @@ func (h *Cycles) handleSection(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	cyclesSection := toolscomp.CyclesSection(&toolscomp.CyclesSectionProps{
-		User:          user,
-		Tool:          tool,
-		TotalCycles:   totalCycles,
-		Cycles:        filteredCycles,
-		Regenerations: regenerations,
+	cyclesSection := toolpage.CyclesSection(&toolpage.CyclesSectionProps{
+		User:             user,
+		Tool:             tool,
+		TotalCycles:      totalCycles,
+		Cycles:           filteredCycles,
+		LastRegeneration: regeneration,
 	})
 
 	if err := cyclesSection.Render(
@@ -215,7 +215,7 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		if _, err := h.DB.ToolRegenerations.Start(cycleID, tool.ID, "", user); err != nil {
+		if _, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user); err != nil {
 			logger.HTMXHandlerTools().Error("Failed to start regeneration for tool %d: %v", tool.ID, err)
 		}
 	}
@@ -275,10 +275,11 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		if _, err := h.DB.ToolRegenerations.Start(cycleID, tool.ID, "", user); err != nil {
+		if _, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user); err != nil {
 			logger.HTMXHandlerTools().Error("Failed to start regeneration for tool %d: %v", tool.ID, err)
 		}
-		if err := h.DB.ToolRegenerations.Stop(tool.ID); err != nil {
+
+		if err := h.DB.ToolRegenerations.StopToolRegeneration(tool.ID, user); err != nil {
 			logger.HTMXHandlerTools().Error("Failed to stop regeneration for tool %d: %v", tool.ID, err)
 		}
 	}

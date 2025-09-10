@@ -11,9 +11,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	loginpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/login"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/loginpage"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -24,11 +23,11 @@ type Auth struct {
 }
 
 func (h *Auth) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
-			webhelpers.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
+			helpers.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
 		},
 	)
 }
@@ -72,7 +71,7 @@ func (h *Auth) handleLogout(c echo.Context) error {
 
 	// Try to get user info before logout for better logging
 	var userName string = "unknown"
-	if user, err := webhelpers.GetUserFromContext(c); err == nil {
+	if user, err := helpers.GetUserFromContext(c); err == nil {
 		userName = user.Name
 		logger.HandlerAuth().Info("User %s logging out", user.Name)
 	}

@@ -7,11 +7,10 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/models"
-
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
-	toolspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
-	presspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
-	toolpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/tool"
+	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,12 +20,12 @@ type Tools struct {
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	webhelpers.RegisterEchoRoutes(
+	helpers.RegisterEchoRoutes(
 		e,
-		[]*webhelpers.EchoRoute{
-			webhelpers.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
-			webhelpers.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
-			webhelpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
+		[]*helpers.EchoRoute{
+			helpers.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
+			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
+			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
 		},
 	)
 }
@@ -63,7 +62,7 @@ func (h *Tools) handleTools(c echo.Context) error {
 
 func (h *Tools) handlePressPage(c echo.Context) error {
 	// Get user from context
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to get user from context: "+err.Error())
@@ -72,7 +71,7 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 	// Get press number from param
 	var pn models.PressNumber
 	// Parsing & validating press number from query parameter
-	if pns, err := webhelpers.ParseInt64Param(c, "press"); err != nil {
+	if pns, err := helpers.ParseInt64Param(c, "press"); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to parse id: "+err.Error())
 	} else {
@@ -120,12 +119,12 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 }
 
 func (h *Tools) handleToolPage(c echo.Context) error {
-	user, err := webhelpers.GetUserFromContext(c)
+	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	id, err := webhelpers.ParseInt64Param(c, "id")
+	id, err := helpers.ParseInt64Param(c, "id")
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to parse id from query parameter: "+err.Error())
