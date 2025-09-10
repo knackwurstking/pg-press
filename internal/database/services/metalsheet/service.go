@@ -7,10 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/interfaces"
-	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
-	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
-	notemodels "github.com/knackwurstking/pgpress/internal/database/models/note"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/database/services/feed"
 	"github.com/knackwurstking/pgpress/internal/database/services/note"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -63,7 +60,7 @@ func New(db *sql.DB, feeds *feed.Service, notes *note.Service) *Service {
 }
 
 // List returns all metal sheets
-func (s *Service) List() ([]*metalsheetmodels.MetalSheet, error) {
+func (s *Service) List() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
@@ -78,7 +75,7 @@ func (s *Service) List() ([]*metalsheetmodels.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*metalsheetmodels.MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -98,7 +95,7 @@ func (s *Service) List() ([]*metalsheetmodels.MetalSheet, error) {
 }
 
 // Get returns a metal sheet by ID
-func (s *Service) Get(id int64) (*metalsheetmodels.MetalSheet, error) {
+func (s *Service) Get(id int64) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
@@ -121,7 +118,7 @@ func (s *Service) Get(id int64) (*metalsheetmodels.MetalSheet, error) {
 }
 
 // GetWithNotes returns a metal sheet with its related notes loaded
-func (s *Service) GetWithNotes(id int64) (*metalsheetmodels.MetalSheetWithNotes, error) {
+func (s *Service) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := s.Get(id)
@@ -129,9 +126,9 @@ func (s *Service) GetWithNotes(id int64) (*metalsheetmodels.MetalSheetWithNotes,
 		return nil, err
 	}
 
-	result := &metalsheetmodels.MetalSheetWithNotes{
+	result := &models.MetalSheetWithNotes{
 		MetalSheet:  sheet,
-		LoadedNotes: []*notemodels.Note{},
+		LoadedNotes: []*models.Note{},
 	}
 
 	// Load notes if there are any linked
@@ -150,7 +147,7 @@ func (s *Service) GetWithNotes(id int64) (*metalsheetmodels.MetalSheetWithNotes,
 }
 
 // GetByToolID returns all metal sheets assigned to a specific tool
-func (s *Service) GetByToolID(toolID int64) ([]*metalsheetmodels.MetalSheet, error) {
+func (s *Service) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
@@ -166,7 +163,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*metalsheetmodels.MetalSheet, err
 	}
 	defer rows.Close()
 
-	var sheets []*metalsheetmodels.MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -186,7 +183,7 @@ func (s *Service) GetByToolID(toolID int64) ([]*metalsheetmodels.MetalSheet, err
 }
 
 // GetAvailable returns all available metal sheets
-func (s *Service) GetAvailable() ([]*metalsheetmodels.MetalSheet, error) {
+func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
@@ -203,7 +200,7 @@ func (s *Service) GetAvailable() ([]*metalsheetmodels.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	var sheets []*metalsheetmodels.MetalSheet
+	var sheets []*models.MetalSheet
 
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
@@ -223,12 +220,12 @@ func (s *Service) GetAvailable() ([]*metalsheetmodels.MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User) (int64, error) {
+func (s *Service) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
-		initialMod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
+		initialMod := modification.NewMod(user, models.MetalSheetMod{
 			TileHeight:  sheet.TileHeight,
 			Value:       sheet.Value,
 			MarkeHeight: sheet.MarkeHeight,
@@ -278,7 +275,7 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 
 	// Trigger feed update
 	if s.feeds != nil {
-		feed := feedmodels.New(
+		feed := models.NewFeed(
 			"Neues Blech hinzugefügt",
 			fmt.Sprintf("Benutzer %s hat ein neues Blech %s hinzugefügt.", user.Name, sheet.String()),
 			user.TelegramID,
@@ -290,7 +287,7 @@ func (s *Service) Add(sheet *metalsheetmodels.MetalSheet, user *usermodels.User)
 }
 
 // Update updates an existing metal sheet
-func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.User) error {
+func (s *Service) Update(sheet *models.MetalSheet, user *models.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Get current sheet to compare for changes
@@ -308,7 +305,7 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 		!equalToolIDs(current.ToolID, sheet.ToolID) ||
 		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
 
-		mod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
+		mod := modification.NewMod(user, models.MetalSheetMod{
 			TileHeight:  current.TileHeight,
 			Value:       current.Value,
 			MarkeHeight: current.MarkeHeight,
@@ -355,7 +352,7 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 
 	// Trigger feed update
 	if s.feeds != nil {
-		feed := feedmodels.New(
+		feed := models.NewFeed(
 			"Blech aktualisiert",
 			fmt.Sprintf("Benutzer %s hat das Blech %s aktualisiert.", user.Name, sheet.String()),
 			user.TelegramID,
@@ -367,7 +364,7 @@ func (s *Service) Update(sheet *metalsheetmodels.MetalSheet, user *usermodels.Us
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User) error {
+func (s *Service) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -377,7 +374,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 	}
 
 	// Add modification record before changing
-	mod := modification.NewMod(user, metalsheetmodels.MetalSheetMod{
+	mod := modification.NewMod(user, models.MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -423,7 +420,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 		} else {
 			content = fmt.Sprintf("Benutzer %s hat Blech #%d vom Werkzeug getrennt.", user.Name, sheetID)
 		}
-		feed := feedmodels.New(
+		feed := models.NewFeed(
 			"Blech-Werkzeug Zuordnung",
 			content,
 			user.TelegramID,
@@ -435,7 +432,7 @@ func (s *Service) AssignTool(sheetID int64, toolID *int64, user *usermodels.User
 }
 
 // Delete deletes a metal sheet
-func (s *Service) Delete(id int64, user *usermodels.User) error {
+func (s *Service) Delete(id int64, user *models.User) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	query := `
@@ -451,7 +448,7 @@ func (s *Service) Delete(id int64, user *usermodels.User) error {
 
 	// Trigger feed update
 	if s.feeds != nil {
-		feed := feedmodels.New(
+		feed := models.NewFeed(
 			"Blech entfernt",
 			fmt.Sprintf("Benutzer %s hat das Blech mit ID %d entfernt.", user.Name, id),
 			user.TelegramID,
@@ -462,9 +459,9 @@ func (s *Service) Delete(id int64, user *usermodels.User) error {
 	return nil
 }
 
-func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*metalsheetmodels.MetalSheet, error) {
+func (s *Service) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Debug("Scanning metal sheet")
-	sheet := &metalsheetmodels.MetalSheet{}
+	sheet := &models.MetalSheet{}
 
 	var (
 		linkedNotes []byte

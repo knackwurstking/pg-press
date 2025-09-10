@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	feedmodels "github.com/knackwurstking/pgpress/internal/database/models/feed"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -66,7 +67,7 @@ func listFeedsCommand() cli.Command {
 					return err
 				}
 
-				var feeds []*feedmodels.Feed
+				var feeds []*models.Feed
 
 				// Get feeds based on parameters
 				if *limit > 0 {
@@ -186,8 +187,8 @@ func removeFeedsCommand() cli.Command {
 
 // Helper functions
 
-func filterFeedsByDate(feeds []*feedmodels.Feed, since, before string) []*feedmodels.Feed {
-	var filtered []*feedmodels.Feed
+func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Feed {
+	var filtered []*models.Feed
 
 	var sinceTime, beforeTime time.Time
 	var err error

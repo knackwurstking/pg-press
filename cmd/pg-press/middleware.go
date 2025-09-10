@@ -7,11 +7,12 @@ import (
 	"slices"
 	"time"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -97,7 +98,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 
 			// Get user info if available
 			userInfo := ""
-			if user, ok := c.Get("user").(*usermodels.User); ok {
+			if user, ok := c.Get("user").(*models.User); ok {
 				userInfo = " " + user.String()
 				// Log security-relevant actions for admin users
 				if user.IsAdmin() && (method == "POST" || method == "PUT" || method == "DELETE") {
@@ -172,7 +173,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *database.DB) (*usermodels.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, error) {
 	remoteIP := ctx.RealIP()
 
 	cookie, err := ctx.Cookie(constants.CookieName)

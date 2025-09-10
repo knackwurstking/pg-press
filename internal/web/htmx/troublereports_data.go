@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	trmodels "github.com/knackwurstking/pgpress/internal/database/models/troublereport"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
-	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+
+	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	troublereportscomp "github.com/knackwurstking/pgpress/internal/web/templates/components/troublereports"
 
 	"github.com/labstack/echo/v4"
@@ -91,7 +92,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 		for _, mod := range tr.Mods {
 			if mod.Time == timeQuery {
 				// Create a temporary trouble report with the modified data
-				modifiedTr := &trmodels.TroubleReport{
+				modifiedTr := &models.TroubleReport{
 					ID:                tr.ID,
 					Title:             mod.Data.Title,
 					Content:           mod.Data.Content,
@@ -124,7 +125,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) handleGetModifications(c echo.Context, tr *trmodels.TroubleReport) error {
+func (h *TroubleReports) handleGetModifications(c echo.Context, tr *models.TroubleReport) error {
 	id, err := webhelpers.ParseInt64Param(c, constants.QueryParamID)
 	if err != nil {
 		return err

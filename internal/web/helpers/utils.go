@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/database/models"
+
+	"github.com/labstack/echo/v4"
 )
 
-func GetUserFromContext(ctx echo.Context) (*usermodels.User, error) {
-	user, ok := ctx.Get("user").(*usermodels.User)
+func GetUserFromContext(ctx echo.Context) (*models.User, error) {
+	user, ok := ctx.Get("user").(*models.User)
 	if !ok {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,

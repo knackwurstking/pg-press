@@ -9,7 +9,7 @@ import (
 
 	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -120,7 +120,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	props.Tool = toolmodels.New(formData.Position)
+	props.Tool = models.NewTool(formData.Position)
 	props.Tool.Format = formData.Format
 	props.Tool.Type = formData.Type
 	props.Tool.Code = formData.Code
@@ -170,7 +170,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		InputPressSelection: formData.Press,
 	}
 
-	props.Tool = toolmodels.New(formData.Position)
+	props.Tool = models.NewTool(formData.Position)
 	props.Tool.ID = toolID
 	props.Tool.Format = formData.Format
 	props.Tool.Type = formData.Type
@@ -223,14 +223,14 @@ func (h *Tools) handleDelete(c echo.Context) error {
 func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 	// Parse position with validation
 	positionFormValue := c.FormValue("position")
-	var position toolmodels.Position
-	switch toolmodels.Position(positionFormValue) {
-	case toolmodels.PositionTop:
-		position = toolmodels.PositionTop
-	case toolmodels.PositionTopCassette:
-		position = toolmodels.PositionTopCassette
-	case toolmodels.PositionBottom:
-		position = toolmodels.PositionBottom
+	var position models.Position
+	switch models.Position(positionFormValue) {
+	case models.PositionTop:
+		position = models.PositionTop
+	case models.PositionTopCassette:
+		position = models.PositionTopCassette
+	case models.PositionBottom:
+		position = models.PositionBottom
 	default:
 		return nil, errors.New("invalid position: " + positionFormValue)
 	}
@@ -290,9 +290,9 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 			return nil, errors.New("invalid press number: " + err.Error())
 		}
 
-		pn := toolmodels.PressNumber(press)
+		pn := models.PressNumber(press)
 		data.Press = &pn
-		if !toolmodels.IsValidPressNumber(data.Press) {
+		if !models.IsValidPressNumber(data.Press) {
 			return nil, errors.New("invalid press number: must be 0, 2, 3, 4, or 5")
 		}
 	}

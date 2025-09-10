@@ -5,11 +5,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+
+	"github.com/SuperPaintman/nice/cli"
 )
 
 func removeCookiesCommand() cli.Command {
@@ -73,7 +74,7 @@ func autoCleanCookiesCommand() cli.Command {
 				}
 
 				t := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
-				isExpired := func(cookie *cookiemodels.Cookie) bool {
+				isExpired := func(cookie *models.Cookie) bool {
 					return t >= cookie.LastLogin
 				}
 

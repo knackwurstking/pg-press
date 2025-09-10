@@ -3,15 +3,16 @@ package html
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	usermodels "github.com/knackwurstking/pgpress/internal/database/models/user"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	profilepage "github.com/knackwurstking/pgpress/internal/web/templates/pages/profile"
+
+	"github.com/labstack/echo/v4"
 )
 
 const (
@@ -57,7 +58,7 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	return nil
 }
 
-func (h *Profile) handleUserNameChange(c echo.Context, user *usermodels.User) error {
+func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
 	formParams, _ := c.FormParams()
 	userName := webhelpers.SanitizeInput(formParams.Get(constants.UserNameFormField))
 
@@ -75,7 +76,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *usermodels.User) er
 	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
 		user.Name, user.TelegramID, userName)
 
-	updatedUser := usermodels.NewUser(user.TelegramID, userName, user.ApiKey)
+	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
 	if err := h.DB.Users.Update(updatedUser, user); err != nil {

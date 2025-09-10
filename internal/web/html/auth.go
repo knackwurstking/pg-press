@@ -6,16 +6,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	cookiemodels "github.com/knackwurstking/pgpress/internal/database/models/cookie"
+	"github.com/knackwurstking/pgpress/internal/database/models"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	loginpage "github.com/knackwurstking/pgpress/internal/web/templates/pages/login"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type Auth struct {
@@ -133,7 +134,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 	ctx.SetCookie(cookie)
 
-	sessionCookie := cookiemodels.New(userAgent, cookieValue, apiKey)
+	sessionCookie := models.NewCookie(userAgent, cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
 		logger.HandlerAuth().Error("Failed to create session for user %s from %s: %v",
 			user.Name, remoteIP, err)

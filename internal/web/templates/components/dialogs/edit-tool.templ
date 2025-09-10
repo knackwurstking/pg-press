@@ -3,7 +3,6 @@ package dialogs
 import (
 	"fmt"
 
-	toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/database/models"
 )
@@ -15,7 +14,7 @@ type EditToolProps struct {
 	InputHeight         int
 	InputType           string
 	InputCode           string
-	InputPressSelection *toolmodels.PressNumber
+	InputPressSelection *models.PressNumber
 	Error               string
 }
 
@@ -58,9 +57,9 @@ templ EditTool(props *EditToolProps) {
 					</option>
 
 					<option
-						value={ toolmodels.PositionTop }
+						value={ models.PositionTop }
 
-						if toolmodels.Position(props.InputPosition) == toolmodels.PositionTop {
+						if models.Position(props.InputPosition) == models.PositionTop {
 							selected
 						}
 					>
@@ -68,9 +67,9 @@ templ EditTool(props *EditToolProps) {
 					</option>
 
 					<option
-						value={ toolmodels.PositionBottom }
+						value={ models.PositionBottom }
 
-						if toolmodels.Position(props.InputPosition) == toolmodels.PositionBottom {
+						if models.Position(props.InputPosition) == models.PositionBottom {
 							selected
 						}
 					>
@@ -78,9 +77,9 @@ templ EditTool(props *EditToolProps) {
 					</option>
 
 					<option
-						value={ toolmodels.PositionTopCassette }
+						value={ models.PositionTopCassette }
 
-						if toolmodels.Position(props.InputPosition) == toolmodels.PositionTopCassette {
+						if models.Position(props.InputPosition) == models.PositionTopCassette {
 							selected
 						}
 					>
@@ -99,7 +98,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value=""
 
-						if !toolmodels.IsValidPressNumber(props.InputPressSelection) {
+						if !models.IsValidPressNumber(props.InputPressSelection) {
 							selected
 						}
 					>
@@ -109,7 +108,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value="0"
 
-						if toolmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
+						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
 							selected
 						}
 					>
@@ -119,7 +118,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value="2"
 
-						if toolmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
+						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
 							selected
 						}
 					>
@@ -129,7 +128,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value="3"
 
-						if toolmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
+						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
 							selected
 						}
 					>
@@ -139,7 +138,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value="4"
 
-						if toolmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
+						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
 							selected
 						}
 					>
@@ -149,7 +148,7 @@ templ EditTool(props *EditToolProps) {
 					<option
 						value="5"
 
-						if toolmodels.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
+						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
 							selected
 						}
 					>

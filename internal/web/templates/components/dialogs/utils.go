@@ -1,8 +1,8 @@
 package dialogs
 
-import toolmodels "github.com/knackwurstking/pgpress/internal/database/models/tool"
+import "github.com/knackwurstking/pgpress/internal/database/models"
 
-func isPress(p *toolmodels.PressNumber, v int) bool {
+func isPress(p *models.PressNumber, v int) bool {
 	if p == nil {
 		return false
 	}

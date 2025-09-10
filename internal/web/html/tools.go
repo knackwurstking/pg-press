@@ -3,11 +3,11 @@ package html
 import (
 	"net/http"
 
-	database "github.com/knackwurstking/pgpress/internal/database/core"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/internal/database/models"
-	metalsheetmodels "github.com/knackwurstking/pgpress/internal/database/models/metalsheet"
 	"github.com/knackwurstking/pgpress/internal/logger"
+
+	database "github.com/knackwurstking/pgpress/internal/database/core"
 	webhelpers "github.com/knackwurstking/pgpress/internal/web/helpers"
 	toolspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools"
 	presspage "github.com/knackwurstking/pgpress/internal/web/templates/pages/tools/press"
@@ -146,7 +146,7 @@ func (h *Tools) handleToolPage(c echo.Context) error {
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
 		logger.HandlerTools().Error("Failed to fetch metal sheets: %v", err)
-		metalSheets = []*metalsheetmodels.MetalSheet{}
+		metalSheets = []*models.MetalSheet{}
 	}
 
 	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
