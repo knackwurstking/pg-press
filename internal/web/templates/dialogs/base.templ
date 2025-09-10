@@ -13,11 +13,12 @@ type BaseProps struct {
 	SubmitButtonText 	string
 }
 
+// NOTE: For now we just reload the page after closing the dialog.
 templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose='this.parentElement.removeChild(this);'
+		onclose='this.parentElement.removeChild(this); window.location.reload();'
 	>
 		<form
 			class="flex flex-col gap"
