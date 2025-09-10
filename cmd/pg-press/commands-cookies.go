@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/models"
 	"github.com/knackwurstking/pgpress/internal/web/constants"
+	"github.com/knackwurstking/pgpress/pkg/logger"
+	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/SuperPaintman/nice/cli"
 )

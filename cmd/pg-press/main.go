@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 
 	"github.com/SuperPaintman/nice/cli"
 )

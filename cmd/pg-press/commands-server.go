@@ -12,8 +12,8 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/router"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -45,14 +45,14 @@ func serverCommand() cli.Command {
 						logger.AppLogger.Error("Failed to open log file %s: %v", *logFile, err)
 						return err
 					} else {
-						logger.SetOutput(f)
-						logger.Server().Info("Redirected logs to file: %s", *logFile)
+						logger.AppLogger.SetOutput(f)
+						logger.AppLogger.Info("Redirected logs to file: %s", *logFile)
 					}
 				}
 
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					logger.Server().Error("Failed to open database: %v", err)
+					logger.AppLogger.Error("Failed to open database: %v", err)
 					return err
 				}
 
