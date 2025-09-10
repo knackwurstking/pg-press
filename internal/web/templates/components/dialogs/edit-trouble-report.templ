@@ -118,162 +118,160 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
             }
         </script>
 
-        <div class="flex flex-col gap">
-	        <!-- Hidden field for attachment order -->
-			<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
+        <!-- Hidden field for attachment order -->
+		<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
 
-			<label for="title" class="flex flex-col">
-				Titel
-				<input
-					name="title"
-					id="title"
-					placeholder="Titel"
-					value={ props.Title }
-					if props.InvalidTitle {
-						aria-invalid="true"
-					}
-				/>
-			</label>
-
-			<label for="content" class="flex flex-col">
-				Bericht
-
-				<textarea
-					name="content"
-					id="content"
-					placeholder="Bericht"
-
-					if props.InvalidContent {
-						aria-invalid="true"
-					}
-				>{ props.Content }</textarea>
-			</label>
-
-			<!-- Attachments Section -->
-			<div id="attachments-section" class="attachments-container flex flex-col gap">
-				<small class="attachments-label">
-					Bilder (max. 10MB pro Datei, max. 10 Dateien)
-				</small>
-
-				if props.InvalidTitle || props.InvalidContent {
-					<div class="attachment-error">
-						<i class="bi bi-exclamation-triangle"></i>
-						Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.
-					</div>
+		<label for="title" class="flex flex-col">
+			Titel
+			<input
+				name="title"
+				id="title"
+				placeholder="Titel"
+				value={ props.Title }
+				if props.InvalidTitle {
+					aria-invalid="true"
 				}
+			/>
+		</label>
 
-				if props.AttachmentError != "" {
-					<div class="attachment-error">{ props.AttachmentError }</div>
+		<label for="content" class="flex flex-col">
+			Bericht
+
+			<textarea
+				name="content"
+				id="content"
+				placeholder="Bericht"
+
+				if props.InvalidContent {
+					aria-invalid="true"
 				}
+			>{ props.Content }</textarea>
+		</label>
 
-				<!-- Existing Attachments -->
-				if len(props.Attachments) > 0 {
-					<details
-						class="attachments-section border"
-						ontoggle='
-							if(this.open) setTimeout(() => {
-								this.parentElement.scrollIntoView({behavior: "smooth", block: "start"});
-							}, 100);
-						'
-					>
-						<summary class="attachments-label flex gap items-center">
-							<i class="bi bi-images"></i>
-							Vorhandene Bilder ({ len(props.Attachments) })
-						</summary>
+		<!-- Attachments Section -->
+		<div id="attachments-section" class="attachments-container flex flex-col gap">
+			<small class="attachments-label">
+				Bilder (max. 10MB pro Datei, max. 10 Dateien)
+			</small>
 
-						<div id="existing-attachments" class="flex flex-col gap">
-							for attachmentIndex, attachment := range props.Attachments {
-								<div
-									class="attachment-item flex gap justify-between items-center border"
-									data-id={ fmt.Sprintf("%s", attachment.ID) }
-								>
-									<div class="attachment-info flex gap items-center">
-										<span class="ellipsis">Anhang { attachmentIndex+1 }</span>
-										<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
-									</div>
+			if props.InvalidTitle || props.InvalidContent {
+				<div class="attachment-error">
+					<i class="bi bi-exclamation-triangle"></i>
+					Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.
+				</div>
+			}
 
-									<div class="attachment-actions flex gap">
-										<button
-											type="button"
-											class="secondary flex gap items-center"
-											onclick={ layouts.OpenImageViewer(attachment.GetID()) }
-										>
-											<small class="flex gap items-center">
-												<i class="bi bi-eye"></i>
-												Anzeigen
-											</small>
-										</button>
+			if props.AttachmentError != "" {
+				<div class="attachment-error">{ props.AttachmentError }</div>
+			}
 
-										<button
-											type="button"
-											class="destructive flex gap items-center"
-											onclick={ deleteAttachment(attachment.GetID()) }
-										>
-											<small class="flex gap items-center">
-												<i class="bi bi-trash"></i>
-												Löschen
-											</small>
-										</button>
-									</div>
-								</div>
-							}
-						</div>
-					</details>
-				}
-
-				<!-- File Upload Area -->
-				<div
-					class="file-input-area flex flex-col justify-center items-center"
-					onclick='document.getElementById("attachments").click();'
-					ondrop="window.dialogEditFunctions.handleFileDrop(event)"
-					ondragover="window.dialogEditFunctions.handleDragOver(event)"
-					ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
+			<!-- Existing Attachments -->
+			if len(props.Attachments) > 0 {
+				<details
+					class="attachments-section border"
+					ontoggle='
+						if(this.open) setTimeout(() => {
+							this.parentElement.scrollIntoView({behavior: "smooth", block: "start"});
+						}, 100);
+					'
 				>
-					<i class="bi bi-cloud-upload"></i>
+					<summary class="attachments-label flex gap items-center">
+						<i class="bi bi-images"></i>
+						Vorhandene Bilder ({ len(props.Attachments) })
+					</summary>
 
-					<div class="text-center">Bilder hochladen</div>
+					<div id="existing-attachments" class="flex flex-col gap">
+						for attachmentIndex, attachment := range props.Attachments {
+							<div
+								class="attachment-item flex gap justify-between items-center border"
+								data-id={ fmt.Sprintf("%s", attachment.ID) }
+							>
+								<div class="attachment-info flex gap items-center">
+									<span class="ellipsis">Anhang { attachmentIndex+1 }</span>
+									<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
+								</div>
 
-					<input
-						type="file"
-						name="attachments"
-						id="attachments"
-						multiple
-						accept="image/*"
-						onchange='onAttachments(this.event)'
-					/>
-				</div>
+								<div class="attachment-actions flex gap">
+									<button
+										type="button"
+										class="secondary flex gap items-center"
+										onclick={ layouts.OpenImageViewer(attachment.GetID()) }
+									>
+										<small class="flex gap items-center">
+											<i class="bi bi-eye"></i>
+											Anzeigen
+										</small>
+									</button>
 
-				<!-- File Preview Area -->
-				<div id="file-preview" class="file-preview flex flex-col gap border">
-					<div class="attachments-label">Neue Bilder:</div>
-
-					<div id="new-attachments" class="flex flex-col gap"></div>
-
-					<template name="attachment-item">
-						<div
-							class="attachment-item flex gap justify-between items-center border"
-						>
-							<div class="attachment-info flex gap items-center">
-								<span class="name ellipsis"></span>
-								<span class="size-text ellipsis"></span>
+									<button
+										type="button"
+										class="destructive flex gap items-center"
+										onclick={ deleteAttachment(attachment.GetID()) }
+									>
+										<small class="flex gap items-center">
+											<i class="bi bi-trash"></i>
+											Löschen
+										</small>
+									</button>
+								</div>
 							</div>
+						}
+					</div>
+				</details>
+			}
 
-							<div class="attachment-actions flex gap">
-								<button
-									type="button"
-									class="delete destructive flex gap items-center"
-								>
-									<small class="flex gap items-center">
-										<i class="bi bi-trash"></i>
-										Entfernen
-									</small>
-								</button>
-							</div>
-						</div>
-					</template>
-				</div>
+			<!-- File Upload Area -->
+			<div
+				class="file-input-area flex flex-col justify-center items-center"
+				onclick='document.getElementById("attachments").click();'
+				ondrop="window.dialogEditFunctions.handleFileDrop(event)"
+				ondragover="window.dialogEditFunctions.handleDragOver(event)"
+				ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
+			>
+				<i class="bi bi-cloud-upload"></i>
+
+				<div class="text-center">Bilder hochladen</div>
+
+				<input
+					type="file"
+					name="attachments"
+					id="attachments"
+					multiple
+					accept="image/*"
+					onchange='onAttachments(this.event)'
+				/>
 			</div>
-        </div>
+
+			<!-- File Preview Area -->
+			<div id="file-preview" class="file-preview flex flex-col gap border">
+				<div class="attachments-label">Neue Bilder:</div>
+
+				<div id="new-attachments" class="flex flex-col gap"></div>
+
+				<template name="attachment-item">
+					<div
+						class="attachment-item flex gap justify-between items-center border"
+					>
+						<div class="attachment-info flex gap items-center">
+							<span class="name ellipsis"></span>
+							<span class="size-text ellipsis"></span>
+						</div>
+
+						<div class="attachment-actions flex gap">
+							<button
+								type="button"
+								class="delete destructive flex gap items-center"
+							>
+								<small class="flex gap items-center">
+									<i class="bi bi-trash"></i>
+									Entfernen
+								</small>
+							</button>
+						</div>
+					</div>
+				</template>
+			</div>
+		</div>
 	}
 }
 
