@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type PressCycle struct {
@@ -40,7 +41,7 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(dberror.NewDatabaseError("create_table", "press_cycles", "failed to create table", err))
+		panic(fmt.Errorf("failed to create press_cycles table: %w", err))
 	}
 
 	return &PressCycle{
@@ -98,9 +99,9 @@ func (p *PressCycle) Get(id int64) (*models.Cycle, error) {
 	cycle, err := p.scanPressCycle(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, dberror.ErrNotFound
+			return nil, utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
 		}
-		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycle %d", id), err)
+		return nil, utils.NewDatabaseError("select", "press_cycles", err)
 	}
 	cycle.PartialCycles = p.GetPartialCycles(cycle)
 
@@ -119,7 +120,7 @@ func (p *PressCycle) List() ([]*models.Cycle, error) {
 
 	rows, err := p.db.Query(query)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "press_cycles", "failed to list press cycles", err)
+		return nil, utils.NewDatabaseError("select", "press_cycles", err)
 	}
 	defer rows.Close()
 
@@ -151,12 +152,12 @@ func (p *PressCycle) Add(cycle *models.Cycle, user *models.User) (int64, error) 
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "press_cycles", "failed to add cycle", err)
+		return 0, utils.NewDatabaseError("insert", "press_cycles", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, dberror.NewDatabaseError("insert", "press_cycles", "failed to get last insert id for cycle", err)
+		return 0, utils.NewDatabaseError("insert", "press_cycles", err)
 	}
 	cycle.ID = id
 
@@ -198,16 +199,16 @@ func (p *PressCycle) Update(cycle *models.Cycle, user *models.User) error {
 		cycle.ID,
 	)
 	if err != nil {
-		return dberror.NewDatabaseError("update", "press_cycles", fmt.Sprintf("failed to update press cycle with id %d", cycle.ID), err)
+		return utils.NewDatabaseError("update", "press_cycles", err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return dberror.NewDatabaseError("update", "press_cycles", "failed to get rows affected", err)
+		return utils.NewDatabaseError("update", "press_cycles", err)
 	}
 
 	if rows == 0 {
-		return dberror.ErrNotFound
+		return utils.NewNotFoundError(fmt.Sprintf("Pressenzyklus mit ID %d nicht gefunden", cycle.ID))
 	}
 
 	// Create feed entry
@@ -236,15 +237,15 @@ func (p *PressCycle) Delete(id int64, user *models.User) error {
 
 	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "press_cycles", fmt.Sprintf("failed to delete press cycle with id %d", id), err)
+		return utils.NewDatabaseError("delete", "press_cycles", err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return dberror.NewDatabaseError("delete", "press_cycles", "failed to get rows affected for delete", err)
+		return utils.NewDatabaseError("delete", "press_cycles", err)
 	}
 	if rows == 0 {
-		return dberror.ErrNotFound
+		return utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
 	}
 
 	// Create feed entry
@@ -274,13 +275,13 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycles for tool %d", toolID), err)
+		return nil, utils.NewDatabaseError("select", "press_cycles", err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, err
+		return nil, utils.NewDatabaseError("scan", "press_cycles", err)
 	}
 
 	return cycles, nil
@@ -291,7 +292,7 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%v, offset=%v", pressNumber, limit, offset)
 
 	if !models.IsValidPressNumber(&pressNumber) {
-		return nil, dberror.NewValidationError("press_number", "invalid press number", pressNumber)
+		return nil, utils.NewValidationError("press_number: invalid press number")
 	}
 
 	var queryLimit, queryOffset sql.NullInt64
@@ -332,13 +333,13 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
-		return nil, dberror.NewDatabaseError("select", "press_cycles", fmt.Sprintf("failed to get press cycles for press %d", pressNumber), err)
+		return nil, utils.NewDatabaseError("select", "press_cycles", err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, err
+		return nil, utils.NewDatabaseError("scan", "press_cycles", err)
 	}
 
 	return cycles, nil
@@ -350,7 +351,7 @@ func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error
 	for rows.Next() {
 		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
-			return nil, dberror.WrapError(err, "failed to scan press cycle")
+			return nil, utils.NewDatabaseError("scan", "press_cycles", err)
 		}
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)

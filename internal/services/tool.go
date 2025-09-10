@@ -8,15 +8,16 @@ import (
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type Tool struct {
 	db    *sql.DB
-	notes *note.Service
-	feeds *feed.Service
+	notes *Note
+	feeds *Feed
 }
 
-func NewTool(db *sql.DB, notes *note.Service, feeds *feed.Service) *Tool {
+func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 	const createTableQuery = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
@@ -33,7 +34,7 @@ func NewTool(db *sql.DB, notes *note.Service, feeds *feed.Service) *Tool {
 	`
 
 	if _, err := db.Exec(createTableQuery); err != nil {
-		panic(dberror.NewDatabaseError("create_table", "tools", "failed to create tools table", err))
+		panic(fmt.Errorf("failed to create tools table: %w", err))
 	}
 
 	logger.DBTools().Info("Tool service initialized")
@@ -62,13 +63,13 @@ func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 		tool.Regenerating, tool.Press, notesBytes, modsBytes)
 	if err != nil {
 		logger.DBTools().Error("Failed to insert tool: %v", err)
-		return 0, dberror.NewDatabaseError("insert", "tools", "failed to insert tool", err)
+		return 0, utils.NewDatabaseError("insert", "tools", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
 		logger.DBTools().Error("Failed to get last insert ID: %v", err)
-		return 0, dberror.NewDatabaseError("insert", "tools", "failed to get last insert ID", err)
+		return 0, utils.NewDatabaseError("insert", "tools", err)
 	}
 
 	tool.ID = id
@@ -86,8 +87,7 @@ func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*mode
 	for _, note := range notes {
 		noteID, err := t.notes.Add(note, user)
 		if err != nil {
-			logger.DBTools().Error("Failed to add note: %v", err)
-			return nil, dberror.WrapError(err, "failed to add note")
+			return nil, err
 		}
 		noteIDs = append(noteIDs, noteID)
 	}
@@ -95,7 +95,7 @@ func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*mode
 	tool.LinkedNotes = noteIDs
 	toolID, err := t.Add(tool, user)
 	if err != nil {
-		return nil, dberror.WrapError(err, "failed to add tool")
+		return nil, err
 	}
 
 	tool.ID = toolID
@@ -108,19 +108,24 @@ func (t *Tool) Delete(id int64, user *models.User) error {
 
 	tool, err := t.Get(id)
 	if err != nil {
-		logger.DBTools().Error("Failed to get tool before deletion: %v", err)
-		return dberror.WrapError(err, "failed to get tool before deletion")
+		return err
 	}
 
 	const deleteQuery = `DELETE FROM tools WHERE id = $1`
 	_, err = t.db.Exec(deleteQuery, id)
 	if err != nil {
 		logger.DBTools().Error("Failed to delete tool %d: %v", id, err)
-		return dberror.NewDatabaseError("delete", "tools", fmt.Sprintf("failed to delete tool with ID %d", id), err)
+		return utils.NewDatabaseError("delete", "tools", err)
 	}
 
-	t.createFeedUpdate("Werkzeug entfernt",
-		fmt.Sprintf("Benutzer %s hat das Werkzeug %s entfernt.", user.Name, tool.String()), user)
+	t.createFeedUpdate(
+		"Werkzeug entfernt",
+		fmt.Sprintf(
+			"Benutzer %s hat das Werkzeug %s entfernt.",
+			user.Name, tool.String(),
+		),
+		user,
+	)
 
 	logger.DBTools().Info("Successfully deleted tool ID: %d", id)
 	return nil
@@ -135,11 +140,9 @@ func (t *Tool) Get(id int64) (*models.Tool, error) {
 	tool, err := t.scanTool(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			logger.DBTools().Debug("Tool not found: %d", id)
-			return nil, dberror.ErrNotFound
+			return nil, utils.NewNotFoundError(fmt.Sprintf("tool with ID %d not found", id))
 		}
-		logger.DBTools().Error("Failed to get tool %d: %v", id, err)
-		return nil, dberror.NewDatabaseError("select", "tools", fmt.Sprintf("failed to get tool with ID %d", id), err)
+		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
 	logger.DBTools().Debug("Successfully retrieved tool: %s", tool.String())
@@ -162,7 +165,7 @@ func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			logger.DBTools().Error("Failed to scan tool: %v", err)
+			logger.DBTools().Warn("Failed to scan tool: %v", err)
 			return nil
 		}
 		tools = append(tools, tool)
@@ -193,8 +196,7 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	rows, err := t.db.Query(query, pressNumber)
 	if err != nil {
 		logger.DBTools().Error("Failed to query tools for press %v: %v", pressNumber, err)
-		return nil, dberror.NewDatabaseError("select", "tools",
-			fmt.Sprintf("failed to query tools for press %v", pressNumber), err)
+		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 	defer rows.Close()
 
@@ -202,15 +204,14 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			logger.DBTools().Error("Failed to scan tool: %v", err)
-			return nil, dberror.WrapError(err, "failed to scan tool")
+			return nil, utils.NewDatabaseError("scan", "tools", err)
 		}
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
 		logger.DBTools().Error("Error iterating over tool rows: %v", err)
-		return nil, dberror.NewDatabaseError("select", "tools", "error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
 	logger.DBTools().Debug("Found %d tools for press %v", len(tools), pressNumber)
@@ -251,8 +252,7 @@ func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 
 	notes, err := t.notes.GetByIDs(tool.LinkedNotes)
 	if err != nil {
-		logger.DBTools().Error("Failed to load notes for tool %d: %v", id, err)
-		return nil, dberror.WrapError(err, "failed to load notes for tool")
+		return nil, fmt.Errorf("failed to load notes for tool")
 	}
 
 	logger.DBTools().Debug("Successfully retrieved tool with %d notes", len(notes))
@@ -265,8 +265,7 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools`
 	rows, err := t.db.Query(query)
 	if err != nil {
-		logger.DBTools().Error("Failed to query tools: %v", err)
-		return nil, dberror.NewDatabaseError("select", "tools", "failed to query tools", err)
+		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 	defer rows.Close()
 
@@ -274,15 +273,14 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			logger.DBTools().Error("Failed to scan tool: %v", err)
-			return nil, dberror.WrapError(err, "failed to scan tool")
+			return nil, utils.NewDatabaseError("scan", "tools", err)
 		}
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
 		logger.DBTools().Error("Error iterating over tool rows: %v", err)
-		return nil, dberror.NewDatabaseError("select", "tools", "error iterating over rows", err)
+		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
 	logger.DBTools().Debug("Successfully listed %d tools", len(tools))
@@ -301,8 +299,7 @@ func (t *Tool) ListWithNotes() ([]*models.ToolWithNotes, error) {
 	for _, tool := range tools {
 		notes, err := t.notes.GetByIDs(tool.LinkedNotes)
 		if err != nil {
-			logger.DBTools().Error("Failed to load notes for tool %d: %v", tool.ID, err)
-			return nil, dberror.WrapError(err, fmt.Sprintf("failed to load notes for tool %d", tool.ID))
+			return nil, fmt.Errorf("failed to load notes for tool %d: %w", tool.ID, err)
 		}
 
 		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
@@ -334,7 +331,7 @@ func (t *Tool) Update(tool *models.Tool, user *models.User) error {
 		tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
 	if err != nil {
 		logger.DBTools().Error("Failed to update tool %d: %v", tool.ID, err)
-		return dberror.NewDatabaseError("update", "tools", fmt.Sprintf("failed to update tool with ID %d", tool.ID), err)
+		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	t.createFeedUpdate("Werkzeug aktualisiert",
@@ -366,15 +363,14 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
 		logger.DBTools().Error("Failed to marshal mods: %v", err)
-		return dberror.NewDatabaseError("update", "tools", "failed to marshal mods", err)
+		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	const query = `UPDATE tools SET press = ?, mods = ? WHERE id = ?`
 	_, err = t.db.Exec(query, press, modsBytes, toolID)
 	if err != nil {
 		logger.DBTools().Error("Failed to update press assignment: %v", err)
-		return dberror.NewDatabaseError("update", "tools",
-			fmt.Sprintf("failed to update press for tool %d", toolID), err)
+		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	tool.Press = press
@@ -404,15 +400,14 @@ func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
 		logger.DBTools().Error("Failed to marshal mods: %v", err)
-		return dberror.NewDatabaseError("update", "tools", "failed to marshal mods", err)
+		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	const query = `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
 	_, err = t.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
 	if err != nil {
 		logger.DBTools().Error("Failed to update regenerating status: %v", err)
-		return dberror.NewDatabaseError("update", "tools",
-			fmt.Sprintf("failed to update regenerating for tool %d", tool.ID), err)
+		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	t.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
@@ -436,17 +431,17 @@ func (t *Tool) marshalToolData(tool *models.Tool, user *models.User) ([]byte, []
 
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal format", err)
+		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
 	}
 
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal notes", err)
+		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
 	}
 
 	modsBytes, err := json.Marshal(tool.Mods)
 	if err != nil {
-		return nil, nil, nil, dberror.NewDatabaseError("marshal", "tools", "failed to marshal mods", err)
+		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
 	}
 
 	return formatBytes, notesBytes, modsBytes, nil
@@ -462,15 +457,15 @@ func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, dberror.NewDatabaseError("scan", "tools", "failed to unmarshal format", err)
+		return nil, fmt.Errorf("failed to unmarshal format data")
 	}
 
 	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
-		return nil, dberror.NewDatabaseError("scan", "tools", "failed to unmarshal notes", err)
+		return nil, fmt.Errorf("failed to unmarshal linked notes data")
 	}
 
 	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
-		return nil, dberror.WrapError(err, "failed to unmarshal mods data")
+		return nil, fmt.Errorf("failed to unmarshal mods data")
 	}
 
 	return tool, nil
@@ -495,7 +490,7 @@ func (t *Tool) updateMods(user *models.User, tool *models.Tool) {
 func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return dberror.NewDatabaseError("validation", "tools", "failed to marshal format", err)
+		return fmt.Errorf("failed to marshal format data: %w", err)
 	}
 
 	var count int
@@ -509,7 +504,12 @@ func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error 
 	}
 
 	if count > 0 {
-		return dberror.ErrAlreadyExists
+		return utils.NewAlreadyExistsError(
+			fmt.Sprintf(
+				"tool with position %d, format %s, type %s, and code %s already exists",
+				tool.Position, tool.Format, tool.Type, tool.Code,
+			),
+		)
 	}
 
 	return nil

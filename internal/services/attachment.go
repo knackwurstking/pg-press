@@ -3,11 +3,11 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"os/user"
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/models/attachment"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -141,7 +141,7 @@ func (s *Attachment) GetByIDs(ids []int64) ([]*attachment.Attachment, error) {
 }
 
 // Add creates a new attachment and returns its generated ID.
-func (a *Attachment) Add(attachment *attachment.Attachment, _ *user.User) (int64, error) {
+func (a *Attachment) Add(attachment *attachment.Attachment, _ *models.User) (int64, error) {
 	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
@@ -167,7 +167,7 @@ func (a *Attachment) Add(attachment *attachment.Attachment, _ *user.User) (int64
 }
 
 // Update modifies an existing attachment.
-func (a *Attachment) Update(attachment *attachment.Attachment, _ *user.User) error {
+func (a *Attachment) Update(attachment *attachment.Attachment, _ *models.User) error {
 	id := attachment.GetID()
 	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
 
@@ -198,7 +198,7 @@ func (a *Attachment) Update(attachment *attachment.Attachment, _ *user.User) err
 }
 
 // Delete deletes an attachment by ID.
-func (a *Attachment) Delete(id int64, _ *user.User) error {
+func (a *Attachment) Delete(id int64, _ *models.User) error {
 	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Feed represents a simple feed entry with just title, content, and user info.
@@ -29,25 +29,25 @@ func New(title, content string, userID int64) *Feed {
 // Validate checks if the feed has valid data.
 func (f *Feed) Validate() error {
 	if f.Title == "" {
-		return dberror.NewValidationError("title", "cannot be empty", f.Title)
+		return utils.NewValidationError("title: cannot be empty")
 	}
 	if len(f.Title) > 255 {
-		return dberror.NewValidationError("title", "too long (max 255 characters)", len(f.Title))
+		return utils.NewValidationError("title: too long (max 255 characters)")
 	}
 
 	if f.Content == "" {
-		return dberror.NewValidationError("content", "cannot be empty", f.Content)
+		return utils.NewValidationError("content: cannot be empty")
 	}
 	if len(f.Content) > 10000 {
-		return dberror.NewValidationError("content", "too long (max 10000 characters)", len(f.Content))
+		return utils.NewValidationError("content: too long (max 10000 characters)")
 	}
 
 	if f.UserID <= 0 {
-		return dberror.NewValidationError("user_id", "must be positive", f.UserID)
+		return utils.NewValidationError("user_id: must be positive")
 	}
 
 	if f.CreatedAt <= 0 {
-		return dberror.NewValidationError("created_at", "must be positive", f.CreatedAt)
+		return utils.NewValidationError("created_at: must be positive")
 	}
 
 	return nil

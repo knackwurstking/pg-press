@@ -49,32 +49,32 @@ func NewUserFromInterfaceMap(modified map[string]any) *User {
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
 	if u.TelegramID <= 0 {
-		return dberror.NewValidationError("telegram_id", "must be positive", u.TelegramID)
+		return utils.NewValidationError("telegram_id: must be positive")
 	}
 
 	if u.Name == "" {
-		return dberror.NewValidationError("user_name", "cannot be empty", u.Name)
+		return utils.NewValidationError("user_name: cannot be empty")
 	}
 	if len(u.Name) < MinNameLength {
-		return dberror.NewValidationError("user_name", "too short", len(u.Name))
+		return utils.NewValidationError("user_name: too short")
 	}
 	if len(u.Name) > MaxNameLength {
-		return dberror.NewValidationError("user_name", "too long", len(u.Name))
+		return utils.NewValidationError("user_name: too long")
 	}
 
 	if u.ApiKey == "" {
-		return dberror.NewValidationError("api_key", "cannot be empty", u.ApiKey)
+		return utils.NewValidationError("api_key: cannot be empty")
 	}
 	if len(u.ApiKey) < MinAPIKeyLength {
-		return dberror.NewValidationError(
-			"api_key",
-			fmt.Sprintf("too short for security, must be at least %d characters", MinAPIKeyLength),
-			len(u.ApiKey),
+		return utils.NewValidationError(
+			fmt.Sprintf(
+				"api_key: too short for security, must be at least %d characters", MinAPIKeyLength,
+			),
 		)
 	}
 
 	if u.LastFeed < 0 {
-		return dberror.NewValidationError("last_feed", "cannot be negative", u.LastFeed)
+		return utils.NewValidationError("last_feed: cannot be negative")
 	}
 
 	return nil

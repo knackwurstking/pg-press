@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database/dberror"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -39,28 +38,28 @@ func New(userAgent, value, apiKey string) *Cookie {
 // Validate checks if the cookie has valid data.
 func (c *Cookie) Validate() error {
 	if c.UserAgent == "" {
-		return dberror.NewValidationError("user_agent", "cannot be empty", c.UserAgent)
+		return utils.NewValidationError("user_agent: cannot be empty")
 	}
 	if len(c.UserAgent) > MaxUserAgentLength {
-		return dberror.NewValidationError("user_agent", "too long", len(c.UserAgent))
+		return utils.NewValidationError("user_agent: too long")
 	}
 
 	if c.Value == "" {
-		return dberror.NewValidationError("value", "cannot be empty", c.Value)
+		return utils.NewValidationError("value: cannot be empty")
 	}
 	if len(c.Value) < MinValueLength {
-		return dberror.NewValidationError("value", "too short for security", len(c.Value))
+		return utils.NewValidationError("value: too short for security")
 	}
 
 	if c.ApiKey == "" {
-		return dberror.NewValidationError("api_key", "cannot be empty", c.ApiKey)
+		return utils.NewValidationError("api_key: cannot be empty")
 	}
 	if len(c.ApiKey) < MinAPIKeyLength {
-		return dberror.NewValidationError("api_key", "too short for security", len(c.ApiKey))
+		return utils.NewValidationError("api_key: too short for security")
 	}
 
 	if c.LastLogin <= 0 {
-		return dberror.NewValidationError("last_login", "must be positive", c.LastLogin)
+		return utils.NewValidationError("last_login: must be positive")
 	}
 
 	return nil
@@ -110,7 +109,7 @@ func (c *Cookie) UpdateLastLogin() {
 func (c *Cookie) RefreshToken() error {
 	newValue, err := utils.GenerateSecureToken(32)
 	if err != nil {
-		return dberror.WrapError(err, "failed to refresh token")
+		return fmt.Errorf("failed to refresh token: %w", err)
 	}
 
 	c.Value = newValue
@@ -122,7 +121,7 @@ func (c *Cookie) RefreshToken() error {
 func (c *Cookie) RefreshAPIKey() error {
 	newAPIKey, err := utils.GenerateSecureToken(MinAPIKeyLength)
 	if err != nil {
-		return dberror.WrapError(err, "failed to refresh API key")
+		return fmt.Errorf("failed to refresh API key: %w", err)
 	}
 
 	c.ApiKey = newAPIKey

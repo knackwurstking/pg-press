@@ -12,8 +12,8 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/internal/database/dberror"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/router"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/labstack/echo/v4"
 )
 
@@ -42,17 +42,17 @@ func serverCommand() cli.Command {
 				if *logFile != "" {
 					f, err := os.OpenFile(*logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
-						logger.AppLogger.Error("Failed to open log file %s: %v", *logFile, err)
+						logger.Server().Error("Failed to open log file %s: %v", *logFile, err)
 						return err
 					} else {
-						logger.AppLogger.SetOutput(f)
-						logger.AppLogger.Info("Redirected logs to file: %s", *logFile)
+						logger.Server().SetOutput(f)
+						logger.Server().Info("Redirected logs to file: %s", *logFile)
 					}
 				}
 
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					logger.AppLogger.Error("Failed to open database: %v", err)
+					logger.Server().Error("Failed to open database: %v", err)
 					return err
 				}
 
@@ -111,6 +111,8 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		// Only log here if we need additional context beyond the standard request log
 		if code >= 500 {
 			logger.Server().Error("Internal server error (%d): %s", code, message)
+		} else if code >= 400 {
+			logger.Server().Warn("Client error (%d): %s", code, message)
 		}
 
 		// This line checks if the HTTP response headers have already been written and sent to the client.
