@@ -27,6 +27,7 @@ func migrationStatusCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
@@ -59,6 +60,7 @@ func migrationRunCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
@@ -90,6 +92,7 @@ func migrationVerifyCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
@@ -122,6 +125,7 @@ func migrationCleanupCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
@@ -160,6 +164,7 @@ func migrationStatsCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
@@ -206,6 +211,7 @@ func migrationExportCommand() cli.Command {
 				if err != nil {
 					return err
 				}
+				defer db.GetDB().Close()
 
 				fmt.Printf("Exporting migration data to %s...\n", *outputFile)
 
@@ -288,6 +294,38 @@ func migrationExportCommand() cli.Command {
 	}
 }
 
+func migrationTestCommand() cli.Command {
+	return cli.Command{
+		Name:  "test-db",
+		Usage: cli.Usage("Test database connection and configuration"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := cli.String(cmd, "db",
+				cli.WithShort("d"),
+				cli.Usage("Custom database path"),
+				cli.Optional,
+			)
+
+			return func(cmd *cli.Command) error {
+				fmt.Println("=== Testing Database Connection ===")
+
+				if err := testDBConnection(*customDBPath); err != nil {
+					fmt.Printf("❌ Database connection test failed: %v\n", err)
+					fmt.Println("\nTroubleshooting tips:")
+					fmt.Println("1. Ensure the database file exists and is not corrupted")
+					fmt.Println("2. Check file permissions on the database file")
+					fmt.Println("3. Make sure no other processes are using the database")
+					fmt.Println("4. Try running with a different database path using --db flag")
+					return err
+				}
+
+				fmt.Println("✅ Database connection test passed!")
+				fmt.Println("The database is properly configured and accessible.")
+				return nil
+			}
+		}),
+	}
+}
+
 func migrationHelpCommand() cli.Command {
 	return cli.Command{
 		Name:  "help",
@@ -303,6 +341,9 @@ func migrationHelpCommand() cli.Command {
 				fmt.Println()
 				fmt.Println("  status    - Show current migration status")
 				fmt.Println("            Shows whether migration is needed and current state")
+				fmt.Println()
+				fmt.Println("  test-db   - Test database connection and configuration")
+				fmt.Println("            Verifies database connectivity and WAL mode setup")
 				fmt.Println()
 				fmt.Println("  run       - Execute the migration process")
 				fmt.Println("            Migrates data from old 'mods' columns to new system")
@@ -322,12 +363,13 @@ func migrationHelpCommand() cli.Command {
 				fmt.Println("            Options: --force to skip confirmation")
 				fmt.Println()
 				fmt.Println("Recommended workflow:")
-				fmt.Println("  1. pgpress migration status    # Check if migration is needed")
-				fmt.Println("  2. pgpress migration run       # Perform the migration")
-				fmt.Println("  3. pgpress migration verify    # Verify migration success")
-				fmt.Println("  4. pgpress migration stats     # Review statistics")
-				fmt.Println("  5. Test your application thoroughly")
-				fmt.Println("  6. pgpress migration cleanup   # Remove old columns (optional)")
+				fmt.Println("  1. pgpress migration test-db   # Test database connection")
+				fmt.Println("  2. pgpress migration status    # Check if migration is needed")
+				fmt.Println("  3. pgpress migration run       # Perform the migration")
+				fmt.Println("  4. pgpress migration verify    # Verify migration success")
+				fmt.Println("  5. pgpress migration stats     # Review statistics")
+				fmt.Println("  6. Test your application thoroughly")
+				fmt.Println("  7. pgpress migration cleanup   # Remove old columns (optional)")
 				fmt.Println()
 				fmt.Println("Safety notes:")
 				fmt.Println("  - Always backup your database before running migrations")

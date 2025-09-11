@@ -78,13 +78,24 @@ func (m *ModificationMigration) MigrateAll() (*MigrationStats, error) {
 func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) error {
 	logger.DBModifications().Info("Migrating trouble report modifications")
 
+	// Start transaction to prevent database locking
+	tx, err := m.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	query := `
 		SELECT id, title, content, linked_attachments, mods
 		FROM trouble_reports
 		WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
 	`
 
-	rows, err := m.db.Query(query)
+	rows, err := tx.Query(query)
 	if err != nil {
 		return fmt.Errorf("failed to query trouble reports: %w", err)
 	}
@@ -135,8 +146,8 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 				fmt.Sprintf("Migrated from old mod system (mod %d/%d)", i+1, len(oldMods)),
 			)
 
-			// Add to new modification system with original timestamp
-			if err := m.addModificationWithTimestamp(userID, ModificationTypeTroubleReport, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
+			// Add to new modification system with original timestamp using transaction
+			if err := m.addModificationWithTimestampTx(tx, userID, ModificationTypeTroubleReport, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
 				logger.DBModifications().Error("Failed to migrate mod for trouble report %d: %v", id, err)
 				stats.Errors++
 				continue
@@ -152,6 +163,11 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 		return fmt.Errorf("error iterating trouble report rows: %w", err)
 	}
 
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	logger.DBModifications().Info("Migrated %d trouble reports with %d total mods", stats.TroubleReportsProcessed, stats.TotalModsMigrated)
 	return nil
 }
@@ -160,13 +176,24 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error {
 	logger.DBModifications().Info("Migrating metal sheet modifications")
 
+	// Start transaction to prevent database locking
+	tx, err := m.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	query := `
 		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
 		FROM metal_sheets
 		WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
 	`
 
-	rows, err := m.db.Query(query)
+	rows, err := tx.Query(query)
 	if err != nil {
 		return fmt.Errorf("failed to query metal sheets: %w", err)
 	}
@@ -223,8 +250,8 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 				fmt.Sprintf("Migrated from old mod system (mod %d/%d)", i+1, len(oldMods)),
 			)
 
-			// Add to new modification system with original timestamp
-			if err := m.addModificationWithTimestamp(userID, ModificationTypeMetalSheet, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
+			// Add to new modification system with original timestamp using transaction
+			if err := m.addModificationWithTimestampTx(tx, userID, ModificationTypeMetalSheet, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
 				logger.DBModifications().Error("Failed to migrate mod for metal sheet %d: %v", id, err)
 				stats.Errors++
 				continue
@@ -240,7 +267,32 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 		return fmt.Errorf("error iterating metal sheet rows: %w", err)
 	}
 
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	logger.DBModifications().Info("Migrated %d metal sheets", stats.MetalSheetsProcessed)
+	return nil
+}
+
+// addModificationWithTimestampTx adds a modification with a specific timestamp using a transaction
+func (m *ModificationMigration) addModificationWithTimestampTx(tx *sql.Tx, userID int64, entityType ModificationType, entityID int64, data interface{}, timestamp time.Time) error {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal modification data: %w", err)
+	}
+
+	query := `
+		INSERT INTO modifications (user_id, entity_type, entity_id, data, created_at)
+		VALUES (?, ?, ?, ?, ?)
+	`
+
+	_, err = tx.Exec(query, userID, string(entityType), entityID, jsonData, timestamp)
+	if err != nil {
+		return fmt.Errorf("failed to insert modification: %w", err)
+	}
+
 	return nil
 }
 
@@ -248,13 +300,24 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 	logger.DBModifications().Info("Migrating tool modifications")
 
+	// Start transaction to prevent database locking
+	tx, err := m.db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	query := `
 		SELECT id, position, format, type, code, regenerating, press, notes, mods
 		FROM tools
 		WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
 	`
 
-	rows, err := m.db.Query(query)
+	rows, err := tx.Query(query)
 	if err != nil {
 		return fmt.Errorf("failed to query tools: %w", err)
 	}
@@ -323,8 +386,8 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 				fmt.Sprintf("Migrated from old mod system (mod %d/%d)", i+1, len(oldMods)),
 			)
 
-			// Add to new modification system with original timestamp
-			if err := m.addModificationWithTimestamp(userID, ModificationTypeTool, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
+			// Add to new modification system with original timestamp using transaction
+			if err := m.addModificationWithTimestampTx(tx, userID, ModificationTypeTool, id, modData, time.UnixMilli(oldMod.Time)); err != nil {
 				logger.DBModifications().Error("Failed to migrate mod for tool %d: %v", id, err)
 				stats.Errors++
 				continue
@@ -338,6 +401,11 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 
 	if err = rows.Err(); err != nil {
 		return fmt.Errorf("error iterating tool rows: %w", err)
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	logger.DBModifications().Info("Migrated %d tools", stats.ToolsProcessed)
