@@ -675,30 +675,6 @@ func (s *TroubleReport) LoadAttachments(tr *models.TroubleReport) ([]*models.Att
 	return attachments, nil
 }
 
-// GetAttachment retrieves a specific attachment by ID.
-func (s *TroubleReport) GetAttachment(id int64) (*models.Attachment, error) {
-	logger.DBTroubleReports().Debug("Getting attachment with ID %d", id)
-	start := time.Now()
-
-	attachment, err := s.attachments.Get(id)
-	elapsed := time.Since(start)
-
-	if err != nil {
-		if utils.IsNotFoundError(err) {
-			logger.DBTroubleReports().Debug("Attachment not found for ID %d (query time: %v)", id, elapsed)
-		} else {
-			logger.DBTroubleReports().Error("Failed to get attachment %d in %v: %v", id, elapsed, err)
-		}
-
-		return nil, err
-	}
-
-	logger.DBTroubleReports().Debug("Retrieved attachment %d (size: %d bytes, type: %s) in %v",
-		id, len(attachment.Data), attachment.MimeType, elapsed)
-
-	return attachment, nil
-}
-
 func (s *TroubleReport) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
 	report := &models.TroubleReport{}
 	var linkedAttachments string
