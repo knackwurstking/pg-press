@@ -57,3 +57,8 @@ func New(db *sql.DB) *DB {
 
 	return dbInstance
 }
+
+// GetDB returns the underlying sql.DB connection
+func (db *DB) GetDB() *sql.DB {
+	return db.db
+}

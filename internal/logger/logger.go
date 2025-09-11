@@ -6,6 +6,7 @@ func Middleware() *logger.Logger       { return logger.GetComponentLogger("Middl
 func Server() *logger.Logger           { return logger.GetComponentLogger("Server") }
 func WSFeedHandler() *logger.Logger    { return logger.GetComponentLogger("WS Feed Handler") }
 func WSFeedConnection() *logger.Logger { return logger.GetComponentLogger("WS Feed Connection") }
+func DBModifications() *logger.Logger  { return logger.GetComponentLogger("DB Modifications") }
 func DBAttachments() *logger.Logger    { return logger.GetComponentLogger("DB Attachments") }
 func DBCookies() *logger.Logger        { return logger.GetComponentLogger("DB Cookies") }
 func DBFeeds() *logger.Logger          { return logger.GetComponentLogger("DB Feeds") }
