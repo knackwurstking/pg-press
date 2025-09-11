@@ -12,7 +12,7 @@
 // - data (any)
 // - created at (time.Time)
 // - user id (int64)
-package modification
+package models
 
 import (
 	"fmt"
@@ -20,8 +20,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/pkg/utils"
-
-	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 type Mods[T any] []*Mod[T]
@@ -39,7 +37,7 @@ func (m *Mods[T]) Reversed() []*Mod[T] {
 	return reversed
 }
 
-func (m *Mods[T]) Add(user *models.User, data T) {
+func (m *Mods[T]) Add(user *User, data T) {
 	*m = append(*m, NewMod(user, data))
 }
 
@@ -64,14 +62,14 @@ func (m *Mods[T]) Get(time int64) (*Mod[T], error) {
 }
 
 type Mod[T any] struct {
-	User *models.User `json:"user"`
-	Time int64        `json:"time"`
-	Data T            `json:"data"`
+	User *User `json:"user"`
+	Time int64 `json:"time"`
+	Data T     `json:"data"`
 }
 
-func NewMod[T any](u *models.User, data T) *Mod[T] {
+func NewMod[T any](u *User, data T) *Mod[T] {
 	if u == nil {
-		u = &models.User{Name: "system"}
+		u = &User{Name: "system"}
 	}
 
 	return &Mod[T]{

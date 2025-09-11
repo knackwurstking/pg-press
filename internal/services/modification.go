@@ -7,8 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/pkg/models/modification"
-	"github.com/knackwurstking/pgpress/pkg/models/user"
+	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -64,7 +63,7 @@ func (s *ModificationService) createTable() {
 }
 
 // Add creates a new modification record
-func (s *ModificationService) Add(userID int64, entityType ModificationType, entityID int64, data interface{}) (*modification.Modification[interface{}], error) {
+func (s *ModificationService) Add(userID int64, entityType ModificationType, entityID int64, data interface{}) (*models.Modification[interface{}], error) {
 	logger.DBModifications().Info("Adding modification: user_id=%d, entity_type=%s, entity_id=%d", userID, entityType, entityID)
 
 	jsonData, err := json.Marshal(data)
@@ -88,7 +87,7 @@ func (s *ModificationService) Add(userID int64, entityType ModificationType, ent
 		return nil, fmt.Errorf("failed to get modification ID: %w", err)
 	}
 
-	mod := &modification.Modification[interface{}]{
+	mod := &models.Modification[interface{}]{
 		ID:        id,
 		UserID:    userID,
 		Data:      jsonData,
@@ -100,7 +99,7 @@ func (s *ModificationService) Add(userID int64, entityType ModificationType, ent
 }
 
 // Get retrieves a specific modification by ID
-func (s *ModificationService) Get(id int64) (*modification.Modification[interface{}], error) {
+func (s *ModificationService) Get(id int64) (*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Getting modification: id=%d", id)
 
 	query := `
@@ -111,7 +110,7 @@ func (s *ModificationService) Get(id int64) (*modification.Modification[interfac
 
 	row := s.db.QueryRow(query, id)
 
-	mod := &modification.Modification[interface{}]{}
+	mod := &models.Modification[interface{}]{}
 	err := row.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -124,7 +123,7 @@ func (s *ModificationService) Get(id int64) (*modification.Modification[interfac
 }
 
 // List retrieves all modifications for a specific entity
-func (s *ModificationService) List(entityType ModificationType, entityID int64, limit, offset int) ([]*modification.Modification[interface{}], error) {
+func (s *ModificationService) List(entityType ModificationType, entityID int64, limit, offset int) ([]*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Listing modifications: entity_type=%s, entity_id=%d, limit=%d, offset=%d", entityType, entityID, limit, offset)
 
 	query := `
@@ -141,9 +140,9 @@ func (s *ModificationService) List(entityType ModificationType, entityID int64, 
 	}
 	defer rows.Close()
 
-	var modifications []*modification.Modification[interface{}]
+	var modifications []*models.Modification[interface{}]
 	for rows.Next() {
-		mod := &modification.Modification[interface{}]{}
+		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan modification: %w", err)
@@ -160,7 +159,7 @@ func (s *ModificationService) List(entityType ModificationType, entityID int64, 
 }
 
 // ListAll retrieves all modifications for a specific entity without pagination
-func (s *ModificationService) ListAll(entityType ModificationType, entityID int64) ([]*modification.Modification[interface{}], error) {
+func (s *ModificationService) ListAll(entityType ModificationType, entityID int64) ([]*models.Modification[interface{}], error) {
 	return s.List(entityType, entityID, -1, 0)
 }
 
@@ -184,7 +183,7 @@ func (s *ModificationService) Count(entityType ModificationType, entityID int64)
 }
 
 // GetLatest retrieves the most recent modification for a specific entity
-func (s *ModificationService) GetLatest(entityType ModificationType, entityID int64) (*modification.Modification[interface{}], error) {
+func (s *ModificationService) GetLatest(entityType ModificationType, entityID int64) (*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Getting latest modification: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
@@ -197,7 +196,7 @@ func (s *ModificationService) GetLatest(entityType ModificationType, entityID in
 
 	row := s.db.QueryRow(query, string(entityType), entityID)
 
-	mod := &modification.Modification[interface{}]{}
+	mod := &models.Modification[interface{}]{}
 	err := row.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -210,7 +209,7 @@ func (s *ModificationService) GetLatest(entityType ModificationType, entityID in
 }
 
 // GetOldest retrieves the oldest modification for a specific entity
-func (s *ModificationService) GetOldest(entityType ModificationType, entityID int64) (*modification.Modification[interface{}], error) {
+func (s *ModificationService) GetOldest(entityType ModificationType, entityID int64) (*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Getting oldest modification: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
@@ -223,7 +222,7 @@ func (s *ModificationService) GetOldest(entityType ModificationType, entityID in
 
 	row := s.db.QueryRow(query, string(entityType), entityID)
 
-	mod := &modification.Modification[interface{}]{}
+	mod := &models.Modification[interface{}]{}
 	err := row.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -278,7 +277,7 @@ func (s *ModificationService) DeleteAll(entityType ModificationType, entityID in
 }
 
 // GetByUser retrieves all modifications made by a specific user
-func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*modification.Modification[interface{}], error) {
+func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Getting modifications by user: user_id=%d, limit=%d, offset=%d", userID, limit, offset)
 
 	query := `
@@ -295,9 +294,9 @@ func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*mod
 	}
 	defer rows.Close()
 
-	var modifications []*modification.Modification[interface{}]
+	var modifications []*models.Modification[interface{}]
 	for rows.Next() {
-		mod := &modification.Modification[interface{}]{}
+		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan modification: %w", err)
@@ -313,7 +312,7 @@ func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*mod
 }
 
 // GetByDateRange retrieves modifications within a specific date range
-func (s *ModificationService) GetByDateRange(entityType ModificationType, entityID int64, from, to time.Time) ([]*modification.Modification[interface{}], error) {
+func (s *ModificationService) GetByDateRange(entityType ModificationType, entityID int64, from, to time.Time) ([]*models.Modification[interface{}], error) {
 	logger.DBModifications().Debug("Getting modifications by date range: entity_type=%s, entity_id=%d, from=%s, to=%s",
 		entityType, entityID, from.Format(time.RFC3339), to.Format(time.RFC3339))
 
@@ -330,9 +329,9 @@ func (s *ModificationService) GetByDateRange(entityType ModificationType, entity
 	}
 	defer rows.Close()
 
-	var modifications []*modification.Modification[interface{}]
+	var modifications []*models.Modification[interface{}]
 	for rows.Next() {
-		mod := &modification.Modification[interface{}]{}
+		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan modification: %w", err)
@@ -413,8 +412,8 @@ func (s *ModificationService) GetWithUser(id int64) (*ModificationWithUser, erro
 
 // ModificationWithUser represents a modification with user information
 type ModificationWithUser struct {
-	Modification modification.Modification[interface{}] `json:"modification"`
-	User         user.User                              `json:"user"`
+	Modification models.Modification[interface{}] `json:"modification"`
+	User         models.User                      `json:"user"`
 }
 
 // ListWithUser retrieves modifications with user information for a specific entity

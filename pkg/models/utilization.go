@@ -1,4 +1,4 @@
-package tool
+package models
 
 // PressUtilization represents the utilization of a single press
 type PressUtilization struct {

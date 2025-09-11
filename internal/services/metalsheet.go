@@ -8,7 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -209,7 +208,7 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 
 	// Ensure initial mod entry exists
 	if len(sheet.Mods) == 0 {
-		initialMod := modification.NewMod(user, models.MetalSheetMod{
+		initialMod := models.NewMod(user, models.MetalSheetMod{
 			TileHeight:  sheet.TileHeight,
 			Value:       sheet.Value,
 			MarkeHeight: sheet.MarkeHeight,
@@ -218,7 +217,7 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 			ToolID:      sheet.ToolID,
 			LinkedNotes: sheet.LinkedNotes,
 		})
-		sheet.Mods = modification.NewMods(initialMod)
+		sheet.Mods = models.NewMods(initialMod)
 	}
 
 	// Marshal JSON fields
@@ -286,7 +285,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 		!equalToolIDs(current.ToolID, sheet.ToolID) ||
 		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
 
-		mod := modification.NewMod(user, models.MetalSheetMod{
+		mod := models.NewMod(user, models.MetalSheetMod{
 			TileHeight:  current.TileHeight,
 			Value:       current.Value,
 			MarkeHeight: current.MarkeHeight,
@@ -297,7 +296,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 		})
 
 		// Prepend new mod to keep most recent first
-		mods := modification.NewMods(mod)
+		mods := models.NewMods(mod)
 		sheet.Mods = append(mods, sheet.Mods...)
 	}
 
@@ -352,7 +351,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	}
 
 	// Add modification record before changing
-	mod := modification.NewMod(user, models.MetalSheetMod{
+	mod := models.NewMod(user, models.MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -363,7 +362,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	})
 
 	// Prepend new mod to keep most recent first
-	mods := modification.NewMods(mod)
+	mods := models.NewMods(mod)
 	sheet.Mods = append(mods, sheet.Mods...)
 
 	// Update the tool assignment

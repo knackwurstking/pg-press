@@ -6,9 +6,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/pkg/models/modification"
-	"github.com/knackwurstking/pgpress/pkg/models/troublereport"
-	"github.com/knackwurstking/pgpress/pkg/models/user"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 // TroubleReportWithModificationService demonstrates how to integrate the new modification service
@@ -31,7 +29,7 @@ func NewTroubleReportWithModificationService(db *sql.DB, modifications *Modifica
 }
 
 // Add creates a new trouble report and records the initial modification
-func (s *TroubleReportWithModificationService) Add(report *troublereport.TroubleReport, user *user.User) error {
+func (s *TroubleReportWithModificationService) Add(report *models.TroubleReport, user *models.User) error {
 	logger.DBModifications().Info("Adding trouble report with modification tracking")
 
 	// Start transaction
@@ -69,13 +67,13 @@ func (s *TroubleReportWithModificationService) Add(report *troublereport.Trouble
 	}
 
 	// Record the initial modification
-	modData := modification.NewExtendedModificationData(
-		modification.TroubleReportModData{
+	modData := models.NewExtendedModificationData(
+		models.TroubleReportModData{
 			Title:             report.Title,
 			Content:           report.Content,
 			LinkedAttachments: report.LinkedAttachments,
 		},
-		modification.ActionCreate,
+		models.ActionCreate,
 		"Initial trouble report creation",
 	)
 
@@ -89,7 +87,7 @@ func (s *TroubleReportWithModificationService) Add(report *troublereport.Trouble
 }
 
 // Update modifies an existing trouble report and records the modification
-func (s *TroubleReportWithModificationService) Update(report *troublereport.TroubleReport, user *user.User) error {
+func (s *TroubleReportWithModificationService) Update(report *models.TroubleReport, user *models.User) error {
 	logger.DBModifications().Info("Updating trouble report with modification tracking: id=%d", report.ID)
 
 	// Get current report for comparison
@@ -148,13 +146,13 @@ func (s *TroubleReportWithModificationService) Update(report *troublereport.Trou
 
 	// Record the modification with details about what changed
 	description := s.buildChangeDescription(current, report)
-	modData := modification.NewExtendedModificationData(
-		modification.TroubleReportModData{
+	modData := models.NewExtendedModificationData(
+		models.TroubleReportModData{
 			Title:             report.Title,
 			Content:           report.Content,
 			LinkedAttachments: report.LinkedAttachments,
 		},
-		modification.ActionUpdate,
+		models.ActionUpdate,
 		description,
 	)
 
@@ -168,7 +166,7 @@ func (s *TroubleReportWithModificationService) Update(report *troublereport.Trou
 }
 
 // Delete removes a trouble report and records the deletion
-func (s *TroubleReportWithModificationService) Delete(reportID int64, user *user.User) error {
+func (s *TroubleReportWithModificationService) Delete(reportID int64, user *models.User) error {
 	logger.DBModifications().Info("Deleting trouble report with modification tracking: id=%d", reportID)
 
 	// Get the report before deletion for the modification record
@@ -206,13 +204,13 @@ func (s *TroubleReportWithModificationService) Delete(reportID int64, user *user
 	}
 
 	// Record the deletion modification
-	modData := modification.NewExtendedModificationData(
-		modification.TroubleReportModData{
+	modData := models.NewExtendedModificationData(
+		models.TroubleReportModData{
 			Title:             report.Title,
 			Content:           report.Content,
 			LinkedAttachments: report.LinkedAttachments,
 		},
-		modification.ActionDelete,
+		models.ActionDelete,
 		fmt.Sprintf("Trouble report '%s' was deleted", report.Title),
 	)
 
@@ -247,7 +245,7 @@ func (s *TroubleReportWithModificationService) GetModificationCount(reportID int
 }
 
 // GetLatestModification returns the most recent modification for a trouble report
-func (s *TroubleReportWithModificationService) GetLatestModification(reportID int64) (*modification.Modification[interface{}], error) {
+func (s *TroubleReportWithModificationService) GetLatestModification(reportID int64) (*models.Modification[any], error) {
 	mod, err := s.modifications.GetLatest(ModificationTypeTroubleReport, reportID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get latest modification: %w", err)
@@ -256,7 +254,7 @@ func (s *TroubleReportWithModificationService) GetLatestModification(reportID in
 }
 
 // RestoreFromModification restores a trouble report to a previous state
-func (s *TroubleReportWithModificationService) RestoreFromModification(reportID, modificationID int64, user *user.User) error {
+func (s *TroubleReportWithModificationService) RestoreFromModification(reportID, modificationID int64, user *models.User) error {
 	logger.DBModifications().Info("Restoring trouble report from modification: report_id=%d, mod_id=%d", reportID, modificationID)
 
 	// Get the modification to restore from
@@ -266,14 +264,14 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 	}
 
 	// Unmarshal the modification data
-	var extendedData modification.ExtendedModificationData[modification.TroubleReportModData]
+	var extendedData models.ExtendedModificationData[models.TroubleReportModData]
 	var dataBytes []byte = mod.Data
 	if err = json.Unmarshal(dataBytes, &extendedData); err != nil {
 		return fmt.Errorf("failed to unmarshal modification data: %w", err)
 	}
 
 	// Create a trouble report with the restored data
-	restoredReport := &troublereport.TroubleReport{
+	restoredReport := &models.TroubleReport{
 		ID:                reportID,
 		Title:             extendedData.Data.Title,
 		Content:           extendedData.Data.Content,
@@ -286,13 +284,13 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 	}
 
 	// Record the restoration as a modification
-	restoreModData := modification.NewExtendedModificationData(
-		modification.TroubleReportModData{
+	restoreModData := models.NewExtendedModificationData(
+		models.TroubleReportModData{
 			Title:             restoredReport.Title,
 			Content:           restoredReport.Content,
 			LinkedAttachments: restoredReport.LinkedAttachments,
 		},
-		modification.ActionUpdate,
+		models.ActionUpdate,
 		fmt.Sprintf("Restored from modification %d", modificationID),
 	)
 
@@ -307,14 +305,14 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 // Helper methods
 
 // Get retrieves a trouble report by ID (placeholder - implement based on your existing logic)
-func (s *TroubleReportWithModificationService) Get(reportID int64) (*troublereport.TroubleReport, error) {
+func (s *TroubleReportWithModificationService) Get(reportID int64) (*models.TroubleReport, error) {
 	// This would contain your existing Get logic
 	// Returning a placeholder for compilation
-	return &troublereport.TroubleReport{}, nil
+	return &models.TroubleReport{}, nil
 }
 
 // buildChangeDescription creates a human-readable description of changes
-func (s *TroubleReportWithModificationService) buildChangeDescription(old, new *troublereport.TroubleReport) string {
+func (s *TroubleReportWithModificationService) buildChangeDescription(old, new *models.TroubleReport) string {
 	var changes []string
 
 	if old.Title != new.Title {

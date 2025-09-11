@@ -7,7 +7,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/pkg/models/cookie"
+	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -35,7 +35,7 @@ func NewCookie(db *sql.DB) *Cookie {
 }
 
 // List retrieves all cookies ordered by last login time (most recent first).
-func (c *Cookie) List() ([]*cookie.Cookie, error) {
+func (c *Cookie) List() ([]*models.Cookie, error) {
 	logger.DBCookies().Info("Listing all cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
@@ -45,7 +45,7 @@ func (c *Cookie) List() ([]*cookie.Cookie, error) {
 	}
 	defer rows.Close()
 
-	var cookies []*cookie.Cookie
+	var cookies []*models.Cookie
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
@@ -63,7 +63,7 @@ func (c *Cookie) List() ([]*cookie.Cookie, error) {
 }
 
 // ListApiKey retrieves all cookies associated with a specific API key.
-func (c *Cookie) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
+func (c *Cookie) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 	logger.DBCookies().Info("Listing cookies by API key")
 
 	if apiKey == "" {
@@ -79,7 +79,7 @@ func (c *Cookie) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 	}
 	defer rows.Close()
 
-	var cookies []*cookie.Cookie
+	var cookies []*models.Cookie
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
@@ -97,7 +97,7 @@ func (c *Cookie) ListApiKey(apiKey string) ([]*cookie.Cookie, error) {
 }
 
 // Get retrieves a specific cookie by its value.
-func (c *Cookie) Get(value string) (*cookie.Cookie, error) {
+func (c *Cookie) Get(value string) (*models.Cookie, error) {
 	logger.DBCookies().Debug("Getting cookie by value")
 
 	if value == "" {
@@ -120,7 +120,7 @@ func (c *Cookie) Get(value string) (*cookie.Cookie, error) {
 }
 
 // Add creates a new cookie session in the database.
-func (c *Cookie) Add(cookie *cookie.Cookie) error {
+func (c *Cookie) Add(cookie *models.Cookie) error {
 	logger.DBCookies().Info("Adding cookie: %+v", cookie)
 
 	if cookie == nil {
@@ -167,7 +167,7 @@ func (c *Cookie) Add(cookie *cookie.Cookie) error {
 }
 
 // Update modifies an existing cookie session.
-func (c *Cookie) Update(value string, cookie *cookie.Cookie) error {
+func (c *Cookie) Update(value string, cookie *models.Cookie) error {
 	logger.DBCookies().Info("Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
@@ -274,8 +274,8 @@ func (c *Cookie) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (c *Cookie) scanCookie(scanner interfaces.Scannable) (*cookie.Cookie, error) {
-	cookie := &cookie.Cookie{}
+func (c *Cookie) scanCookie(scanner interfaces.Scannable) (*models.Cookie, error) {
+	cookie := &models.Cookie{}
 	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 	if err != nil {
 		if err == sql.ErrNoRows {

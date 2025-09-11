@@ -1,29 +1,24 @@
-package metalsheet
+package models
 
 import (
 	"fmt"
-
-	"github.com/knackwurstking/pgpress/pkg/models/note"
-	"github.com/knackwurstking/pgpress/pkg/models/tool"
-	"github.com/knackwurstking/pgpress/pkg/models/user"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
-	ID          int64                            `json:"id"`
-	TileHeight  float64                          `json:"tile_height"`  // Tile height in mm
-	Value       float64                          `json:"value"`        // Value
-	MarkeHeight int                              `json:"marke_height"` // Marke height
-	STF         float64                          `json:"stf"`          // STF value
-	STFMax      float64                          `json:"stf_max"`      // STF max value
-	ToolID      *int64                           `json:"tool_id"`      // Currently assigned tool (nullable)
-	LinkedNotes []int64                          `json:"notes"`        // Contains note ids from the "notes" table
-	Mods        modification.Mods[MetalSheetMod] `json:"mods"`
+	ID          int64               `json:"id"`
+	TileHeight  float64             `json:"tile_height"`  // Tile height in mm
+	Value       float64             `json:"value"`        // Value
+	MarkeHeight int                 `json:"marke_height"` // Marke height
+	STF         float64             `json:"stf"`          // STF value
+	STFMax      float64             `json:"stf_max"`      // STF max value
+	ToolID      *int64              `json:"tool_id"`      // Currently assigned tool (nullable)
+	LinkedNotes []int64             `json:"notes"`        // Contains note ids from the "notes" table
+	Mods        Mods[MetalSheetMod] `json:"mods"`
 }
 
 // New creates a new MetalSheet with default values
-func New(u *user.User) *MetalSheet {
+func NewMetalSheet(u *User) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,
@@ -32,11 +27,11 @@ func New(u *user.User) *MetalSheet {
 		STFMax:      0,
 		ToolID:      nil,
 		LinkedNotes: make([]int64, 0),
-		Mods:        modification.NewMods[MetalSheetMod](),
+		Mods:        NewMods[MetalSheetMod](),
 	}
 
 	// Create initial mod entry
-	sheet.Mods = append(sheet.Mods, modification.NewMod(u, MetalSheetMod{
+	sheet.Mods = append(sheet.Mods, NewMod(u, MetalSheetMod{
 		TileHeight:  sheet.TileHeight,
 		Value:       sheet.Value,
 		MarkeHeight: sheet.MarkeHeight,
@@ -74,6 +69,6 @@ type MetalSheetMod struct {
 // MetalSheetWithNotes represents a metal sheet with its related notes loaded
 type MetalSheetWithNotes struct {
 	*MetalSheet
-	LoadedNotes []*note.Note `json:"loaded_notes"`
-	Tool        *tool.Tool   `json:"tool,omitempty"` // The tool currently using this sheet
+	LoadedNotes []*Note `json:"loaded_notes"`
+	Tool        *Tool   `json:"tool,omitempty"` // The tool currently using this sheet
 }

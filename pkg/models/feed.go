@@ -1,4 +1,4 @@
-package feed
+package models
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Feed struct {
 }
 
 // New creates a new feed entry with the current timestamp.
-func New(title, content string, userID int64) *Feed {
+func NewFeed(title, content string, userID int64) *Feed {
 	return &Feed{
 		Title:     title,
 		Content:   content,

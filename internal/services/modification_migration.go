@@ -8,8 +8,6 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/models/modification"
-	"github.com/knackwurstking/pgpress/pkg/models/troublereport"
 	oldmodification "github.com/knackwurstking/pgpress/pkg/modification"
 )
 
@@ -105,7 +103,7 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 		}
 
 		// Parse old mods
-		var oldMods oldmodification.Mods[troublereport.TroubleReportMod]
+		var oldMods oldmodification.Mods[models.TroubleReportMod]
 		if err := json.Unmarshal(modsJSON, &oldMods); err != nil {
 			logger.DBModifications().Error("Failed to unmarshal old mods for trouble report %d: %v", id, err)
 			stats.Errors++
@@ -127,8 +125,8 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 			}
 
 			// Create new modification data
-			modData := modification.NewExtendedModificationData(
-				modification.TroubleReportModData{
+			modData := models.NewExtendedModificationData(
+				models.TroubleReportModData{
 					Title:             oldMod.Data.Title,
 					Content:           oldMod.Data.Content,
 					LinkedAttachments: oldMod.Data.LinkedAttachments,
@@ -211,8 +209,8 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 			}
 
 			// Create new modification data
-			modData := modification.NewExtendedModificationData(
-				modification.MetalSheetModData{
+			modData := models.NewExtendedModificationData(
+				models.MetalSheetModData{
 					TileHeight:  oldMod.Data.TileHeight,
 					Value:       oldMod.Data.Value,
 					MarkeHeight: oldMod.Data.MarkeHeight,
@@ -285,13 +283,13 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 		}
 
 		// Parse position
-		var position modification.ToolPosition
+		var position models.ToolPosition
 		if err := json.Unmarshal(positionJSON, &position); err != nil {
 			logger.DBModifications().Error("Failed to unmarshal position for tool %d: %v", id, err)
 		}
 
 		// Parse format
-		var format modification.ToolFormat
+		var format models.ToolFormat
 		if err := json.Unmarshal(formatJSON, &format); err != nil {
 			logger.DBModifications().Error("Failed to unmarshal format for tool %d: %v", id, err)
 		}
@@ -311,8 +309,8 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 			}
 
 			// Create new modification data
-			modData := modification.NewExtendedModificationData(
-				modification.ToolModData{
+			modData := models.NewExtendedModificationData(
+				models.ToolModData{
 					Position:     position,
 					Format:       format,
 					Type:         toolType,
@@ -367,13 +365,13 @@ func (m *ModificationMigration) addModificationWithTimestamp(userID int64, entit
 }
 
 // determineAction determines the action type based on mod position
-func (m *ModificationMigration) determineAction(index, total int) modification.ModificationAction {
+func (m *ModificationMigration) determineAction(index, total int) models.ModificationAction {
 	if index == 0 && total == 1 {
-		return modification.ActionCreate
+		return models.ActionCreate
 	} else if index == 0 {
-		return modification.ActionCreate
+		return models.ActionCreate
 	} else {
-		return modification.ActionUpdate
+		return models.ActionUpdate
 	}
 }
 

@@ -1,4 +1,4 @@
-package note
+package models
 
 import "time"
 
@@ -17,7 +17,7 @@ type Note struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func New(l Level, message string) *Note {
+func NewNote(l Level, message string) *Note {
 	return &Note{
 		Level:     l,
 		Content:   message,

@@ -3,7 +3,6 @@ package troublereportspage
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/pkg/modification"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -11,9 +10,9 @@ import (
 templ ListMods(
 	user *models.User,
 	id int64,
-	first *modification.Mod[models.TroubleReportMod],
-	current *modification.Mod[models.TroubleReportMod],
-	mods modification.Mods[models.TroubleReportMod],
+	first *models.Mod[models.TroubleReportMod],
+	current *models.Mod[models.TroubleReportMod],
+	mods models.Mods[models.TroubleReportMod],
 ) {
 	<div id="data" class="flex flex-col gap">
 		<div class="flex flex-wrap gap justify-between items-center">

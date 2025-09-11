@@ -1,4 +1,4 @@
-package cookie
+package models
 
 import (
 	"fmt"
@@ -14,7 +14,6 @@ const (
 	DefaultExpiration  = 6 * 30 * 24 * time.Hour
 	MinValueLength     = 16
 	MaxUserAgentLength = 1000
-	MinAPIKeyLength    = constants.MinAPIKeyLength
 )
 
 // Cookie represents a user session with authentication information.
@@ -26,7 +25,7 @@ type Cookie struct {
 }
 
 // New creates a new cookie with the current timestamp.
-func New(userAgent, value, apiKey string) *Cookie {
+func NewCookie(userAgent, value, apiKey string) *Cookie {
 	return &Cookie{
 		UserAgent: strings.TrimSpace(userAgent),
 		Value:     strings.TrimSpace(value),
@@ -54,7 +53,7 @@ func (c *Cookie) Validate() error {
 	if c.ApiKey == "" {
 		return utils.NewValidationError("api_key: cannot be empty")
 	}
-	if len(c.ApiKey) < MinAPIKeyLength {
+	if len(c.ApiKey) < constants.MinAPIKeyLength {
 		return utils.NewValidationError("api_key: too short for security")
 	}
 
@@ -119,7 +118,7 @@ func (c *Cookie) RefreshToken() error {
 
 // RefreshAPIKey generates a new secure API key.
 func (c *Cookie) RefreshAPIKey() error {
-	newAPIKey, err := utils.GenerateSecureToken(MinAPIKeyLength)
+	newAPIKey, err := utils.GenerateSecureToken(constants.MinAPIKeyLength)
 	if err != nil {
 		return fmt.Errorf("failed to refresh API key: %w", err)
 	}
@@ -170,8 +169,8 @@ func (c *Cookie) Equals(other *Cookie) bool {
 		c.LastLogin == other.LastLogin
 }
 
-// Sort sorts a slice of cookies by last login time in descending order.
-func Sort(cookies []*Cookie) []*Cookie {
+// SortCookies sorts a slice of cookies by last login time in descending order.
+func SortCookies(cookies []*Cookie) []*Cookie {
 	if len(cookies) <= 1 {
 		return cookies
 	}

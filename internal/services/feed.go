@@ -8,7 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/models/feed"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -76,7 +75,7 @@ func (f *Feed) List() ([]*models.Feed, error) {
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
-func (f *Feed) ListRange(offset, limit int) ([]*feed.Feed, error) {
+func (f *Feed) ListRange(offset, limit int) ([]*models.Feed, error) {
 	start := time.Now()
 
 	if offset < 0 {
@@ -112,7 +111,7 @@ func (f *Feed) ListRange(offset, limit int) ([]*feed.Feed, error) {
 }
 
 // ListByUser retrieves feeds created by a specific user
-func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*feed.Feed, error) {
+func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
 	start := time.Now()
 
 	if userID <= 0 {
@@ -151,7 +150,7 @@ func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*feed.Feed, error)
 }
 
 // Add creates a new feed entry in the database
-func (f *Feed) Add(feedData *feed.Feed) error {
+func (f *Feed) Add(feedData *models.Feed) error {
 	if feedData == nil {
 		return utils.NewValidationError("feed: cannot be nil")
 	}
@@ -260,7 +259,7 @@ func (f *Feed) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (f *Feed) Get(id int64) (*feed.Feed, error) {
+func (f *Feed) Get(id int64) (*models.Feed, error) {
 	if id <= 0 {
 		return nil, utils.NewValidationError("id: must be positive")
 	}
@@ -302,8 +301,8 @@ func (f *Feed) Delete(id int64) error {
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
-func (f *Feed) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
-	var feeds []*feed.Feed
+func (f *Feed) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
+	var feeds []*models.Feed
 	scanStart := time.Now()
 
 	for rows.Next() {
@@ -326,8 +325,8 @@ func (f *Feed) scanAllRows(rows *sql.Rows) ([]*feed.Feed, error) {
 	return feeds, nil
 }
 
-func (f *Feed) scanFeed(scanner interfaces.Scannable) (*feed.Feed, error) {
-	feedData := &feed.Feed{}
+func (f *Feed) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
+	feedData := &models.Feed{}
 
 	if err := scanner.Scan(&feedData.ID, &feedData.Title, &feedData.Content, &feedData.UserID, &feedData.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {

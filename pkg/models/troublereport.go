@@ -1,11 +1,9 @@
-package troublereport
+package models
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/pkg/models/attachment"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -24,20 +22,20 @@ type TroubleReportMod struct {
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64                               `json:"id"`
-	Title             string                              `json:"title"`
-	Content           string                              `json:"content"`
-	LinkedAttachments []int64                             `json:"linked_attachments"`
-	Mods              modification.Mods[TroubleReportMod] `json:"mods"`
+	ID                int64                  `json:"id"`
+	Title             string                 `json:"title"`
+	Content           string                 `json:"content"`
+	LinkedAttachments []int64                `json:"linked_attachments"`
+	Mods              Mods[TroubleReportMod] `json:"mods"`
 }
 
 // New creates a new trouble report with the provided details.
-func New(title, content string) *TroubleReport {
+func NewTroubleReport(title, content string) *TroubleReport {
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: make([]int64, 0),
-		Mods:              modification.NewMods[TroubleReportMod](),
+		Mods:              NewMods[TroubleReportMod](),
 	}
 }
 
@@ -165,5 +163,5 @@ func (tr *TroubleReport) Equals(other *TroubleReport) bool {
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.
 type TroubleReportWithAttachments struct {
 	*TroubleReport
-	LoadedAttachments []*attachment.Attachment `json:"loaded_attachments"`
+	LoadedAttachments []*Attachment `json:"loaded_attachments"`
 }

@@ -1,4 +1,4 @@
-package attachment
+package models
 
 import (
 	"fmt"

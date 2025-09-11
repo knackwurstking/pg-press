@@ -1,11 +1,9 @@
-package tool
+package models
 
 import (
 	"fmt"
 	"slices"
 
-	"github.com/knackwurstking/pgpress/pkg/models/note"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -59,18 +57,18 @@ type ToolMod struct {
 // Tool represents a tool in the database.
 // Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
-	ID           int64                      `json:"id"`
-	Position     Position                   `json:"position"`
-	Format       Format                     `json:"format"`
-	Type         string                     `json:"type"` // Ex: FC, GTC, MASS
-	Code         string                     `json:"code"` // Ex: G01, G02, ...
-	Regenerating bool                       `json:"regenerating"`
-	Press        *PressNumber               `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes  []int64                    `json:"notes"` // Contains note ids from the "notes" table
-	Mods         modification.Mods[ToolMod] `json:"mods"`
+	ID           int64         `json:"id"`
+	Position     Position      `json:"position"`
+	Format       Format        `json:"format"`
+	Type         string        `json:"type"` // Ex: FC, GTC, MASS
+	Code         string        `json:"code"` // Ex: G01, G02, ...
+	Regenerating bool          `json:"regenerating"`
+	Press        *PressNumber  `json:"press"` // Press number (0-5) when status is active
+	LinkedNotes  []int64       `json:"notes"` // Contains note ids from the "notes" table
+	Mods         Mods[ToolMod] `json:"mods"`
 }
 
-func New(position Position) *Tool {
+func NewTool(position Position) *Tool {
 	return &Tool{
 		Format:       Format{},
 		Position:     position,
@@ -79,7 +77,7 @@ func New(position Position) *Tool {
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),
-		Mods:         modification.NewMods[ToolMod](),
+		Mods:         NewMods[ToolMod](),
 	}
 }
 
@@ -159,5 +157,5 @@ func (t *Tool) GetPressString() string {
 // ToolWithNotes represents a tool with its related notes loaded.
 type ToolWithNotes struct {
 	*Tool
-	LoadedNotes []*note.Note `json:"loaded_notes"`
+	LoadedNotes []*Note `json:"loaded_notes"`
 }
