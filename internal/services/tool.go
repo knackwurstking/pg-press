@@ -18,7 +18,18 @@ type Tool struct {
 }
 
 func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
-	const createTableQuery = `
+	t := &Tool{
+		db:    db,
+		notes: notes,
+		feeds: feeds,
+	}
+
+	t.createTable()
+	return t
+}
+
+func (t *Tool) createTable() {
+	query := `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
 			position TEXT NOT NULL,
@@ -33,14 +44,10 @@ func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 		);
 	`
 
-	if _, err := db.Exec(createTableQuery); err != nil {
+	if _, err := t.db.Exec(query); err != nil {
 		panic(fmt.Errorf("failed to create tools table: %w", err))
 	}
-
-	logger.DBTools().Info("Tool service initialized")
-	return &Tool{db: db, notes: notes, feeds: feeds}
 }
-
 func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding new tool: %s (user: %s)", tool.String(), user.Name)
 

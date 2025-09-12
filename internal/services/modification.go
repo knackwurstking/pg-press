@@ -41,6 +41,11 @@ func NewModificationService(db *sql.DB) *ModificationService {
 
 // createTable creates the modifications table if it doesn't exist
 func (s *ModificationService) createTable() {
+	//dropQuery := `DROP TABLE IF EXISTS modifications;`
+	//if _, err := s.db.Exec(dropQuery); err != nil {
+	//	panic(fmt.Errorf("failed to drop feeds table: %w", err))
+	//}
+
 	query := `
 		CREATE TABLE IF NOT EXISTS modifications (
 			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
