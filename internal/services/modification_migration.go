@@ -325,12 +325,13 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 
 	for rows.Next() {
 		var id int64
+		var position models.Position
 		var toolType, code string
 		var regenerating bool
 		var press *int
-		var positionJSON, formatJSON, notesJSON, modsJSON []byte
+		var formatJSON, notesJSON, modsJSON []byte
 
-		err := rows.Scan(&id, &positionJSON, &formatJSON, &toolType, &code, &regenerating, &press, &notesJSON, &modsJSON)
+		err := rows.Scan(&id, &position, &formatJSON, &toolType, &code, &regenerating, &press, &notesJSON, &modsJSON)
 		if err != nil {
 			logger.DBModifications().Error("Failed to scan tool row: %v", err)
 			stats.Errors++
@@ -345,14 +346,8 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 			continue
 		}
 
-		// Parse position
-		var position models.ToolPosition
-		if err := json.Unmarshal(positionJSON, &position); err != nil {
-			logger.DBModifications().Error("Failed to unmarshal position for tool %d: %v", id, err)
-		}
-
 		// Parse format
-		var format models.ToolFormat
+		var format models.Format
 		if err := json.Unmarshal(formatJSON, &format); err != nil {
 			logger.DBModifications().Error("Failed to unmarshal format for tool %d: %v", id, err)
 		}
@@ -445,8 +440,24 @@ func (m *ModificationMigration) determineAction(index, total int) models.Modific
 
 // CleanupOldMods removes the old mod columns after successful migration
 // WARNING: This is destructive and should only be run after verifying the migration
-func (m *ModificationMigration) CleanupOldMods() error {
+// If force is true, skips verification checks
+func (m *ModificationMigration) CleanupOldMods(force bool) error {
 	logger.DBModifications().Info("Starting cleanup of old mod columns - THIS IS DESTRUCTIVE!")
+
+	if !force {
+		logger.DBModifications().Info("Performing verification before cleanup...")
+		result, err := m.VerifyMigration()
+		if err != nil {
+			return fmt.Errorf("verification failed before cleanup: %w", err)
+		}
+
+		if !result.OverallMatch {
+			return fmt.Errorf("verification failed - migration appears incomplete or incorrect")
+		}
+		logger.DBModifications().Info("Verification passed, proceeding with cleanup")
+	} else {
+		logger.DBModifications().Warn("Force flag enabled - skipping verification checks")
+	}
 
 	queries := []string{
 		"ALTER TABLE trouble_reports DROP COLUMN mods",

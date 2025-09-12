@@ -22,26 +22,13 @@ type MetalSheetModData struct {
 
 // ToolModData represents the data structure for tool modifications
 type ToolModData struct {
-	Position     ToolPosition `json:"position"`
-	Format       ToolFormat   `json:"format"`
-	Type         string       `json:"type"`
-	Code         string       `json:"code"`
-	Regenerating bool         `json:"regenerating"`
-	Press        *int         `json:"press"`
-	LinkedNotes  []int64      `json:"linked_notes"`
-}
-
-// ToolPosition represents tool position data
-type ToolPosition struct {
-	Row    int `json:"row"`
-	Column int `json:"column"`
-}
-
-// ToolFormat represents tool format data
-type ToolFormat struct {
-	Width  float64 `json:"width"`
-	Height float64 `json:"height"`
-	Depth  float64 `json:"depth"`
+	Position     Position `json:"position"`
+	Format       Format   `json:"format"`
+	Type         string   `json:"type"`
+	Code         string   `json:"code"`
+	Regenerating bool     `json:"regenerating"`
+	Press        *int     `json:"press"`
+	LinkedNotes  []int64  `json:"linked_notes"`
 }
 
 // PressCycleModData represents the data structure for press cycle modifications

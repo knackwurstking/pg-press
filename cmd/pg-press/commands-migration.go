@@ -49,12 +49,6 @@ func migrationRunCommand() cli.Command {
 				cli.Optional,
 			)
 
-			force := cli.Bool(cmd, "force",
-				cli.WithShort("f"),
-				cli.Usage("Force migration even if it appears to have been completed"),
-				cli.Optional,
-			)
-
 			return func(cmd *cli.Command) error {
 				db, err := openDB(*customDBPath)
 				if err != nil {
@@ -64,11 +58,6 @@ func migrationRunCommand() cli.Command {
 
 				users := services.NewUser(db.GetDB(), db.Feeds)
 				migrationCLI := services.NewModificationCLI(db.GetDB(), users)
-
-				// If force flag is set, skip the interactive confirmation
-				if *force {
-					fmt.Println("Force flag set, proceeding with migration...")
-				}
 
 				return migrationCLI.RunCommand("migrate", []string{})
 			}
@@ -133,6 +122,7 @@ func migrationCleanupCommand() cli.Command {
 				if *force {
 					fmt.Println("⚠️  WARNING: Force cleanup requested!")
 					fmt.Println("This will skip safety checks and proceed with cleanup.")
+					return migrationCLI.RunCommand("cleanup", []string{"--force"})
 				}
 
 				return migrationCLI.RunCommand("cleanup", []string{})
@@ -360,7 +350,7 @@ func migrationHelpCommand() cli.Command {
 				fmt.Println()
 				fmt.Println("  cleanup   - Remove old mod columns (DESTRUCTIVE)")
 				fmt.Println("            Only run after successful migration and verification!")
-				fmt.Println("            Options: --force to skip confirmation")
+				fmt.Println("            Options: --force to skip verification and confirmation")
 				fmt.Println()
 				fmt.Println("Recommended workflow:")
 				fmt.Println("  1. pgpress migration test-db   # Test database connection")

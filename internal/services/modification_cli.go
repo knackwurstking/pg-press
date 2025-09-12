@@ -40,7 +40,15 @@ func (cli *ModificationCLI) RunCommand(command string, args []string) error {
 	case "verify":
 		return cli.verifyMigration()
 	case "cleanup":
-		return cli.cleanupOldMods()
+		// Check for force flag in args
+		force := false
+		for _, arg := range args {
+			if arg == "--force" || arg == "-f" {
+				force = true
+				break
+			}
+		}
+		return cli.cleanupOldMods(force)
 	case "stats":
 		return cli.showStats()
 	case "help":
@@ -161,37 +169,45 @@ func (cli *ModificationCLI) verifyMigration() error {
 }
 
 // cleanupOldMods removes old mod columns (destructive operation)
-func (cli *ModificationCLI) cleanupOldMods() error {
+func (cli *ModificationCLI) cleanupOldMods(force bool) error {
 	fmt.Println("=== Cleanup Old Mod System ===")
 	fmt.Println("⚠️  WARNING: This operation is DESTRUCTIVE and cannot be undone!")
 	fmt.Println("It will remove the old 'mods' columns from your database tables.")
 	fmt.Println()
 
-	// Verify migration first
-	fmt.Println("Verifying migration before cleanup...")
-	result, err := cli.migration.VerifyMigration()
-	if err != nil {
-		return fmt.Errorf("verification failed: %w", err)
+	if force {
+		fmt.Println("🚨 FORCE MODE ENABLED - Skipping verification checks!")
+	} else {
+		// Verify migration first
+		fmt.Println("Verifying migration before cleanup...")
+		result, err := cli.migration.VerifyMigration()
+		if err != nil {
+			return fmt.Errorf("verification failed: %w", err)
+		}
+
+		if !result.OverallMatch {
+			fmt.Println("❌ Verification failed! Cleanup aborted for safety.")
+			fmt.Println("Please resolve migration issues before attempting cleanup.")
+			return fmt.Errorf("verification failed, cleanup aborted")
+		}
+
+		fmt.Println("✅ Verification passed.")
 	}
 
-	if !result.OverallMatch {
-		fmt.Println("❌ Verification failed! Cleanup aborted for safety.")
-		fmt.Println("Please resolve migration issues before attempting cleanup.")
-		return fmt.Errorf("verification failed, cleanup aborted")
-	}
-
-	fmt.Println("✅ Verification passed.")
-	fmt.Print("Are you absolutely sure you want to proceed with cleanup? (type 'yes' to confirm): ")
-
-	var response string
-	fmt.Scanln(&response)
-	if response != "yes" {
-		fmt.Println("Cleanup cancelled.")
-		return nil
+	if !force {
+		fmt.Print("Are you absolutely sure you want to proceed with cleanup? (type 'yes' to confirm): ")
+		var response string
+		fmt.Scanln(&response)
+		if response != "yes" {
+			fmt.Println("Cleanup cancelled.")
+			return nil
+		}
+	} else {
+		fmt.Println("Force mode enabled - proceeding without confirmation.")
 	}
 
 	fmt.Println("Performing cleanup...")
-	if err := cli.migration.CleanupOldMods(); err != nil {
+	if err := cli.migration.CleanupOldMods(force); err != nil {
 		return fmt.Errorf("cleanup failed: %w", err)
 	}
 
@@ -302,6 +318,7 @@ func (cli *ModificationCLI) showHelp() {
 	fmt.Println("  migrate   - Run the migration from old mod system to new modification system")
 	fmt.Println("  verify    - Verify migration integrity by comparing old and new data")
 	fmt.Println("  cleanup   - Remove old mod columns (DESTRUCTIVE - use after verification)")
+	fmt.Println("              Options: --force or -f to skip verification and confirmation")
 	fmt.Println("  stats     - Display modification system statistics")
 	fmt.Println("  help      - Show this help message")
 	fmt.Println()
