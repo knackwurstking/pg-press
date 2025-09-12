@@ -24,11 +24,15 @@ func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 		feeds: feeds,
 	}
 
-	t.createTable()
+	if err := t.createTable(); err != nil {
+		panic(err)
+	}
+
 	return t
 }
 
-func (t *Tool) createTable() {
+// TODO: Remove mods from this table
+func (t *Tool) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
@@ -45,9 +49,12 @@ func (t *Tool) createTable() {
 	`
 
 	if _, err := t.db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create tools table: %w", err))
+		return fmt.Errorf("failed to create tools table: %w", err)
 	}
+
+	return nil
 }
+
 func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 	logger.DBTools().Info("Adding new tool: %s (user: %s)", tool.String(), user.Name)
 

@@ -18,8 +18,22 @@ type MetalSheet struct {
 	notes *Note
 }
 
-// NewMetalSheet creates a new MetalSheet instance
 func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
+	metalSheet := &MetalSheet{
+		db:    db,
+		feeds: feeds,
+		notes: notes,
+	}
+
+	if err := metalSheet.createTable(); err != nil {
+		panic(err)
+	}
+
+	return metalSheet
+}
+
+// TODO: Remove mods from this table
+func (s *MetalSheet) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
@@ -38,15 +52,11 @@ func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
 		);
 	`
 
-	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create metal_sheets table: %w", err))
+	if _, err := s.db.Exec(query); err != nil {
+		return fmt.Errorf("failed to create metal_sheets table: %w", err)
 	}
 
-	return &MetalSheet{
-		db:    db,
-		feeds: feeds,
-		notes: notes,
-	}
+	return nil
 }
 
 // List returns all metal sheets

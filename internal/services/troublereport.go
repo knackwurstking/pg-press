@@ -19,6 +19,21 @@ type TroubleReport struct {
 }
 
 func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *TroubleReport {
+	troubleReport := &TroubleReport{
+		db:          db,
+		attachments: attachments,
+		feeds:       feeds,
+	}
+
+	if err := troubleReport.createTable(db); err != nil {
+		panic(err)
+	}
+
+	return troubleReport
+}
+
+// NewMetalSheet creates a new MetalSheet instance
+func (s *TroubleReport) createTable(db *sql.DB) error {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
@@ -30,14 +45,10 @@ func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *Trouble
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create trouble_reports table: %w", err))
+		return fmt.Errorf("failed to create trouble_reports table: %w", err)
 	}
 
-	return &TroubleReport{
-		db:          db,
-		attachments: attachments,
-		feeds:       feeds,
-	}
+	return nil
 }
 
 // List retrieves all trouble reports ordered by ID descending.
