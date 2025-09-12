@@ -11,6 +11,7 @@ import (
 	"github.com/SuperPaintman/nice/cli"
 )
 
+// NOTE: This command will become obsolete if version 1.0.0 is finished.
 func migrationStatusCommand() cli.Command {
 	return cli.Command{
 		Name:  "status",
