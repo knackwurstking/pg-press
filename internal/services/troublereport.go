@@ -32,7 +32,7 @@ func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *Trouble
 	return troubleReport
 }
 
-// NewMetalSheet creates a new MetalSheet instance
+// TODO: Remove mods from this table
 func (s *TroubleReport) createTable(db *sql.DB) error {
 	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
