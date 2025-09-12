@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -482,8 +483,10 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 	logger.DBModifications().Info("Verifying migration integrity")
 
 	result := &VerificationResult{}
+	cleanupCompleted := false
 
-	// Count old mods in trouble reports
+	// Check if old mods columns still exist by attempting to query them
+	// If they don't exist, assume cleanup has been completed
 	var oldTroubleReportMods int
 	err := m.db.QueryRow(`
 		SELECT COUNT(*)
@@ -491,7 +494,48 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 		WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
 	`).Scan(&oldTroubleReportMods)
 	if err != nil {
-		return nil, fmt.Errorf("failed to count old trouble report mods: %w", err)
+		// Check if error is due to missing column (cleanup completed)
+		if strings.Contains(err.Error(), "no such column: mods") {
+			logger.DBModifications().Info("Old mods columns not found - cleanup appears to have been completed")
+			oldTroubleReportMods = 0
+			cleanupCompleted = true
+		} else {
+			return nil, fmt.Errorf("failed to count old trouble report mods: %w", err)
+		}
+	}
+
+	// Count old mods in metal sheets
+	var oldMetalSheetMods int
+	if !cleanupCompleted {
+		err = m.db.QueryRow(`
+			SELECT COUNT(*)
+			FROM metal_sheets
+			WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
+		`).Scan(&oldMetalSheetMods)
+		if err != nil {
+			if strings.Contains(err.Error(), "no such column: mods") {
+				oldMetalSheetMods = 0
+			} else {
+				return nil, fmt.Errorf("failed to count old metal sheet mods: %w", err)
+			}
+		}
+	}
+
+	// Count old mods in tools
+	var oldToolMods int
+	if !cleanupCompleted {
+		err = m.db.QueryRow(`
+			SELECT COUNT(*)
+			FROM tools
+			WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
+		`).Scan(&oldToolMods)
+		if err != nil {
+			if strings.Contains(err.Error(), "no such column: mods") {
+				oldToolMods = 0
+			} else {
+				return nil, fmt.Errorf("failed to count old tool mods: %w", err)
+			}
+		}
 	}
 
 	// Count new modifications for trouble reports
@@ -505,25 +549,88 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 		return nil, fmt.Errorf("failed to count new trouble report modifications: %w", err)
 	}
 
+	// Count new modifications for metal sheets
+	var newMetalSheetModsCount int
+	err = m.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM modifications
+		WHERE entity_type = 'metal_sheets'
+	`).Scan(&newMetalSheetModsCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count new metal sheet modifications: %w", err)
+	}
+
+	// Count new modifications for tools
+	var newToolModsCount int
+	err = m.db.QueryRow(`
+		SELECT COUNT(*)
+		FROM modifications
+		WHERE entity_type = 'tools'
+	`).Scan(&newToolModsCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count new tool modifications: %w", err)
+	}
+
 	result.TroubleReports = EntityVerification{
 		OldCount: oldTroubleReportMods,
 		NewCount: newTroubleReportModsCount,
-		Match:    oldTroubleReportMods == newTroubleReportModsCount,
+		Match:    cleanupCompleted || (oldTroubleReportMods == newTroubleReportModsCount),
 	}
 
-	// Similar verification for metal sheets and tools would go here...
+	result.MetalSheets = EntityVerification{
+		OldCount: oldMetalSheetMods,
+		NewCount: newMetalSheetModsCount,
+		Match:    cleanupCompleted || (oldMetalSheetMods == newMetalSheetModsCount),
+	}
 
-	result.OverallMatch = result.TroubleReports.Match
-	logger.DBModifications().Info("Migration verification completed")
+	result.Tools = EntityVerification{
+		OldCount: oldToolMods,
+		NewCount: newToolModsCount,
+		Match:    cleanupCompleted || (oldToolMods == newToolModsCount),
+	}
+
+	result.CleanupCompleted = cleanupCompleted
+
+	if cleanupCompleted {
+		// If cleanup is completed, overall match is true if we have any modifications
+		result.OverallMatch = (newTroubleReportModsCount + newMetalSheetModsCount + newToolModsCount) > 0
+		logger.DBModifications().Info("Migration verification completed - cleanup detected, validating new modifications exist")
+	} else {
+		result.OverallMatch = result.TroubleReports.Match && result.MetalSheets.Match && result.Tools.Match
+		logger.DBModifications().Info("Migration verification completed")
+	}
+
 	return result, nil
+}
+
+// CheckOldModsExist checks if the old 'mods' columns still exist in the database tables
+func (m *ModificationMigration) CheckOldModsExist() (bool, error) {
+	tables := []string{"trouble_reports", "metal_sheets", "tools"}
+
+	for _, table := range tables {
+		query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE mods IS NOT NULL LIMIT 1", table)
+		var count int
+		err := m.db.QueryRow(query).Scan(&count)
+		if err != nil {
+			if strings.Contains(err.Error(), "no such column: mods") {
+				return false, nil // Column doesn't exist, cleanup completed
+			}
+			// Other error, might be a real issue
+			return false, fmt.Errorf("error checking mods column in %s: %w", table, err)
+		}
+	}
+
+	// If we get here, all tables have the mods column
+	return true, nil
 }
 
 // VerificationResult holds the results of migration verification
 type VerificationResult struct {
-	TroubleReports EntityVerification `json:"trouble_reports"`
-	MetalSheets    EntityVerification `json:"metal_sheets"`
-	Tools          EntityVerification `json:"tools"`
-	OverallMatch   bool               `json:"overall_match"`
+	TroubleReports   EntityVerification `json:"trouble_reports"`
+	MetalSheets      EntityVerification `json:"metal_sheets"`
+	Tools            EntityVerification `json:"tools"`
+	OverallMatch     bool               `json:"overall_match"`
+	CleanupCompleted bool               `json:"cleanup_completed"`
 }
 
 // EntityVerification holds verification data for a single entity type
@@ -548,16 +655,15 @@ func (m *ModificationMigration) GetMigrationStatus() (*MigrationStatus, error) {
 	status.ModificationTableExists = true
 	status.TotalModifications = modCount
 
-	// Check if old mod columns still exist
-	// This is a simple check - in production you might want more sophisticated detection
-	var oldModsExist int
-	err = m.db.QueryRow(`
-		SELECT COUNT(*)
-		FROM trouble_reports
-		WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''
-	`).Scan(&oldModsExist)
+	// Check if old mod columns still exist using the helper method
+	oldModsExist, err := m.CheckOldModsExist()
+	if err != nil {
+		// If we can't determine the status, assume no old mods exist
+		status.OldModsExist = false
+	} else {
+		status.OldModsExist = oldModsExist
+	}
 
-	status.OldModsExist = err == nil && oldModsExist > 0
 	status.MigrationNeeded = status.OldModsExist && modCount == 0
 
 	return status, nil

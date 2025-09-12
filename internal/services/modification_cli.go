@@ -77,10 +77,15 @@ func (cli *ModificationCLI) showStatus() error {
 		fmt.Println("\n⚠️  Migration is recommended!")
 		fmt.Println("Run 'migrate' command to start the migration process.")
 	} else if status.TotalModifications > 0 && !status.OldModsExist {
-		fmt.Println("\n✅ Migration appears to be complete!")
+		fmt.Println("\n✅ Migration and cleanup completed successfully!")
+		fmt.Println("Old 'mods' columns have been removed and new modification system is active.")
 	} else if status.TotalModifications > 0 && status.OldModsExist {
 		fmt.Println("\n⚠️  Both old and new systems detected!")
 		fmt.Println("Consider running 'verify' to check migration integrity.")
+		fmt.Println("After verification, run 'cleanup' to remove old columns.")
+	} else if status.TotalModifications == 0 && !status.OldModsExist {
+		fmt.Println("\n⚠️  No modifications found and old columns missing!")
+		fmt.Println("This may indicate cleanup was run without migration, or data loss occurred.")
 	}
 
 	return nil
@@ -152,17 +157,39 @@ func (cli *ModificationCLI) verifyMigration() error {
 		return fmt.Errorf("verification failed: %w", err)
 	}
 
-	fmt.Printf("Trouble Reports - Old: %d, New: %d, Match: %v\n",
-		result.TroubleReports.OldCount, result.TroubleReports.NewCount, result.TroubleReports.Match)
-	fmt.Printf("Metal Sheets - Old: %d, New: %d, Match: %v\n",
-		result.MetalSheets.OldCount, result.MetalSheets.NewCount, result.MetalSheets.Match)
-	fmt.Printf("Tools - Old: %d, New: %d, Match: %v\n",
-		result.Tools.OldCount, result.Tools.NewCount, result.Tools.Match)
+	// Use the cleanup completed status from verification result
+	cleanupCompleted := result.CleanupCompleted
+
+	totalNewMods := result.TroubleReports.NewCount + result.MetalSheets.NewCount + result.Tools.NewCount
+
+	if cleanupCompleted && totalNewMods > 0 {
+		fmt.Println("🧹 Cleanup completed - old 'mods' columns have been removed")
+		fmt.Printf("New modifications found:\n")
+		fmt.Printf("  Trouble Reports: %d modifications\n", result.TroubleReports.NewCount)
+		fmt.Printf("  Metal Sheets: %d modifications\n", result.MetalSheets.NewCount)
+		fmt.Printf("  Tools: %d modifications\n", result.Tools.NewCount)
+		fmt.Printf("  Total: %d modifications\n", totalNewMods)
+	} else {
+		fmt.Printf("Trouble Reports - Old: %d, New: %d, Match: %v\n",
+			result.TroubleReports.OldCount, result.TroubleReports.NewCount, result.TroubleReports.Match)
+		fmt.Printf("Metal Sheets - Old: %d, New: %d, Match: %v\n",
+			result.MetalSheets.OldCount, result.MetalSheets.NewCount, result.MetalSheets.Match)
+		fmt.Printf("Tools - Old: %d, New: %d, Match: %v\n",
+			result.Tools.OldCount, result.Tools.NewCount, result.Tools.Match)
+	}
 
 	if result.OverallMatch {
-		fmt.Println("✅ Verification successful! Migration appears to be complete and accurate.")
+		if cleanupCompleted && totalNewMods > 0 {
+			fmt.Println("✅ Migration and cleanup completed successfully!")
+		} else {
+			fmt.Println("✅ Verification successful! Migration appears to be complete and accurate.")
+		}
 	} else {
-		fmt.Println("⚠️  Verification found discrepancies. Please review the migration.")
+		if cleanupCompleted && totalNewMods == 0 {
+			fmt.Println("⚠️  No modifications found! This may indicate the migration was not run or failed.")
+		} else {
+			fmt.Println("⚠️  Verification found discrepancies. Please review the migration.")
+		}
 	}
 
 	return nil
