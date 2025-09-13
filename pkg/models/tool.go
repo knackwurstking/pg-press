@@ -44,28 +44,17 @@ func (f Format) String() string {
 	return fmt.Sprintf("%dx%d", f.Width, f.Height)
 }
 
-type ToolMod struct {
-	Position     Position     `json:"position"`
-	Format       Format       `json:"format"`
-	Type         string       `json:"type"`
-	Code         string       `json:"code"`
-	Regenerating bool         `json:"regenerating"`
-	Press        *PressNumber `json:"press"`
-	LinkedNotes  []int64      `json:"notes"`
-}
-
 // Tool represents a tool in the database.
 // Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
-	ID           int64         `json:"id"`
-	Position     Position      `json:"position"`
-	Format       Format        `json:"format"`
-	Type         string        `json:"type"` // Ex: FC, GTC, MASS
-	Code         string        `json:"code"` // Ex: G01, G02, ...
-	Regenerating bool          `json:"regenerating"`
-	Press        *PressNumber  `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes  []int64       `json:"notes"` // Contains note ids from the "notes" table
-	Mods         Mods[ToolMod] `json:"mods"`
+	ID           int64        `json:"id"`
+	Position     Position     `json:"position"`
+	Format       Format       `json:"format"`
+	Type         string       `json:"type"` // Ex: FC, GTC, MASS
+	Code         string       `json:"code"` // Ex: G01, G02, ...
+	Regenerating bool         `json:"regenerating"`
+	Press        *PressNumber `json:"press"` // Press number (0-5) when status is active
+	LinkedNotes  []int64      `json:"notes"` // Contains note ids from the "notes" table
 }
 
 func NewTool(position Position) *Tool {
@@ -77,7 +66,6 @@ func NewTool(position Position) *Tool {
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),
-		Mods:         NewMods[ToolMod](),
 	}
 }
 

@@ -115,7 +115,7 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 		}
 
 		// Parse old mods
-		var oldMods oldmodification.Mods[models.TroubleReportMod]
+		var oldMods oldmodification.Mods[models.TroubleReportModData]
 		if err := json.Unmarshal(modsJSON, &oldMods); err != nil {
 			logger.DBModifications().Error("Failed to unmarshal old mods for trouble report %d: %v", id, err)
 			stats.Errors++

@@ -215,20 +215,6 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
-	// Ensure initial mod entry exists
-	if len(sheet.Mods) == 0 {
-		initialMod := models.NewMod(user, models.MetalSheetMod{
-			TileHeight:  sheet.TileHeight,
-			Value:       sheet.Value,
-			MarkeHeight: sheet.MarkeHeight,
-			STF:         sheet.STF,
-			STFMax:      sheet.STFMax,
-			ToolID:      sheet.ToolID,
-			LinkedNotes: sheet.LinkedNotes,
-		})
-		sheet.Mods = models.NewMods(initialMod)
-	}
-
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
@@ -274,36 +260,6 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
-	// Get current sheet to compare for changes
-	current, err := s.Get(sheet.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get current sheet: %w: %w", err)
-	}
-
-	// Add modification record if values changed
-	if current.TileHeight != sheet.TileHeight ||
-		current.Value != sheet.Value ||
-		current.MarkeHeight != sheet.MarkeHeight ||
-		current.STF != sheet.STF ||
-		current.STFMax != sheet.STFMax ||
-		!equalToolIDs(current.ToolID, sheet.ToolID) ||
-		len(current.LinkedNotes) != len(sheet.LinkedNotes) {
-
-		mod := models.NewMod(user, models.MetalSheetMod{
-			TileHeight:  current.TileHeight,
-			Value:       current.Value,
-			MarkeHeight: current.MarkeHeight,
-			STF:         current.STF,
-			STFMax:      current.STFMax,
-			ToolID:      current.ToolID,
-			LinkedNotes: current.LinkedNotes,
-		})
-
-		// Prepend new mod to keep most recent first
-		mods := models.NewMods(mod)
-		sheet.Mods = append(mods, sheet.Mods...)
-	}
-
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
@@ -348,21 +304,6 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	if err != nil {
 		return fmt.Errorf("failed to get sheet for tool assignment: %w: %w", err)
 	}
-
-	// Add modification record before changing
-	mod := models.NewMod(user, models.MetalSheetMod{
-		TileHeight:  sheet.TileHeight,
-		Value:       sheet.Value,
-		MarkeHeight: sheet.MarkeHeight,
-		STF:         sheet.STF,
-		STFMax:      sheet.STFMax,
-		ToolID:      sheet.ToolID,
-		LinkedNotes: sheet.LinkedNotes,
-	})
-
-	// Prepend new mod to keep most recent first
-	mods := models.NewMods(mod)
-	sheet.Mods = append(mods, sheet.Mods...)
 
 	// Update the tool assignment
 	sheet.ToolID = toolID
