@@ -3,7 +3,6 @@ package pdf
 import (
 	"bytes"
 	"fmt"
-	"time"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
 
@@ -35,7 +34,6 @@ func GenerateTroubleReportPDF(
 	addTroubleReportHeader(o)
 	addTroubleReportTitleSection(o)
 	addTroubleReportContentSection(o)
-	addTroubleReportMetadataSection(o)
 	addTroubleReportImagesSection(o)
 
 	var buf bytes.Buffer
@@ -81,43 +79,6 @@ func addTroubleReportContentSection(o *troubleReportOptions) {
 	o.PDF.Ln(8)
 }
 
-func addTroubleReportMetadataSection(o *troubleReportOptions) {
-	if len(o.Report.Mods) == 0 {
-		return
-	}
-
-	o.PDF.SetFont("Arial", "B", 14)
-	o.PDF.SetFillColor(240, 248, 255)
-	o.PDF.CellFormat(0, 10, "METADATEN", "1", 1, "L", true, 0, "")
-	o.PDF.Ln(5)
-
-	earliestTime, latestTime, creator, lastModifier := getTroubleReportMetadataInfo(o)
-
-	o.PDF.SetFont("Arial", "", 11)
-	createdAt := time.Unix(0, earliestTime*int64(time.Millisecond))
-	createdText := fmt.Sprintf("Erstellt am: %s",
-		createdAt.Format("02.01.2006 15:04:05"))
-	if creator != nil {
-		createdText += fmt.Sprintf(" von %s", creator.Name)
-	}
-	o.PDF.MultiCell(0, 6, o.Translator(createdText), "", "", false)
-
-	if latestTime != earliestTime {
-		lastModifiedAt := time.Unix(0, latestTime*int64(time.Millisecond))
-		modifiedText := fmt.Sprintf("Zuletzt geändert: %s",
-			lastModifiedAt.Format("02.01.2006 15:04:05"))
-		if lastModifier != nil {
-			modifiedText += fmt.Sprintf(" von %s", lastModifier.Name)
-		}
-		o.PDF.MultiCell(0, 6, o.Translator(modifiedText), "", "", false)
-	}
-
-	o.PDF.Cell(0, 6, o.Translator(
-		fmt.Sprintf("Anzahl Änderungen: %d", len(o.Report.Mods)),
-	))
-	o.PDF.Ln(13)
-}
-
 func addTroubleReportImagesSection(o *troubleReportOptions) {
 	if len(o.Report.LoadedAttachments) == 0 {
 		return
@@ -136,26 +97,6 @@ func addTroubleReportImagesSection(o *troubleReportOptions) {
 		"1", 1, "L", true, 0, "")
 
 	renderTroubleReportImagesInGrid(o, images)
-}
-
-func getTroubleReportMetadataInfo(o *troubleReportOptions) (
-	earliestTime, latestTime int64,
-	creator *models.User, lastModifier *models.User,
-) {
-	earliestTime, latestTime = o.Report.Mods[0].Time, o.Report.Mods[0].Time
-
-	for _, m := range o.Report.Mods {
-		if m.Time < earliestTime {
-			earliestTime = m.Time
-			creator = m.User
-		}
-		if m.Time > latestTime {
-			latestTime = m.Time
-			lastModifier = m.User
-		}
-	}
-
-	return earliestTime, latestTime, creator, lastModifier
 }
 
 func getTroubleReportImageAttachments(attachments []*models.Attachment) []*models.Attachment {
