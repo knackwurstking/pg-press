@@ -31,7 +31,6 @@ func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 	return t
 }
 
-// TODO: Remove mods from this table
 func (t *Tool) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS tools (
@@ -43,7 +42,6 @@ func (t *Tool) createTable() error {
 			regenerating BOOLEAN NOT NULL DEFAULT 0,
 			press INTEGER,
 			notes BLOB NOT NULL,
-			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -56,33 +54,27 @@ func (t *Tool) createTable() error {
 }
 
 func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
-	logger.DBTools().Info("Adding new tool: %s (user: %s)", tool.String(), user.Name)
-
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
-		logger.DBTools().Warn("Tool validation failed: %v", err)
 		return 0, err
 	}
 
-	formatBytes, notesBytes, modsBytes, err := t.marshalToolData(tool, user)
+	formatBytes, notesBytes, err := t.marshalToolData(tool)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal tool data: %v", err)
 		return 0, err
 	}
 
 	const insertQuery = `
-		INSERT INTO tools (position, format, type, code, regenerating, press, notes, mods)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO tools (position, format, type, code, regenerating, press, notes)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 	result, err := t.db.Exec(insertQuery, tool.Position, formatBytes, tool.Type, tool.Code,
-		tool.Regenerating, tool.Press, notesBytes, modsBytes)
+		tool.Regenerating, tool.Press, notesBytes)
 	if err != nil {
-		logger.DBTools().Error("Failed to insert tool: %v", err)
 		return 0, utils.NewDatabaseError("insert", "tools", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		logger.DBTools().Error("Failed to get last insert ID: %v", err)
 		return 0, utils.NewDatabaseError("insert", "tools", err)
 	}
 
@@ -90,13 +82,10 @@ func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 	t.createFeedUpdate("Neues Werkzeug hinzugefügt",
 		fmt.Sprintf("Benutzer %s hat ein neues Werkzeug %s zur Werkzeugliste hinzugefügt.", user.Name, tool.String()), user)
 
-	logger.DBTools().Info("Successfully added tool with ID: %d", id)
 	return id, nil
 }
 
 func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Adding tool with %d notes (user: %s)", len(notes), user.Name)
-
 	var noteIDs []int64
 	for _, note := range notes {
 		noteID, err := t.notes.Add(note, user)
@@ -113,13 +102,10 @@ func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*mode
 	}
 
 	tool.ID = toolID
-	logger.DBTools().Debug("Successfully added tool with notes, ID: %d", toolID)
 	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
 func (t *Tool) Delete(id int64, user *models.User) error {
-	logger.DBTools().Info("Deleting tool ID %d (user: %s)", id, user.Name)
-
 	tool, err := t.Get(id)
 	if err != nil {
 		return err
@@ -128,7 +114,6 @@ func (t *Tool) Delete(id int64, user *models.User) error {
 	const deleteQuery = `DELETE FROM tools WHERE id = $1`
 	_, err = t.db.Exec(deleteQuery, id)
 	if err != nil {
-		logger.DBTools().Error("Failed to delete tool %d: %v", id, err)
 		return utils.NewDatabaseError("delete", "tools", err)
 	}
 
@@ -141,14 +126,11 @@ func (t *Tool) Delete(id int64, user *models.User) error {
 		user,
 	)
 
-	logger.DBTools().Info("Successfully deleted tool ID: %d", id)
 	return nil
 }
 
 func (t *Tool) Get(id int64) (*models.Tool, error) {
-	logger.DBTools().Debug("Getting tool with ID: %d", id)
-
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools WHERE id = $1`
+	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools WHERE id = $1`
 	row := t.db.QueryRow(query, id)
 
 	tool, err := t.scanTool(row)
@@ -159,13 +141,12 @@ func (t *Tool) Get(id int64) (*models.Tool, error) {
 		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
-	logger.DBTools().Debug("Successfully retrieved tool: %s", tool.String())
 	return tool, nil
 }
 
 func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods
+		SELECT id, position, format, type, code, regenerating, press, notes
 		FROM tools WHERE regenerating = 0 AND press = ?
 	`
 	rows, err := t.db.Query(query, pressNumber)
@@ -179,7 +160,6 @@ func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			logger.DBTools().Warn("Failed to scan tool: %v", err)
 			return nil
 		}
 		tools = append(tools, tool)
@@ -197,19 +177,12 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
-	if pressNumber == nil {
-		logger.DBTools().Debug("Getting inactive tools")
-	} else {
-		logger.DBTools().Debug("Getting active tools for press: %d", *pressNumber)
-	}
-
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press, notes, mods
+		SELECT id, position, format, type, code, regenerating, press, notes
 		FROM tools WHERE press = $1 AND regenerating = 0
 	`
 	rows, err := t.db.Query(query, pressNumber)
 	if err != nil {
-		logger.DBTools().Error("Failed to query tools for press %v: %v", pressNumber, err)
 		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 	defer rows.Close()
@@ -224,18 +197,13 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
 		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
-	logger.DBTools().Debug("Found %d tools for press %v", len(tools), pressNumber)
 	return tools, nil
 }
 
-// GetPressUtilization returns a complete overview of press utilization across all presses
 func (t *Tool) GetPressUtilization() ([]models.PressUtilization, error) {
-	logger.DBTools().Info("Generating press utilization map")
-
 	var utilization []models.PressUtilization
 
 	// Valid press numbers: 0, 2, 3, 4, 5
@@ -257,8 +225,6 @@ func (t *Tool) GetPressUtilization() ([]models.PressUtilization, error) {
 }
 
 func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Getting tool with notes, ID: %d", id)
-
 	tool, err := t.Get(id)
 	if err != nil {
 		return nil, err
@@ -269,14 +235,11 @@ func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 		return nil, fmt.Errorf("failed to load notes for tool")
 	}
 
-	logger.DBTools().Debug("Successfully retrieved tool with %d notes", len(notes))
 	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
 func (t *Tool) List() ([]*models.Tool, error) {
-	logger.DBTools().Debug("Listing all tools")
-
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes, mods FROM tools`
+	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools`
 	rows, err := t.db.Query(query)
 	if err != nil {
 		return nil, utils.NewDatabaseError("select", "tools", err)
@@ -293,17 +256,13 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
 		return nil, utils.NewDatabaseError("select", "tools", err)
 	}
 
-	logger.DBTools().Debug("Successfully listed %d tools", len(tools))
 	return tools, nil
 }
 
 func (t *Tool) ListWithNotes() ([]*models.ToolWithNotes, error) {
-	logger.DBTools().Debug("Listing all tools with notes")
-
 	tools, err := t.List()
 	if err != nil {
 		return nil, err
@@ -319,52 +278,42 @@ func (t *Tool) ListWithNotes() ([]*models.ToolWithNotes, error) {
 		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
 	}
 
-	logger.DBTools().Debug("Successfully listed %d tools with notes", len(result))
 	return result, nil
 }
 
 func (t *Tool) Update(tool *models.Tool, user *models.User) error {
-	logger.DBTools().Info("Updating tool ID %d: %s (user: %s)", tool.ID, tool.String(), user.Name)
-
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
-		logger.DBTools().Warn("Tool update validation failed: %v", err)
 		return err
 	}
 
-	formatBytes, notesBytes, modsBytes, err := t.marshalToolData(tool, user)
+	formatBytes, notesBytes, err := t.marshalToolData(tool)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal tool data for update: %v", err)
 		return err
 	}
 
 	const updateQuery = `
 		UPDATE tools SET position = $1, format = $2, type = $3, code = $4,
-		regenerating = $5, press = $6, notes = $7, mods = $8 WHERE id = $9
+		regenerating = $5, press = $6, notes = $7 WHERE id = $8
 	`
 	_, err = t.db.Exec(updateQuery, tool.Position, formatBytes, tool.Type, tool.Code,
-		tool.Regenerating, tool.Press, notesBytes, modsBytes, tool.ID)
+		tool.Regenerating, tool.Press, notesBytes, tool.ID)
 	if err != nil {
-		logger.DBTools().Error("Failed to update tool %d: %v", tool.ID, err)
 		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	t.createFeedUpdate("Werkzeug aktualisiert",
 		fmt.Sprintf("Benutzer %s hat das Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
 
-	logger.DBTools().Info("Successfully updated tool ID: %d", tool.ID)
 	return nil
 }
 
 func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
-	logger.DBTools().Info("Updating press assignment for tool %d (user: %s)", toolID, user.Name)
-
 	tool, err := t.Get(toolID)
 	if err != nil {
 		return fmt.Errorf("failed to get tool for press update: %w", err)
 	}
 
 	if equalPressNumbers(tool.Press, press) {
-		logger.DBTools().Debug("Tool %d press assignment unchanged", toolID)
 		return nil
 	}
 
@@ -372,18 +321,9 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 		return fmt.Errorf("failed to set press for tool %d: %w", toolID, err)
 	}
 
-	t.updateMods(user, tool)
-
-	modsBytes, err := json.Marshal(tool.Mods)
+	const query = `UPDATE tools SET press = ? WHERE id = ?`
+	_, err = t.db.Exec(query, press, toolID)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal mods: %v", err)
-		return utils.NewDatabaseError("update", "tools", err)
-	}
-
-	const query = `UPDATE tools SET press = ?, mods = ? WHERE id = ?`
-	_, err = t.db.Exec(query, press, modsBytes, toolID)
-	if err != nil {
-		logger.DBTools().Error("Failed to update press assignment: %v", err)
 		return utils.NewDatabaseError("update", "tools", err)
 	}
 
@@ -391,43 +331,28 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 	t.createFeedUpdate("Werkzeug Pressendaten aktualisiert",
 		fmt.Sprintf("Benutzer %s hat die Pressendaten für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
 
-	logger.DBTools().Info("Successfully updated press assignment for tool %d", toolID)
 	return nil
 }
 
 func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
-	logger.DBTools().Info("Updating regenerating status for tool %d to %v (user: %s)", toolID, regenerating, user.Name)
-
 	tool, err := t.Get(toolID)
 	if err != nil {
 		return fmt.Errorf("failed to get tool for regenerating status update: %w", err)
 	}
 
 	if tool.Regenerating == regenerating {
-		logger.DBTools().Debug("Tool %d regenerating status unchanged: %v", toolID, regenerating)
 		return nil
 	}
 
-	tool.Regenerating = regenerating
-	t.updateMods(user, tool)
-
-	modsBytes, err := json.Marshal(tool.Mods)
+	const query = `UPDATE tools SET regenerating = ? WHERE id = ?`
+	_, err = t.db.Exec(query, regenerating, tool.ID)
 	if err != nil {
-		logger.DBTools().Error("Failed to marshal mods: %v", err)
-		return utils.NewDatabaseError("update", "tools", err)
-	}
-
-	const query = `UPDATE tools SET regenerating = ?, mods = ? WHERE id = ?`
-	_, err = t.db.Exec(query, tool.Regenerating, modsBytes, tool.ID)
-	if err != nil {
-		logger.DBTools().Error("Failed to update regenerating status: %v", err)
 		return utils.NewDatabaseError("update", "tools", err)
 	}
 
 	t.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
 		fmt.Sprintf("Benutzer %s hat die Regenerierung für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
 
-	logger.DBTools().Info("Successfully updated regenerating status for tool %d", toolID)
 	return nil
 }
 
@@ -440,33 +365,26 @@ func (t *Tool) createFeedUpdate(title, message string, user *models.User) {
 	}
 }
 
-func (t *Tool) marshalToolData(tool *models.Tool, user *models.User) ([]byte, []byte, []byte, error) {
-	t.updateMods(user, tool)
-
+func (t *Tool) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
+		return nil, nil, utils.NewDatabaseError("marshal", "tools", err)
 	}
 
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
-		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
+		return nil, nil, utils.NewDatabaseError("marshal", "tools", err)
 	}
 
-	modsBytes, err := json.Marshal(tool.Mods)
-	if err != nil {
-		return nil, nil, nil, utils.NewDatabaseError("marshal", "tools", err)
-	}
-
-	return formatBytes, notesBytes, modsBytes, nil
+	return formatBytes, notesBytes, nil
 }
 
 func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
-	var format, linkedNotes, mods []byte
+	var format, linkedNotes []byte
 
 	if err := scanner.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &tool.Regenerating, &tool.Press, &linkedNotes, &mods); err != nil {
+		&tool.Code, &tool.Regenerating, &tool.Press, &linkedNotes); err != nil {
 		return nil, err
 	}
 
@@ -478,27 +396,7 @@ func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 		return nil, fmt.Errorf("failed to unmarshal linked notes data")
 	}
 
-	if err := json.Unmarshal(mods, &tool.Mods); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal mods data")
-	}
-
 	return tool, nil
-}
-
-func (t *Tool) updateMods(user *models.User, tool *models.Tool) {
-	if user == nil {
-		return
-	}
-
-	tool.Mods.Add(user, models.ToolMod{
-		Position:     tool.Position,
-		Format:       tool.Format,
-		Type:         tool.Type,
-		Code:         tool.Code,
-		Regenerating: tool.Regenerating,
-		Press:        tool.Press,
-		LinkedNotes:  tool.LinkedNotes,
-	})
 }
 
 func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
