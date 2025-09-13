@@ -54,7 +54,7 @@ func (s *MetalSheet) createTable() error {
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
-		return fmt.Errorf("failed to create metal_sheets table: %w", err)
+		return fmt.Errorf("failed to create metal_sheets table: %w: %w", err)
 	}
 
 	return nil
@@ -71,7 +71,7 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 	defer rows.Close()
 
@@ -80,13 +80,13 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Listed %d metal sheets", len(sheets))
@@ -109,7 +109,7 @@ func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("metal sheet with ID %d", id))
 		}
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 
 	return sheet, nil
@@ -156,7 +156,7 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 	defer rows.Close()
 
@@ -165,13 +165,13 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
@@ -191,7 +191,7 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 	defer rows.Close()
 
@@ -200,13 +200,13 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "metal_sheets", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d available metal sheets", len(sheets))
@@ -234,12 +234,12 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
 
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
 
 	query := `
@@ -251,12 +251,12 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "metal_sheets", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
 
 	// Set sheet ID for return
@@ -284,7 +284,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 	// Get current sheet to compare for changes
 	current, err := s.Get(sheet.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get current sheet: %w", err)
+		return fmt.Errorf("failed to get current sheet: %w: %w", err)
 	}
 
 	// Add modification record if values changed
@@ -314,12 +314,12 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return utils.NewDatabaseError("update", "metal_sheets", err)
+		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return utils.NewDatabaseError("update", "metal_sheets", err)
+		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
 	query := `
@@ -333,7 +333,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
 	if err != nil {
-		return utils.NewDatabaseError("update", "metal_sheets", err)
+		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
@@ -358,7 +358,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	// Get current sheet to track changes
 	sheet, err := s.Get(sheetID)
 	if err != nil {
-		return fmt.Errorf("failed to get sheet for tool assignment: %w", err)
+		return fmt.Errorf("failed to get sheet for tool assignment: %w: %w", err)
 	}
 
 	// Add modification record before changing
@@ -382,7 +382,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	// Marshal mods for database update
 	modsBytes, err := json.Marshal(sheet.Mods)
 	if err != nil {
-		return utils.NewDatabaseError("update", "metal_sheets", err)
+		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
 	// Update both tool_id and mods in database
@@ -393,7 +393,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 		toolID, modsBytes, sheetID,
 	)
 	if err != nil {
-		return utils.NewDatabaseError("update", "metal_sheets", err)
+		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
@@ -426,7 +426,7 @@ func (s *MetalSheet) Delete(id int64, user *models.User) error {
 	`
 	_, err := s.db.Exec(query, id)
 	if err != nil {
-		return utils.NewDatabaseError("delete", "metal_sheets", err)
+		return fmt.Errorf("delete error: metal_sheets: %w", err)
 	}
 
 	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
@@ -459,7 +459,7 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, utils.NewDatabaseError("scan", "metal_sheets", err)
+		return nil, fmt.Errorf("scan error: metal_sheets: %w", err)
 	}
 
 	// Handle nullable tool_id
@@ -468,11 +468,11 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 	}
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
-		return nil, utils.NewDatabaseError("scan", "metal_sheets", err)
+		return nil, fmt.Errorf("scan error: metal_sheets: %w", err)
 	}
 
 	if err := json.Unmarshal(mods, &sheet.Mods); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal mods: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal mods: %w: %w", err)
 	}
 
 	return sheet, nil

@@ -50,17 +50,17 @@ func (m *ModificationMigration) MigrateAll() (*MigrationStats, error) {
 
 	// Migrate trouble reports
 	if err := m.migrateTroubleReports(stats); err != nil {
-		return stats, fmt.Errorf("failed to migrate trouble reports: %w", err)
+		return stats, fmt.Errorf("failed to migrate trouble reports: %w: %w", err)
 	}
 
 	// Migrate metal sheets
 	if err := m.migrateMetalSheets(stats); err != nil {
-		return stats, fmt.Errorf("failed to migrate metal sheets: %w", err)
+		return stats, fmt.Errorf("failed to migrate metal sheets: %w: %w", err)
 	}
 
 	// Migrate tools
 	if err := m.migrateTools(stats); err != nil {
-		return stats, fmt.Errorf("failed to migrate tools: %w", err)
+		return stats, fmt.Errorf("failed to migrate tools: %w: %w", err)
 	}
 
 	stats.EndTime = time.Now()
@@ -82,7 +82,7 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 	// Start transaction to prevent database locking
 	tx, err := m.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -98,7 +98,7 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 
 	rows, err := tx.Query(query)
 	if err != nil {
-		return fmt.Errorf("failed to query trouble reports: %w", err)
+		return fmt.Errorf("failed to query trouble reports: %w: %w", err)
 	}
 	defer rows.Close()
 
@@ -109,7 +109,7 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 
 		err := rows.Scan(&id, &title, &content, &linkedAttachmentsJSON, &modsJSON)
 		if err != nil {
-			logger.DBModifications().Error("Failed to scan trouble report row: %v", err)
+			logger.DBModifications().Error("Failed to scan trouble report row: %v: %w", err)
 			stats.Errors++
 			continue
 		}
@@ -161,12 +161,12 @@ func (m *ModificationMigration) migrateTroubleReports(stats *MigrationStats) err
 	}
 
 	if err = rows.Err(); err != nil {
-		return fmt.Errorf("error iterating trouble report rows: %w", err)
+		return fmt.Errorf("error iterating trouble report rows: %w: %w", err)
 	}
 
 	// Commit transaction
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	logger.DBModifications().Info("Migrated %d trouble reports with %d total mods", stats.TroubleReportsProcessed, stats.TotalModsMigrated)
@@ -180,7 +180,7 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 	// Start transaction to prevent database locking
 	tx, err := m.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -196,7 +196,7 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 
 	rows, err := tx.Query(query)
 	if err != nil {
-		return fmt.Errorf("failed to query metal sheets: %w", err)
+		return fmt.Errorf("failed to query metal sheets: %w: %w", err)
 	}
 	defer rows.Close()
 
@@ -209,7 +209,7 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 
 		err := rows.Scan(&id, &tileHeight, &value, &markeHeight, &stf, &stfMax, &toolID, &notesJSON, &modsJSON)
 		if err != nil {
-			logger.DBModifications().Error("Failed to scan metal sheet row: %v", err)
+			logger.DBModifications().Error("Failed to scan metal sheet row: %v: %w", err)
 			stats.Errors++
 			continue
 		}
@@ -265,12 +265,12 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 	}
 
 	if err = rows.Err(); err != nil {
-		return fmt.Errorf("error iterating metal sheet rows: %w", err)
+		return fmt.Errorf("error iterating metal sheet rows: %w: %w", err)
 	}
 
 	// Commit transaction
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	logger.DBModifications().Info("Migrated %d metal sheets", stats.MetalSheetsProcessed)
@@ -281,7 +281,7 @@ func (m *ModificationMigration) migrateMetalSheets(stats *MigrationStats) error 
 func (m *ModificationMigration) addModificationWithTimestampTx(tx *sql.Tx, userID int64, entityType ModificationType, entityID int64, data interface{}, timestamp time.Time) error {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("failed to marshal modification data: %w", err)
+		return fmt.Errorf("failed to marshal modification data: %w: %w", err)
 	}
 
 	query := `
@@ -291,7 +291,7 @@ func (m *ModificationMigration) addModificationWithTimestampTx(tx *sql.Tx, userI
 
 	_, err = tx.Exec(query, userID, string(entityType), entityID, jsonData, timestamp)
 	if err != nil {
-		return fmt.Errorf("failed to insert modification: %w", err)
+		return fmt.Errorf("failed to insert modification: %w: %w", err)
 	}
 
 	return nil
@@ -304,7 +304,7 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 	// Start transaction to prevent database locking
 	tx, err := m.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -320,7 +320,7 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 
 	rows, err := tx.Query(query)
 	if err != nil {
-		return fmt.Errorf("failed to query tools: %w", err)
+		return fmt.Errorf("failed to query tools: %w: %w", err)
 	}
 	defer rows.Close()
 
@@ -334,7 +334,7 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 
 		err := rows.Scan(&id, &position, &formatJSON, &toolType, &code, &regenerating, &press, &notesJSON, &modsJSON)
 		if err != nil {
-			logger.DBModifications().Error("Failed to scan tool row: %v", err)
+			logger.DBModifications().Error("Failed to scan tool row: %v: %w", err)
 			stats.Errors++
 			continue
 		}
@@ -396,12 +396,12 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 	}
 
 	if err = rows.Err(); err != nil {
-		return fmt.Errorf("error iterating tool rows: %w", err)
+		return fmt.Errorf("error iterating tool rows: %w: %w", err)
 	}
 
 	// Commit transaction
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	logger.DBModifications().Info("Migrated %d tools", stats.ToolsProcessed)
@@ -412,7 +412,7 @@ func (m *ModificationMigration) migrateTools(stats *MigrationStats) error {
 func (m *ModificationMigration) addModificationWithTimestamp(userID int64, entityType ModificationType, entityID int64, data interface{}, timestamp time.Time) error {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("failed to marshal modification data: %w", err)
+		return fmt.Errorf("failed to marshal modification data: %w: %w", err)
 	}
 
 	query := `
@@ -422,7 +422,7 @@ func (m *ModificationMigration) addModificationWithTimestamp(userID int64, entit
 
 	_, err = m.db.Exec(query, userID, string(entityType), entityID, jsonData, timestamp)
 	if err != nil {
-		return fmt.Errorf("failed to insert modification: %w", err)
+		return fmt.Errorf("failed to insert modification: %w: %w", err)
 	}
 
 	return nil
@@ -449,7 +449,7 @@ func (m *ModificationMigration) CleanupOldMods(force bool) error {
 		logger.DBModifications().Info("Performing verification before cleanup...")
 		result, err := m.VerifyMigration()
 		if err != nil {
-			return fmt.Errorf("verification failed before cleanup: %w", err)
+			return fmt.Errorf("verification failed before cleanup: %w: %w", err)
 		}
 
 		if !result.OverallMatch {
@@ -470,7 +470,7 @@ func (m *ModificationMigration) CleanupOldMods(force bool) error {
 		if _, err := m.db.Exec(query); err != nil {
 			// SQLite doesn't support DROP COLUMN in older versions
 			// So we'll create a backup and recreate tables
-			logger.DBModifications().Warn("Failed to drop column (this is expected in older SQLite): %v", err)
+			logger.DBModifications().Warn("Failed to drop column (this is expected in older SQLite): %v: %w", err)
 		}
 	}
 
@@ -500,7 +500,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 			oldTroubleReportMods = 0
 			cleanupCompleted = true
 		} else {
-			return nil, fmt.Errorf("failed to count old trouble report mods: %w", err)
+			return nil, fmt.Errorf("failed to count old trouble report mods: %w: %w", err)
 		}
 	}
 
@@ -516,7 +516,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 			if strings.Contains(err.Error(), "no such column: mods") {
 				oldMetalSheetMods = 0
 			} else {
-				return nil, fmt.Errorf("failed to count old metal sheet mods: %w", err)
+				return nil, fmt.Errorf("failed to count old metal sheet mods: %w: %w", err)
 			}
 		}
 	}
@@ -533,7 +533,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 			if strings.Contains(err.Error(), "no such column: mods") {
 				oldToolMods = 0
 			} else {
-				return nil, fmt.Errorf("failed to count old tool mods: %w", err)
+				return nil, fmt.Errorf("failed to count old tool mods: %w: %w", err)
 			}
 		}
 	}
@@ -546,7 +546,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 		WHERE entity_type = 'trouble_reports'
 	`).Scan(&newTroubleReportModsCount)
 	if err != nil {
-		return nil, fmt.Errorf("failed to count new trouble report modifications: %w", err)
+		return nil, fmt.Errorf("failed to count new trouble report modifications: %w: %w", err)
 	}
 
 	// Count new modifications for metal sheets
@@ -557,7 +557,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 		WHERE entity_type = 'metal_sheets'
 	`).Scan(&newMetalSheetModsCount)
 	if err != nil {
-		return nil, fmt.Errorf("failed to count new metal sheet modifications: %w", err)
+		return nil, fmt.Errorf("failed to count new metal sheet modifications: %w: %w", err)
 	}
 
 	// Count new modifications for tools
@@ -568,7 +568,7 @@ func (m *ModificationMigration) VerifyMigration() (*VerificationResult, error) {
 		WHERE entity_type = 'tools'
 	`).Scan(&newToolModsCount)
 	if err != nil {
-		return nil, fmt.Errorf("failed to count new tool modifications: %w", err)
+		return nil, fmt.Errorf("failed to count new tool modifications: %w: %w", err)
 	}
 
 	result.TroubleReports = EntityVerification{

@@ -27,7 +27,7 @@ func NewNote(db *sql.DB) *Note {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create notes table: %w", err))
+		panic(fmt.Errorf("failed to create notes table: %w: %w", err))
 	}
 
 	return &Note{
@@ -44,7 +44,7 @@ func (n *Note) List() ([]*models.Note, error) {
 
 	rows, err := n.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "notes", err)
+		return nil, fmt.Errorf("select error: notes: %w", err)
 	}
 	defer rows.Close()
 
@@ -53,13 +53,13 @@ func (n *Note) List() ([]*models.Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan note: %w", err)
+			return nil, fmt.Errorf("failed to scan note: %w: %w", err)
 		}
 		notes = append(notes, note)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "notes", err)
+		return nil, fmt.Errorf("select error: notes: %w", err)
 	}
 
 	return notes, nil
@@ -79,7 +79,7 @@ func (n *Note) Get(id int64) (*models.Note, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
 		}
-		return nil, utils.NewDatabaseError("select", "notes", err)
+		return nil, fmt.Errorf("select error: notes: %w", err)
 	}
 
 	return note, nil
@@ -107,7 +107,7 @@ func (n *Note) GetByIDs(ids []int64) ([]*models.Note, error) {
 
 	rows, err := n.db.Query(query, args...)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "notes", err)
+		return nil, fmt.Errorf("select error: notes: %w", err)
 	}
 	defer rows.Close()
 
@@ -117,13 +117,13 @@ func (n *Note) GetByIDs(ids []int64) ([]*models.Note, error) {
 	for rows.Next() {
 		note, err := n.scanNote(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan attachment: %w", err)
+			return nil, fmt.Errorf("failed to scan attachment: %w: %w", err)
 		}
 		noteMap[note.ID] = note
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "notes", err)
+		return nil, fmt.Errorf("select error: notes: %w", err)
 	}
 
 	// Return attachments in the order of the requested IDs
@@ -146,12 +146,12 @@ func (n *Note) Add(note *models.Note, _ *models.User) (int64, error) {
 
 	result, err := n.db.Exec(query, note.Level, note.Content)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "notes", err)
+		return 0, fmt.Errorf("insert error: notes: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "notes", err)
+		return 0, fmt.Errorf("insert error: notes: %w", err)
 	}
 
 	return id, nil
@@ -173,7 +173,7 @@ func (n *Note) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
 			return nil, err
 		}
 
-		return nil, utils.NewDatabaseError("scan", "notes", err)
+		return nil, fmt.Errorf("scan error: notes: %w", err)
 	}
 
 	return note, nil

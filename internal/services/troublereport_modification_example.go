@@ -35,7 +35,7 @@ func (s *TroubleReportWithModificationService) Add(report *models.TroubleReport,
 	// Start transaction
 	tx, err := s.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -47,23 +47,23 @@ func (s *TroubleReportWithModificationService) Add(report *models.TroubleReport,
 
 	attachmentsJSON, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
-		return fmt.Errorf("failed to marshal linked attachments: %w", err)
+		return fmt.Errorf("failed to marshal linked attachments: %w: %w", err)
 	}
 
 	result, err := tx.Exec(query, report.Title, report.Content, attachmentsJSON)
 	if err != nil {
-		return fmt.Errorf("failed to insert trouble report: %w", err)
+		return fmt.Errorf("failed to insert trouble report: %w: %w", err)
 	}
 
 	reportID, err := result.LastInsertId()
 	if err != nil {
-		return fmt.Errorf("failed to get report ID: %w", err)
+		return fmt.Errorf("failed to get report ID: %w: %w", err)
 	}
 	report.ID = reportID
 
 	// Commit the transaction
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	// Record the initial modification
@@ -93,7 +93,7 @@ func (s *TroubleReportWithModificationService) Update(report *models.TroubleRepo
 	// Get current report for comparison
 	current, err := s.Get(report.ID)
 	if err != nil {
-		return fmt.Errorf("failed to get current report: %w", err)
+		return fmt.Errorf("failed to get current report: %w: %w", err)
 	}
 
 	// Check if there are actual changes
@@ -109,7 +109,7 @@ func (s *TroubleReportWithModificationService) Update(report *models.TroubleRepo
 	// Start transaction
 	tx, err := s.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -122,17 +122,17 @@ func (s *TroubleReportWithModificationService) Update(report *models.TroubleRepo
 
 	attachmentsJSON, err := json.Marshal(report.LinkedAttachments)
 	if err != nil {
-		return fmt.Errorf("failed to marshal linked attachments: %w", err)
+		return fmt.Errorf("failed to marshal linked attachments: %w: %w", err)
 	}
 
 	result, err := tx.Exec(query, report.Title, report.Content, attachmentsJSON, report.ID)
 	if err != nil {
-		return fmt.Errorf("failed to update trouble report: %w", err)
+		return fmt.Errorf("failed to update trouble report: %w: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get affected rows: %w", err)
+		return fmt.Errorf("failed to get affected rows: %w: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -141,7 +141,7 @@ func (s *TroubleReportWithModificationService) Update(report *models.TroubleRepo
 
 	// Commit the transaction
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	// Record the modification with details about what changed
@@ -172,13 +172,13 @@ func (s *TroubleReportWithModificationService) Delete(reportID int64, user *mode
 	// Get the report before deletion for the modification record
 	report, err := s.Get(reportID)
 	if err != nil {
-		return fmt.Errorf("failed to get report before deletion: %w", err)
+		return fmt.Errorf("failed to get report before deletion: %w: %w", err)
 	}
 
 	// Start transaction
 	tx, err := s.db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf("failed to begin transaction: %w: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -186,12 +186,12 @@ func (s *TroubleReportWithModificationService) Delete(reportID int64, user *mode
 	query := `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := tx.Exec(query, reportID)
 	if err != nil {
-		return fmt.Errorf("failed to delete trouble report: %w", err)
+		return fmt.Errorf("failed to delete trouble report: %w: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get affected rows: %w", err)
+		return fmt.Errorf("failed to get affected rows: %w: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -200,7 +200,7 @@ func (s *TroubleReportWithModificationService) Delete(reportID int64, user *mode
 
 	// Commit the transaction
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+		return fmt.Errorf("failed to commit transaction: %w: %w", err)
 	}
 
 	// Record the deletion modification
@@ -229,7 +229,7 @@ func (s *TroubleReportWithModificationService) GetModificationHistory(reportID i
 
 	modifications, err := s.modifications.ListWithUser(ModificationTypeTroubleReport, reportID, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get modification history: %w", err)
+		return nil, fmt.Errorf("failed to get modification history: %w: %w", err)
 	}
 
 	return modifications, nil
@@ -239,7 +239,7 @@ func (s *TroubleReportWithModificationService) GetModificationHistory(reportID i
 func (s *TroubleReportWithModificationService) GetModificationCount(reportID int64) (int64, error) {
 	count, err := s.modifications.Count(ModificationTypeTroubleReport, reportID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get modification count: %w", err)
+		return 0, fmt.Errorf("failed to get modification count: %w: %w", err)
 	}
 	return count, nil
 }
@@ -248,7 +248,7 @@ func (s *TroubleReportWithModificationService) GetModificationCount(reportID int
 func (s *TroubleReportWithModificationService) GetLatestModification(reportID int64) (*models.Modification[any], error) {
 	mod, err := s.modifications.GetLatest(ModificationTypeTroubleReport, reportID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get latest modification: %w", err)
+		return nil, fmt.Errorf("failed to get latest modification: %w: %w", err)
 	}
 	return mod, nil
 }
@@ -260,14 +260,14 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 	// Get the modification to restore from
 	mod, err := s.modifications.Get(modificationID)
 	if err != nil {
-		return fmt.Errorf("failed to get modification: %w", err)
+		return fmt.Errorf("failed to get modification: %w: %w", err)
 	}
 
 	// Unmarshal the modification data
 	var extendedData models.ExtendedModificationData[models.TroubleReportModData]
 	var dataBytes []byte = mod.Data
 	if err = json.Unmarshal(dataBytes, &extendedData); err != nil {
-		return fmt.Errorf("failed to unmarshal modification data: %w", err)
+		return fmt.Errorf("failed to unmarshal modification data: %w: %w", err)
 	}
 
 	// Create a trouble report with the restored data
@@ -280,7 +280,7 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 
 	// Update the report
 	if err = s.Update(restoredReport, user); err != nil {
-		return fmt.Errorf("failed to restore report: %w", err)
+		return fmt.Errorf("failed to restore report: %w: %w", err)
 	}
 
 	// Record the restoration as a modification
@@ -295,7 +295,7 @@ func (s *TroubleReportWithModificationService) RestoreFromModification(reportID,
 	)
 
 	if err = s.modifications.AddTroubleReportMod(user.TelegramID, reportID, restoreModData); err != nil {
-		logger.DBModifications().Error("Failed to record restoration modification: %v", err)
+		logger.DBModifications().Error("Failed to record restoration modification: %v: %w", err)
 	}
 
 	logger.DBModifications().Info("Successfully restored trouble report from modification")

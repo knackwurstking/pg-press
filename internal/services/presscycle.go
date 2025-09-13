@@ -19,7 +19,7 @@ type PressCycle struct {
 func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
 	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w", err))
+	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w: %w", err))
 	//}
 
 	// Create new table with tool_id and tool_position instead of slot fields
@@ -41,7 +41,7 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create press_cycles table: %w", err))
+		panic(fmt.Errorf("failed to create press_cycles table: %w: %w", err))
 	}
 
 	return &PressCycle{
@@ -101,7 +101,7 @@ func (p *PressCycle) Get(id int64) (*models.Cycle, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
 		}
-		return nil, utils.NewDatabaseError("select", "press_cycles", err)
+		return nil, fmt.Errorf("select error: press_cycles: %w", err)
 	}
 	cycle.PartialCycles = p.GetPartialCycles(cycle)
 
@@ -120,7 +120,7 @@ func (p *PressCycle) List() ([]*models.Cycle, error) {
 
 	rows, err := p.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "press_cycles", err)
+		return nil, fmt.Errorf("select error: press_cycles: %w", err)
 	}
 	defer rows.Close()
 
@@ -152,12 +152,12 @@ func (p *PressCycle) Add(cycle *models.Cycle, user *models.User) (int64, error) 
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "press_cycles", err)
+		return 0, fmt.Errorf("insert error: press_cycles: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "press_cycles", err)
+		return 0, fmt.Errorf("insert error: press_cycles: %w", err)
 	}
 	cycle.ID = id
 
@@ -199,12 +199,12 @@ func (p *PressCycle) Update(cycle *models.Cycle, user *models.User) error {
 		cycle.ID,
 	)
 	if err != nil {
-		return utils.NewDatabaseError("update", "press_cycles", err)
+		return fmt.Errorf("update error: press_cycles: %w", err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return utils.NewDatabaseError("update", "press_cycles", err)
+		return fmt.Errorf("update error: press_cycles: %w", err)
 	}
 
 	if rows == 0 {
@@ -237,12 +237,12 @@ func (p *PressCycle) Delete(id int64, user *models.User) error {
 
 	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return utils.NewDatabaseError("delete", "press_cycles", err)
+		return fmt.Errorf("delete error: press_cycles: %w", err)
 	}
 
 	rows, err := result.RowsAffected()
 	if err != nil {
-		return utils.NewDatabaseError("delete", "press_cycles", err)
+		return fmt.Errorf("delete error: press_cycles: %w", err)
 	}
 	if rows == 0 {
 		return utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
@@ -275,13 +275,13 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "press_cycles", err)
+		return nil, fmt.Errorf("select error: press_cycles: %w", err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, utils.NewDatabaseError("scan", "press_cycles", err)
+		return nil, fmt.Errorf("scan error: press_cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -333,13 +333,13 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "press_cycles", err)
+		return nil, fmt.Errorf("select error: press_cycles: %w", err)
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, utils.NewDatabaseError("scan", "press_cycles", err)
+		return nil, fmt.Errorf("scan error: press_cycles: %w", err)
 	}
 
 	return cycles, nil
@@ -351,7 +351,7 @@ func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error
 	for rows.Next() {
 		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
-			return nil, utils.NewDatabaseError("scan", "press_cycles", err)
+			return nil, fmt.Errorf("scan error: press_cycles: %w", err)
 		}
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)

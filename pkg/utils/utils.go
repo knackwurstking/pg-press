@@ -7,32 +7,6 @@ import (
 	"strings"
 )
 
-type DatabaseError struct {
-	message string
-	table   string
-	err     error
-}
-
-func NewDatabaseError(action, table string, err error) *DatabaseError {
-	return &DatabaseError{message: action + " error", table: table, err: err}
-}
-
-func (de *DatabaseError) Error() string {
-	return de.message + ": " + de.table + ": " + de.err.Error()
-}
-
-func IsNotDatabaseError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	if _, ok := err.(*DatabaseError); ok {
-		return true
-	}
-
-	return false
-}
-
 type ValidationError struct {
 	message string
 }

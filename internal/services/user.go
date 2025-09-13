@@ -34,7 +34,7 @@ func NewUser(db *sql.DB, feeds *Feed) *User {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create users table: %v", err))
+		panic(fmt.Errorf("failed to create users table: %v: %w", err))
 	}
 
 	return &User{
@@ -50,8 +50,8 @@ func (u *User) List() ([]*models.User, error) {
 	query := `SELECT * FROM users`
 	rows, err := u.db.Query(query)
 	if err != nil {
-		logger.DBUsers().Error("Failed to execute user list query: %v", err)
-		return nil, utils.NewDatabaseError("select", "users", err)
+		logger.DBUsers().Error("Failed to execute user list query: %v: %w", err)
+		return nil, fmt.Errorf("select error: users: %w", err)
 	}
 	defer rows.Close()
 
@@ -60,14 +60,14 @@ func (u *User) List() ([]*models.User, error) {
 	for rows.Next() {
 		user, err := u.scanUser(rows)
 		if err != nil {
-			return nil, utils.NewDatabaseError("scan", "users", err)
+			return nil, fmt.Errorf("scan error: users: %w", err)
 		}
 		users = append(users, user)
 		userCount++
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "users", err)
+		return nil, fmt.Errorf("select error: users: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -89,7 +89,7 @@ func (u *User) Get(telegramID int64) (*models.User, error) {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("user with Telegram ID %d not found", telegramID))
 		}
 
-		return nil, utils.NewDatabaseError("select", "users", err)
+		return nil, fmt.Errorf("select error: users: %w", err)
 	}
 
 	return user, nil
@@ -118,7 +118,7 @@ func (u *User) Add(user *models.User, actor *models.User) (int64, error) {
 	query := `SELECT COUNT(*) FROM users WHERE telegram_id = ?`
 	err := u.db.QueryRow(query, user.TelegramID).Scan(&count)
 	if err != nil {
-		return 0, utils.NewDatabaseError("select", "users", err)
+		return 0, fmt.Errorf("select error: users: %w", err)
 	}
 
 	if count > 0 {
@@ -129,7 +129,7 @@ func (u *User) Add(user *models.User, actor *models.User) (int64, error) {
 	query = `INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
 	_, err = u.db.Exec(query, user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "users", err)
+		return 0, fmt.Errorf("insert error: users: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -142,7 +142,7 @@ func (u *User) Add(user *models.User, actor *models.User) (int64, error) {
 		user.TelegramID,
 	)
 	if err := u.feeds.Add(feed); err != nil {
-		return user.TelegramID, fmt.Errorf("failed to add feed entry: %w", err)
+		return user.TelegramID, fmt.Errorf("failed to add feed entry: %w: %w", err)
 	}
 
 	return user.TelegramID, nil
@@ -168,12 +168,12 @@ func (u *User) Delete(telegramID int64, actor *models.User) error {
 	query := `DELETE FROM users WHERE telegram_id = ?`
 	result, err := u.db.Exec(query, telegramID)
 	if err != nil {
-		return utils.NewDatabaseError("delete", "users", err)
+		return fmt.Errorf("delete error: users: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return utils.NewDatabaseError("delete", "users", err)
+		return fmt.Errorf("delete error: users: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -243,7 +243,7 @@ func (u *User) Update(user, actor *models.User) error {
 	query := `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
 	_, err = u.db.Exec(query, user.Name, user.ApiKey, user.LastFeed, telegramID)
 	if err != nil {
-		return utils.NewDatabaseError("update", "users", err)
+		return fmt.Errorf("update error: users: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -261,7 +261,7 @@ func (u *User) Update(user, actor *models.User) error {
 		)
 
 		if err := u.feeds.Add(feed); err != nil {
-			return fmt.Errorf("failed to add feed entry: %w", err)
+			return fmt.Errorf("failed to add feed entry: %w: %w", err)
 		}
 	}
 
@@ -286,7 +286,7 @@ func (s *User) GetUserFromApiKey(apiKey string) (*models.User, error) {
 			return nil, utils.NewNotFoundError("apiKey: " + utils.MaskString(apiKey))
 		}
 
-		return nil, utils.NewDatabaseError("select", "users", err)
+		return nil, fmt.Errorf("select error: users: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -304,7 +304,7 @@ func (u *User) scanUser(scanner interfaces.Scannable) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan user: %w", err)
+		return nil, fmt.Errorf("failed to scan user: %w: %w", err)
 	}
 	return user, nil
 }

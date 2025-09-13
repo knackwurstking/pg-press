@@ -21,7 +21,7 @@ type Feed struct {
 func NewFeed(db *sql.DB) *Feed {
 	//dropQuery := `DROP TABLE IF EXISTS feeds;`
 	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop feeds table: %w", err))
+	//	panic(fmt.Errorf("failed to drop feeds table: %w: %w", err))
 	//}
 
 	query := `
@@ -38,7 +38,7 @@ func NewFeed(db *sql.DB) *Feed {
 		CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create feeds table: %w", err))
+		panic(fmt.Errorf("failed to create feeds table: %w: %w", err))
 	}
 	return &Feed{db: db}
 }
@@ -56,7 +56,7 @@ func (f *Feed) List() ([]*models.Feed, error) {
 	query := `SELECT id, title, content, user_id, created_at FROM feeds ORDER BY created_at DESC`
 	rows, err := f.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "feeds", err)
+		return nil, fmt.Errorf("select error: feeds: %w", err)
 	}
 	defer rows.Close()
 
@@ -64,7 +64,7 @@ func (f *Feed) List() ([]*models.Feed, error) {
 	elapsed := time.Since(start)
 
 	if err != nil {
-		return nil, utils.NewDatabaseError("scan", "feeds", err)
+		return nil, fmt.Errorf("scan error: feeds: %w", err)
 	}
 
 	if elapsed > 100*time.Millisecond {
@@ -92,7 +92,7 @@ func (f *Feed) ListRange(offset, limit int) ([]*models.Feed, error) {
 		ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := f.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "feeds", err)
+		return nil, fmt.Errorf("select error: feeds: %w", err)
 	}
 	defer rows.Close()
 
@@ -100,7 +100,7 @@ func (f *Feed) ListRange(offset, limit int) ([]*models.Feed, error) {
 	elapsed := time.Since(start)
 
 	if err != nil {
-		return nil, utils.NewDatabaseError("scan", "feeds", err)
+		return nil, fmt.Errorf("scan error: feeds: %w", err)
 	}
 
 	if elapsed > 100*time.Millisecond {
@@ -131,7 +131,7 @@ func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*models.Feed, erro
 		WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`
 	rows, err := f.db.Query(query, userID, limit, offset)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "feeds", err)
+		return nil, fmt.Errorf("select error: feeds: %w", err)
 	}
 	defer rows.Close()
 
@@ -139,7 +139,7 @@ func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*models.Feed, erro
 	elapsed := time.Since(start)
 
 	if err != nil {
-		return nil, utils.NewDatabaseError("scan", "feeds", err)
+		return nil, fmt.Errorf("scan error: feeds: %w", err)
 	}
 
 	if elapsed > 100*time.Millisecond {
@@ -164,13 +164,13 @@ func (f *Feed) Add(feedData *models.Feed) error {
 	query := `INSERT INTO feeds (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`
 	result, err := f.db.Exec(query, feedData.Title, feedData.Content, feedData.UserID, feedData.CreatedAt)
 	if err != nil {
-		return utils.NewDatabaseError("insert", "feeds", err)
+		return fmt.Errorf("insert error: feeds: %w", err)
 	}
 
 	// Get the generated ID
 	id, err := result.LastInsertId()
 	if err != nil {
-		return utils.NewDatabaseError("insert", "feeds", err)
+		return fmt.Errorf("insert error: feeds: %w", err)
 	}
 	feedData.ID = id
 
@@ -195,7 +195,7 @@ func (f *Feed) Count() (int, error) {
 	query := `SELECT COUNT(*) FROM feeds`
 	err := f.db.QueryRow(query).Scan(&count)
 	if err != nil {
-		return 0, utils.NewDatabaseError("count", "feeds", err)
+		return 0, fmt.Errorf("count error: feeds: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -218,7 +218,7 @@ func (f *Feed) CountByUser(userID int64) (int, error) {
 	query := `SELECT COUNT(*) FROM feeds WHERE user_id = ?`
 	err := f.db.QueryRow(query, userID).Scan(&count)
 	if err != nil {
-		return 0, utils.NewDatabaseError("count", "feeds", err)
+		return 0, fmt.Errorf("count error: feeds: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -240,12 +240,12 @@ func (f *Feed) DeleteBefore(timestamp int64) (int64, error) {
 	query := `DELETE FROM feeds WHERE created_at < ?`
 	result, err := f.db.Exec(query, timestamp)
 	if err != nil {
-		return 0, utils.NewDatabaseError("delete", "feeds", err)
+		return 0, fmt.Errorf("delete error: feeds: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, utils.NewDatabaseError("delete", "feeds", err)
+		return 0, fmt.Errorf("delete error: feeds: %w", err)
 	}
 
 	elapsed := time.Since(start)
@@ -271,7 +271,7 @@ func (f *Feed) Get(id int64) (*models.Feed, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("feed with id %d not found", id))
 		}
-		return nil, utils.NewDatabaseError("select", "feeds", err)
+		return nil, fmt.Errorf("select error: feeds: %w", err)
 	}
 
 	return feedData, nil
@@ -286,12 +286,12 @@ func (f *Feed) Delete(id int64) error {
 	query := `DELETE FROM feeds WHERE id = ?`
 	result, err := f.db.Exec(query, id)
 	if err != nil {
-		return utils.NewDatabaseError("delete", "feeds", err)
+		return fmt.Errorf("delete error: feeds: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return utils.NewDatabaseError("delete", "feeds", err)
+		return fmt.Errorf("delete error: feeds: %w", err)
 	}
 
 	if rowsAffected == 0 {
@@ -308,13 +308,13 @@ func (f *Feed) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	for rows.Next() {
 		feedData, err := f.scanFeed(rows)
 		if err != nil {
-			return nil, utils.NewDatabaseError("scan", "feeds", err)
+			return nil, fmt.Errorf("scan error: feeds: %w", err)
 		}
 		feeds = append(feeds, feedData)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("scan", "feeds", err)
+		return nil, fmt.Errorf("scan error: feeds: %w", err)
 	}
 
 	scanElapsed := time.Since(scanStart)
@@ -332,7 +332,7 @@ func (f *Feed) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan row: %w", err)
+		return nil, fmt.Errorf("failed to scan row: %w: %w", err)
 	}
 
 	return feedData, nil

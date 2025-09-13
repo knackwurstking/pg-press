@@ -65,7 +65,7 @@ func (cli *ModificationCLI) showStatus() error {
 
 	status, err := cli.migration.GetMigrationStatus()
 	if err != nil {
-		return fmt.Errorf("failed to get migration status: %w", err)
+		return fmt.Errorf("failed to get migration status: %w: %w", err)
 	}
 
 	fmt.Printf("Modification table exists: %v\n", status.ModificationTableExists)
@@ -98,7 +98,7 @@ func (cli *ModificationCLI) runMigration() error {
 	// Check if migration is needed
 	status, err := cli.migration.GetMigrationStatus()
 	if err != nil {
-		return fmt.Errorf("failed to check migration status: %w", err)
+		return fmt.Errorf("failed to check migration status: %w: %w", err)
 	}
 
 	if !status.MigrationNeeded && status.TotalModifications > 0 {
@@ -118,7 +118,7 @@ func (cli *ModificationCLI) runMigration() error {
 
 	stats, err := cli.migration.MigrateAll()
 	if err != nil {
-		return fmt.Errorf("migration failed: %w", err)
+		return fmt.Errorf("migration failed: %w: %w", err)
 	}
 
 	fmt.Println("\n=== Migration Complete ===")
@@ -137,7 +137,7 @@ func (cli *ModificationCLI) runMigration() error {
 
 	// Save migration stats to file
 	if err := cli.saveMigrationStats(stats); err != nil {
-		fmt.Printf("Warning: Failed to save migration stats: %v\n", err)
+		fmt.Printf("Warning: Failed to save migration stats: %v\n: %w", err)
 	}
 
 	fmt.Println("\nNext steps:")
@@ -154,7 +154,7 @@ func (cli *ModificationCLI) verifyMigration() error {
 
 	result, err := cli.migration.VerifyMigration()
 	if err != nil {
-		return fmt.Errorf("verification failed: %w", err)
+		return fmt.Errorf("verification failed: %w: %w", err)
 	}
 
 	// Use the cleanup completed status from verification result
@@ -209,7 +209,7 @@ func (cli *ModificationCLI) cleanupOldMods(force bool) error {
 		fmt.Println("Verifying migration before cleanup...")
 		result, err := cli.migration.VerifyMigration()
 		if err != nil {
-			return fmt.Errorf("verification failed: %w", err)
+			return fmt.Errorf("verification failed: %w: %w", err)
 		}
 
 		if !result.OverallMatch {
@@ -235,7 +235,7 @@ func (cli *ModificationCLI) cleanupOldMods(force bool) error {
 
 	fmt.Println("Performing cleanup...")
 	if err := cli.migration.CleanupOldMods(force); err != nil {
-		return fmt.Errorf("cleanup failed: %w", err)
+		return fmt.Errorf("cleanup failed: %w: %w", err)
 	}
 
 	fmt.Println("✅ Cleanup completed successfully!")
@@ -252,7 +252,7 @@ func (cli *ModificationCLI) showStats() error {
 	var totalMods int
 	err := cli.db.QueryRow("SELECT COUNT(*) FROM modifications").Scan(&totalMods)
 	if err != nil {
-		return fmt.Errorf("failed to count total modifications: %w", err)
+		return fmt.Errorf("failed to count total modifications: %w: %w", err)
 	}
 	fmt.Printf("Total modifications: %d\n", totalMods)
 
@@ -287,7 +287,7 @@ func (cli *ModificationCLI) showStats() error {
 		sevenDaysAgo,
 	).Scan(&recentCount)
 	if err != nil {
-		fmt.Printf("Recent activity (7 days): Error (%v)\n", err)
+		fmt.Printf("Recent activity (7 days): Error (%v)\n: %w", err)
 	} else {
 		fmt.Printf("Recent activity (7 days): %d\n", recentCount)
 	}
@@ -303,7 +303,7 @@ func (cli *ModificationCLI) showStats() error {
 		LIMIT 5
 	`)
 	if err != nil {
-		fmt.Printf("Error getting user stats: %v\n", err)
+		fmt.Printf("Error getting user stats: %v\n: %w", err)
 	} else {
 		defer rows.Close()
 		for rows.Next() {
@@ -324,11 +324,11 @@ func (cli *ModificationCLI) saveMigrationStats(stats *MigrationStats) error {
 
 	data, err := json.MarshalIndent(stats, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal stats: %w", err)
+		return fmt.Errorf("failed to marshal stats: %w: %w", err)
 	}
 
 	if err := os.WriteFile(filename, data, 0644); err != nil {
-		return fmt.Errorf("failed to write stats file: %w", err)
+		return fmt.Errorf("failed to write stats file: %w: %w", err)
 	}
 
 	fmt.Printf("Migration stats saved to: %s\n", filename)
@@ -374,7 +374,7 @@ func ExampleMain() {
 	// Initialize database connection (replace with your actual DB setup)
 	db, err := sql.Open("sqlite3", "your_database.db")
 	if err != nil {
-		log.Fatalf("Failed to open database: %v", err)
+		log.Fatalf("Failed to open database: %v: %w", err)
 	}
 	defer db.Close()
 
@@ -385,6 +385,6 @@ func ExampleMain() {
 	args := os.Args[2:]
 
 	if err := cli.RunCommand(command, args); err != nil {
-		log.Fatalf("Command failed: %v", err)
+		log.Fatalf("Command failed: %v: %w", err)
 	}
 }

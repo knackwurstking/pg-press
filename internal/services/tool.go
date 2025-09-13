@@ -47,7 +47,7 @@ func (t *Tool) createTable() error {
 	`
 
 	if _, err := t.db.Exec(query); err != nil {
-		return fmt.Errorf("failed to create tools table: %w", err)
+		return fmt.Errorf("failed to create tools table: %w: %w", err)
 	}
 
 	return nil
@@ -70,12 +70,12 @@ func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 	result, err := t.db.Exec(insertQuery, tool.Position, formatBytes, tool.Type, tool.Code,
 		tool.Regenerating, tool.Press, notesBytes)
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "tools", err)
+		return 0, fmt.Errorf("insert error: tools: %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, utils.NewDatabaseError("insert", "tools", err)
+		return 0, fmt.Errorf("insert error: tools: %w", err)
 	}
 
 	tool.ID = id
@@ -114,7 +114,7 @@ func (t *Tool) Delete(id int64, user *models.User) error {
 	const deleteQuery = `DELETE FROM tools WHERE id = $1`
 	_, err = t.db.Exec(deleteQuery, id)
 	if err != nil {
-		return utils.NewDatabaseError("delete", "tools", err)
+		return fmt.Errorf("delete error: tools: %w", err)
 	}
 
 	t.createFeedUpdate(
@@ -138,7 +138,7 @@ func (t *Tool) Get(id int64) (*models.Tool, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("tool with ID %d not found", id))
 		}
-		return nil, utils.NewDatabaseError("select", "tools", err)
+		return nil, fmt.Errorf("select error: tools: %w", err)
 	}
 
 	return tool, nil
@@ -151,7 +151,7 @@ func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.
 	`
 	rows, err := t.db.Query(query, pressNumber)
 	if err != nil {
-		logger.DBTools().Error("Failed to query active tools: %v", err)
+		logger.DBTools().Error("Failed to query active tools: %v: %w", err)
 		return nil
 	}
 	defer rows.Close()
@@ -166,7 +166,7 @@ func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
+		logger.DBTools().Error("Error iterating over tool rows: %v: %w", err)
 		return nil
 	}
 	return tools
@@ -183,7 +183,7 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	`
 	rows, err := t.db.Query(query, pressNumber)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "tools", err)
+		return nil, fmt.Errorf("select error: tools: %w", err)
 	}
 	defer rows.Close()
 
@@ -191,13 +191,13 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			return nil, utils.NewDatabaseError("scan", "tools", err)
+			return nil, fmt.Errorf("scan error: tools: %w", err)
 		}
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "tools", err)
+		return nil, fmt.Errorf("select error: tools: %w", err)
 	}
 
 	return tools, nil
@@ -242,7 +242,7 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools`
 	rows, err := t.db.Query(query)
 	if err != nil {
-		return nil, utils.NewDatabaseError("select", "tools", err)
+		return nil, fmt.Errorf("select error: tools: %w", err)
 	}
 	defer rows.Close()
 
@@ -250,13 +250,13 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	for rows.Next() {
 		tool, err := t.scanTool(rows)
 		if err != nil {
-			return nil, utils.NewDatabaseError("scan", "tools", err)
+			return nil, fmt.Errorf("scan error: tools: %w", err)
 		}
 		tools = append(tools, tool)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, utils.NewDatabaseError("select", "tools", err)
+		return nil, fmt.Errorf("select error: tools: %w", err)
 	}
 
 	return tools, nil
@@ -298,7 +298,7 @@ func (t *Tool) Update(tool *models.Tool, user *models.User) error {
 	_, err = t.db.Exec(updateQuery, tool.Position, formatBytes, tool.Type, tool.Code,
 		tool.Regenerating, tool.Press, notesBytes, tool.ID)
 	if err != nil {
-		return utils.NewDatabaseError("update", "tools", err)
+		return fmt.Errorf("update error: tools: %w", err)
 	}
 
 	t.createFeedUpdate("Werkzeug aktualisiert",
@@ -310,7 +310,7 @@ func (t *Tool) Update(tool *models.Tool, user *models.User) error {
 func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
 	tool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for press update: %w", err)
+		return fmt.Errorf("failed to get tool for press update: %w: %w", err)
 	}
 
 	if equalPressNumbers(tool.Press, press) {
@@ -324,7 +324,7 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 	const query = `UPDATE tools SET press = ? WHERE id = ?`
 	_, err = t.db.Exec(query, press, toolID)
 	if err != nil {
-		return utils.NewDatabaseError("update", "tools", err)
+		return fmt.Errorf("update error: tools: %w", err)
 	}
 
 	tool.Press = press
@@ -337,7 +337,7 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
 	tool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for regenerating status update: %w", err)
+		return fmt.Errorf("failed to get tool for regenerating status update: %w: %w", err)
 	}
 
 	if tool.Regenerating == regenerating {
@@ -347,7 +347,7 @@ func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.
 	const query = `UPDATE tools SET regenerating = ? WHERE id = ?`
 	_, err = t.db.Exec(query, regenerating, tool.ID)
 	if err != nil {
-		return utils.NewDatabaseError("update", "tools", err)
+		return fmt.Errorf("update error: tools: %w", err)
 	}
 
 	t.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
@@ -360,7 +360,7 @@ func (t *Tool) createFeedUpdate(title, message string, user *models.User) {
 	if t.feeds != nil {
 		feed := models.NewFeed(title, message, user.TelegramID)
 		if err := t.feeds.Add(feed); err != nil {
-			logger.DBTools().Warn("Failed to create feed update: %v", err)
+			logger.DBTools().Warn("Failed to create feed update: %v: %w", err)
 		}
 	}
 }
@@ -368,12 +368,12 @@ func (t *Tool) createFeedUpdate(title, message string, user *models.User) {
 func (t *Tool) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return nil, nil, utils.NewDatabaseError("marshal", "tools", err)
+		return nil, nil, fmt.Errorf("marshal error: tools: %w", err)
 	}
 
 	notesBytes, err := json.Marshal(tool.LinkedNotes)
 	if err != nil {
-		return nil, nil, utils.NewDatabaseError("marshal", "tools", err)
+		return nil, nil, fmt.Errorf("marshal error: tools: %w", err)
 	}
 
 	return formatBytes, notesBytes, nil
@@ -402,7 +402,7 @@ func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return fmt.Errorf("failed to marshal format data: %w", err)
+		return fmt.Errorf("failed to marshal format data: %w: %w", err)
 	}
 
 	var count int
@@ -412,7 +412,7 @@ func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error 
 	`
 	err = t.db.QueryRow(query, excludeID, tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("failed to check for existing tool: %w", err)
+		return fmt.Errorf("failed to check for existing tool: %w: %w", err)
 	}
 
 	if count > 0 {
