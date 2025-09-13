@@ -30,12 +30,6 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 			// Attachments preview routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview", h.handleGetAttachmentsPreview),
-
-			// Modifications routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/modifications/:id", func(c echo.Context) error {
-				return h.handleGetModifications(c, nil)
-			}),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/modifications/:id", h.handlePostModifications),
 		},
 	)
 }

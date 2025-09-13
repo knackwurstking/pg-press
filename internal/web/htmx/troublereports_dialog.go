@@ -104,7 +104,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 			title, len(attachments),
 		)
 
-		err := h.DB.TroubleReports.AddWithAttachments(user, tr, attachments)
+		err := h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
 		if err != nil {
 			logger.HTMXHandlerTroubleReports().Error(
 				"Failed to add trouble report: %v",
@@ -196,7 +196,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	tr.Content = content
 	tr.LinkedAttachments = existingAttachmentIDs
 
-	err = h.DB.TroubleReports.UpdateWithAttachments(user, id, tr, newAttachments)
+	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error(
 			"Failed to update trouble report %d: %v",
