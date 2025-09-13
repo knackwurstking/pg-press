@@ -32,19 +32,17 @@ func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *Trouble
 	return troubleReport
 }
 
-// TODO: Remove mods from this table
 func (s *TroubleReport) createTable(db *sql.DB) error {
-	query := `
+	const createQuery string = `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
 			linked_attachments TEXT NOT NULL,
-			mods BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
-	if _, err := db.Exec(query); err != nil {
+	if _, err := db.Exec(createQuery); err != nil {
 		return fmt.Errorf("failed to create trouble_reports table: %w", err)
 	}
 
@@ -56,8 +54,8 @@ func (s *TroubleReport) List() ([]*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Starting trouble reports list query")
 	start := time.Now()
 
-	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
-	rows, err := s.db.Query(query)
+	const listQuery string = `SELECT * FROM trouble_reports ORDER BY id DESC`
+	rows, err := s.db.Query(listQuery)
 	if err != nil {
 		logger.DBTroubleReports().Error("Failed to execute trouble reports list query: %v", err)
 		return nil, utils.NewDatabaseError("select", "trouble_reports", err)
@@ -96,8 +94,8 @@ func (s *TroubleReport) Get(id int64) (*models.TroubleReport, error) {
 	logger.DBTroubleReports().Debug("Getting trouble report by ID: %d", id)
 	start := time.Now()
 
-	query := `SELECT * FROM trouble_reports WHERE id = ?`
-	row := s.db.QueryRow(query, id)
+	const getQuery = `SELECT * FROM trouble_reports WHERE id = ?`
+	row := s.db.QueryRow(getQuery, id)
 
 	report, err := s.scanTroubleReport(row)
 	elapsed := time.Since(start)
@@ -116,53 +114,49 @@ func (s *TroubleReport) Get(id int64) (*models.TroubleReport, error) {
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
 func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.User) (int64, error) {
+	// Validate
 	if troubleReport == nil {
 		logger.DBTroubleReports().Error("Attempted to add nil trouble report")
 		return 0, utils.NewValidationError("report: trouble report cannot be nil")
 	}
 
-	userInfo := "unknown user"
-	if user != nil {
-		userInfo = fmt.Sprintf("%s (ID: %d)", user.Name, user.TelegramID)
+	if user == nil {
+		return 0, utils.NewValidationError("user: user cannot be nil")
 	}
+	userInfo := fmt.Sprintf("%s (ID: %d)", user.Name, user.TelegramID)
 
 	logger.DBTroubleReports().Info("Adding trouble report by %s: title='%s', attachments=%d",
 		userInfo, troubleReport.Title, len(troubleReport.LinkedAttachments))
-	start := time.Now()
 
 	if err := troubleReport.Validate(); err != nil {
 		logger.DBTroubleReports().Warn("Trouble report validation failed for %s: %v", userInfo, err)
 		return 0, err
 	}
 
+	// Update mods
 	s.updateMods(user, troubleReport)
 
-	marshalStart := time.Now()
+	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
 		return 0, fmt.Errorf("failed to marshal linked attachments: %w", err)
 	}
 
-	mods, err := json.Marshal(troubleReport.Mods)
-	if err != nil {
-		return 0, fmt.Errorf("failed to marshal mods data: %w", err)
-	}
-	marshalElapsed := time.Since(marshalStart)
-
+	// Insert trouble report
 	dbStart := time.Now()
-	query := `INSERT INTO trouble_reports
-		(title, content, linked_attachments, mods) VALUES (?, ?, ?, ?)`
+	const addQuery = `INSERT INTO trouble_reports
+		(title, content, linked_attachments) VALUES (?, ?, ?)`
+
 	result, err := s.db.Exec(
-		query,
-		troubleReport.Title, troubleReport.Content, string(linkedAttachments), mods,
+		addQuery, troubleReport.Title, troubleReport.Content, string(linkedAttachments),
 	)
 	if err != nil {
 		dbElapsed := time.Since(dbStart)
 		logger.DBTroubleReports().Error("Failed to insert trouble report for %s in %v: %v", userInfo, dbElapsed, err)
 		return 0, utils.NewDatabaseError("insert", "trouble_reports", err)
 	}
-	dbElapsed := time.Since(dbStart)
 
+	// Get ID of inserted trouble report
 	id, err := result.LastInsertId()
 	if err != nil {
 		logger.DBTroubleReports().Error("Failed to get last insert ID for trouble report by %s: %v", userInfo, err)
@@ -170,30 +164,23 @@ func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.Us
 	}
 	troubleReport.ID = id
 
-	feedStart := time.Now()
+	// Create feed entry for trouble report
 	feed := models.NewFeed(
 		"Neuer Problembericht",
-		fmt.Sprintf("Benutzer %s hat einen neuen Problembericht '%s' hinzugefügt.",
-			troubleReport.Mods.Current().User.Name, troubleReport.Title),
-		troubleReport.Mods.Current().User.TelegramID,
+		fmt.Sprintf("Benutzer %s hat einen neuen Problembericht '%s' hinzugefügt.", user.Name, troubleReport.Title),
+		user.TelegramID,
 	)
 	if err := s.feeds.Add(feed); err != nil {
-		feedElapsed := time.Since(feedStart)
-		logger.DBTroubleReports().Error("Failed to create feed entry for trouble report %d in %v: %v", id, feedElapsed, err)
+		logger.DBTroubleReports().Error("Failed to create feed entry for trouble report %d: %v", id, err)
 		return id, fmt.Errorf("failed to add feed entry: %w", err)
 	}
-	feedElapsed := time.Since(feedStart)
 
-	totalElapsed := time.Since(start)
-	logger.DBTroubleReports().Info("Successfully added trouble report %d by %s in %v (marshal: %v, db: %v, feed: %v)",
-		id, userInfo, totalElapsed, marshalElapsed, dbElapsed, feedElapsed)
-
-	if totalElapsed > 200*time.Millisecond {
-		logger.DBTroubleReports().Warn("Slow trouble report insertion took %v for %s", totalElapsed, userInfo)
-	}
+	logger.DBTroubleReports().Info("Successfully added trouble report %d by %s", id, userInfo)
 
 	return id, nil
 }
+
+// TODO: Continue removing mods here...
 
 // Update modifies an existing trouble report and generates an activity feed entry.
 func (s *TroubleReport) Update(troubleReport *models.TroubleReport, user *models.User) error {
@@ -715,13 +702,5 @@ func (s *TroubleReport) scanTroubleReport(scanner interfaces.Scannable) (*models
 }
 
 func (s *TroubleReport) updateMods(user *models.User, report *models.TroubleReport) {
-	if user == nil {
-		return
-	}
-
-	report.Mods.Add(user, models.TroubleReportMod{
-		Title:             report.Title,
-		Content:           report.Content,
-		LinkedAttachments: report.LinkedAttachments,
-	})
+	// TODO: Update mods here
 }

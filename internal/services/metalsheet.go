@@ -33,6 +33,7 @@ func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
 }
 
 // TODO: Remove mods from this table
+// TODO: Using createMods (private method), see troublereports.go
 func (s *MetalSheet) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
