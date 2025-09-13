@@ -32,7 +32,6 @@ func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
 	return metalSheet
 }
 
-// TODO: Remove mods from this table
 // TODO: Using createMods (private method), see troublereports.go
 func (s *MetalSheet) createTable() error {
 	query := `
@@ -45,7 +44,6 @@ func (s *MetalSheet) createTable() error {
 			stf_max REAL NOT NULL,
 			tool_id INTEGER,
 			notes BLOB NOT NULL,
-			mods BLOB NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL,
@@ -54,7 +52,7 @@ func (s *MetalSheet) createTable() error {
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
-		return fmt.Errorf("failed to create metal_sheets table: %w: %w", err)
+		return fmt.Errorf("failed to create metal_sheets table: %w", err)
 	}
 
 	return nil
@@ -65,7 +63,7 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
 		FROM metal_sheets
 		ORDER BY id DESC;
 	`
@@ -98,7 +96,7 @@ func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
 		FROM metal_sheets
 		WHERE id = $1;
 	`
@@ -149,7 +147,7 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
 		FROM metal_sheets
 		WHERE tool_id = $1
 		ORDER BY id DESC;
@@ -183,7 +181,7 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods
+		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
 		FROM metal_sheets
 		WHERE tool_id IS NULL
 		ORDER BY id DESC;
@@ -237,19 +235,14 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
 
-	modsBytes, err := json.Marshal(sheet.Mods)
-	if err != nil {
-		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
-	}
-
 	query := `
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes, mods)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, tool_id, notes)
+		VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
 	result, err := s.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
-		sheet.ToolID, notesBytes, modsBytes)
+		sheet.ToolID, notesBytes)
 	if err != nil {
 		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
 	}
@@ -317,21 +310,16 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
 
-	modsBytes, err := json.Marshal(sheet.Mods)
-	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %w", err)
-	}
-
 	query := `
 		UPDATE metal_sheets
 		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
-						tool_id = $6, notes = $7, mods = $8, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $9;
+						tool_id = $6, notes = $7, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $8;
 	`
 
 	_, err = s.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
-		sheet.ToolID, notesBytes, modsBytes, sheet.ID)
+		sheet.ToolID, notesBytes, sheet.ID)
 	if err != nil {
 		return fmt.Errorf("update error: metal_sheets: %w", err)
 	}
@@ -379,18 +367,12 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	// Update the tool assignment
 	sheet.ToolID = toolID
 
-	// Marshal mods for database update
-	modsBytes, err := json.Marshal(sheet.Mods)
-	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %w", err)
-	}
-
 	// Update both tool_id and mods in database
 	_, err = s.db.Exec(
 		`UPDATE metal_sheets
-		SET tool_id = $1, mods = $2, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $3`,
-		toolID, modsBytes, sheetID,
+		SET tool_id = $1, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $2`,
+		toolID, sheetID,
 	)
 	if err != nil {
 		return fmt.Errorf("update error: metal_sheets: %w", err)
@@ -450,12 +432,11 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 
 	var (
 		linkedNotes []byte
-		mods        []byte
 		toolID      sql.NullInt64
 	)
 
 	if err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
-		&toolID, &linkedNotes, &mods); err != nil {
+		&toolID, &linkedNotes); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
@@ -469,10 +450,6 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
 		return nil, fmt.Errorf("scan error: metal_sheets: %w", err)
-	}
-
-	if err := json.Unmarshal(mods, &sheet.Mods); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal mods: %w: %w", err)
 	}
 
 	return sheet, nil
