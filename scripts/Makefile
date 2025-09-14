@@ -1,18 +1,18 @@
 # Makefile for pg-press migration tools
-# Provides convenient targets for building and running migration scripts
+# Simplified version using only the Go migration script
 
-.PHONY: help build clean migrate verify cleanup status full backup test install deps
+.PHONY: help build clean migrate verify cleanup status full backup test deps install
 
 # Default database path (can be overridden)
 DB_PATH ?= ../data.db
 GO_SCRIPT := migrate_mods.go
-SHELL_SCRIPT := ./run_migration.sh
+BINARY := migrate_mods
 BACKUP_DIR := backups
 
 # Default target
 help: ## Show this help message
-	@echo "PG-Press Migration Tools"
-	@echo "======================="
+	@echo "PG-Press Migration Tools (Go-only)"
+	@echo "=================================="
 	@echo ""
 	@echo "Usage: make [target] [DB_PATH=/path/to/db]"
 	@echo ""
@@ -28,8 +28,8 @@ help: ## Show this help message
 # Build the Go migration tool
 build: ## Build the Go migration binary
 	@echo "Building Go migration tool..."
-	go build -o migrate_mods $(GO_SCRIPT)
-	@echo "✅ Built migrate_mods binary"
+	go build -o $(BINARY) $(GO_SCRIPT)
+	@echo "✅ Built $(BINARY) binary"
 
 # Install dependencies
 deps: ## Install Go dependencies
@@ -40,7 +40,7 @@ deps: ## Install Go dependencies
 # Clean build artifacts
 clean: ## Remove built binaries and temporary files
 	@echo "Cleaning up build artifacts..."
-	rm -f migrate_mods
+	rm -f $(BINARY)
 	rm -f migration_stats_*.json
 	@echo "✅ Cleanup complete"
 
@@ -61,7 +61,7 @@ backup: $(BACKUP_DIR) ## Create a timestamped backup of the database
 # Database status check
 status: ## Show current migration status
 	@echo "Checking migration status for: $(DB_PATH)"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" status
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action status -v
 
 # Test database connection
 test-db: ## Test database connection and integrity
@@ -78,26 +78,26 @@ test-db: ## Test database connection and integrity
 	fi
 
 # Schema setup
-setup: backup ## Set up database schema (add mods columns, create modifications table)
+setup: ## Set up database schema (add mods columns, create modifications table)
 	@echo "Setting up database schema..."
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" setup
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action setup -v
 
 # Data migration
-migrate: backup ## Migrate data from mods columns to modifications table
+migrate: ## Migrate data from mods columns to modifications table
 	@echo "Starting data migration..."
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" migrate
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action migrate -v
 
 # Verify migration
 verify: ## Verify migration integrity
 	@echo "Verifying migration..."
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" verify
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action verify -v
 
 # Cleanup old columns (destructive)
 cleanup: ## Remove old mods columns (DESTRUCTIVE - use after verification)
 	@echo "⚠️  WARNING: This will permanently remove old mods columns!"
 	@read -p "Are you sure? (yes/no): " confirm; \
 	if [ "$$confirm" = "yes" ]; then \
-		$(SHELL_SCRIPT) --db "$(DB_PATH)" cleanup; \
+		go run $(GO_SCRIPT) -db "$(DB_PATH)" -action cleanup -v; \
 	else \
 		echo "Cleanup cancelled"; \
 	fi
@@ -105,78 +105,62 @@ cleanup: ## Remove old mods columns (DESTRUCTIVE - use after verification)
 # Force cleanup without confirmation
 cleanup-force: ## Force cleanup without confirmation (DANGEROUS)
 	@echo "🚨 FORCING CLEANUP WITHOUT CONFIRMATION!"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" --force cleanup
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action cleanup -force -v
 
 # Complete migration workflow
-full: backup ## Run complete migration process (setup + migrate + verify)
+full: ## Run complete migration process (setup + migrate + verify)
 	@echo "Starting full migration process..."
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" full
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action full -v
 
 # Dry run variants
 dry-run: ## Show what full migration would do without making changes
 	@echo "DRY RUN: Full migration process"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" --dry-run full
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action full -dry-run -v
 
 dry-run-migrate: ## Show what migration would do without making changes
 	@echo "DRY RUN: Data migration"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" --dry-run migrate
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action migrate -dry-run -v
 
 dry-run-cleanup: ## Show what cleanup would do without making changes
 	@echo "DRY RUN: Cleanup old columns"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" --dry-run cleanup
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action cleanup -dry-run -v
 
-# Using Go script directly
-go-migrate: build ## Run migration using standalone Go script
-	@echo "Running Go migration tool..."
-	./migrate_mods --db "$(DB_PATH)" --action migrate
+# Using built binary instead of go run
+bin-migrate: build ## Run migration using built binary
+	@echo "Running migration with built binary..."
+	./$(BINARY) -db "$(DB_PATH)" -action migrate -v
 
-go-verify: build ## Verify migration using standalone Go script
-	@echo "Running Go verification tool..."
-	./migrate_mods --db "$(DB_PATH)" --action verify
+bin-full: build ## Run full migration using built binary
+	@echo "Running full migration with built binary..."
+	./$(BINARY) -db "$(DB_PATH)" -action full -v
 
-go-cleanup: build ## Cleanup using standalone Go script
-	@echo "Running Go cleanup tool..."
-	./migrate_mods --db "$(DB_PATH)" --action cleanup
-
-go-status: build ## Show status using standalone Go script
-	@echo "Running Go status tool..."
-	./migrate_mods --db "$(DB_PATH)" --action status
-
-# Export migration data
-export: ## Export migration data to JSON file
-	@echo "Exporting migration data..."
-	@if command -v pgpress >/dev/null 2>&1; then \
-		pgpress migration export --db "$(DB_PATH)" --output migration_export_$$(date +%Y%m%d_%H%M%S).json; \
-	else \
-		echo "❌ pgpress command not found. Please install pgpress or use manual export."; \
-		exit 1; \
-	fi
+bin-status: build ## Show status using built binary
+	@echo "Running status check with built binary..."
+	./$(BINARY) -db "$(DB_PATH)" -action status -v
 
 # Development and testing targets
 test: test-db ## Run basic tests and checks
 	@echo "Running migration tests..."
 	@echo "✅ Database connection test passed"
-	$(SHELL_SCRIPT) --db "$(DB_PATH)" --dry-run status
+	go run $(GO_SCRIPT) -db "$(DB_PATH)" -action status
 
-# Install the migration tools
-install: build ## Install migration tools to system PATH
-	@echo "Installing migration tools..."
+# Install the migration tool
+install: build ## Install migration tool to system PATH
+	@echo "Installing migration tool..."
 	@if [ -w "/usr/local/bin" ]; then \
-		cp migrate_mods /usr/local/bin/; \
-		cp $(SHELL_SCRIPT) /usr/local/bin/pgpress-migrate; \
-		chmod +x /usr/local/bin/pgpress-migrate; \
-		echo "✅ Tools installed to /usr/local/bin/"; \
+		cp $(BINARY) /usr/local/bin/pgpress-migrate; \
+		echo "✅ Tool installed to /usr/local/bin/pgpress-migrate"; \
+		echo "You can now run: pgpress-migrate -db /path/to/db -action full"; \
 	else \
 		echo "❌ Cannot write to /usr/local/bin. Try: sudo make install"; \
 		exit 1; \
 	fi
 
-# Uninstall migration tools
-uninstall: ## Remove migration tools from system PATH
-	@echo "Uninstalling migration tools..."
-	rm -f /usr/local/bin/migrate_mods
+# Uninstall migration tool
+uninstall: ## Remove migration tool from system PATH
+	@echo "Uninstalling migration tool..."
 	rm -f /usr/local/bin/pgpress-migrate
-	@echo "✅ Tools uninstalled"
+	@echo "✅ Tool uninstalled"
 
 # Show database statistics
 stats: ## Show database and migration statistics
@@ -214,12 +198,6 @@ check: ## Check migration prerequisites
 	else \
 		echo "❌ Not found"; \
 	fi
-	@echo -n "pgpress: "
-	@if command -v pgpress >/dev/null 2>&1; then \
-		echo "✅ Found"; \
-	else \
-		echo "⚠️  Not found (optional)"; \
-	fi
 	@echo -n "Database: "
 	@if [ -f "$(DB_PATH)" ]; then \
 		echo "✅ Found ($(DB_PATH))"; \
@@ -227,13 +205,49 @@ check: ## Check migration prerequisites
 		echo "❌ Not found ($(DB_PATH))"; \
 	fi
 
+# Show recent migration activity
+logs: ## Show recent migration activity and logs
+	@echo "Recent Migration Activity"
+	@echo "========================"
+	@if [ -f "$(DB_PATH)" ] && sqlite3 "$(DB_PATH)" "SELECT name FROM sqlite_master WHERE type='table' AND name='modifications';" | grep -q modifications; then \
+		sqlite3 "$(DB_PATH)" "SELECT datetime(created_at) as created, entity_type, entity_id FROM modifications ORDER BY created_at DESC LIMIT 10;"; \
+	else \
+		echo "No modifications table found"; \
+	fi
+
+# Package migration tool
+package: build ## Create a distribution package of migration tool
+	@echo "Creating migration package..."
+	@PACKAGE_NAME="pgpress-migration-tool-$$(date +%Y%m%d)"; \
+	mkdir -p "$$PACKAGE_NAME"; \
+	cp $(BINARY) "$$PACKAGE_NAME/"; \
+	cp $(GO_SCRIPT) "$$PACKAGE_NAME/"; \
+	cp Makefile "$$PACKAGE_NAME/"; \
+	cp README.md "$$PACKAGE_NAME/" 2>/dev/null || true; \
+	tar -czf "$$PACKAGE_NAME.tar.gz" "$$PACKAGE_NAME"; \
+	rm -rf "$$PACKAGE_NAME"; \
+	echo "✅ Package created: $$PACKAGE_NAME.tar.gz"
+
+# Show help for the Go tool
+go-help: ## Show help for the Go migration tool
+	@go run $(GO_SCRIPT) -help
+
+# Quick commands for common operations
+quick-migrate: ## Quick migration with minimal output
+	@go run $(GO_SCRIPT) -db "$(DB_PATH)" -action full
+
+quick-status: ## Quick status check
+	@go run $(GO_SCRIPT) -db "$(DB_PATH)" -action status
+
+quick-verify: ## Quick verification
+	@go run $(GO_SCRIPT) -db "$(DB_PATH)" -action verify
+
 # Advanced targets for development
-dev-reset: ## Reset development database to pre-migration state (DESTRUCTIVE)
-	@echo "⚠️  WARNING: This will reset your development database!"
+dev-reset: ## Reset database to pre-migration state (DESTRUCTIVE)
+	@echo "⚠️  WARNING: This will reset your database!"
 	@read -p "Are you sure? (yes/no): " confirm; \
 	if [ "$$confirm" = "yes" ]; then \
 		sqlite3 "$(DB_PATH)" "DROP TABLE IF EXISTS modifications;"; \
-		sqlite3 "$(DB_PATH)" "DROP VIEW IF EXISTS migration_status;"; \
 		sqlite3 "$(DB_PATH)" "DROP VIEW IF EXISTS modification_stats;"; \
 		echo "✅ Database reset to pre-migration state"; \
 	else \
@@ -246,43 +260,18 @@ dev-sample: ## Create sample data for testing migration
 	@sqlite3 "$(DB_PATH)" "UPDATE trouble_reports SET mods = '[{\"action\":\"create\",\"timestamp\":\"2024-01-01T10:00:00Z\",\"user_id\":1,\"data\":{\"title\":\"Sample\"}}]' WHERE id = 1 AND (mods IS NULL OR mods = '[]');"
 	@echo "✅ Sample data created"
 
-# Show recent migration activity
-logs: ## Show recent migration activity and logs
-	@echo "Recent Migration Activity"
-	@echo "========================"
-	@if [ -f "$(DB_PATH)" ] && sqlite3 "$(DB_PATH)" "SELECT name FROM sqlite_master WHERE type='table' AND name='modifications';" | grep -q modifications; then \
-		sqlite3 "$(DB_PATH)" "SELECT datetime(created_at) as created, entity_type, entity_id FROM modifications ORDER BY created_at DESC LIMIT 10;"; \
-	else \
-		echo "No modifications table found"; \
-	fi
+# Performance test
+perf-test: ## Run performance test on migration
+	@echo "Running migration performance test..."
+	@time go run $(GO_SCRIPT) -db "$(DB_PATH)" -action migrate -dry-run
 
-# Package migration tools
-package: build ## Create a distribution package of migration tools
-	@echo "Creating migration package..."
-	@PACKAGE_NAME="pgpress-migration-tools-$$(date +%Y%m%d)"; \
-	mkdir -p "$$PACKAGE_NAME"; \
-	cp migrate_mods "$$PACKAGE_NAME/"; \
-	cp $(SHELL_SCRIPT) "$$PACKAGE_NAME/"; \
-	cp migrate_mods_to_modifications.sql "$$PACKAGE_NAME/"; \
-	cp README.md "$$PACKAGE_NAME/"; \
-	cp Makefile "$$PACKAGE_NAME/"; \
-	tar -czf "$$PACKAGE_NAME.tar.gz" "$$PACKAGE_NAME"; \
-	rm -rf "$$PACKAGE_NAME"; \
-	echo "✅ Package created: $$PACKAGE_NAME.tar.gz"
-
-# Default variables that can be overridden
-VERBOSE ?= false
-FORCE ?= false
-DRY_RUN ?= false
-
-# Pass variables to shell script
-SCRIPT_FLAGS = --db "$(DB_PATH)"
-ifeq ($(VERBOSE),true)
-	SCRIPT_FLAGS += --verbose
-endif
-ifeq ($(FORCE),true)
-	SCRIPT_FLAGS += --force
-endif
-ifeq ($(DRY_RUN),true)
-	SCRIPT_FLAGS += --dry-run
-endif
+# Show tool version/info
+info: ## Show tool information
+	@echo "PG-Press Migration Tool"
+	@echo "======================"
+	@echo "Go script: $(GO_SCRIPT)"
+	@echo "Binary: $(BINARY)"
+	@echo "Database: $(DB_PATH)"
+	@echo "Go version: $$(go version)"
+	@echo ""
+	@echo "Available actions: full, setup, migrate, verify, cleanup, status"

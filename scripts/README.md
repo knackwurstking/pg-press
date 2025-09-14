@@ -1,368 +1,429 @@
-# PG-Press Migration Scripts
+# PG-Press Migration Tool
 
-This directory contains scripts to migrate from the old `mods` column-based modification tracking system to the new centralized `modifications` table system in pg-press.
+A standalone Go-based tool for migrating from the old `mods` column system to the new centralized `modifications` table in pg-press.
 
-## Overview
+## 🚀 Quick Start
 
-The migration process transforms data from individual `mods` JSON columns in `trouble_reports`, `metal_sheets`, and `tools` tables into a centralized `modifications` table. This provides better performance, consistency, and maintainability.
-
-### What the Migration Does
-
-1. **Adds missing schema**: Creates `mods` columns if they don't exist and sets up the `modifications` table
-2. **Migrates data**: Converts JSON data from `mods` columns to structured records in the `modifications` table
-3. **Preserves history**: Maintains original timestamps, user information, and modification details
-4. **Enables verification**: Provides tools to verify migration accuracy
-5. **Cleans up**: Optionally removes old `mods` columns after successful migration
-
-## Files in This Directory
-
-| File                                | Purpose                                                  |
-| ----------------------------------- | -------------------------------------------------------- |
-| `migrate_mods_to_modifications.sql` | SQL script to set up database schema                     |
-| `migrate_mods.go`                   | Standalone Go migration tool                             |
-| `run_migration.sh`                  | Shell script orchestrator for complete migration process |
-| `README.md`                         | This documentation                                       |
-
-## Prerequisites
-
-### Before You Start
-
-1. **Backup your database!** This cannot be stressed enough - create a full backup before starting
-2. **Stop your application** to prevent conflicts during migration
-3. **Verify database integrity** using SQLite's built-in tools
-4. **Have sufficient disk space** for the migration and backups
-
-### System Requirements
-
-- SQLite 3.x
-- Go 1.19+ (if using the standalone Go script)
-- Bash shell (for the orchestrator script)
-- `pgpress` binary (if using built-in migration commands)
-
-## Quick Start
-
-For most users, the shell script orchestrator provides the easiest migration path:
+**Most users should run:**
 
 ```bash
-# Run complete migration with dry-run first to see what will happen
-./scripts/run_migration.sh --dry-run full
+# Complete migration (recommended)
+go run migrate_mods.go
 
-# Run the actual migration
-./scripts/run_migration.sh full
-
-# If you need to specify a custom database path
-./scripts/run_migration.sh --db /path/to/your/data.db full
+# Or see what would happen first
+go run migrate_mods.go -dry-run
 ```
 
-## Detailed Migration Process
+That's it! The tool automatically handles backup, schema setup, data migration, and verification.
 
-### Step 1: Preparation
+## 📋 Overview
+
+The migration tool transforms data from individual `mods` JSON columns in `trouble_reports`, `metal_sheets`, and `tools` tables into a centralized `modifications` table, providing:
+
+- ✅ **Better performance** with proper indexing
+- ✅ **Consistency** across all entity types
+- ✅ **Foreign key relationships** for data integrity
+- ✅ **Easier reporting** and analytics
+
+## 📁 What's in This Directory
+
+| File              | Purpose                                             |
+| ----------------- | --------------------------------------------------- |
+| `migrate_mods.go` | **Main migration tool** (standalone Go application) |
+| `Makefile`        | Convenient build and automation targets             |
+| `README.md`       | This documentation                                  |
+
+## 🔧 Installation & Usage
+
+### Prerequisites
+
+- **Go 1.19+** installed
+- **SQLite database** file accessible
+- **Backup** of your database (automatically created by tool)
+
+### Basic Usage
 
 ```bash
-# 1. Create a backup
-cp data.db data.db.backup.$(date +%Y%m%d_%H%M%S)
+# Show help
+go run migrate_mods.go -help
 
-# 2. Check current status
-./scripts/run_migration.sh status
+# Complete migration (default action)
+go run migrate_mods.go -db ./data.db
 
-# 3. Test database connection
-pgpress migration test-db
+# Check status
+go run migrate_mods.go -action status -db ./data.db
+
+# Dry run (preview changes)
+go run migrate_mods.go -dry-run -db ./data.db
 ```
 
-### Step 2: Schema Setup
+### Available Actions
+
+| Action    | Description                                                 |
+| --------- | ----------------------------------------------------------- |
+| `full`    | **Complete migration** (setup + migrate + verify) [DEFAULT] |
+| `setup`   | Set up database schema (add columns, create tables)         |
+| `migrate` | Migrate data from old mods columns                          |
+| `verify`  | Verify migration integrity                                  |
+| `cleanup` | Remove old mods columns (DESTRUCTIVE!)                      |
+| `status`  | Show current migration status                               |
+
+### Command Line Options
+
+```
+  -action string    Action to perform (default "full")
+  -backup          Create backup before migration (default true)
+  -db string       Path to SQLite database (default "./data.db")
+  -dry-run         Show what would be done without making changes
+  -force           Force operation without confirmation
+  -help            Show help message
+  -v               Verbose output
+```
+
+## 📝 Usage Examples
+
+### Complete Migration Workflow
 
 ```bash
-# Option A: Using the orchestrator script
-./scripts/run_migration.sh setup
+# 1. Run complete migration (recommended)
+go run migrate_mods.go -db ./data.db -v
 
-# Option B: Using SQL directly
-sqlite3 data.db < scripts/migrate_mods_to_modifications.sql
+# 2. Verify everything looks good
+go run migrate_mods.go -action verify -db ./data.db
 
-# Option C: Using pgpress (if the modifications table doesn't exist)
-pgpress migration status
+# 3. Test your application thoroughly
+
+# 4. Optionally clean up old columns (destructive!)
+go run migrate_mods.go -action cleanup -db ./data.db
 ```
 
-### Step 3: Data Migration
+### Step-by-Step Migration
 
 ```bash
-# Option A: Using the orchestrator script
-./scripts/run_migration.sh migrate
+# 1. Check current status
+go run migrate_mods.go -action status -db ./data.db
 
-# Option B: Using pgpress built-in migration
-pgpress migration run
+# 2. Set up schema
+go run migrate_mods.go -action setup -db ./data.db
 
-# Option C: Using standalone Go script
-go run scripts/migrate_mods.go --db data.db --action migrate
+# 3. Migrate data
+go run migrate_mods.go -action migrate -db ./data.db
+
+# 4. Verify migration
+go run migrate_mods.go -action verify -db ./data.db
 ```
 
-### Step 4: Verification
+### Advanced Usage
 
 ```bash
-# Verify migration completed successfully
-./scripts/run_migration.sh verify
+# Dry run to preview changes
+go run migrate_mods.go -action full -dry-run -v
 
-# Or using pgpress
-pgpress migration verify
+# Custom database path
+go run migrate_mods.go -db /path/to/custom/database.db
 
-# Check statistics
-pgpress migration stats
+# Force operations (skip confirmations)
+go run migrate_mods.go -action cleanup -force
+
+# Disable automatic backup
+go run migrate_mods.go -backup=false
+
+# Verbose output for troubleshooting
+go run migrate_mods.go -action migrate -v
 ```
 
-### Step 5: Testing
+## 🏗️ Using the Makefile
 
-**Important**: Thoroughly test your application before proceeding to cleanup!
-
-1. Start your application
-2. Test all functionality that involves modifications
-3. Verify data integrity in your application
-4. Run your test suite if available
-
-### Step 6: Cleanup (Optional)
-
-⚠️ **WARNING: This step is destructive and cannot be undone!**
+For convenience, use the included Makefile:
 
 ```bash
-# Clean up old mods columns
-./scripts/run_migration.sh cleanup
+# Show all available targets
+make help
 
-# Or using pgpress with force flag
-pgpress migration cleanup --force
+# Quick migration with default database
+make full
+
+# Custom database path
+make full DB_PATH=/path/to/data.db
+
+# Other useful targets
+make status                    # Check migration status
+make verify                    # Verify migration
+make dry-run                   # Preview full migration
+make clean                     # Clean build artifacts
+make build                     # Build binary
+make install                   # Install to system PATH
 ```
 
-## Script Usage Details
+## 🔍 Understanding Migration Status
 
-### Shell Script Orchestrator (`run_migration.sh`)
+The tool provides clear status information:
 
-The main orchestrator script that handles the complete migration process.
+### Before Migration
 
-```bash
-Usage: ./run_migration.sh [OPTIONS] ACTION
-
-ACTIONS:
-    setup       - Set up database schema
-    migrate     - Migrate data from mods columns
-    verify      - Verify migration integrity
-    cleanup     - Remove old mods columns (DESTRUCTIVE!)
-    status      - Show current migration status
-    full        - Run complete migration process
-
-OPTIONS:
-    -d, --db PATH       Database path (default: ./data.db)
-    -f, --force         Force operation without confirmation
-    -n, --dry-run       Show what would be done without making changes
-    -v, --verbose       Verbose output
-    -g, --go-script     Use standalone Go script instead of pgpress commands
-    -h, --help          Show help
 ```
+Database: ./data.db (15.32 MB)
+Modifications table exists: false
+trouble_reports: 5 records with old mods
+metal_sheets: 12 records with old mods
+tools: 8 records with old mods
 
-#### Examples
-
-```bash
-# Dry run to see what would happen
-./scripts/run_migration.sh --dry-run full
-
-# Full migration with custom database
-./scripts/run_migration.sh --db /path/to/data.db full
-
-# Force cleanup without confirmation (dangerous!)
-./scripts/run_migration.sh --force cleanup
-
-# Use standalone Go script instead of pgpress
-./scripts/run_migration.sh --go-script migrate
+ℹ️  Migration needed - found 25 records with old mods
+ℹ️  Run: go run migrate_mods.go -action=full
 ```
-
-### Standalone Go Script (`migrate_mods.go`)
-
-Direct Go implementation for environments where pgpress isn't available.
-
-```bash
-Usage: go run migrate_mods.go [OPTIONS]
-
-OPTIONS:
-    -db string          Path to SQLite database (default "./data.db")
-    -action string      Action: migrate, verify, cleanup, status (default "migrate")
-    -force              Force operation without confirmation
-    -dry-run            Show what would be done without making changes
-    -v                  Verbose output
-```
-
-#### Examples
-
-```bash
-# Run migration
-go run scripts/migrate_mods.go --db data.db --action migrate
-
-# Verify with verbose output
-go run scripts/migrate_mods.go --db data.db --action verify -v
-
-# Dry run cleanup
-go run scripts/migrate_mods.go --db data.db --action cleanup --dry-run
-```
-
-### SQL Schema Script (`migrate_mods_to_modifications.sql`)
-
-Pure SQL script for manual database setup.
-
-```bash
-# Apply schema changes
-sqlite3 data.db < scripts/migrate_mods_to_modifications.sql
-
-# Check migration views
-sqlite3 data.db "SELECT * FROM migration_status;"
-sqlite3 data.db "SELECT * FROM modification_stats;"
-```
-
-## Migration Workflow Recommendations
-
-### For Production Systems
-
-1. **Maintenance Window**: Schedule migration during low-traffic periods
-2. **Staged Approach**: Test on a copy of production data first
-3. **Rollback Plan**: Keep backups and have a rollback procedure ready
-4. **Monitoring**: Monitor system performance after migration
-5. **Gradual Cleanup**: Wait several days before running cleanup
-
-### For Development Systems
-
-1. **Test First**: Run migrations on development data
-2. **Version Control**: Commit any schema changes
-3. **Team Notification**: Inform team members about the migration
-4. **Documentation**: Update application documentation
-
-## Troubleshooting
-
-### Common Issues
-
-#### "Column already exists" errors
-
-```bash
-# This is usually harmless during schema setup
-# The scripts handle this gracefully
-```
-
-#### "Failed to drop column" during cleanup
-
-```bash
-# Older SQLite versions don't support DROP COLUMN
-# Consider upgrading SQLite or manually recreating tables
-```
-
-#### Migration verification fails
-
-```bash
-# Check for data inconsistencies
-sqlite3 data.db "SELECT * FROM migration_status;"
-
-# Re-run migration if needed
-./scripts/run_migration.sh migrate
-```
-
-#### Database locked errors
-
-```bash
-# Stop all applications using the database
-# Check for zombie processes
-ps aux | grep pgpress
-
-# Force unlock (use with caution)
-sqlite3 data.db "BEGIN IMMEDIATE; ROLLBACK;"
-```
-
-### Recovery Procedures
-
-#### Restore from Backup
-
-```bash
-# If migration fails, restore from backup
-cp data.db.backup.YYYYMMDD_HHMMSS data.db
-```
-
-#### Partial Migration Recovery
-
-```bash
-# Check what was migrated
-./scripts/run_migration.sh status
-
-# Continue from where it left off
-./scripts/run_migration.sh migrate
-```
-
-#### Manual Cleanup
-
-```bash
-# If automatic cleanup fails, manually drop columns
-sqlite3 data.db "
-  -- Create new tables without mods columns
-  CREATE TABLE trouble_reports_new AS
-  SELECT id, title, content, linked_attachments
-  FROM trouble_reports;
-
-  DROP TABLE trouble_reports;
-  ALTER TABLE trouble_reports_new RENAME TO trouble_reports;
-"
-```
-
-## Performance Considerations
-
-### During Migration
-
-- Migration time depends on the amount of modification data
-- Expect 1000-10000 records per second on modern hardware
-- Monitor disk space as the process creates additional data
 
 ### After Migration
 
-- The new system provides better query performance
-- Indexes are automatically created for optimal access patterns
-- Consider running `VACUUM` after cleanup to reclaim space
+```
+Database: ./data.db (15.45 MB)
+Modifications table exists: true
+Total modifications: 78
+trouble_reports: 0 records with old mods
+metal_sheets: 0 records with old mods
+tools: 0 records with old mods
 
-## Validation Queries
+✅ Migration completed successfully!
+ℹ️  Ready for cleanup. Run: go run migrate_mods.go -action=cleanup
+```
 
-Use these queries to validate the migration:
+### After Cleanup
+
+```
+Database: ./data.db (15.32 MB)
+Modifications table exists: true
+Total modifications: 78
+trouble_reports: Old mods column not found (cleanup completed)
+metal_sheets: Old mods column not found (cleanup completed)
+tools: Old mods column not found (cleanup completed)
+
+✅ Migration cleanup completed - old mods columns removed
+ℹ️  New modification system is active with 78 modifications
+```
+
+## 🛡️ Safety Features
+
+The migration tool includes several safety mechanisms:
+
+### Automatic Backups
+
+- **Created automatically** before any destructive operations
+- **Timestamped** backups in `backups/` directory
+- **Can be disabled** with `-backup=false`
+
+### Dry Run Mode
+
+- **Preview changes** without modifying database
+- **Shows exactly** what would be executed
+- **Safe to run** multiple times
+
+### Verification System
+
+- **Compares old vs new** data counts
+- **Validates migration** integrity
+- **Required before cleanup** (unless forced)
+
+### Interactive Confirmations
+
+- **Confirms destructive** operations
+- **Can be bypassed** with `-force` flag
+- **Shows warnings** for dangerous actions
+
+## 🚨 Important Notes
+
+### Before Migration
+
+1. **⚠️ BACKUP YOUR DATABASE** - Always create backups (done automatically)
+2. **Stop your application** during migration to prevent conflicts
+3. **Test on a copy** of production data first if possible
+4. **Ensure sufficient disk space** for migration and backups
+
+### Cleanup Warning
+
+The `cleanup` action **permanently removes** old `mods` columns and **cannot be undone**!
+
+- Only run after thorough testing
+- Automatically runs verification first (unless `-force` used)
+- Consider keeping old columns for a grace period
+
+### Performance Notes
+
+- Migration speed: ~1,000-10,000 records per second
+- Uses transactions to prevent database corruption
+- WAL mode enabled for better concurrent access
+- Indexes created automatically for optimal performance
+
+## 🔧 Building and Distribution
+
+### Build Binary
+
+```bash
+# Build migration binary
+go build -o migrate_mods migrate_mods.go
+
+# Use built binary
+./migrate_mods -db ./data.db -action full
+```
+
+### Install System-Wide
+
+```bash
+# Install to /usr/local/bin
+make install
+
+# Now available as pgpress-migrate
+pgpress-migrate -db ./data.db -action status
+```
+
+### Create Distribution Package
+
+```bash
+# Create tarball with all necessary files
+make package
+```
+
+## ❓ Troubleshooting
+
+### Common Issues
+
+**Database not found**
+
+```bash
+❌ Database validation failed: database file does not exist: ./data.db
+```
+
+→ Check the database path with `-db` flag
+
+**Permission denied**
+
+```bash
+❌ Failed to connect to database: unable to open database file
+```
+
+→ Check file permissions and ensure database isn't locked
+
+**Column already exists**
+
+```bash
+⚠️ Column already exists (this is normal): duplicate column name: mods
+```
+
+→ This is normal and can be ignored
+
+**Verification failed**
+
+```bash
+❌ Verification failed - found discrepancies in migration data
+```
+
+→ Check logs with `-v` flag, may need to re-run migration
+
+### Getting Help
+
+**Check status first:**
+
+```bash
+go run migrate_mods.go -action status -v
+```
+
+**Run with verbose output:**
+
+```bash
+go run migrate_mods.go -action full -v
+```
+
+**Use dry run to preview:**
+
+```bash
+go run migrate_mods.go -action full -dry-run -v
+```
+
+### Database Recovery
+
+**If migration fails partway:**
+
+```bash
+# Check what was completed
+go run migrate_mods.go -action status -v
+
+# Resume migration
+go run migrate_mods.go -action migrate
+```
+
+**Restore from backup:**
+
+```bash
+# Find backup file
+ls -la backups/
+
+# Restore (replace with actual backup filename)
+cp backups/data_backup_2024-12-19_10-30-45.db ./data.db
+```
+
+## 📊 Migration Data Validation
+
+### Manual Verification Queries
 
 ```sql
 -- Check migration status
-SELECT * FROM migration_status;
-
--- Compare old vs new counts
 SELECT
-  'trouble_reports' as table_name,
-  (SELECT COUNT(*) FROM trouble_reports WHERE mods IS NOT NULL AND mods != '[]') as old_count,
-  (SELECT COUNT(DISTINCT entity_id) FROM modifications WHERE entity_type = 'trouble_reports') as new_count;
+    'trouble_reports' as table_name,
+    COUNT(*) as total_records,
+    SUM(CASE WHEN mods IS NOT NULL AND mods != '[]' THEN 1 ELSE 0 END) as with_mods
+FROM trouble_reports;
 
--- View recent modifications
-SELECT * FROM modifications ORDER BY created_at DESC LIMIT 10;
+-- Check new modifications
+SELECT entity_type, COUNT(*) as modifications
+FROM modifications
+GROUP BY entity_type;
 
--- Check for orphaned modifications (should return 0)
-SELECT COUNT(*) FROM modifications m
-WHERE NOT EXISTS (
-  SELECT 1 FROM trouble_reports t WHERE t.id = m.entity_id AND m.entity_type = 'trouble_reports'
-);
+-- Recent activity
+SELECT datetime(created_at), entity_type, entity_id
+FROM modifications
+ORDER BY created_at DESC
+LIMIT 10;
 ```
 
-## Support and Reporting Issues
+### Data Integrity Checks
 
-If you encounter issues:
+```bash
+# Verify all tables
+go run migrate_mods.go -action verify -v
 
-1. **Check logs**: Enable verbose mode for detailed output
-2. **Verify prerequisites**: Ensure all requirements are met
-3. **Review documentation**: Check this README and inline help
-4. **Create minimal reproduction**: Isolate the problem
-5. **Report issues**: Include error messages, system info, and steps to reproduce
+# Check specific migration statistics
+make stats
+```
 
-## Security Notes
+## 🔄 Migration from Old Commands
 
-- **Backup Security**: Store backups securely and encrypt if necessary
-- **Access Control**: Ensure migration scripts have appropriate permissions
-- **Data Integrity**: The migration preserves all original data and metadata
-- **Audit Trail**: All modifications maintain original timestamps and user information
+If you previously used `pgpress migration` commands:
 
-## Version Compatibility
+| Old Command                 | New Command                                |
+| --------------------------- | ------------------------------------------ |
+| `pgpress migration status`  | `go run migrate_mods.go -action status`    |
+| `pgpress migration run`     | `go run migrate_mods.go -action migrate`   |
+| `pgpress migration verify`  | `go run migrate_mods.go -action verify`    |
+| `pgpress migration cleanup` | `go run migrate_mods.go -action cleanup`   |
+| `pgpress migration stats`   | `go run migrate_mods.go -action status -v` |
 
-This migration system is designed for:
+The new tool provides **enhanced functionality** with better safety features, dry-run capabilities, and automatic backups.
 
-- pg-press v0.9.x to v1.0.x
-- SQLite 3.8.0 and newer
-- Go 1.19 and newer
+## 📈 What's New in v2.0
 
-For older versions, manual migration may be required.
+- **🎨 Colorized output** for better readability
+- **🔄 Automatic backups** before destructive operations
+- **👀 Dry-run mode** to preview changes safely
+- **📊 Enhanced status reporting** with detailed information
+- **🛡️ Better error handling** and recovery options
+- **⚡ Performance improvements** with optimized queries
+- **🧹 Simplified workflow** - one tool does everything
+
+## 🤝 Support
+
+- **Documentation**: This README and inline help (`-help`)
+- **Status checking**: Use `-action status -v` for detailed information
+- **Dry runs**: Always available with `-dry-run` flag
+- **Verbose mode**: Use `-v` for detailed output during troubleshooting
+
+---
+
+**The migration tool is designed to be safe, reliable, and user-friendly. Most users should simply run `go run migrate_mods.go` and let the tool handle everything automatically.**
