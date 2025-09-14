@@ -222,7 +222,7 @@ func migrationExportCommand() cli.Command {
 
 				rows, err := db.GetDB().Query(query, args...)
 				if err != nil {
-					return fmt.Errorf("failed to query modifications: %w", err)
+					return fmt.Errorf("failed to query modifications: %v", err)
 				}
 				defer rows.Close()
 
@@ -257,7 +257,7 @@ func migrationExportCommand() cli.Command {
 				}
 
 				if err = rows.Err(); err != nil {
-					return fmt.Errorf("error iterating rows: %w", err)
+					return fmt.Errorf("error iterating rows: %v", err)
 				}
 
 				// Create export data structure
@@ -271,11 +271,11 @@ func migrationExportCommand() cli.Command {
 				// Write to file
 				data, err := json.MarshalIndent(exportData, "", "  ")
 				if err != nil {
-					return fmt.Errorf("failed to marshal export data: %w", err)
+					return fmt.Errorf("failed to marshal export data: %v", err)
 				}
 
 				if err := os.WriteFile(*outputFile, data, 0644); err != nil {
-					return fmt.Errorf("failed to write export file: %w", err)
+					return fmt.Errorf("failed to write export file: %v", err)
 				}
 
 				fmt.Printf("Successfully exported %d modifications to %s\n", len(modifications), *outputFile)

@@ -227,7 +227,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Invalid title form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("invalid title form value: %w", err))
+			fmt.Errorf("invalid title form value: %v", err))
 	}
 	title = helpers.SanitizeInput(title)
 
@@ -235,7 +235,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Invalid content form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("invalid content form value: %w", err))
+			fmt.Errorf("invalid content form value: %v", err))
 	}
 	content = helpers.SanitizeInput(content)
 
@@ -244,7 +244,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Failed to process attachments: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("failed to process attachments: %w", err))
+			fmt.Errorf("failed to process attachments: %v", err))
 	}
 
 	logger.HTMXHandlerTroubleReports().Debug("Form validation successful: title='%s', attachments=%d", title, len(attachments))
@@ -304,7 +304,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 		attachment, err := h.processFileUpload(fileHeader, i+len(attachments))
 		if err != nil {
 			logger.HTMXHandlerTroubleReports().Error("Failed to process file %s: %v", fileHeader.Filename, err)
-			return nil, fmt.Errorf("failed to process file %s: %w", fileHeader.Filename, err)
+			return nil, fmt.Errorf("failed to process file %s: %v", fileHeader.Filename, err)
 		}
 
 		if attachment != nil {
@@ -330,13 +330,13 @@ func (h *TroubleReports) processFileUpload(
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
+		return nil, fmt.Errorf("failed to open file: %v", err)
 	}
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
+		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
 
 	// Create temporary ID
@@ -382,7 +382,7 @@ func (h *TroubleReports) processFileUpload(
 
 	if err := attachment.Validate(); err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Invalid attachment: %v", err)
-		return nil, fmt.Errorf("invalid attachment: %w", err)
+		return nil, fmt.Errorf("invalid attachment: %v", err)
 	}
 
 	logger.HTMXHandlerTroubleReports().Debug("Successfully processed file upload: %s", sanitizedFilename)

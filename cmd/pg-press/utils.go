@@ -61,7 +61,7 @@ func testDBConnection(customPath string) error {
 
 	db, err := sql.Open("sqlite3", connectionString)
 	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
+		return fmt.Errorf("failed to open database: %v", err)
 	}
 	defer db.Close()
 
@@ -72,14 +72,14 @@ func testDBConnection(customPath string) error {
 
 	// Test basic connectivity
 	if err = db.Ping(); err != nil {
-		return fmt.Errorf("failed to ping database: %w", err)
+		return fmt.Errorf("failed to ping database: %v", err)
 	}
 
 	// Test WAL mode is enabled
 	var journalMode string
 	err = db.QueryRow("PRAGMA journal_mode").Scan(&journalMode)
 	if err != nil {
-		return fmt.Errorf("failed to check journal mode: %w", err)
+		return fmt.Errorf("failed to check journal mode: %v", err)
 	}
 
 	if journalMode != "wal" {
@@ -89,7 +89,7 @@ func testDBConnection(customPath string) error {
 	// Test for potential locking by performing a simple transaction
 	tx, err := db.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin test transaction: %w", err)
+		return fmt.Errorf("failed to begin test transaction: %v", err)
 	}
 
 	// Simple test query
@@ -97,11 +97,11 @@ func testDBConnection(customPath string) error {
 	err = tx.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table'").Scan(&count)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to execute test query: %w", err)
+		return fmt.Errorf("failed to execute test query: %v", err)
 	}
 
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit test transaction: %w", err)
+		return fmt.Errorf("failed to commit test transaction: %v", err)
 	}
 
 	logger.Server().Info("Database connection test passed - WAL mode enabled, %d tables found", count)

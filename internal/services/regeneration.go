@@ -20,7 +20,7 @@ type Regeneration struct {
 func NewRegeneration(db *sql.DB, tools *Tool, feeds *Feed) *Regeneration {
 	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
 	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %w: %w", err))
+	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
 	//}
 
 	query := `
@@ -39,7 +39,7 @@ func NewRegeneration(db *sql.DB, tools *Tool, feeds *Feed) *Regeneration {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create tool_regenerations table: %w: %w", err))
+		panic(fmt.Errorf("failed to create tool_regenerations table: %v", err))
 	}
 
 	return &Regeneration{
@@ -84,7 +84,7 @@ func (r *Regeneration) Add(regeneration *models.Regeneration, user *models.User)
 			return nil, utils.NewNotFoundError(fmt.Sprintf("tool regeneration: %d", regeneration.ID))
 		}
 
-		return nil, fmt.Errorf("insert error: tool_regenerations: %w", err)
+		return nil, fmt.Errorf("insert error: tool_regenerations: %v", err)
 	}
 
 	// Create feed entry
@@ -121,7 +121,7 @@ func (r *Regeneration) Update(regeneration *models.Regeneration, user *models.Us
 		regeneration.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("update error: tool_regenerations: %w", err)
+		return fmt.Errorf("update error: tool_regenerations: %v", err)
 	}
 
 	return nil
@@ -134,7 +134,7 @@ func (r *Regeneration) Delete(id int64) error {
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("delete error: tool_regenerations: %w", err)
+		return fmt.Errorf("delete error: tool_regenerations: %v", err)
 	}
 
 	return nil
@@ -146,7 +146,7 @@ func (r *Regeneration) AddToolRegeneration(cycleID, toolID int64, reason string,
 	// Update the tool's regeneration status
 	logger.DBRegenerations().Debug("Updating tool regeneration status to regenerating: tool_id=%d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, true, user); err != nil {
-		return nil, fmt.Errorf("failed to update tool regeneration status: %w: %w", err)
+		return nil, fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
 	// After this, create a new regeneration record
@@ -176,7 +176,7 @@ func (r *Regeneration) StopToolRegeneration(toolID int64, user *models.User) err
 	// Just set the tool's regeneration status to false
 	logger.DBRegenerations().Debug("Undoing tool regeneration status: tool_id=%d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
-		return fmt.Errorf("failed to update tool regeneration status: %w: %w", err)
+		return fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
 	logger.DBRegenerations().Info("Tool regeneration stopped: tool_id=%d", toolID)
@@ -201,7 +201,7 @@ func (r *Regeneration) GetLastRegeneration(toolID int64) (*models.Regeneration, 
 			return nil, utils.NewNotFoundError(fmt.Sprintf("tool_id=%d", toolID))
 		}
 
-		return nil, fmt.Errorf("select error: tool_regenerations: %w", err)
+		return nil, fmt.Errorf("select error: tool_regenerations: %v", err)
 	}
 
 	return regen, nil
@@ -219,7 +219,7 @@ func (r *Regeneration) GetRegenerationHistory(toolID int64) ([]*models.Regenerat
 	`
 	rows, err := r.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("select error: tool_regenerations: %w", err)
+		return nil, fmt.Errorf("select error: tool_regenerations: %v", err)
 	}
 	defer rows.Close()
 
@@ -227,7 +227,7 @@ func (r *Regeneration) GetRegenerationHistory(toolID int64) ([]*models.Regenerat
 	for rows.Next() {
 		regen, err := r.scanToolRegeneration(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan error: tool_regenerations: %w", err)
+			return nil, fmt.Errorf("scan error: tool_regenerations: %v", err)
 		}
 
 		regenerations = append(regenerations, regen)

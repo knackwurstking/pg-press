@@ -28,7 +28,7 @@ func NewCookie(db *sql.DB) *Cookie {
 		);
 	`
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create cookies table: %w: %w", err))
+		panic(fmt.Errorf("failed to create cookies table: %v", err))
 	}
 
 	return &Cookie{db: db}
@@ -41,7 +41,7 @@ func (c *Cookie) List() ([]*models.Cookie, error) {
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select error: cookies: %w", err)
+		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 	defer rows.Close()
 
@@ -49,13 +49,13 @@ func (c *Cookie) List() ([]*models.Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan error: cookies: %w", err)
+			return nil, fmt.Errorf("scan error: cookies: %v", err)
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: cookies: %w", err)
+		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Listed %d cookies", len(cookies))
@@ -75,7 +75,7 @@ func (c *Cookie) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 		WHERE api_key = ? ORDER BY last_login DESC`
 	rows, err := c.db.Query(query, apiKey)
 	if err != nil {
-		return nil, fmt.Errorf("select error: cookies: %w", err)
+		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 	defer rows.Close()
 
@@ -83,13 +83,13 @@ func (c *Cookie) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 	for rows.Next() {
 		cookie, err := c.scanCookie(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan error: cookies: %w", err)
+			return nil, fmt.Errorf("scan error: cookies: %v", err)
 		}
 		cookies = append(cookies, cookie)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: cookies: %w", err)
+		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Found %d cookies for API key", len(cookies))
@@ -113,7 +113,7 @@ func (c *Cookie) Get(value string) (*models.Cookie, error) {
 			return nil, utils.NewNotFoundError(value)
 		}
 
-		return nil, fmt.Errorf("select error: cookies: %w", err)
+		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 
 	return cookie, nil
@@ -147,7 +147,7 @@ func (c *Cookie) Add(cookie *models.Cookie) error {
 	query := `SELECT COUNT(*) FROM cookies WHERE value = ?`
 	err := c.db.QueryRow(query, cookie.Value).Scan(&count)
 	if err != nil {
-		return fmt.Errorf("select error: cookies: %w", err)
+		return fmt.Errorf("select error: cookies: %v", err)
 	}
 	if count > 0 {
 		logger.DBCookies().Debug("Cookie already exists with value")
@@ -159,7 +159,7 @@ func (c *Cookie) Add(cookie *models.Cookie) error {
 	_, err = c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return fmt.Errorf("insert error: cookies: %w", err)
+		return fmt.Errorf("insert error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Successfully added cookie")
@@ -196,12 +196,12 @@ func (c *Cookie) Update(value string, cookie *models.Cookie) error {
 	result, err := c.db.Exec(query,
 		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
-		return fmt.Errorf("update error: cookies: %w", err)
+		return fmt.Errorf("update error: cookies: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("update error: cookies: %w", err)
+		return fmt.Errorf("update error: cookies: %v", err)
 	}
 	if rowsAffected == 0 {
 		logger.DBCookies().Debug("No cookie found to update")
@@ -224,7 +224,7 @@ func (c *Cookie) Remove(value string) error {
 	query := `DELETE FROM cookies WHERE value = ?`
 	_, err := c.db.Exec(query, value)
 	if err != nil {
-		return fmt.Errorf("delete error: cookies: %w", err)
+		return fmt.Errorf("delete error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookie")
@@ -243,7 +243,7 @@ func (c *Cookie) RemoveApiKey(apiKey string) error {
 	query := `DELETE FROM cookies WHERE api_key = ?`
 	_, err := c.db.Exec(query, apiKey)
 	if err != nil {
-		return fmt.Errorf("delete error: cookies: %w", err)
+		return fmt.Errorf("delete error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Successfully removed cookies for API key")
@@ -262,12 +262,12 @@ func (c *Cookie) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	query := `DELETE FROM cookies WHERE last_login < ?`
 	result, err := c.db.Exec(query, beforeTimestamp)
 	if err != nil {
-		return 0, fmt.Errorf("delete error: cookies: %w", err)
+		return 0, fmt.Errorf("delete error: cookies: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, fmt.Errorf("delete error: cookies: %w", err)
+		return 0, fmt.Errorf("delete error: cookies: %v", err)
 	}
 
 	logger.DBCookies().Debug("Removed %d expired cookies", rowsAffected)

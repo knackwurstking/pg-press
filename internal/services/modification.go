@@ -43,7 +43,7 @@ func NewModificationService(db *sql.DB) *ModificationService {
 func (s *ModificationService) createTable() {
 	//const dropQuery string = `DROP TABLE IF EXISTS modifications;`
 	//if _, err := s.db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop feeds table: %w: %w", err))
+	//	panic(fmt.Errorf("failed to drop feeds table: %v", err))
 	//}
 
 	query := `
@@ -63,7 +63,7 @@ func (s *ModificationService) createTable() {
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create modifications table: %w: %w", err))
+		panic(fmt.Errorf("failed to create modifications table: %v", err))
 	}
 }
 
@@ -73,7 +73,7 @@ func (s *ModificationService) Add(userID int64, entityType ModificationType, ent
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal modification data: %w: %w", err)
+		return nil, fmt.Errorf("failed to marshal modification data: %v", err)
 	}
 
 	query := `
@@ -84,12 +84,12 @@ func (s *ModificationService) Add(userID int64, entityType ModificationType, ent
 	now := time.Now()
 	result, err := s.db.Exec(query, userID, string(entityType), entityID, jsonData, now)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert modification: %w: %w", err)
+		return nil, fmt.Errorf("failed to insert modification: %v", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get modification ID: %w: %w", err)
+		return nil, fmt.Errorf("failed to get modification ID: %v", err)
 	}
 
 	mod := &models.Modification[interface{}]{
@@ -121,7 +121,7 @@ func (s *ModificationService) Get(id int64) (*models.Modification[interface{}], 
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
 		}
-		return nil, fmt.Errorf("failed to get modification: %w: %w", err)
+		return nil, fmt.Errorf("failed to get modification: %v", err)
 	}
 
 	return mod, nil
@@ -141,7 +141,7 @@ func (s *ModificationService) List(entityType ModificationType, entityID int64, 
 
 	rows, err := s.db.Query(query, string(entityType), entityID, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query modifications: %w: %w", err)
+		return nil, fmt.Errorf("failed to query modifications: %v", err)
 	}
 	defer rows.Close()
 
@@ -150,13 +150,13 @@ func (s *ModificationService) List(entityType ModificationType, entityID int64, 
 		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan modification: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan modification: %v", err)
 		}
 		modifications = append(modifications, mod)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating modifications: %w: %w", err)
+		return nil, fmt.Errorf("error iterating modifications: %v", err)
 	}
 
 	logger.DBModifications().Debug("Found %d modifications", len(modifications))
@@ -181,7 +181,7 @@ func (s *ModificationService) Count(entityType ModificationType, entityID int64)
 	var count int64
 	err := s.db.QueryRow(query, string(entityType), entityID).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("failed to count modifications: %w: %w", err)
+		return 0, fmt.Errorf("failed to count modifications: %v", err)
 	}
 
 	return count, nil
@@ -207,7 +207,7 @@ func (s *ModificationService) GetLatest(entityType ModificationType, entityID in
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
 		}
-		return nil, fmt.Errorf("failed to get latest modification: %w: %w", err)
+		return nil, fmt.Errorf("failed to get latest modification: %v", err)
 	}
 
 	return mod, nil
@@ -233,7 +233,7 @@ func (s *ModificationService) GetOldest(entityType ModificationType, entityID in
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
 		}
-		return nil, fmt.Errorf("failed to get oldest modification: %w: %w", err)
+		return nil, fmt.Errorf("failed to get oldest modification: %v", err)
 	}
 
 	return mod, nil
@@ -246,12 +246,12 @@ func (s *ModificationService) Delete(id int64) error {
 	query := `DELETE FROM modifications WHERE id = ?`
 	result, err := s.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete modification: %w: %w", err)
+		return fmt.Errorf("failed to delete modification: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get affected rows: %w: %w", err)
+		return fmt.Errorf("failed to get affected rows: %v", err)
 	}
 
 	if rowsAffected == 0 {
@@ -269,12 +269,12 @@ func (s *ModificationService) DeleteAll(entityType ModificationType, entityID in
 	query := `DELETE FROM modifications WHERE entity_type = ? AND entity_id = ?`
 	result, err := s.db.Exec(query, string(entityType), entityID)
 	if err != nil {
-		return fmt.Errorf("failed to delete modifications: %w: %w", err)
+		return fmt.Errorf("failed to delete modifications: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get affected rows: %w: %w", err)
+		return fmt.Errorf("failed to get affected rows: %v", err)
 	}
 
 	logger.DBModifications().Info("Successfully deleted %d modifications", rowsAffected)
@@ -295,7 +295,7 @@ func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*mod
 
 	rows, err := s.db.Query(query, userID, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query modifications by user: %w: %w", err)
+		return nil, fmt.Errorf("failed to query modifications by user: %v", err)
 	}
 	defer rows.Close()
 
@@ -304,13 +304,13 @@ func (s *ModificationService) GetByUser(userID int64, limit, offset int) ([]*mod
 		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan modification: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan modification: %v", err)
 		}
 		modifications = append(modifications, mod)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating modifications: %w: %w", err)
+		return nil, fmt.Errorf("error iterating modifications: %v", err)
 	}
 
 	return modifications, nil
@@ -330,7 +330,7 @@ func (s *ModificationService) GetByDateRange(entityType ModificationType, entity
 
 	rows, err := s.db.Query(query, string(entityType), entityID, from, to)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query modifications by date range: %w: %w", err)
+		return nil, fmt.Errorf("failed to query modifications by date range: %v", err)
 	}
 	defer rows.Close()
 
@@ -339,13 +339,13 @@ func (s *ModificationService) GetByDateRange(entityType ModificationType, entity
 		mod := &models.Modification[interface{}]{}
 		err := rows.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan modification: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan modification: %v", err)
 		}
 		modifications = append(modifications, mod)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating modifications: %w: %w", err)
+		return nil, fmt.Errorf("error iterating modifications: %v", err)
 	}
 
 	return modifications, nil
@@ -408,7 +408,7 @@ func (s *ModificationService) GetWithUser(id int64) (*ModificationWithUser, erro
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
 		}
-		return nil, fmt.Errorf("failed to get modification with user: %w: %w", err)
+		return nil, fmt.Errorf("failed to get modification with user: %v", err)
 	}
 
 	modWithUser.User.TelegramID = modWithUser.Modification.UserID
@@ -436,7 +436,7 @@ func (s *ModificationService) ListWithUser(entityType ModificationType, entityID
 
 	rows, err := s.db.Query(query, string(entityType), entityID, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query modifications with user: %w: %w", err)
+		return nil, fmt.Errorf("failed to query modifications with user: %v", err)
 	}
 	defer rows.Close()
 
@@ -451,14 +451,14 @@ func (s *ModificationService) ListWithUser(entityType ModificationType, entityID
 			&modWithUser.User.Name,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan modification with user: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan modification with user: %v", err)
 		}
 		modWithUser.User.TelegramID = modWithUser.Modification.UserID
 		modifications = append(modifications, modWithUser)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating modifications with user: %w: %w", err)
+		return nil, fmt.Errorf("error iterating modifications with user: %v", err)
 	}
 
 	return modifications, nil

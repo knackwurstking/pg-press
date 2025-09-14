@@ -28,7 +28,7 @@ func NewAttachment(db *sql.DB) *Attachment {
 	`
 
 	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create attachments table: %w: %w", err))
+		panic(fmt.Errorf("failed to create attachments table: %v", err))
 	}
 
 	return &Attachment{
@@ -43,7 +43,7 @@ func (a *Attachment) List() ([]*models.Attachment, error) {
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
 	rows, err := a.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select attachments: %w: %w", err)
+		return nil, fmt.Errorf("select attachments: %v", err)
 	}
 	defer rows.Close()
 
@@ -52,13 +52,13 @@ func (a *Attachment) List() ([]*models.Attachment, error) {
 	for rows.Next() {
 		attachment, err := a.scan(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan attachments: %w: %w", err)
+			return nil, fmt.Errorf("scan attachments: %v", err)
 		}
 		attachments = append(attachments, attachment)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select attachments: %w: %w", err)
+		return nil, fmt.Errorf("select attachments: %v", err)
 	}
 
 	return attachments, nil
@@ -76,7 +76,7 @@ func (a *Attachment) Get(id int64) (*models.Attachment, error) {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("attachment with ID %d not found", id))
 		}
 
-		return nil, fmt.Errorf("select attachments: %w: %w", err)
+		return nil, fmt.Errorf("select attachments: %v", err)
 	}
 
 	return attachment, nil
@@ -109,7 +109,7 @@ func (s *Attachment) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("select attachments: %w: %w", err)
+		return nil, fmt.Errorf("select attachments: %v", err)
 	}
 	defer rows.Close()
 
@@ -119,13 +119,13 @@ func (s *Attachment) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	for rows.Next() {
 		attachment, err := s.scan(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan attachments: %w: %w", err)
+			return nil, fmt.Errorf("scan attachments: %v", err)
 		}
 		attachmentMap[attachment.GetID()] = attachment
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select attachments: %w: %w", err)
+		return nil, fmt.Errorf("select attachments: %v", err)
 	}
 
 	// Return attachments in the order of the requested IDs
@@ -154,12 +154,12 @@ func (a *Attachment) Add(attachment *models.Attachment, _ *models.User) (int64, 
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, fmt.Errorf("insert attachments: %w: %w", err)
+		return 0, fmt.Errorf("insert attachments: %v", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("insert attachments: %w: %w", err)
+		return 0, fmt.Errorf("insert attachments: %v", err)
 	}
 
 	return id, nil
@@ -181,12 +181,12 @@ func (a *Attachment) Update(attachment *models.Attachment, _ *models.User) error
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return fmt.Errorf("update attachments: %w: %w", err)
+		return fmt.Errorf("update attachments: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("update attachments: %w: %w", err)
+		return fmt.Errorf("update attachments: %v", err)
 	}
 
 	if rowsAffected == 0 {
@@ -203,12 +203,12 @@ func (a *Attachment) Delete(id int64, _ *models.User) error {
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("delete attachments: %w: %w", err)
+		return fmt.Errorf("delete attachments: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("delete attachments: %w: %w", err)
+		return fmt.Errorf("delete attachments: %v", err)
 	}
 
 	if rowsAffected == 0 {
@@ -227,7 +227,7 @@ func (s *Attachment) scan(scanner interfaces.Scannable) (*models.Attachment, err
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan row: %w: %w", err)
+		return nil, fmt.Errorf("failed to scan row: %v", err)
 	}
 
 	// Set the ID using string conversion to maintain compatibility

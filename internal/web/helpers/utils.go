@@ -94,14 +94,14 @@ func HandleTemplate(
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("failed to parse templates: %w", err),
+			fmt.Errorf("failed to parse templates: %v", err),
 		)
 	}
 
 	if err := t.Execute(c.Response(), pageData); err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
-			fmt.Errorf("failed to render page: %w", err),
+			fmt.Errorf("failed to render page: %v", err),
 		)
 	}
 

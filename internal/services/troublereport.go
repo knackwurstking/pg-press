@@ -42,7 +42,7 @@ func (s *TroubleReport) createTable(db *sql.DB) error {
 		);
 	`
 	if _, err := db.Exec(createQuery); err != nil {
-		return fmt.Errorf("failed to create trouble_reports table: %w: %w", err)
+		return fmt.Errorf("failed to create trouble_reports table: %v", err)
 	}
 
 	return nil
@@ -55,8 +55,8 @@ func (s *TroubleReport) List() ([]*models.TroubleReport, error) {
 	const listQuery string = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := s.db.Query(listQuery)
 	if err != nil {
-		logger.DBTroubleReports().Error("Failed to execute trouble reports list query: %v: %w", err)
-		return nil, fmt.Errorf("select error: trouble_reports: %w", err)
+		logger.DBTroubleReports().Error("Failed to execute trouble reports list query: %v", err)
+		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 	defer rows.Close()
 
@@ -66,7 +66,7 @@ func (s *TroubleReport) List() ([]*models.TroubleReport, error) {
 	for rows.Next() {
 		report, err := s.scanTroubleReport(rows)
 		if err != nil {
-			return nil, fmt.Errorf("scan error: trouble_reports: %w", err)
+			return nil, fmt.Errorf("scan error: trouble_reports: %v", err)
 		}
 		reports = append(reports, report)
 		reportCount++
@@ -74,7 +74,7 @@ func (s *TroubleReport) List() ([]*models.TroubleReport, error) {
 
 	if err := rows.Err(); err != nil {
 		logger.DBTroubleReports().Error("Error iterating over %d trouble report rows: %v", reportCount, err)
-		return nil, fmt.Errorf("select error: trouble_reports: %w", err)
+		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 
 	logger.DBTroubleReports().Info("Listed %d trouble reports", len(reports))
@@ -95,7 +95,7 @@ func (s *TroubleReport) Get(id int64) (*models.TroubleReport, error) {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("trouble report with ID %d", id))
 		}
 
-		return nil, fmt.Errorf("select error: trouble_reports: %w", err)
+		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 
 	logger.DBTroubleReports().Debug("Retrieved trouble report %d (title='%s')", id, report.Title)
@@ -121,7 +121,7 @@ func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.Us
 	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
-		return 0, fmt.Errorf("failed to marshal linked attachments: %w: %w", err)
+		return 0, fmt.Errorf("failed to marshal linked attachments: %v", err)
 	}
 
 	// Insert trouble report
@@ -132,14 +132,14 @@ func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.Us
 		addQuery, troubleReport.Title, troubleReport.Content, string(linkedAttachments),
 	)
 	if err != nil {
-		return 0, fmt.Errorf("insert error: trouble_reports: %w", err)
+		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
 	}
 
 	// Get ID of inserted trouble report
 	id, err := result.LastInsertId()
 	if err != nil {
 		logger.DBTroubleReports().Error("Failed to get last insert ID for trouble report by %s: %v", userInfo, err)
-		return 0, fmt.Errorf("insert error: trouble_reports: %w", err)
+		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
 	}
 	troubleReport.ID = id
 
@@ -151,7 +151,7 @@ func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.Us
 	)
 	if err := s.feeds.Add(feed); err != nil {
 		logger.DBTroubleReports().Error("Failed to create feed entry for trouble report %d: %v", id, err)
-		return id, fmt.Errorf("failed to add feed entry: %w: %w", err)
+		return id, fmt.Errorf("failed to add feed entry: %v", err)
 	}
 
 	logger.DBTroubleReports().Info("Successfully added trouble report %d by %s", id, userInfo)
@@ -178,7 +178,7 @@ func (s *TroubleReport) Update(troubleReport *models.TroubleReport, user *models
 	// Unmarshal linked attachments
 	linkedAttachments, err := json.Marshal(troubleReport.LinkedAttachments)
 	if err != nil {
-		return fmt.Errorf("failed to marshal linked attachments: %w: %w", err)
+		return fmt.Errorf("failed to marshal linked attachments: %v", err)
 	}
 
 	const updateQuery string = `UPDATE trouble_reports
@@ -189,7 +189,7 @@ func (s *TroubleReport) Update(troubleReport *models.TroubleReport, user *models
 		troubleReport.ID, // WHERE
 	)
 	if err != nil {
-		return fmt.Errorf("update error: trouble_reports: %w", err)
+		return fmt.Errorf("update error: trouble_reports: %v", err)
 	}
 
 	feed := models.NewFeed(
@@ -228,12 +228,12 @@ func (s *TroubleReport) Delete(id int64, user *models.User) error {
 	const deleteQuery = `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := s.db.Exec(deleteQuery, id)
 	if err != nil {
-		return fmt.Errorf("delete error: trouble_reports: %w", err)
+		return fmt.Errorf("delete error: trouble_reports: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("delete error: trouble_reports: %w", err)
+		return fmt.Errorf("delete error: trouble_reports: %v", err)
 	}
 
 	if rowsAffected == 0 {
@@ -241,17 +241,15 @@ func (s *TroubleReport) Delete(id int64, user *models.User) error {
 	}
 
 	// Create feed entry for the removed report
-	if user != nil {
-		feed := models.NewFeed(
-			"Problembericht entfernt",
-			fmt.Sprintf("Benutzer %s hat den Problembericht '%s' entfernt.",
-				user.Name, report.Title),
-			user.TelegramID,
-		)
+	feed := models.NewFeed(
+		"Problembericht entfernt",
+		fmt.Sprintf("Benutzer %s hat den Problembericht '%s' entfernt.",
+			user.Name, report.Title),
+		user.TelegramID,
+	)
 
-		if err := s.feeds.Add(feed); err != nil {
-			return err
-		}
+	if err := s.feeds.Add(feed); err != nil {
+		return err
 	}
 
 	logger.DBTroubleReports().Info(
@@ -556,13 +554,13 @@ func (s *TroubleReport) scanTroubleReport(scanner interfaces.Scannable) (*models
 			return nil, err
 		}
 
-		return nil, fmt.Errorf("failed to scan row %v: %w", err)
+		return nil, fmt.Errorf("failed to scan row: %v", err)
 	}
 
 	// Try to unmarshal as new format (array of int64 IDs) first
 	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
 		logger.DBTroubleReports().Error("Failed to unmarshal linked attachments for report %d: %v", report.ID, err)
-		return nil, fmt.Errorf("failed to unmarshal linked attachments %v: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal linked attachments: %v", err)
 	}
 
 	return report, nil

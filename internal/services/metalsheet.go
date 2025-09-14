@@ -52,7 +52,7 @@ func (s *MetalSheet) createTable() error {
 	`
 
 	if _, err := s.db.Exec(query); err != nil {
-		return fmt.Errorf("failed to create metal_sheets table: %w", err)
+		return fmt.Errorf("failed to create metal_sheets table: %v", err)
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 	defer rows.Close()
 
@@ -78,13 +78,13 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Listed %d metal sheets", len(sheets))
@@ -107,7 +107,7 @@ func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("metal sheet with ID %d", id))
 		}
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
 	return sheet, nil
@@ -154,7 +154,7 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	`
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 	defer rows.Close()
 
@@ -163,13 +163,13 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
@@ -189,7 +189,7 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 	defer rows.Close()
 
@@ -198,13 +198,13 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 	for rows.Next() {
 		sheet, err := s.scanMetalSheet(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %w: %w", err)
+			return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
 		}
 		sheets = append(sheets, sheet)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Found %d available metal sheets", len(sheets))
@@ -218,7 +218,7 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %v", err)
 	}
 
 	query := `
@@ -230,12 +230,12 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes)
 	if err != nil {
-		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %v", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("insert error: metal_sheets: %w", err)
+		return 0, fmt.Errorf("insert error: metal_sheets: %v", err)
 	}
 
 	// Set sheet ID for return
@@ -263,7 +263,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
 	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %w", err)
+		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
 
 	query := `
@@ -277,7 +277,7 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.ToolID, notesBytes, sheet.ID)
 	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %w", err)
+		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
@@ -302,7 +302,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 	// Get current sheet to track changes
 	sheet, err := s.Get(sheetID)
 	if err != nil {
-		return fmt.Errorf("failed to get sheet for tool assignment: %w: %w", err)
+		return fmt.Errorf("failed to get sheet for tool assignment: %v", err)
 	}
 
 	// Update the tool assignment
@@ -316,7 +316,7 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 		toolID, sheetID,
 	)
 	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %w", err)
+		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
@@ -349,7 +349,7 @@ func (s *MetalSheet) Delete(id int64, user *models.User) error {
 	`
 	_, err := s.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("delete error: metal_sheets: %w", err)
+		return fmt.Errorf("delete error: metal_sheets: %v", err)
 	}
 
 	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
@@ -381,7 +381,7 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("scan error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("scan error: metal_sheets: %v", err)
 	}
 
 	// Handle nullable tool_id
@@ -390,7 +390,7 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 	}
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
-		return nil, fmt.Errorf("scan error: metal_sheets: %w", err)
+		return nil, fmt.Errorf("scan error: metal_sheets: %v", err)
 	}
 
 	return sheet, nil

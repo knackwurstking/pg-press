@@ -57,7 +57,7 @@ if err = db.Ping(); err != nil {
 // Each migration method now uses transactions
 tx, err := m.db.Begin()
 if err != nil {
-    return fmt.Errorf("failed to begin transaction: %w", err)
+    return fmt.Errorf("failed to begin transaction: %v", err)
 }
 defer func() {
     if err != nil {
