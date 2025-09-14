@@ -82,22 +82,6 @@ func main() {
 				},
 			},
 
-			{
-				Name: "migration",
-				Usage: cli.Usage(
-					"Handle database migration from old mod system to new modification service"),
-				Commands: []cli.Command{
-					migrationTestCommand(),
-					migrationStatusCommand(),
-					migrationRunCommand(),
-					migrationVerifyCommand(),
-					migrationStatsCommand(),
-					migrationExportCommand(),
-					migrationCleanupCommand(),
-					migrationHelpCommand(),
-				},
-			},
-
 			serverCommand(),
 
 			cli.CompletionCommand(),
