@@ -42,11 +42,18 @@ type MigrationStats struct {
 	Duration                time.Duration `json:"duration"`
 }
 
+type User struct {
+	TelegramID int64  `json:"telegram_id"`
+	UserName   string `json:"user_name"`
+	APIKey     string `json:"api_key"`
+	LastFeed   int    `json:"last_feed"`
+}
+
 type ModificationData struct {
-	Action    string                 `json:"action"`
-	Timestamp time.Time              `json:"timestamp"`
-	UserID    int64                  `json:"user_id"`
-	Data      map[string]interface{} `json:"data"`
+	Action string                 `json:"action"`
+	Time   int64                  `json:"time"`
+	User   User                   `json:"user"`
+	Data   map[string]interface{} `json:"data"`
 }
 
 func main() {
@@ -322,19 +329,19 @@ func (m *MigrationScript) setup(dryRun, verbose bool) error {
 		SELECT
 			'trouble_reports' as table_name,
 			COUNT(*) as total_records,
-			SUM(CASE WHEN mods IS NOT NULL AND mods != '[]' AND mods != '' THEN 1 ELSE 0 END) as records_with_mods
+			SUM(CASE WHEN mods IS NOT NULL AND json_array_length(mods) > 0 THEN 1 ELSE 0 END) as records_with_mods
 		FROM trouble_reports
 		UNION ALL
 		SELECT
 			'metal_sheets' as table_name,
 			COUNT(*) as total_records,
-			SUM(CASE WHEN mods IS NOT NULL AND mods != '[]' AND mods != '' THEN 1 ELSE 0 END) as records_with_mods
+			SUM(CASE WHEN mods IS NOT NULL AND json_array_length(mods) > 0 THEN 1 ELSE 0 END) as records_with_mods
 		FROM metal_sheets
 		UNION ALL
 		SELECT
 			'tools' as table_name,
 			COUNT(*) as total_records,
-			SUM(CASE WHEN mods IS NOT NULL AND mods != '[]' AND mods != '' THEN 1 ELSE 0 END) as records_with_mods
+			SUM(CASE WHEN mods IS NOT NULL AND json_array_length(mods) > 0 THEN 1 ELSE 0 END) as records_with_mods
 		FROM tools`,
 
 		`CREATE VIEW IF NOT EXISTS modification_stats AS
@@ -429,7 +436,7 @@ func (m *MigrationScript) migrateTroubleReports(stats *MigrationStats, dryRun, v
 		printInfo("Migrating trouble report modifications...")
 	}
 
-	query := `SELECT id, mods FROM trouble_reports WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''`
+	query := `SELECT id, mods FROM trouble_reports WHERE mods IS NOT NULL AND json_array_length(mods) > 0`
 
 	rows, err := m.db.Query(query)
 	if err != nil {
@@ -471,7 +478,7 @@ func (m *MigrationScript) migrateMetalSheets(stats *MigrationStats, dryRun, verb
 		printInfo("Migrating metal sheet modifications...")
 	}
 
-	query := `SELECT id, mods FROM metal_sheets WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''`
+	query := `SELECT id, mods FROM metal_sheets WHERE mods IS NOT NULL AND json_array_length(mods) > 0`
 
 	rows, err := m.db.Query(query)
 	if err != nil {
@@ -513,7 +520,7 @@ func (m *MigrationScript) migrateTools(stats *MigrationStats, dryRun, verbose bo
 		printInfo("Migrating tool modifications...")
 	}
 
-	query := `SELECT id, mods FROM tools WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''`
+	query := `SELECT id, mods FROM tools WHERE mods IS NOT NULL AND json_array_length(mods) > 0`
 
 	rows, err := m.db.Query(query)
 	if err != nil {
@@ -559,13 +566,13 @@ func (m *MigrationScript) processMods(entityID int64, entityType, modsJSON strin
 	for i, mod := range mods {
 		if verbose && len(mods) > 1 {
 			fmt.Printf("    Processing mod %d/%d for %s %d: action=%s, user=%d\n",
-				i+1, len(mods), entityType, entityID, mod.Action, mod.UserID)
+				i+1, len(mods), entityType, entityID, mod.Action, mod.User.TelegramID)
 		}
 
 		if dryRun {
 			if verbose {
 				fmt.Printf("    WOULD INSERT: entity_type=%s, entity_id=%d, user_id=%d\n",
-					entityType, entityID, mod.UserID)
+					entityType, entityID, mod.User.TelegramID)
 			}
 			continue
 		}
@@ -576,12 +583,15 @@ func (m *MigrationScript) processMods(entityID int64, entityType, modsJSON strin
 			return fmt.Errorf("failed to marshal mod data: %v", err)
 		}
 
+		// Convert Unix timestamp (milliseconds) to time.Time
+		timestamp := time.Unix(0, mod.Time*int64(time.Millisecond))
+
 		// Insert into modifications table
 		query := `
 			INSERT INTO modifications (user_id, entity_type, entity_id, data, created_at)
 			VALUES (?, ?, ?, ?, ?)
 		`
-		_, err = m.db.Exec(query, mod.UserID, entityType, entityID, modDataJSON, mod.Timestamp)
+		_, err = m.db.Exec(query, mod.User.TelegramID, entityType, entityID, modDataJSON, timestamp)
 		if err != nil {
 			return fmt.Errorf("failed to insert modification: %v", err)
 		}
@@ -636,7 +646,7 @@ func (m *MigrationScript) verify(verbose bool) error {
 func (m *MigrationScript) verifyTable(table string, verbose bool) (int, int, error) {
 	// Count records with mods
 	var oldCount int
-	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''", table)
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE mods IS NOT NULL AND json_array_length(mods) > 0", table)
 	if err := m.db.QueryRow(query).Scan(&oldCount); err != nil {
 		// Check if error is due to missing column (cleanup completed)
 		if strings.Contains(err.Error(), "no such column: mods") {
@@ -793,7 +803,7 @@ func (m *MigrationScript) status(verbose bool) error {
 
 	for _, table := range tables {
 		var count int
-		query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE mods IS NOT NULL AND mods != '[]' AND mods != ''", table)
+		query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE mods IS NOT NULL AND json_array_length(mods) > 0", table)
 		err := m.db.QueryRow(query).Scan(&count)
 
 		if err != nil {
