@@ -7,14 +7,17 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	modificationspage "github.com/knackwurstking/pgpress/internal/web/templates/modifiactionspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/modification"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -30,6 +33,7 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports", h.handleTroubleReports),
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.handleGetSharePdf),
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.handleGetAttachment),
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id", h.handleModifications),
 		},
 	)
 }
@@ -39,7 +43,6 @@ func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 
 	page := troublereportspage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerTroubleReports().Error("Failed to render trouble reports page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render trouble reports page: "+err.Error())
 	}
@@ -49,7 +52,6 @@ func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
-		logger.HandlerTroubleReports().Error("Invalid trouble report ID parameter: %v", err)
 		return err
 	}
 
@@ -57,19 +59,12 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
-		logger.HandlerTroubleReports().Error(
-			"Failed to retrieve trouble report %d for PDF generation: %v",
-			id, err,
-		)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve trouble report: "+err.Error())
 	}
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		logger.HandlerTroubleReports().Error(
-			"Failed to generate PDF for trouble report %d: %v", tr.ID, err,
-		)
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"Fehler beim Erstellen der PDF",
@@ -81,6 +76,48 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 		tr.ID, pdfBuffer.Len())
 
 	return h.shareResponse(c, tr, pdfBuffer)
+}
+
+func (h *TroubleReports) handleModifications(c echo.Context) error {
+	logger.HandlerTroubleReports().Info("Handling modifications for trouble report")
+
+	// Parse ID parameter
+	id, err := helpers.ParseInt64Param(c, "id")
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
+		return err
+	}
+
+	// Fetch trouble report from database
+	logger.HandlerTroubleReports().Debug("Fetching trouble report %d", id)
+	tr, err := h.DB.TroubleReports.Get(id)
+	if err != nil {
+		logger.HandlerTroubleReports().Error(
+			"Failed to retrieve trouble report %d for modifications: %v",
+			id, err,
+		)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve trouble report: "+err.Error())
+	}
+
+	logger.HandlerTroubleReports().Debug("Successfully retrieved trouble report %d", id)
+
+	// TODO: Implement modifications handling logic...
+	var (
+		m modification.Mods[models.TroubleReportModData]
+		f func(m *modification.Mod[models.TroubleReportModData]) templ.Component
+	)
+
+	// ...
+
+	// Rendering the page template
+	page := modificationspage.Page(m, f)
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to render trouble reports page: "+err.Error())
+	}
+
+	return nil
 }
 
 func (h *TroubleReports) shareResponse(
