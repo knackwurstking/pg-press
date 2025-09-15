@@ -264,7 +264,7 @@ func (p *PressCycle) Delete(id int64, user *models.User) error {
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
 func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
-	logger.DBPressCycles().Debug("Getting press cycles for tool: tool_id=%d", toolID)
+	logger.DBPressCycles().Info("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -273,16 +273,22 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 		ORDER BY id DESC
 	`
 
+	logger.DBPressCycles().Debug("Executing query: %s", query)
+
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("select error: press_cycles: %v", err)
 	}
 	defer rows.Close()
 
+	logger.DBPressCycles().Debug("Query executed successfully")
+
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
 		return nil, fmt.Errorf("scan error: press_cycles: %v", err)
 	}
+
+	logger.DBPressCycles().Debug("Rows scanned successfully")
 
 	return cycles, nil
 }
