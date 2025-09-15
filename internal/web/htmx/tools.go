@@ -67,28 +67,32 @@ func (h *Tools) handleList(c echo.Context) error {
 }
 
 func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) error {
+	logger.HTMXHandlerTools().Info("Rendering edit tool dialog with props: %+v", props)
+
 	if props == nil {
 		props = &dialogs.EditToolProps{}
 
 		toolID, _ := helpers.ParseInt64Query(c, "id")
+
 		if toolID > 0 {
-			tool, err := h.DB.Tools.GetWithNotes(toolID)
+			var err error
+			props.Tool, err = h.DB.Tools.Get(toolID)
 			if err != nil {
 				return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 					"failed to get tool from database: "+err.Error())
 			}
 
-			props.InputPosition = string(tool.Position)
-			props.InputWidth = tool.Format.Width
-			props.InputHeight = tool.Format.Height
-			props.InputType = tool.Type
-			props.InputCode = tool.Code
-			props.InputPressSelection = tool.Press
+			props.InputPosition = string(props.Tool.Position)
+			props.InputWidth = props.Tool.Format.Width
+			props.InputHeight = props.Tool.Format.Height
+			props.InputType = props.Tool.Type
+			props.InputCode = props.Tool.Code
+			props.InputPressSelection = props.Tool.Press
 		}
 	}
 
+	logger.HTMXHandlerTools().Debug("Rendering edit tool dialog with props: %+v", props)
 	toolEdit := dialogs.EditTool(props)
-
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render tool edit dialog: "+err.Error())

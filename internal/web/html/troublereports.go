@@ -90,7 +90,7 @@ func (h *TroubleReports) handleModifications(c echo.Context) error {
 
 	// Fetch trouble report from database
 	logger.HandlerTroubleReports().Debug("Fetching trouble report %d", id)
-	tr, err := h.DB.TroubleReports.Get(id)
+	_, err = h.DB.TroubleReports.Get(id)
 	if err != nil {
 		logger.HandlerTroubleReports().Error(
 			"Failed to retrieve trouble report %d for modifications: %v",
