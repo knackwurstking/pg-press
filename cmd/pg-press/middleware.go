@@ -172,7 +172,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 
 func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, error) {
 	remoteIP := ctx.RealIP()
-	logger.Middleware().Info("Validating user from cookie for %s", remoteIP)
+	logger.Middleware().Info("Validating user from cookie for %s [URL: %s]", remoteIP, ctx.Request().URL)
 
 	httpCookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
