@@ -126,7 +126,6 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 	return h.handleGetDialogEdit(c, props)
 }
 
-// FIXME: "Internal server error (500): failed to render Trouble Reports Edit Dialog: context canceled"
 func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	// Get ID from query parameter
 	id, err := helpers.ParseInt64Query(c, "id")
