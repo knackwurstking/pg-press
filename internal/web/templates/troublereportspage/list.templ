@@ -57,7 +57,7 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 
 						<button
 							hx-get={ fmt.Sprintf(
-								"%s/htmx/trouble-reports/dialog-edit?id=%d",
+								"%s/htmx/trouble-reports/edit?id=%d",
 								env.ServerPathPrefix, tr.ID,
 							) }
 							hx-trigger="click"

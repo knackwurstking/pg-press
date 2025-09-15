@@ -155,7 +155,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 				}
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-					"%s/htmx/trouble-reports/dialog-edit?id=%d",
+					"%s/htmx/trouble-reports/edit?id=%d",
 					env.ServerPathPrefix, tr.ID,
 				))
 				if templ_7745c5c3_Err != nil {

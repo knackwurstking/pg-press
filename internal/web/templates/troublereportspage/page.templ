@@ -31,7 +31,7 @@ templ Page() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<button
-					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit" }
+					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/edit" }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -66,7 +66,7 @@ templ navContent() {
 }
 
 templ additionalHead() {
-	<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css" }/>
+	<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/trouble-reports/edit.css" }/>
 	<link rel="stylesheet" href={ env.ServerPathPrefix + "/css/trouble-reports/data.css" }/>
 
 	<script>

@@ -18,11 +18,11 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			// Dialog edit routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/dialog-edit", func(c echo.Context) error {
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit", func(c echo.Context) error {
 				return h.handleGetDialogEdit(c, nil)
 			}),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/dialog-edit", h.handlePostDialogEdit),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/dialog-edit", h.handlePutDialogEdit),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit", h.handlePostDialogEdit),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit", h.handlePutDialogEdit),
 
 			// Data routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data", h.handleGetData),

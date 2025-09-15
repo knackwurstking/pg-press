@@ -52,9 +52,9 @@ func Page() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/dialog-edit")
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/edit")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/page.templ`, Line: 34, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/page.templ`, Line: 34, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -165,9 +165,9 @@ func additionalHead() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/dialog-edit.css")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/css/trouble-reports/edit.css")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/page.templ`, Line: 69, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/page.templ`, Line: 69, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
