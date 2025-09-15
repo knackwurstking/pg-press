@@ -56,7 +56,6 @@ func (h *TroubleReports) handleGetDialogEdit(
 			// Load attachments for display
 			if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr); err == nil {
 				props.Attachments = loadedAttachments
-				logger.HTMXHandlerTroubleReports().Debug("Loaded %d attachments for trouble report %d", len(loadedAttachments), id)
 			} else {
 				logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for trouble report %d: %v", id, err)
 			}
@@ -83,7 +82,7 @@ func (h *TroubleReports) handlePostDialogEdit(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("User %s is creating a new trouble report", user.Name)
+	logger.HTMXHandlerTroubleReports().Debug("User %s is creating a new trouble report", user.Name)
 
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
@@ -133,7 +132,7 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("Updating trouble report %d", id)
+	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d", id)
 
 	// Get user from context
 	user, err := helpers.GetUserFromContext(c)
@@ -187,10 +186,8 @@ func (h *TroubleReports) handlePutDialogEdit(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Updating trouble report %d: title='%s', existing attachments=%d, new attachments=%d",
-		id, title, len(existingAttachmentIDs), len(newAttachments),
-	)
+	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d with %d attachments",
+		id, len(props.Attachments))
 
 	tr.Title = title
 	tr.Content = content
@@ -221,7 +218,6 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	attachments []*models.Attachment,
 	err error,
 ) {
-	logger.HTMXHandlerTroubleReports().Debug("Validating dialog edit form data")
 
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
@@ -247,12 +243,11 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 			fmt.Errorf("failed to process attachments: %v", err))
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Form validation successful: title='%s', attachments=%d", title, len(attachments))
 	return title, content, attachments, nil
 }
 
 func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
-	logger.HTMXHandlerTroubleReports().Debug("Processing attachments")
+
 	var attachments []*models.Attachment
 
 	// Get existing attachments if editing
@@ -264,7 +259,6 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 					existingTR); err == nil {
 					attachments = make([]*models.Attachment, len(loadedAttachments))
 					copy(attachments, loadedAttachments)
-					logger.HTMXHandlerTroubleReports().Debug("Loaded %d existing attachments for trouble report %d", len(loadedAttachments), id)
 				}
 			}
 		}
@@ -280,7 +274,7 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 		form.Value[constants.ExistingAttachmentsRemovalFormField][0],
 		",",
 	)
-	logger.HTMXHandlerTroubleReports().Debug("Removing %d existing attachments", len(existingAttachmentsToRemove))
+
 	for _, a := range existingAttachmentsToRemove {
 		for i, a2 := range attachments {
 			if a2.ID == a {
@@ -291,7 +285,6 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	}
 
 	files := form.File[constants.AttachmentsFormField]
-	logger.HTMXHandlerTroubleReports().Debug("Processing %d new file uploads", len(files))
 	for i, fileHeader := range files {
 		if len(attachments) >= 10 {
 			break
@@ -312,7 +305,6 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 		}
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Successfully processed %d total attachments", len(attachments))
 	return attachments, nil
 }
 
@@ -320,7 +312,6 @@ func (h *TroubleReports) processFileUpload(
 	fileHeader *multipart.FileHeader,
 	index int,
 ) (*models.Attachment, error) {
-	logger.HTMXHandlerTroubleReports().Debug("Processing file upload: %s (size: %d bytes)", fileHeader.Filename, fileHeader.Size)
 
 	if fileHeader.Size > models.MaxDataSize {
 		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, models.MaxDataSize)
@@ -385,7 +376,6 @@ func (h *TroubleReports) processFileUpload(
 		return nil, fmt.Errorf("invalid attachment: %v", err)
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Successfully processed file upload: %s", sanitizedFilename)
 	return attachment, nil
 }
 

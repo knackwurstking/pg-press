@@ -25,8 +25,6 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Feed) handleFeed(c echo.Context) error {
-	logger.HandlerFeed().Debug("Rendering feed page")
-
 	page := feedpage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerFeed().Error("Failed to render feed page: %v", err)

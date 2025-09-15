@@ -67,7 +67,7 @@ func (h *Tools) handleList(c echo.Context) error {
 }
 
 func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) error {
-	logger.HTMXHandlerTools().Info("Rendering edit tool dialog with props: %+v", props)
+	logger.HTMXHandlerTools().Debug("Rendering edit tool dialog")
 
 	if props == nil {
 		props = &dialogs.EditToolProps{}
@@ -91,7 +91,6 @@ func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) erro
 		}
 	}
 
-	logger.HTMXHandlerTools().Debug("Rendering edit tool dialog with props: %+v", props)
 	toolEdit := dialogs.EditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
@@ -107,7 +106,7 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s creating new tool", user.Name)
+	logger.HTMXHandlerTools().Debug("User %s creating new tool", user.Name)
 
 	formData, err := h.getToolFormData(c)
 	if err != nil {
@@ -157,7 +156,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s updating tool %d", user.Name, toolID)
+	logger.HTMXHandlerTools().Debug("User %s updating tool %d", user.Name, toolID)
 
 	formData, err := h.getToolFormData(c)
 	if err != nil {
@@ -211,7 +210,7 @@ func (h *Tools) handleDelete(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Info("User %s deleting tool %d", user.Name, toolID)
+	logger.HTMXHandlerTools().Debug("User %s deleting tool %d", user.Name, toolID)
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {

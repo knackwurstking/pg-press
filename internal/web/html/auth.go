@@ -50,7 +50,7 @@ func (h *Auth) handleLogin(c echo.Context) error {
 			}
 			return nil
 		} else {
-			logger.HandlerAuth().Warn("Failed login attempt from %s", remoteIP)
+			logger.HandlerAuth().Info("Failed login attempt from %s", remoteIP)
 		}
 	}
 
@@ -72,7 +72,7 @@ func (h *Auth) handleLogout(c echo.Context) error {
 	var userName string = "unknown"
 	if user, err := helpers.GetUserFromContext(c); err == nil {
 		userName = user.Name
-		logger.HandlerAuth().Info("User %s logging out", user.Name)
+		logger.HandlerAuth().Debug("User %s logging out", user.Name)
 	}
 
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
@@ -99,6 +99,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Validate API key format
 	if len(apiKey) < 16 {
+		logger.HandlerAuth().Debug("API key too short from %s", remoteIP)
 		return false
 	}
 
@@ -107,6 +108,8 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if err != nil {
 		if !utils.IsNotFoundError(err) {
 			logger.HandlerAuth().Error("Database error during authentication from %s: %v", remoteIP, err)
+		} else {
+			logger.HandlerAuth().Debug("Invalid API key from %s", remoteIP)
 		}
 		return false
 	}

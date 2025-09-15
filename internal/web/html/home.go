@@ -22,8 +22,6 @@ func (h *Home) RegisterRoutes(e *echo.Echo) {
 
 // handleHome handles the home page request.
 func (h *Home) handleHome(c echo.Context) error {
-	logger.HandlerHome().Debug("Rendering home page")
-
 	page := homepage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		logger.HandlerHome().Error("Failed to render home page: %v", err)

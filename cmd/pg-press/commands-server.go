@@ -82,14 +82,23 @@ func serverCommand() cli.Command {
 	}
 }
 
-// createHTTPErrorHandler creates a custom HTTP error handler.
+// createHTTPErrorHandler creates a custom HTTP error handler with comprehensive logging.
+//
+// The handler provides:
+// - Detailed error logging with request context (method, URI, remote IP, user agent)
+// - Status-appropriate log levels (ERROR for 5xx, INFO/WARN for 4xx, DEBUG for 404 GET)
+// - Smart client error filtering to reduce log noise
+// - JSON or plain text responses based on Accept header
+// - Protection against double-header writing
 func createHTTPErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
-		// NOTE: I hope there will never be a nil error again, but if it does, we'll handle it gracefully
+		// Handle nil error case (should never happen, but be defensive)
 		if err == nil {
+			logger.Server().Error("HTTP error handler received nil error - this indicates a bug in the application")
 			err = errors.New("unexpected nil error")
 		}
 
+		// Extract error details
 		code := http.StatusInternalServerError
 		var message string
 
@@ -108,19 +117,32 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 			message = err.Error()
 		}
 
-		// Note: Request logging is handled by the logger middleware
-		// Only log here if we need additional context beyond the standard request log
+		// Get request context for logging
+		req := c.Request()
+		remoteIP := c.RealIP()
+		method := req.Method
+		uri := req.RequestURI
+		userAgent := req.UserAgent()
+
+		// Log errors with appropriate level and context
 		if code >= 500 {
-			logger.Server().Error("Internal server error (%d): %s", code, message)
+			logger.Server().Error("HTTP %d: %s [%s %s] from %s (UA: %s)",
+				code, message, method, uri, remoteIP, userAgent)
 		} else if code >= 400 {
-			logger.Server().Warn("Client error (%d): %s", code, message)
+			// Be more selective with client error logging to reduce noise
+			if code == 401 || code == 403 {
+				logger.Server().Warn("HTTP %d: Authentication/Authorization failed [%s %s] from %s",
+					code, method, uri, remoteIP)
+			} else if code == 404 {
+				logger.Server().Debug("HTTP %d: Not found [%s %s] from %s",
+					code, method, uri, remoteIP)
+			} else {
+				logger.Server().Info("HTTP %d: %s [%s %s] from %s",
+					code, message, method, uri, remoteIP)
+			}
 		}
 
-		// This line checks if the HTTP response headers have already been written and sent to the client.
-		// The `c.Response().Committed` property is true after the response headers are sent.
-		// This check is a crucial safeguard to prevent the server from trying to send a new
-		// error response if another response has already been started or completed.
-		// Attempting to write headers twice would cause a panic.
+		// Send error response if headers haven't been written yet
 		if !c.Response().Committed {
 			if c.Request().Header.Get("Accept") == "application/json" {
 				c.JSON(code, map[string]any{
@@ -132,7 +154,8 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				c.String(code, message)
 			}
 		} else {
-			logger.Server().Error("Could not send error response because response was already committed (status: %d, error: %s)", code, message)
+			logger.Server().Error("Cannot send HTTP %d response - headers already committed [%s %s] from %s",
+				code, method, uri, remoteIP)
 		}
 	}
 }

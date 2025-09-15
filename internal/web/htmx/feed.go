@@ -27,8 +27,6 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Feed) handleListGET(c echo.Context) error {
-	logger.HTMXHandlerFeed().Debug("Fetching feed data")
-
 	// Get feeds
 	feeds, err := h.DB.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
@@ -37,15 +35,11 @@ func (h *Feed) handleListGET(c echo.Context) error {
 			"error getting feeds: "+err.Error())
 	}
 
-	logger.HTMXHandlerFeed().Debug("Retrieved %d feed items", len(feeds))
-
 	// Update user's last feed
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
-
-	logger.HTMXHandlerFeed().Debug("Rendering feed data for user %s", user.Name)
 
 	feedData := feedpage.List(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
@@ -58,7 +52,7 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	if len(feeds) > 0 {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
-		logger.HTMXHandlerFeed().Info("Updating user %s last feed from %d to %d",
+		logger.HTMXHandlerFeed().Debug("Updating user %s last feed from %d to %d",
 			user.Name, oldLastFeed, user.LastFeed)
 
 		if err := h.DB.Users.Update(user, user); err != nil {
@@ -67,7 +61,6 @@ func (h *Feed) handleListGET(c echo.Context) error {
 				"error updating user's last feed: "+err.Error())
 		}
 
-		logger.HTMXHandlerFeed().Debug("Successfully updated last feed for user %s", user.Name)
 	}
 
 	return nil

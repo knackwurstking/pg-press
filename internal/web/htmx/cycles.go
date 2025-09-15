@@ -48,7 +48,6 @@ func (h *Cycles) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Cycles) handleSection(c echo.Context) error {
-	logger.DBPressCycles().Debug("Handle section")
 
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
@@ -110,14 +109,10 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "tool_id parameter is required")
 	}
 
-	logger.DBPressCycles().Debug("Handle total cycles for tool ID: %d", toolID)
-
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to get tool")
 	}
-
-	logger.DBPressCycles().Debug("Tool ID: %#v", tool)
 
 	// Get cycles for this specific tool
 	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
@@ -139,7 +134,6 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 }
 
 func (h *Cycles) handleEditGET(props *dialogs.EditCycleProps, c echo.Context) error {
-	logger.DBPressCycles().Debug("Handle edit")
 
 	if props == nil {
 		props = &dialogs.EditCycleProps{}
@@ -178,7 +172,6 @@ func (h *Cycles) handleEditGET(props *dialogs.EditCycleProps, c echo.Context) er
 }
 
 func (h *Cycles) handleEditPOST(c echo.Context) error {
-	logger.DBPressCycles().Debug("Handle edit post")
 
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
@@ -234,7 +227,6 @@ func (h *Cycles) handleEditPOST(c echo.Context) error {
 }
 
 func (h *Cycles) handleEditPUT(c echo.Context) error {
-	logger.DBPressCycles().Debug("Handle edit put")
 
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
@@ -300,7 +292,6 @@ func (h *Cycles) handleEditPUT(c echo.Context) error {
 }
 
 func (h *Cycles) handleDELETE(c echo.Context) error {
-	logger.DBPressCycles().Debug("Handle edit delete")
 
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
@@ -311,8 +302,6 @@ func (h *Cycles) handleDELETE(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	logger.HTMXHandlerTools().Debug("Handling cycle deletion request for ID %d", cycleID)
 
 	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to delete press cycle: "+err.Error())

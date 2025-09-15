@@ -22,7 +22,7 @@ var (
 // Initialize sets up the application logger with appropriate defaults
 func Initialize() {
 	// Create logger with sensible defaults
-	AppLogger = New(logOutput, WARN, true)
+	AppLogger = New(logOutput, INFO, true)
 
 	// Configure based on environment
 	configureFromEnvironment()
