@@ -52,7 +52,10 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
-	//logger.DBPressCycles().Debug("Getting partial cycles for press %d, tool %d, position %s", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition)
+	logger.DBPressCycles().Debug(
+		"Getting partial cycles for press %d, tool %d, position %s",
+		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition,
+	)
 
 	// Get the total_cycles from the previous entry on the same press and tool position
 	// IDs must be greater than start cycle ID and less than current cycle ID
@@ -72,10 +75,15 @@ func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
 	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.ID).Scan(&previousTotalCycles)
+	err := s.db.QueryRow(
+		query, cycle.PressNumber, cycle.ToolPosition, cycle.ID,
+	).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.DBPressCycles().Error("Failed to get previous total cycles for press %d, tool %d, position %s: %v", cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err)
+			logger.DBPressCycles().Error(
+				"Failed to get previous total cycles for press %d, tool %d, position %s: %v",
+				cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err,
+			)
 		}
 		return cycle.TotalCycles
 	}
@@ -355,13 +363,18 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
 	cycles := make([]*models.Cycle, 0)
 	for rows.Next() {
+		logger.DBPressCycles().Debug("Scanning press cycle %d", len(cycles))
+
 		cycle, err := p.scanPressCycle(rows)
 		if err != nil {
 			return nil, fmt.Errorf("scan error: press_cycles: %v", err)
 		}
+
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)
 	}
+
+	logger.DBPressCycles().Debug("Got %d press cycles", len(cycles))
 	return cycles, nil
 }
 
