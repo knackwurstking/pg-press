@@ -361,6 +361,7 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 
 // scanPressCyclesRows scans multiple press cycles from sql.Rows (without partial_cycles)
 func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
+	// Scanning cycles
 	cycles := make([]*models.Cycle, 0)
 	for rows.Next() {
 		logger.DBPressCycles().Debug("Scanning press cycle %d", len(cycles))
@@ -369,9 +370,15 @@ func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error
 		if err != nil {
 			return nil, fmt.Errorf("scan error: press_cycles: %v", err)
 		}
-
-		cycle.PartialCycles = p.GetPartialCycles(cycle)
 		cycles = append(cycles, cycle)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: press_cycles: %v", err)
+	}
+
+	// Get partial cycles for each cycle
+	for _, cycle := range cycles {
+		cycle.PartialCycles = p.GetPartialCycles(cycle)
 	}
 
 	logger.DBPressCycles().Debug("Got %d press cycles", len(cycles))
