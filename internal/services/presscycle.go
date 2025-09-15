@@ -52,7 +52,7 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
-	logger.DBPressCycles().Debug(
+	logger.DBPressCycles().Info(
 		"Getting partial cycles for press %d, tool %d, position %s",
 		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition,
 	)
