@@ -16,10 +16,13 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
 					>
 						<summary>{ tr.Title }</summary>
+
 						<pre>{ tr.Content }</pre>
+
 						<!-- Attachments Preview Container -->
 						if len(tr.LoadedAttachments) > 0 {
 							<br/>
+
 							<div
 								class="attachments-preview-placeholder"
 								data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
@@ -38,20 +41,20 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 							</div>
 						}
 					</details>
+
 					<div class="actions flex gap justify-end items-center">
-						<button
-							hx-get={ fmt.Sprintf(
-								"%s/htmx/trouble-reports/modifications/%d",
+						<a
+							role="button"
+							class="ghost secondary icon"
+
+							href={ fmt.Sprintf(
+								"%s/trouble-reports/modifications/%d",
 								env.ServerPathPrefix, tr.ID,
 							) }
-							hx-trigger="click"
-							hx-target="#data"
-							hx-swap="outerHTML"
-							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-							class="ghost secondary icon"
 						>
 							<i class="bi bi-clock-history"></i>
-						</button>
+						</a>
+
 						<button
 							hx-get={ fmt.Sprintf(
 								"%s/htmx/trouble-reports/dialog-edit?id=%d",
@@ -65,6 +68,7 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						>
 							<i class="bi bi-pen"></i>
 						</button>
+
 						<button
 							id={ fmt.Sprintf("share-btn-%d", tr.ID) }
 							onclick={ shareTroubleReportPDF(templ.JSExpression("event"), tr.ID, tr.Title) }
@@ -73,6 +77,7 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						>
 							<i class="bi bi-share"></i>
 						</button>
+
 						if user.IsAdmin() {
 							<button
 								hx-delete={ fmt.Sprintf(

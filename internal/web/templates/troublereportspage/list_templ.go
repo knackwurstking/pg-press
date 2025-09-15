@@ -75,7 +75,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 19, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 20, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -93,7 +93,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tr.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 25, Col: 57}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 28, Col: 57}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 						env.ServerPathPrefix, tr.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 29, Col: 9}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 32, Col: 9}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(len(tr.LoadedAttachments))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 36, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 39, Col: 46}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -133,23 +133,23 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</details><div class=\"actions flex gap justify-end items-center\"><button hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</details><div class=\"actions flex gap justify-end items-center\"><!-- TODO: This modifications view will move to the modifications page entirely --><a role=\"button\" class=\"ghost secondary icon\" href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-					"%s/htmx/trouble-reports/modifications/%d",
+				var templ_7745c5c3_Var8 templ.SafeURL
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
+					"%s/trouble-reports/modifications/%d",
 					env.ServerPathPrefix, tr.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 46, Col: 8}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 54, Col: 8}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost secondary icon\"><i class=\"bi bi-clock-history\"></i></button> <button hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><i class=\"bi bi-clock-history\"></i></a> <button hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -159,7 +159,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 					env.ServerPathPrefix, tr.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 59, Col: 8}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 63, Col: 8}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -180,7 +180,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("share-btn-%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 69, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 74, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 						env.ServerPathPrefix, tr.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 81, Col: 9}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 87, Col: 9}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -231,7 +231,7 @@ func List(user *models.User, troubleReports []*models.TroubleReportWithAttachmen
 						env.ServerPathPrefix, tr.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 98, Col: 9}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/troublereportspage/list.templ`, Line: 104, Col: 9}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {

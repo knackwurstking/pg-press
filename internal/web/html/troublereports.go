@@ -22,7 +22,7 @@ type TroubleReports struct {
 	DB *database.DB
 }
 
-// TODO: Add modifications the view
+// TODO: Add "/trouble-reports/modifications/:id" the view
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
