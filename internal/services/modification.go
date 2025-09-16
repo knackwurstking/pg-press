@@ -54,7 +54,7 @@ func (s *Modification) createTable() {
 			entity_id INTEGER NOT NULL,
 			data BLOB NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(user_id) REFERENCES users(telegram_id) ON DELETE CASCADE
+			FOREIGN KEY(user_id) REFERENCES users(telegram_id) ON DELETE SET NULL
 		);
 
 		CREATE INDEX IF NOT EXISTS idx_modifications_entity ON modifications(entity_type, entity_id);
