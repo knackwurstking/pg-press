@@ -516,7 +516,6 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 
 	logger.HTMXHandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
 
-	// TODO: Move this to the templates folder
 	// Return success message for HTMX
 	return c.HTML(http.StatusOK, `
 		<div class="card success p mb">
@@ -533,6 +532,7 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 				</div>
 			</div>
 		</div>
+
 		<script>
 			setTimeout(function() {
 				window.location.reload();
