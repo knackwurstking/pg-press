@@ -103,7 +103,7 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
                             selectedFiles.forEach((file) => dt.items.add(file));
                             fileInput.files = dt.files;
 
-                            onAttachments();
+                            onAttachments(event);
                         };
 
                         container.appendChild(item);
@@ -238,7 +238,7 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 					id="attachments"
 					multiple
 					accept="image/*"
-					onchange='onAttachments(this.event)'
+					onchange='onAttachments(event)'
 				/>
 			</div>
 
