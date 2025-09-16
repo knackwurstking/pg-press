@@ -19,7 +19,6 @@ type EditTroubleReportProps struct {
 	Attachments     []*models.Attachment
 }
 
-// FIXME: "TypeError: undefined is not an object" after loading attachment(s)
 templ EditTroubleReport(props *EditTroubleReportProps) {
 	{{
 		var (
