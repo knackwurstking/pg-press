@@ -8,38 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
-// Breadcrumb navigation for trouble report modifications
-templ ModificationsBreadcrumb(reportID int64) {
-	<nav class="flex mb" aria-label="Breadcrumb">
-		<ol class="inline-flex items-center gap">
-			<li class="inline-flex items-center">
-				<a href="/trouble-reports" class="inline-flex items-center text-sm nav-link">
-					<svg width="16" height="16" style="margin-right: var(--ui-spacing);" fill="currentColor" viewBox="0 0 20 20">
-						<path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-					</svg>
-					Trouble Reports
-				</a>
-			</li>
-			<li>
-				<div class="flex items-center">
-					<svg width="24" height="24" class="muted" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-					</svg>
-					<span style="margin-left: var(--ui-spacing);" class="text-sm muted">Report #{ fmt.Sprintf("%d", reportID) }</span>
-				</div>
-			</li>
-			<li aria-current="page">
-				<div class="flex items-center">
-					<svg width="24" height="24" class="muted" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-					</svg>
-					<span style="margin-left: var(--ui-spacing);" class="text-sm muted">Modifications</span>
-				</div>
-			</li>
-		</ol>
-	</nav>
-}
-
 // Individual modification entry with rollback functionality
 templ ModificationEntry(mod *modification.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
 	<div class="card primary p mb" style="border-left: 4px solid var(--ui-primary);">
@@ -94,35 +62,21 @@ templ RollbackButton(reportID int64, modificationTime int64) {
 	</form>
 }
 
-// Complete modifications page with breadcrumbs and rollback messages
-templ ModificationsPageContent(reportID int64, mods modification.Mods[models.TroubleReportModData], canRollback bool) {
-	@ModificationsBreadcrumb(reportID)
-	<div id="rollback-messages"></div>
-	
-	for _, mod := range mods {
-		@ModificationEntry(mod, reportID, canRollback)
-	}
-}
-
 // Render function factory that returns a templ.Component for use with modificationspage.Page
 func CreateModificationRenderer(reportID int64, canRollback bool) func(*modification.Mod[models.TroubleReportModData]) templ.Component {
-	renderBreadcrumbs := true
+	renderOnce := true
+
 	return func(mod *modification.Mod[models.TroubleReportModData]) templ.Component {
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-			// Render breadcrumbs and rollback messages container only once
-			if renderBreadcrumbs {
-				breadcrumb := ModificationsBreadcrumb(reportID)
-				if err := breadcrumb.Render(ctx, w); err != nil {
-					return err
-				}
-				
+			// Render rollback messages container only once
+			if renderOnce {
 				if _, err := w.Write([]byte(`<div id="rollback-messages"></div>`)); err != nil {
 					return err
 				}
-				
-				renderBreadcrumbs = false
+
+				renderOnce = false
 			}
-			
+
 			// Render the modification entry
 			entry := ModificationEntry(mod, reportID, canRollback)
 			return entry.Render(ctx, w)

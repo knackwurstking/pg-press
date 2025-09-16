@@ -94,7 +94,9 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		// Handle nil error case (should never happen, but be defensive)
 		if err == nil {
-			logger.Server().Error("HTTP error handler received nil error - this indicates a bug in the application")
+			logger.Server().Error("HTTP error handler received nil error - " +
+				"this indicates a bug in the application")
+
 			err = errors.New("unexpected nil error")
 		}
 
@@ -124,22 +126,25 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		uri := req.RequestURI
 		userAgent := req.UserAgent()
 
-		// Log errors with appropriate level and context
 		if code >= 500 {
 			logger.Server().Error("HTTP %d: %s [%s %s] from %s (UA: %s)",
 				code, message, method, uri, remoteIP, userAgent)
 		} else if code >= 400 {
-			// Be more selective with client error logging to reduce noise
-			if code == 401 || code == 403 {
-				logger.Server().Warn("HTTP %d: Authentication/Authorization failed [%s %s] from %s",
+			switch code {
+			case 401, 403:
+				logger.Server().Warn(
+					"HTTP %d: Authentication/Authorization failed [%s %s] from %s",
 					code, method, uri, remoteIP)
-			} else if code == 404 {
-				logger.Server().Debug("HTTP %d: Not found [%s %s] from %s",
+			case 404:
+				logger.Server().Warn("HTTP %d: Not found [%s %s] from %s",
 					code, method, uri, remoteIP)
-			} else {
-				logger.Server().Info("HTTP %d: %s [%s %s] from %s",
+			default:
+				logger.Server().Warn("HTTP %d: %s [%s %s] from %s",
 					code, message, method, uri, remoteIP)
 			}
+		} else {
+			logger.Server().Warn("HTTP %d: %s [%s %s] from %s",
+				code, message, method, uri, remoteIP)
 		}
 
 		// Send error response if headers haven't been written yet
@@ -154,7 +159,9 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				c.String(code, message)
 			}
 		} else {
-			logger.Server().Error("Cannot send HTTP %d response - headers already committed [%s %s] from %s",
+			logger.Server().Error(
+				"Cannot send HTTP %d response - "+
+					"headers already committed [%s %s] from %s",
 				code, method, uri, remoteIP)
 		}
 	}

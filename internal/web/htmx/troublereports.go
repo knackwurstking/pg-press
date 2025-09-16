@@ -473,8 +473,6 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	modifications, err := h.DB.Modifications.ListAll(
 		services.ModificationTypeTroubleReport, id)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to get modifications: %v", err) // TODO: ???
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve modifications: "+err.Error())
 	}
@@ -494,8 +492,6 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	// Unmarshal the modification data
 	var modData models.TroubleReportModData
 	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to unmarshal modification data: %v", err) // TODO: ???
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to parse modification data: "+err.Error())
 	}
@@ -503,7 +499,6 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	// Get the current trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve trouble report: "+err.Error())
 	}
@@ -515,13 +510,13 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 
 	// Update the trouble report
 	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to rollback trouble report %d: %v", id, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to rollback trouble report: "+err.Error())
 	}
 
 	logger.HTMXHandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
 
+	// TODO: Move this to the templates folder
 	// Return success message for HTMX
 	return c.HTML(http.StatusOK, `
 		<div class="card success p mb">

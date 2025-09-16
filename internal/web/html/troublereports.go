@@ -42,8 +42,8 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id",
 				h.handleModificationsGET),
 
-			helpers.NewEchoRoute(http.MethodPost, "/trouble-reports/rollback/:id",
-				h.handleRollbackPOST),
+			//helpers.NewEchoRoute(http.MethodPost, "/trouble-reports/rollback/:id",
+			//	h.handleRollbackPOST),
 		},
 	)
 }
@@ -129,7 +129,6 @@ func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	// Parse ID parameter
 	id, err := helpers.ParseInt64Param(c, "id")
 	if err != nil {
-		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
 		return err
 	}
 
@@ -138,22 +137,19 @@ func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	modifications, err := h.DB.Modifications.ListWithUser(
 		services.ModificationTypeTroubleReport, id, 100, 0)
 	if err != nil {
-		logger.HandlerTroubleReports().Error(
-			"Failed to retrieve modifications for trouble report %d: %v",
-			id, err,
-		)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve modifications: "+err.Error())
 	}
 
-	logger.HandlerTroubleReports().Debug("Found %d modifications for trouble report %d", len(modifications), id)
+	logger.HandlerTroubleReports().Debug(
+		"Found %d modifications for trouble report %d",
+		len(modifications), id)
 
 	// Convert to the format expected by the modifications page
 	var m modification.Mods[models.TroubleReportModData]
 	for _, mod := range modifications {
 		var data models.TroubleReportModData
 		if err := json.Unmarshal(mod.Modification.Data, &data); err != nil {
-			logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
 			continue
 		}
 
@@ -196,88 +192,86 @@ func (h *TroubleReports) shareResponse(
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
 }
 
-func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
-	logger.HandlerTroubleReports().Info("Handling rollback for trouble report")
-
-	// Parse ID parameter
-	id, err := helpers.ParseInt64Param(c, "id")
-	if err != nil {
-		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
-		return err
-	}
-
-	// Get modification timestamp from form data
-	modTimeStr := c.FormValue("modification_time")
-	if modTimeStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
-	}
-
-	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
-	}
-
-	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
-	if err != nil {
-		return err
-	}
-
-	logger.HandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
-		user.Name, id, modTime)
-
-	// Find the specific modification
-	modifications, err := h.DB.Modifications.ListAll(
-		services.ModificationTypeTroubleReport, id)
-	if err != nil {
-		logger.HandlerTroubleReports().Error("Failed to get modifications: %v", err)
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve modifications: "+err.Error())
-	}
-
-	var targetMod *models.Modification[interface{}]
-	for _, mod := range modifications {
-		if mod.CreatedAt.UnixMilli() == modTime {
-			targetMod = mod
-			break
-		}
-	}
-
-	if targetMod == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
-	}
-
-	// Unmarshal the modification data
-	var modData models.TroubleReportModData
-	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to parse modification data: "+err.Error())
-	}
-
-	// Get the current trouble report
-	tr, err := h.DB.TroubleReports.Get(id)
-	if err != nil {
-		logger.HandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve trouble report: "+err.Error())
-	}
-
-	// Apply the rollback
-	tr.Title = modData.Title
-	tr.Content = modData.Content
-	tr.LinkedAttachments = modData.LinkedAttachments
-
-	// Update the trouble report
-	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
-		logger.HandlerTroubleReports().Error("Failed to rollback trouble report %d: %v", id, err)
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to rollback trouble report: "+err.Error())
-	}
-
-	logger.HandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
-
-	// Redirect back to modifications page
-	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/trouble-reports/modifications/%d", id))
-	return c.NoContent(http.StatusOK)
-}
+//func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
+//	logger.HandlerTroubleReports().Info("Handling rollback for trouble report")
+//
+//	// Parse ID parameter
+//	id, err := helpers.ParseInt64Param(c, "id")
+//	if err != nil {
+//		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
+//		return err
+//	}
+//
+//	// Get modification timestamp from form data
+//	modTimeStr := c.FormValue("modification_time")
+//	if modTimeStr == "" {
+//		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
+//	}
+//
+//	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
+//	if err != nil {
+//		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
+//	}
+//
+//	// Get user from context
+//	user, err := helpers.GetUserFromContext(c)
+//	if err != nil {
+//		return err
+//	}
+//
+//	logger.HandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
+//		user.Name, id, modTime)
+//
+//	// Find the specific modification
+//	modifications, err := h.DB.Modifications.ListAll(
+//		services.ModificationTypeTroubleReport, id)
+//	if err != nil {
+//		logger.HandlerTroubleReports().Error("Failed to get modifications: %v", err)
+//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+//			"failed to retrieve modifications: "+err.Error())
+//	}
+//
+//	var targetMod *models.Modification[interface{}]
+//	for _, mod := range modifications {
+//		if mod.CreatedAt.UnixMilli() == modTime {
+//			targetMod = mod
+//			break
+//		}
+//	}
+//
+//	if targetMod == nil {
+//		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
+//	}
+//
+//	// Unmarshal the modification data
+//	var modData models.TroubleReportModData
+//	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
+//		logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
+//		return echo.NewHTTPError(http.StatusInternalServerError,
+//			"failed to parse modification data: "+err.Error())
+//	}
+//
+//	// Get the current trouble report
+//	tr, err := h.DB.TroubleReports.Get(id)
+//	if err != nil {
+//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+//			"failed to retrieve trouble report: "+err.Error())
+//	}
+//
+//	// Apply the rollback
+//	tr.Title = modData.Title
+//	tr.Content = modData.Content
+//	tr.LinkedAttachments = modData.LinkedAttachments
+//
+//	// Update the trouble report
+//	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
+//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+//			"failed to rollback trouble report: "+err.Error())
+//	}
+//
+//	logger.HandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
+//
+//	// Redirect back to modifications page
+//	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/trouble-reports/modifications/%d", id))
+//	return c.NoContent(http.StatusOK)
+//}
