@@ -15,15 +15,15 @@ type TroubleReport struct {
 	db            *sql.DB
 	attachments   *Attachment
 	feeds         *Feed
-	modifications *ModificationService
+	modifications *Modification
 }
 
-func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *TroubleReport {
+func NewTroubleReport(db *sql.DB, a *Attachment, f *Feed, m *Modification) *TroubleReport {
 	troubleReport := &TroubleReport{
 		db:            db,
-		attachments:   attachments,
-		feeds:         feeds,
-		modifications: NewModificationService(db),
+		attachments:   a,
+		feeds:         f,
+		modifications: m,
 	}
 
 	if err := troubleReport.createTable(db); err != nil {

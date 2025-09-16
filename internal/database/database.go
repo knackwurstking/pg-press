@@ -22,15 +22,18 @@ type DB struct {
 	Cookies           *services.Cookie
 	ToolRegenerations *services.Regeneration
 	Feeds             *services.Feed
+	Modifications     *services.Modification
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
 // Feeds must be created before Users and TroubleReports as they generate feed entries.
 func New(db *sql.DB) *DB {
+	modifications := services.NewModification(db)
+
 	feeds := services.NewFeed(db)
 
 	attachments := services.NewAttachment(db)
-	troubleReports := services.NewTroubleReport(db, attachments, feeds)
+	troubleReports := services.NewTroubleReport(db, attachments, feeds, modifications)
 
 	pressCycles := services.NewPressCycle(db, feeds)
 
@@ -50,9 +53,9 @@ func New(db *sql.DB) *DB {
 		MetalSheets:       metalSheets,
 		PressCycles:       pressCycles,
 		ToolRegenerations: toolRegenerations,
-
-		Feeds: feeds,
-		db:    db,
+		Modifications:     modifications,
+		Feeds:             feeds,
+		db:                db,
 	}
 
 	return dbInstance

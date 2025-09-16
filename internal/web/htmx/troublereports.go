@@ -469,13 +469,12 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	logger.HTMXHandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
 		user.Name, id, modTime)
 
-	// Get modification service
-	modService := services.NewModificationService(h.DB.GetDB())
-
 	// Find the specific modification
-	modifications, err := modService.ListAll(services.ModificationTypeTroubleReport, id)
+	modifications, err := h.DB.Modifications.ListAll(
+		services.ModificationTypeTroubleReport, id)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to get modifications: %v", err)
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to get modifications: %v", err) // TODO: ???
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to retrieve modifications: "+err.Error())
 	}
@@ -495,7 +494,8 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	// Unmarshal the modification data
 	var modData models.TroubleReportModData
 	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to unmarshal modification data: %v", err) // TODO: ???
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to parse modification data: "+err.Error())
 	}
