@@ -2,17 +2,18 @@ package html
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/modificationspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
@@ -40,6 +41,9 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id",
 				h.handleModificationsGET),
+
+			helpers.NewEchoRoute(http.MethodPost, "/trouble-reports/rollback/:id",
+				h.handleRollbackPOST),
 		},
 	)
 }
@@ -119,6 +123,40 @@ func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
 	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
 
+// handleModificationsGET handles the trouble reports modifications page for rollback functionality.
+//
+// This endpoint provides a comprehensive modification history and rollback system for trouble reports:
+//
+// Features:
+// - Displays all historical modifications in chronological order
+// - Shows the current version at the top with a special highlight
+// - Provides rollback functionality for administrators to restore previous versions
+// - Each modification entry shows: user, timestamp, title, content, and attachment count
+// - Breadcrumb navigation for easy return to trouble reports list
+//
+// Rollback System:
+// - Only administrators can perform rollbacks (user.IsAdmin() check)
+// - Rollbacks are performed via HTMX for smooth user experience
+// - Each rollback creates a new modification entry preserving history
+// - Confirmation dialog prevents accidental rollbacks
+// - Success feedback with automatic page refresh
+//
+// Data Flow:
+// 1. Fetch trouble report by ID from URL parameter
+// 2. Query modification service for all historical changes
+// 3. Convert database modifications to template-friendly format
+// 4. Render modifications page with rollback controls
+//
+// Security:
+// - Rollback buttons only shown to administrators
+// - All rollback operations require admin privileges
+// - Modification data is properly validated and sanitized
+//
+// Template Integration:
+// - Uses generic modificationspage.Page template
+// - Custom render function creates HTML for each modification entry
+// - Responsive design with proper styling and icons
+// - HTMX integration for seamless rollback operations
 func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	logger.HandlerTroubleReports().Info("Handling modifications for trouble report")
 
@@ -143,13 +181,43 @@ func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 
 	logger.HandlerTroubleReports().Debug("Successfully retrieved trouble report %d", id)
 
-	// TODO: Implement modifications handling logic...
-	var (
-		m modification.Mods[models.TroubleReportModData]
-		f func(m *modification.Mod[models.TroubleReportModData]) templ.Component
-	)
+	// Get modification service from database
+	modService := services.NewModificationService(h.DB.GetDB())
 
-	// ...
+	// Fetch modifications for this trouble report
+	logger.HandlerTroubleReports().Debug("Fetching modifications for trouble report %d", id)
+	modifications, err := modService.ListWithUser(services.ModificationTypeTroubleReport, id, 100, 0)
+	if err != nil {
+		logger.HandlerTroubleReports().Error(
+			"Failed to retrieve modifications for trouble report %d: %v",
+			id, err,
+		)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve modifications: "+err.Error())
+	}
+
+	logger.HandlerTroubleReports().Debug("Found %d modifications for trouble report %d", len(modifications), id)
+
+	// Convert to the format expected by the modifications page
+	var m modification.Mods[models.TroubleReportModData]
+	for _, mod := range modifications {
+		var data models.TroubleReportModData
+		if err := json.Unmarshal(mod.Modification.Data, &data); err != nil {
+			logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
+			continue
+		}
+
+		modEntry := modification.NewMod(&mod.User, data)
+		modEntry.Time = mod.Modification.CreatedAt.UnixMilli()
+		m = append(m, modEntry)
+	}
+
+	// Get user from context to check permissions
+	currentUser, _ := helpers.GetUserFromContext(c)
+	canRollback := currentUser != nil && currentUser.IsAdmin()
+
+	// Create render function using the new template
+	f := troublereportspage.CreateModificationRenderer(id, canRollback)
 
 	// Rendering the page template
 	page := modificationspage.Page(m, f)
@@ -176,4 +244,92 @@ func (h *TroubleReports) shareResponse(
 		fmt.Sprintf("%d", buf.Len()))
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
+}
+
+func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
+	logger.HandlerTroubleReports().Info("Handling rollback for trouble report")
+
+	// Parse ID parameter
+	id, err := helpers.ParseInt64Param(c, "id")
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
+		return err
+	}
+
+	// Get modification timestamp from form data
+	modTimeStr := c.FormValue("modification_time")
+	if modTimeStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
+	}
+
+	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
+	}
+
+	// Get user from context
+	user, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	logger.HandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
+		user.Name, id, modTime)
+
+	// Get modification service
+	modService := services.NewModificationService(h.DB.GetDB())
+
+	// Find the specific modification
+	modifications, err := modService.ListAll(services.ModificationTypeTroubleReport, id)
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Failed to get modifications: %v", err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve modifications: "+err.Error())
+	}
+
+	var targetMod *models.Modification[interface{}]
+	for _, mod := range modifications {
+		if mod.CreatedAt.UnixMilli() == modTime {
+			targetMod = mod
+			break
+		}
+	}
+
+	if targetMod == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
+	}
+
+	// Unmarshal the modification data
+	var modData models.TroubleReportModData
+	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
+		logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to parse modification data: "+err.Error())
+	}
+
+	// Get the current trouble report
+	tr, err := h.DB.TroubleReports.Get(id)
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve trouble report: "+err.Error())
+	}
+
+	// Apply the rollback
+	tr.Title = modData.Title
+	tr.Content = modData.Content
+	tr.LinkedAttachments = modData.LinkedAttachments
+
+	// Update the trouble report
+	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
+		logger.HandlerTroubleReports().Error("Failed to rollback trouble report %d: %v", id, err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to rollback trouble report: "+err.Error())
+	}
+
+	logger.HandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
+
+	// Redirect back to modifications page
+	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/trouble-reports/modifications/%d", id))
+	return c.NoContent(http.StatusOK)
 }

@@ -12,16 +12,18 @@ import (
 )
 
 type TroubleReport struct {
-	db          *sql.DB
-	attachments *Attachment
-	feeds       *Feed
+	db            *sql.DB
+	attachments   *Attachment
+	feeds         *Feed
+	modifications *ModificationService
 }
 
 func NewTroubleReport(db *sql.DB, attachments *Attachment, feeds *Feed) *TroubleReport {
 	troubleReport := &TroubleReport{
-		db:          db,
-		attachments: attachments,
-		feeds:       feeds,
+		db:            db,
+		attachments:   attachments,
+		feeds:         feeds,
+		modifications: NewModificationService(db),
 	}
 
 	if err := troubleReport.createTable(db); err != nil {
@@ -143,6 +145,17 @@ func (s *TroubleReport) Add(troubleReport *models.TroubleReport, user *models.Us
 	}
 	troubleReport.ID = id
 
+	// Save initial modification
+	modData := models.TroubleReportModData{
+		Title:             troubleReport.Title,
+		Content:           troubleReport.Content,
+		LinkedAttachments: troubleReport.LinkedAttachments,
+	}
+	if err := s.modifications.AddTroubleReportMod(user.TelegramID, id, modData); err != nil {
+		logger.DBTroubleReports().Error("Failed to save initial modification for trouble report %d: %v", id, err)
+		// Don't fail the entire operation for modification tracking
+	}
+
 	// Create feed entry for trouble report
 	feed := models.NewFeed(
 		"Neuer Problembericht",
@@ -190,6 +203,17 @@ func (s *TroubleReport) Update(troubleReport *models.TroubleReport, user *models
 	)
 	if err != nil {
 		return fmt.Errorf("update error: trouble_reports: %v", err)
+	}
+
+	// Save modification
+	modData := models.TroubleReportModData{
+		Title:             troubleReport.Title,
+		Content:           troubleReport.Content,
+		LinkedAttachments: troubleReport.LinkedAttachments,
+	}
+	if err := s.modifications.AddTroubleReportMod(user.TelegramID, troubleReport.ID, modData); err != nil {
+		logger.DBTroubleReports().Error("Failed to save modification for trouble report %d: %v", troubleReport.ID, err)
+		// Don't fail the entire operation for modification tracking
 	}
 
 	feed := models.NewFeed(
@@ -460,6 +484,18 @@ func (s *TroubleReport) UpdateWithAttachments(
 		}
 
 		return err
+	}
+
+	// Save modification (additional to the one saved in Update method)
+	// This ensures we track the attachment changes specifically
+	modData := models.TroubleReportModData{
+		Title:             tr.Title,
+		Content:           tr.Content,
+		LinkedAttachments: tr.LinkedAttachments,
+	}
+	if err := s.modifications.AddTroubleReportMod(user.TelegramID, id, modData); err != nil {
+		logger.DBTroubleReports().Error("Failed to save modification for trouble report %d with attachments: %v", id, err)
+		// Don't fail the entire operation for modification tracking
 	}
 
 	logger.DBTroubleReports().Info(

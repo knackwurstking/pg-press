@@ -1,14 +1,96 @@
 package modificationspage
 
-import "github.com/knackwurstking/pgpress/pkg/modification"
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/pkg/modification"
+)
 
-// TODO: A Generic modifications page template
+// Generic modifications page template with enhanced layout
 templ Page[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) {
-	// TODO: List the current on top and then the rest
+	<div class="h-screen">
+		<div class="container">
+			<!-- Page Header -->
+			<div class="card elevated p-lg mb">
+				<div class="flex items-center justify-between">
+					<div>
+						<h1 class="text-2xl text-bold">Modifications History</h1>
+						<p class="text-sm muted mt">View and rollback to previous versions</p>
+					</div>
+					<div class="flex items-center gap">
+						<span class="badge info">
+							{ fmt.Sprintf("%d versions", len(m)) }
+						</span>
+						<a href="javascript:history.back()" 
+						   role="button" class="secondary">
+							← Back
+						</a>
+					</div>
+				</div>
+			</div>
 
-	<div class="flex flex-col gap">
-		for _, mod := range m {
-			@f(mod)
-		}
+			<!-- Modifications List -->
+			<div class="flex flex-col gap">
+				if len(m) == 0 {
+					<div class="card p-xl text-center">
+						<div class="muted mb">
+							<svg width="48" height="48" style="margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+							</svg>
+						</div>
+						<h3 class="text-lg text-semibold mb">No Modifications Found</h3>
+						<p class="muted">This item has no modification history yet.</p>
+					</div>
+				} else {
+					<!-- Current Version (Latest Modification) -->
+					if len(m) > 0 {
+						<div class="card success p" style="border-left: 4px solid var(--ui-success);">
+							<div class="flex items-center mb">
+								<span class="badge success">
+									Current Version
+								</span>
+								<span class="ml text-sm muted">Latest</span>
+							</div>
+							@f(m.Current())
+						</div>
+					}
+
+					<!-- Previous Versions -->
+					if len(m) > 1 {
+						<div class="card">
+							<div class="card-header">
+								<h2 class="text-lg text-semibold">Previous Versions</h2>
+								<p class="text-sm muted">Click "Rollback" to restore a previous version</p>
+							</div>
+							<div class="card-body">
+								for i, mod := range m.Reversed() {
+									if i > 0 {
+										<div class="p mb">
+											@f(mod)
+										</div>
+									}
+								}
+							</div>
+						</div>
+					}
+				}
+			</div>
+
+			<!-- Help Text -->
+			<div class="card info p" style="margin-top: calc(var(--ui-spacing) * 2);">
+				<div class="flex">
+					<div class="shrink-0">
+						<svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+						</svg>
+					</div>
+					<div class="ml">
+						<h3 class="text-sm text-semibold">About Rollbacks</h3>
+						<div class="mt text-sm">
+							<p>Rolling back will restore the selected version and create a new modification entry. The current version will be preserved in the history.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 }

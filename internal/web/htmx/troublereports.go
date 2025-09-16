@@ -1,6 +1,7 @@
 package htmx
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -14,6 +15,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
@@ -52,6 +54,10 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data",
 				h.handleDataDELETE,
 			),
+
+			// Rollback route
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
+				h.handleRollbackPOST),
 
 			// Attachments preview routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview",
@@ -427,6 +433,117 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	}
 
 	return attachments, nil
+}
+
+func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
+	logger.HTMXHandlerTroubleReports().Info("Handling HTMX rollback for trouble report")
+
+	// Parse ID parameter from query
+	id, err := helpers.ParseInt64Query(c, "id")
+	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Invalid ID parameter: %v", err)
+		return err
+	}
+
+	// Get modification timestamp from form data
+	modTimeStr := c.FormValue("modification_time")
+	if modTimeStr == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
+	}
+
+	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
+	}
+
+	// Get user from context
+	user, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if !user.IsAdmin() {
+		return echo.NewHTTPError(http.StatusForbidden, "administrator privileges required")
+	}
+
+	logger.HTMXHandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
+		user.Name, id, modTime)
+
+	// Get modification service
+	modService := services.NewModificationService(h.DB.GetDB())
+
+	// Find the specific modification
+	modifications, err := modService.ListAll(services.ModificationTypeTroubleReport, id)
+	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to get modifications: %v", err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve modifications: "+err.Error())
+	}
+
+	var targetMod *models.Modification[interface{}]
+	for _, mod := range modifications {
+		if mod.CreatedAt.UnixMilli() == modTime {
+			targetMod = mod
+			break
+		}
+	}
+
+	if targetMod == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
+	}
+
+	// Unmarshal the modification data
+	var modData models.TroubleReportModData
+	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to parse modification data: "+err.Error())
+	}
+
+	// Get the current trouble report
+	tr, err := h.DB.TroubleReports.Get(id)
+	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to retrieve trouble report: "+err.Error())
+	}
+
+	// Apply the rollback
+	tr.Title = modData.Title
+	tr.Content = modData.Content
+	tr.LinkedAttachments = modData.LinkedAttachments
+
+	// Update the trouble report
+	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
+		logger.HTMXHandlerTroubleReports().Error("Failed to rollback trouble report %d: %v", id, err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to rollback trouble report: "+err.Error())
+	}
+
+	logger.HTMXHandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
+
+	// Return success message for HTMX
+	return c.HTML(http.StatusOK, `
+		<div class="card success p mb">
+			<div class="flex">
+				<div class="shrink-0">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+					</svg>
+				</div>
+				<div style="margin-left: var(--ui-spacing);">
+					<p class="text-sm text-semibold">
+						Successfully rolled back trouble report. The page will refresh automatically.
+					</p>
+				</div>
+			</div>
+		</div>
+		<script>
+			setTimeout(function() {
+				window.location.reload();
+			}, 2000);
+		</script>
+	`)
 }
 
 func (h *TroubleReports) processFileUpload(
