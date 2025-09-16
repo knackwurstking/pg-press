@@ -148,6 +148,7 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
+// TODO: Get rid of the props parameter, no longer needed
 func (h *TroubleReports) handleGetDialogEdit(
 	c echo.Context,
 	props *dialogs.EditTroubleReportProps,
@@ -156,11 +157,7 @@ func (h *TroubleReports) handleGetDialogEdit(
 		props = &dialogs.EditTroubleReportProps{}
 	}
 
-	if !props.Close {
-		props.Close = helpers.ParseBoolQuery(c, "close")
-	}
-
-	if !props.Close && !props.InvalidTitle && !props.InvalidContent {
+	if !props.InvalidTitle && !props.InvalidContent {
 		if idStr := c.QueryParam("id"); idStr != "" {
 			id, err := helpers.ParseInt64Query(c, "id")
 			if err != nil {
@@ -195,14 +192,11 @@ func (h *TroubleReports) handleGetDialogEdit(
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render Trouble Reports Edit Dialog: "+err.Error())
 	}
+
 	return nil
 }
 
 func (h *TroubleReports) handleDialogEditPOST(c echo.Context) error {
-	props := &dialogs.EditTroubleReportProps{
-		Close: true,
-	}
-
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
@@ -215,41 +209,35 @@ func (h *TroubleReports) handleDialogEditPOST(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	props.Title = title
-	props.Content = content
-	props.InvalidTitle = title == ""
-	props.InvalidContent = content == ""
-
-	if !props.InvalidTitle && !props.InvalidContent {
-		props.Attachments = attachments
-		tr := models.NewTroubleReport(title, content)
-
-		logger.HTMXHandlerTroubleReports().Debug(
-			"Creating trouble report: title='%s', attachments=%d",
-			title, len(attachments),
-		)
-
-		err := h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
-		if err != nil {
-			logger.HTMXHandlerTroubleReports().Error(
-				"Failed to add trouble report: %v",
-				err,
-			)
-
-			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-				"failed to add trouble report: "+err.Error())
-		}
-
-		logger.HTMXHandlerTroubleReports().Info(
-			"Successfully created trouble report %d",
-			tr.ID,
-		)
-	} else {
-		props.Close = false
+	if title == "" || content == "" {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"title and content are required")
 	}
 
-	return h.handleGetDialogEdit(c, props)
+	tr := models.NewTroubleReport(title, content)
+
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Creating trouble report: title='%s', attachments=%d",
+		title, len(attachments),
+	)
+
+	err = h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
+	if err != nil {
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to add trouble report: %v",
+			err,
+		)
+
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to add trouble report: "+err.Error())
+	}
+
+	logger.HTMXHandlerTroubleReports().Info(
+		"Successfully created trouble report %d",
+		tr.ID,
+	)
+
+	return nil
 }
 
 func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
@@ -273,30 +261,14 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
 	}
-
-	// Initialize dialog template data
-	props := &dialogs.EditTroubleReportProps{
-		Close:          true,
-		ID:             id,
-		Title:          title,
-		Content:        content,
-		InvalidTitle:   title == "",
-		InvalidContent: content == "",
+	if title == "" || content == "" {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"title and content are required")
 	}
-
-	// Abort if invalid title or content
-	if props.InvalidTitle || props.InvalidContent {
-		props.Close = false
-		return h.handleGetDialogEdit(c, props)
-	}
-
-	// Set attachments to handlePutDialogEdit
-	props.Attachments = attachments
 
 	// Query previous trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get trouble report: "+err.Error())
 	}
@@ -304,7 +276,7 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 	// Filter out existing and new attachments
 	var existingAttachmentIDs []int64
 	var newAttachments []*models.Attachment
-	for _, a := range props.Attachments {
+	for _, a := range attachments {
 		if a.GetID() > 0 {
 			existingAttachmentIDs = append(existingAttachmentIDs, a.GetID())
 		} else {
@@ -314,29 +286,20 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 
 	// Update trouble report with existing and new attachments, title content and mods
 	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d with %d attachments",
-		id, len(props.Attachments))
+		id, len(attachments))
 
+	// Update the previous trouble report
 	tr.Title = title
 	tr.Content = content
 	tr.LinkedAttachments = existingAttachmentIDs
 
 	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to update trouble report %d: %v",
-			id, err,
-		)
-
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update trouble report: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Info(
-		"Successfully updated trouble report %d",
-		id,
-	)
-
-	return h.handleGetDialogEdit(c, props)
+	return nil
 }
 
 // TODO: Do somehtings like the `get*FormData` method in "tools.go"
