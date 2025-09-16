@@ -14,7 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	modificationspage "github.com/knackwurstking/pgpress/internal/web/templates/modifiactionspage"
+	"github.com/knackwurstking/pgpress/internal/web/templates/modificationspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/modification"
@@ -25,20 +25,26 @@ type TroubleReports struct {
 	DB *database.DB
 }
 
-// TODO: Add "/trouble-reports/modifications/:id" the view
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports", h.handleTroubleReports),
-			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.handleGetSharePdf),
-			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.handleGetAttachment),
-			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id", h.handleModifications),
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports",
+				h.handleTroubleReportsGET),
+
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf",
+				h.handleSharePdfGET),
+
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment",
+				h.handleAttachmentGET),
+
+			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id",
+				h.handleModificationsGET),
 		},
 	)
 }
 
-func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
+func (h *TroubleReports) handleTroubleReportsGET(c echo.Context) error {
 	logger.HandlerTroubleReports().Debug("Rendering trouble reports page")
 
 	page := troublereportspage.Page()
@@ -49,7 +55,7 @@ func (h *TroubleReports) handleTroubleReports(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
+func (h *TroubleReports) handleSharePdfGET(c echo.Context) error {
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
@@ -78,7 +84,42 @@ func (h *TroubleReports) handleGetSharePdf(c echo.Context) error {
 	return h.shareResponse(c, tr, pdfBuffer)
 }
 
-func (h *TroubleReports) handleModifications(c echo.Context) error {
+func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
+	attachmentID, err := helpers.ParseInt64Query(c, "attachment_id")
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
+		return err
+	}
+
+	logger.HandlerTroubleReports().Debug("Fetching attachment %d", attachmentID)
+
+	// Get the attachment from the attachments table
+	attachment, err := h.DB.Attachments.Get(attachmentID)
+	if err != nil {
+		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to get attachment: "+err.Error())
+	}
+
+	// Set appropriate headers
+	c.Response().Header().Set("Content-Type", attachment.MimeType)
+	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
+
+	// Try to determine filename from attachment ID
+	filename := fmt.Sprintf("attachment_%d", attachmentID)
+	if ext := attachment.GetFileExtension(); ext != "" {
+		filename += ext
+	}
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	logger.HandlerTroubleReports().Info("Serving attachment %d (size: %d bytes, type: %s)",
+		attachmentID, len(attachment.Data), attachment.MimeType)
+
+	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
+}
+
+func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	logger.HandlerTroubleReports().Info("Handling modifications for trouble report")
 
 	// Parse ID parameter
@@ -135,39 +176,4 @@ func (h *TroubleReports) shareResponse(
 		fmt.Sprintf("%d", buf.Len()))
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
-}
-
-func (h *TroubleReports) handleGetAttachment(c echo.Context) error {
-	attachmentID, err := helpers.ParseInt64Query(c, "attachment_id")
-	if err != nil {
-		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
-		return err
-	}
-
-	logger.HandlerTroubleReports().Debug("Fetching attachment %d", attachmentID)
-
-	// Get the attachment from the attachments table
-	attachment, err := h.DB.Attachments.Get(attachmentID)
-	if err != nil {
-		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get attachment: "+err.Error())
-	}
-
-	// Set appropriate headers
-	c.Response().Header().Set("Content-Type", attachment.MimeType)
-	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
-
-	// Try to determine filename from attachment ID
-	filename := fmt.Sprintf("attachment_%d", attachmentID)
-	if ext := attachment.GetFileExtension(); ext != "" {
-		filename += ext
-	}
-	c.Response().Header().Set("Content-Disposition",
-		fmt.Sprintf("attachment; filename=\"%s\"", filename))
-
-	logger.HandlerTroubleReports().Info("Serving attachment %d (size: %d bytes, type: %s)",
-		attachmentID, len(attachment.Data), attachment.MimeType)
-
-	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
