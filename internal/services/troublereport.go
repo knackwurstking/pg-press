@@ -264,6 +264,12 @@ func (s *TroubleReport) Delete(id int64, user *models.User) error {
 		return utils.NewNotFoundError(fmt.Sprintf("no trouble report found with ID %d", id))
 	}
 
+	// Delete modification
+	if err := s.modifications.DeleteAll(ModificationTypeTroubleReport, report.ID); err != nil {
+		logger.DBTroubleReports().Error("Failed to delete all modifications for entity type \"%s\" and entity ID %d",
+			ModificationTypeTroubleReport, report.ID)
+	}
+
 	// Create feed entry for the removed report
 	feed := models.NewFeed(
 		"Problembericht entfernt",
@@ -484,18 +490,6 @@ func (s *TroubleReport) UpdateWithAttachments(
 		}
 
 		return err
-	}
-
-	// Save modification (additional to the one saved in Update method)
-	// This ensures we track the attachment changes specifically
-	modData := models.TroubleReportModData{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-	}
-	if err := s.modifications.AddTroubleReportMod(user.TelegramID, id, modData); err != nil {
-		logger.DBTroubleReports().Error("Failed to save modification for trouble report %d with attachments: %v", id, err)
-		// Don't fail the entire operation for modification tracking
 	}
 
 	logger.DBTroubleReports().Info(
