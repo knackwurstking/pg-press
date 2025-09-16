@@ -77,7 +77,7 @@ func Page[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Co
 					return templ_7745c5c3_Err
 				}
 				if len(m) > 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"card p\"><div class=\"flex items-center mb\"><span class=\"badge success\">Current Version</span></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"card p\"><div class=\"flex items-center mb\"><span class=\"badge primary\">Current Version</span></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
