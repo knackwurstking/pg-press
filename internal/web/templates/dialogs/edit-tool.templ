@@ -15,7 +15,6 @@ type EditToolProps struct {
 	InputType           string
 	InputCode           string
 	InputPressSelection *models.PressNumber
-	Error               string
 }
 
 templ EditTool(props *EditToolProps) {
@@ -37,7 +36,6 @@ templ EditTool(props *EditToolProps) {
 		Type: 				baseType,
 		Href: 				baseHref,
 		ID: 				"tool-edit-dialog",
-		Error: 				props.Error,
 		SubmitButtonText: 	submitButtonText,
 	}){
 		<span class="flex flex-row gap flex-wrap justify-between items-center">

@@ -18,7 +18,6 @@ import (
 type EditMetalSheetProps struct {
 	MetalSheetID int64
 	Tool         *models.Tool
-	Error        string
 }
 
 func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
@@ -55,10 +54,9 @@ func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
 		if props.MetalSheetID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+				"%s/htmx/tools/cycle/edit?id=%d",
 				env.ServerPathPrefix,
 				props.MetalSheetID,
-				props.Tool.ID,
 			)
 			submitButtonText = "Aktualisieren"
 		}
@@ -80,7 +78,6 @@ func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
 			ID:               "metal-sheet-edit-dialog",
 			Type:             baseType,
 			Href:             baseHref,
-			Error:            props.Error,
 			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
