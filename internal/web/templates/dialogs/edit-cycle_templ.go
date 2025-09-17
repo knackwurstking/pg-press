@@ -281,4 +281,12 @@ func EditCycle(props *EditCycleProps) templ.Component {
 	})
 }
 
+func isPress(p *models.PressNumber, v int) bool {
+	if p == nil {
+		return false
+	}
+
+	return int(*p) == v
+}
+
 var _ = templruntime.GeneratedTemplate

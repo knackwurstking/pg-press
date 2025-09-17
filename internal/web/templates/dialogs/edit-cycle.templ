@@ -162,3 +162,11 @@ templ EditCycle(props *EditCycleProps) {
 		</section>
 	}
 }
+
+func isPress(p *models.PressNumber, v int) bool {
+	if p == nil {
+		return false
+	}
+
+	return int(*p) == v
+}
