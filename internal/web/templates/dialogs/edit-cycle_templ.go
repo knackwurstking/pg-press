@@ -49,21 +49,25 @@ func EditCycle(props *EditCycleProps) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		var (
-			baseType = "POST"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID,
-			)
-			submitButtonText = "Erstellen"
+			baseType         string = "POST"
+			baseHref         string = ""
+			submitButtonText string = "???"
 		)
 
-		if props.CycleID > 0 {
+		if props.Tool != nil && props.CycleID <= 0 {
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit?tool_id=%d",
+				env.ServerPathPrefix, props.Tool.ID)
+		} else if props.CycleID > 0 {
 			baseType = "PUT"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d",
-				env.ServerPathPrefix, props.CycleID,
-			)
 			submitButtonText = "Aktualisieren"
+			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit?id=%d",
+				env.ServerPathPrefix, props.CycleID)
+		} else {
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -81,7 +85,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Tool.Press != nil {
+			if props.Tool != nil && props.Tool.Press != nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<section class=\"tool-info flex flex-col gap-sm\"><label>Aktives Werkzeug</label><div class=\"flex flex-col gap-xs\"><div class=\"text-sm\"><strong>Werkzeug:</strong> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -89,7 +93,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 55, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 59, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -102,7 +106,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.Position)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 58, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 62, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -117,7 +121,9 @@ func EditCycle(props *EditCycleProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Tool.Press == nil && props.InputPressNumber == nil {
+			if props.Tool != nil &&
+				props.Tool.Press == nil &&
+				props.InputPressNumber == nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -135,7 +141,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 78, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 84, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -145,8 +151,11 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-					(props.InputPressNumber == nil && isPress(props.Tool.Press, i)) {
+				if (props.InputPressNumber != nil &&
+					int(*props.InputPressNumber) == i) ||
+					(props.InputPressNumber == nil &&
+						props.Tool != nil &&
+						isPress(props.Tool.Press, i)) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -159,7 +168,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 82, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 91, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -182,7 +191,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 95, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 104, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -200,7 +209,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.OriginalDate.Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 97, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 106, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -223,7 +232,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.InputTotalCycles))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 115, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 124, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {

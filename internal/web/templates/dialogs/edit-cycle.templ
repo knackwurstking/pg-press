@@ -10,32 +10,36 @@ import (
 )
 
 type EditCycleProps struct {
-	Tool             *models.Tool
-	CycleID          int64
-	InputTotalCycles int64
-	InputPressNumber *models.PressNumber
-	OriginalDate     *time.Time
-	Tools 		 	 []*models.Tool
+	Tool				*models.Tool
+	CycleID				int64
+	InputTotalCycles	int64
+	InputPressNumber	*models.PressNumber
+	OriginalDate		*time.Time
+	Tools 				[]*models.Tool
 }
 
 templ EditCycle(props *EditCycleProps) {
 	{{
 		var (
-			baseType = "POST"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID,
-			)
-			submitButtonText = "Erstellen"
+			baseType 		 string = "POST"
+			baseHref 		 string = ""
+			submitButtonText string = "???"
 		)
 
-		if props.CycleID > 0 {
+		if props.Tool != nil && props.CycleID <= 0 {
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit?tool_id=%d",
+				env.ServerPathPrefix, props.Tool.ID)
+		} else if props.CycleID > 0 {
 			baseType = "PUT"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d",
-				env.ServerPathPrefix, props.CycleID,
-			)
 			submitButtonText = "Aktualisieren"
+			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit?id=%d",
+				env.ServerPathPrefix, props.CycleID)
+		} else {
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		}
 	}}
 
@@ -46,7 +50,7 @@ templ EditCycle(props *EditCycleProps) {
 		SubmitButtonText: 	submitButtonText,
 	}){
 		<!-- Display active tool information -->
-		if props.Tool.Press != nil {
+		if props.Tool != nil && props.Tool.Press != nil {
 			<section class="tool-info flex flex-col gap-sm">
 				<label>Aktives Werkzeug</label>
 
@@ -68,7 +72,9 @@ templ EditCycle(props *EditCycleProps) {
 				<option
 					value=""
 					disabled
-					selected?={ props.Tool.Press == nil && props.InputPressNumber == nil }
+					selected?={ props.Tool != nil &&
+								props.Tool.Press == nil &&
+								props.InputPressNumber == nil }
 				>
 					Presse auswählen
 				</option>
@@ -76,8 +82,11 @@ templ EditCycle(props *EditCycleProps) {
 				for _, i := range []int{0, 2, 3, 4, 5} {
 					<option
 						value={ fmt.Sprintf("%d", i) }
-						selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-							(props.InputPressNumber == nil && isPress(props.Tool.Press, i)) }
+						selected?={ (props.InputPressNumber != nil &&
+										int(*props.InputPressNumber) == i) ||
+									(props.InputPressNumber == nil &&
+										props.Tool != nil &&
+										isPress(props.Tool.Press, i)) }
 					>
 						Presse { fmt.Sprintf("%d", i) }
 					</option>
