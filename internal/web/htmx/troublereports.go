@@ -100,21 +100,21 @@ func (h *TroubleReports) handleDataDELETE(c echo.Context) error {
 	}
 
 	if !user.IsAdmin() {
-		return echo.NewHTTPError(
-			http.StatusForbidden,
-			"administrator privileges required",
-		)
+		return echo.NewHTTPError(http.StatusForbidden,
+			"administrator privileges required")
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
+	logger.HTMXHandlerTroubleReports().Info(
+		"Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.Name, user.TelegramID, id)
 
 	if removedReport, err := h.DB.TroubleReports.RemoveWithAttachments(id, user); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to delete trouble report %d: %v", id, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to delete trouble report: "+err.Error())
 	} else {
-		logger.HTMXHandlerTroubleReports().Info("Successfully deleted trouble report %d (%s)", removedReport.ID, removedReport.Title)
+		logger.HTMXHandlerTroubleReports().Info(
+			"Successfully deleted trouble report %d (%s)",
+			removedReport.ID, removedReport.Title)
 	}
 
 	return h.handleDataGET(c)
@@ -179,7 +179,6 @@ func (h *TroubleReports) handleDialogEditGET(c echo.Context) error {
 
 	dialog := dialogs.EditTroubleReport(props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to render edit dialog: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render Trouble Reports Edit Dialog: "+err.Error())
 	}
@@ -190,7 +189,6 @@ func (h *TroubleReports) handleDialogEditGET(c echo.Context) error {
 func (h *TroubleReports) handleDialogEditPOST(c echo.Context) error {
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
 	}
 
@@ -209,24 +207,13 @@ func (h *TroubleReports) handleDialogEditPOST(c echo.Context) error {
 
 	logger.HTMXHandlerTroubleReports().Debug(
 		"Creating trouble report: title='%s', attachments=%d",
-		title, len(attachments),
-	)
+		title, len(attachments))
 
 	err = h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to add trouble report: %v",
-			err,
-		)
-
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to add trouble report: "+err.Error())
 	}
-
-	logger.HTMXHandlerTroubleReports().Info(
-		"Successfully created trouble report %d",
-		tr.ID,
-	)
 
 	return nil
 }
@@ -276,7 +263,8 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d with %d attachments",
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Updating trouble report %d with %d attachments",
 		id, len(attachments))
 
 	// Update the previous trouble report
@@ -302,7 +290,6 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 
 	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Invalid title form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			fmt.Errorf("invalid title form value: %v", err))
 	}
@@ -310,7 +297,6 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 
 	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Invalid content form value: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			fmt.Errorf("invalid content form value: %v", err))
 	}
@@ -319,7 +305,6 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	// Process existing attachments and their order
 	attachments, err = h.processAttachments(ctx)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Failed to process attachments: %v", err)
 		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
 			fmt.Errorf("failed to process attachments: %v", err))
 	}
@@ -351,14 +336,12 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 		return attachments, nil
 	}
 
-	existingAttachmentsToRemove := strings.Split(
+	attachmentsToRemoveSeq := strings.SplitSeq(
 		form.Value[constants.ExistingAttachmentsRemovalFormField][0],
-		",",
-	)
-
-	for _, a := range existingAttachmentsToRemove {
-		for i, a2 := range attachments {
-			if a2.ID == a {
+		",")
+	for atr := range attachmentsToRemoveSeq {
+		for i, a := range attachments {
+			if a.ID == atr {
 				attachments = slices.Delete(attachments, i, 1)
 				break
 			}
@@ -377,7 +360,6 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 
 		attachment, err := h.processFileUpload(fileHeader, i+len(attachments))
 		if err != nil {
-			logger.HTMXHandlerTroubleReports().Error("Failed to process file %s: %v", fileHeader.Filename, err)
 			return nil, fmt.Errorf("failed to process file %s: %v", fileHeader.Filename, err)
 		}
 
@@ -395,7 +377,6 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 	// Parse ID parameter from query
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Invalid ID parameter: %v", err)
 		return err
 	}
 
@@ -420,7 +401,8 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "administrator privileges required")
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
+	logger.HTMXHandlerTroubleReports().Info(
+		"User %s is rolling back trouble report %d to modification %d",
 		user.Name, id, modTime)
 
 	// Find the specific modification
@@ -431,7 +413,7 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 			"failed to retrieve modifications: "+err.Error())
 	}
 
-	var targetMod *models.Modification[interface{}]
+	var targetMod *models.Modification[any]
 	for _, mod := range modifications {
 		if mod.CreatedAt.UnixMilli() == modTime {
 			targetMod = mod
@@ -468,7 +450,8 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 			"failed to rollback trouble report: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
+	logger.HTMXHandlerTroubleReports().Info(
+		"Successfully rolled back trouble report %d", id)
 
 	// Return success message for HTMX
 	return c.HTML(http.StatusOK, `
@@ -496,12 +479,10 @@ func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
 }
 
 func (h *TroubleReports) processFileUpload(
-	fileHeader *multipart.FileHeader,
-	index int,
+	fileHeader *multipart.FileHeader, index int,
 ) (*models.Attachment, error) {
 
 	if fileHeader.Size > models.MaxDataSize {
-		logger.HTMXHandlerTroubleReports().Error("File %s is too large: %d bytes (max: %d)", fileHeader.Filename, fileHeader.Size, models.MaxDataSize)
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
 	}
@@ -518,14 +499,16 @@ func (h *TroubleReports) processFileUpload(
 	}
 
 	// Create temporary ID
-	sanitizedFilename := h.sanitizeFilename(fileHeader.Filename)
+	sanitizedFilename := helpers.SanitizeFilename(fileHeader.Filename)
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	attachmentID := fmt.Sprintf("temp_%s_%s_%d", sanitizedFilename, timestamp, index)
+	attachmentID := fmt.Sprintf("temp_%s_%s_%d",
+		sanitizedFilename, timestamp, index)
 
 	// Ensure ID doesn't exceed maximum length
 	if len(attachmentID) > models.MaxIDLength {
 		maxFilenameLen := models.MaxIDLength - len(timestamp) -
 			len(fmt.Sprintf("temp_%d", index)) - 2
+
 		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
 			sanitizedFilename = sanitizedFilename[:maxFilenameLen]
 			attachmentID = fmt.Sprintf("temp_%s_%s_%d",
@@ -559,7 +542,6 @@ func (h *TroubleReports) processFileUpload(
 	}
 
 	if err := attachment.Validate(); err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Invalid attachment: %v", err)
 		return nil, fmt.Errorf("invalid attachment: %v", err)
 	}
 
@@ -588,29 +570,4 @@ func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
 	}
 
 	return "application/octet-stream"
-}
-
-func (h *TroubleReports) sanitizeFilename(filename string) string {
-	if idx := strings.LastIndex(filename, "."); idx > 0 {
-		filename = filename[:idx]
-	}
-
-	filename = strings.ReplaceAll(filename, " ", "_")
-	filename = strings.ReplaceAll(filename, "-", "_")
-	filename = strings.ReplaceAll(filename, "(", "_")
-	filename = strings.ReplaceAll(filename, ")", "_")
-	filename = strings.ReplaceAll(filename, "[", "_")
-	filename = strings.ReplaceAll(filename, "]", "_")
-
-	for strings.Contains(filename, "__") {
-		filename = strings.ReplaceAll(filename, "__", "_")
-	}
-
-	filename = strings.Trim(filename, "_")
-
-	if filename == "" {
-		filename = "attachment"
-	}
-
-	return filename
 }

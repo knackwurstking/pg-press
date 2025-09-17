@@ -84,6 +84,31 @@ func SanitizeInput(input string) string {
 	return sanitized
 }
 
+func SanitizeFilename(filename string) string {
+	if idx := strings.LastIndex(filename, "."); idx > 0 {
+		filename = filename[:idx]
+	}
+
+	filename = strings.ReplaceAll(filename, " ", "_")
+	filename = strings.ReplaceAll(filename, "-", "_")
+	filename = strings.ReplaceAll(filename, "(", "_")
+	filename = strings.ReplaceAll(filename, ")", "_")
+	filename = strings.ReplaceAll(filename, "[", "_")
+	filename = strings.ReplaceAll(filename, "]", "_")
+
+	for strings.Contains(filename, "__") {
+		filename = strings.ReplaceAll(filename, "__", "_")
+	}
+
+	filename = strings.Trim(filename, "_")
+
+	if filename == "" {
+		filename = "attachment"
+	}
+
+	return filename
+}
+
 func HandleTemplate(
 	c echo.Context,
 	pageData any,
