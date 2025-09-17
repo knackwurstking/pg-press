@@ -62,6 +62,7 @@ func ParseInt64Query(ctx echo.Context, paramName string) (int64, error) {
 	if err != nil {
 		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be a number")
 	}
+
 	return id, nil
 }
 
