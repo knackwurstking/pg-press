@@ -36,9 +36,7 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 		[]*helpers.EchoRoute{
 			// Dialog edit routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
-				func(c echo.Context) error {
-					return h.handleGetDialogEdit(c, nil)
-				}),
+				h.handleDialogEditGET),
 
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
 				h.handleDialogEditPOST),
@@ -61,7 +59,7 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 			// Attachments preview routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview",
-				h.handleGetAttachmentsPreview),
+				h.handleAttachmentsPreviewGET),
 		},
 	)
 }
@@ -122,13 +120,14 @@ func (h *TroubleReports) handleDataDELETE(c echo.Context) error {
 	return h.handleDataGET(c)
 }
 
-func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
+func (h *TroubleReports) handleAttachmentsPreviewGET(c echo.Context) error {
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
 		return err
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Fetching attachments preview for trouble report %d", id)
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Fetching attachments preview for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
@@ -137,53 +136,45 @@ func (h *TroubleReports) handleGetAttachmentsPreview(c echo.Context) error {
 	}
 
 	logger.HTMXHandlerTroubleReports().Debug(
-		"Rendering attachments preview with %d attachments", len(tr.LoadedAttachments),
-	)
+		"Rendering attachments preview with %d attachments",
+		len(tr.LoadedAttachments))
 
 	attachmentsPreview := components.AttachmentsPreview(tr.LoadedAttachments)
 	if err := attachmentsPreview.Render(c.Request().Context(), c.Response()); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render attachments preview component: "+err.Error())
 	}
+
 	return nil
 }
 
-// TODO: Get rid of the props parameter, no longer needed
-func (h *TroubleReports) handleGetDialogEdit(
-	c echo.Context,
-	props *dialogs.EditTroubleReportProps,
-) error {
-	if props == nil {
-		props = &dialogs.EditTroubleReportProps{}
+func (h *TroubleReports) handleDialogEditGET(c echo.Context) error {
+	props := &dialogs.EditTroubleReportProps{}
+
+	var err error
+	props.ID, err = helpers.ParseInt64Query(c, "id")
+	if err != nil {
+		return err
 	}
 
-	if !props.InvalidTitle && !props.InvalidContent {
-		if idStr := c.QueryParam("id"); idStr != "" {
-			id, err := helpers.ParseInt64Query(c, "id")
-			if err != nil {
-				return err
-			}
+	logger.HTMXHandlerTroubleReports().Debug(
+		"Loading trouble report %d for editing", props.ID)
 
-			props.ID = id
+	tr, err := h.DB.TroubleReports.Get(props.ID)
+	if err != nil {
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to get trouble report: "+err.Error())
+	}
+	props.Title = tr.Title
+	props.Content = tr.Content
 
-			logger.HTMXHandlerTroubleReports().Debug("Loading trouble report %d for editing", id)
-			tr, err := h.DB.TroubleReports.Get(id)
-			if err != nil {
-				logger.HTMXHandlerTroubleReports().Error("Failed to get trouble report %d: %v", id, err)
-				return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-					"failed to get trouble report: "+err.Error())
-			}
-
-			props.Title = tr.Title
-			props.Content = tr.Content
-
-			// Load attachments for display
-			if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr); err == nil {
-				props.Attachments = loadedAttachments
-			} else {
-				logger.HTMXHandlerTroubleReports().Error("Failed to load attachments for trouble report %d: %v", id, err)
-			}
-		}
+	// Load attachments for display
+	if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr); err == nil {
+		props.Attachments = loadedAttachments
+	} else {
+		logger.HTMXHandlerTroubleReports().Error(
+			"Failed to load attachments for trouble report %d: %v",
+			props.ID, err)
 	}
 
 	dialog := dialogs.EditTroubleReport(props)
