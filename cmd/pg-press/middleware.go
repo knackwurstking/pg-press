@@ -126,9 +126,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 				}
 			} else {
 				// Success cases - use debug level for routine requests
-				if latency > 500*time.Millisecond || method != "GET" {
-					logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
-				}
+				logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 			}
 
 			return err
