@@ -129,37 +129,81 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><footer class=\"flex gap justify-end\"><button name=\"close\" class=\"secondary flex gap\" type=\"button\" onclick=\"this.closest('dialog').close()\"><i class=\"bi bi-x-circle\"></i> Schließen</button> <button type=\"submit\" class=\"flex gap\" onclick=\"this.closest('dialog').close()\"><i class=\"bi bi-check-circle\"></i> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><footer class=\"flex gap justify-end\"><button name=\"close\" class=\"secondary flex gap\" type=\"button\" onclick=\"this.closest('dialog').close()\"><i class=\"bi bi-x-circle\"></i> Schließen</button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubmitButtonText)
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, baseSubmitOnClickHandler())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<button type=\"submit\" class=\"flex gap\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 templ.ComponentScript = baseSubmitOnClickHandler()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><i class=\"bi bi-check-circle\"></i> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubmitButtonText)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 70, Col: 29}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</button></footer></form><script defer>\n            document.querySelector('#")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</button></footer></form><script defer>\n            document.querySelector('#")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var7, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(props.ID)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(props.ID)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 76, Col: 48}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "').showModal();\n        </script></dialog>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "').showModal();\n        </script></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+func baseSubmitOnClickHandler() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_baseSubmitOnClickHandler_b527`,
+		Function: `function __templ_baseSubmitOnClickHandler_b527(){const form = this.closest("form");
+
+	const requiredInputs = form.querySelectorAll(
+    	"input[required], select[required], textarea[required]");
+
+	let allValid = true;
+
+	requiredInputs.forEach(input => {
+		if (!input.value.trim()) {
+			allValid = false;
+			input.focus();
+			return;
+		}
+	});
+
+	if (allValid) {
+		this.closest("dialog").close();
+	}
+}`,
+		Call:       templ.SafeScript(`__templ_baseSubmitOnClickHandler_b527`),
+		CallInline: templ.SafeScriptInline(`__templ_baseSubmitOnClickHandler_b527`),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

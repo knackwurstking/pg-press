@@ -30,7 +30,6 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	// Get feeds
 	feeds, err := h.DB.Feeds.ListRange(0, constants.MaxFeedsPerPage)
 	if err != nil {
-		logger.HTMXHandlerFeed().Error("Failed to fetch feeds: %v", err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"error getting feeds: "+err.Error())
 	}
@@ -44,7 +43,6 @@ func (h *Feed) handleListGET(c echo.Context) error {
 	feedData := feedpage.List(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		logger.HTMXHandlerFeed().Error("Failed to render feed data: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"error rendering feed data: "+err.Error())
 	}
@@ -56,7 +54,6 @@ func (h *Feed) handleListGET(c echo.Context) error {
 			user.Name, oldLastFeed, user.LastFeed)
 
 		if err := h.DB.Users.Update(user, user); err != nil {
-			logger.HTMXHandlerFeed().Error("Failed to update user's last feed: %v", err)
 			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 				"error updating user's last feed: "+err.Error())
 		}

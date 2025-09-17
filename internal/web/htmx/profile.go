@@ -37,7 +37,6 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		logger.HTMXHandlerProfile().Error("Failed to list cookies for user %s: %v", user.Name, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to list cookies: "+err.Error())
 	}
@@ -46,17 +45,16 @@ func (h *Profile) handleGetCookies(c echo.Context) error {
 
 	cookiesTable := profilepage.Cookies(models.SortCookies(cookies))
 	if err := cookiesTable.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HTMXHandlerProfile().Error("Failed to render cookies table: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render cookies table: "+err.Error())
 	}
+
 	return nil
 }
 
 func (h *Profile) handleDeleteCookies(c echo.Context) error {
 	value := helpers.SanitizeInput(c.QueryParam("value"))
 	if value == "" {
-		logger.HTMXHandlerProfile().Error("Cookie deletion attempted with empty value")
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"cookie value parameter is required")
 	}
@@ -64,11 +62,9 @@ func (h *Profile) handleDeleteCookies(c echo.Context) error {
 	logger.HTMXHandlerProfile().Info("Deleting cookie with value: %s", value)
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
-		logger.HTMXHandlerProfile().Error("Failed to delete cookie: %v", err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to delete cookie: "+err.Error())
 	}
 
-	logger.HTMXHandlerProfile().Info("Successfully deleted cookie")
 	return h.handleGetCookies(c)
 }

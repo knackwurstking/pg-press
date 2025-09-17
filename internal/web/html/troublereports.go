@@ -56,6 +56,7 @@ func (h *TroubleReports) handleTroubleReportsGET(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render trouble reports page: "+err.Error())
 	}
+
 	return nil
 }
 
@@ -75,10 +76,8 @@ func (h *TroubleReports) handleSharePdfGET(c echo.Context) error {
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		return echo.NewHTTPError(
-			http.StatusInternalServerError,
-			"Fehler beim Erstellen der PDF",
-		)
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"Fehler beim Erstellen der PDF")
 	}
 
 	logger.HandlerTroubleReports().Info(
@@ -91,7 +90,6 @@ func (h *TroubleReports) handleSharePdfGET(c echo.Context) error {
 func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
 	attachmentID, err := helpers.ParseInt64Query(c, "attachment_id")
 	if err != nil {
-		logger.HandlerTroubleReports().Error("Invalid attachment ID parameter: %v", err)
 		return err
 	}
 
@@ -100,7 +98,6 @@ func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
-		logger.HandlerTroubleReports().Error("Failed to get attachment %d: %v", attachmentID, err)
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to get attachment: "+err.Error())
 	}
@@ -191,87 +188,3 @@ func (h *TroubleReports) shareResponse(
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
 }
-
-//func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
-//	logger.HandlerTroubleReports().Info("Handling rollback for trouble report")
-//
-//	// Parse ID parameter
-//	id, err := helpers.ParseInt64Param(c, "id")
-//	if err != nil {
-//		logger.HandlerTroubleReports().Error("Invalid ID parameter: %v", err)
-//		return err
-//	}
-//
-//	// Get modification timestamp from form data
-//	modTimeStr := c.FormValue("modification_time")
-//	if modTimeStr == "" {
-//		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
-//	}
-//
-//	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
-//	if err != nil {
-//		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
-//	}
-//
-//	// Get user from context
-//	user, err := helpers.GetUserFromContext(c)
-//	if err != nil {
-//		return err
-//	}
-//
-//	logger.HandlerTroubleReports().Info("User %s is rolling back trouble report %d to modification %d",
-//		user.Name, id, modTime)
-//
-//	// Find the specific modification
-//	modifications, err := h.DB.Modifications.ListAll(
-//		services.ModificationTypeTroubleReport, id)
-//	if err != nil {
-//		logger.HandlerTroubleReports().Error("Failed to get modifications: %v", err)
-//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-//			"failed to retrieve modifications: "+err.Error())
-//	}
-//
-//	var targetMod *models.Modification[interface{}]
-//	for _, mod := range modifications {
-//		if mod.CreatedAt.UnixMilli() == modTime {
-//			targetMod = mod
-//			break
-//		}
-//	}
-//
-//	if targetMod == nil {
-//		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
-//	}
-//
-//	// Unmarshal the modification data
-//	var modData models.TroubleReportModData
-//	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-//		logger.HandlerTroubleReports().Error("Failed to unmarshal modification data: %v", err)
-//		return echo.NewHTTPError(http.StatusInternalServerError,
-//			"failed to parse modification data: "+err.Error())
-//	}
-//
-//	// Get the current trouble report
-//	tr, err := h.DB.TroubleReports.Get(id)
-//	if err != nil {
-//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-//			"failed to retrieve trouble report: "+err.Error())
-//	}
-//
-//	// Apply the rollback
-//	tr.Title = modData.Title
-//	tr.Content = modData.Content
-//	tr.LinkedAttachments = modData.LinkedAttachments
-//
-//	// Update the trouble report
-//	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
-//		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-//			"failed to rollback trouble report: "+err.Error())
-//	}
-//
-//	logger.HandlerTroubleReports().Info("Successfully rolled back trouble report %d", id)
-//
-//	// Redirect back to modifications page
-//	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("/trouble-reports/modifications/%d", id))
-//	return c.NoContent(http.StatusOK)
-//}

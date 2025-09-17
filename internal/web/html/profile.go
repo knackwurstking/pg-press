@@ -41,19 +41,16 @@ func (h *Profile) handleProfile(c echo.Context) error {
 	logger.HandlerProfile().Debug("Rendering profile page for user %s", user.Name)
 
 	if err = h.handleUserNameChange(c, user); err != nil {
-		logger.HandlerProfile().Error("Failed to update username for user %s: %v", user.Name, err)
-		return echo.NewHTTPError(
-			utils.GetHTTPStatusCode(err),
-			"error updating username: "+err.Error(),
-		)
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"error updating username: "+err.Error())
 	}
 
 	page := profilepage.Page(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerProfile().Error("Failed to render profile page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render profile page: "+err.Error())
 	}
+
 	return nil
 }
 
@@ -66,10 +63,8 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	}
 
 	if len(userName) < UserNameMinLength || len(userName) > UserNameMaxLength {
-		return utils.NewValidationError(
-			constants.UserNameFormField + ": " +
-				"username must be between 1 and 100 characters",
-		)
+		return utils.NewValidationError(constants.UserNameFormField + ": " +
+			"username must be between 1 and 100 characters")
 	}
 
 	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
@@ -85,5 +80,6 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	logger.HandlerProfile().Info("Successfully updated username for user %d from %s to %s",
 		user.TelegramID, user.Name, userName)
 	user.Name = userName
+
 	return nil
 }

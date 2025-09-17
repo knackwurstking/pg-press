@@ -44,10 +44,10 @@ func (h *Auth) handleLogin(c echo.Context) error {
 			logger.HandlerAuth().Info("Successful login for user from %s", remoteIP)
 
 			if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
-				logger.HandlerAuth().Error("Failed to redirect after successful login from %s: %v", remoteIP, err)
 				return echo.NewHTTPError(http.StatusInternalServerError,
 					"failed to redirect to profile page")
 			}
+
 			return nil
 		} else {
 			logger.HandlerAuth().Info("Failed login attempt from %s", remoteIP)
@@ -56,7 +56,6 @@ func (h *Auth) handleLogin(c echo.Context) error {
 
 	page := loginpage.Page(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerAuth().Error("Failed to render login page for %s: %v", remoteIP, err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render login page: "+err.Error())
 	}
@@ -84,7 +83,6 @@ func (h *Auth) handleLogout(c echo.Context) error {
 	}
 
 	if err := c.Redirect(http.StatusSeeOther, "./login"); err != nil {
-		logger.HandlerAuth().Error("Failed to redirect to login page after logout from %s: %v", remoteIP, err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to redirect to login page")
 	}
@@ -111,6 +109,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 		} else {
 			logger.HandlerAuth().Debug("Invalid API key from %s", remoteIP)
 		}
+
 		return false
 	}
 
@@ -137,8 +136,6 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	sessionCookie := models.NewCookie(userAgent, cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
-		logger.HandlerAuth().Error("Failed to create session for user %s from %s: %v",
-			user.Name, remoteIP, err)
 		return false
 	}
 

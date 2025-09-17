@@ -30,10 +30,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
 
 			// Get, Post or Edit a tool
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", func(c echo.Context) error {
-				return h.handleEditGET(c, nil)
-			}),
-
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.handleEditGET),
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
 
@@ -66,29 +63,26 @@ func (h *Tools) handleList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEditGET(c echo.Context, props *dialogs.EditToolProps) error {
+func (h *Tools) handleEditGET(c echo.Context) error {
 	logger.HTMXHandlerTools().Debug("Rendering edit tool dialog")
 
-	if props == nil {
-		props = &dialogs.EditToolProps{}
+	props := &dialogs.EditToolProps{}
 
-		toolID, _ := helpers.ParseInt64Query(c, "id")
-
-		if toolID > 0 {
-			var err error
-			props.Tool, err = h.DB.Tools.Get(toolID)
-			if err != nil {
-				return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-					"failed to get tool from database: "+err.Error())
-			}
-
-			props.InputPosition = string(props.Tool.Position)
-			props.InputWidth = props.Tool.Format.Width
-			props.InputHeight = props.Tool.Format.Height
-			props.InputType = props.Tool.Type
-			props.InputCode = props.Tool.Code
-			props.InputPressSelection = props.Tool.Press
+	toolID, _ := helpers.ParseInt64Query(c, "id")
+	if toolID > 0 {
+		var err error
+		props.Tool, err = h.DB.Tools.Get(toolID)
+		if err != nil {
+			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+				"failed to get tool from database: "+err.Error())
 		}
+
+		props.InputPosition = string(props.Tool.Position)
+		props.InputWidth = props.Tool.Format.Width
+		props.InputHeight = props.Tool.Format.Height
+		props.InputType = props.Tool.Type
+		props.InputCode = props.Tool.Code
+		props.InputPressSelection = props.Tool.Press
 	}
 
 	toolEdit := dialogs.EditTool(props)
@@ -130,13 +124,8 @@ func (h *Tools) handleEditPOST(c echo.Context) error {
 	props.Tool.Press = formData.Press
 
 	if t, err := h.DB.Tools.AddWithNotes(props.Tool, user); err != nil {
-		if utils.IsAlreadyExistsError(err) {
-			props.Error = "Tool bereits vorhanden"
-			return h.handleEditGET(c, props)
-		} else {
-			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-				"failed to add tool: "+err.Error())
-		}
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to add tool: "+err.Error())
 	} else {
 		logger.HTMXHandlerTools().Info("Created tool ID %d (Type=%s, Code=%s) by user %s",
 			t.ID, props.Tool.Type, props.Tool.Code, user.Name)
@@ -156,7 +145,7 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Debug("User %s updating tool %d", user.Name, toolID)
+	logger.HTMXHandlerTools().Warn("User %s updating tool %d", user.Name, toolID)
 
 	formData, err := h.getToolFormData(c)
 	if err != nil {
@@ -181,13 +170,8 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 	props.Tool.Press = formData.Press
 
 	if err := h.DB.Tools.Update(props.Tool, user); err != nil {
-		if utils.IsAlreadyExistsError(err) {
-			props.Error = "Tool bereits vorhanden"
-			return h.handleEditGET(c, props)
-		} else {
-			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-				"failed to update tool: "+err.Error())
-		}
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to update tool: "+err.Error())
 	} else {
 		logger.HTMXHandlerTools().Info("Updated tool %d (Type=%s, Code=%s) by user %s",
 			props.Tool.ID, props.Tool.Type, props.Tool.Code, user.Name)

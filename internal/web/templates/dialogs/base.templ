@@ -64,7 +64,7 @@ templ Base(props BaseProps) {
 				<button
 					type="submit"
 					class="flex gap"
-					onclick="this.closest('dialog').close()"
+					onclick={baseSubmitOnClickHandler()}
 				>
 					<i class="bi bi-check-circle"></i>
 					{ props.SubmitButtonText }
@@ -76,4 +76,25 @@ templ Base(props BaseProps) {
             document.querySelector('#{{ props.ID }}').showModal();
         </script>
 	</dialog>
+}
+
+script baseSubmitOnClickHandler() {
+	const form = this.closest("form");
+
+	const requiredInputs = form.querySelectorAll(
+    	"input[required], select[required], textarea[required]");
+
+	let allValid = true;
+
+	requiredInputs.forEach(input => {
+		if (!input.value.trim()) {
+			allValid = false;
+			input.focus();
+			return;
+		}
+	});
+
+	if (allValid) {
+		this.closest("dialog").close();
+	}
 }

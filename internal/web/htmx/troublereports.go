@@ -85,6 +85,7 @@ func (h *TroubleReports) handleDataGET(c echo.Context) error {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to render trouble reports list component: "+err.Error())
 	}
+
 	return nil
 }
 
@@ -236,7 +237,6 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 	// Get Title, Content and Attachments from form data
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
-		logger.HTMXHandlerTroubleReports().Error("Form validation failed: %v", err)
 		return err
 	}
 	if title == "" || content == "" {
@@ -531,7 +531,6 @@ func (h *TroubleReports) processFileUpload(
 
 	// Validate that the file is an image
 	if !strings.HasPrefix(mimeType, "image/") {
-		logger.HTMXHandlerTroubleReports().Error("File %s is not an image: %s", fileHeader.Filename, mimeType)
 		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
 	}
 

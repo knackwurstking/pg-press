@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/feedpage"
 )
@@ -27,9 +26,9 @@ func (h *Feed) RegisterRoutes(e *echo.Echo) {
 func (h *Feed) handleFeed(c echo.Context) error {
 	page := feedpage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		logger.HandlerFeed().Error("Failed to render feed page: %v", err)
 		return echo.NewHTTPError(http.StatusInternalServerError,
 			"failed to render feed page: "+err.Error())
 	}
+
 	return nil
 }
