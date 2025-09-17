@@ -250,7 +250,9 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 			fmt.Sprintf("Benutzer %s hat ein neues Blech %s hinzugefügt.", user.Name, sheet.String()),
 			user.TelegramID,
 		)
-		s.feeds.Add(feed)
+		if err := s.feeds.Add(feed); err != nil {
+			logger.DBMetalSheets().Error("Failed to add feed for new metal sheet: %v", err)
+		}
 	}
 
 	return id, nil
@@ -289,7 +291,9 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 			fmt.Sprintf("Benutzer %s hat das Blech %s aktualisiert.", user.Name, sheet.String()),
 			user.TelegramID,
 		)
-		s.feeds.Add(feed)
+		if err := s.feeds.Add(feed); err != nil {
+			logger.DBMetalSheets().Error("Failed to add feed for updated metal sheet: %v", err)
+		}
 	}
 
 	return nil
@@ -334,7 +338,9 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 			content,
 			user.TelegramID,
 		)
-		s.feeds.Add(feed)
+		if err := s.feeds.Add(feed); err != nil {
+			logger.DBMetalSheets().Error("Failed to add feed for tool assignment: %v", err)
+		}
 	}
 
 	return nil
@@ -361,7 +367,9 @@ func (s *MetalSheet) Delete(id int64, user *models.User) error {
 			fmt.Sprintf("Benutzer %s hat das Blech mit ID %d entfernt.", user.Name, id),
 			user.TelegramID,
 		)
-		s.feeds.Add(feed)
+		if err := s.feeds.Add(feed); err != nil {
+			logger.DBMetalSheets().Error("Failed to add feed for deleted metal sheet: %v", err)
+		}
 	}
 
 	return nil
@@ -394,15 +402,4 @@ func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.Metal
 	}
 
 	return sheet, nil
-}
-
-// equalToolIDs compares two tool ID pointers for equality
-func equalToolIDs(a, b *int64) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-	return *a == *b
 }

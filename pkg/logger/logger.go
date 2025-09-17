@@ -183,7 +183,9 @@ func (l *Logger) log(level LogLevel, format string, args ...any) {
 		prefix,
 		color+message+reset)
 
-	output.Write([]byte(logLine))
+	if _, err := output.Write([]byte(logLine)); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write log message: %v\n", err)
+	}
 }
 
 // Debug logs a debug message
@@ -319,7 +321,9 @@ func (l *Logger) HTTPRequest(status int, method, uri, remoteIP string, latency t
 			levelStr, timestamp, prefix, status, method, uri, remoteIP, latency, userInfo)
 	}
 
-	output.Write([]byte(logLine))
+	if _, err := output.Write([]byte(logLine)); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write log message: %v\n", err)
+	}
 }
 
 // InitializeFromStandardLog configures the logger to replace standard log package

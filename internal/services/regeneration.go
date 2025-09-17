@@ -94,7 +94,9 @@ func (r *Regeneration) Add(regeneration *models.Regeneration, user *models.User)
 			"Eine neue Regenerierung wurde hinzugefügt.",
 			0, // No specific user for regeneration entries
 		)
-		r.feeds.Add(feed)
+		if err := r.feeds.Add(feed); err != nil {
+			logger.DBRegenerations().Error("Failed to add feed for new regeneration: %v", err)
+		}
 	}
 
 	return regeneration, nil

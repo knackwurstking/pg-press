@@ -204,6 +204,10 @@ func (u *User) Delete(telegramID int64, actor *models.User) error {
 
 // Update modifies an existing user and generates activity feed entries for changes.
 func (u *User) Update(user, actor *models.User) error {
+	if user == nil {
+		return utils.NewValidationError("user: user cannot be nil")
+	}
+
 	telegramID := user.TelegramID
 	actorInfo := "system"
 	if actor != nil {
@@ -211,10 +215,6 @@ func (u *User) Update(user, actor *models.User) error {
 	}
 	logger.DBUsers().Info("Updating user %d by %s: new_name=%s", telegramID, actorInfo, user.Name)
 	start := time.Now()
-
-	if user == nil {
-		return utils.NewValidationError("user: user cannot be nil")
-	}
 
 	if user.Name == "" {
 		return utils.NewValidationError("user_name: username cannot be empty")

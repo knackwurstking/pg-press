@@ -736,7 +736,9 @@ func (m *MigrationScript) cleanup(force, dryRun, verbose bool) error {
 
 	// Drop migration status view since it depends on mods columns
 	if !dryRun {
-		m.db.Exec("DROP VIEW IF EXISTS migration_status")
+		if _, err := m.db.Exec("DROP VIEW IF EXISTS migration_status"); err != nil {
+			printWarning("Failed to drop migration_status view: %v", err)
+		}
 	}
 
 	if dryRun {
@@ -770,7 +772,9 @@ func (m *MigrationScript) status(verbose bool) error {
 
 	var totalMods int
 	if modTableExists {
-		m.db.QueryRow("SELECT COUNT(*) FROM modifications").Scan(&totalMods)
+		if err := m.db.QueryRow("SELECT COUNT(*) FROM modifications").Scan(&totalMods); err != nil {
+			printWarning("Could not query total modifications: %v", err)
+		}
 		fmt.Printf("Total modifications: %d\n", totalMods)
 
 		if totalMods > 0 && verbose {

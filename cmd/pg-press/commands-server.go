@@ -101,7 +101,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		}
 
 		// Extract error details
-		code := http.StatusInternalServerError
+		var code int
 		var message string
 
 		if herr, ok := err.(*echo.HTTPError); ok {
@@ -150,13 +150,17 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		// Send error response if headers haven't been written yet
 		if !c.Response().Committed {
 			if c.Request().Header.Get("Accept") == "application/json" {
-				c.JSON(code, map[string]any{
+				if err := c.JSON(code, map[string]any{
 					"error":  message,
 					"code":   code,
 					"status": http.StatusText(code),
-				})
+				}); err != nil {
+					logger.Server().Error("Failed to send JSON error response: %v", err)
+				}
 			} else {
-				c.String(code, message)
+				if err := c.String(code, message); err != nil {
+					logger.Server().Error("Failed to send string error response: %v", err)
+				}
 			}
 		} else {
 			logger.Server().Error(

@@ -146,9 +146,7 @@ func removeUserCommand() cli.Command {
 					return err
 				}
 
-				db.Users.Delete(*telegramID, nil)
-
-				return nil
+				return db.Users.Delete(*telegramID, nil)
 			}
 		}),
 	}

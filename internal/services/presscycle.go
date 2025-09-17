@@ -177,7 +177,9 @@ func (p *PressCycle) Add(cycle *models.Cycle, user *models.User) (int64, error) 
 			fmt.Sprintf("Benutzer %s hat einen neuen Pressenzyklus mit %d Zyklen hinzugefügt.", user.Name, cycle.TotalCycles),
 			user.TelegramID,
 		)
-		p.feeds.Add(feed)
+		if err := p.feeds.Add(feed); err != nil {
+			logger.DBPressCycles().Error("Failed to add feed for new press cycle: %v", err)
+		}
 	}
 
 	return id, nil
@@ -227,7 +229,9 @@ func (p *PressCycle) Update(cycle *models.Cycle, user *models.User) error {
 			fmt.Sprintf("Benutzer %s hat den Pressenzyklus auf %d Zyklen aktualisiert.", user.Name, cycle.TotalCycles),
 			user.TelegramID,
 		)
-		p.feeds.Add(feed)
+		if err := p.feeds.Add(feed); err != nil {
+			logger.DBPressCycles().Error("Failed to add feed for updated press cycle: %v", err)
+		}
 	}
 
 	return nil
@@ -264,7 +268,9 @@ func (p *PressCycle) Delete(id int64, user *models.User) error {
 			fmt.Sprintf("Benutzer %s hat den Pressenzyklus entfernt.", user.Name),
 			user.TelegramID,
 		)
-		p.feeds.Add(feed)
+		if err := p.feeds.Add(feed); err != nil {
+			logger.DBPressCycles().Error("Failed to add feed for deleted press cycle: %v", err)
+		}
 	}
 
 	return nil

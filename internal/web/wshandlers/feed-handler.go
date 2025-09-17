@@ -234,7 +234,10 @@ func (conn *FeedConnection) WritePump() {
 			}
 
 			// Set write deadline - longer timeout for suspended connections
-			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
+			if err := conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second)); err != nil {
+				logger.WSFeedConnection().Error("Error setting write deadline for user %d: %v", conn.UserID, err)
+				return
+			}
 
 			if err := websocket.Message.Send(conn.Conn, string(message)); err != nil {
 				logger.WSFeedConnection().Error("Error writing message to user %d: %v", conn.UserID, err)
@@ -244,7 +247,10 @@ func (conn *FeedConnection) WritePump() {
 		case <-ticker.C:
 			// Send ping message - golang.org/x/net/websocket doesn't have built-in ping/pong
 			// We'll send a simple ping message instead
-			conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
+			if err := conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second)); err != nil {
+				logger.WSFeedConnection().Error("Error setting ping write deadline for user %d: %v", conn.UserID, err)
+				return
+			}
 			if err := websocket.Message.Send(conn.Conn, "ping"); err != nil {
 				logger.WSFeedConnection().Error("Error sending ping to user %d: %v", conn.UserID, err)
 				return
