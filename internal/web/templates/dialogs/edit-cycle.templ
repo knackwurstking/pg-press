@@ -15,7 +15,7 @@ type EditCycleProps struct {
 	InputTotalCycles int64
 	InputPressNumber *models.PressNumber
 	OriginalDate     *time.Time
-	Error            string
+	Tools 		 	 []*models.Tool
 }
 
 templ EditCycle(props *EditCycleProps) {
@@ -32,10 +32,8 @@ templ EditCycle(props *EditCycleProps) {
 		if props.CycleID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-				env.ServerPathPrefix,
-				props.CycleID,
-				props.Tool.ID,
+				"%s/htmx/tools/cycle/edit?id=%d",
+				env.ServerPathPrefix, props.CycleID,
 			)
 			submitButtonText = "Aktualisieren"
 		}
@@ -45,7 +43,6 @@ templ EditCycle(props *EditCycleProps) {
 		Type: 				baseType,
 		Href: 				baseHref,
 		ID: 				"cycle-edit-dialog",
-		Error: 				props.Error,
 		SubmitButtonText: 	submitButtonText,
 	}){
 		<!-- Display active tool information -->

@@ -33,7 +33,30 @@ templ Page(props PageProps) {
 
             <!-- Press Cycles Table -->
             <section id="cycle-table-section" class="mt-4">
-                <h5>Pressennutzungsverlauf</h5>
+	            <div class="flex justify-between items-center mb">
+	                <h5>Pressennutzungsverlauf</h5>
+
+	                <button
+						class="secondary small flex"
+
+						hx-get={ fmt.Sprintf(
+							"%s/htmx/tools/cycle/edit", env.ServerPathPrefix,
+						) }
+						hx-trigger="click"
+						hx-target="body"
+						hx-swap="beforeend"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+
+						title="Neuen Eintrag hinzufügen"
+
+						if !props.User.IsAdmin() {
+							disabled
+						}
+					>
+						<i class="bi bi-plus-lg"></i>
+					</button>
+				</div>
+
                 <figure class="w-full overflow-x-scroll">
                     <table name="additional-cycles-table" class="table borderless compact">
                         <thead>
