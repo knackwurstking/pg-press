@@ -2,10 +2,18 @@ package logger
 
 import "github.com/knackwurstking/pgpress/pkg/logger"
 
-func Middleware() *logger.Logger       { return logger.GetComponentLogger("Middleware") }
-func Server() *logger.Logger           { return logger.GetComponentLogger("Server") }
+// Server
+
+func Server() *logger.Logger     { return logger.GetComponentLogger("Server") }
+func Middleware() *logger.Logger { return logger.GetComponentLogger("Middleware") }
+
+// Web Socket Handlers
+
 func WSFeedHandler() *logger.Logger    { return logger.GetComponentLogger("WS Feed Handler") }
 func WSFeedConnection() *logger.Logger { return logger.GetComponentLogger("WS Feed Connection") }
+
+// Database Handlers
+
 func DBModifications() *logger.Logger  { return logger.GetComponentLogger("DB Modifications") }
 func DBAttachments() *logger.Logger    { return logger.GetComponentLogger("DB Attachments") }
 func DBCookies() *logger.Logger        { return logger.GetComponentLogger("DB Cookies") }
@@ -17,21 +25,26 @@ func DBNotes() *logger.Logger          { return logger.GetComponentLogger("DB No
 func DBTroubleReports() *logger.Logger { return logger.GetComponentLogger("DB TroubleReports") }
 func DBPressCycles() *logger.Logger    { return logger.GetComponentLogger("DB Service PressCycles") }
 func DBRegenerations() *logger.Logger  { return logger.GetComponentLogger("DB Tool Regenerations") }
-func HandlerAuth() *logger.Logger      { return logger.GetComponentLogger("Handler Auth") }
-func HandlerFeed() *logger.Logger      { return logger.GetComponentLogger("Handler Feed") }
-func HandlerHome() *logger.Logger      { return logger.GetComponentLogger("Handler Home") }
-func HandlerProfile() *logger.Logger   { return logger.GetComponentLogger("Handler Profile") }
-func HandlerTools() *logger.Logger     { return logger.GetComponentLogger("Handler Tools") }
+
+// HTML Hanlders
+
+func HandlerAuth() *logger.Logger    { return logger.GetComponentLogger("Handler Auth") }
+func HandlerFeed() *logger.Logger    { return logger.GetComponentLogger("Handler Feed") }
+func HandlerHome() *logger.Logger    { return logger.GetComponentLogger("Handler Home") }
+func HandlerProfile() *logger.Logger { return logger.GetComponentLogger("Handler Profile") }
+func HandlerTools() *logger.Logger   { return logger.GetComponentLogger("Handler Tools") }
 
 func HandlerTroubleReports() *logger.Logger {
 	return logger.GetComponentLogger("Handler TroubleReports")
 }
 
+// HTMX Loggers
+
 func HTMXHandlerFeed() *logger.Logger    { return logger.GetComponentLogger("HTMX Handler Feed") }
 func HTMXHandlerNav() *logger.Logger     { return logger.GetComponentLogger("HTMX Handler Nav") }
 func HTMXHandlerProfile() *logger.Logger { return logger.GetComponentLogger("HTMX Handler Profile") }
 func HTMXHandlerTools() *logger.Logger   { return logger.GetComponentLogger("HTMX Handler Tools") }
-
+func HTMXHandlerCycles() *logger.Logger  { return logger.GetComponentLogger("HTMX Handler Cycles") }
 func HTMXHandlerTroubleReports() *logger.Logger {
 	return logger.GetComponentLogger("HTMX Handler TroubleReports")
 }
