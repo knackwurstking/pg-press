@@ -2,14 +2,15 @@ package html
 
 import (
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/loginpage"
+
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -18,73 +19,71 @@ import (
 )
 
 type Auth struct {
-	DB *database.DB
+	*handlers.BaseHandler
+}
+
+func NewAuth(db *database.DB, logger *logger.Logger) *Tools {
+	return &Tools{
+		BaseHandler: handlers.NewBaseHandlerWithLogger(db, logger),
+	}
 }
 
 func (h *Auth) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/login", h.handleLogin),
-			helpers.NewEchoRoute(http.MethodGet, "/logout", h.handleLogout),
+			helpers.NewEchoRoute(http.MethodGet, "/login", h.HandleLogin),
+			helpers.NewEchoRoute(http.MethodGet, "/logout", h.HandleLogout),
 		},
 	)
 }
 
 // handleLogin handles the login page and form submission.
-func (h *Auth) handleLogin(c echo.Context) error {
+func (h *Auth) HandleLogin(c echo.Context) error {
 	remoteIP := c.RealIP()
 
-	formParams, _ := c.FormParams()
-	apiKey := strings.TrimSpace(formParams.Get(constants.APIKeyFormField))
-
+	apiKey := h.GetSanitizedFormValue(c, constants.APIKeyFormField)
 	if apiKey != "" {
-
 		if h.processApiKeyLogin(apiKey, c) {
-			logger.HandlerAuth().Info("Successful login for user from %s", remoteIP)
-
-			if err := c.Redirect(http.StatusSeeOther, "./profile"); err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError,
-					"failed to redirect to profile page")
+			h.LogInfo("Successful login for user from %s", remoteIP)
+			if err := h.RedirectTo(c, "./profile"); err != nil {
+				return h.RenderInternalError(c,
+					"failed to redirect to profile page: "+err.Error())
 			}
-
 			return nil
 		} else {
-			logger.HandlerAuth().Info("Failed login attempt from %s", remoteIP)
+			h.LogInfo("Failed login attempt from %s", remoteIP)
 		}
 	}
 
 	page := loginpage.Page(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render login page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render login page: "+err.Error())
 	}
 
 	return nil
 }
 
 // handleLogout handles user logout.
-func (h *Auth) handleLogout(c echo.Context) error {
+func (h *Auth) HandleLogout(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	// Try to get user info before logout for better logging
-	var userName string = "unknown"
-	if user, err := helpers.GetUserFromContext(c); err == nil {
-		userName = user.Name
-		logger.HandlerAuth().Debug("User %s logging out", user.Name)
+	user, err := h.GetUserFromContext(c)
+	if err == nil {
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
-
 		if err := h.DB.Cookies.Remove(cookie.Value); err != nil {
-			logger.HandlerAuth().Error("Failed to remove cookie from database for user %s from %s: %v",
-				userName, remoteIP, err)
+			h.LogError("Failed to remove cookie from database for user %s from %s: %v",
+				user.Name, remoteIP, err)
 		}
 	}
 
-	if err := c.Redirect(http.StatusSeeOther, "./login"); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to redirect to login page")
+	if err := h.RedirectTo(c, "./login"); err != nil {
+		return h.RenderInternalError(c,
+			"failed to redirect to login page: "+err.Error())
 	}
 
 	return nil
@@ -97,7 +96,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Validate API key format
 	if len(apiKey) < 16 {
-		logger.HandlerAuth().Debug("API key too short from %s", remoteIP)
+		h.LogDebug("API key too short from %s", remoteIP)
 		return false
 	}
 
@@ -105,9 +104,9 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	if err != nil {
 		if !utils.IsNotFoundError(err) {
-			logger.HandlerAuth().Error("Database error during authentication from %s: %v", remoteIP, err)
+			h.LogError("Database error during authentication from %s: %v", remoteIP, err)
 		} else {
-			logger.HandlerAuth().Debug("Invalid API key from %s", remoteIP)
+			h.LogDebug("Invalid API key from %s", remoteIP)
 		}
 
 		return false
@@ -115,9 +114,8 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Check for existing session
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
-
 		if err := h.DB.Cookies.Remove(existingCookie.Value); err != nil {
-			logger.HandlerAuth().Error("Failed to remove existing cookie for user %s from %s: %v",
+			h.LogError("Failed to remove existing cookie for user %s from %s: %v",
 				user.Name, remoteIP, err)
 		}
 	}
@@ -141,7 +139,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Log security-relevant information
 	if user.IsAdmin() {
-		logger.HandlerAuth().Info("Administrator %s logged in from %s", user.Name, remoteIP)
+		h.LogInfo("Administrator %s logged in from %s", user.Name, remoteIP)
 	}
 
 	return true
