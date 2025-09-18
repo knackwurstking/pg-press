@@ -1,6 +1,7 @@
 package html
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
@@ -25,6 +26,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 		[]*helpers.EchoRoute{
 			helpers.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
+			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau", h.handlePressUmbauPage),
 			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
 		},
 	)
@@ -116,6 +118,12 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Tools) handlePressUmbauPage(c echo.Context) error {
+	// TODO: ...
+
+	return errors.New("under construction")
 }
 
 func (h *Tools) handleToolPage(c echo.Context) error {
