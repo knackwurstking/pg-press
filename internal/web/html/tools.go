@@ -24,7 +24,7 @@ type Tools struct {
 
 func NewTools(db *database.DB, logger *logger.Logger) *Tools {
 	return &Tools{
-		BaseHandler: handlers.NewBaseHandlerWithLogger(db, logger),
+		BaseHandler: handlers.NewBaseHandler(db, logger),
 	}
 }
 

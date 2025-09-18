@@ -18,15 +18,8 @@ type BaseHandler struct {
 	Logger *logger.Logger
 }
 
-// NewBaseHandler creates a new base handler with database access
-func NewBaseHandler(db *database.DB) *BaseHandler {
-	return &BaseHandler{
-		DB: db,
-	}
-}
-
-// NewBaseHandlerWithLogger creates a new base handler with database and logger
-func NewBaseHandlerWithLogger(db *database.DB, logger *logger.Logger) *BaseHandler {
+// NewBaseHandler creates a new base handler with database and logger
+func NewBaseHandler(db *database.DB, logger *logger.Logger) *BaseHandler {
 	return &BaseHandler{
 		DB:     db,
 		Logger: logger,
