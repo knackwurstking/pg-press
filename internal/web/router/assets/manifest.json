@@ -13,6 +13,7 @@
   "lang": "de",
   "dir": "ltr",
   "categories": ["productivity", "business", "utilities"],
+
   "icons": [
     {
       "src": "./pwa-64x64.png",
@@ -20,24 +21,28 @@
       "type": "image/png",
       "purpose": "any"
     },
+
     {
       "src": "./pwa-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
+
     {
       "src": "./pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
+
     {
       "src": "./maskable-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
+
     {
       "src": "./apple-touch-icon-180x180.png",
       "sizes": "180x180",
@@ -45,15 +50,18 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [],
 
+  "screenshots": [],
   "prefer_related_applications": false,
+
   "edge_side_panel": {
     "preferred_width": 400
   },
+
   "launch_handler": {
-    "client_mode": "navigate-existing"
+    "client_mode": "auto"
   },
+
   "shortcuts": [
     {
       "name": "Feed",
@@ -67,6 +75,7 @@
         }
       ]
     },
+
     {
       "name": "Problemberichte",
       "short_name": "Berichte",
@@ -79,6 +88,7 @@
         }
       ]
     },
+
     {
       "name": "Werkzeuge",
       "short_name": "Werkzeuge",
