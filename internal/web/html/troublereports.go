@@ -11,19 +11,26 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/modificationspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
+
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/modification"
-	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type TroubleReports struct {
-	DB *database.DB
+	*handlers.BaseHandler
+}
+
+func NewTroubleReports(db *database.DB, logger *logger.Logger) *TroubleReports {
+	return &TroubleReports{
+		BaseHandler: handlers.NewBaseHandler(db, logger),
+	}
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
@@ -31,75 +38,67 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports",
-				h.handleTroubleReportsGET),
+				h.HandleTroubleReportsGET),
 
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf",
-				h.handleSharePdfGET),
+				h.HandleSharePdfGET),
 
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment",
-				h.handleAttachmentGET),
+				h.HandleAttachmentGET),
 
 			helpers.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id",
-				h.handleModificationsGET),
-
-			//helpers.NewEchoRoute(http.MethodPost, "/trouble-reports/rollback/:id",
-			//	h.handleRollbackPOST),
+				h.HandleModificationsGET),
 		},
 	)
 }
 
-func (h *TroubleReports) handleTroubleReportsGET(c echo.Context) error {
-	logger.HandlerTroubleReports().Debug("Rendering trouble reports page")
+func (h *TroubleReports) HandleTroubleReportsGET(c echo.Context) error {
+	h.LogDebug("Rendering trouble reports page")
 
 	page := troublereportspage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
+		return h.RenderInternalError(c,
 			"failed to render trouble reports page: "+err.Error())
 	}
-
 	return nil
 }
 
-func (h *TroubleReports) handleSharePdfGET(c echo.Context) error {
-	id, err := helpers.ParseInt64Query(c, "id")
+func (h *TroubleReports) HandleSharePdfGET(c echo.Context) error {
+	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, err.Error())
 	}
 
-	logger.HandlerTroubleReports().Info("Generating PDF for trouble report %d", id)
+	h.LogInfo("Generating PDF for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to retrieve trouble report")
 	}
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"Fehler beim Erstellen der PDF")
+		return h.HandleError(c, err, "failed to generate PDF")
 	}
 
-	logger.HandlerTroubleReports().Info(
-		"Successfully generated PDF for trouble report %d (size: %d bytes)",
+	h.LogInfo("Successfully generated PDF for trouble report %d (size: %d bytes)",
 		tr.ID, pdfBuffer.Len())
 
 	return h.shareResponse(c, tr, pdfBuffer)
 }
 
-func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
-	attachmentID, err := helpers.ParseInt64Query(c, "attachment_id")
+func (h *TroubleReports) HandleAttachmentGET(c echo.Context) error {
+	attachmentID, err := h.ParseInt64Query(c, "attachment_id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, err.Error())
 	}
 
-	logger.HandlerTroubleReports().Debug("Fetching attachment %d", attachmentID)
+	h.LogDebug("Fetching attachment %d", attachmentID)
 
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get attachment: "+err.Error())
+		return h.HandleError(c, err, "failed to get attachment")
 	}
 
 	// Set appropriate headers
@@ -114,31 +113,31 @@ func (h *TroubleReports) handleAttachmentGET(c echo.Context) error {
 	c.Response().Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	logger.HandlerTroubleReports().Info("Serving attachment %d (size: %d bytes, type: %s)",
+	h.LogInfo("Serving attachment %d (size: %d bytes, type: %s)",
 		attachmentID, len(attachment.Data), attachment.MimeType)
 
 	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
 
-func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
-	logger.HandlerTroubleReports().Info("Handling modifications for trouble report")
+func (h *TroubleReports) HandleModificationsGET(c echo.Context) error {
+	h.LogInfo("Handling modifications for trouble report")
 
 	// Parse ID parameter
-	id, err := helpers.ParseInt64Param(c, "id")
+	id, err := h.ParseInt64Param(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, err.Error())
 	}
 
 	// Fetch modifications for this trouble report
-	logger.HandlerTroubleReports().Debug("Fetching modifications for trouble report %d", id)
+	h.LogDebug("Fetching modifications for trouble report %d", id)
+
 	modifications, err := h.DB.Modifications.ListWithUser(
 		services.ModificationTypeTroubleReport, id, 100, 0)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve modifications: "+err.Error())
+		return h.HandleError(c, err, "failed to retrieve modifications")
 	}
 
-	logger.HandlerTroubleReports().Debug(
+	h.LogDebug(
 		"Found %d modifications for trouble report %d",
 		len(modifications), id)
 
@@ -156,7 +155,10 @@ func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	}
 
 	// Get user from context to check permissions
-	currentUser, _ := helpers.GetUserFromContext(c)
+	currentUser, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve user from context")
+	}
 	canRollback := currentUser != nil && currentUser.IsAdmin()
 
 	// Create render function using the new template
@@ -165,8 +167,7 @@ func (h *TroubleReports) handleModificationsGET(c echo.Context) error {
 	// Rendering the page template
 	page := modificationspage.Page(m, f)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render trouble reports page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render page: "+err.Error())
 	}
 
 	return nil

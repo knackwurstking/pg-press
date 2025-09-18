@@ -16,16 +16,10 @@ import (
 func GetUserFromContext(ctx echo.Context) (*models.User, error) {
 	user, ok := ctx.Get("user").(*models.User)
 	if !ok {
-		return nil, echo.NewHTTPError(
-			http.StatusUnauthorized,
-			"authentication required",
-		)
+		return nil, fmt.Errorf("missing user context")
 	}
 	if user == nil {
-		return nil, echo.NewHTTPError(
-			http.StatusUnauthorized,
-			"invalid user session",
-		)
+		return nil, fmt.Errorf("invalid user session")
 	}
 	return user, nil
 }
@@ -42,12 +36,12 @@ func ParseStringQuery(ctx echo.Context, paramName string) (string, error) {
 func ParseInt64Param(ctx echo.Context, paramName string) (int64, error) {
 	idStr := ctx.Param(paramName)
 	if idStr == "" {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" parameter")
+		return 0, fmt.Errorf("missing %s parameter", paramName)
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be a number")
+		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
 	}
 	return id, nil
 }
@@ -55,12 +49,12 @@ func ParseInt64Param(ctx echo.Context, paramName string) (int64, error) {
 func ParseInt64Query(ctx echo.Context, paramName string) (int64, error) {
 	idStr := ctx.QueryParam(paramName)
 	if idStr == "" {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "missing "+paramName+" query parameter")
+		return 0, fmt.Errorf("missing %s query parameter", paramName)
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, echo.NewHTTPError(http.StatusBadRequest, "invalid "+paramName+": must be a number")
+		return 0, fmt.Errorf("invalid %s query parameter: must be a number", paramName)
 	}
 
 	return id, nil
