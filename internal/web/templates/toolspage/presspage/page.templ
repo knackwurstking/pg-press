@@ -3,17 +3,17 @@ package presspage
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/internal/env"
 )
 
 type PageProps struct {
-	Press 		models.PressNumber
-	Cycles 		[]*models.Cycle
-	User 		*models.User
-	ToolsMap 	map[int64]*models.Tool
+	Press    models.PressNumber
+	Cycles   []*models.Cycle
+	User     *models.User
+	ToolsMap map[int64]*models.Tool
 }
 
 templ Page(props PageProps) {
@@ -25,14 +25,16 @@ templ Page(props PageProps) {
 		},
 	) {
 		<main class="container fluid">
+			// Dev Note
 			<div class="card warning mb">
 				<div class="card-body">
 					<span>In Bearbeitung</span>
 				</div>
 			</div>
-
+			// Actions
 			<section class="flex justify-end items-center gap">
-				<a role="button"
+				<a
+					role="button"
 					class="primary"
 					href={ fmt.Sprintf("%s/htmx/tools/press/%d/umbau",
 						env.ServerPathPrefix, props.Press) }
@@ -40,12 +42,11 @@ templ Page(props PageProps) {
 					Umbau
 				</a>
 			</section>
-
+			// Aktive tools table
 			<section id="tool-state-section" class="mt">
-			    <div class="flex justify-between items-center mb">
-			        <h5>Aktive Werkzeuge</h5>
+				<div class="flex justify-between items-center mb">
+					<h5>Aktive Werkzeuge</h5>
 				</div>
-
 				<table>
 					<tbody>
 						for _, tool := range props.ToolsMap {
@@ -54,16 +55,15 @@ templ Page(props PageProps) {
 									<td>{ tool.Format.String() }</td>
 									<td>{ tool.Code }</td>
 									<td>{ tool.Type }</td>
-
 									switch tool.Position {
-									case models.PositionTop:
-										<td>Oberteil</td>
-									case models.PositionTopCassette:
-										<td>Kassette Oberteil</td>
-									case models.PositionBottom:
-										<td>Unterteil</td>
-									default:
-										<td></td>
+										case models.PositionTop:
+											<td>Oberteil</td>
+										case models.PositionTopCassette:
+											<td>Kassette Oberteil</td>
+										case models.PositionBottom:
+											<td>Unterteil</td>
+										default:
+											<td></td>
 									}
 								</tr>
 							}
@@ -71,91 +71,90 @@ templ Page(props PageProps) {
 					</tbody>
 				</table>
 			</section>
-
-            <!-- Press Cycles Table -->
-            <section id="cycle-table-section" class="mt">
-	            <div class="flex justify-between items-center mb">
-	                <h5>Pressennutzungsverlauf</h5>
+			<!-- Press Cycles Table -->
+			<section id="cycle-table-section" class="mt">
+				<div class="flex justify-between items-center mb">
+					<h5>Pressennutzungsverlauf</h5>
 				</div>
-
-                <figure class="w-full overflow-x-scroll">
-                    <table name="additional-cycles-table" class="table borderless compact">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Datum</th>
-                                <th>Werkzeug</th>
-                                <th>Position</th>
-                                <th>Gesamtzyklen</th>
-                                <th>Teilzyklen (berechnet)</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                        	@renderCycles(props)
-                        </tbody>
-                    </table>
-                </figure>
-            </section>
-        </main>
-    }
+				<figure class="w-full overflow-x-scroll">
+					<table name="additional-cycles-table" class="table borderless compact">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>Datum</th>
+								<th>Werkzeug</th>
+								<th>Position</th>
+								<th>Gesamtzyklen</th>
+								<th>Teilzyklen (berechnet)</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							@renderCycles(props)
+						</tbody>
+					</table>
+				</figure>
+			</section>
+		</main>
+	}
 }
 
 templ renderCycles(props PageProps) {
 	if len(props.Cycles) == 0 {
-        <tr>
-            <td colspan="7" class="text-center">
+		<tr>
+			<td colspan="7" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
-        </tr>
-    } else {
+		</tr>
+	} else {
 		for _, cycle := range props.Cycles {
 			@renderCycle(props, cycle)
 		}
-    }
+	}
 }
 
 templ renderCycle(props PageProps, cycle *models.Cycle) {
 	<tr>
+		// Cycle ID
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
 		</td>
-
+		// Cycle Date
 		<td>
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
 		</td>
-
+		// Cycle Tool
 		<td>
 			{{ tool, _ := props.ToolsMap[cycle.ToolID] }}
-
 			if tool != nil {
-				<span class="text-xs">{ fmt.Sprintf("%s %s %s", tool.Format.String(), tool.Code, tool.Type) }</span>
+				<span class="text-xs">
+					{  fmt.Sprintf("%s %s %s",
+						tool.Format.String(), tool.Code, tool.Type) }
+				</span>
 			} else {
 				<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
 			}
 		</td>
-
+		// Cycle Position
 		<td>
 			<span class="text-xs">{ cycle.ToolPosition }</span>
 		</td>
-
+		// Total Cycles
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
-
+		// Partial Cycles
 		<td>
 			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
 				{ fmt.Sprintf("%d", cycle.PartialCycles) }
 			</span>
 		</td>
-
+		// Actions
 		<td>
 			<span class="button-group flex justify-end items-center">
 				// HTMX Button: Goto: Edit cycle entry dialog
 				<button
 					class="small ghost"
-
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
 						env.ServerPathPrefix, cycle.ToolID, cycle.ID,
@@ -164,32 +163,27 @@ templ renderCycle(props PageProps, cycle *models.Cycle) {
 					hx-target="body"
 					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
 					title="Bearbeiten"
-
 					if !props.User.IsAdmin() {
 						disabled
 					}
 				>
 					<i class="bi bi-pencil"></i>
 				</button>
-
 				// HTMX Button: Delete cycle from database table and reload section.cycles
 				<button
 					class="destructive small ghost"
-
 					hx-delete={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 					) }
 					hx-trigger="click"
 					hx-swap="none"
-					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
+					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
+       					cycle.TotalCycles) }
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-					hx-on:htmx:after-request='window.location.reload();'
-
+					hx-on:htmx:after-request="window.location.reload();"
 					title="Löschen"
-
 					if !props.User.IsAdmin() {
 						disabled
 					}
