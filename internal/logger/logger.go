@@ -48,3 +48,6 @@ func HTMXHandlerCycles() *logger.Logger  { return logger.GetComponentLogger("HTM
 func HTMXHandlerTroubleReports() *logger.Logger {
 	return logger.GetComponentLogger("HTMX Handler TroubleReports")
 }
+func HTMXHandlerMetalSheets() *logger.Logger {
+	return logger.GetComponentLogger("HTMX Handler MetalSheets")
+}
