@@ -46,19 +46,15 @@
     }
   ],
   "screenshots": [],
+
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "shortcuts": [
-    {
-      "name": "Problemberichte",
-      "short_name": "Berichte",
-      "description": "Problemberichte anzeigen und verwalten",
-      "url": "./trouble-reports",
-      "icons": [
-        {
-          "src": "./icon.png",
-          "sizes": "96x96"
-        }
-      ]
-    },
     {
       "name": "Feed",
       "short_name": "Feed",
@@ -72,10 +68,22 @@
       ]
     },
     {
-      "name": "Profil",
-      "short_name": "Profil",
-      "description": "Ihr Profil und Einstellungen verwalten",
-      "url": "./profile",
+      "name": "Problemberichte",
+      "short_name": "Berichte",
+      "description": "Problemberichte anzeigen und verwalten",
+      "url": "./trouble-reports",
+      "icons": [
+        {
+          "src": "./icon.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Werkzeuge",
+      "short_name": "Werkzeuge",
+      "description": "Werkzeuge anzeigen und verwalten",
+      "url": "./tools",
       "icons": [
         {
           "src": "./icon.png",
@@ -83,12 +91,5 @@
         }
       ]
     }
-  ],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  }
+  ]
 }
