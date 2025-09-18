@@ -15,8 +15,8 @@ type Home struct {
 	*handlers.BaseHandler
 }
 
-func NewHome(db *database.DB, logger *logger.Logger) *Tools {
-	return &Tools{
+func NewHome(db *database.DB, logger *logger.Logger) *Home {
+	return &Home{
 		BaseHandler: handlers.NewBaseHandler(db, logger),
 	}
 }

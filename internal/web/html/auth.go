@@ -22,8 +22,8 @@ type Auth struct {
 	*handlers.BaseHandler
 }
 
-func NewAuth(db *database.DB, logger *logger.Logger) *Tools {
-	return &Tools{
+func NewAuth(db *database.DB, logger *logger.Logger) *Auth {
+	return &Auth{
 		BaseHandler: handlers.NewBaseHandler(db, logger),
 	}
 }
