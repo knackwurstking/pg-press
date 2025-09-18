@@ -62,7 +62,7 @@ func Page(props PageProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 templ.SafeURL
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/htmx/tools/press/%d/umbau",
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/press/%d/umbau",
 				env.ServerPathPrefix, props.Press))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/page.templ`, Line: 40, Col: 40}
