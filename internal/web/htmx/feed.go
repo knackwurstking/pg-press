@@ -19,7 +19,7 @@ type Feed struct {
 
 func NewFeed(db *database.DB) *Feed {
 	return &Feed{
-		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerFeed()),
+		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerFeed()),
 	}
 }
 
