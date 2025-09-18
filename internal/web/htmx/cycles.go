@@ -145,6 +145,13 @@ func (h *Cycles) handleTotalCycles(c echo.Context) error {
 func (h *Cycles) handleEditGET(c echo.Context) error {
 	props := &dialogs.EditCycleProps{}
 
+	var err error
+	props.Tools, err = h.DB.Tools.List()
+	if err != nil {
+		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
+			"failed to load tool data: "+err.Error())
+	}
+
 	if c.QueryParam("id") != "" {
 		cycleID, err := helpers.ParseInt64Query(c, "id")
 		if err != nil {
@@ -178,8 +185,6 @@ func (h *Cycles) handleEditGET(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusInternalServerError,
 				"failed to load tool data: "+err.Error())
 		}
-	} else {
-		// TODO: List and set `Tools` to props for the tool input datalist
 	}
 
 	cycleEditDialog := dialogs.EditCycle(props)
