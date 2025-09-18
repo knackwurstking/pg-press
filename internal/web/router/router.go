@@ -36,7 +36,6 @@ func Serve(e *echo.Echo, db *database.DB) {
 	html.NewTools(db).RegisterRoutes(e)
 
 	// HTMX Handler (Old)
-	(&htmx.Feed{DB: db}).RegisterRoutes(e)           // TODO: Migrate
 	(&htmx.Profile{DB: db}).RegisterRoutes(e)        // TODO: Migrate
 	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e) // TODO: Migrate
 	(&htmx.Tools{DB: db}).RegisterRoutes(e)          // TODO: Migrate
@@ -45,6 +44,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 
 	// HTMX Handler (Migrated)
 	htmx.NewNav(db, wsh).RegisterRoutes(e)
+	htmx.NewFeed(db).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type
