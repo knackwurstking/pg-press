@@ -21,9 +21,9 @@ type EditCycleProps struct {
 templ EditCycle(props *EditCycleProps) {
 	{{
 		var (
-			baseType 		 string = "POST"
-			baseHref 		 string = ""
-			submitButtonText string = "???"
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		)
 
 		if props.Tool != nil && props.CycleID <= 0 {
@@ -36,10 +36,6 @@ templ EditCycle(props *EditCycleProps) {
 			submitButtonText = "Aktualisieren"
 			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit?id=%d",
 				env.ServerPathPrefix, props.CycleID)
-		} else {
-			baseType = "POST"
-			submitButtonText = "Erstellen"
-			baseHref = fmt.Sprintf( "%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		}
 	}}
 
@@ -132,15 +128,8 @@ templ EditCycle(props *EditCycleProps) {
 			<label class="flex flex-row justify-between items-center">
 				<span class="flex flex-col gap-0">
 					if props.CycleID > 0 {
-						<span>
-							Werkzeug nach diesem Zyklus-Eintrag als regeneriert markieren.
-							if props.CycleID > 0 {
-								(Rückwirkend)
-							}
-						</span>
-
 						<small>
-							Diese Aktion setzt die Gesamtzyklen auf 0 zurück
+							Werkzeug wurde Regeneriert nach diesem Zyklus
 						</small>
 					} else {
 						<span>
