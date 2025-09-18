@@ -72,16 +72,15 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 
 	// Get press number from param
 	var pn models.PressNumber
-	// Parsing & validating press number from query parameter
-	if pns, err := helpers.ParseInt64Param(c, "press"); err != nil {
+	pns, err := helpers.ParseInt64Param(c, "press")
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to parse id: "+err.Error())
-	} else {
-		pn = models.PressNumber(pns)
-		if !models.IsValidPressNumber(&pn) {
-			return echo.NewHTTPError(http.StatusBadRequest,
-				"invalid press number")
-		}
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid press number")
 	}
 
 	// Get cycles for this press
@@ -121,7 +120,27 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 }
 
 func (h *Tools) handlePressUmbauPage(c echo.Context) error {
-	// TODO: ...
+	// Get user from context
+	user, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError,
+			"failed to get user from context: "+err.Error())
+	}
+
+	// Get press number from param
+	var pn models.PressNumber
+	pns, err := helpers.ParseInt64Param(c, "press")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"failed to parse id: "+err.Error())
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return echo.NewHTTPError(http.StatusBadRequest,
+			"invalid press number")
+	}
+
+	// TODO: Implement press umbau page logic
 
 	return errors.New("under construction")
 }
