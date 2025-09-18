@@ -2,51 +2,63 @@ package html
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
+
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Tools struct {
-	DB *database.DB
+	*handlers.BaseHandler
+}
+
+func NewTools(db *database.DB, logger *logger.Logger) *Tools {
+	return &Tools{
+		BaseHandler: handlers.NewBaseHandlerWithLogger(db, logger),
+	}
 }
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/tools", h.handleTools),
-			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press", h.handlePressPage),
-			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau", h.handlePressUmbauPage),
-			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.handleToolPage),
+			helpers.NewEchoRoute(http.MethodGet, "/tools",
+				h.HandleTools),
+
+			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press",
+				h.HandlePressPage),
+			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau",
+				h.HandlePressUmbauPage),
+
+			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id",
+				h.HandleToolPage),
 		},
 	)
 }
 
-func (h *Tools) handleTools(c echo.Context) error {
-	logger.HandlerTools().Info("Rendering tools page")
+func (h *Tools) HandleTools(c echo.Context) error {
+	h.LogInfo("Rendering tools page")
 
 	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get tools: "+err.Error())
+		return h.HandleError(c, err, "failed to get tools")
 	}
 
-	logger.HandlerTools().Debug("Retrieved %d tools", len(tools))
+	h.LogDebug("Retrieved %d tools", len(tools))
 
 	pressUtilization, err := h.DB.Tools.GetPressUtilization()
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get press utilization: "+err.Error())
+		return h.HandleError(c, err, "failed to get press utilization")
 	}
 
 	page := toolspage.Page(&toolspage.PageProps{
@@ -55,46 +67,40 @@ func (h *Tools) handleTools(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render tools page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render tools page: "+err.Error())
 	}
 
 	return nil
 }
 
-func (h *Tools) handlePressPage(c echo.Context) error {
+func (h *Tools) HandlePressPage(c echo.Context) error {
 	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to get user from context: "+err.Error())
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	// Get press number from param
 	var pn models.PressNumber
-	pns, err := helpers.ParseInt64Param(c, "press")
+	pns, err := h.ParseInt64Param(c, "press")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to parse id: "+err.Error())
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
 	}
 	pn = models.PressNumber(pns)
 	if !models.IsValidPressNumber(&pn) {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid press number")
+		return h.RenderBadRequest(c, fmt.Sprintf("invalid press number: %d", pn))
 	}
 
 	// Get cycles for this press
 	cycles, err := h.DB.PressCycles.GetPressCycles(pn, nil, nil)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to get press cycles: "+err.Error())
+		return h.HandleError(c, err, "failed to get press cycles")
 	}
 
 	// Get tools
 	tools, err := h.DB.Tools.List()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to get tools map: "+err.Error())
+		return h.HandleError(c, err, "failed to get tools map")
 	}
 	// Convert tools to map[int64]*Tool
 	toolsMap := make(map[int64]*models.Tool)
@@ -103,7 +109,7 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 	}
 
 	// Render page
-	logger.HandlerTools().Debug("Rendering page for press %d", pn)
+	h.LogDebug("Rendering page for press %d", pn)
 	page := presspage.Page(presspage.PageProps{
 		Press:    pn,
 		Cycles:   cycles,
@@ -112,32 +118,28 @@ func (h *Tools) handlePressPage(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render press page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render press page: "+err.Error())
 	}
 
 	return nil
 }
 
-func (h *Tools) handlePressUmbauPage(c echo.Context) error {
+func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
+	_, err := h.GetUserFromContext(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to get user from context: "+err.Error())
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	// Get press number from param
 	var pn models.PressNumber
-	pns, err := helpers.ParseInt64Param(c, "press")
+	pns, err := h.ParseInt64Param(c, "press")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to parse id: "+err.Error())
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
 	}
 	pn = models.PressNumber(pns)
 	if !models.IsValidPressNumber(&pn) {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"invalid press number")
+		return h.RenderBadRequest(c, "invalid press number")
 	}
 
 	// TODO: Implement press umbau page logic
@@ -145,41 +147,41 @@ func (h *Tools) handlePressUmbauPage(c echo.Context) error {
 	return errors.New("under construction")
 }
 
-func (h *Tools) handleToolPage(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+func (h *Tools) HandleToolPage(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	id, err := helpers.ParseInt64Param(c, "id")
+	id, err := h.ParseInt64Param(c, "id")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to parse id from query parameter: "+err.Error())
+		return h.RenderBadRequest(c,
+			"failed to parse id from query parameter:"+err.Error())
 	}
 
-	logger.HandlerTools().Debug("Fetching tool %d with notes", id)
+	h.LogDebug("Fetching tool %d with notes", id)
+
 	tool, err := h.DB.Tools.GetWithNotes(id)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get tool: "+err.Error())
+		return h.HandleError(c, err, "failed to get tool")
 	}
 
-	logger.HandlerTools().Debug("Successfully fetched tool %d: Type=%s, Code=%s", id, tool.Type, tool.Code)
+	h.LogDebug("Successfully fetched tool %d: Type=%s, Code=%s",
+		id, tool.Type, tool.Code)
 
 	// Fetch metal sheets assigned to this tool
 	metalSheets, err := h.DB.MetalSheets.GetByToolID(id)
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
-		logger.HandlerTools().Error("Failed to fetch metal sheets: %v", err)
+		h.LogError("Failed to fetch metal sheets: %v", err)
 		metalSheets = []*models.MetalSheet{}
 	}
 
-	logger.HandlerTools().Debug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
+	h.LogDebug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
 
 	page := toolpage.Page(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render tool page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render tool page: "+err.Error())
 	}
 
 	return nil

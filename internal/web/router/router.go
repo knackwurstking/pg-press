@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/html"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
@@ -27,13 +28,15 @@ func Serve(e *echo.Echo, db *database.DB) {
 	// WebSocket Handlers
 	wsh := startWebSocketHandlers(db)
 
-	// HTML Handler
+	// HTML Handler (Old)
 	(&html.Auth{DB: db}).RegisterRoutes(e)
 	(&html.Home{}).RegisterRoutes(e)
 	(&html.Feed{DB: db}).RegisterRoutes(e)
 	(&html.Profile{DB: db}).RegisterRoutes(e)
 	(&html.TroubleReports{DB: db}).RegisterRoutes(e)
-	(&html.Tools{DB: db}).RegisterRoutes(e)
+
+	// HTML Handler (Migrated)
+	html.NewTools(db, logger.HandlerTools()).RegisterRoutes(e)
 
 	// HTMX Handler
 	(&htmx.Nav{DB: db, WSFeedHandler: wsh}).RegisterRoutes(e)
