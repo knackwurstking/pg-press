@@ -29,13 +29,13 @@ func Serve(e *echo.Echo, db *database.DB) {
 	wsh := startWebSocketHandlers(db)
 
 	// HTML Handler (Old)
-	(&html.Profile{DB: db}).RegisterRoutes(e)        // TODO: Migrate
 	(&html.TroubleReports{DB: db}).RegisterRoutes(e) // TODO: Migrate
 
 	// HTML Handler (Migrated)
 	html.NewAuth(db, logger.HandlerAuth()).RegisterRoutes(e)
 	html.NewFeed(db, logger.HandlerFeed()).RegisterRoutes(e)
 	html.NewHome(db, logger.HandlerHome()).RegisterRoutes(e)
+	html.NewProfile(db, logger.HandlerProfile()).RegisterRoutes(e)
 	html.NewTools(db, logger.HandlerTools()).RegisterRoutes(e)
 
 	// HTMX Handler

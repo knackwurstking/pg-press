@@ -5,9 +5,11 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/profilepage"
+
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -20,43 +22,45 @@ const (
 )
 
 type Profile struct {
-	DB *database.DB
+	*handlers.BaseHandler
+}
+
+func NewProfile(db *database.DB, logger *logger.Logger) *Profile {
+	return &Profile{
+		BaseHandler: handlers.NewBaseHandler(db, logger),
+	}
 }
 
 func (h *Profile) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/profile", h.handleProfile),
+			helpers.NewEchoRoute(http.MethodGet, "/profile", h.HandleProfile),
 		},
 	)
 }
 
-func (h *Profile) handleProfile(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+func (h *Profile) HandleProfile(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	logger.HandlerProfile().Debug("Rendering profile page for user %s", user.Name)
+	h.LogDebug("Rendering profile page for user %s", user.Name)
 
 	if err = h.handleUserNameChange(c, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"error updating username: "+err.Error())
+		return h.HandleError(c, err, "error updating username")
 	}
 
 	page := profilepage.Page(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render profile page: "+err.Error())
+		return h.RenderInternalError(c, "failed to render profile page: "+err.Error())
 	}
-
 	return nil
 }
 
 func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
-	formParams, _ := c.FormParams()
-	userName := helpers.SanitizeInput(formParams.Get(constants.UserNameFormField))
+	userName := h.GetSanitizedFormValue(c, constants.UserNameFormField)
 
 	if userName == "" || userName == user.Name {
 		return nil
@@ -67,7 +71,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 			"username must be between 1 and 100 characters")
 	}
 
-	logger.HandlerProfile().Info("User %s (Telegram ID: %d) is changing username to %s",
+	h.LogInfo("User %s (Telegram ID: %d) is changing username to %s",
 		user.Name, user.TelegramID, userName)
 
 	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
@@ -77,8 +81,9 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 		return err
 	}
 
-	logger.HandlerProfile().Info("Successfully updated username for user %d from %s to %s",
+	h.LogInfo("Successfully updated username for user %d from %s to %s",
 		user.TelegramID, user.Name, userName)
+
 	user.Name = userName
 
 	return nil
