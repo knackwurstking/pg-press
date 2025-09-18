@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
@@ -18,7 +19,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/templates/modificationspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
 
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/modification"
 )
@@ -27,9 +27,9 @@ type TroubleReports struct {
 	*handlers.BaseHandler
 }
 
-func NewTroubleReports(db *database.DB, logger *logger.Logger) *TroubleReports {
+func NewTroubleReports(db *database.DB) *TroubleReports {
 	return &TroubleReports{
-		BaseHandler: handlers.NewBaseHandler(db, logger),
+		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerTroubleReports()),
 	}
 }
 

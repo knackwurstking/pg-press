@@ -6,19 +6,19 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/feedpage"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 )
 
 type Feed struct {
 	*handlers.BaseHandler
 }
 
-func NewFeed(db *database.DB, logger *logger.Logger) *Feed {
+func NewFeed(db *database.DB) *Feed {
 	return &Feed{
-		BaseHandler: handlers.NewBaseHandler(db, logger),
+		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerFeed()),
 	}
 }
 

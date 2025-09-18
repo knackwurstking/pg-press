@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
@@ -22,9 +22,9 @@ type Tools struct {
 	*handlers.BaseHandler
 }
 
-func NewTools(db *database.DB, logger *logger.Logger) *Tools {
+func NewTools(db *database.DB) *Tools {
 	return &Tools{
-		BaseHandler: handlers.NewBaseHandler(db, logger),
+		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerTools()),
 	}
 }
 

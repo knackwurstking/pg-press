@@ -6,11 +6,11 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/loginpage"
 
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -22,9 +22,9 @@ type Auth struct {
 	*handlers.BaseHandler
 }
 
-func NewAuth(db *database.DB, logger *logger.Logger) *Auth {
+func NewAuth(db *database.DB) *Auth {
 	return &Auth{
-		BaseHandler: handlers.NewBaseHandler(db, logger),
+		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerAuth()),
 	}
 }
 

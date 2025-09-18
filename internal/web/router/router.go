@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/html"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
@@ -28,22 +27,24 @@ func Serve(e *echo.Echo, db *database.DB) {
 	// WebSocket Handlers
 	wsh := startWebSocketHandlers(db)
 
-	// HTML Handler (Migrated)
-	html.NewAuth(db, logger.HandlerAuth()).RegisterRoutes(e)
-	html.NewFeed(db, logger.HandlerFeed()).RegisterRoutes(e)
-	html.NewHome(db, logger.HandlerHome()).RegisterRoutes(e)
-	html.NewProfile(db, logger.HandlerProfile()).RegisterRoutes(e)
-	html.NewTroubleReports(db, logger.HandlerTroubleReports()).RegisterRoutes(e)
-	html.NewTools(db, logger.HandlerTools()).RegisterRoutes(e)
+	// HTML Handler
+	html.NewAuth(db).RegisterRoutes(e)
+	html.NewFeed(db).RegisterRoutes(e)
+	html.NewHome(db).RegisterRoutes(e)
+	html.NewProfile(db).RegisterRoutes(e)
+	html.NewTroubleReports(db).RegisterRoutes(e)
+	html.NewTools(db).RegisterRoutes(e)
 
-	// HTMX Handler
-	(&htmx.Nav{DB: db, WSFeedHandler: wsh}).RegisterRoutes(e)
-	(&htmx.Feed{DB: db}).RegisterRoutes(e)
-	(&htmx.Profile{DB: db}).RegisterRoutes(e)
-	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e)
-	(&htmx.Tools{DB: db}).RegisterRoutes(e)
-	(&htmx.Cycles{DB: db}).RegisterRoutes(e)
-	(&htmx.MetalSheets{DB: db}).RegisterRoutes(e)
+	// HTMX Handler (Old)
+	(&htmx.Feed{DB: db}).RegisterRoutes(e)           // TODO: Migrate
+	(&htmx.Profile{DB: db}).RegisterRoutes(e)        // TODO: Migrate
+	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e) // TODO: Migrate
+	(&htmx.Tools{DB: db}).RegisterRoutes(e)          // TODO: Migrate
+	(&htmx.Cycles{DB: db}).RegisterRoutes(e)         // TODO: Migrate
+	(&htmx.MetalSheets{DB: db}).RegisterRoutes(e)    // TODO: Migrate
+
+	// HTMX Handler (Migrated)
+	htmx.NewNav(db, wsh).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type

@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 
@@ -13,39 +14,47 @@ import (
 )
 
 type Nav struct {
-	DB            *database.DB
+	*handlers.BaseHandler
+
 	WSFeedHandler *wshandlers.FeedHandler
+}
+
+func NewNav(db *database.DB, wsFeedHandler *wshandlers.FeedHandler) *Nav {
+	return &Nav{
+		BaseHandler:   handlers.NewBaseHandler(db, logger.HTMXHandlerNav()),
+		WSFeedHandler: wsFeedHandler,
+	}
 }
 
 func (h *Nav) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.handleFeedCounterWebSocketEcho),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.HandleFeedCounterWebSocketEcho),
 		},
 	)
 }
 
 // handleFeedCounterWebSocketEcho creates an echo-compatible WebSocket handler
-func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
+func (h *Nav) HandleFeedCounterWebSocketEcho(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	// Create a WebSocket handler that can work with Echo
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 		// Get user from echo context
-		user, err := helpers.GetUserFromContext(c)
+		user, err := h.GetUserFromContext(c)
 		if err != nil {
-			logger.HTMXHandlerNav().Error("WebSocket authentication failed from %s: %v", remoteIP, err)
+			h.LogError("WebSocket authentication failed from %s: %v", remoteIP, err)
 			ws.Close()
 			return
 		}
 
-		logger.HTMXHandlerNav().Info("WebSocket connection established for user %s from %s", user.Name, remoteIP)
+		h.LogInfo("WebSocket connection established for user %s from %s", user.Name, remoteIP)
 
 		// Register the connection with the feed notifier
 		feedConn := h.WSFeedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			logger.HTMXHandlerNav().Error("Failed to register WebSocket connection for user %s from %s",
+			h.LogError("Failed to register WebSocket connection for user %s from %s",
 				user.Name, remoteIP)
 			ws.Close()
 			return
@@ -53,7 +62,7 @@ func (h *Nav) handleFeedCounterWebSocketEcho(c echo.Context) error {
 
 		// Track active connections
 		defer func() {
-			logger.HTMXHandlerNav().Info("WebSocket connection closed for user %s from %s",
+			h.LogInfo("WebSocket connection closed for user %s from %s",
 				user.Name, remoteIP)
 		}()
 
