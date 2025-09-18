@@ -37,13 +37,13 @@ func Serve(e *echo.Echo, db *database.DB) {
 
 	// HTMX Handler (Old)
 	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e) // TODO: Migrate
-	(&htmx.Tools{DB: db}).RegisterRoutes(e)          // TODO: Migrate
 	(&htmx.Cycles{DB: db}).RegisterRoutes(e)         // TODO: Migrate
 
 	// HTMX Handler (Migrated)
 	htmx.NewNav(db, wsh).RegisterRoutes(e)
 	htmx.NewFeed(db).RegisterRoutes(e)
 	htmx.NewProfile(db).RegisterRoutes(e)
+	htmx.NewTools(db).RegisterRoutes(e)       // TODO: Migrate
 	htmx.NewMetalSheets(db).RegisterRoutes(e) // TODO: Migrate
 }
 

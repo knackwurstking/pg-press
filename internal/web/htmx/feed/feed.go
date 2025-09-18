@@ -8,7 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/templates/feedpage"
 
 	"github.com/labstack/echo/v4"
 )
@@ -45,7 +44,7 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 		return h.HandleError(c, err, "failed getting user from context")
 	}
 
-	feedData := feedpage.List(feeds, user.LastFeed)
+	feedData := ListFeeds(feeds, user.LastFeed)
 	err = feedData.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return h.RenderInternalError(c,

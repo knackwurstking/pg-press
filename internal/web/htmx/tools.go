@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
@@ -20,8 +21,16 @@ import (
 )
 
 type Tools struct {
-	DB *database.DB
+	*handlers.BaseHandler
 }
+
+func NewTools(db *database.DB) *Tools {
+	return &Tools{
+		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerTools()),
+	}
+}
+
+// TODO: Continue here...
 
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
