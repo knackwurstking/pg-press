@@ -25,14 +25,51 @@ templ Page(props PageProps) {
 		},
 	) {
 		<main class="container fluid">
-			<div class="card warning">
+			<div class="card warning mb">
 				<div class="card-body">
 					<span>In Bearbeitung</span>
 				</div>
 			</div>
 
+			<section class="flex justify-end items-center gap">
+				<a role="button"
+					class="primary"
+					href={ fmt.Sprintf("%s/htmx/tools/press/%d/umbau",
+						env.ServerPathPrefix, props.Press) }
+				>
+					Umbau
+				</a>
+			</section>
+
 			<section id="tool-state-section" class="mt">
-				<!-- TODO: ... -->
+			    <div class="flex justify-between items-center mb">
+			        <h5>Aktive Werkzeuge</h5>
+				</div>
+
+				<table>
+					<tbody>
+						for _, tool := range props.ToolsMap {
+							if tool.Press != nil && *tool.Press == props.Press {
+								<tr>
+									<td>{ tool.Format.String() }</td>
+									<td>{ tool.Code }</td>
+									<td>{ tool.Type }</td>
+
+									switch tool.Position {
+									case models.PositionTop:
+										<td>Oberteil</td>
+									case models.PositionTopCassette:
+										<td>Kassette Oberteil</td>
+									case models.PositionBottom:
+										<td>Unterteil</td>
+									default:
+										<td></td>
+									}
+								</tr>
+							}
+						}
+					</tbody>
+				</table>
 			</section>
 
             <!-- Press Cycles Table -->

@@ -287,8 +287,6 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 		ORDER BY id DESC
 	`
 
-	logger.DBPressCycles().Debug("Executing query: %s", query)
-
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
 		return nil, fmt.Errorf("select error: press_cycles: %v", err)

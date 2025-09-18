@@ -49,9 +49,9 @@ func EditCycle(props *EditCycleProps) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		var (
-			baseType         string = "POST"
-			baseHref         string = ""
-			submitButtonText string = "???"
+			baseType         = "POST"
+			submitButtonText = "Erstellen"
+			baseHref         = fmt.Sprintf("%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		)
 
 		if props.Tool != nil && props.CycleID <= 0 {
@@ -64,10 +64,6 @@ func EditCycle(props *EditCycleProps) templ.Component {
 			submitButtonText = "Aktualisieren"
 			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit?id=%d",
 				env.ServerPathPrefix, props.CycleID)
-		} else {
-			baseType = "POST"
-			submitButtonText = "Erstellen"
-			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -93,7 +89,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 59, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 55, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -106,7 +102,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.Position)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 62, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 58, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -141,7 +137,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 84, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 80, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -168,7 +164,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 91, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 87, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -191,7 +187,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 104, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 100, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -209,7 +205,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.OriginalDate.Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 106, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 102, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -232,7 +228,7 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.InputTotalCycles))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 124, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/edit-cycle.templ`, Line: 120, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -248,27 +244,17 @@ func EditCycle(props *EditCycleProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.CycleID > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<span>Werkzeug nach diesem Zyklus-Eintrag als regeneriert markieren. ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				if props.CycleID > 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "(Rückwirkend)")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span> <small>Diese Aktion setzt die Gesamtzyklen auf 0 zurück</small>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<small>Werkzeug wurde Regeneriert nach diesem Zyklus</small>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<span>Werkzeug in den Regenerationszustand versetzen</span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<span>Werkzeug in den Regenerationszustand versetzen</span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</span><script>\n\t\t\t\t\tfunction checkboxOnChangeHandler(e) {\n\t\t\t\t\t\tif (e.checked) {\n                            if (!confirm(\"Sicher, diesen Zustand ändern?\")) {\n                                e.checked = false\n                            };\n                        }\n              \t\t}\n\t\t\t\t</script><input name=\"regenerating\" type=\"checkbox\" onchange=\"checkboxOnChangeHandler(this);\"></label></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span><script>\n\t\t\t\t\tfunction checkboxOnChangeHandler(e) {\n\t\t\t\t\t\tif (e.checked) {\n                            if (!confirm(\"Sicher, diesen Zustand ändern?\")) {\n                                e.checked = false\n                            };\n                        }\n              \t\t}\n\t\t\t\t</script><input name=\"regenerating\" type=\"checkbox\" onchange=\"checkboxOnChangeHandler(this);\"></label></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
