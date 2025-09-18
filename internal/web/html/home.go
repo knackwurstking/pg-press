@@ -21,24 +21,20 @@ func NewHome(db *database.DB, logger *logger.Logger) *Tools {
 	}
 }
 
-// TODO: Refactor
-
 func (h *Home) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "", h.handleHome),
+			helpers.NewEchoRoute(http.MethodGet, "", h.HandleHome),
 		},
 	)
 }
 
-// handleHome handles the home page request.
-func (h *Home) handleHome(c echo.Context) error {
+func (h *Home) HandleHome(c echo.Context) error {
 	page := homepage.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
+		return h.RenderInternalError(c,
 			"failed to render home page: "+err.Error())
 	}
-
 	return nil
 }
