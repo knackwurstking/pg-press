@@ -13,7 +13,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
+
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -61,7 +61,7 @@ func (h *Tools) GetToolsList(c echo.Context) error {
 		h.LogWarn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
 	}
 
-	toolsList := toolspage.ListTools(tools)
+	toolsList := ListTools(tools)
 	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render tools list all: "+err.Error())
@@ -163,12 +163,11 @@ func (h *Tools) UpdateTool(c echo.Context) error {
 	return nil
 }
 
-// TODO: ...
 func (h *Tools) DeleteTool(c echo.Context) error {
 	// Get tool ID from query parameter
-	toolID, err := helpers.ParseInt64Query(c, "id")
+	toolID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
+		return h.RenderBadRequest(c,
 			"invalid or missing id parameter: "+err.Error())
 	}
 
@@ -182,8 +181,7 @@ func (h *Tools) DeleteTool(c echo.Context) error {
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to delete tool: "+err.Error())
+		return h.HandleError(c, err, "failed to delete tool")
 	}
 
 	// Set redirect header to tools page
