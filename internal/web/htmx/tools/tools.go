@@ -1,4 +1,4 @@
-package htmx
+package tools
 
 import (
 	"errors"
@@ -30,26 +30,26 @@ func NewTools(db *database.DB) *Tools {
 	}
 }
 
-// TODO: Continue here...
-
 func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.handleList),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.GetToolsList),
 
 			// Get, Post or Edit a tool
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.handleEditGET),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.handleEditPOST),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.handleEditPUT),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.GetEditDialog),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.AddTool),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.UpdateTool),
 
 			// Delete a tool
-			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.handleDelete),
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete",
+				h.DeleteTool),
 		},
 	)
 }
 
-func (h *Tools) handleList(c echo.Context) error {
+// TODO: Contiue here
+func (h *Tools) GetToolsList(c echo.Context) error {
 	start := time.Now()
 	// Get tools from database
 	tools, err := h.DB.Tools.ListWithNotes()
@@ -60,7 +60,7 @@ func (h *Tools) handleList(c echo.Context) error {
 
 	dbElapsed := time.Since(start)
 	if dbElapsed > 100*time.Millisecond {
-		logger.HTMXHandlerTools().Warn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
+		h.LogWarn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
 	}
 
 	toolsList := toolspage.ListTools(tools)
@@ -72,8 +72,8 @@ func (h *Tools) handleList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEditGET(c echo.Context) error {
-	logger.HTMXHandlerTools().Debug("Rendering edit tool dialog")
+func (h *Tools) GetEditDialog(c echo.Context) error {
+	h.LogDebug("Rendering edit tool dialog")
 
 	props := &dialogs.EditToolProps{}
 
@@ -103,47 +103,35 @@ func (h *Tools) handleEditGET(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) handleEditPOST(c echo.Context) error {
+func (h *Tools) AddTool(c echo.Context) error {
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Debug("User %s creating new tool", user.Name)
+	h.LogDebug("User %s creating new tool", user.Name)
 
-	formData, err := h.getToolFormData(c)
+	formData, err := h.getEditToolFormData(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to get tool form data: "+err.Error())
 	}
 
-	props := &dialogs.EditToolProps{
-		InputPosition:       string(formData.Position),
-		InputWidth:          formData.Format.Width,
-		InputHeight:         formData.Format.Height,
-		InputType:           formData.Type,
-		InputCode:           formData.Code,
-		InputPressSelection: formData.Press,
-	}
+	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
+	tool.Press = formData.Press
 
-	props.Tool = models.NewTool(formData.Position)
-	props.Tool.Format = formData.Format
-	props.Tool.Type = formData.Type
-	props.Tool.Code = formData.Code
-	props.Tool.Press = formData.Press
-
-	if t, err := h.DB.Tools.AddWithNotes(props.Tool, user); err != nil {
+	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to add tool: "+err.Error())
 	} else {
-		logger.HTMXHandlerTools().Info("Created tool ID %d (Type=%s, Code=%s) by user %s",
-			t.ID, props.Tool.Type, props.Tool.Code, user.Name)
+		h.LogInfo("Created tool ID %d (Type=%s, Code=%s) by user %s",
+			t.ID, tool.Type, tool.Code, user.Name)
 	}
 
 	return nil
 }
 
-func (h *Tools) handleEditPUT(c echo.Context) error {
+func (h *Tools) UpdateTool(c echo.Context) error {
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
 		return err
@@ -154,9 +142,9 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return err
 	}
 
-	logger.HTMXHandlerTools().Warn("User %s updating tool %d", user.Name, toolID)
+	h.LogWarn("User %s updating tool %d", user.Name, toolID)
 
-	formData, err := h.getToolFormData(c)
+	formData, err := h.getEditToolFormData(c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest,
 			"failed to get tool form data: "+err.Error())
@@ -182,14 +170,14 @@ func (h *Tools) handleEditPUT(c echo.Context) error {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update tool: "+err.Error())
 	} else {
-		logger.HTMXHandlerTools().Info("Updated tool %d (Type=%s, Code=%s) by user %s",
+		h.LogInfo("Updated tool %d (Type=%s, Code=%s) by user %s",
 			props.Tool.ID, props.Tool.Type, props.Tool.Code, user.Name)
 	}
 
 	return nil
 }
 
-func (h *Tools) handleDelete(c echo.Context) error {
+func (h *Tools) DeleteTool(c echo.Context) error {
 	// Get tool ID from query parameter
 	toolID, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
@@ -198,12 +186,12 @@ func (h *Tools) handleDelete(c echo.Context) error {
 	}
 
 	// Get user from context for audit trail
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	logger.HTMXHandlerTools().Debug("User %s deleting tool %d", user.Name, toolID)
+	h.LogDebug("User %s deleting tool %d", user.Name, toolID)
 
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {
@@ -216,10 +204,11 @@ func (h *Tools) handleDelete(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
+func (h *Tools) getEditToolFormData(c echo.Context) (*EditFormData, error) {
 	// Parse position with validation
-	positionFormValue := c.FormValue("position")
 	var position models.Position
+
+	positionFormValue := h.GetSanitizedFormValue(c, "position")
 	switch models.Position(positionFormValue) {
 	case models.PositionTop:
 		position = models.PositionTop
@@ -231,7 +220,7 @@ func (h *Tools) getToolFormData(c echo.Context) (*ToolEditFormData, error) {
 		return nil, errors.New("invalid position: " + positionFormValue)
 	}
 
-	data := &ToolEditFormData{
+	data := &EditFormData{
 		Position: position,
 	}
 

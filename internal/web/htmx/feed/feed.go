@@ -1,4 +1,4 @@
-package htmx
+package feed
 
 import (
 	"net/http"

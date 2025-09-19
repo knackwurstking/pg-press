@@ -1,4 +1,4 @@
-package htmx
+package profile
 
 import (
 	"net/http"
@@ -7,7 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/templates/profilepage"
 	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
@@ -50,7 +49,7 @@ func (h *Profile) HandleGetCookies(c echo.Context) error {
 
 	h.LogDebug("Found %d cookies for user %s", len(cookies), user.Name)
 
-	cookiesTable := profilepage.Cookies(models.SortCookies(cookies))
+	cookiesTable := Cookies(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return h.RenderInternalError(c,

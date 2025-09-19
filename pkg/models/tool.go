@@ -57,12 +57,12 @@ type Tool struct {
 	LinkedNotes  []int64      `json:"notes"` // Contains note ids from the "notes" table
 }
 
-func NewTool(position Position) *Tool {
+func NewTool(position Position, format Format, code string, _type string) *Tool {
 	return &Tool{
-		Format:       Format{},
+		Format:       format,
 		Position:     position,
-		Type:         "",
-		Code:         "",
+		Type:         _type,
+		Code:         code,
 		Regenerating: false,
 		Press:        nil,
 		LinkedNotes:  make([]int64, 0),

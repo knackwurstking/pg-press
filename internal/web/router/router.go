@@ -43,8 +43,8 @@ func Serve(e *echo.Echo, db *database.DB) {
 	htmx.NewNav(db, wsh).RegisterRoutes(e)
 	htmx.NewFeed(db).RegisterRoutes(e)
 	htmx.NewProfile(db).RegisterRoutes(e)
-	htmx.NewTools(db).RegisterRoutes(e)       // TODO: Migrate
-	htmx.NewMetalSheets(db).RegisterRoutes(e) // TODO: Migrate
+	htmx.NewTools(db).RegisterRoutes(e) // TODO: Migrate
+	htmx.NewMetalSheets(db).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type
