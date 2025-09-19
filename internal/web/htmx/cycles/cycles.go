@@ -1,4 +1,4 @@
-package htmx
+package cycles
 
 import (
 	"fmt"
@@ -13,10 +13,8 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -93,7 +91,7 @@ func (h *Cycles) GetSection(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	cyclesSection := toolpage.CyclesSection(&toolpage.CyclesSectionProps{
+	cyclesSection := CyclesSection(&CyclesSectionProps{
 		User:             user,
 		Tool:             tool,
 		TotalCycles:      totalCycles,
@@ -183,27 +181,25 @@ func (h *Cycles) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
-// TODO: ...
 func (h *Cycles) HandleEditPOST(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	tool, err := h.getToolFromQuery(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to get tool from query: "+err.Error())
 	}
 
 	// Parse form data
 	form, err := h.getCycleFormData(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse form data: "+err.Error())
 	}
 
 	if !models.IsValidPressNumber(form.PressNumber) {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"press_number must be a valid integer")
+		return h.RenderBadRequest(c, "press_number must be a valid integer")
 	}
 
 	pressCycle := models.NewCycle(
@@ -218,15 +214,14 @@ func (h *Cycles) HandleEditPOST(c echo.Context) error {
 
 	cycleID, err := h.DB.PressCycles.Add(pressCycle, user)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err), err)
+		return h.HandleError(c, err, "failed to add cycle")
 	}
 
 	// Handle regeneration if requested
 	if form.Regenerating {
 		_, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user)
 		if err != nil {
-			h.LogError(
-				"Failed to start regeneration for tool %d: %v",
+			h.LogError("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 	}
@@ -237,58 +232,52 @@ func (h *Cycles) HandleEditPOST(c echo.Context) error {
 func (h *Cycles) HandleEditPUT(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	cycleID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse ID from query: "+err.Error())
 	}
 
 	tool, err := h.getToolFromQuery(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to get tool from query: "+err.Error())
 	}
 
 	form, err := h.getCycleFormData(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to get cycle form data from query: "+err.Error())
 	}
 
 	if !models.IsValidPressNumber(form.PressNumber) {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"press_number must be a valid integer")
+		return h.RenderBadRequest(c, "press_number must be a valid integer")
 	}
 
 	// Update the cycle
 	pressCycle := models.NewPressCycleWithID(
 		cycleID,
 		*form.PressNumber,
-		tool.ID,
-		tool.Position,
-		form.TotalCycles,
+		tool.ID, tool.Position, form.TotalCycles,
 		user.TelegramID,
 		form.Date,
 	)
 
 	if err := h.DB.PressCycles.Update(pressCycle, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to update press cycle: "+err.Error())
+		return h.HandleError(c, err, "failed to update press cycle")
 	}
 
 	// Handle regeneration if requested
 	if form.Regenerating {
 		_, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user)
 		if err != nil {
-			h.LogError(
-				"Failed to start regeneration for tool %d: %v",
+			h.LogError("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 
 		err = h.DB.ToolRegenerations.StopToolRegeneration(tool.ID, user)
 		if err != nil {
-			h.LogError(
-				"Failed to stop regeneration for tool %d: %v",
+			h.LogError("Failed to stop regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 	}
@@ -297,20 +286,18 @@ func (h *Cycles) HandleEditPUT(c echo.Context) error {
 }
 
 func (h *Cycles) HandleDELETE(c echo.Context) error {
-
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	cycleID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse ID query: "+err.Error())
 	}
 
 	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to delete press cycle: "+err.Error())
+		return h.HandleError(c, err, "failed to delete press cycle")
 	}
 
 	return h.GetSection(c)

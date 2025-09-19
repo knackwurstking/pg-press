@@ -1,19 +1,19 @@
-package toolpage
+package cycles
 
 import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 type CyclesSectionProps struct {
-	User          *models.User
-	Tool          *models.Tool
-	ToolPosition  string
-	TotalCycles   int64
-	Cycles        []*models.Cycle
+	User             *models.User
+	Tool             *models.Tool
+	ToolPosition     string
+	TotalCycles      int64
+	Cycles           []*models.Cycle
 	LastRegeneration *models.Regeneration
 }
 
@@ -22,18 +22,15 @@ templ CyclesSection(props *CyclesSectionProps) {
 		<div class="card-header">
 			Entwicklernotiz
 		</div>
-
 		<div class="card-body">
 			Die Presszyklen sind nach ihrer ID und nicht nach Datum sortiert.
 			Eine niedrigere ID bedeutet einen älteren Eintrag (IDs sind einzigartig).
 		</div>
 	</div>
-
 	<div class="flex justify-between items-center mb">
 		<h5>Pressennutzungsverlauf</h5>
 		<button
 			class="secondary small flex"
-
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycle/edit?tool_id=%d",
 				env.ServerPathPrefix, props.Tool.ID,
@@ -42,9 +39,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 			hx-target="body"
 			hx-swap="beforeend"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
 			title="Neuen Eintrag hinzufügen"
-
 			if !props.User.IsAdmin() {
 				disabled
 			}
@@ -52,7 +47,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 			<i class="bi bi-plus-lg"></i>
 		</button>
 	</div>
-
 	<section>
 		<h6 class="mb">
 			Gesamtzyklen für { props.Tool.String() } (Position: { props.ToolPosition }):
@@ -61,7 +55,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 			@components.TotalCycles(props.TotalCycles, true)
 		</span>
 	</section>
-
 	<figure class="w-full overflow-x-scroll">
 		<table name="tool-cycles-table" class="table borderless compact">
 			<thead>
@@ -76,7 +69,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 					<th></th>
 				</tr>
 			</thead>
-
 			<tbody>
 				@cyclesTableRows(props)
 			</tbody>
@@ -109,39 +101,31 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cyc
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
 		</td>
-
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>
-
 		<td>
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
 		</td>
-
 		<td>
 			<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
 		</td>
-
 		<td>
 			<span class="text-xs">{ cycle.ToolPosition }</span>
 		</td>
-
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
 		</td>
-
 		<td>
 			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
 				{ fmt.Sprintf("%d", cycle.PartialCycles) }
 			</span>
 		</td>
-
 		<td>
 			<span class="button-group flex justify-end items-center">
 				// HTMX Button: Goto: Edit cycle entry dialog
 				<button
 					class="small ghost"
-
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
@@ -150,20 +134,16 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cyc
 					hx-target="body"
 					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
 					title="Bearbeiten"
-
 					if !props.User.IsAdmin() {
 						disabled
 					}
 				>
 					<i class="bi bi-pencil"></i>
 				</button>
-
 				// HTMX Button: Delete cycle from database table and reload section.cycles
 				<button
 					class="destructive small ghost"
-
 					hx-delete={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
@@ -173,9 +153,7 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cyc
 					hx-swap="innerHTML"
 					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-
 					title="Löschen"
-
 					if !props.User.IsAdmin() {
 						disabled
 					}

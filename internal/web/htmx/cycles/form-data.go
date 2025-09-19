@@ -1,4 +1,4 @@
-package htmx
+package cycles
 
 import (
 	"time"
