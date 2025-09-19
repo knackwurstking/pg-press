@@ -35,9 +35,6 @@ func Serve(e *echo.Echo, db *database.DB) {
 	html.NewTroubleReports(db).RegisterRoutes(e)
 	html.NewTools(db).RegisterRoutes(e)
 
-	// HTMX Handler (Old)
-	(&htmx.TroubleReports{DB: db}).RegisterRoutes(e) // TODO: Migrate
-
 	// HTMX Handler (Migrated)
 	htmx.NewNav(db, wsh).RegisterRoutes(e)
 	htmx.NewFeed(db).RegisterRoutes(e)
@@ -45,6 +42,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 	htmx.NewTools(db).RegisterRoutes(e)
 	htmx.NewMetalSheets(db).RegisterRoutes(e)
 	htmx.NewCycles(db).RegisterRoutes(e)
+	htmx.NewTroubleReports(db).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type

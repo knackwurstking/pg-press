@@ -1,4 +1,4 @@
-package troublereportspage
+package troublereports
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
+templ ListTroubleReports(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
 	if len(troubleReports) > 0 {
 		<ul id="data">
 			for _, tr := range troubleReports {
@@ -16,13 +16,10 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
 					>
 						<summary>{ tr.Title }</summary>
-
 						<pre>{ tr.Content }</pre>
-
 						<!-- Attachments Preview Container -->
 						if len(tr.LoadedAttachments) > 0 {
 							<br/>
-
 							<div
 								class="attachments-preview-placeholder"
 								data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
@@ -41,12 +38,10 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 							</div>
 						}
 					</details>
-
 					<div class="actions flex gap justify-end items-center">
 						<a
 							role="button"
 							class="ghost secondary icon"
-
 							href={ fmt.Sprintf(
 								"%s/trouble-reports/modifications/%d",
 								env.ServerPathPrefix, tr.ID,
@@ -54,7 +49,6 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						>
 							<i class="bi bi-clock-history"></i>
 						</a>
-
 						<button
 							hx-get={ fmt.Sprintf(
 								"%s/htmx/trouble-reports/edit?id=%d",
@@ -68,7 +62,6 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						>
 							<i class="bi bi-pen"></i>
 						</button>
-
 						<button
 							id={ fmt.Sprintf("share-btn-%d", tr.ID) }
 							onclick={ shareTroubleReportPDF(templ.JSExpression("event"), tr.ID, tr.Title) }
@@ -77,7 +70,6 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 						>
 							<i class="bi bi-share"></i>
 						</button>
-
 						if user.IsAdmin() {
 							<button
 								hx-delete={ fmt.Sprintf(
@@ -115,14 +107,14 @@ templ List(user *models.User, troubleReports []*models.TroubleReportWithAttachme
 					<hr/>
 				</span>
 			}
-			@listScript()
+			@listTroubleReportsScript()
 		</ul>
 	} else {
 		<span id="data"></span>
 	}
 }
 
-script listScript() {
+script listTroubleReportsScript() {
 	if (location.hash === "") {
 		return;
 	}
@@ -135,4 +127,73 @@ script listScript() {
     					details.scrollIntoView({ behavior: 'smooth', block: 'start' }),
 		100);
 	}
+}
+
+script shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, title string) {
+    var button = event.target.closest("button");
+    if (!button) {
+        alert("Fehler: Share-Button nicht gefunden.");
+        return;
+    }
+
+    var originalContent = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+    button.disabled = true;
+
+    function resetButton() {
+        button.innerHTML = originalContent;
+        button.style.color = "blue";
+        button.disabled = false;
+    }
+
+    function showSuccess(icon) {
+        button.innerHTML = icon;
+        button.style.color = "green";
+        setTimeout(resetButton, 1500);
+    }
+
+    function downloadPDF(blob) {
+        var filename = `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf`;
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showSuccess('<i class="bi bi-download"></i>');
+    }
+
+    fetch(`${serverPathPrefix}/trouble-reports/share-pdf?id=${troubleReportId}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.blob();
+        })
+        .then(blob => {
+            var filename = `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf`;
+            var isHTTPS = location.protocol === "https:";
+
+            if (isHTTPS && navigator.share && navigator.canShare) {
+                var file = new File([blob], filename, { type: "application/pdf" });
+                var shareData = {
+                    title: `Fehlerbericht: ${title}`,
+                    text: `Fehlerbericht #${troubleReportId}`,
+                    files: [file]
+                };
+
+                if (navigator.canShare(shareData)) {
+                    return navigator.share(shareData)
+                        .then(() => showSuccess('<i class="bi bi-check-circle"></i>'))
+                        .catch(() => downloadPDF(blob));
+                }
+            }
+            downloadPDF(blob);
+        })
+        .catch(error => {
+            console.error("Error sharing/downloading PDF:", error);
+            alert("Fehler beim Erstellen oder Teilen der PDF. Bitte versuchen Sie es erneut.");
+            resetButton();
+        });
 }

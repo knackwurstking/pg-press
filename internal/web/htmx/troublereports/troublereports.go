@@ -1,4 +1,4 @@
-package htmx
+package troublereports
 
 import (
 	"encoding/json"
@@ -16,239 +16,232 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/services"
+	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
-	"github.com/knackwurstking/pgpress/internal/web/templates/troublereportspage"
+
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 type TroubleReports struct {
-	DB *database.DB
+	*handlers.BaseHandler
+}
+
+func NewTroubleReports(db *database.DB) *TroubleReports {
+	return &TroubleReports{
+		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerTroubleReports()),
+	}
 }
 
 func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			// Dialog edit routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
-				h.handleDialogEditGET),
-
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
-				h.handleDialogEditPOST),
-
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit",
-				h.handleDialogEditPUT),
-
 			// Data routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data",
-				h.handleDataGET,
+				h.GetData,
 			),
 
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data",
-				h.handleDataDELETE,
+				h.DeleteTroubleReport,
 			),
-
-			// Rollback route
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
-				h.handleRollbackPOST),
 
 			// Attachments preview routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview",
-				h.handleAttachmentsPreviewGET),
+				h.GetAttachmentsPreview),
+
+			// Dialog edit routes
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
+				h.GetDialogEdit),
+
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
+				h.AddTroubleReport),
+
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit",
+				h.UpdateTroubleReport),
+
+			// Rollback route
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
+				h.Rollback),
 		},
 	)
 }
 
-func (h *TroubleReports) handleDataGET(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+func (h *TroubleReports) GetData(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("User %s fetching trouble reports list", user.Name)
+	h.LogDebug("User %s fetching trouble reports list", user.Name)
 
 	trs, err := h.DB.TroubleReports.ListWithAttachments()
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to load trouble reports: "+err.Error())
+		return h.HandleError(c, err, "failed to load trouble reports")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Found %d trouble reports for user %s", len(trs), user.Name)
+	h.LogDebug("Found %d trouble reports for user %s", len(trs), user.Name)
 
-	troubleReportsList := troublereportspage.List(user, trs)
+	troubleReportsList := ListTroubleReports(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to render trouble reports list component: "+err.Error())
+		h.HandleError(c, err, "failed to render trouble reports list component")
 	}
 
 	return nil
 }
 
-func (h *TroubleReports) handleDataDELETE(c echo.Context) error {
-	id, err := helpers.ParseInt64Query(c, "id")
+func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
+	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse trouble report ID: "+err.Error())
 	}
 
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	if !user.IsAdmin() {
-		return echo.NewHTTPError(http.StatusForbidden,
-			"administrator privileges required")
+		return h.RenderUnauthorized(c, "administrator privileges required")
 	}
 
-	logger.HTMXHandlerTroubleReports().Info(
-		"Administrator %s (Telegram ID: %d) is deleting trouble report %d",
+	h.LogInfo("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.Name, user.TelegramID, id)
 
 	if removedReport, err := h.DB.TroubleReports.RemoveWithAttachments(id, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to delete trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to delete trouble report")
 	} else {
-		logger.HTMXHandlerTroubleReports().Info(
-			"Successfully deleted trouble report %d (%s)",
+		h.LogInfo("Successfully deleted trouble report %d (%s)",
 			removedReport.ID, removedReport.Title)
 	}
 
-	return h.handleDataGET(c)
+	return h.GetData(c)
 }
 
-func (h *TroubleReports) handleAttachmentsPreviewGET(c echo.Context) error {
+func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse ID from query")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Fetching attachments preview for trouble report %d", id)
+	h.LogDebug("Fetching attachments preview for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to load trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to load trouble report")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Rendering attachments preview with %d attachments",
+	h.LogDebug("Rendering attachments preview with %d attachments",
 		len(tr.LoadedAttachments))
 
 	attachmentsPreview := components.AttachmentsPreview(tr.LoadedAttachments)
-	if err := attachmentsPreview.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
+	err = attachmentsPreview.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return h.RenderInternalError(c,
 			"failed to render attachments preview component: "+err.Error())
 	}
 
 	return nil
 }
 
-func (h *TroubleReports) handleDialogEditGET(c echo.Context) error {
+func (h *TroubleReports) GetDialogEdit(c echo.Context) error {
 	props := &dialogs.EditTroubleReportProps{}
 
 	var err error
 	props.ID, err = helpers.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse trouble report ID: "+err.Error())
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Loading trouble report %d for editing", props.ID)
+	h.LogDebug("Loading trouble report %d for editing", props.ID)
 
 	tr, err := h.DB.TroubleReports.Get(props.ID)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to get trouble report")
 	}
 	props.Title = tr.Title
 	props.Content = tr.Content
 
 	// Load attachments for display
-	if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr); err == nil {
+	loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr)
+	if err == nil {
 		props.Attachments = loadedAttachments
 	} else {
-		logger.HTMXHandlerTroubleReports().Error(
-			"Failed to load attachments for trouble report %d: %v",
+		h.LogError("Failed to load attachments for trouble report %d: %v",
 			props.ID, err)
 	}
 
 	dialog := dialogs.EditTroubleReport(props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to render Trouble Reports Edit Dialog: "+err.Error())
+		return h.RenderInternalError(c,
+			"failed to render trouble report edit dialog: "+err.Error())
 	}
 
 	return nil
 }
 
-func (h *TroubleReports) handleDialogEditPOST(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+func (h *TroubleReports) AddTroubleReport(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("User %s is creating a new trouble report", user.Name)
+	h.LogDebug("User %s is creating a new trouble report", user.Name)
 
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c,
+			"failed to get trouble report form data: "+err.Error())
 	}
 	if title == "" || content == "" {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"title and content are required")
+		return h.RenderBadRequest(c, "title and content are required")
 	}
 
 	tr := models.NewTroubleReport(title, content)
 
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Creating trouble report: title='%s', attachments=%d",
+	h.LogDebug("Creating trouble report: title='%s', attachments=%d",
 		title, len(attachments))
 
 	err = h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to add trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to add trouble report")
 	}
 
 	return nil
 }
 
-func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
+func (h *TroubleReports) UpdateTroubleReport(c echo.Context) error {
 	// Get ID from query parameter
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse ID query")
 	}
 
-	logger.HTMXHandlerTroubleReports().Debug("Updating trouble report %d", id)
+	h.LogDebug("Updating trouble report %d", id)
 
 	// Get user from context
 	user, err := helpers.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	// Get Title, Content and Attachments from form data
 	title, content, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c,
+			"failed to get trouble report form data: "+err.Error())
 	}
 	if title == "" || content == "" {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"title and content are required")
+		return h.RenderBadRequest(c, "title and content are required")
 	}
 
 	// Query previous trouble report
 	tr, err := h.DB.TroubleReports.Get(id)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to get trouble report")
 	}
 
 	// Filter out existing and new attachments
@@ -263,8 +256,7 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 	}
 
 	// Update trouble report with existing and new attachments, title content and mods
-	logger.HTMXHandlerTroubleReports().Debug(
-		"Updating trouble report %d with %d attachments",
+	h.LogDebug("Updating trouble report %d with %d attachments",
 		id, len(attachments))
 
 	// Update the previous trouble report
@@ -274,14 +266,100 @@ func (h *TroubleReports) handleDialogEditPUT(c echo.Context) error {
 
 	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to update trouble report: "+err.Error())
+		return h.HandleError(c, err, "failed to update trouble report")
 	}
 
 	return nil
 }
 
-// TODO: Do somehtings like the `get*FormData` method in "tools.go"
+func (h *TroubleReports) Rollback(c echo.Context) error {
+	h.LogInfo("Handling HTMX rollback for trouble report")
+
+	// Parse ID parameter from query
+	id, err := helpers.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse ID query")
+	}
+
+	// Get modification timestamp from form data
+	modTimeStr := c.FormValue("modification_time")
+	if modTimeStr == "" {
+		return h.RenderBadRequest(c, "modification_time form value is required")
+	}
+
+	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid modification_time format: "+err.Error())
+	}
+
+	// Get user from context
+	user, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	if !user.IsAdmin() {
+		return h.RenderUnauthorized(c, "administrator privileges required")
+	}
+
+	h.LogInfo("User %s is rolling back trouble report %d to modification %d",
+		user.Name, id, modTime)
+
+	// Find the specific modification
+	modifications, err := h.DB.Modifications.ListAll(
+		services.ModificationTypeTroubleReport, id)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve modifications")
+	}
+
+	var targetMod *models.Modification[any]
+	for _, mod := range modifications {
+		if mod.CreatedAt.UnixMilli() == modTime {
+			targetMod = mod
+			break
+		}
+	}
+
+	if targetMod == nil {
+		return h.RenderNotFound(c, "modification not found")
+	}
+
+	// Unmarshal the modification data
+	var modData models.TroubleReportModData
+	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
+		return h.RenderInternalError(c,
+			"failed to parse modification data: "+err.Error())
+	}
+
+	// Get the current trouble report
+	tr, err := h.DB.TroubleReports.Get(id)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve trouble report")
+	}
+
+	// Apply the rollback
+	tr.Title = modData.Title
+	tr.Content = modData.Content
+	tr.LinkedAttachments = modData.LinkedAttachments
+
+	// Update the trouble report
+	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
+		return h.HandleError(c, err, "failed to rollback trouble report")
+	}
+
+	h.LogInfo("Successfully rolled back trouble report %d", id)
+
+	// Return success message for HTMX
+	err = RollbackResponseStatusOK().Render(
+		c.Request().Context(), c.Response(),
+	)
+	if err != nil {
+		return h.HandleError(c, err, "failed to render response")
+	}
+
+	return nil
+}
+
 func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
 	attachments []*models.Attachment,
@@ -369,113 +447,6 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	}
 
 	return attachments, nil
-}
-
-func (h *TroubleReports) handleRollbackPOST(c echo.Context) error {
-	logger.HTMXHandlerTroubleReports().Info("Handling HTMX rollback for trouble report")
-
-	// Parse ID parameter from query
-	id, err := helpers.ParseInt64Query(c, "id")
-	if err != nil {
-		return err
-	}
-
-	// Get modification timestamp from form data
-	modTimeStr := c.FormValue("modification_time")
-	if modTimeStr == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "modification_time is required")
-	}
-
-	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid modification_time format")
-	}
-
-	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
-	if err != nil {
-		return err
-	}
-
-	if !user.IsAdmin() {
-		return echo.NewHTTPError(http.StatusForbidden, "administrator privileges required")
-	}
-
-	logger.HTMXHandlerTroubleReports().Info(
-		"User %s is rolling back trouble report %d to modification %d",
-		user.Name, id, modTime)
-
-	// Find the specific modification
-	modifications, err := h.DB.Modifications.ListAll(
-		services.ModificationTypeTroubleReport, id)
-	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve modifications: "+err.Error())
-	}
-
-	var targetMod *models.Modification[any]
-	for _, mod := range modifications {
-		if mod.CreatedAt.UnixMilli() == modTime {
-			targetMod = mod
-			break
-		}
-	}
-
-	if targetMod == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "modification not found")
-	}
-
-	// Unmarshal the modification data
-	var modData models.TroubleReportModData
-	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
-			"failed to parse modification data: "+err.Error())
-	}
-
-	// Get the current trouble report
-	tr, err := h.DB.TroubleReports.Get(id)
-	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to retrieve trouble report: "+err.Error())
-	}
-
-	// Apply the rollback
-	tr.Title = modData.Title
-	tr.Content = modData.Content
-	tr.LinkedAttachments = modData.LinkedAttachments
-
-	// Update the trouble report
-	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to rollback trouble report: "+err.Error())
-	}
-
-	logger.HTMXHandlerTroubleReports().Info(
-		"Successfully rolled back trouble report %d", id)
-
-	// Return success message for HTMX
-	return c.HTML(http.StatusOK, `
-		<div class="card success p mb">
-			<div class="flex">
-				<div class="shrink-0">
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-						<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-					</svg>
-				</div>
-				<div style="margin-left: var(--ui-spacing);">
-					<p class="text-sm text-semibold">
-						Successfully rolled back trouble report. The page will refresh automatically.
-					</p>
-				</div>
-			</div>
-		</div>
-
-		<script>
-			setTimeout(function() {
-				window.location.reload();
-			}, 2000);
-		</script>
-	`)
 }
 
 func (h *TroubleReports) processFileUpload(
