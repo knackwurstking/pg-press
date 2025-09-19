@@ -48,14 +48,12 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 	)
 }
 
-// TODO: Contiue here
 func (h *Tools) GetToolsList(c echo.Context) error {
 	start := time.Now()
 	// Get tools from database
 	tools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to get tools from database: "+err.Error())
+		return h.HandleError(c, err, "failed to get tools from database")
 	}
 
 	dbElapsed := time.Since(start)
@@ -65,7 +63,7 @@ func (h *Tools) GetToolsList(c echo.Context) error {
 
 	toolsList := toolspage.ListTools(tools)
 	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
+		return h.RenderInternalError(c,
 			"failed to render tools list all: "+err.Error())
 	}
 
@@ -77,13 +75,12 @@ func (h *Tools) GetEditDialog(c echo.Context) error {
 
 	props := &dialogs.EditToolProps{}
 
-	toolID, _ := helpers.ParseInt64Query(c, "id")
+	toolID, _ := h.ParseInt64Query(c, "id")
 	if toolID > 0 {
 		var err error
 		props.Tool, err = h.DB.Tools.Get(toolID)
 		if err != nil {
-			return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-				"failed to get tool from database: "+err.Error())
+			return h.HandleError(c, err, "failed to get tool from database")
 		}
 
 		props.InputPosition = string(props.Tool.Position)
@@ -96,7 +93,7 @@ func (h *Tools) GetEditDialog(c echo.Context) error {
 
 	toolEdit := dialogs.EditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError,
+		return h.RenderInternalError(c,
 			"failed to render tool edit dialog: "+err.Error())
 	}
 
@@ -104,25 +101,25 @@ func (h *Tools) GetEditDialog(c echo.Context) error {
 }
 
 func (h *Tools) AddTool(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
 	h.LogDebug("User %s creating new tool", user.Name)
 
 	formData, err := h.getEditToolFormData(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to get tool form data: "+err.Error())
+		return h.RenderBadRequest(c, "failed to get tool form data: "+err.Error())
 	}
 
-	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
+	tool := models.NewTool(
+		formData.Position, formData.Format, formData.Code, formData.Type,
+	)
 	tool.Press = formData.Press
 
 	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
-		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
-			"failed to add tool: "+err.Error())
+		return h.HandleError(c, err, "failed to add tool")
 	} else {
 		h.LogInfo("Created tool ID %d (Type=%s, Code=%s) by user %s",
 			t.ID, tool.Type, tool.Code, user.Name)
@@ -132,51 +129,41 @@ func (h *Tools) AddTool(c echo.Context) error {
 }
 
 func (h *Tools) UpdateTool(c echo.Context) error {
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
-		return err
+		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	toolID, err := helpers.ParseInt64Query(c, "id")
+	toolID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return err
+		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
 	}
 
 	h.LogWarn("User %s updating tool %d", user.Name, toolID)
 
 	formData, err := h.getEditToolFormData(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest,
-			"failed to get tool form data: "+err.Error())
+		return h.RenderBadRequest(c, "failed to get tool form data: "+err.Error())
 	}
 
-	props := &dialogs.EditToolProps{
-		InputPosition:       string(formData.Position),
-		InputWidth:          formData.Format.Width,
-		InputHeight:         formData.Format.Height,
-		InputType:           formData.Type,
-		InputCode:           formData.Code,
-		InputPressSelection: formData.Press,
-	}
+	tool := models.NewTool(
+		formData.Position, formData.Format, formData.Code, formData.Type,
+	)
+	tool.ID = toolID
+	tool.Press = formData.Press
 
-	props.Tool = models.NewTool(formData.Position)
-	props.Tool.ID = toolID
-	props.Tool.Format = formData.Format
-	props.Tool.Type = formData.Type
-	props.Tool.Code = formData.Code
-	props.Tool.Press = formData.Press
-
-	if err := h.DB.Tools.Update(props.Tool, user); err != nil {
+	if err := h.DB.Tools.Update(tool, user); err != nil {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update tool: "+err.Error())
 	} else {
 		h.LogInfo("Updated tool %d (Type=%s, Code=%s) by user %s",
-			props.Tool.ID, props.Tool.Type, props.Tool.Code, user.Name)
+			tool.ID, tool.Type, tool.Code, user.Name)
 	}
 
 	return nil
 }
 
+// TODO: ...
 func (h *Tools) DeleteTool(c echo.Context) error {
 	// Get tool ID from query parameter
 	toolID, err := helpers.ParseInt64Query(c, "id")
