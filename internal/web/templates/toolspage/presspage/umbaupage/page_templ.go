@@ -17,12 +17,27 @@ import (
 
 type PageProps struct {
 	PressNumber models.PressNumber
-	Slots       map[models.Position]*models.Tool
 	User        *models.User
 	Tools       []*models.Tool // TODO: Create a datalist for tool inputs and some completion
 }
 
-func Page(props PageProps) templ.Component {
+func (pp *PageProps) GetSlots() map[models.Position]*models.Tool {
+	slots := map[models.Position]*models.Tool{
+		models.PositionTop:         nil,
+		models.PositionTopCassette: nil,
+		models.PositionBottom:      nil,
+	}
+
+	for _, t := range pp.Tools {
+		if t.Press != nil && *t.Press == pp.PressNumber {
+			slots[t.Position] = t
+		}
+	}
+
+	return slots
+}
+
+func Page(props *PageProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -55,6 +70,7 @@ func Page(props PageProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
+			slots := props.GetSlots()
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"umbau-page\"><h1>Werkzeugumbau an Presse ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -62,7 +78,7 @@ func Page(props PageProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.PressNumber))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 26, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 42, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -75,7 +91,7 @@ func Page(props PageProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/presses/%d/umbau", props.PressNumber))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 27, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 43, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -85,15 +101,15 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Slots[models.PositionTop] != nil {
+			if slots[models.PositionTop] != nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p>Aktuelles Werkzeug: ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Slots[models.PositionTop].String())
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionTop].String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 31, Col: 71}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 47, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -113,15 +129,15 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Slots[models.PositionTopCassette] != nil {
+			if slots[models.PositionTopCassette] != nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<p>Aktuelles Werkzeug: ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Slots[models.PositionTopCassette].String())
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionTopCassette].String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 42, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 58, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -141,15 +157,15 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if props.Slots[models.PositionBottom] != nil {
+			if slots[models.PositionBottom] != nil {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<p>Aktuelles Werkzeug: ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Slots[models.PositionBottom].String())
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionBottom].String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 53, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 69, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {

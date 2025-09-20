@@ -9,12 +9,27 @@ import (
 
 type PageProps struct {
 	PressNumber models.PressNumber
-	Slots       map[models.Position]*models.Tool
 	User        *models.User
 	Tools       []*models.Tool // TODO: Create a datalist for tool inputs and some completion
 }
 
-templ Page(props PageProps) {
+func (pp *PageProps) GetSlots() map[models.Position]*models.Tool {
+	slots := map[models.Position]*models.Tool{
+		models.PositionTop:         nil,
+		models.PositionTopCassette: nil,
+		models.PositionBottom:      nil,
+	}
+
+	for _, t := range pp.Tools {
+		if t.Press != nil && *t.Press == pp.PressNumber {
+			slots[t.Position] = t
+		}
+	}
+
+	return slots
+}
+
+templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
@@ -22,13 +37,14 @@ templ Page(props PageProps) {
 			NavContent:  navContent(),
 		},
 	) {
+		{{ slots := props.GetSlots() }}
 		<main id="umbau-page">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
 				<div>
 					<h2>Oberteil</h2>
-					if props.Slots[models.PositionTop] != nil {
-						<p>Aktuelles Werkzeug: { props.Slots[models.PositionTop].String() }</p>
+					if slots[models.PositionTop] != nil {
+						<p>Aktuelles Werkzeug: { slots[models.PositionTop].String() }</p>
 					} else {
 						<p>Aktuelles Werkzeug: -</p>
 					}
@@ -38,8 +54,8 @@ templ Page(props PageProps) {
 				<hr/>
 				<div>
 					<h2>Kassette Oberteil (optional)</h2>
-					if props.Slots[models.PositionTopCassette] != nil {
-						<p>Aktuelles Werkzeug: { props.Slots[models.PositionTopCassette].String() }</p>
+					if slots[models.PositionTopCassette] != nil {
+						<p>Aktuelles Werkzeug: { slots[models.PositionTopCassette].String() }</p>
 					} else {
 						<p>Aktuelles Werkzeug: -</p>
 					}
@@ -49,8 +65,8 @@ templ Page(props PageProps) {
 				<hr/>
 				<div>
 					<h2>Unterteil</h2>
-					if props.Slots[models.PositionBottom] != nil {
-						<p>Aktuelles Werkzeug: { props.Slots[models.PositionBottom].String() }</p>
+					if slots[models.PositionBottom] != nil {
+						<p>Aktuelles Werkzeug: { slots[models.PositionBottom].String() }</p>
 					} else {
 						<p>Aktuelles Werkzeug: -</p>
 					}

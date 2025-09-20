@@ -148,12 +148,9 @@ func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 		return h.HandleError(c, err, "failed to list tools")
 	}
 
-	// TODO: Get tools for each slot (top, top cassette, bottom)
-
-	umbaupage := umbaupage.Page(umbaupage.PageProps{
+	umbaupage := umbaupage.Page(&umbaupage.PageProps{
 		PressNumber: pn,
 		User:        user,
-		Slots:       nil, // TODO: map[position]tool
 		Tools:       tools,
 	})
 
