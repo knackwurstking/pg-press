@@ -133,7 +133,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<label for=\"top\">Neues Werkzeug:</label> <input type=\"text\" id=\"top\" name=\"top\" placeholder=\"Werkzeug-ID oder Code\" list=\"tools-list-top\" required></div><hr><div><h2>Kassette Oberteil (optional)</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<label for=\"top\">Neues Werkzeug:</label> <input type=\"text\" id=\"top\" name=\"top\" placeholder=\"Werkzeug\" list=\"tools-list-top\" required></div><hr><div><h2>Kassette Oberteil (optional)</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -161,7 +161,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<label for=\"top-cassette\">Neues Werkzeug:</label> <input type=\"text\" id=\"top-cassette\" name=\"top-cassette\" list=\"tools-list-top-cassette\" placeholder=\"Werkzeug-ID oder Code\"></div><hr><div><h2>Unterteil</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<label for=\"top-cassette\">Neues Werkzeug:</label> <input type=\"text\" id=\"top-cassette\" name=\"top-cassette\" placeholder=\"Werkzeug\" list=\"tools-list-top-cassette\"></div><hr><div><h2>Unterteil</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -189,7 +189,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<label for=\"bottom\">Neues Werkzeug:</label> <input type=\"text\" id=\"bottom\" name=\"bottom\" placeholder=\"Werkzeug-ID oder Code\" list=\"tools-list-bottom\" required></div><hr><button type=\"submit\">Umbau speichern</button></form></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<label for=\"bottom\">Neues Werkzeug:</label> <input type=\"text\" id=\"bottom\" name=\"bottom\" list=\"tools-list-bottom\" placeholder=\"Werkzeug\" required></div><hr><button type=\"submit\">Umbau speichern</button></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
