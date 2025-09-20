@@ -68,7 +68,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Href)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 27, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 26, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -87,7 +87,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Href)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 31, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 29, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -110,7 +110,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 43, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 39, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -133,7 +133,7 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, baseSubmitOnClickHandler())
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, baseSubmitOnClickHandler(templ.JSExpression("event.currentTarget")))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -141,7 +141,7 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 templ.ComponentScript = baseSubmitOnClickHandler()
+		var templ_7745c5c3_Var6 templ.ComponentScript = baseSubmitOnClickHandler(templ.JSExpression("event.currentTarget"))
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -153,7 +153,7 @@ func Base(props BaseProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubmitButtonText)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 70, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 63, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func Base(props BaseProps) templ.Component {
 		}
 		templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(props.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 76, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/dialogs/base.templ`, Line: 68, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -179,10 +179,10 @@ func Base(props BaseProps) templ.Component {
 	})
 }
 
-func baseSubmitOnClickHandler() templ.ComponentScript {
+func baseSubmitOnClickHandler(e templ.JSExpression) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_baseSubmitOnClickHandler_b527`,
-		Function: `function __templ_baseSubmitOnClickHandler_b527(){const form = this.closest("form");
+		Name: `__templ_baseSubmitOnClickHandler_2c6c`,
+		Function: `function __templ_baseSubmitOnClickHandler_2c6c(e){const form = e.closest("form");
 
 	const requiredInputs = form.querySelectorAll(
     	"input[required], select[required], textarea[required]");
@@ -198,11 +198,11 @@ func baseSubmitOnClickHandler() templ.ComponentScript {
 	});
 
 	if (allValid) {
-		this.closest("dialog").close();
+		e.closest("dialog").close();
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_baseSubmitOnClickHandler_b527`),
-		CallInline: templ.SafeScriptInline(`__templ_baseSubmitOnClickHandler_b527`),
+		Call:       templ.SafeScript(`__templ_baseSubmitOnClickHandler_2c6c`, e),
+		CallInline: templ.SafeScriptInline(`__templ_baseSubmitOnClickHandler_2c6c`, e),
 	}
 }
 

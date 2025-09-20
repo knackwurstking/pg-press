@@ -240,9 +240,13 @@ func (h *Cycles) HandleEditPUT(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse ID from query: "+err.Error())
 	}
 
-	tool, err := h.getToolFromQuery(c)
+	cycle, err := h.DB.PressCycles.Get(cycleID)
 	if err != nil {
-		return h.RenderBadRequest(c, "failed to get tool from query: "+err.Error())
+		return h.HandleError(c, err, "failed to get cycle")
+	}
+	tool, err := h.DB.Tools.Get(cycle.ToolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool")
 	}
 
 	form, err := h.getCycleFormData(c)
@@ -256,7 +260,7 @@ func (h *Cycles) HandleEditPUT(c echo.Context) error {
 
 	// Update the cycle
 	pressCycle := models.NewPressCycleWithID(
-		cycleID,
+		cycle.ID,
 		*form.PressNumber,
 		tool.ID, tool.Position, form.TotalCycles,
 		user.TelegramID,

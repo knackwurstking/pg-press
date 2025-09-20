@@ -7,10 +7,10 @@ const (
 type BaseProps struct {
 	ID string
 
-	Type 				string // Type like "POST", "PUT"
-	Href 				string
-	Error 				string
-	SubmitButtonText 	string
+	Type             string // Type like "POST", "PUT"
+	Href             string
+	Error            string
+	SubmitButtonText string
 }
 
 // NOTE: For now we just reload the page after closing the dialog.
@@ -18,22 +18,18 @@ templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose='this.parentElement.removeChild(this); window.location.reload();'
+		onclose="this.parentElement.removeChild(this); window.location.reload();"
 	>
 		<form
 			class="flex flex-col gap"
-
 			if props.Type == "POST" {
 				hx-post={ props.Href }
 			}
-
 			if props.Type == "PUT" {
 				hx-put={ props.Href }
 			}
-
 			hx-target="body"
 			hx-swap="beforeend"
-
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			enctype="multipart/form-data"
 		>
@@ -44,12 +40,10 @@ templ Base(props BaseProps) {
 					</div>
 				</div>
 			}
-
 			// Content
 			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
 				{ children... }
 			</div>
-
 			<footer class="flex gap justify-end">
 				<button
 					name="close"
@@ -60,26 +54,24 @@ templ Base(props BaseProps) {
 					<i class="bi bi-x-circle"></i>
 					Schließen
 				</button>
-
 				<button
 					type="submit"
 					class="flex gap"
-					onclick={baseSubmitOnClickHandler()}
+					onclick={ baseSubmitOnClickHandler(templ.JSExpression("event.currentTarget")) }
 				>
 					<i class="bi bi-check-circle"></i>
 					{ props.SubmitButtonText }
 				</button>
 			</footer>
 		</form>
-
 		<script defer>
             document.querySelector('#{{ props.ID }}').showModal();
         </script>
 	</dialog>
 }
 
-script baseSubmitOnClickHandler() {
-	const form = this.closest("form");
+script baseSubmitOnClickHandler(e templ.JSExpression) {
+	const form = e.closest("form");
 
 	const requiredInputs = form.querySelectorAll(
     	"input[required], select[required], textarea[required]");
@@ -95,6 +87,6 @@ script baseSubmitOnClickHandler() {
 	});
 
 	if (allValid) {
-		this.closest("dialog").close();
+		e.closest("dialog").close();
 	}
 }
