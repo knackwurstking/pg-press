@@ -71,7 +71,7 @@ func Page(props *PageProps) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 			slots := props.GetSlots()
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"umbau-page\"><h1>Werkzeugumbau an Presse ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><h1>Werkzeugumbau an Presse ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,7 +125,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<label for=\"top\">Neues Werkzeug:</label> <input type=\"text\" id=\"top\" name=\"top\" placeholder=\"Werkzeug-ID oder Code\"></div><hr><div><h2>Kassette Oberteil (optional)</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<label for=\"top\">Neues Werkzeug:</label> <input type=\"text\" id=\"top\" name=\"top\" placeholder=\"Werkzeug-ID oder Code\" required></div><hr><div><h2>Kassette Oberteil (optional)</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -137,7 +137,7 @@ func Page(props *PageProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionTopCassette].String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 58, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 64, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func Page(props *PageProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionBottom].String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 69, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/toolspage/presspage/umbaupage/page.templ`, Line: 80, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +181,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<label for=\"bottom\">Neues Werkzeug:</label> <input type=\"text\" id=\"bottom\" name=\"bottom\" placeholder=\"Werkzeug-ID oder Code\"></div><hr><button type=\"submit\">Umbau speichern</button></form></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<label for=\"bottom\">Neues Werkzeug:</label> <input type=\"text\" id=\"bottom\" name=\"bottom\" placeholder=\"Werkzeug-ID oder Code\" required></div><hr><button type=\"submit\">Umbau speichern</button></form></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

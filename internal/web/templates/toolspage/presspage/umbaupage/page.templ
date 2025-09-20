@@ -38,7 +38,7 @@ templ Page(props *PageProps) {
 		},
 	) {
 		{{ slots := props.GetSlots() }}
-		<main id="umbau-page">
+		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
 				<div>
@@ -49,7 +49,13 @@ templ Page(props *PageProps) {
 						<p>Aktuelles Werkzeug: -</p>
 					}
 					<label for="top">Neues Werkzeug:</label>
-					<input type="text" id="top" name="top" placeholder="Werkzeug-ID oder Code"/>
+					<input
+						type="text"
+						id="top"
+						name="top"
+						placeholder="Werkzeug-ID oder Code"
+						required
+					/>
 				</div>
 				<hr/>
 				<div>
@@ -60,7 +66,12 @@ templ Page(props *PageProps) {
 						<p>Aktuelles Werkzeug: -</p>
 					}
 					<label for="top-cassette">Neues Werkzeug:</label>
-					<input type="text" id="top-cassette" name="top-cassette" placeholder="Werkzeug-ID oder Code"/>
+					<input
+						type="text"
+						id="top-cassette"
+						name="top-cassette"
+						placeholder="Werkzeug-ID oder Code"
+					/>
 				</div>
 				<hr/>
 				<div>
@@ -71,7 +82,13 @@ templ Page(props *PageProps) {
 						<p>Aktuelles Werkzeug: -</p>
 					}
 					<label for="bottom">Neues Werkzeug:</label>
-					<input type="text" id="bottom" name="bottom" placeholder="Werkzeug-ID oder Code"/>
+					<input
+						type="text"
+						id="bottom"
+						name="bottom"
+						placeholder="Werkzeug-ID oder Code"
+						required
+					/>
 				</div>
 				<hr/>
 				<button type="submit">Umbau speichern</button>
