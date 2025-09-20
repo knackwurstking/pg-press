@@ -41,6 +41,7 @@ templ Page(props *PageProps) {
 		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
+				@toolsDataList(props.Tools)
 				<div>
 					<h2>Oberteil</h2>
 					if slots[models.PositionTop] != nil {
@@ -54,6 +55,7 @@ templ Page(props *PageProps) {
 						id="top"
 						name="top"
 						placeholder="Werkzeug-ID oder Code"
+						datalist="tools-list-top"
 						required
 					/>
 				</div>
@@ -70,6 +72,7 @@ templ Page(props *PageProps) {
 						type="text"
 						id="top-cassette"
 						name="top-cassette"
+						datalist="tools-list-top-cassette"
 						placeholder="Werkzeug-ID oder Code"
 					/>
 				</div>
@@ -87,6 +90,7 @@ templ Page(props *PageProps) {
 						id="bottom"
 						name="bottom"
 						placeholder="Werkzeug-ID oder Code"
+						datalist="tools-list-bottom"
 						required
 					/>
 				</div>
@@ -95,6 +99,41 @@ templ Page(props *PageProps) {
 			</form>
 		</main>
 	}
+}
+
+templ toolsDataList(tools []*models.Tool) {
+	{{
+	var (
+		topTools         []*models.Tool
+		bottomTools      []*models.Tool
+		topCassetteTools []*models.Tool
+	)
+	for _, tool := range tools {
+		switch tool.Position {
+		case models.PositionTop:
+			topTools = append(topTools, tool)
+		case models.PositionBottom:
+			bottomTools = append(bottomTools, tool)
+		case models.PositionTopCassette:
+			topCassetteTools = append(topCassetteTools, tool)
+		}
+	}
+	}}
+	<datalist id="tools-list-top">
+		for _, tool := range topTools {
+			<option value={ tool.String() }></option>
+		}
+	</datalist>
+	<datalist id="tools-list-bottom">
+		for _, tool := range bottomTools {
+			<option value={ tool.String() }></option>
+		}
+	</datalist>
+	<datalist id="tools-list-top-cassette">
+		for _, tool := range topCassetteTools {
+			<option value={ tool.String() }></option>
+		}
+	</datalist>
 }
 
 templ navContent() {
