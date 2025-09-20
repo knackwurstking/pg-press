@@ -1,0 +1,74 @@
+package umbaupage
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+type PageProps struct {
+	PressNumber models.PressNumber
+	Slots       map[models.Position]*models.Tool
+	User        *models.User
+}
+
+// TODO: ...
+//  - Get total cycles via HTMX
+templ Page(props PageProps) {
+	@layouts.Main(
+		layouts.MainOptions{
+			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
+			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.PressNumber),
+			NavContent:  navContent(),
+		},
+	) {
+		<main id="umbau-page">
+			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
+			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
+				<div>
+					<h2>Oberteil</h2>
+					if props.Slots[models.PositionTop] != nil {
+						<p>Aktuelles Werkzeug: { props.Slots[models.PositionTop].String() }</p>
+					} else {
+						<p>Aktuelles Werkzeug: -</p>
+					}
+					<label for="top">Neues Werkzeug:</label>
+					<input type="text" id="top" name="top" placeholder="Werkzeug-ID oder Code"/>
+				</div>
+				<hr/>
+				<div>
+					<h2>Kassette Oberteil (optional)</h2>
+					if props.Slots[models.PositionTopCassette] != nil {
+						<p>Aktuelles Werkzeug: { props.Slots[models.PositionTopCassette].String() }</p>
+					} else {
+						<p>Aktuelles Werkzeug: -</p>
+					}
+					<label for="top-cassette">Neues Werkzeug:</label>
+					<input type="text" id="top-cassette" name="top-cassette" placeholder="Werkzeug-ID oder Code"/>
+				</div>
+				<hr/>
+				<div>
+					<h2>Unterteil</h2>
+					if props.Slots[models.PositionBottom] != nil {
+						<p>Aktuelles Werkzeug: { props.Slots[models.PositionBottom].String() }</p>
+					} else {
+						<p>Aktuelles Werkzeug: -</p>
+					}
+					<label for="bottom">Neues Werkzeug:</label>
+					<input type="text" id="bottom" name="bottom" placeholder="Werkzeug-ID oder Code"/>
+				</div>
+				<hr/>
+				<button type="submit">Umbau speichern</button>
+			</form>
+		</main>
+	}
+}
+
+templ navContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
+	</div>
+}

@@ -11,6 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
+	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage/umbaupage"
 	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -126,7 +127,7 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 
 func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 	// Get user from context
-	_, err := h.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -143,6 +144,16 @@ func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 	}
 
 	// TODO: Implement press umbau page logic
+
+	umbaupage := umbaupage.Page(umbaupage.PageProps{
+		PressNumber: pn,
+		User:        user,
+		Slots:       nil, // TODO: map[position]tool
+	})
+
+	if err := umbaupage.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render press umbau page: "+err.Error())
+	}
 
 	return errors.New("under construction")
 }
