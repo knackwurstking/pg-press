@@ -11,10 +11,9 @@ type PageProps struct {
 	PressNumber models.PressNumber
 	Slots       map[models.Position]*models.Tool
 	User        *models.User
+	Tools       []*models.Tool // TODO: Create a datalist for tool inputs and some completion
 }
 
-// TODO: ...
-//  - Get total cycles via HTMX
 templ Page(props PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{

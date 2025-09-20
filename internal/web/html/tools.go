@@ -143,12 +143,18 @@ func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 		return h.RenderBadRequest(c, "invalid press number")
 	}
 
-	// TODO: Implement press umbau page logic
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to list tools")
+	}
+
+	// TODO: Get tools for each slot (top, top cassette, bottom)
 
 	umbaupage := umbaupage.Page(umbaupage.PageProps{
 		PressNumber: pn,
 		User:        user,
 		Slots:       nil, // TODO: map[position]tool
+		Tools:       tools,
 	})
 
 	if err := umbaupage.Render(c.Request().Context(), c.Response()); err != nil {
