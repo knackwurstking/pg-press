@@ -1,19 +1,18 @@
-package umbaupage
+package tools
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type PageProps struct {
+type UmbauPageProps struct {
 	PressNumber models.PressNumber
 	User        *models.User
-	Tools       []*models.Tool // TODO: Create a datalist for tool inputs and some completion
+	Tools       []*models.Tool
 }
 
-func (pp *PageProps) GetSlots() map[models.Position]*models.Tool {
+func (pp *UmbauPageProps) GetSlots() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
 		models.PositionTop:         nil,
 		models.PositionTopCassette: nil,
@@ -29,7 +28,7 @@ func (pp *PageProps) GetSlots() map[models.Position]*models.Tool {
 	return slots
 }
 
-templ Page(props *PageProps) {
+templ UmbauPage(props *UmbauPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
@@ -136,12 +135,4 @@ templ toolsDataList(tools []*models.Tool) {
 			<option value={ tool.String() }></option>
 		}
 	</datalist>
-}
-
-templ navContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
 }

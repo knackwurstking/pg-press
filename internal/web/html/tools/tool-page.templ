@@ -1,4 +1,4 @@
-package toolpage
+package tools
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
@@ -26,14 +26,11 @@ templ Page(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.
 					</h4>
 				</div>
 			</div>
-
 			@sectionActions(user, tool)
 			@sectionNotes(tool)
-
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				@sectionMetalSheets(user, metalSheets, tool)
 			}
-
 			@sectionCycles(tool)
 		</main>
 	}
@@ -43,7 +40,6 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 	<div class="action-bar flex gap justify-end items-center">
 		<button
 			class="primary flex gap"
-
 			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID) }
 			hx-trigger="click"
 			hx-target="body"
@@ -53,10 +49,8 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			<i class="bi bi-pencil"></i>
 			Bearbeiten
 		</button>
-
 		<button
 			class="destructive flex gap"
-
 			hx-delete={ fmt.Sprintf(
 				"%s/htmx/tools/delete?id=%d",
 				env.ServerPathPrefix, tool.ID,
@@ -66,7 +60,6 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="destructive flex gap"
-
 			if !user.IsAdmin() {
 				disabled
 			}
@@ -81,7 +74,6 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section>
 			<h4>Notizen</h4>
-
 			<div class="notes-list">
 				for _, note := range tool.LoadedNotes {
 					<div class="card">
@@ -99,12 +91,10 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 										<strong>Defekt</strong>
 								}
 							</span>
-
 							<span class="note-date">
 								{ note.CreatedAt.Format("2006-01-02 15:04") }
 							</span>
 						</div>
-
 						<div class="card-body">
 							<p>{ note.Content }</p>
 						</div>
@@ -119,10 +109,8 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 	<section>
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
-
 			<button
 				class="secondary small flex"
-
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/metal-sheets/edit?tool_id=%d",
 					env.ServerPathPrefix, tool.ID,
@@ -131,13 +119,11 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 				hx-target="body"
 				hx-swap="beforeend"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-
 				title="Neues Blech hinzufügen"
 			>
 				<i class="bi bi-plus-lg"></i>
 			</button>
 		</div>
-
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:
@@ -156,10 +142,8 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 templ sectionCycles(tool *models.ToolWithNotes) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
-
 		<section class="setatus">
 			<h5>Aktueller Status</h5>
-
 			switch tool.Status() {
 				case models.StatusActive:
 					<a
@@ -174,7 +158,6 @@ templ sectionCycles(tool *models.ToolWithNotes) {
 							<span class="contrast ghost">Presse { fmt.Sprintf("%d", *tool.Press) }</span>
 							<span class="primary ghost">Aktiv</span>
 						</span>
-
 						<i class="bi bi-chevron-right text-muted"></i>
 					</a>
 				case models.StatusAvailable:
@@ -185,10 +168,8 @@ templ sectionCycles(tool *models.ToolWithNotes) {
 					<span>{ tool.Status() }</span>
 			}
 		</section>
-
 		<section
 			class="cycles"
-
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/tools/cycles?tool_id=%d&tool_position=%s",
 				env.ServerPathPrefix, tool.ID, tool.Position,

@@ -1,20 +1,20 @@
-package toolspage
+package tools
 
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type PageProps struct {
-	Tools []*models.ToolWithNotes
+type ToolsPageProps struct {
+	Tools            []*models.ToolWithNotes
 	PressUtilization []models.PressUtilization
 }
 
-templ Page(props *PageProps) {
+templ ToolsPage(props *ToolsPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Werkzeuge",
@@ -31,15 +31,7 @@ templ Page(props *PageProps) {
 	}
 }
 
-templ navContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
-}
-
-templ sectionPress(props *PageProps) {
+templ sectionPress(props *ToolsPageProps) {
 	<details class="active-tools" open>
 		<summary class="mb">
 			<h4>
@@ -47,7 +39,6 @@ templ sectionPress(props *PageProps) {
 				Eingebaute Werkzeuge
 			</h4>
 		</summary>
-
 		<ul
 			class="flex flex-col gap m-0 p-0"
 			style="list-style: none;"
@@ -55,9 +46,9 @@ templ sectionPress(props *PageProps) {
 			for _, u := range props.PressUtilization {
 				{{
 					var (
-						top    		string
+						top         string
 						topCassette string
-						bottom 		string
+						bottom      string
 					)
 
 					for _, t := range u.Tools {
@@ -71,7 +62,6 @@ templ sectionPress(props *PageProps) {
 						}
 					}
 				}}
-
 				@sectionPressListItem(
 					fmt.Sprintf("Presse %d", u.PressNumber),
 					top,
@@ -93,7 +83,6 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 		>
 			<span class="flex flex-col gap-lg w-full">
 				<h5>{ title }</h5>
-
 				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
 					if top != "" || topCassette != "" {
 						<!-- Upper Tool -->
@@ -104,7 +93,6 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 									<small class="text-sm">{ top }</small>
 								</span>
 							}
-
 							if topCassette != "" {
 								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
 									@components.PositionBadge(models.PositionTopCassette, "primary text-bold")
@@ -113,7 +101,6 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 							}
 						</span>
 					}
-
 					if bottom != "" {
 						<!-- Lower Tool -->
 						<span class="flex flex-col justify-center items-start gap-sm">
@@ -128,7 +115,7 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 	</li>
 }
 
-templ sectionTools(props *PageProps) {
+templ sectionTools(props *ToolsPageProps) {
 	<div class="all-tools p">
 		<h4 class="mb p">
 			<i class="bi bi-archive mr"></i>

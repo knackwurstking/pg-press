@@ -1,4 +1,4 @@
-package html
+package tools
 
 import (
 	"fmt"
@@ -8,10 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/presspage/umbaupage"
-	"github.com/knackwurstking/pgpress/internal/web/templates/toolspage/toolpage"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
 
@@ -38,7 +34,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press",
 				h.HandlePressPage),
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau",
-				h.HandlePressUmbauPage),
+				h.HandleUmbauPage),
 
 			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id",
 				h.HandleToolPage),
@@ -61,7 +57,7 @@ func (h *Tools) HandleTools(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get press utilization")
 	}
 
-	page := toolspage.Page(&toolspage.PageProps{
+	page := ToolsPage(&ToolsPageProps{
 		Tools:            tools,
 		PressUtilization: pressUtilization,
 	})
@@ -110,7 +106,7 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 
 	// Render page
 	h.LogDebug("Rendering page for press %d", pn)
-	page := presspage.Page(presspage.PageProps{
+	page := PressPage(PressPageProps{
 		Press:    pn,
 		Cycles:   cycles,
 		User:     user,
@@ -124,7 +120,7 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
+func (h *Tools) HandleUmbauPage(c echo.Context) error {
 	// Get user from context
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -147,7 +143,7 @@ func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 		return h.HandleError(c, err, "failed to list tools")
 	}
 
-	umbaupage := umbaupage.Page(&umbaupage.PageProps{
+	umbaupage := UmbauPage(&UmbauPageProps{
 		PressNumber: pn,
 		User:        user,
 		Tools:       tools,
@@ -192,7 +188,7 @@ func (h *Tools) HandleToolPage(c echo.Context) error {
 
 	h.LogDebug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
 
-	page := toolpage.Page(user, tool, metalSheets)
+	page := ToolPage(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tool page: "+err.Error())
 	}
