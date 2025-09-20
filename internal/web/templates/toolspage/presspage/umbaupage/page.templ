@@ -95,7 +95,9 @@ templ Page(props *PageProps) {
 					/>
 				</div>
 				<hr/>
-				<button type="submit">Umbau speichern</button>
+				if props.User.IsAdmin() {
+					<button type="submit">Umbau speichern</button>
+				}
 			</form>
 		</main>
 	}
