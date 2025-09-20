@@ -1,7 +1,6 @@
 package html
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -158,7 +157,7 @@ func (h *Tools) HandlePressUmbauPage(c echo.Context) error {
 		return h.RenderInternalError(c, "failed to render press umbau page: "+err.Error())
 	}
 
-	return errors.New("under construction")
+	return nil
 }
 
 func (h *Tools) HandleToolPage(c echo.Context) error {
