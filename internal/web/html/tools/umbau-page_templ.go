@@ -131,7 +131,7 @@ func UmbauPage(props *UmbauPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = umbauPageSectionTop(slots).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = umbauPageSectionTop(slots[models.PositionTop]).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -139,7 +139,7 @@ func UmbauPage(props *UmbauPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = umbauPageSectionTopCassette(slots).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = umbauPageSectionTopCassette(slots[models.PositionTopCassette]).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -147,7 +147,7 @@ func UmbauPage(props *UmbauPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = umbauPageSectionBottom(slots).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = umbauPageSectionBottom(slots[models.PositionBottom]).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -306,7 +306,7 @@ func umbauPagePressCyclesSection() templ.Component {
 	})
 }
 
-func umbauPageSectionTop(slots map[models.Position]*models.Tool) templ.Component {
+func umbauPageSectionTop(tool *models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -331,15 +331,15 @@ func umbauPageSectionTop(slots map[models.Position]*models.Tool) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if slots[models.PositionTop] != nil {
+		if tool != nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<p>Aktuelles Werkzeug: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionTop].String())
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 113, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 113, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -363,7 +363,7 @@ func umbauPageSectionTop(slots map[models.Position]*models.Tool) templ.Component
 	})
 }
 
-func umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) templ.Component {
+func umbauPageSectionTopCassette(tool *models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -388,15 +388,15 @@ func umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if slots[models.PositionTopCassette] != nil {
+		if tool != nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<p>Aktuelles Werkzeug: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionTopCassette].String())
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 135, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 135, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -420,7 +420,7 @@ func umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) templ.C
 	})
 }
 
-func umbauPageSectionBottom(slots map[models.Position]*models.Tool) templ.Component {
+func umbauPageSectionBottom(tool *models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -445,15 +445,15 @@ func umbauPageSectionBottom(slots map[models.Position]*models.Tool) templ.Compon
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if slots[models.PositionBottom] != nil {
+		if tool != nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<p>Aktuelles Werkzeug: ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(slots[models.PositionBottom].String())
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 156, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/umbau-page.templ`, Line: 156, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {

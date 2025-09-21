@@ -61,11 +61,11 @@ templ UmbauPage(props *UmbauPageProps) {
 			>
 				@umbauPagePressCyclesSection()
 				<hr/>
-				@umbauPageSectionTop(slots)
+				@umbauPageSectionTop(slots[models.PositionTop])
 				<hr/>
-				@umbauPageSectionTopCassette(slots)
+				@umbauPageSectionTopCassette(slots[models.PositionTopCassette])
 				<hr/>
-				@umbauPageSectionBottom(slots)
+				@umbauPageSectionBottom(slots[models.PositionBottom])
 				<hr/>
 				@umbauPageFormActions(props.User)
 			</form>
@@ -106,11 +106,11 @@ templ umbauPagePressCyclesSection() {
 	</section>
 }
 
-templ umbauPageSectionTop(slots map[models.Position]*models.Tool) {
+templ umbauPageSectionTop(tool *models.Tool) {
 	<section>
 		<h2>Oberteil</h2>
-		if slots[models.PositionTop] != nil {
-			<p>Aktuelles Werkzeug: { slots[models.PositionTop].String() }</p>
+		if tool != nil {
+			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
@@ -128,11 +128,11 @@ templ umbauPageSectionTop(slots map[models.Position]*models.Tool) {
 	</section>
 }
 
-templ umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) {
+templ umbauPageSectionTopCassette(tool *models.Tool) {
 	<section>
 		<h2>Kassette Oberteil (optional)</h2>
-		if slots[models.PositionTopCassette] != nil {
-			<p>Aktuelles Werkzeug: { slots[models.PositionTopCassette].String() }</p>
+		if tool != nil {
+			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
@@ -149,11 +149,11 @@ templ umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) {
 	</section>
 }
 
-templ umbauPageSectionBottom(slots map[models.Position]*models.Tool) {
+templ umbauPageSectionBottom(tool *models.Tool) {
 	<section>
 		<h2>Unterteil</h2>
-		if slots[models.PositionBottom] != nil {
-			<p>Aktuelles Werkzeug: { slots[models.PositionBottom].String() }</p>
+		if tool != nil {
+			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
