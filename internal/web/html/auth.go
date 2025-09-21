@@ -6,6 +6,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -126,7 +127,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 		Name:     constants.CookieName,
 		Value:    cookieValue,
 		Expires:  time.Now().Add(constants.CookieExpirationDuration),
-		Path:     "/",
+		Path:     env.ServerPathPrefix,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
