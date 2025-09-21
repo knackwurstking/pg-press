@@ -56,7 +56,10 @@ templ UmbauPage(props *UmbauPageProps) {
 		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			@toolsDataLists(props)
-			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
+			<form
+				hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			>
 				@umbauPagePressCyclesSection()
 				<hr/>
 				@umbauPageSectionTop(slots)
