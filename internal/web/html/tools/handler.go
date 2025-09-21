@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -33,8 +34,11 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press",
 				h.HandlePressPage),
+
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau",
 				h.HandleUmbauPage),
+			helpers.NewEchoRoute(http.MethodPost, "/tools/press/:press/umbau",
+				h.HandleUmbauPagePOST),
 
 			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id",
 				h.HandleToolPage),
@@ -154,6 +158,12 @@ func (h *Tools) HandleUmbauPage(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
+	// TODO: ...
+
+	return errors.New("under construction")
 }
 
 func (h *Tools) HandleToolPage(c echo.Context) error {
