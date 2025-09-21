@@ -2,6 +2,11 @@ package tools
 
 import "github.com/knackwurstking/pgpress/internal/web/templates/components"
 
+type DataListOption struct {
+	ToolID int64
+	Label  string
+}
+
 templ navContent() {
 	<div class="flex flex-row gap justify-end items-center">
 		@components.NavFeedButton()

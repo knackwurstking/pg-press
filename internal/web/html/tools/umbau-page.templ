@@ -12,7 +12,22 @@ type UmbauPageProps struct {
 	Tools       []*models.Tool
 }
 
-func (pp *UmbauPageProps) GetSlots() map[models.Position]*models.Tool {
+func (pp *UmbauPageProps) GetDataListOptions(position models.Position) []DataListOption {
+	var options []DataListOption
+
+	for _, tool := range pp.Tools {
+		if tool.Position == position {
+			options = append(options, DataListOption{
+				ToolID: tool.ID,
+				Label:  tool.String(),
+			})
+		}
+	}
+
+	return options
+}
+
+func (pp *UmbauPageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
 		models.PositionTop:         nil,
 		models.PositionTopCassette: nil,
@@ -28,6 +43,7 @@ func (pp *UmbauPageProps) GetSlots() map[models.Position]*models.Tool {
 	return slots
 }
 
+// TODO: Need to add a section for the press cycles, the submit button should be disabled as long the press cycles input is missing
 templ UmbauPage(props *UmbauPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -36,63 +52,16 @@ templ UmbauPage(props *UmbauPageProps) {
 			NavContent:  navContent(),
 		},
 	) {
-		{{ slots := props.GetSlots() }}
+		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
-				@toolsDataList(props.Tools)
-				<div>
-					<h2>Oberteil</h2>
-					if slots[models.PositionTop] != nil {
-						<p>Aktuelles Werkzeug: { slots[models.PositionTop].String() }</p>
-					} else {
-						<p>Aktuelles Werkzeug: -</p>
-					}
-					<label for="top">Neues Werkzeug:</label>
-					<input
-						type="text"
-						id="top"
-						name="top"
-						placeholder="Werkzeug"
-						list="tools-list-top"
-						required
-					/>
-				</div>
+				@toolsDataLists(props)
+				@umbauPageSectionTop(slots)
 				<hr/>
-				<div>
-					<h2>Kassette Oberteil (optional)</h2>
-					if slots[models.PositionTopCassette] != nil {
-						<p>Aktuelles Werkzeug: { slots[models.PositionTopCassette].String() }</p>
-					} else {
-						<p>Aktuelles Werkzeug: -</p>
-					}
-					<label for="top-cassette">Neues Werkzeug:</label>
-					<input
-						type="text"
-						id="top-cassette"
-						name="top-cassette"
-						placeholder="Werkzeug"
-						list="tools-list-top-cassette"
-					/>
-				</div>
+				@umbauPageSectionTopCassette(slots)
 				<hr/>
-				<div>
-					<h2>Unterteil</h2>
-					if slots[models.PositionBottom] != nil {
-						<p>Aktuelles Werkzeug: { slots[models.PositionBottom].String() }</p>
-					} else {
-						<p>Aktuelles Werkzeug: -</p>
-					}
-					<label for="bottom">Neues Werkzeug:</label>
-					<input
-						type="text"
-						id="bottom"
-						name="bottom"
-						list="tools-list-bottom"
-						placeholder="Werkzeug"
-						required
-					/>
-				</div>
+				@umbauPageSectionBottom(slots)
 				<hr/>
 				if props.User.IsAdmin() {
 					<button type="submit">Umbau speichern</button>
@@ -102,37 +71,79 @@ templ UmbauPage(props *UmbauPageProps) {
 	}
 }
 
-templ toolsDataList(tools []*models.Tool) {
-	{{
-	var (
-		topTools         []*models.Tool
-		bottomTools      []*models.Tool
-		topCassetteTools []*models.Tool
-	)
-	for _, tool := range tools {
-		switch tool.Position {
-		case models.PositionTop:
-			topTools = append(topTools, tool)
-		case models.PositionBottom:
-			bottomTools = append(bottomTools, tool)
-		case models.PositionTopCassette:
-			topCassetteTools = append(topCassetteTools, tool)
-		}
-	}
-	}}
+templ toolsDataLists(props *UmbauPageProps) {
 	<datalist id="tools-list-top">
-		for _, tool := range topTools {
-			<option value={ tool.String() }></option>
-		}
-	</datalist>
-	<datalist id="tools-list-bottom">
-		for _, tool := range bottomTools {
-			<option value={ tool.String() }></option>
+		for _, o := range props.GetDataListOptions(models.PositionTop) {
+			<option value={ o.Label }></option>
 		}
 	</datalist>
 	<datalist id="tools-list-top-cassette">
-		for _, tool := range topCassetteTools {
-			<option value={ tool.String() }></option>
+		for _, o := range props.GetDataListOptions(models.PositionTopCassette) {
+			<option value={ o.Label }></option>
 		}
 	</datalist>
+	<datalist id="tools-list-bottom">
+		for _, o := range props.GetDataListOptions(models.PositionBottom) {
+			<option value={ o.Label }></option>
+		}
+	</datalist>
+}
+
+templ umbauPageSectionTop(slots map[models.Position]*models.Tool) {
+	<section>
+		<h2>Oberteil</h2>
+		if slots[models.PositionTop] != nil {
+			<p>Aktuelles Werkzeug: { slots[models.PositionTop].String() }</p>
+		} else {
+			<p>Aktuelles Werkzeug: -</p>
+		}
+		<label for="top">Neues Werkzeug:</label>
+		<input
+			type="text"
+			id="top"
+			name="top"
+			placeholder="Werkzeug"
+			list="tools-list-top"
+			required
+		/>
+	</section>
+}
+
+templ umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) {
+	<section>
+		<h2>Kassette Oberteil (optional)</h2>
+		if slots[models.PositionTopCassette] != nil {
+			<p>Aktuelles Werkzeug: { slots[models.PositionTopCassette].String() }</p>
+		} else {
+			<p>Aktuelles Werkzeug: -</p>
+		}
+		<label for="top-cassette">Neues Werkzeug:</label>
+		<input
+			type="text"
+			id="top-cassette"
+			name="top-cassette"
+			placeholder="Werkzeug"
+			list="tools-list-top-cassette"
+		/>
+	</section>
+}
+
+templ umbauPageSectionBottom(slots map[models.Position]*models.Tool) {
+	<section>
+		<h2>Unterteil</h2>
+		if slots[models.PositionBottom] != nil {
+			<p>Aktuelles Werkzeug: { slots[models.PositionBottom].String() }</p>
+		} else {
+			<p>Aktuelles Werkzeug: -</p>
+		}
+		<label for="bottom">Neues Werkzeug:</label>
+		<input
+			type="text"
+			id="bottom"
+			name="bottom"
+			list="tools-list-bottom"
+			placeholder="Werkzeug"
+			required
+		/>
+	</section>
 }
