@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -56,7 +57,8 @@ templ UmbauPage(props *UmbauPageProps) {
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			@toolsDataLists(props)
 			<form
-				hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }
+				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau",
+    				env.ServerPathPrefix, props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			>
 				@umbauPagePressCyclesSection()
