@@ -43,7 +43,6 @@ func (pp *UmbauPageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	return slots
 }
 
-// TODO: Need to add a section for the press cycles, the submit button should be disabled as long the press cycles input is missing
 templ UmbauPage(props *UmbauPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
