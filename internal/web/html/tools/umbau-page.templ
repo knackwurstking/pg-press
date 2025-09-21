@@ -57,15 +57,15 @@ templ UmbauPage(props *UmbauPageProps) {
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
 			@toolsDataLists(props)
 			<form hx-post={ fmt.Sprintf("/presses/%d/umbau", props.PressNumber) }>
+				@umbauPagePressCyclesSection()
+				<hr/>
 				@umbauPageSectionTop(slots)
 				<hr/>
 				@umbauPageSectionTopCassette(slots)
 				<hr/>
 				@umbauPageSectionBottom(slots)
 				<hr/>
-				if props.User.IsAdmin() {
-					<button type="submit">Umbau speichern</button>
-				}
+				@umbauPageFormActions(props.User)
 			</form>
 		</main>
 	}
@@ -89,6 +89,21 @@ templ toolsDataLists(props *UmbauPageProps) {
 	</datalist>
 }
 
+templ umbauPagePressCyclesSection() {
+	<section>
+		<span class="flex flex-col">
+			<label for="press-total-cycles">Gesamtzyklen:</label>
+			<input
+				type="number"
+				id="press-total-cycles"
+				name="press-total-cycles"
+				placeholder="Gesamtzyklen"
+				required
+			/>
+		</span>
+	</section>
+}
+
 templ umbauPageSectionTop(slots map[models.Position]*models.Tool) {
 	<section>
 		<h2>Oberteil</h2>
@@ -97,15 +112,17 @@ templ umbauPageSectionTop(slots map[models.Position]*models.Tool) {
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
-		<label for="top">Neues Werkzeug:</label>
-		<input
-			type="text"
-			id="top"
-			name="top"
-			placeholder="Werkzeug"
-			list="tools-list-top"
-			required
-		/>
+		<span class="flex flex-col">
+			<label for="top">Neues Werkzeug:</label>
+			<input
+				type="text"
+				id="top"
+				name="top"
+				placeholder="Werkzeug"
+				list="tools-list-top"
+				required
+			/>
+		</span>
 	</section>
 }
 
@@ -117,14 +134,16 @@ templ umbauPageSectionTopCassette(slots map[models.Position]*models.Tool) {
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
-		<label for="top-cassette">Neues Werkzeug:</label>
-		<input
-			type="text"
-			id="top-cassette"
-			name="top-cassette"
-			placeholder="Werkzeug"
-			list="tools-list-top-cassette"
-		/>
+		<span class="flex flex-col">
+			<label for="top-cassette">Neues Werkzeug:</label>
+			<input
+				type="text"
+				id="top-cassette"
+				name="top-cassette"
+				placeholder="Werkzeug"
+				list="tools-list-top-cassette"
+			/>
+		</span>
 	</section>
 }
 
@@ -136,14 +155,24 @@ templ umbauPageSectionBottom(slots map[models.Position]*models.Tool) {
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
-		<label for="bottom">Neues Werkzeug:</label>
-		<input
-			type="text"
-			id="bottom"
-			name="bottom"
-			list="tools-list-bottom"
-			placeholder="Werkzeug"
-			required
-		/>
+		<span class="flex flex-col">
+			<label for="bottom">Neues Werkzeug:</label>
+			<input
+				type="text"
+				id="bottom"
+				name="bottom"
+				list="tools-list-bottom"
+				placeholder="Werkzeug"
+				required
+			/>
+		</span>
 	</section>
+}
+
+templ umbauPageFormActions(user *models.User) {
+	<footer class="flex justify-end items-center">
+		if user.IsAdmin() {
+			<button type="submit">Umbau speichern</button>
+		}
+	</footer>
 }
