@@ -133,7 +133,7 @@ func (h *Tools) HandleUmbauPage(c echo.Context) error {
 
 	// Get press number from param
 	var pn models.PressNumber
-	pns, err := h.ParseInt64Param(c, "press")
+	pns, err := h.ParseInt8Param(c, "press")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
 	}
@@ -161,7 +161,26 @@ func (h *Tools) HandleUmbauPage(c echo.Context) error {
 }
 
 func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
-	// TODO: ...
+	// Get user from context
+	_, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get press number from param
+	var pn models.PressNumber
+	pns, err := h.ParseInt8Param(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// TODO: Parse form values
+
+	// TODO: Update database, press cycles, tools
 
 	return errors.New("under construction")
 }
