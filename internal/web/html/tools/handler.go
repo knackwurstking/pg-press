@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
@@ -263,14 +264,35 @@ func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 	for _, tool := range toolsToAssign {
 		// Assign tool to press
 		if err := h.DB.Tools.UpdatePress(tool.ID, &pn, user); err != nil {
-			return h.HandleError(c, err, fmt.Sprintf("failed to assign tool %d to press", tool.ID))
+			return h.HandleError(c, err,
+				fmt.Sprintf("failed to assign tool %d to press", tool.ID))
 		}
+	}
+
+	// Create a feed
+	title := fmt.Sprintf("Werkzeugwechsel Presse %d", pn)
+	content := fmt.Sprintf(
+		"Umbau abgeschlossen für Presse %d. \n"+
+			"Eingebautes Oberteil: %s\n"+
+			"Eingebautes Unterteil: %s",
+		pn, topTool.String(), bottomTool.String(),
+	)
+	if topCassetteTool != nil {
+		content += fmt.Sprintf("\nEingebaute Obere Kassette: %s", topCassetteTool.String())
+	}
+	content += fmt.Sprintf("\nGesamtzyklen: %d", totalCycles)
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for press %d: %v", pn, err)
 	}
 
 	h.LogInfo("Successfully completed tool change for press %d", pn)
 
-	// Redirect back to the umbau page
-	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/tools/press/%d/umbau", pn))
+	// Set redirect header for HTMX
+	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("%s/tools/press/%d",
+		env.ServerPathPrefix, pn))
+	return c.NoContent(http.StatusOK)
 }
 
 // findToolByString finds a tool by its string representation and position
