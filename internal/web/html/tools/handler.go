@@ -272,7 +272,7 @@ func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 	// Create a feed
 	title := fmt.Sprintf("Werkzeugwechsel Presse %d", pn)
 	content := fmt.Sprintf(
-		"Umbau abgeschlossen für Presse %d. \n"+
+		"Umbau abgeschlossen für Presse %d.\n"+
 			"Eingebautes Oberteil: %s\n"+
 			"Eingebautes Unterteil: %s",
 		pn, topTool.String(), bottomTool.String(),

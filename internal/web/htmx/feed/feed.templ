@@ -2,12 +2,13 @@ package feed
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ ListFeeds(feeds []*models.Feed, lastFeedID int64) {
+templ ListFeeds(feeds []*models.Feed, lastFeedID int64, userMap map[int64]*models.User) {
 	if len(feeds) > 0 {
 		<ul id="data">
 			for _, feed := range feeds {
@@ -17,7 +18,7 @@ templ ListFeeds(feeds []*models.Feed, lastFeedID int64) {
 							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
 						</div>
 					}
-					@RenderFeed(feed)
+					@RenderFeed(feed, userMap)
 				</section>
 			}
 		</ul>
@@ -26,7 +27,7 @@ templ ListFeeds(feeds []*models.Feed, lastFeedID int64) {
 	}
 }
 
-templ RenderFeed(feed *models.Feed) {
+templ RenderFeed(feed *models.Feed, userMap map[int64]*models.User) {
 	<article id={ fmt.Sprintf("feed-%d", feed.ID) } class="card" data-id={ fmt.Sprintf("%d", feed.ID) } data-time={ fmt.Sprintf("%d", feed.CreatedAt) }>
 		<div style="margin-bottom: var(--ui-spacing);" class="card-body">
 			<div class="feed-item">
@@ -35,10 +36,19 @@ templ RenderFeed(feed *models.Feed) {
 						{ feed.Title }
 					</h5>
 					<div class="feed-content" style="margin-bottom: 0.5rem;">
-						{ feed.Content }
+						@templ.Raw(
+							strings.ReplaceAll(
+								templ.EscapeString(feed.Content), "\n", "<br/>",
+							),
+						)
 					</div>
 					<small class="feed-user" style="color: var(--ui-text-muted);">
-						Von Benutzer ID: { fmt.Sprintf("%d", feed.UserID) }
+						{{ user, ok := userMap[feed.UserID] }}
+						if ok {
+							Von Benutzer: { user.Name }
+						} else {
+							Von Benutzer ID: { feed.UserID }
+						}
 					</small>
 				</div>
 			</div>

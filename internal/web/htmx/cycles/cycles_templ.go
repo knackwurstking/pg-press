@@ -46,7 +46,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"card compact info text-sm mb\"><div class=\"card-header\">Entwicklernotiz</div><div class=\"card-body\">Die Presszyklen sind nach ihrer ID und nicht nach Datum sortiert. Eine niedrigere ID bedeutet einen älteren Eintrag (IDs sind einzigartig).</div></div><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5><button class=\"secondary small flex\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5><button class=\"secondary small flex\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,7 +56,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 			env.ServerPathPrefix, props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 37, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 28, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -79,7 +79,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 52, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 43, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -92,7 +92,7 @@ func CyclesSection(props *CyclesSectionProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.ToolPosition)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 52, Col: 76}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 43, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -200,7 +200,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 102, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 93, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -213,7 +213,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PressNumber))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 105, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 96, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +226,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("02.01.2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 108, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 99, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.ToolID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 111, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 102, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -252,7 +252,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.ToolPosition)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 114, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 105, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -265,7 +265,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 117, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 108, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -278,7 +278,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PartialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 121, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 112, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -294,7 +294,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 			env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 132, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 123, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -320,7 +320,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 			env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 150, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 141, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -333,7 +333,7 @@ func renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycl
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 154, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/cycles/cycles.templ`, Line: 145, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {

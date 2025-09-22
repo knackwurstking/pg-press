@@ -58,7 +58,7 @@ func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
 	)
 
 	// Get the total_cycles from the previous entry on the same press and tool position
-	// IDs must be greater than start cycle ID and less than current cycle ID
+	// Total cycles must be less than current cycle total_cycles
 	query := `
 		SELECT
 			total_cycles
@@ -68,15 +68,15 @@ func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
 			press_number = ?
 			AND tool_id > 0
 			AND tool_position = ?
-			AND id < ?
+			AND total_cycles < ?
 		ORDER BY
-			id DESC
+			total_cycles DESC
 		LIMIT 1
 	`
 
 	var previousTotalCycles int64
 	err := s.db.QueryRow(
-		query, cycle.PressNumber, cycle.ToolPosition, cycle.ID,
+		query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles,
 	).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -123,7 +123,7 @@ func (p *PressCycle) List() ([]*models.Cycle, error) {
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
-		ORDER BY id DESC
+		ORDER BY total_cycles DESC
 	`
 
 	rows, err := p.db.Query(query)
@@ -284,7 +284,7 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY id DESC
+		ORDER BY press_number, total_cycles DESC
 	`
 
 	rows, err := s.db.Query(query, toolID)
@@ -327,7 +327,7 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE press_number = ?
-		ORDER BY id DESC
+		ORDER BY total_cycles DESC
 	`
 	if queryLimit.Valid {
 		query += " LIMIT ?"

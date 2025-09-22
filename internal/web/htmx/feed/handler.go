@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
+	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
 )
@@ -44,13 +45,7 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 		return h.HandleError(c, err, "failed getting user from context")
 	}
 
-	feedData := ListFeeds(feeds, user.LastFeed)
-	err = feedData.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return h.RenderInternalError(c,
-			"error rendering feed data: "+err.Error())
-	}
-
+	// Update user's last feed
 	if len(feeds) > 0 {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
@@ -61,6 +56,25 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 			return h.HandleError(c, err, "failed to update user's last feed")
 		}
 
+	}
+
+	// Create users map map[int64]*models.User
+	userMap := make(map[int64]*models.User)
+
+	// Populate users map
+	for _, feed := range feeds {
+		user, err := h.DB.Users.Get(feed.UserID)
+		if err != nil {
+			h.LogError("failed to getting user: %v", err)
+		}
+		userMap[feed.UserID] = user
+	}
+
+	feedData := ListFeeds(feeds, user.LastFeed, userMap)
+	err = feedData.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return h.RenderInternalError(c,
+			"error rendering feed data: "+err.Error())
 	}
 
 	return nil
