@@ -1,9 +1,9 @@
 package tools
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
@@ -162,7 +162,7 @@ func (h *Tools) HandleUmbauPage(c echo.Context) error {
 
 func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 	// Get user from context
-	_, err := h.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -178,11 +178,109 @@ func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 		return h.RenderBadRequest(c, "invalid press number")
 	}
 
-	// TODO: Parse form values
+	// Parse form values
+	totalCyclesStr := c.FormValue("press-total-cycles")
+	if totalCyclesStr == "" {
+		return h.RenderBadRequest(c, "missing total cycles")
+	}
 
-	// TODO: Update database, press cycles, tools
+	totalCycles, err := strconv.ParseInt(totalCyclesStr, 10, 64)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid total cycles: "+err.Error())
+	}
 
-	return errors.New("under construction")
+	topToolStr := c.FormValue("top")
+	if topToolStr == "" {
+		return h.RenderBadRequest(c, "missing top tool")
+	}
+
+	bottomToolStr := c.FormValue("bottom")
+	if bottomToolStr == "" {
+		return h.RenderBadRequest(c, "missing bottom tool")
+	}
+
+	topCassetteToolStr := c.FormValue("top-cassette") // Optional
+
+	// Get all tools to find by string representation
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools")
+	}
+
+	// Find tools by their string representation
+	topTool, err := h.findToolByString(tools, topToolStr, models.PositionTop)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid top tool: "+err.Error())
+	}
+
+	bottomTool, err := h.findToolByString(tools, bottomToolStr, models.PositionBottom)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid bottom tool: "+err.Error())
+	}
+
+	var topCassetteTool *models.Tool
+	if topCassetteToolStr != "" {
+		topCassetteTool, err = h.findToolByString(tools, topCassetteToolStr, models.PositionTopCassette)
+		if err != nil {
+			return h.RenderBadRequest(c, "invalid top cassette tool: "+err.Error())
+		}
+	}
+
+	// Get currently assigned tools for this press
+	currentTools, err := h.DB.Tools.GetByPress(&pn)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get current tools for press")
+	}
+
+	// Create final cycle entries for current tools (being removed) with the total cycles
+	for _, tool := range currentTools {
+		cycle := &models.Cycle{
+			PressNumber:  pn,
+			ToolID:       tool.ID,
+			ToolPosition: tool.Position,
+			TotalCycles:  totalCycles,
+		}
+
+		_, err := h.DB.PressCycles.Add(cycle, user)
+		if err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to create final cycle for outgoing tool %d", tool.ID))
+		}
+	}
+
+	// Unassign current tools from press
+	for _, tool := range currentTools {
+		if err := h.DB.Tools.UpdatePress(tool.ID, nil, user); err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to unassign tool %d", tool.ID))
+		}
+	}
+
+	// Assign new tools to press (without creating initial cycles)
+	toolsToAssign := []*models.Tool{topTool, bottomTool}
+	if topCassetteTool != nil {
+		toolsToAssign = append(toolsToAssign, topCassetteTool)
+	}
+
+	for _, tool := range toolsToAssign {
+		// Assign tool to press
+		if err := h.DB.Tools.UpdatePress(tool.ID, &pn, user); err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to assign tool %d to press", tool.ID))
+		}
+	}
+
+	h.LogInfo("Successfully completed tool change for press %d", pn)
+
+	// Redirect back to the umbau page
+	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/tools/press/%d/umbau", pn))
+}
+
+// findToolByString finds a tool by its string representation and position
+func (h *Tools) findToolByString(tools []*models.Tool, toolStr string, position models.Position) (*models.Tool, error) {
+	for _, tool := range tools {
+		if tool.Position == position && tool.String() == toolStr {
+			return tool, nil
+		}
+	}
+	return nil, fmt.Errorf("tool not found: %s", toolStr)
 }
 
 func (h *Tools) HandleToolPage(c echo.Context) error {
