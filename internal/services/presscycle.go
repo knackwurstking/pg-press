@@ -284,7 +284,7 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM press_cycles
 		WHERE tool_id = ?
-		ORDER BY press_number, total_cycles DESC
+		ORDER BY date DESC
 	`
 
 	rows, err := s.db.Query(query, toolID)
