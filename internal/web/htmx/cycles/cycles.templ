@@ -40,7 +40,8 @@ templ CyclesSection(props *CyclesSectionProps) {
 	</div>
 	<section>
 		<h6 class="mb">
-			Gesamtzyklen für { props.Tool.String() } (Position: { props.ToolPosition }):
+			Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
+    			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
 		</h6>
 		<span>
 			@components.TotalCycles(props.TotalCycles, true)
@@ -52,8 +53,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 				<tr>
 					<th name="press">Presse</th>
 					<th name="date">Datum</th>
-					<th name="tool">Werkzeug</th>
-					<th name="position">Position</th>
 					<th name="total">Gesamtzyklen</th>
 					<th name="partial">Teilzyklen (berechnet)</th>
 					<th></th>
@@ -69,7 +68,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 templ cyclesTableRows(props *CyclesSectionProps) {
 	if len(props.Cycles) == 0 {
 		<tr>
-			<td colspan="7" class="text-center">
+			<td colspan="5" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -93,12 +92,6 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cyc
 		</td>
 		<td>
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
-		</td>
-		<td>
-			<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
-		</td>
-		<td>
-			<span class="text-xs">{ cycle.ToolPosition }</span>
 		</td>
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }
