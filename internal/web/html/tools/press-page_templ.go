@@ -335,8 +335,8 @@ func renderCycle(props PressPageProps, cycle *models.Cycle) templ.Component {
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
-			env.ServerPathPrefix, cycle.ToolID, cycle.ID,
+			"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/press-page.templ`, Line: 149, Col: 6}

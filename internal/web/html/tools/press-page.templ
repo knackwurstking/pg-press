@@ -144,8 +144,8 @@ templ renderCycle(props PressPageProps, cycle *models.Cycle) {
 				<button
 					class="small ghost"
 					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d&cycle_id=%d",
-						env.ServerPathPrefix, cycle.ToolID, cycle.ID,
+						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 					) }
 					hx-trigger="click"
 					hx-target="body"
