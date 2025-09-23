@@ -17,8 +17,8 @@ type BaseProps struct {
 
 	Type             string // Type like "POST", "PUT"
 	Href             string
-	Error            string
 	SubmitButtonText string
+	Error            string
 }
 
 // NOTE: For now we just reload the page after closing the dialog.
@@ -56,7 +56,7 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"fullscreen clean flex flex-col justify-center items-center\" onclose=\"this.parentElement.removeChild(this);\"><form class=\"flex flex-col gap\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"fullscreen clean flex flex-col justify-center items-center\" onclose=\"this.parentElement.removeChild(this); location.reload();\"><form class=\"flex flex-col gap\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,28 +181,32 @@ func Base(props BaseProps) templ.Component {
 
 func baseSubmitOnClickHandler(e templ.JSExpression) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_baseSubmitOnClickHandler_2c6c`,
-		Function: `function __templ_baseSubmitOnClickHandler_2c6c(e){const form = e.closest("form");
+		Name: `__templ_baseSubmitOnClickHandler_918f`,
+		Function: `function __templ_baseSubmitOnClickHandler_918f(e){try {
+        const form = e.closest("form");
 
-	const requiredInputs = form.querySelectorAll(
-    	"input[required], select[required], textarea[required]");
+    	const requiredInputs = form.querySelectorAll(
+       	"input[required], select[required], textarea[required]");
 
-	let allValid = true;
+    	let allValid = true;
 
-	requiredInputs.forEach(input => {
-		if (!input.value.trim()) {
-			allValid = false;
-			input.focus();
-			return;
-		}
-	});
+    	requiredInputs.forEach(input => {
+    		if (!input.value.trim()) {
+    			allValid = false;
+    			input.focus();
+    			return;
+    		}
+    	});
 
-	if (allValid) {
-		e.closest("dialog").close();
-	}
+    	if (allValid) {
+    		e.closest("dialog").close();
+    	}
+    } catch (err) {
+        alert(` + "`" + `Dialog submit error: ${err}` + "`" + `)
+    }
 }`,
-		Call:       templ.SafeScript(`__templ_baseSubmitOnClickHandler_2c6c`, e),
-		CallInline: templ.SafeScriptInline(`__templ_baseSubmitOnClickHandler_2c6c`, e),
+		Call:       templ.SafeScript(`__templ_baseSubmitOnClickHandler_918f`, e),
+		CallInline: templ.SafeScriptInline(`__templ_baseSubmitOnClickHandler_918f`, e),
 	}
 }
 

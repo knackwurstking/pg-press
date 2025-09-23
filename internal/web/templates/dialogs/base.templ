@@ -9,8 +9,8 @@ type BaseProps struct {
 
 	Type             string // Type like "POST", "PUT"
 	Href             string
-	Error            string
 	SubmitButtonText string
+	Error            string
 }
 
 // NOTE: For now we just reload the page after closing the dialog.
@@ -18,7 +18,7 @@ templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose="this.parentElement.removeChild(this);"
+		onclose="this.parentElement.removeChild(this); location.reload();"
 	>
 		<form
 			class="flex flex-col gap"
@@ -71,22 +71,26 @@ templ Base(props BaseProps) {
 }
 
 script baseSubmitOnClickHandler(e templ.JSExpression) {
-	const form = e.closest("form");
+    try {
+        const form = e.closest("form");
 
-	const requiredInputs = form.querySelectorAll(
-    	"input[required], select[required], textarea[required]");
+    	const requiredInputs = form.querySelectorAll(
+       	"input[required], select[required], textarea[required]");
 
-	let allValid = true;
+    	let allValid = true;
 
-	requiredInputs.forEach(input => {
-		if (!input.value.trim()) {
-			allValid = false;
-			input.focus();
-			return;
-		}
-	});
+    	requiredInputs.forEach(input => {
+    		if (!input.value.trim()) {
+    			allValid = false;
+    			input.focus();
+    			return;
+    		}
+    	});
 
-	if (allValid) {
-		//e.closest("dialog").close();
-	}
+    	if (allValid) {
+    		e.closest("dialog").close();
+    	}
+    } catch (err) {
+        alert(`Dialog submit error: ${err}`)
+    }
 }
