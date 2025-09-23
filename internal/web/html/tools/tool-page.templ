@@ -18,14 +18,6 @@ templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mod
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			<div class="dev-note card warning mb">
-				<div class="card-header">
-					<h4>
-						<i class="bi bi-exclamation-triangle mr"></i>
-						<span>In Bearbeitung</span>
-					</h4>
-				</div>
-			</div>
 			@sectionActions(user, tool)
 			@sectionNotes(tool)
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
