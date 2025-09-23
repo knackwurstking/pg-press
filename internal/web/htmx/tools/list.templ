@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -36,25 +37,10 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 					</span>
 					<span class="flex flex-row gap items center">
 						@components.PositionBadge(tool.Position, "muted text-bold")
-						switch tool.Status() {
-							case models.StatusActive:
-								<small
-									class="badge badge-sm badge-outline primary"
-								>
-									<span class="flex flex-col gap-0 justify-center items-center">
-										<span class="text-bold">Eingebaut</span>
-										<span>Presse { *tool.Press }</span>
-									</span>
-								</small>
-							case models.StatusAvailable:
-								<small class="badge badge-sm badge-outline info">
-									Verfügbar
-								</small>
-							case models.StatusRegenerating:
-								<small class="badge badge-sm badge-outline warning">
-									Regenerierung
-								</small>
-						}
+						@ToolStatusEdit(&ToolStatusEditProps{
+							Tool:     tool.Tool,
+							Editable: false,
+						})
 					</span>
 				</span>
 				<span

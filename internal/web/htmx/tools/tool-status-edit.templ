@@ -1,0 +1,193 @@
+package tools
+
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+type ToolStatusEditProps struct {
+	Tool     *models.Tool
+	Editable bool
+}
+
+templ ToolStatusEdit(props *ToolStatusEditProps) {
+	<div
+		id={ fmt.Sprintf("tool-status-%d", props.Tool.ID) }
+		class="flex flex-col gap-sm"
+	>
+		if props.Editable {
+			@toolStatusEditForm(props.Tool)
+		} else {
+			@toolStatusDisplay(props.Tool)
+		}
+	</div>
+}
+
+templ toolStatusDisplay(tool *models.Tool) {
+	<div class="flex items-center gap-sm">
+		switch tool.Status() {
+			case models.StatusActive:
+				<span class="badge badge-sm badge-outline primary">
+					<span class="flex flex-col gap-0 justify-center items-center">
+						<span class="text-bold">Eingebaut</span>
+						<span>Presse { *tool.Press }</span>
+					</span>
+				</span>
+			case models.StatusAvailable:
+				<span class="badge badge-sm badge-outline info">
+					Verfügbar
+				</span>
+			case models.StatusRegenerating:
+				<span class="badge badge-sm badge-outline warning">
+					Regenerierung
+				</span>
+		}
+		<button
+			type="button"
+			class="btn btn-sm btn-ghost text-muted hover:text-primary transition-colors"
+			hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d", env.ServerPathPrefix, tool.ID) }
+			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+			hx-swap="outerHTML"
+			title="Status bearbeiten"
+		>
+			<i class="bi bi-pencil-square text-sm"></i>
+		</button>
+	</div>
+}
+
+templ toolStatusEditForm(tool *models.Tool) {
+	<form
+		class="card p-sm flex flex-col gap-sm"
+		hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+		hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+		hx-swap="outerHTML"
+	>
+		<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+		<div class="flex flex-col gap-xs">
+			<label for="status" class="text-sm font-semibold text-muted">Status:</label>
+			<select name="status" id="status" class="form-control">
+				<option
+					value="available"
+					if tool.Status() == models.StatusAvailable {
+						selected
+					}
+				>
+					Verfügbar
+				</option>
+				<option
+					value="active"
+					if tool.Status() == models.StatusActive {
+						selected
+					}
+				>
+					Eingebaut
+				</option>
+				<option
+					value="regenerating"
+					if tool.Status() == models.StatusRegenerating {
+						selected
+					}
+				>
+					Regenerierung
+				</option>
+			</select>
+		</div>
+		<div
+			class="flex flex-col gap-xs press-selection"
+			style={ fmt.Sprintf("display: %s", func() string {
+				if tool.Status() == models.StatusActive {
+					return "flex"
+				}
+				return "none"
+			}()) }
+		>
+			<label for="press" class="text-sm font-semibold text-muted">Presse:</label>
+			<select name="press" id="press" class="form-control">
+				<option value="">Nicht zugewiesen</option>
+				<option
+					value="0"
+					if tool.Press != nil && *tool.Press == 0 {
+						selected
+					}
+				>
+					Presse 0
+				</option>
+				<option
+					value="2"
+					if tool.Press != nil && *tool.Press == 2 {
+						selected
+					}
+				>
+					Presse 2
+				</option>
+				<option
+					value="3"
+					if tool.Press != nil && *tool.Press == 3 {
+						selected
+					}
+				>
+					Presse 3
+				</option>
+				<option
+					value="4"
+					if tool.Press != nil && *tool.Press == 4 {
+						selected
+					}
+				>
+					Presse 4
+				</option>
+				<option
+					value="5"
+					if tool.Press != nil && *tool.Press == 5 {
+						selected
+					}
+				>
+					Presse 5
+				</option>
+			</select>
+		</div>
+		<div class="flex gap-sm mt-sm">
+			<button type="submit" class="btn btn-sm primary flex-1 font-medium">
+				<i class="bi bi-check"></i>
+				Speichern
+			</button>
+			<button
+				type="button"
+				class="btn btn-sm secondary flex-1 font-medium"
+				hx-get={ fmt.Sprintf("%s/htmx/tools/status-display?id=%d", env.ServerPathPrefix, tool.ID) }
+				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+				hx-swap="outerHTML"
+			>
+				<i class="bi bi-x"></i>
+				Abbrechen
+			</button>
+		</div>
+	</form>
+	<script>
+		// Function to show/hide press selection based on status
+		function togglePressSelection(statusValue) {
+			const pressDiv = document.querySelector('.press-selection');
+			if (pressDiv) {
+				if (statusValue === 'active') {
+					pressDiv.style.display = 'flex';
+				} else {
+					pressDiv.style.display = 'none';
+				}
+			}
+		}
+
+		// Initialize immediately (no need to wait for DOMContentLoaded since script is inline)
+		const statusSelect = document.getElementById('status');
+		if (statusSelect) {
+			// Set initial state
+			togglePressSelection(statusSelect.value);
+
+			// Add change listener
+			statusSelect.addEventListener('change', function() {
+				togglePressSelection(this.value);
+			});
+		}
+	</script>
+}

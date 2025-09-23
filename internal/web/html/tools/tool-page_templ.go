@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/htmx/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -120,7 +121,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 35, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 36, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -136,7 +137,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 49, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 50, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -215,7 +216,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 87, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 88, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -228,7 +229,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 91, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 92, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -279,7 +280,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 109, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 110, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -334,13 +335,19 @@ func sectionCycles(tool *models.ToolWithNotes) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<section class=\"flex flex-col gap\"><h4>Werkzeugnutzung & Zyklen</h4><section class=\"setatus\"><h5>Aktueller Status</h5>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<section class=\"flex flex-col gap\"><h4>Werkzeugnutzung & Zyklen</h4><section class=\"status\"><div class=\"flex justify-between items-center mb\"><h5>Aktueller Status</h5></div><div class=\"flex items-center gap\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		switch tool.Status() {
-		case models.StatusActive:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a role=\"button\" class=\"secondary ghost flex gap justify-between w-full\" href=\"")
+		templ_7745c5c3_Err = tools.ToolStatusEdit(&tools.ToolStatusEditProps{
+			Tool:     tool.Tool,
+			Editable: false,
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if tool.Status() == models.StatusActive && tool.Press != nil {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a role=\"button\" class=\"btn btn-sm btn-outline\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -350,75 +357,47 @@ func sectionCycles(tool *models.ToolWithNotes) templ.Component {
 				env.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 147, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 154, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"><span class=\"flex gap items-center  text-sm\"><span class=\"contrast ghost\">Presse ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" title=\"Zur Pressenübersicht\"><i class=\"bi bi-arrow-right\"></i> Presse ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 150, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 158, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span> <span class=\"primary ghost\">Aktiv</span></span> <i class=\"bi bi-chevron-right text-muted\"></i></a>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.StatusAvailable:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<span class=\"info ghost\">Verfügbar</span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.StatusRegenerating:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<span class=\"warning ghost\">Regenerierung</span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		default:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(tool.Status())
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 160, Col: 26}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</section><section class=\"cycles\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div></section><section class=\"cycles\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 			"%s/htmx/tools/cycles?tool_id=%d&tool_position=%s",
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 168, Col: 4}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></section></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></section></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -442,12 +421,12 @@ func toolsPageNavContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var16 == nil {
-			templ_7745c5c3_Var16 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -463,7 +442,7 @@ func toolsPageNavContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

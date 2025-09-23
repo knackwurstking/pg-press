@@ -7,11 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
+
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -46,6 +48,11 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			// Delete a tool
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete",
 				h.DeleteTool),
+
+			// Tool status management
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-edit", h.GetStatusEdit),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-display", h.GetStatusDisplay),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status", h.UpdateToolStatus),
 		},
 	)
 }
@@ -202,6 +209,143 @@ func (h *Tools) DeleteTool(c echo.Context) error {
 	// Set redirect header to tools page
 	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
 	return c.NoContent(http.StatusOK)
+}
+
+func (h *Tools) GetStatusEdit(c echo.Context) error {
+	toolID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
+	}
+
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool from database")
+	}
+
+	statusEdit := h.renderStatusComponent(tool, true)
+	if err := statusEdit.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render tool status edit: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Tools) GetStatusDisplay(c echo.Context) error {
+	toolID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
+	}
+
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool from database")
+	}
+
+	statusDisplay := h.renderStatusComponent(tool, false)
+	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render tool status display: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Tools) UpdateToolStatus(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	toolIDStr := c.FormValue("tool_id")
+	if toolIDStr == "" {
+		return h.RenderBadRequest(c, "tool_id is required")
+	}
+
+	toolID, err := strconv.ParseInt(toolIDStr, 10, 64)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid tool_id: "+err.Error())
+	}
+
+	statusStr := c.FormValue("status")
+	if statusStr == "" {
+		return h.RenderBadRequest(c, "status is required")
+	}
+
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool from database")
+	}
+
+	h.LogInfo("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
+
+	// Handle status change
+	switch statusStr {
+	case "regenerating":
+		if err := h.DB.Tools.UpdateRegenerating(toolID, true, user); err != nil {
+			return h.HandleError(c, err, "failed to update tool regenerating status")
+		}
+		// Clear press assignment when regenerating
+		if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
+			return h.HandleError(c, err, "failed to clear press assignment")
+		}
+
+	case "available":
+		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
+			return h.HandleError(c, err, "failed to update tool regenerating status")
+		}
+		// Clear press assignment when making available
+		if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
+			return h.HandleError(c, err, "failed to clear press assignment")
+		}
+
+	case "active":
+		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
+			return h.HandleError(c, err, "failed to update tool regenerating status")
+		}
+
+		// Handle press assignment for active status
+		pressStr := c.FormValue("press")
+		if pressStr != "" {
+			press, err := strconv.Atoi(pressStr)
+			if err != nil {
+				return h.RenderBadRequest(c, "invalid press number: "+err.Error())
+			}
+			pn := models.PressNumber(press)
+			if !models.IsValidPressNumber(&pn) {
+				return h.RenderBadRequest(c, "invalid press number: must be 0, 2, 3, 4, or 5")
+			}
+			if err := h.DB.Tools.UpdatePress(toolID, &pn, user); err != nil {
+				return h.HandleError(c, err, "failed to assign tool to press")
+			}
+		} else {
+			// If no press specified for active status, clear it
+			if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
+				return h.HandleError(c, err, "failed to clear press assignment")
+			}
+		}
+
+	default:
+		return h.RenderBadRequest(c, "invalid status: "+statusStr)
+	}
+
+	// Get updated tool and render status display
+	updatedTool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get updated tool from database")
+	}
+
+	statusDisplay := h.renderStatusComponent(updatedTool, false)
+	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render updated tool status: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool) templ.Component {
+	return ToolStatusEdit(&ToolStatusEditProps{
+		Tool:     tool,
+		Editable: editable,
+	})
 }
 
 func (h *Tools) getEditToolFormData(c echo.Context) (*EditFormData, error) {

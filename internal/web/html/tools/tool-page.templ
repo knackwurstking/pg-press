@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/htmx/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -134,31 +135,30 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 templ sectionCycles(tool *models.ToolWithNotes) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
-		<section class="setatus">
-			<h5>Aktueller Status</h5>
-			switch tool.Status() {
-				case models.StatusActive:
+		<section class="status">
+			<div class="flex justify-between items-center mb">
+				<h5>Aktueller Status</h5>
+			</div>
+			<div class="flex items-center gap">
+				@tools.ToolStatusEdit(&tools.ToolStatusEditProps{
+					Tool:     tool.Tool,
+					Editable: false,
+				})
+				if tool.Status() == models.StatusActive && tool.Press != nil {
 					<a
 						role="button"
-						class="secondary ghost flex gap justify-between w-full"
+						class="btn btn-sm btn-outline"
 						href={ fmt.Sprintf(
 							"%s/tools/press/%d",
 							env.ServerPathPrefix, *tool.Press,
 						) }
+						title="Zur Pressenübersicht"
 					>
-						<span class="flex gap items-center  text-sm">
-							<span class="contrast ghost">Presse { fmt.Sprintf("%d", *tool.Press) }</span>
-							<span class="primary ghost">Aktiv</span>
-						</span>
-						<i class="bi bi-chevron-right text-muted"></i>
+						<i class="bi bi-arrow-right"></i>
+						Presse { fmt.Sprintf("%d", *tool.Press) }
 					</a>
-				case models.StatusAvailable:
-					<span class="info ghost">Verfügbar</span>
-				case models.StatusRegenerating:
-					<span class="warning ghost">Regenerierung</span>
-				default:
-					<span>{ tool.Status() }</span>
-			}
+				}
+			</div>
 		</section>
 		<section
 			class="cycles"
