@@ -45,19 +45,6 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 		return h.HandleError(c, err, "failed getting user from context")
 	}
 
-	// Update user's last feed
-	if len(feeds) > 0 {
-		oldLastFeed := user.LastFeed
-		user.LastFeed = feeds[0].ID
-		h.LogDebug("Updating user %s last feed from %d to %d",
-			user.Name, oldLastFeed, user.LastFeed)
-
-		if err := h.DB.Users.Update(user, user); err != nil {
-			return h.HandleError(c, err, "failed to update user's last feed")
-		}
-
-	}
-
 	// Create users map map[int64]*models.User
 	userMap := make(map[int64]*models.User)
 
@@ -75,6 +62,18 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 	if err != nil {
 		return h.RenderInternalError(c,
 			"error rendering feed data: "+err.Error())
+	}
+
+	// Update user's last feed
+	if len(feeds) > 0 {
+		oldLastFeed := user.LastFeed
+		user.LastFeed = feeds[0].ID
+		h.LogDebug("Updating user %s last feed from %d to %d",
+			user.Name, oldLastFeed, user.LastFeed)
+
+		if err := h.DB.Users.Update(user, user); err != nil {
+			return h.HandleError(c, err, "failed to update user's last feed")
+		}
 	}
 
 	return nil
