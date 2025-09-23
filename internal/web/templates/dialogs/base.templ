@@ -18,7 +18,7 @@ templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose="this.parentElement.removeChild(this); window.location.reload();"
+		onclose="this.parentElement.removeChild(this);"
 	>
 		<form
 			class="flex flex-col gap"
@@ -87,6 +87,6 @@ script baseSubmitOnClickHandler(e templ.JSExpression) {
 	});
 
 	if (allValid) {
-		e.closest("dialog").close();
+		//e.closest("dialog").close();
 	}
 }
