@@ -175,8 +175,9 @@ templ umbauPageSectionBottom(tool *models.Tool) {
 
 templ umbauPageFormActions(user *models.User) {
 	<footer class="flex justify-end items-center">
-		if user.IsAdmin() {
-			<button type="submit">Umbau speichern</button>
-		}
+		<button
+			type="submit"
+			disabled?={ !user.IsAdmin() }
+		>Umbau speichern</button>
 	</footer>
 }
