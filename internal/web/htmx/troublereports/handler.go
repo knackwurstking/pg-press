@@ -55,13 +55,13 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 
 			// Dialog edit routes
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
-				h.GetDialogEdit),
+				h.GetEditDialog),
 
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
-				h.AddTroubleReport),
+				h.AddTroubleReportOnEditDialogSubmit),
 
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit",
-				h.UpdateTroubleReport),
+				h.UpdateTroubleReportOnEditDialogSubmit),
 
 			// Rollback route
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
@@ -147,31 +147,32 @@ func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) GetDialogEdit(c echo.Context) error {
+func (h *TroubleReports) GetEditDialog(c echo.Context) error {
 	props := &dialogs.EditTroubleReportProps{}
+	props.ID, _ = helpers.ParseInt64Query(c, "id")
 
-	var err error
-	props.ID, err = helpers.ParseInt64Query(c, "id")
-	if err != nil {
-		return h.RenderBadRequest(c, "failed to parse trouble report ID: "+err.Error())
-	}
-
-	h.LogDebug("Loading trouble report %d for editing", props.ID)
-
-	tr, err := h.DB.TroubleReports.Get(props.ID)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get trouble report")
-	}
-	props.Title = tr.Title
-	props.Content = tr.Content
-
-	// Load attachments for display
-	loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr)
-	if err == nil {
-		props.Attachments = loadedAttachments
+	if props.ID > 0 {
+		h.LogDebug("Open edit dialog for trouble report %d", props.ID)
 	} else {
-		h.LogError("Failed to load attachments for trouble report %d: %v",
-			props.ID, err)
+		h.LogDebug("Open edit dialog for new trouble report")
+	}
+
+	if props.ID > 0 {
+		tr, err := h.DB.TroubleReports.Get(props.ID)
+		if err != nil {
+			return h.HandleError(c, err, "failed to get trouble report")
+		}
+		props.Title = tr.Title
+		props.Content = tr.Content
+
+		// Load attachments for display
+		loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr)
+		if err == nil {
+			props.Attachments = loadedAttachments
+		} else {
+			h.LogError("Failed to load attachments for trouble report %d: %v",
+				props.ID, err)
+		}
 	}
 
 	dialog := dialogs.EditTroubleReport(props)
@@ -183,7 +184,7 @@ func (h *TroubleReports) GetDialogEdit(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) AddTroubleReport(c echo.Context) error {
+func (h *TroubleReports) AddTroubleReportOnEditDialogSubmit(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -210,10 +211,10 @@ func (h *TroubleReports) AddTroubleReport(c echo.Context) error {
 		return h.HandleError(c, err, "failed to add trouble report")
 	}
 
-	return nil
+	return h.closeDialog(c)
 }
 
-func (h *TroubleReports) UpdateTroubleReport(c echo.Context) error {
+func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) error {
 	// Get ID from query parameter
 	id, err := helpers.ParseInt64Query(c, "id")
 	if err != nil {
@@ -267,6 +268,19 @@ func (h *TroubleReports) UpdateTroubleReport(c echo.Context) error {
 	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 	if err != nil {
 		return h.HandleError(c, err, "failed to update trouble report")
+	}
+
+	return h.closeDialog(c)
+}
+
+func (h *TroubleReports) closeDialog(c echo.Context) error {
+	dialog := dialogs.EditTroubleReport(&dialogs.EditTroubleReportProps{
+		CloseDialog: true,
+	})
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render trouble report edit dialog: "+err.Error())
 	}
 
 	return nil

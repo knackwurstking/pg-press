@@ -16,8 +16,10 @@ import (
 )
 
 type EditMetalSheetProps struct {
-	MetalSheetID int64
 	Tool         *models.Tool
+	MetalSheetID int64
+
+	CloseDialog bool // Standalone prop
 }
 
 func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
@@ -79,6 +81,7 @@ func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
 			Type:             baseType,
 			Href:             baseHref,
 			SubmitButtonText: submitButtonText,
+			CloseDialog:      props.CloseDialog,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

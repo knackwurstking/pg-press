@@ -38,8 +38,10 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 
 			// Get, Post or Edit a tool
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.GetEditDialog),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.AddTool),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.UpdateTool),
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit",
+				h.AddToolOnEditDialogSubmit),
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit",
+				h.UpdateToolOnEditDialogSubmit),
 
 			// Delete a tool
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete",
@@ -100,7 +102,7 @@ func (h *Tools) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) AddTool(c echo.Context) error {
+func (h *Tools) AddToolOnEditDialogSubmit(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -125,10 +127,10 @@ func (h *Tools) AddTool(c echo.Context) error {
 			t.ID, tool.Type, tool.Code, user.Name)
 	}
 
-	return nil
+	return h.closeDialog(c)
 }
 
-func (h *Tools) UpdateTool(c echo.Context) error {
+func (h *Tools) UpdateToolOnEditDialogSubmit(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -158,6 +160,19 @@ func (h *Tools) UpdateTool(c echo.Context) error {
 	} else {
 		h.LogInfo("Updated tool %d (Type=%s, Code=%s) by user %s",
 			tool.ID, tool.Type, tool.Code, user.Name)
+	}
+
+	return h.closeDialog(c)
+}
+
+func (h *Tools) closeDialog(c echo.Context) error {
+	dialog := dialogs.EditTool(&dialogs.EditToolProps{
+		CloseDialog: true,
+	})
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render tool edit dialog: "+err.Error())
 	}
 
 	return nil

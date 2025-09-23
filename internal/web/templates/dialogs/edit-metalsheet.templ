@@ -8,8 +8,10 @@ import (
 )
 
 type EditMetalSheetProps struct {
-	MetalSheetID int64
 	Tool         *models.Tool
+	MetalSheetID int64
+
+	CloseDialog bool // Standalone prop
 }
 
 templ EditMetalSheet(props *EditMetalSheetProps) {
@@ -33,13 +35,13 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 			submitButtonText = "Aktualisieren"
 		}
 	}}
-
 	@Base(BaseProps{
-		ID: 				"metal-sheet-edit-dialog",
-		Type: 				baseType,
-		Href: 				baseHref,
-		SubmitButtonText: 	submitButtonText,
-	}){
+		ID:               "metal-sheet-edit-dialog",
+		Type:             baseType,
+		Href:             baseHref,
+		SubmitButtonText: submitButtonText,
+		CloseDialog:      props.CloseDialog,
+	}) {
 		// TOOD: Dialog content here
 	}
 }

@@ -9,20 +9,24 @@ import (
 )
 
 type EditTroubleReportProps struct {
-	ID              int64
-	Title           string
-	Content         string
+	ID int64
+
+	Title       string
+	Content     string
+	Attachments []*models.Attachment
+
 	InvalidTitle    bool
 	InvalidContent  bool
 	AttachmentError string
-	Attachments     []*models.Attachment
+
+	CloseDialog bool // Standalone prop
 }
 
 templ EditTroubleReport(props *EditTroubleReportProps) {
 	{{
 		var (
-			baseType = "POST"
-			baseHref = fmt.Sprintf("%s/htmx/trouble-reports/edit", env.ServerPathPrefix,)
+			baseType         = "POST"
+			baseHref         = fmt.Sprintf("%s/htmx/trouble-reports/edit", env.ServerPathPrefix)
 			submitButtonText = "Erstellen"
 		)
 
@@ -35,13 +39,13 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 			submitButtonText = "Aktualisieren"
 		}
 	}}
-
 	@Base(BaseProps{
-		ID: 				"metal-sheet-edit-dialog",
-		Type: 				baseType,
-		Href: 				baseHref,
-		SubmitButtonText: 	submitButtonText,
-	}){
+		ID:               "metal-sheet-edit-dialog",
+		Type:             baseType,
+		Href:             baseHref,
+		SubmitButtonText: submitButtonText,
+		CloseDialog:      props.CloseDialog,
+	}) {
 		<script>
             var selectedFiles = []; // Used by the file input change event handler
             var existingAttachmentsRemoval = [];
@@ -116,10 +120,8 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
                 }
             }
         </script>
-
-        <!-- Hidden field for attachment order -->
+		<!-- Hidden field for attachment order -->
 		<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
-
 		<label for="title" class="flex flex-col">
 			Titel
 			<input
@@ -132,38 +134,31 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 				}
 			/>
 		</label>
-
 		<label for="content" class="flex flex-col">
 			Bericht
-
 			<textarea
 				name="content"
 				id="content"
 				placeholder="Bericht"
-
 				if props.InvalidContent {
 					aria-invalid="true"
 				}
 			>{ props.Content }</textarea>
 		</label>
-
 		<!-- Attachments Section -->
 		<div id="attachments-section" class="attachments-container flex flex-col gap">
 			<small class="attachments-label">
 				Bilder (max. 10MB pro Datei, max. 10 Dateien)
 			</small>
-
 			if props.InvalidTitle || props.InvalidContent {
 				<div class="attachment-error">
 					<i class="bi bi-exclamation-triangle"></i>
 					Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.
 				</div>
 			}
-
 			if props.AttachmentError != "" {
 				<div class="attachment-error">{ props.AttachmentError }</div>
 			}
-
 			<!-- Existing Attachments -->
 			if len(props.Attachments) > 0 {
 				<details
@@ -178,7 +173,6 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 						<i class="bi bi-images"></i>
 						Vorhandene Bilder ({ len(props.Attachments) })
 					</summary>
-
 					<div id="existing-attachments" class="flex flex-col gap">
 						for attachmentIndex, attachment := range props.Attachments {
 							<div
@@ -189,7 +183,6 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 									<span class="ellipsis">Anhang { attachmentIndex+1 }</span>
 									<span class="muted text-sm ellipsis">({ attachment.GetMimeType() })</span>
 								</div>
-
 								<div class="attachment-actions flex gap">
 									<button
 										type="button"
@@ -201,7 +194,6 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 											Anzeigen
 										</small>
 									</button>
-
 									<button
 										type="button"
 										class="destructive flex gap items-center"
@@ -218,7 +210,6 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 					</div>
 				</details>
 			}
-
 			<!-- File Upload Area -->
 			<div
 				class="file-input-area flex flex-col justify-center items-center"
@@ -228,25 +219,20 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 				ondragleave="window.dialogEditFunctions.handleDragLeave(event)"
 			>
 				<i class="bi bi-cloud-upload"></i>
-
 				<div class="text-center">Bilder hochladen</div>
-
 				<input
 					type="file"
 					name="attachments"
 					id="attachments"
 					multiple
 					accept="image/*"
-					onchange='onAttachments(event)'
+					onchange="onAttachments(event)"
 				/>
 			</div>
-
 			<!-- File Preview Area -->
 			<div id="file-preview" class="file-preview flex flex-col gap border">
 				<div class="attachments-label">Neue Bilder:</div>
-
 				<div id="new-attachments" class="flex flex-col gap"></div>
-
 				<template name="attachment-item">
 					<div
 						class="attachment-item flex gap justify-between items-center border"
@@ -255,7 +241,6 @@ templ EditTroubleReport(props *EditTroubleReportProps) {
 							<span class="name ellipsis"></span>
 							<span class="size-text ellipsis"></span>
 						</div>
-
 						<div class="attachment-actions flex gap">
 							<button
 								type="button"

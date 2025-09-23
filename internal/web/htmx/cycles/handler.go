@@ -226,7 +226,7 @@ func (h *Cycles) HandleEditPOST(c echo.Context) error {
 		}
 	}
 
-	return nil
+	return h.closeDialog(c)
 }
 
 func (h *Cycles) HandleEditPUT(c echo.Context) error {
@@ -284,6 +284,18 @@ func (h *Cycles) HandleEditPUT(c echo.Context) error {
 			h.LogError("Failed to stop regeneration for tool %d: %v",
 				tool.ID, err)
 		}
+	}
+
+	return h.closeDialog(c)
+}
+
+func (h *Cycles) closeDialog(c echo.Context) error {
+	props := &dialogs.EditCycleProps{
+		CloseDialog: true,
+	}
+	cycleEditDialog := dialogs.EditCycle(props)
+	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.HandleError(c, err, "failed to render cycle edit dialog")
 	}
 
 	return nil

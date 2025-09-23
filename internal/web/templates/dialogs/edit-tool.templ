@@ -8,21 +8,24 @@ import (
 )
 
 type EditToolProps struct {
-	Tool              	*models.Tool
+	Tool *models.Tool
+
 	InputPosition       string
 	InputWidth          int
 	InputHeight         int
 	InputType           string
 	InputCode           string
 	InputPressSelection *models.PressNumber
+
+	CloseDialog bool // Standalone prop
 }
 
 templ EditTool(props *EditToolProps) {
 	{{
 		var (
-			baseType 			= "POST"
-			baseHref 			= fmt.Sprintf("%s/htmx/tools/edit", env.ServerPathPrefix)
-			submitButtonText 	= "Erstellen"
+			baseType         = "POST"
+			baseHref         = fmt.Sprintf("%s/htmx/tools/edit", env.ServerPathPrefix)
+			submitButtonText = "Erstellen"
 		)
 
 		if props.Tool != nil && props.Tool.ID > 0 {
@@ -31,51 +34,43 @@ templ EditTool(props *EditToolProps) {
 			submitButtonText = "Aktualisieren"
 		}
 	}}
-
 	@Base(BaseProps{
-		Type: 				baseType,
-		Href: 				baseHref,
-		ID: 				"tool-edit-dialog",
-		SubmitButtonText: 	submitButtonText,
-	}){
+		Type:             baseType,
+		Href:             baseHref,
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: submitButtonText,
+		CloseDialog:      props.CloseDialog,
+	}) {
 		<span class="flex flex-row gap flex-wrap justify-between items-center">
 			<span class="flex flex-col gap-0">
 				<label for="position">Position</label>
-
 				<select id="position" name="position" required>
 					<option
 						value=""
-
 						if props.InputPosition == "" {
 							selected
 						}
 					>
 						Position auswählen
 					</option>
-
 					<option
 						value={ models.PositionTop }
-
 						if models.Position(props.InputPosition) == models.PositionTop {
 							selected
 						}
 					>
 						Oberteil
 					</option>
-
 					<option
 						value={ models.PositionBottom }
-
 						if models.Position(props.InputPosition) == models.PositionBottom {
 							selected
 						}
 					>
 						Unterteil
 					</option>
-
 					<option
 						value={ models.PositionTopCassette }
-
 						if models.Position(props.InputPosition) == models.PositionTopCassette {
 							selected
 						}
@@ -84,67 +79,54 @@ templ EditTool(props *EditToolProps) {
 					</option>
 				</select>
 			</span>
-
 			<span class="flex flex-col gap-0 w-fit">
 				<label for="press">Presse</label>
-
 				<select
 					id="pressSelection"
 					name="press-selection"
 				>
 					<option
 						value=""
-
 						if !models.IsValidPressNumber(props.InputPressSelection) {
 							selected
 						}
 					>
 						Nicht Eingebaut
 					</option>
-
 					<option
 						value="0"
-
 						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
 							selected
 						}
 					>
 						Presse 0
 					</option>
-
 					<option
 						value="2"
-
 						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
 							selected
 						}
 					>
 						Presse 2
 					</option>
-
 					<option
 						value="3"
-
 						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
 							selected
 						}
 					>
 						Presse 3
 					</option>
-
 					<option
 						value="4"
-
 						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
 							selected
 						}
 					>
 						Presse 4
 					</option>
-
 					<option
 						value="5"
-
 						if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
 							selected
 						}
@@ -154,10 +136,8 @@ templ EditTool(props *EditToolProps) {
 				</select>
 			</span>
 		</span>
-
 		<span class="flex flex-col gap-0">
 			<label>Format</label>
-
 			<div class="flex gap-sm">
 				<input
 					type="number"
@@ -165,15 +145,12 @@ templ EditTool(props *EditToolProps) {
 					name="width"
 					class="w-full"
 					placeholder="z.B. 120"
-
 					if props.InputWidth != 0 {
 						value={ props.InputWidth }
 					}
-
 					required
 				/>
 				<span style="margin: auto 0;" class="text-xl">x</span>
-
 				<input
 					type="number"
 					id="height"
@@ -187,10 +164,8 @@ templ EditTool(props *EditToolProps) {
 				/>
 			</div>
 		</span>
-
 		<span class="flex flex-col gap-0">
 			<label for="type">Typ</label>
-
 			<input
 				type="text"
 				id="type"
@@ -200,10 +175,8 @@ templ EditTool(props *EditToolProps) {
 				required
 			/>
 		</span>
-
 		<span class="flex flex-col gap-0">
 			<label for="code">Code</label>
-
 			<input
 				type="text"
 				id="code"

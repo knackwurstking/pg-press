@@ -10,87 +10,71 @@ type BaseProps struct {
 	Type             string // Type like "POST", "PUT"
 	Href             string
 	SubmitButtonText string
-	Error            string
+
+	Error string
+
+	CloseDialog bool
 }
 
-// NOTE: For now we just reload the page after closing the dialog.
 templ Base(props BaseProps) {
-	<dialog
-		id={ props.ID }
-		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose="this.parentElement.removeChild(this); location.reload();"
-	>
-		<form
-			class="flex flex-col gap"
-			if props.Type == "POST" {
-				hx-post={ props.Href }
-			}
-			if props.Type == "PUT" {
-				hx-put={ props.Href }
-			}
-			hx-target="body"
-			hx-swap="beforeend"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			enctype="multipart/form-data"
+	if props.CloseDialog {
+		<script>
+			var dialog = document.querySelector(`dialog#{{ props.ID }}`);
+			dialog.close();
+			location.reload();
+	    </script>
+	} else {
+		<dialog
+			id={ props.ID }
+			class="fullscreen clean flex flex-col justify-center items-center"
+			onclose="this.parentElement.removeChild(this);"
 		>
-			if props.Error != "" {
-				<div class="card compact destructive">
-					<div class="card-body">
-						{ props.Error }
+			<form
+				class="flex flex-col gap"
+				if props.Type == "POST" {
+					hx-post={ props.Href }
+				}
+				if props.Type == "PUT" {
+					hx-put={ props.Href }
+				}
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				enctype="multipart/form-data"
+			>
+				if props.Error != "" {
+					<div class="card compact destructive">
+						<div class="card-body">
+							{ props.Error }
+						</div>
 					</div>
+				}
+				// Content
+				<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
+					{ children... }
 				</div>
-			}
-			// Content
-			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
-				{ children... }
-			</div>
-			<footer class="flex gap justify-end">
-				<button
-					name="close"
-					class="secondary flex gap"
-					type="button"
-					onclick="this.closest('dialog').close()"
-				>
-					<i class="bi bi-x-circle"></i>
-					Schließen
-				</button>
-				<button
-					type="submit"
-					class="flex gap"
-					onclick={ baseSubmitOnClickHandler(templ.JSExpression("event.currentTarget")) }
-				>
-					<i class="bi bi-check-circle"></i>
-					{ props.SubmitButtonText }
-				</button>
-			</footer>
-		</form>
-		<script defer>
-            document.querySelector('#{{ props.ID }}').showModal();
-        </script>
-	</dialog>
-}
-
-script baseSubmitOnClickHandler(e templ.JSExpression) {
-    try {
-        const form = e.closest("form");
-
-    	const requiredInputs = form.querySelectorAll(
-       	"input[required], select[required], textarea[required]");
-
-    	let allValid = true;
-
-    	requiredInputs.forEach(input => {
-    		if (!input.value.trim()) {
-    			allValid = false;
-    			input.focus();
-    			return;
-    		}
-    	});
-
-    	if (allValid) {
-    		e.closest("dialog").close();
-    	}
-    } catch (err) {
-        alert(`Dialog submit error: ${err}`)
-    }
+				<footer class="flex gap justify-end">
+					<button
+						name="close"
+						class="secondary flex gap"
+						type="button"
+						onclick="this.closest('dialog').close()"
+					>
+						<i class="bi bi-x-circle"></i>
+						Schließen
+					</button>
+					<button
+						type="submit"
+						class="flex gap"
+					>
+						<i class="bi bi-check-circle"></i>
+						{ props.SubmitButtonText }
+					</button>
+				</footer>
+			</form>
+			<script defer>
+                document.querySelector('#{{ props.ID }}').showModal();
+            </script>
+		</dialog>
+	}
 }

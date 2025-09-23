@@ -10,12 +10,14 @@ import (
 )
 
 type EditCycleProps struct {
-	Tool             *models.Tool
-	CycleID          int64
+	Tool    *models.Tool
+	CycleID int64
+
 	InputTotalCycles int64
 	InputPressNumber *models.PressNumber
 	OriginalDate     *time.Time
-	Tools            []*models.Tool
+
+	CloseDialog bool // Standalone prop
 }
 
 templ EditCycle(props *EditCycleProps) {
@@ -43,6 +45,7 @@ templ EditCycle(props *EditCycleProps) {
 		Href:             baseHref,
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: submitButtonText,
+		CloseDialog:      props.CloseDialog,
 	}) {
 		<!-- Display active tool information -->
 		if props.Tool != nil {
