@@ -50,7 +50,6 @@ templ CyclesSection(props *CyclesSectionProps) {
 		<table name="tool-cycles-table" class="table borderless compact">
 			<thead>
 				<tr>
-					<th name="id">ID</th>
 					<th name="press">Presse</th>
 					<th name="date">Datum</th>
 					<th name="tool">Werkzeug</th>
@@ -70,7 +69,7 @@ templ CyclesSection(props *CyclesSectionProps) {
 templ cyclesTableRows(props *CyclesSectionProps) {
 	if len(props.Cycles) == 0 {
 		<tr>
-			<td colspan="8" class="text-center">
+			<td colspan="7" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -89,9 +88,6 @@ templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cyc
 			style="color: var(--ui-muted);"
 		}
 	>
-		<td>
-			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
-		</td>
 		<td>
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>

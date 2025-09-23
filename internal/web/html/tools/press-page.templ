@@ -79,7 +79,6 @@ templ PressPage(props PressPageProps) {
 					<table name="additional-cycles-table" class="table borderless compact">
 						<thead>
 							<tr>
-								<th>ID</th>
 								<th>Datum</th>
 								<th>Werkzeug</th>
 								<th>Position</th>
@@ -101,7 +100,7 @@ templ PressPage(props PressPageProps) {
 templ renderCycles(props PressPageProps) {
 	if len(props.Cycles) == 0 {
 		<tr>
-			<td colspan="7" class="text-center">
+			<td colspan="6" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
@@ -114,10 +113,6 @@ templ renderCycles(props PressPageProps) {
 
 templ renderCycle(props PressPageProps, cycle *models.Cycle) {
 	<tr>
-		// Cycle ID
-		<td>
-			<span>{ fmt.Sprintf("%d", cycle.ID) }</span>
-		</td>
 		// Cycle Date
 		<td>
 			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
