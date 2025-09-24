@@ -37,6 +37,16 @@ templ CyclesSection(props *CyclesSectionProps) {
 			<i class="bi bi-plus-lg"></i>
 		</button>
 	</div>
+	<div class="card compact info">
+		<div class="card-body">
+			Sollte soweit alles stimmen, muss natürlich immer mal kontrolliert werden fürs Erste.
+			<br/>
+			Bei jeder Werkzeug-Regenerierung werden die Gesamtzyklen auf 0 zurückgesetzt.
+			<br/>
+			Die Werkzeuge, die noch nicht regeneriert wurden seit Bestehen dieser Liste, sind bei den Gesamtzyklen nicht zwingend vollständig.
+			<br/>
+		</div>
+	</div>
 	<section>
 		<h6 class="mb">
 			Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",

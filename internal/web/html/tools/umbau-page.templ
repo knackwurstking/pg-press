@@ -55,6 +55,11 @@ templ UmbauPage(props *UmbauPageProps) {
 		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
+			<div class="card compact info">
+				<div class="card-body">
+					In Bearbeitung
+				</div>
+			</div>
 			@toolsDataLists(props)
 			<form
 				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau",
