@@ -123,20 +123,41 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Create new session cookie
 	cookieValue := uuid.New().String()
+
+	// Only set Secure flag for HTTPS requests (PWA compatibility)
+	isHTTPS := ctx.Request().TLS != nil || ctx.Scheme() == "https"
+
+	// Use ServerPathPrefix or fallback to root for cookie path
+	cookiePath := env.ServerPathPrefix
+	if cookiePath == "" {
+		cookiePath = "/"
+	}
+
+	// Log cookie creation details for debugging PWA issues
+	h.LogDebug("Creating cookie for user %s from %s: HTTPS=%v, UserAgent='%s', Scheme='%s', Path='%s'",
+		user.Name, remoteIP, isHTTPS, userAgent, ctx.Scheme(), cookiePath)
+
 	cookie := &http.Cookie{
 		Name:     constants.CookieName,
 		Value:    cookieValue,
 		Expires:  time.Now().Add(constants.CookieExpirationDuration),
-		Path:     env.ServerPathPrefix,
+		Path:     cookiePath,
 		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+		Secure:   isHTTPS,
+		SameSite: http.SameSiteLaxMode,
 	}
 	ctx.SetCookie(cookie)
 
+	h.LogDebug("Cookie set successfully: Name=%s, Secure=%v, SameSite=%v, Path=%s, Expires=%v",
+		cookie.Name, cookie.Secure, cookie.SameSite, cookie.Path, cookie.Expires)
+
 	sessionCookie := models.NewCookie(userAgent, cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
+		h.LogError("Failed to store session cookie for user %s from %s: %v", user.Name, remoteIP, err)
 		return false
 	}
+
+	h.LogDebug("Session cookie stored in database for user %s", user.Name)
 
 	// Log security-relevant information
 	if user.IsAdmin() {

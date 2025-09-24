@@ -181,20 +181,31 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 	remoteIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
+		logger.Middleware().Debug("No cookie found for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
+	logger.Middleware().Debug("Found cookie for request from %s: expires=%v, secure=%v",
+		remoteIP, httpCookie.Expires, httpCookie.Secure)
+
 	cookie, err := db.Cookies.Get(httpCookie.Value)
 	if err != nil {
+		logger.Middleware().Debug("Cookie not found in database for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
+
+	logger.Middleware().Debug("Cookie found in database for request from %s: lastLogin=%d, userAgent='%s'",
+		remoteIP, cookie.LastLogin, cookie.UserAgent)
 
 	// Check if cookie has expired
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if cookie.LastLogin < expirationTime {
-		logger.Middleware().Debug("Expired cookie from %s", remoteIP)
+		logger.Middleware().Debug("Expired cookie from %s: lastLogin=%d, expirationTime=%d",
+			remoteIP, cookie.LastLogin, expirationTime)
 		return nil, utils.NewValidationError("cookie: cookie has expired")
 	}
+
+	logger.Middleware().Debug("Cookie is valid (not expired) for request from %s", remoteIP)
 
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
 	if err != nil {
@@ -202,10 +213,18 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}
 
+	logger.Middleware().Debug("User validated from cookie for request from %s: user=%s", remoteIP, user.Name)
+
 	// Log user agent mismatch as potential security concern
+	// Be more lenient for PWA compatibility - only log significant changes
 	requestUserAgent := ctx.Request().UserAgent()
 	if cookie.UserAgent != requestUserAgent {
-		logger.Middleware().Info("User agent changed for %s from %s", user.Name, remoteIP)
+		// Only log if the change seems significant (different browser/version, not just PWA vs browser mode)
+		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
+			logger.Middleware().Info("Significant user agent change for %s from %s", user.Name, remoteIP)
+		} else {
+			logger.Middleware().Debug("Minor user agent variation for %s from %s (likely PWA)", user.Name, remoteIP)
+		}
 	}
 
 	if slices.Contains(pages, ctx.Request().URL.Path) {
@@ -213,10 +232,58 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(constants.CookieExpirationDuration)
 
+		logger.Middleware().Debug("Updating cookie for page visit by user %s from %s: path=%s",
+			user.Name, remoteIP, ctx.Request().URL.Path)
+
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
 			logger.Middleware().Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
+		} else {
+			logger.Middleware().Debug("Cookie successfully updated for user %s from %s", user.Name, remoteIP)
 		}
 	}
 
+	logger.Middleware().Debug("Cookie validation successful for user %s from %s", user.Name, remoteIP)
 	return user, nil
+}
+
+// isMinorUserAgentChange checks if the user agent change is minor (e.g., PWA vs browser mode)
+// rather than a significant change (different browser/device)
+func isMinorUserAgentChange(originalUA, newUA string) bool {
+	if originalUA == newUA {
+		return true
+	}
+
+	// If either is empty, consider it a significant change
+	if originalUA == "" || newUA == "" {
+		return false
+	}
+
+	// Common PWA-related user agent variations that should be considered minor:
+	// - Addition or removal of "wv" (WebView)
+	// - Changes in Chrome version numbers
+	// - Addition/removal of PWA-specific identifiers
+
+	// Extract the core browser identifier (Chrome, Firefox, Safari, etc.)
+	originalCore := extractBrowserCore(originalUA)
+	newCore := extractBrowserCore(newUA)
+
+	// If the core browser is the same, consider it a minor change
+	return originalCore != "" && originalCore == newCore
+}
+
+// extractBrowserCore extracts the core browser identifier from a user agent string
+func extractBrowserCore(userAgent string) string {
+	// Look for common browser patterns
+	patterns := []string{
+		"Chrome/", "Firefox/", "Safari/", "Edge/", "Opera/",
+	}
+
+	for _, pattern := range patterns {
+		if pos := regexp.MustCompile(pattern).FindStringIndex(userAgent); pos != nil {
+			// Return the browser name without version
+			return pattern[:len(pattern)-1]
+		}
+	}
+
+	return ""
 }
