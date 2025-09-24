@@ -47,18 +47,22 @@ templ ToolStatusEdit(props *ToolStatusEditProps) {
 }
 
 templ toolStatusDisplay(tool *models.Tool) {
-	<div class="flex items-center gap-sm">
+	<div class="flex items-center gap-lg">
 		@ToolStatusBadge(tool)
 		<button
 			type="button"
-			class="small btn-ghost text-muted hover:text-primary transition-colors"
+			class="small ghost flex gap"
 			hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
 				env.ServerPathPrefix, tool.ID) }
 			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 			hx-swap="outerHTML"
 			title="Status bearbeiten"
+			if tool.IsActive() {
+				disabled
+			}
 		>
 			<i class="bi bi-pencil-square text-sm"></i>
+			Regenerierung
 		</button>
 	</div>
 }

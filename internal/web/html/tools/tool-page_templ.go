@@ -335,7 +335,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<section class=\"flex flex-col gap\"><h4>Werkzeugnutzung & Zyklen</h4><section class=\"status\"><div class=\"flex justify-between items-center mb\"><h5>Aktueller Status</h5></div><div class=\"flex gap justify-between items-center\"><span class=\"flex gap\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<section class=\"flex flex-col gap\"><h4>Werkzeugnutzung & Zyklen</h4><section class=\"status\"><div class=\"flex justify-between items-center mb\"><h5>Aktueller Status</h5></div><div class=\"flex gap justify-between items-center\"><span class=\"flex gap-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -347,7 +347,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			return templ_7745c5c3_Err
 		}
 		if tool.IsActive() {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a role=\"button\" class=\"btn btn-sm btn-outline\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a role=\"button\" class=\"small ghost flex gap\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
