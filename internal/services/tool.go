@@ -239,7 +239,14 @@ func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 }
 
 func (t *Tool) List() ([]*models.Tool, error) {
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools`
+	const query = `
+		SELECT
+			id, position, format, type, code, regenerating, press, notes
+		FROM
+			tools
+		ORDER BY format ASC, code ASC
+	`
+
 	rows, err := t.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("select error: tools: %v", err)
