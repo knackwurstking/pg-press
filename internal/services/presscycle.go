@@ -11,12 +11,11 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type PressCycle struct {
-	db    *sql.DB
-	feeds *Feed
+type PressCycles struct {
+	db *sql.DB
 }
 
-func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
+func NewPressCycles(db *sql.DB) *PressCycles {
 	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
 	//if _, err := db.Exec(dropQuery); err != nil {
 	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
@@ -44,14 +43,13 @@ func NewPressCycle(db *sql.DB, feeds *Feed) *PressCycle {
 		panic(fmt.Errorf("failed to create press_cycles table: %v", err))
 	}
 
-	return &PressCycle{
-		db:    db,
-		feeds: feeds,
+	return &PressCycles{
+		db: db,
 	}
 }
 
 // GetPartialCycles calculates the partial cycles for a given cycle
-func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
+func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	logger.DBPressCycles().Info(
 		"Getting partial cycles for press %d, tool %d, position %s",
 		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition,
@@ -94,7 +92,7 @@ func (s *PressCycle) GetPartialCycles(cycle *models.Cycle) int64 {
 }
 
 // Get retrieves a specific press cycle by its ID.
-func (p *PressCycle) Get(id int64) (*models.Cycle, error) {
+func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycle by id: %d", id)
 
 	query := `
@@ -117,7 +115,7 @@ func (p *PressCycle) Get(id int64) (*models.Cycle, error) {
 }
 
 // List retrieves all press cycles from the database, ordered by ID descending.
-func (p *PressCycle) List() ([]*models.Cycle, error) {
+func (p *PressCycles) List() ([]*models.Cycle, error) {
 	logger.DBPressCycles().Debug("Listing all press cycles")
 
 	query := `
@@ -136,7 +134,7 @@ func (p *PressCycle) List() ([]*models.Cycle, error) {
 }
 
 // Add creates a new press cycle entry in the database.
-func (p *PressCycle) Add(cycle *models.Cycle, user *models.User) (int64, error) {
+func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
 	logger.DBPressCycles().Info(
 		"Adding new cycle: tool_id=%d, tool_position=%s, press_number=%d, total_cycles=%d",
 		cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
@@ -169,24 +167,11 @@ func (p *PressCycle) Add(cycle *models.Cycle, user *models.User) (int64, error) 
 	}
 	cycle.ID = id
 
-	// Create feed entry
-	// Trigger feed update
-	if p.feeds != nil {
-		feed := models.NewFeed(
-			"Neuer Pressenzyklus",
-			fmt.Sprintf("Benutzer %s hat einen neuen Pressenzyklus mit %d Zyklen hinzugefügt.", user.Name, cycle.TotalCycles),
-			user.TelegramID,
-		)
-		if err := p.feeds.Add(feed); err != nil {
-			logger.DBPressCycles().Error("Failed to add feed for new press cycle: %v", err)
-		}
-	}
-
 	return id, nil
 }
 
 // Update modifies an existing press cycle entry.
-func (p *PressCycle) Update(cycle *models.Cycle, user *models.User) error {
+func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 	logger.DBPressCycles().Info("Updating press cycle: id=%d", cycle.ID)
 
 	if cycle.Date.IsZero() {
@@ -221,24 +206,11 @@ func (p *PressCycle) Update(cycle *models.Cycle, user *models.User) error {
 		return utils.NewNotFoundError(fmt.Sprintf("Pressenzyklus mit ID %d nicht gefunden", cycle.ID))
 	}
 
-	// Create feed entry
-	// Trigger feed update
-	if p.feeds != nil {
-		feed := models.NewFeed(
-			"Pressenzyklus aktualisiert",
-			fmt.Sprintf("Benutzer %s hat den Pressenzyklus auf %d Zyklen aktualisiert.", user.Name, cycle.TotalCycles),
-			user.TelegramID,
-		)
-		if err := p.feeds.Add(feed); err != nil {
-			logger.DBPressCycles().Error("Failed to add feed for updated press cycle: %v", err)
-		}
-	}
-
 	return nil
 }
 
 // Delete removes a press cycle from the database.
-func (p *PressCycle) Delete(id int64, user *models.User) error {
+func (p *PressCycles) Delete(id int64, user *models.User) error {
 	logger.DBPressCycles().Info("Deleting press cycle: id=%d", id)
 
 	// No need to get cycle data for simplified feed system
@@ -260,24 +232,11 @@ func (p *PressCycle) Delete(id int64, user *models.User) error {
 		return utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
 	}
 
-	// Create feed entry
-	// Trigger feed update
-	if p.feeds != nil {
-		feed := models.NewFeed(
-			"Pressenzyklus entfernt",
-			fmt.Sprintf("Benutzer %s hat den Pressenzyklus entfernt.", user.Name),
-			user.TelegramID,
-		)
-		if err := p.feeds.Add(feed); err != nil {
-			logger.DBPressCycles().Error("Failed to add feed for deleted press cycle: %v", err)
-		}
-	}
-
 	return nil
 }
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
-func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
+func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
 	logger.DBPressCycles().Info("Getting press cycles for tool: tool_id=%d", toolID)
 
 	query := `
@@ -306,7 +265,7 @@ func (s *PressCycle) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error
 }
 
 // GetPressCycles gets all press cycles (current and historical) for a specific press
-func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
+func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
 	logger.DBPressCycles().Debug("Getting press cycles: press_number=%d, limit=%v, offset=%v", pressNumber, limit, offset)
 
 	if !models.IsValidPressNumber(&pressNumber) {
@@ -364,7 +323,7 @@ func (s *PressCycle) GetPressCycles(pressNumber models.PressNumber, limit *int, 
 }
 
 // scanPressCyclesRows scans multiple press cycles from sql.Rows (without partial_cycles)
-func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
+func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
 	// Scanning cycles
 	cycles := make([]*models.Cycle, 0)
 	for rows.Next() {
@@ -389,7 +348,7 @@ func (p *PressCycle) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error
 	return cycles, nil
 }
 
-func (p *PressCycle) scanPressCycle(scanner interfaces.Scannable) (*models.Cycle, error) {
+func (p *PressCycles) scanPressCycle(scanner interfaces.Scannable) (*models.Cycle, error) {
 	cycle := &models.Cycle{}
 	var performedBy sql.NullInt64
 
