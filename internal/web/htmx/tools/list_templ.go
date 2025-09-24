@@ -101,7 +101,7 @@ func toolListItem(id int64, tool *models.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"ghost contrast flex justify-between items-center flex gap justify-between\"><span class=\"flex gap-sm w-full\"><span class=\"flex flex-col gap-sm\"><span class=\"text-sm text-normal\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"ghost contrast flex gap justify-between items-center\"><span class=\"flex gap-sm w-full\"><span class=\"flex flex-col gap-sm\"><span class=\"text-sm text-normal\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -157,14 +157,12 @@ func toolListItem(id int64, tool *models.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.PositionBadge(tool.Position, "muted text-bold").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.PositionBadge(
+			tool.Position, "muted text-bold").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ToolStatusEdit(&ToolStatusEditProps{
-			Tool:     tool.Tool,
-			Editable: false,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ToolStatusBadge(tool.Tool).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -178,7 +176,7 @@ func toolListItem(id int64, tool *models.ToolWithNotes) templ.Component {
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/list.templ`, Line: 51, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/list.templ`, Line: 49, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {

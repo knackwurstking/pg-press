@@ -139,25 +139,27 @@ templ sectionCycles(tool *models.ToolWithNotes) {
 			<div class="flex justify-between items-center mb">
 				<h5>Aktueller Status</h5>
 			</div>
-			<div class="flex items-center gap">
-				@tools.ToolStatusEdit(&tools.ToolStatusEditProps{
-					Tool:     tool.Tool,
-					Editable: false,
-				})
-				if tool.Status() == models.StatusActive && tool.Press != nil {
-					<a
-						role="button"
-						class="btn btn-sm btn-outline"
-						href={ fmt.Sprintf(
+			<div class="flex gap justify-between items-center">
+				<span class="flex gap">
+					@tools.ToolStatusEdit(&tools.ToolStatusEditProps{
+						Tool:     tool.Tool,
+						Editable: false,
+					})
+					if tool.IsActive() {
+						<a
+							role="button"
+							class="btn btn-sm btn-outline"
+							href={ fmt.Sprintf(
 							"%s/tools/press/%d",
 							env.ServerPathPrefix, *tool.Press,
 						) }
-						title="Zur Pressenübersicht"
-					>
-						<i class="bi bi-arrow-right"></i>
-						Presse { fmt.Sprintf("%d", *tool.Press) }
-					</a>
-				}
+							title="Zur Pressenübersicht"
+						>
+							<i class="bi bi-arrow-right"></i>
+							Presse { fmt.Sprintf("%d", *tool.Press) }
+						</a>
+					}
+				</span>
 			</div>
 		</section>
 		<section

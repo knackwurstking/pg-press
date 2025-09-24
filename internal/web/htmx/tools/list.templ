@@ -28,7 +28,7 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 		<a
 			role="button"
 			href={ fmt.Sprintf(env.ServerPathPrefix+"/tools/tool/%d", id) }
-			class="ghost contrast flex justify-between items-center flex gap justify-between"
+			class="ghost contrast flex gap justify-between items-center"
 		>
 			<span class="flex gap-sm w-full">
 				<span class="flex flex-col gap-sm">
@@ -36,11 +36,9 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 						{ tool.Format.Width }x{ tool.Format.Height } { tool.Code } { tool.Type }
 					</span>
 					<span class="flex flex-row gap items center">
-						@components.PositionBadge(tool.Position, "muted text-bold")
-						@ToolStatusEdit(&ToolStatusEditProps{
-							Tool:     tool.Tool,
-							Editable: false,
-						})
+						@components.PositionBadge(
+							tool.Position, "muted text-bold")
+						@ToolStatusBadge(tool.Tool)
 					</span>
 				</span>
 				<span
