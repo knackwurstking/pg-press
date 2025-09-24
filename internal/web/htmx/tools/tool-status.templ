@@ -162,7 +162,8 @@ templ toolStatusEditForm(tool *models.Tool) {
 			<button
 				type="button"
 				class="btn btn-sm secondary flex-1 font-medium"
-				hx-get={ fmt.Sprintf("%s/htmx/tools/status-display?id=%d", env.ServerPathPrefix, tool.ID) }
+				hx-get={ fmt.Sprintf("%s/htmx/tools/status-display?id=%d",
+					env.ServerPathPrefix, tool.ID) }
 				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 				hx-swap="outerHTML"
 			>
