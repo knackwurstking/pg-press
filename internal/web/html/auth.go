@@ -71,7 +71,7 @@ func (h *Auth) HandleLogout(c echo.Context) error {
 
 	// Try to get user info before logout for better logging
 	user, err := h.GetUserFromContext(c)
-	if err == nil {
+	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
