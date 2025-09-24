@@ -212,6 +212,11 @@ func (h *Tools) DeleteTool(c echo.Context) error {
 }
 
 func (h *Tools) GetStatusEdit(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
 	toolID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
@@ -222,7 +227,7 @@ func (h *Tools) GetStatusEdit(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	statusEdit := h.renderStatusComponent(tool, true)
+	statusEdit := h.renderStatusComponent(tool, true, user)
 	if err := statusEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tool status edit: "+err.Error())
 	}
@@ -231,6 +236,11 @@ func (h *Tools) GetStatusEdit(c echo.Context) error {
 }
 
 func (h *Tools) GetStatusDisplay(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
 	toolID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
@@ -241,7 +251,7 @@ func (h *Tools) GetStatusDisplay(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	statusDisplay := h.renderStatusComponent(tool, false)
+	statusDisplay := h.renderStatusComponent(tool, false, user)
 	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tool status display: "+err.Error())
 	}
@@ -333,7 +343,7 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get updated tool from database")
 	}
 
-	statusDisplay := h.renderStatusComponent(updatedTool, false)
+	statusDisplay := h.renderStatusComponent(updatedTool, false, user)
 	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render updated tool status: "+err.Error())
 	}
@@ -341,10 +351,11 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool) templ.Component {
+func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
 	return ToolStatusEdit(&ToolStatusEditProps{
-		Tool:     tool,
-		Editable: editable,
+		Tool:              tool,
+		Editable:          editable,
+		UserHasPermission: user.IsAdmin(),
 	})
 }
 

@@ -71,8 +71,9 @@ func ToolStatusBadge(tool *models.Tool) templ.Component {
 }
 
 type ToolStatusEditProps struct {
-	Tool     *models.Tool
-	Editable bool
+	Tool              *models.Tool
+	Editable          bool
+	UserHasPermission bool
 }
 
 func ToolStatusEdit(props *ToolStatusEditProps) templ.Component {
@@ -103,7 +104,7 @@ func ToolStatusEdit(props *ToolStatusEditProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tool-status-%d", props.Tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 37, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 38, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -119,7 +120,7 @@ func ToolStatusEdit(props *ToolStatusEditProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = toolStatusDisplay(props.Tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = toolStatusDisplay(props.Tool, props.UserHasPermission).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -132,7 +133,7 @@ func ToolStatusEdit(props *ToolStatusEditProps) templ.Component {
 	})
 }
 
-func toolStatusDisplay(tool *models.Tool) templ.Component {
+func toolStatusDisplay(tool *models.Tool, editable bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -161,34 +162,44 @@ func toolStatusDisplay(tool *models.Tool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button type=\"button\" class=\"btn btn-sm btn-ghost text-muted hover:text-primary transition-colors\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button type=\"button\" class=\"btn btn-sm btn-ghost text-muted hover:text-primary transition-colors\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
-			env.ServerPathPrefix, tool.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 55, Col: 34}
+		if editable {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
+				env.ServerPathPrefix, tool.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 57, Col: 34}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-target=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 58, Col: 55}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-swap=\"outerHTML\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 56, Col: 54}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-swap=\"outerHTML\" title=\"Status bearbeiten\"><i class=\"bi bi-pencil-square text-sm\"></i></button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " title=\"Status bearbeiten\"><i class=\"bi bi-pencil-square text-sm\"></i></button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -218,76 +229,76 @@ func toolStatusEditForm(tool *models.Tool) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<form class=\"card p-sm flex flex-col gap-sm\" hx-put=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<form class=\"card p-sm flex flex-col gap-sm\" hx-put=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 69, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 72, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 70, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 73, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"tool_id\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"tool_id\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 73, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 76, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><div class=\"flex flex-col gap-xs\"><label for=\"status\" class=\"text-sm font-semibold text-muted\">Status:</label> <select name=\"status\" id=\"status\" class=\"form-control\"><option value=\"available\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><div class=\"flex flex-col gap-xs\"><label for=\"status\" class=\"text-sm font-semibold text-muted\">Status:</label> <select name=\"status\" id=\"status\" class=\"form-control\"><option value=\"available\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tool.Status() == models.StatusAvailable {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " selected")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ">Verfügbar</option> <option value=\"active\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if tool.Status() == models.StatusActive {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, ">Eingebaut</option> <option value=\"regenerating\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, ">Verfügbar</option> <option value=\"active\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Status() == models.StatusRegenerating {
+		if tool.Status() == models.StatusActive {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">Regenerierung</option></select></div><div class=\"flex flex-col gap-xs press-selection\" style=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">Eingebaut</option> <option value=\"regenerating\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if tool.Status() == models.StatusRegenerating {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">Regenerierung</option></select></div><div class=\"flex flex-col gap-xs press-selection\" style=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -299,63 +310,63 @@ func toolStatusEditForm(tool *models.Tool) templ.Component {
 			return "none"
 		}()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 110, Col: 7}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 113, Col: 7}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"><label for=\"press\" class=\"text-sm font-semibold text-muted\">Presse:</label> <select name=\"press\" id=\"press\" class=\"form-control\"><option value=\"\">Nicht zugewiesen</option> <option value=\"0\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"><label for=\"press\" class=\"text-sm font-semibold text-muted\">Presse:</label> <select name=\"press\" id=\"press\" class=\"form-control\"><option value=\"\">Nicht zugewiesen</option> <option value=\"0\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if tool.Press != nil && *tool.Press == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, " selected")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, ">Presse 0</option> <option value=\"2\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if tool.Press != nil && *tool.Press == 2 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, ">Presse 2</option> <option value=\"3\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, ">Presse 0</option> <option value=\"2\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Press != nil && *tool.Press == 3 {
+		if tool.Press != nil && *tool.Press == 2 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, ">Presse 3</option> <option value=\"4\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, ">Presse 2</option> <option value=\"3\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Press != nil && *tool.Press == 4 {
+		if tool.Press != nil && *tool.Press == 3 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, ">Presse 4</option> <option value=\"5\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, ">Presse 3</option> <option value=\"4\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Press != nil && *tool.Press == 5 {
+		if tool.Press != nil && *tool.Press == 4 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, ">Presse 5</option></select></div><div class=\"flex gap-sm mt-sm\"><button type=\"submit\" class=\"btn btn-sm primary flex-1 font-medium\"><i class=\"bi bi-check\"></i> Speichern</button> <button type=\"button\" class=\"btn btn-sm secondary flex-1 font-medium\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, ">Presse 4</option> <option value=\"5\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if tool.Press != nil && *tool.Press == 5 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, ">Presse 5</option></select></div><div class=\"flex gap-sm mt-sm\"><button type=\"submit\" class=\"btn btn-sm primary flex-1 font-medium\"><i class=\"bi bi-check\"></i> Speichern</button> <button type=\"button\" class=\"btn btn-sm secondary flex-1 font-medium\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -363,26 +374,26 @@ func toolStatusEditForm(tool *models.Tool) templ.Component {
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status-display?id=%d",
 			env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 166, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 169, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" hx-target=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" hx-target=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 167, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/htmx/tools/tool-status.templ`, Line: 170, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" hx-swap=\"outerHTML\"><i class=\"bi bi-x\"></i> Abbrechen</button></div></form><script>\n\t\t// Function to show/hide press selection based on status\n\t\tfunction togglePressSelection(statusValue) {\n\t\t\tconst pressDiv = document.querySelector('.press-selection');\n\t\t\tif (pressDiv) {\n\t\t\t\tif (statusValue === 'active') {\n\t\t\t\t\tpressDiv.style.display = 'flex';\n\t\t\t\t} else {\n\t\t\t\t\tpressDiv.style.display = 'none';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Initialize immediately (no need to wait for DOMContentLoaded since script is inline)\n\t\tconst statusSelect = document.getElementById('status');\n\t\tif (statusSelect) {\n\t\t\t// Set initial state\n\t\t\ttogglePressSelection(statusSelect.value);\n\n\t\t\t// Add change listener\n\t\t\tstatusSelect.addEventListener('change', function() {\n\t\t\t\ttogglePressSelection(this.value);\n\t\t\t});\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" hx-swap=\"outerHTML\"><i class=\"bi bi-x\"></i> Abbrechen</button></div></form><script>\n\t\t// Function to show/hide press selection based on status\n\t\tfunction togglePressSelection(statusValue) {\n\t\t\tconst pressDiv = document.querySelector('.press-selection');\n\t\t\tif (pressDiv) {\n\t\t\t\tif (statusValue === 'active') {\n\t\t\t\t\tpressDiv.style.display = 'flex';\n\t\t\t\t} else {\n\t\t\t\t\tpressDiv.style.display = 'none';\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Initialize immediately (no need to wait for DOMContentLoaded since script is inline)\n\t\tconst statusSelect = document.getElementById('status');\n\t\tif (statusSelect) {\n\t\t\t// Set initial state\n\t\t\ttogglePressSelection(statusSelect.value);\n\n\t\t\t// Add change listener\n\t\t\tstatusSelect.addEventListener('change', function() {\n\t\t\t\ttogglePressSelection(this.value);\n\t\t\t});\n\t\t}\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

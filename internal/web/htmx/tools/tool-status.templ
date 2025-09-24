@@ -28,8 +28,9 @@ templ ToolStatusBadge(tool *models.Tool) {
 }
 
 type ToolStatusEditProps struct {
-	Tool     *models.Tool
-	Editable bool
+	Tool              *models.Tool
+	Editable          bool
+	UserHasPermission bool
 }
 
 templ ToolStatusEdit(props *ToolStatusEditProps) {
@@ -40,21 +41,23 @@ templ ToolStatusEdit(props *ToolStatusEditProps) {
 		if props.Editable {
 			@toolStatusEditForm(props.Tool)
 		} else {
-			@toolStatusDisplay(props.Tool)
+			@toolStatusDisplay(props.Tool, props.UserHasPermission)
 		}
 	</div>
 }
 
-templ toolStatusDisplay(tool *models.Tool) {
+templ toolStatusDisplay(tool *models.Tool, editable bool) {
 	<div class="flex items-center gap-sm">
 		@ToolStatusBadge(tool)
 		<button
 			type="button"
 			class="btn btn-sm btn-ghost text-muted hover:text-primary transition-colors"
-			hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
+			if editable {
+				hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
 				env.ServerPathPrefix, tool.ID) }
-			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
-			hx-swap="outerHTML"
+				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+				hx-swap="outerHTML"
+			}
 			title="Status bearbeiten"
 		>
 			<i class="bi bi-pencil-square text-sm"></i>

@@ -69,7 +69,7 @@ func ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mode
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = sectionCycles(tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = sectionCycles(tool, user).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -314,7 +314,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 	})
 }
 
-func sectionCycles(tool *models.ToolWithNotes) templ.Component {
+func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -340,8 +340,8 @@ func sectionCycles(tool *models.ToolWithNotes) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = tools.ToolStatusEdit(&tools.ToolStatusEditProps{
-			Tool:     tool.Tool,
-			Editable: false,
+			Tool:              tool.Tool,
+			UserHasPermission: user.IsAdmin(),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

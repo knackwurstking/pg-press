@@ -24,7 +24,7 @@ templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mod
 			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 				@sectionMetalSheets(user, metalSheets, tool)
 			}
-			@sectionCycles(tool)
+			@sectionCycles(tool, user)
 		</main>
 	}
 }
@@ -132,7 +132,7 @@ templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, to
 	</section>
 }
 
-templ sectionCycles(tool *models.ToolWithNotes) {
+templ sectionCycles(tool *models.ToolWithNotes, user *models.User) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section class="status">
@@ -142,8 +142,8 @@ templ sectionCycles(tool *models.ToolWithNotes) {
 			<div class="flex gap justify-between items-center">
 				<span class="flex gap">
 					@tools.ToolStatusEdit(&tools.ToolStatusEditProps{
-						Tool:     tool.Tool,
-						Editable: false,
+						Tool:              tool.Tool,
+						UserHasPermission: user.IsAdmin(),
 					})
 					if tool.IsActive() {
 						<a
