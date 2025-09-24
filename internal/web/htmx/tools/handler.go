@@ -287,54 +287,28 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 
 	h.LogInfo("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
 
-	// Handle status change
+	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":
+		// Start regeneration
 		if err := h.DB.Tools.UpdateRegenerating(toolID, true, user); err != nil {
-			return h.HandleError(c, err, "failed to update tool regenerating status")
-		}
-		// Clear press assignment when regenerating
-		if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
-			return h.HandleError(c, err, "failed to clear press assignment")
-		}
-
-	case "available":
-		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-			return h.HandleError(c, err, "failed to update tool regenerating status")
-		}
-		// Clear press assignment when making available
-		if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
-			return h.HandleError(c, err, "failed to clear press assignment")
+			return h.HandleError(c, err, "failed to start tool regeneration")
 		}
 
 	case "active":
+		// Stop regeneration (return to active status)
 		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-			return h.HandleError(c, err, "failed to update tool regenerating status")
+			return h.HandleError(c, err, "failed to stop tool regeneration")
 		}
 
-		// Handle press assignment for active status
-		pressStr := c.FormValue("press")
-		if pressStr != "" {
-			press, err := strconv.Atoi(pressStr)
-			if err != nil {
-				return h.RenderBadRequest(c, "invalid press number: "+err.Error())
-			}
-			pn := models.PressNumber(press)
-			if !models.IsValidPressNumber(&pn) {
-				return h.RenderBadRequest(c, "invalid press number: must be 0, 2, 3, 4, or 5")
-			}
-			if err := h.DB.Tools.UpdatePress(toolID, &pn, user); err != nil {
-				return h.HandleError(c, err, "failed to assign tool to press")
-			}
-		} else {
-			// If no press specified for active status, clear it
-			if err := h.DB.Tools.UpdatePress(toolID, nil, user); err != nil {
-				return h.HandleError(c, err, "failed to clear press assignment")
-			}
+	case "abort":
+		// Abort regeneration (remove regeneration record and set status to false)
+		if err := h.DB.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
+			return h.HandleError(c, err, "failed to abort tool regeneration")
 		}
 
 	default:
-		return h.RenderBadRequest(c, "invalid status: "+statusStr)
+		return h.RenderBadRequest(c, "invalid status: must be 'regenerating', 'active', or 'abort'")
 	}
 
 	// Get updated tool and render status display

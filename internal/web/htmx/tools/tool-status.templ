@@ -39,25 +39,23 @@ templ ToolStatusEdit(props *ToolStatusEditProps) {
 		class="flex flex-col gap-sm"
 	>
 		if props.Editable {
-			@toolStatusEditForm(props.Tool)
+			@toolStatusEditForm(props.Tool, props.UserHasPermission)
 		} else {
-			@toolStatusDisplay(props.Tool, props.UserHasPermission)
+			@toolStatusDisplay(props.Tool)
 		}
 	</div>
 }
 
-templ toolStatusDisplay(tool *models.Tool, editable bool) {
+templ toolStatusDisplay(tool *models.Tool) {
 	<div class="flex items-center gap-sm">
 		@ToolStatusBadge(tool)
 		<button
 			type="button"
-			class="btn btn-sm btn-ghost text-muted hover:text-primary transition-colors"
-			if editable {
-				hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
+			class="small btn-ghost text-muted hover:text-primary transition-colors"
+			hx-get={ fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
 				env.ServerPathPrefix, tool.ID) }
-				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
-				hx-swap="outerHTML"
-			}
+			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+			hx-swap="outerHTML"
 			title="Status bearbeiten"
 		>
 			<i class="bi bi-pencil-square text-sm"></i>
@@ -65,106 +63,73 @@ templ toolStatusDisplay(tool *models.Tool, editable bool) {
 	</div>
 }
 
-// TODO: Change this component to only handle the regeneration state, start and stop, where stop will set the state back to active
-templ toolStatusEditForm(tool *models.Tool) {
-	<form
-		class="card p-sm flex flex-col gap-sm"
-		hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
-		hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
-		hx-swap="outerHTML"
-	>
-		<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
-		<div class="flex flex-col gap-xs">
-			<label for="status" class="text-sm font-semibold text-muted">Status:</label>
-			<select name="status" id="status" class="form-control">
-				<option
-					value="available"
-					if tool.Status() == models.StatusAvailable {
-						selected
-					}
-				>
-					Verfügbar
-				</option>
-				<option
-					value="active"
-					if tool.Status() == models.StatusActive {
-						selected
-					}
-				>
-					Eingebaut
-				</option>
-				<option
-					value="regenerating"
-					if tool.Status() == models.StatusRegenerating {
-						selected
-					}
-				>
-					Regenerierung
-				</option>
-			</select>
+templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
+	<div class="card p-sm flex flex-col gap-sm">
+		<div class="flex items-center gap-sm mb-sm">
+			@ToolStatusBadge(tool)
+			<span class="text-sm text-muted">Regenerierung steuern</span>
 		</div>
-		<div
-			class="flex flex-col gap-xs press-selection"
-			style={ fmt.Sprintf("display: %s", func() string {
-				if tool.Status() == models.StatusActive {
-					return "flex"
-				}
-				return "none"
-			}()) }
-		>
-			<label for="press" class="text-sm font-semibold text-muted">Presse:</label>
-			<select name="press" id="press" class="form-control">
-				<option value="">Nicht zugewiesen</option>
-				<option
-					value="0"
-					if tool.Press != nil && *tool.Press == 0 {
-						selected
-					}
+		<div class="flex flex-col gap-sm">
+			if tool.Status() != models.StatusRegenerating {
+				<form
+					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+					hx-swap="outerHTML"
 				>
-					Presse 0
-				</option>
-				<option
-					value="2"
-					if tool.Press != nil && *tool.Press == 2 {
-						selected
-					}
+					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+					<input type="hidden" name="status" value="regenerating"/>
+					<button
+						type="submit"
+						class="small warning w-full m-0 flex gap"
+						if !userHasPermission {
+							disabled
+						}
+					>
+						<i class="bi bi-arrow-clockwise"></i>
+						Regenerierung starten
+					</button>
+				</form>
+			} else {
+				<form
+					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+					hx-swap="outerHTML"
 				>
-					Presse 2
-				</option>
-				<option
-					value="3"
-					if tool.Press != nil && *tool.Press == 3 {
-						selected
-					}
+					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+					<input type="hidden" name="status" value="active"/>
+					<button
+						type="submit"
+						class="small success w-full m-0 flex gap"
+						if !userHasPermission {
+							disabled
+						}
+					>
+						<i class="bi bi-sign-stop"></i>
+						Regenerierung stoppen
+					</button>
+				</form>
+				<form
+					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+					hx-swap="outerHTML"
 				>
-					Presse 3
-				</option>
-				<option
-					value="4"
-					if tool.Press != nil && *tool.Press == 4 {
-						selected
-					}
-				>
-					Presse 4
-				</option>
-				<option
-					value="5"
-					if tool.Press != nil && *tool.Press == 5 {
-						selected
-					}
-				>
-					Presse 5
-				</option>
-			</select>
-		</div>
-		<div class="flex gap-sm mt-sm">
-			<button type="submit" class="btn btn-sm primary flex-1 font-medium">
-				<i class="bi bi-check"></i>
-				Speichern
-			</button>
+					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+					<input type="hidden" name="status" value="abort"/>
+					<button
+						type="submit"
+						class="small destructive w-full m-0 flex gap"
+						if !userHasPermission {
+							disabled
+						}
+					>
+						<i class="bi bi-trash"></i>
+						Regenerierung Abbrechen
+					</button>
+				</form>
+			}
 			<button
 				type="button"
-				class="btn btn-sm secondary flex-1 font-medium"
+				class="small secondary flex gap"
 				hx-get={ fmt.Sprintf("%s/htmx/tools/status-display?id=%d",
 					env.ServerPathPrefix, tool.ID) }
 				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
@@ -174,30 +139,5 @@ templ toolStatusEditForm(tool *models.Tool) {
 				Abbrechen
 			</button>
 		</div>
-	</form>
-	<script>
-		// Function to show/hide press selection based on status
-		function togglePressSelection(statusValue) {
-			const pressDiv = document.querySelector('.press-selection');
-			if (pressDiv) {
-				if (statusValue === 'active') {
-					pressDiv.style.display = 'flex';
-				} else {
-					pressDiv.style.display = 'none';
-				}
-			}
-		}
-
-		// Initialize immediately (no need to wait for DOMContentLoaded since script is inline)
-		const statusSelect = document.getElementById('status');
-		if (statusSelect) {
-			// Set initial state
-			togglePressSelection(statusSelect.value);
-
-			// Add change listener
-			statusSelect.addEventListener('change', function() {
-				togglePressSelection(this.value);
-			});
-		}
-	</script>
+	</div>
 }

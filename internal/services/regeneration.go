@@ -185,6 +185,38 @@ func (r *Regeneration) StopToolRegeneration(toolID int64, user *models.User) err
 	return nil
 }
 
+// AbortToolRegeneration aborts the tool regeneration process and removes the regeneration record
+func (r *Regeneration) AbortToolRegeneration(toolID int64, user *models.User) error {
+	logger.DBRegenerations().Info("Aborting tool regeneration: tool_id=%d", toolID)
+
+	if toolID <= 0 {
+		return errors.New("invalid tool ID")
+	}
+
+	// First, get the last regeneration record to delete it
+	lastRegen, err := r.GetLastRegeneration(toolID)
+	if err != nil {
+		logger.DBRegenerations().Warn("No regeneration record found to abort for tool_id=%d: %v", toolID, err)
+		// Continue with status update even if no record found
+	} else {
+		// Delete the regeneration record
+		logger.DBRegenerations().Debug("Deleting regeneration record: id=%d", lastRegen.ID)
+		if err := r.Delete(lastRegen.ID); err != nil {
+			logger.DBRegenerations().Error("Failed to delete regeneration record: id=%d, error=%v", lastRegen.ID, err)
+			return fmt.Errorf("failed to delete regeneration record: %v", err)
+		}
+	}
+
+	// Set the tool's regeneration status to false
+	logger.DBRegenerations().Debug("Undoing tool regeneration status: tool_id=%d", toolID)
+	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
+		return fmt.Errorf("failed to update tool regeneration status: %v", err)
+	}
+
+	logger.DBRegenerations().Info("Tool regeneration aborted: tool_id=%d", toolID)
+	return nil
+}
+
 // GetLastRegeneration gets the most recent regeneration for a tool
 func (r *Regeneration) GetLastRegeneration(toolID int64) (*models.Regeneration, error) {
 	logger.DBRegenerations().Info("Getting last regeneration for tool: tool_id=%d", toolID)
