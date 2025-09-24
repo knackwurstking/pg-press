@@ -1,0 +1,60 @@
+package components
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+templ FeedsList(feeds []*models.Feed, lastFeedID int64, userMap map[int64]*models.User) {
+	if len(feeds) > 0 {
+		<ul id="data">
+			for _, feed := range feeds {
+				<section style="position: relative;">
+					if feed.ID > lastFeedID {
+						<div style="position: absolute; top: 8px; right: 8px; z-index: 10;">
+							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
+						</div>
+					}
+					@RenderFeed(feed, userMap)
+				</section>
+			}
+		</ul>
+	} else {
+		<span id="data"></span>
+	}
+}
+
+templ RenderFeed(feed *models.Feed, userMap map[int64]*models.User) {
+	<article id={ fmt.Sprintf("feed-%d", feed.ID) } class="card" data-id={ fmt.Sprintf("%d", feed.ID) } data-time={ fmt.Sprintf("%d", feed.CreatedAt) }>
+		<div style="margin-bottom: var(--ui-spacing);" class="card-body">
+			<div class="feed-item">
+				<div class="feed-item-content" style="padding: var(--ui-spacing);">
+					<h5 class="feed-title" style="margin-bottom: 0.5rem; font-weight: bold;">
+						{ feed.Title }
+					</h5>
+					<div class="feed-content" style="margin-bottom: 0.5rem;">
+						@templ.Raw(
+							strings.ReplaceAll(
+								templ.EscapeString(feed.Content), "\n", "<br/>",
+							),
+						)
+					</div>
+					<small class="feed-user" style="color: var(--ui-text-muted);">
+						{{ user, ok := userMap[feed.UserID] }}
+						if ok {
+							Von Benutzer: { user.Name }
+						} else {
+							Von Benutzer ID: { feed.UserID }
+						}
+					</small>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer">
+			<small style="float: right;">{ time.UnixMilli(feed.CreatedAt).Format("2006-01-02 15:04:05") }</small>
+		</div>
+	</article>
+}

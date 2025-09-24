@@ -12,7 +12,6 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/htmx/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -121,7 +120,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 36, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 35, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -137,7 +136,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 50, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 49, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -216,7 +215,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 88, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 87, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -229,7 +228,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 92, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 91, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -280,7 +279,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 110, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 109, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -339,7 +338,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = tools.ToolStatusEdit(&tools.ToolStatusEditProps{
+		templ_7745c5c3_Err = components.ToolStatusEdit(&components.ToolStatusEditProps{
 			Tool:              tool.Tool,
 			UserHasPermission: user.IsAdmin(),
 		}).Render(ctx, templ_7745c5c3_Buffer)
@@ -357,7 +356,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 				env.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 155, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 154, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -370,7 +369,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 159, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 158, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -391,7 +390,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 170, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/html/tools/tool-page.templ`, Line: 169, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {

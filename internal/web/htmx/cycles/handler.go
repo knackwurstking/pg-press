@@ -19,6 +19,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type EditFormData struct {
+	TotalCycles  int64 // TotalCycles form field name "total_cycles"
+	PressNumber  *models.PressNumber
+	Date         time.Time // OriginalDate form field name "original_date"
+	Regenerating bool
+}
+
 type Cycles struct {
 	*handlers.BaseHandler
 }
@@ -91,7 +98,7 @@ func (h *Cycles) GetSection(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	cyclesSection := CyclesSection(&CyclesSectionProps{
+	cyclesSection := components.CyclesSection(&components.CyclesSectionProps{
 		User:             user,
 		Tool:             tool,
 		TotalCycles:      totalCycles,
@@ -353,8 +360,8 @@ func (h *Cycles) getToolFromQuery(c echo.Context) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (h *Cycles) getCycleFormData(c echo.Context) (*CycleEditFormData, error) {
-	form := &CycleEditFormData{}
+func (h *Cycles) getCycleFormData(c echo.Context) (*EditFormData, error) {
+	form := &EditFormData{}
 
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)

@@ -1,0 +1,145 @@
+package profile
+
+import (
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+templ ProfilePage(user *models.User) {
+	@layouts.Main(
+		layouts.MainOptions{
+			PageTitle:   "PG Presse | Profil",
+			AppBarTitle: "Profil",
+			NavContent:  navContent(),
+		},
+	) {
+		<style>
+            .profile-header {
+                background: var(--ui-color-100);
+                padding: calc(var(--ui-spacing) * 2);
+                margin-bottom: calc(var(--ui-spacing) * 2);
+            }
+
+            .telegram-id {
+                color: var(--ui-color-600);
+                font-size: 0.95rem;
+                background: var(--ui-color-200);
+                padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
+                border-radius: var(--ui-radius);
+                border: var(--ui-border-width) var(--ui-border-style)
+                    var(--ui-color-300);
+            }
+
+            .profile-dialog {
+                background: var(--ui-bg);
+                border-radius: calc(var(--ui-radius) * 2);
+                padding: calc(var(--ui-spacing) * 2);
+                box-shadow: 0 10px 25px var(--ui-backdrop-color);
+            }
+
+            .profile-dialog label {
+                margin-bottom: var(--ui-spacing);
+            }
+
+            .profile-dialog input {
+                margin-top: calc(var(--ui-spacing) / 2);
+                font-size: 1rem;
+            }
+        </style>
+		<main style="max-width: 42rem; margin: 0 auto;" class="container fluid">
+			<div class="profile-header border">
+				<!-- Profile user name with an edit button to the right -->
+				<div
+					style="margin-bottom: var(--ui-spacing);"
+					class="flex flex-row justify-between items-center"
+				>
+					<h1 style="margin: 0; color: var(--ui-text); font-size: 2.25rem;">
+						{ user.Name }
+					</h1>
+					<!-- Edit user namne button, open the dialog -->
+					<button
+						class="secondary icon"
+						onclick='document.querySelector("#edit-user-name-dialog").showModal();'
+						title="Benutzername bearbeiten"
+					>
+						<i class="bi bi-pen"></i>
+					</button>
+				</div>
+				<!-- Profile Telegram ID and a Logout button -->
+				<div class="flex flex-row gap flex-wrap justify-between items-center">
+					<div class="telegram-id">
+						<i class="bi bi-telegram"></i>
+						Telegram ID: { user.TelegramID }
+					</div>
+					<a
+						role="button"
+						href={ env.ServerPathPrefix + "/logout" }
+						class="ghost destructive flex flex-row gap"
+					>
+						<i class="bi bi-box-arrow-right"></i>
+						Abmelden
+					</a>
+				</div>
+			</div>
+			<!-- User cookies table, requested via HTMX -->
+			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
+				<span
+					id="cookies"
+					hx-get={ env.ServerPathPrefix + "/htmx/profile/cookies" }
+					hx-trigger="load"
+					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				></span>
+			</div>
+			<!-- Dialog for changing the user name -->
+			<dialog
+				id="edit-user-name-dialog"
+				class="profile-dialog border clean"
+				oncancel="event.preventDefault()"
+			>
+				<form action="./profile">
+					<!-- User name -->
+					<label class="flex flex-col">
+						<strong>Benutzername ändern</strong>
+						<input
+							name="user-name"
+							type="text"
+							value={ user.Name }
+							placeholder="Neuer Benutzername"
+							required
+						/>
+					</label>
+					<footer
+						style="margin-top: calc(var(--ui-spacing) * 2);"
+						class="flex flex-row gap justify-end"
+					>
+						<!-- Cancel button -->
+						<a
+							role="button"
+							href={ env.ServerPathPrefix + "/profile" }
+							class="secondary flex flex-row gap"
+						>
+							<i class="bi bi-x-circle"></i>
+							Schließen
+						</a>
+						<!-- Submit button -->
+						<button type="submit" class="primary flex flex-row gap">
+							<i class="bi bi-check-circle"></i>
+							Ändern
+						</button>
+					</footer>
+				</form>
+			</dialog>
+		</main>
+	}
+}
+
+templ navContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
+	</div>
+}

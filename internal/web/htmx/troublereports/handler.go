@@ -85,7 +85,7 @@ func (h *TroubleReports) GetData(c echo.Context) error {
 
 	h.LogDebug("Found %d trouble reports for user %s", len(trs), user.Name)
 
-	troubleReportsList := ListTroubleReports(user, trs)
+	troubleReportsList := components.TroubleReportsList(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
 		h.HandleError(c, err, "failed to render trouble reports list component")
 	}
@@ -364,7 +364,7 @@ func (h *TroubleReports) Rollback(c echo.Context) error {
 	h.LogInfo("Successfully rolled back trouble report %d", id)
 
 	// Return success message for HTMX
-	err = RollbackResponseStatusOK().Render(
+	err = components.RollbackResponseStatusOK().Render(
 		c.Request().Context(), c.Response(),
 	)
 	if err != nil {

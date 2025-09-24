@@ -1,0 +1,145 @@
+package components
+
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+type CyclesSectionProps struct {
+	User             *models.User
+	Tool             *models.Tool
+	ToolPosition     string
+	TotalCycles      int64
+	Cycles           []*models.Cycle
+	LastRegeneration *models.Regeneration
+}
+
+templ CyclesSection(props *CyclesSectionProps) {
+	<div class="flex justify-between items-center mb">
+		<h5>Pressennutzungsverlauf</h5>
+		<button
+			class="secondary small flex"
+			hx-get={ fmt.Sprintf(
+				"%s/htmx/tools/cycle/edit?tool_id=%d",
+				env.ServerPathPrefix, props.Tool.ID,
+			) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			title="Neuen Eintrag hinzufügen"
+			if !props.User.IsAdmin() {
+				disabled
+			}
+		>
+			<i class="bi bi-plus-lg"></i>
+		</button>
+	</div>
+	<section>
+		<h6 class="mb">
+			Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
+    			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+		</h6>
+		<span>
+			@TotalCycles(props.TotalCycles, true)
+		</span>
+	</section>
+	<figure class="w-full overflow-x-scroll">
+		<table name="tool-cycles-table" class="table borderless compact">
+			<thead>
+				<tr>
+					<th name="press">Presse</th>
+					<th name="date">Datum</th>
+					<th name="total">Gesamtzyklen</th>
+					<th name="partial">Teilzyklen (berechnet)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@cyclesTableRows(props)
+			</tbody>
+		</table>
+	</figure>
+}
+
+templ cyclesTableRows(props *CyclesSectionProps) {
+	if len(props.Cycles) == 0 {
+		<tr>
+			<td colspan="5" class="text-center">
+				Kein Pressenverlauf verfügbar
+			</td>
+		</tr>
+	} else {
+		for _, cycle := range props.Cycles {
+			@renderCycleRowWithPartialCalc(props, cycle)
+		}
+	}
+}
+
+// renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
+// Partial cycles = total_cycles - previous_total_cycles
+templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycle) {
+	<tr
+		if props.LastRegeneration != nil && props.LastRegeneration.CycleID == cycle.ID {
+			style="color: var(--ui-muted);"
+		}
+	>
+		<td>
+			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
+		</td>
+		<td>
+			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
+		</td>
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+		<td>
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
+				{ fmt.Sprintf("%d", cycle.PartialCycles) }
+			</span>
+		</td>
+		<td>
+			<span class="button-group flex justify-end items-center">
+				// HTMX Button: Goto: Edit cycle entry dialog
+				<button
+					class="small ghost"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
+					) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Bearbeiten"
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-pencil"></i>
+				</button>
+				// HTMX Button: Delete cycle from database table and reload section.cycles
+				<button
+					class="destructive small ghost"
+					hx-delete={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
+					) }
+					hx-trigger="click"
+					hx-target="section.cycles"
+					hx-swap="innerHTML"
+					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+					title="Löschen"
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</span>
+		</td>
+	</tr>
+}

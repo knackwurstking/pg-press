@@ -14,6 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -21,6 +22,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+type EditFormData struct {
+	Position models.Position     // Position form field name "position"
+	Format   models.Format       // Format form field names "width" and "height"
+	Type     string              // Type form field name "type"
+	Code     string              // Code form field name "code"
+	Press    *models.PressNumber // Press form field name "press-selection"
+}
 
 type Tools struct {
 	*handlers.BaseHandler
@@ -70,7 +79,7 @@ func (h *Tools) GetToolsList(c echo.Context) error {
 		h.LogWarn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
 	}
 
-	toolsList := ListTools(tools)
+	toolsList := components.ToolsList(tools)
 	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render tools list all: "+err.Error())
@@ -326,7 +335,7 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 }
 
 func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
-	return ToolStatusEdit(&ToolStatusEditProps{
+	return components.ToolStatusEdit(&components.ToolStatusEditProps{
 		Tool:              tool,
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
