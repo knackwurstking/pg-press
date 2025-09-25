@@ -10,4 +10,4 @@
 - [ ] feeds
 - [x] cookies
 - [ ] attachments
-- [ ] users
+- [x] users

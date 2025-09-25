@@ -77,7 +77,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
-	if err := h.DB.Users.Update(updatedUser, user); err != nil {
+	if err := h.DB.Users.Update(updatedUser); err != nil {
 		return err
 	}
 

@@ -118,7 +118,7 @@ func addUserCommand() cli.Command {
 				}
 
 				user := models.NewUser(*telegramID, *userName, *apiKey)
-				if _, err = db.Users.Add(user, nil); utils.IsAlreadyExistsError(err) {
+				if _, err = db.Users.Add(user); utils.IsAlreadyExistsError(err) {
 					return fmt.Errorf("user already exists: %d (%s)",
 						*telegramID, *userName)
 				}
@@ -146,7 +146,7 @@ func removeUserCommand() cli.Command {
 					return err
 				}
 
-				return db.Users.Delete(*telegramID, nil)
+				return db.Users.Delete(*telegramID)
 			}
 		}),
 	}
@@ -189,8 +189,7 @@ func modUserCommand() cli.Command {
 					user.ApiKey = *apiKey
 				}
 
-				err = db.Users.Update(user, nil)
-				return err
+				return db.Users.Update(user)
 			}
 		}),
 	}

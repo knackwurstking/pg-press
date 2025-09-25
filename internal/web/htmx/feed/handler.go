@@ -72,7 +72,7 @@ func (h *Feed) HandleListGET(c echo.Context) error {
 		h.LogDebug("Updating user %s last feed from %d to %d",
 			user.Name, oldLastFeed, user.LastFeed)
 
-		if err := h.DB.Users.Update(user, user); err != nil {
+		if err := h.DB.Users.Update(user); err != nil {
 			return h.HandleError(c, err, "failed to update user's last feed")
 		}
 	}
