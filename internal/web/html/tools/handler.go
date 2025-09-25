@@ -37,7 +37,7 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 				h.HandlePressPage),
 
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau",
-				h.HandleUmbauPage),
+				h.GetUmbauPage),
 			helpers.NewEchoRoute(http.MethodPost, "/tools/press/:press/umbau",
 				h.HandleUmbauPagePOST),
 
@@ -125,7 +125,7 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) HandleUmbauPage(c echo.Context) error {
+func (h *Tools) GetUmbauPage(c echo.Context) error {
 	// Get user from context
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
