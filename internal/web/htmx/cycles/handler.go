@@ -52,10 +52,10 @@ func (h *Cycles) RegisterRoutes(e *echo.Echo) {
 				h.GetEditDialog),
 
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit",
-				h.HandleEditPOST),
+				h.HandleEditDialogPOST),
 
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit",
-				h.HandleEditPUT),
+				h.HandleEditDialogPUT),
 
 			// Delete a cycle table entry
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete",
@@ -189,7 +189,7 @@ func (h *Cycles) GetEditDialog(c echo.Context) error {
 }
 
 // TODO: Create a feed entry for the cycle edit
-func (h *Cycles) HandleEditPOST(c echo.Context) error {
+func (h *Cycles) HandleEditDialogPOST(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -238,7 +238,7 @@ func (h *Cycles) HandleEditPOST(c echo.Context) error {
 }
 
 // TODO: Create a feed entry for the cycle edit
-func (h *Cycles) HandleEditPUT(c echo.Context) error {
+func (h *Cycles) HandleEditDialogPUT(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
