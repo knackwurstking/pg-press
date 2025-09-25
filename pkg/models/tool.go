@@ -80,24 +80,7 @@ func (t *Tool) Status() Status {
 }
 
 func (t *Tool) String() string {
-	var base string
-	switch t.Position {
-	case PositionTop:
-		base = fmt.Sprintf("%s %s (%s, Oberteil)", t.Format, t.Code, t.Type)
-	case PositionTopCassette:
-		base = fmt.Sprintf("%s %s (%s, Kassette Oberteil)", t.Format, t.Code, t.Type)
-	case PositionBottom:
-		base = fmt.Sprintf("%s %s (%s, Unterteil)", t.Format, t.Code, t.Type)
-	default:
-		base = fmt.Sprintf("%s %s (%s)", t.Format, t.Code, t.Type)
-	}
-
-	// Add press information if tool is active
-	if t.Status() == StatusActive && t.Press != nil {
-		base = fmt.Sprintf("%s - Presse %d", base, *t.Press)
-	}
-
-	return base
+	return fmt.Sprintf("%s %s", t.Format, t.Code)
 }
 
 // SetPress sets the press for the tool with validation (0-5)
