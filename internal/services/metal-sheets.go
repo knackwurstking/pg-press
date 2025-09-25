@@ -11,17 +11,15 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// MetalSheet represents a collection of metal sheets in the database.
-type MetalSheet struct {
+// MetalSheets represents a collection of metal sheets in the database.
+type MetalSheets struct {
 	db    *sql.DB
-	feeds *Feed
 	notes *Notes
 }
 
-func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Notes) *MetalSheet {
-	metalSheet := &MetalSheet{
+func NewMetalSheets(db *sql.DB, notes *Notes) *MetalSheets {
+	metalSheet := &MetalSheets{
 		db:    db,
-		feeds: feeds,
 		notes: notes,
 	}
 
@@ -32,7 +30,7 @@ func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Notes) *MetalSheet {
 	return metalSheet
 }
 
-func (s *MetalSheet) createTable() error {
+func (s *MetalSheets) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
@@ -58,7 +56,7 @@ func (s *MetalSheet) createTable() error {
 }
 
 // List returns all metal sheets
-func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
+func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Listing metal sheets")
 
 	query := `
@@ -91,7 +89,7 @@ func (s *MetalSheet) List() ([]*models.MetalSheet, error) {
 }
 
 // Get returns a metal sheet by ID
-func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
+func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
 
 	query := `
@@ -113,7 +111,7 @@ func (s *MetalSheet) Get(id int64) (*models.MetalSheet, error) {
 }
 
 // GetWithNotes returns a metal sheet with its related notes loaded
-func (s *MetalSheet) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
+func (s *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
 	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := s.Get(id)
@@ -142,7 +140,7 @@ func (s *MetalSheet) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error)
 }
 
 // GetByToolID returns all metal sheets assigned to a specific tool
-func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
+func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
@@ -176,7 +174,7 @@ func (s *MetalSheet) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 }
 
 // GetAvailable returns all available metal sheets
-func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
+func (s *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
 	logger.DBMetalSheets().Info("Getting available metal sheets")
 
 	query := `
@@ -211,7 +209,7 @@ func (s *MetalSheet) GetAvailable() ([]*models.MetalSheet, error) {
 }
 
 // Add inserts a new metal sheet
-func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, error) {
+func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
 
 	// Marshal JSON fields
@@ -242,23 +240,11 @@ func (s *MetalSheet) Add(sheet *models.MetalSheet, user *models.User) (int64, er
 
 	logger.DBMetalSheets().Debug("Added metal sheet with ID %d", id)
 
-	// Trigger feed update
-	if s.feeds != nil {
-		feed := models.NewFeed(
-			"Neues Blech hinzugefügt",
-			fmt.Sprintf("Benutzer %s hat ein neues Blech %s hinzugefügt.", user.Name, sheet.String()),
-			user.TelegramID,
-		)
-		if err := s.feeds.Add(feed); err != nil {
-			logger.DBMetalSheets().Error("Failed to add feed for new metal sheet: %v", err)
-		}
-	}
-
 	return id, nil
 }
 
 // Update updates an existing metal sheet
-func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
+func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
 
 	// Marshal JSON fields
@@ -283,23 +269,11 @@ func (s *MetalSheet) Update(sheet *models.MetalSheet, user *models.User) error {
 
 	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
 
-	// Trigger feed update
-	if s.feeds != nil {
-		feed := models.NewFeed(
-			"Blech aktualisiert",
-			fmt.Sprintf("Benutzer %s hat das Blech %s aktualisiert.", user.Name, sheet.String()),
-			user.TelegramID,
-		)
-		if err := s.feeds.Add(feed); err != nil {
-			logger.DBMetalSheets().Error("Failed to add feed for updated metal sheet: %v", err)
-		}
-	}
-
 	return nil
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User) error {
+func (s *MetalSheets) AssignTool(sheetID int64, toolID *int64) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -324,29 +298,11 @@ func (s *MetalSheet) AssignTool(sheetID int64, toolID *int64, user *models.User)
 
 	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
 
-	// Trigger feed update
-	if s.feeds != nil {
-		var content string
-		if toolID != nil {
-			content = fmt.Sprintf("Benutzer %s hat Blech #%d dem Werkzeug #%d zugewiesen.", user.Name, sheetID, *toolID)
-		} else {
-			content = fmt.Sprintf("Benutzer %s hat Blech #%d vom Werkzeug getrennt.", user.Name, sheetID)
-		}
-		feed := models.NewFeed(
-			"Blech-Werkzeug Zuordnung",
-			content,
-			user.TelegramID,
-		)
-		if err := s.feeds.Add(feed); err != nil {
-			logger.DBMetalSheets().Error("Failed to add feed for tool assignment: %v", err)
-		}
-	}
-
 	return nil
 }
 
 // Delete deletes a metal sheet
-func (s *MetalSheet) Delete(id int64, user *models.User) error {
+func (s *MetalSheets) Delete(id int64) error {
 	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
 
 	query := `
@@ -359,22 +315,10 @@ func (s *MetalSheet) Delete(id int64, user *models.User) error {
 
 	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
 
-	// Trigger feed update
-	if s.feeds != nil {
-		feed := models.NewFeed(
-			"Blech entfernt",
-			fmt.Sprintf("Benutzer %s hat das Blech mit ID %d entfernt.", user.Name, id),
-			user.TelegramID,
-		)
-		if err := s.feeds.Add(feed); err != nil {
-			logger.DBMetalSheets().Error("Failed to add feed for deleted metal sheet: %v", err)
-		}
-	}
-
 	return nil
 }
 
-func (s *MetalSheet) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
+func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
 	logger.DBMetalSheets().Debug("Scanning metal sheet")
 	sheet := &models.MetalSheet{}
 

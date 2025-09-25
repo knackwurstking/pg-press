@@ -6,7 +6,7 @@
 - [x] trouble reports
 - [x] notes
 - [x] modifications
-- [ ] metal sheets
+- [x] metal sheets
 - [ ] feeds
 - [ ] cookies
 - [ ] attachments
