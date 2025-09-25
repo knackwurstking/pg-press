@@ -111,6 +111,7 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 
 	// Render page
 	h.LogDebug("Rendering page for press %d", pn)
+	// TODO: Need to pass a combined metal sheets list here
 	page := PressPage(PressPageProps{
 		Press:    pn,
 		Cycles:   cycles,
