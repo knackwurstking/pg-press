@@ -1,5 +1,5 @@
 # Handle feeds
 
 - [x] cycles
-- [ ] tools
+- [x] tools
 - [ ] trouble reports

@@ -2,6 +2,7 @@ package tools
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -141,6 +142,19 @@ func (h *Tools) AddToolOnEditDialogSubmit(c echo.Context) error {
 	} else {
 		h.LogInfo("Created tool ID %d (Type=%s, Code=%s) by user %s",
 			t.ID, tool.Type, tool.Code, user.Name)
+
+		// Create feed entry
+		title := "Neues Werkzeug erstellt"
+		content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+			t.String(), t.Type, t.Code, string(t.Position))
+		if t.Press != nil {
+			content += fmt.Sprintf("\nPresse: %d", *t.Press)
+		}
+
+		feed := models.NewFeed(title, content, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for tool creation: %v", err)
+		}
 	}
 
 	return h.closeDialog(c)
@@ -176,6 +190,19 @@ func (h *Tools) UpdateToolOnEditDialogSubmit(c echo.Context) error {
 	} else {
 		h.LogInfo("Updated tool %d (Type=%s, Code=%s) by user %s",
 			tool.ID, tool.Type, tool.Code, user.Name)
+
+		// Create feed entry
+		title := "Werkzeug aktualisiert"
+		content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+			tool.String(), tool.Type, tool.Code, string(tool.Position))
+		if tool.Press != nil {
+			content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+		}
+
+		feed := models.NewFeed(title, content, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for tool update: %v", err)
+		}
 	}
 
 	return h.closeDialog(c)
@@ -210,9 +237,28 @@ func (h *Tools) DeleteTool(c echo.Context) error {
 
 	h.LogDebug("User %s deleting tool %d", user.Name, toolID)
 
+	// Get tool data before deletion for the feed
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool for deletion")
+	}
+
 	// Delete the tool from database
 	if err := h.DB.Tools.Delete(toolID, user); err != nil {
 		return h.HandleError(c, err, "failed to delete tool")
+	}
+
+	// Create feed entry
+	title := "Werkzeug gelöscht"
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for tool deletion: %v", err)
 	}
 
 	// Set redirect header to tools page
@@ -304,16 +350,40 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 			return h.HandleError(c, err, "failed to start tool regeneration")
 		}
 
+		// Create feed entry
+		title := "Werkzeug Regenerierung gestartet"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		feed := models.NewFeed(title, content, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for regeneration start: %v", err)
+		}
+
 	case "active":
 		// Stop regeneration (return to active status)
 		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
 			return h.HandleError(c, err, "failed to stop tool regeneration")
 		}
 
+		// Create feed entry
+		title := "Werkzeug Regenerierung beendet"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		feed := models.NewFeed(title, content, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for regeneration stop: %v", err)
+		}
+
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
 		if err := h.DB.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
 			return h.HandleError(c, err, "failed to abort tool regeneration")
+		}
+
+		// Create feed entry
+		title := "Werkzeug Regenerierung abgebrochen"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		feed := models.NewFeed(title, content, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for regeneration abort: %v", err)
 		}
 
 	default:
