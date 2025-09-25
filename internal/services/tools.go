@@ -13,10 +13,10 @@ import (
 
 type Tools struct {
 	db    *sql.DB
-	notes *Note
+	notes *Notes
 }
 
-func NewTools(db *sql.DB, notes *Note) *Tools {
+func NewTools(db *sql.DB, notes *Notes) *Tools {
 	t := &Tools{
 		db:    db,
 		notes: notes,
@@ -82,7 +82,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 func (t *Tools) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
 	var noteIDs []int64
 	for _, note := range notes {
-		noteID, err := t.notes.Add(note, user)
+		noteID, err := t.notes.Add(note)
 		if err != nil {
 			return nil, err
 		}

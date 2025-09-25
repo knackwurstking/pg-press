@@ -11,11 +11,11 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type Note struct {
+type Notes struct {
 	db *sql.DB
 }
 
-func NewNote(db *sql.DB) *Note {
+func NewNotes(db *sql.DB) *Notes {
 	query := `
 		CREATE TABLE IF NOT EXISTS notes (
 			id INTEGER NOT NULL,
@@ -30,12 +30,12 @@ func NewNote(db *sql.DB) *Note {
 		panic(fmt.Errorf("failed to create notes table: %v", err))
 	}
 
-	return &Note{
+	return &Notes{
 		db: db,
 	}
 }
 
-func (n *Note) List() ([]*models.Note, error) {
+func (n *Notes) List() ([]*models.Note, error) {
 	logger.DBNotes().Info("Listing notes")
 
 	query := `
@@ -65,7 +65,7 @@ func (n *Note) List() ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Note) Get(id int64) (*models.Note, error) {
+func (n *Notes) Get(id int64) (*models.Note, error) {
 	logger.DBNotes().Info("Getting note, id: %d", id)
 
 	query := `
@@ -85,7 +85,7 @@ func (n *Note) Get(id int64) (*models.Note, error) {
 	return note, nil
 }
 
-func (n *Note) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -137,7 +137,7 @@ func (n *Note) GetByIDs(ids []int64) ([]*models.Note, error) {
 	return notes, nil
 }
 
-func (n *Note) Add(note *models.Note, _ *models.User) (int64, error) {
+func (n *Notes) Add(note *models.Note) (int64, error) {
 	logger.DBNotes().Info("Adding note: level=%d", note.Level)
 
 	query := `
@@ -157,15 +157,15 @@ func (n *Note) Add(note *models.Note, _ *models.User) (int64, error) {
 	return id, nil
 }
 
-func (n *Note) Update(note *models.Note, user *models.User) error {
-	return fmt.Errorf("operation not supported")
+func (n *Notes) Update(note *models.Note) error {
+	return fmt.Errorf("under construction") // TODO: ...
 }
 
-func (n *Note) Delete(id int64, user *models.User) error {
-	return fmt.Errorf("operation not supported")
+func (n *Notes) Delete(id int64, user *models.User) error {
+	return fmt.Errorf("under construction") // TODO: ...
 }
 
-func (n *Note) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
+func (n *Notes) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
 
 	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {

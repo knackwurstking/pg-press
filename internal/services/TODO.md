@@ -4,7 +4,7 @@
 - [x] tool regenerations
 - [x] tools
 - [x] trouble reports
-- [ ] notes
+- [x] notes
 - [ ] modifications
 - [ ] metal sheets
 - [ ] feeds

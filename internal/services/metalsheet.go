@@ -15,10 +15,10 @@ import (
 type MetalSheet struct {
 	db    *sql.DB
 	feeds *Feed
-	notes *Note
+	notes *Notes
 }
 
-func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Note) *MetalSheet {
+func NewMetalSheet(db *sql.DB, feeds *Feed, notes *Notes) *MetalSheet {
 	metalSheet := &MetalSheet{
 		db:    db,
 		feeds: feeds,
