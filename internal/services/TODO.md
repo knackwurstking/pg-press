@@ -9,5 +9,5 @@
 - [x] metal sheets
 - [ ] feeds
 - [x] cookies
-- [ ] attachments
+- [x] attachments
 - [x] users

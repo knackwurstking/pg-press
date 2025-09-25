@@ -18,7 +18,7 @@ type DB struct {
 	Tools          *services.Tools
 	MetalSheets    *services.MetalSheets
 
-	Attachments       *services.Attachment
+	Attachments       *services.Attachments
 	Cookies           *services.Cookies
 	ToolRegenerations *services.ToolRegenerations
 	Feeds             *services.Feed
@@ -32,7 +32,7 @@ func New(db *sql.DB) *DB {
 
 	feeds := services.NewFeed(db)
 
-	attachments := services.NewAttachment(db)
+	attachments := services.NewAttachments(db)
 	troubleReports := services.NewTroubleReports(db, attachments, modifications)
 
 	pressCycles := services.NewPressCycles(db)

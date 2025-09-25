@@ -13,11 +13,11 @@ import (
 
 type TroubleReports struct {
 	db            *sql.DB
-	attachments   *Attachment
+	attachments   *Attachments
 	modifications *Modifications
 }
 
-func NewTroubleReports(db *sql.DB, a *Attachment, m *Modifications) *TroubleReports {
+func NewTroubleReports(db *sql.DB, a *Attachments, m *Modifications) *TroubleReports {
 	troubleReport := &TroubleReports{
 		db:            db,
 		attachments:   a,
@@ -344,14 +344,14 @@ func (s *TroubleReports) AddWithAttachments(
 		logger.DBTroubleReports().Debug("Adding attachment %d/%d (size: %d bytes) for %s",
 			i+1, len(attachments), len(attachment.Data), userInfo)
 
-		id, err := s.attachments.Add(attachment, user)
+		id, err := s.attachments.Add(attachment)
 		if err != nil {
 			// Cleanup already added attachments on failure
 			logger.DBTroubleReports().Error("Failed to add attachment %d for %s, cleaning up %d existing: %v",
 				i+1, userInfo, len(attachmentIDs), err)
 
 			for _, addedID := range attachmentIDs {
-				if cleanupErr := s.attachments.Delete(addedID, user); cleanupErr != nil {
+				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
 					logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", addedID, cleanupErr)
 				}
 			}
@@ -374,16 +374,13 @@ func (s *TroubleReports) AddWithAttachments(
 
 		// Cleanup attachments on failure
 		for _, id := range attachmentIDs {
-			if cleanupErr := s.attachments.Delete(id, user); cleanupErr != nil {
+			if cleanupErr := s.attachments.Delete(id); cleanupErr != nil {
 				logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", id, cleanupErr)
 			}
 		}
 
 		return err
 	}
-
-	logger.DBTroubleReports().Info("Successfully added trouble report %d with %d attachments by %s",
-		troubleReport.ID, len(attachmentIDs), userInfo)
 
 	return nil
 }
@@ -417,7 +414,7 @@ func (s *TroubleReports) UpdateWithAttachments(
 		logger.DBTroubleReports().Debug("Adding new attachment %d/%d (size: %d bytes) for update %d by %s",
 			i+1, len(newAttachments), len(attachment.Data), id, userInfo)
 
-		attachmentID, err := s.attachments.Add(attachment, user)
+		attachmentID, err := s.attachments.Add(attachment)
 
 		if err != nil {
 			// Cleanup already added attachments on failure
@@ -425,7 +422,7 @@ func (s *TroubleReports) UpdateWithAttachments(
 				i+1, id, userInfo, len(newAttachmentIDs), err)
 
 			for _, addedID := range newAttachmentIDs {
-				if cleanupErr := s.attachments.Delete(addedID, user); cleanupErr != nil {
+				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
 					logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", addedID, cleanupErr)
 				}
 			}
@@ -452,7 +449,7 @@ func (s *TroubleReports) UpdateWithAttachments(
 
 		// Cleanup new attachments on failure
 		for _, attachmentID := range newAttachmentIDs {
-			if cleanupErr := s.attachments.Delete(attachmentID, user); cleanupErr != nil {
+			if cleanupErr := s.attachments.Delete(attachmentID); cleanupErr != nil {
 				logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", attachmentID, cleanupErr)
 			}
 		}
@@ -498,7 +495,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 	successfulAttachmentDeletes := 0
 	failedAttachmentDeletes := 0
 	for _, attachmentID := range tr.LinkedAttachments {
-		if err := s.attachments.Delete(attachmentID, user); err != nil {
+		if err := s.attachments.Delete(attachmentID); err != nil {
 			logger.DBTroubleReports().Warn(
 				"Failed to remove attachment %d for trouble report %d by %s: %v",
 				attachmentID, id, userInfo, err,
@@ -509,11 +506,6 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 			successfulAttachmentDeletes++
 		}
 	}
-
-	logger.DBTroubleReports().Info(
-		"Successfully removed trouble report %d (title='%s') with %d/%d attachments by %s",
-		id, tr.Title, successfulAttachmentDeletes, len(tr.LinkedAttachments), userInfo,
-	)
 
 	if failedAttachmentDeletes > 0 {
 		logger.DBTroubleReports().Warn(
