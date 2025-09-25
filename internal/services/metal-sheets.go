@@ -32,6 +32,7 @@ func NewMetalSheets(db *sql.DB, notes *Notes) *MetalSheets {
 
 func (s *MetalSheets) createTable() error {
 	query := `
+		DROP TABLE IF EXISTS metal_sheets;
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id INTEGER NOT NULL,
 			tile_height REAL NOT NULL,
