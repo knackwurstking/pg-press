@@ -294,7 +294,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "></div><div class=\"flex flex-col\"><label for=\"stf-max\">Stf. Max</label> <input type=\"number\" id=\"stf-max\" name=\"stf_max\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "></div><div class=\"flex flex-col\"><label for=\"stf-max\">Hubende</label> <input type=\"number\" id=\"stf-max\" name=\"stf_max\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
