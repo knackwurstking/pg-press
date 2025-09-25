@@ -9,10 +9,11 @@ import (
 )
 
 type PressPageProps struct {
-	Press    models.PressNumber
-	Cycles   []*models.Cycle
-	User     *models.User
-	ToolsMap map[int64]*models.Tool
+	Press       models.PressNumber
+	Cycles      []*models.Cycle
+	User        *models.User
+	ToolsMap    map[int64]*models.Tool
+	MetalSheets []*models.MetalSheet
 }
 
 templ PressPage(props PressPageProps) {
@@ -64,17 +65,14 @@ templ PressPage(props PressPageProps) {
 					</tbody>
 				</table>
 			</section>
+			<br/>
 			<section>
 				<div class="flex justify-between items-center mb">
 					<h5>Blech Listen</h5>
 				</div>
-				<div class="card compact info">
-					<div class="card-body">
-						Eine kombinierte Blechliste wird hier bald hinzugefügt
-					</div>
-				</div>
-				// TODO: Create a combined metal sheets table here
+				@MetalSheetTablesCollapsible(props.MetalSheets, props.ToolsMap)
 			</section>
+			<br/>
 			<!-- Press Cycles Table -->
 			<section id="cycle-table-section" class="mt">
 				<div class="flex justify-between items-center mb">

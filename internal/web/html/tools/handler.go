@@ -109,14 +109,27 @@ func (h *Tools) HandlePressPage(c echo.Context) error {
 		toolsMap[tool.ID] = tool
 	}
 
+	// Get metal sheets for tools assigned to this press
+	var metalSheets []*models.MetalSheet
+	for _, tool := range tools {
+		if tool.Press != nil && *tool.Press == pn {
+			toolSheets, err := h.DB.MetalSheets.GetByToolID(tool.ID)
+			if err != nil {
+				h.LogError("Failed to fetch metal sheets for tool %d: %v", tool.ID, err)
+				continue
+			}
+			metalSheets = append(metalSheets, toolSheets...)
+		}
+	}
+
 	// Render page
-	h.LogDebug("Rendering page for press %d", pn)
-	// TODO: Need to pass a combined metal sheets list here
+	h.LogDebug("Rendering page for press %d with %d metal sheets", pn, len(metalSheets))
 	page := PressPage(PressPageProps{
-		Press:    pn,
-		Cycles:   cycles,
-		User:     user,
-		ToolsMap: toolsMap,
+		Press:       pn,
+		Cycles:      cycles,
+		User:        user,
+		ToolsMap:    toolsMap,
+		MetalSheets: metalSheets,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
