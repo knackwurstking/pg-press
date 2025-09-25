@@ -3,7 +3,7 @@
 - [x] press cycles
 - [x] tool regenerations
 - [x] tools
-- [ ] trouble reports
+- [x] trouble reports
 - [ ] notes
 - [ ] modifications
 - [ ] metal sheets

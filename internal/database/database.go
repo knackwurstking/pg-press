@@ -13,7 +13,7 @@ type DB struct {
 	// Kind of DataOperations
 	PressCycles    *services.PressCycles
 	Users          *services.User
-	TroubleReports *services.TroubleReport
+	TroubleReports *services.TroubleReports
 	Notes          *services.Note
 	Tools          *services.Tools
 	MetalSheets    *services.MetalSheet
@@ -33,7 +33,7 @@ func New(db *sql.DB) *DB {
 	feeds := services.NewFeed(db)
 
 	attachments := services.NewAttachment(db)
-	troubleReports := services.NewTroubleReport(db, attachments, feeds, modifications)
+	troubleReports := services.NewTroubleReports(db, attachments, modifications)
 
 	pressCycles := services.NewPressCycles(db)
 
