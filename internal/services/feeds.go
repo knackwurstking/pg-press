@@ -11,14 +11,14 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// Feed handles database operations for feed entries
-type Feed struct {
+// Feeds handles database operations for feed entries
+type Feeds struct {
 	db          *sql.DB
 	broadcaster interfaces.Broadcaster
 }
 
-// NewFeed creates a new Feed instance and initializes the database table
-func NewFeed(db *sql.DB) *Feed {
+// NewFeeds creates a new Feed instance and initializes the database table
+func NewFeeds(db *sql.DB) *Feeds {
 	//dropQuery := `DROP TABLE IF EXISTS feeds;`
 	//if _, err := db.Exec(dropQuery); err != nil {
 	//	panic(fmt.Errorf("failed to drop feeds table: %v", err))
@@ -40,17 +40,17 @@ func NewFeed(db *sql.DB) *Feed {
 	if _, err := db.Exec(query); err != nil {
 		panic(fmt.Errorf("failed to create feeds table: %v", err))
 	}
-	return &Feed{db: db}
+	return &Feeds{db: db}
 }
 
 // SetBroadcaster sets the feed notifier for real-time updates
-func (f *Feed) SetBroadcaster(broadcaster interfaces.Broadcaster) {
+func (f *Feeds) SetBroadcaster(broadcaster interfaces.Broadcaster) {
 	logger.DBFeeds().Debug("Setting broadcaster for real-time updates")
 	f.broadcaster = broadcaster
 }
 
 // List retrieves all feeds ordered by creation time in descending order
-func (f *Feed) List() ([]*models.Feed, error) {
+func (f *Feeds) List() ([]*models.Feed, error) {
 	start := time.Now()
 
 	query := `SELECT id, title, content, user_id, created_at FROM feeds ORDER BY created_at DESC`
@@ -75,7 +75,7 @@ func (f *Feed) List() ([]*models.Feed, error) {
 }
 
 // ListRange retrieves a specific range of feeds with pagination support
-func (f *Feed) ListRange(offset, limit int) ([]*models.Feed, error) {
+func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 	start := time.Now()
 
 	if offset < 0 {
@@ -111,7 +111,7 @@ func (f *Feed) ListRange(offset, limit int) ([]*models.Feed, error) {
 }
 
 // ListByUser retrieves feeds created by a specific user
-func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
+func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
 	start := time.Now()
 
 	if userID <= 0 {
@@ -150,7 +150,7 @@ func (f *Feed) ListByUser(userID int64, offset, limit int) ([]*models.Feed, erro
 }
 
 // Add creates a new feed entry in the database
-func (f *Feed) Add(feedData *models.Feed) error {
+func (f *Feeds) Add(feedData *models.Feed) error {
 	if feedData == nil {
 		return utils.NewValidationError("feed: cannot be nil")
 	}
@@ -188,7 +188,7 @@ func (f *Feed) Add(feedData *models.Feed) error {
 }
 
 // Count returns the total number of feeds in the database
-func (f *Feed) Count() (int, error) {
+func (f *Feeds) Count() (int, error) {
 	start := time.Now()
 
 	var count int
@@ -207,7 +207,7 @@ func (f *Feed) Count() (int, error) {
 }
 
 // CountByUser returns the number of feeds created by a specific user
-func (f *Feed) CountByUser(userID int64) (int, error) {
+func (f *Feeds) CountByUser(userID int64) (int, error) {
 	start := time.Now()
 
 	if userID <= 0 {
@@ -230,7 +230,7 @@ func (f *Feed) CountByUser(userID int64) (int, error) {
 }
 
 // DeleteBefore removes all feeds created before the specified timestamp
-func (f *Feed) DeleteBefore(timestamp int64) (int64, error) {
+func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 	start := time.Now()
 
 	if timestamp <= 0 {
@@ -259,7 +259,7 @@ func (f *Feed) DeleteBefore(timestamp int64) (int64, error) {
 }
 
 // Get retrieves a specific feed by ID
-func (f *Feed) Get(id int64) (*models.Feed, error) {
+func (f *Feeds) Get(id int64) (*models.Feed, error) {
 	if id <= 0 {
 		return nil, utils.NewValidationError("id: must be positive")
 	}
@@ -278,7 +278,7 @@ func (f *Feed) Get(id int64) (*models.Feed, error) {
 }
 
 // Delete removes a specific feed by ID
-func (f *Feed) Delete(id int64) error {
+func (f *Feeds) Delete(id int64) error {
 	if id <= 0 {
 		return utils.NewValidationError("id: must be positive")
 	}
@@ -301,7 +301,7 @@ func (f *Feed) Delete(id int64) error {
 }
 
 // scanAllRows scans all rows from a query result into Feed structs
-func (f *Feed) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
+func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	var feeds []*models.Feed
 	scanStart := time.Now()
 
@@ -325,7 +325,7 @@ func (f *Feed) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 	return feeds, nil
 }
 
-func (f *Feed) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
+func (f *Feeds) scanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
 	feedData := &models.Feed{}
 
 	if err := scanner.Scan(&feedData.ID, &feedData.Title, &feedData.Content, &feedData.UserID, &feedData.CreatedAt); err != nil {

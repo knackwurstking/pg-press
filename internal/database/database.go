@@ -21,37 +21,30 @@ type DB struct {
 	Attachments       *services.Attachments
 	Cookies           *services.Cookies
 	ToolRegenerations *services.ToolRegenerations
-	Feeds             *services.Feed
+	Feeds             *services.Feeds
 	Modifications     *services.Modifications
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
 // Feeds must be created before Users and TroubleReports as they generate feed entries.
 func New(db *sql.DB) *DB {
+	feeds := services.NewFeeds(db)
 	modifications := services.NewModifications(db)
-
-	feeds := services.NewFeed(db)
-
 	attachments := services.NewAttachments(db)
-	troubleReports := services.NewTroubleReports(db, attachments, modifications)
-
-	pressCycles := services.NewPressCycles(db)
-
 	notes := services.NewNotes(db)
-	tools := services.NewTools(db, notes)
 
-	metalSheets := services.NewMetalSheets(db, notes)
+	tools := services.NewTools(db, notes)
 	toolRegenerations := services.NewToolRegenerations(db, tools)
 
 	dbInstance := &DB{
 		Users:             services.NewUsers(db),
 		Cookies:           services.NewCookies(db),
 		Attachments:       attachments,
-		TroubleReports:    troubleReports,
+		TroubleReports:    services.NewTroubleReports(db, attachments, modifications),
 		Notes:             notes,
 		Tools:             tools,
-		MetalSheets:       metalSheets,
-		PressCycles:       pressCycles,
+		MetalSheets:       services.NewMetalSheets(db, notes),
+		PressCycles:       services.NewPressCycles(db),
 		ToolRegenerations: toolRegenerations,
 		Modifications:     modifications,
 		Feeds:             feeds,

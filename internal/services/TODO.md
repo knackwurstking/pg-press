@@ -7,7 +7,7 @@
 - [x] notes
 - [x] modifications
 - [x] metal sheets
-- [ ] feeds
+- [x] feeds
 - [x] cookies
 - [x] attachments
 - [x] users
