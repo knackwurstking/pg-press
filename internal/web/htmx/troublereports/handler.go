@@ -116,6 +116,14 @@ func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
 	} else {
 		h.LogInfo("Successfully deleted trouble report %d (%s)",
 			removedReport.ID, removedReport.Title)
+
+		// Create feed entry
+		feedTitle := "Problembericht gelöscht"
+		feedContent := fmt.Sprintf("Titel: %s", removedReport.Title)
+		feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+		if err := h.DB.Feeds.Add(feed); err != nil {
+			h.LogError("Failed to create feed for trouble report deletion: %v", err)
+		}
 	}
 
 	return h.GetData(c)
@@ -211,6 +219,17 @@ func (h *TroubleReports) AddTroubleReportOnEditDialogSubmit(c echo.Context) erro
 		return h.HandleError(c, err, "failed to add trouble report")
 	}
 
+	// Create feed entry
+	feedTitle := "Neuer Problembericht erstellt"
+	feedContent := fmt.Sprintf("Titel: %s", tr.Title)
+	if len(attachments) > 0 {
+		feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
+	}
+	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for trouble report creation: %v", err)
+	}
+
 	return h.closeDialog(c)
 }
 
@@ -268,6 +287,18 @@ func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) e
 	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 	if err != nil {
 		return h.HandleError(c, err, "failed to update trouble report")
+	}
+
+	// Create feed entry
+	feedTitle := "Problembericht aktualisiert"
+	feedContent := fmt.Sprintf("Titel: %s", tr.Title)
+	totalAttachments := len(existingAttachmentIDs) + len(newAttachments)
+	if totalAttachments > 0 {
+		feedContent += fmt.Sprintf("\nAnhänge: %d", totalAttachments)
+	}
+	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for trouble report update: %v", err)
 	}
 
 	return h.closeDialog(c)
@@ -362,6 +393,15 @@ func (h *TroubleReports) Rollback(c echo.Context) error {
 	}
 
 	h.LogInfo("Successfully rolled back trouble report %d", id)
+
+	// Create feed entry
+	feedTitle := "Problembericht zurückgesetzt"
+	feedContent := fmt.Sprintf("Titel: %s\nZurückgesetzt auf Version vom: %s",
+		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
+	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for trouble report rollback: %v", err)
+	}
 
 	// Return success message for HTMX
 	err = components.RollbackResponseStatusOK().Render(
