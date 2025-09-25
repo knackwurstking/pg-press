@@ -1,7 +1,7 @@
 # Update services, remove feeds and rename
 
 - [x] press cycles
-- [ ] tool regenerations
+- [x] tool regenerations
 - [ ] tools
 - [ ] trouble reports
 - [ ] notes

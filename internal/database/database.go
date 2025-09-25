@@ -20,7 +20,7 @@ type DB struct {
 
 	Attachments       *services.Attachment
 	Cookies           *services.Cookie
-	ToolRegenerations *services.Regeneration
+	ToolRegenerations *services.ToolRegenerations
 	Feeds             *services.Feed
 	Modifications     *services.Modification
 }
@@ -41,7 +41,7 @@ func New(db *sql.DB) *DB {
 	tools := services.NewTool(db, notes, feeds)
 
 	metalSheets := services.NewMetalSheet(db, feeds, notes)
-	toolRegenerations := services.NewRegeneration(db, tools, feeds)
+	toolRegenerations := services.NewRegeneration(db, tools)
 
 	dbInstance := &DB{
 		Users:             services.NewUser(db, feeds),

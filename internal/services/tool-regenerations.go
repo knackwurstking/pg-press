@@ -11,13 +11,12 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type Regeneration struct {
+type ToolRegenerations struct {
 	db    *sql.DB
 	tools *Tool
-	feeds *Feed
 }
 
-func NewRegeneration(db *sql.DB, tools *Tool, feeds *Feed) *Regeneration {
+func NewRegeneration(db *sql.DB, tools *Tool) *ToolRegenerations {
 	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
 	//if _, err := db.Exec(dropQuery); err != nil {
 	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
@@ -42,15 +41,14 @@ func NewRegeneration(db *sql.DB, tools *Tool, feeds *Feed) *Regeneration {
 		panic(fmt.Errorf("failed to create tool_regenerations table: %v", err))
 	}
 
-	return &Regeneration{
+	return &ToolRegenerations{
 		db:    db,
 		tools: tools,
-		feeds: feeds,
 	}
 }
 
 // Create records a new tool regeneration event
-func (r *Regeneration) Add(regeneration *models.Regeneration, user *models.User) (*models.Regeneration, error) {
+func (r *ToolRegenerations) Add(regeneration *models.Regeneration, user *models.User) (*models.Regeneration, error) {
 	logger.DBRegenerations().Info("Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
 	if user == nil {
@@ -87,23 +85,11 @@ func (r *Regeneration) Add(regeneration *models.Regeneration, user *models.User)
 		return nil, fmt.Errorf("insert error: tool_regenerations: %v", err)
 	}
 
-	// Create feed entry
-	if r.feeds != nil {
-		feed := models.NewFeed(
-			"Regenerierung hinzugefügt",
-			"Eine neue Regenerierung wurde hinzugefügt.",
-			0, // No specific user for regeneration entries
-		)
-		if err := r.feeds.Add(feed); err != nil {
-			logger.DBRegenerations().Error("Failed to add feed for new regeneration: %v", err)
-		}
-	}
-
 	return regeneration, nil
 }
 
 // Update updates an existing regeneration record
-func (r *Regeneration) Update(regeneration *models.Regeneration, user *models.User) error {
+func (r *ToolRegenerations) Update(regeneration *models.Regeneration, user *models.User) error {
 	logger.DBRegenerations().Info("Updating tool regeneration: id=%d", regeneration.ID)
 
 	if user == nil {
@@ -130,7 +116,7 @@ func (r *Regeneration) Update(regeneration *models.Regeneration, user *models.Us
 }
 
 // Delete removes a regeneration record (should be used carefully)
-func (r *Regeneration) Delete(id int64) error {
+func (r *ToolRegenerations) Delete(id int64) error {
 	logger.DBRegenerations().Info("Deleting regeneration record: id=%d", id)
 
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
@@ -142,7 +128,7 @@ func (r *Regeneration) Delete(id int64) error {
 	return nil
 }
 
-func (r *Regeneration) AddToolRegeneration(cycleID, toolID int64, reason string, user *models.User) (*models.Regeneration, error) {
+func (r *ToolRegenerations) AddToolRegeneration(cycleID, toolID int64, reason string, user *models.User) (*models.Regeneration, error) {
 	logger.DBRegenerations().Info("Starting tool regeneration: tool_id=%d", toolID)
 
 	// Update the tool's regeneration status
@@ -168,7 +154,7 @@ func (r *Regeneration) AddToolRegeneration(cycleID, toolID int64, reason string,
 }
 
 // Stop stops the tool regeneration process for the given tool ID
-func (r *Regeneration) StopToolRegeneration(toolID int64, user *models.User) error {
+func (r *ToolRegenerations) StopToolRegeneration(toolID int64, user *models.User) error {
 	logger.DBRegenerations().Info("Stopping tool regeneration: tool_id=%d", toolID)
 
 	if toolID <= 0 {
@@ -186,7 +172,7 @@ func (r *Regeneration) StopToolRegeneration(toolID int64, user *models.User) err
 }
 
 // AbortToolRegeneration aborts the tool regeneration process and removes the regeneration record
-func (r *Regeneration) AbortToolRegeneration(toolID int64, user *models.User) error {
+func (r *ToolRegenerations) AbortToolRegeneration(toolID int64, user *models.User) error {
 	logger.DBRegenerations().Info("Aborting tool regeneration: tool_id=%d", toolID)
 
 	if toolID <= 0 {
@@ -218,7 +204,7 @@ func (r *Regeneration) AbortToolRegeneration(toolID int64, user *models.User) er
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
-func (r *Regeneration) GetLastRegeneration(toolID int64) (*models.Regeneration, error) {
+func (r *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.Regeneration, error) {
 	logger.DBRegenerations().Info("Getting last regeneration for tool: tool_id=%d", toolID)
 
 	query := `
@@ -242,7 +228,7 @@ func (r *Regeneration) GetLastRegeneration(toolID int64) (*models.Regeneration, 
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
-func (r *Regeneration) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, error) {
+func (r *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, error) {
 	logger.DBRegenerations().Info("Getting regeneration history for tool: tool_id=%d", toolID)
 
 	query := `
@@ -270,7 +256,7 @@ func (r *Regeneration) GetRegenerationHistory(toolID int64) ([]*models.Regenerat
 	return regenerations, nil
 }
 
-func (r *Regeneration) scanToolRegeneration(scanner interfaces.Scannable) (*models.Regeneration, error) {
+func (r *ToolRegenerations) scanToolRegeneration(scanner interfaces.Scannable) (*models.Regeneration, error) {
 	regen := &models.Regeneration{}
 	var performedBy sql.NullInt64
 
