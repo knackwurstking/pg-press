@@ -5,7 +5,7 @@
 - [x] tools
 - [x] trouble reports
 - [x] notes
-- [ ] modifications
+- [x] modifications
 - [ ] metal sheets
 - [ ] feeds
 - [ ] cookies

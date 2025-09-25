@@ -14,10 +14,10 @@ import (
 type TroubleReports struct {
 	db            *sql.DB
 	attachments   *Attachment
-	modifications *Modification
+	modifications *Modifications
 }
 
-func NewTroubleReports(db *sql.DB, a *Attachment, m *Modification) *TroubleReports {
+func NewTroubleReports(db *sql.DB, a *Attachment, m *Modifications) *TroubleReports {
 	troubleReport := &TroubleReports{
 		db:            db,
 		attachments:   a,
