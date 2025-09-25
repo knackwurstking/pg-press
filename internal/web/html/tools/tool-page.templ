@@ -98,42 +98,45 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 }
 
 templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes) {
-	<section>
-		<div class="flex justify-between items-center mb">
-			<h4>Bleche</h4>
-			<button
-				class="secondary small flex"
-				hx-get={ fmt.Sprintf(
+	// NOTE: For now only top and bottom position can contain metal sheets
+	if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
+		<section>
+			<div class="flex justify-between items-center mb">
+				<h4>Bleche</h4>
+				<button
+					class="secondary small flex"
+					hx-get={ fmt.Sprintf(
 					"%s/htmx/metal-sheets/edit?tool_id=%d",
 					env.ServerPathPrefix, tool.ID,
 				) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				title="Neues Blech hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-			</button>
-		</div>
-		<div class="card compact info">
-			<div class="card-body">
-				In Bearbeitung
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Neues Blech hinzufügen"
+				>
+					<i class="bi bi-plus-lg"></i>
+				</button>
 			</div>
-		</div>
-		<div class="table-container">
-			switch tool.Position {
-				case models.PositionBottom:
-					@MetalSheetTableBottom(
-						user, metalSheets,
-					)
-				case models.PositionTop:
-					@MetalSheetTableTop(
-						user, metalSheets,
-					)
-			}
-		</div>
-	</section>
+			<div class="card compact info">
+				<div class="card-body">
+					In Bearbeitung
+				</div>
+			</div>
+			<div class="table-container">
+				switch tool.Position {
+					case models.PositionBottom:
+						@MetalSheetTableBottom(
+							user, metalSheets,
+						)
+					case models.PositionTop:
+						@MetalSheetTableTop(
+							user, metalSheets,
+						)
+				}
+			</div>
+		</section>
+	}
 }
 
 templ sectionCycles(tool *models.ToolWithNotes, user *models.User) {
