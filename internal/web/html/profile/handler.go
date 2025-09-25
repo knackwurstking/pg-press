@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
@@ -82,6 +83,14 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 
 	h.LogInfo("Successfully updated username for user %d from %s to %s",
 		user.TelegramID, user.Name, userName)
+
+	// Create feed entry
+	feedTitle := "Benutzername geändert"
+	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
+	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for username change: %v", err)
+	}
 
 	user.Name = userName
 
