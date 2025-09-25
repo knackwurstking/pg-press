@@ -1,6 +1,6 @@
 # Handle feeds
 
-- [ ] cycles
+- [x] cycles
 - [ ] metal sheets
 - [ ] tools
 - [ ] trouble reports

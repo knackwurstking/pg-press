@@ -188,7 +188,6 @@ func (h *Cycles) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
-// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleEditDialogPOST(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -234,10 +233,22 @@ func (h *Cycles) HandleEditDialogPOST(c echo.Context) error {
 		}
 	}
 
+	// Create feed entry
+	title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
+	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	if form.Regenerating {
+		content += "\nRegenerierung gestartet"
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for cycle creation: %v", err)
+	}
+
 	return h.closeDialog(c)
 }
 
-// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleEditDialogPUT(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -295,6 +306,19 @@ func (h *Cycles) HandleEditDialogPUT(c echo.Context) error {
 		}
 	}
 
+	// Create feed entry
+	title := fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
+	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	if form.Regenerating {
+		content += "\nRegenerierung abgeschlossen"
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for cycle update: %v", err)
+	}
+
 	return h.closeDialog(c)
 }
 
@@ -310,9 +334,8 @@ func (h *Cycles) closeDialog(c echo.Context) error {
 	return nil
 }
 
-// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleDELETE(c echo.Context) error {
-	_, err := h.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -322,8 +345,29 @@ func (h *Cycles) HandleDELETE(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse ID query: "+err.Error())
 	}
 
+	// Get cycle data before deletion for the feed
+	cycle, err := h.DB.PressCycles.Get(cycleID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get cycle for deletion")
+	}
+
+	tool, err := h.DB.Tools.Get(cycle.ToolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool for deletion")
+	}
+
 	if err := h.DB.PressCycles.Delete(cycleID); err != nil {
 		return h.HandleError(c, err, "failed to delete press cycle")
+	}
+
+	// Create feed entry
+	title := fmt.Sprintf("Zyklus gelöscht für %s", tool.String())
+	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+		cycle.PressNumber, tool.String(), cycle.TotalCycles, cycle.Date.Format("2006-01-02 15:04:05"))
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for cycle deletion: %v", err)
 	}
 
 	return h.GetSection(c)
