@@ -376,9 +376,9 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error
 	var count int
 	const query = `
 		SELECT COUNT(*) FROM tools
-		WHERE id != $1 AND position = $2 AND format = $3 AND type = $4 AND code = $5
+		WHERE id != $1 AND position = $2 AND format = $3 AND code = $4
 	`
-	err = t.db.QueryRow(query, excludeID, tool.Position, formatBytes, tool.Type, tool.Code).Scan(&count)
+	err = t.db.QueryRow(query, excludeID, tool.Position, formatBytes, tool.Code).Scan(&count)
 	if err != nil {
 		return fmt.Errorf("failed to check for existing tool: %v", err)
 	}
@@ -386,8 +386,8 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error
 	if count > 0 {
 		return utils.NewAlreadyExistsError(
 			fmt.Sprintf(
-				"tool with position %s, format %s, type %s, and code %s already exists",
-				tool.Position, tool.Format, tool.Type, tool.Code,
+				"tool with position %s, format %s, and code %s already exists",
+				tool.Position, tool.Format, tool.Code,
 			),
 		)
 	}
