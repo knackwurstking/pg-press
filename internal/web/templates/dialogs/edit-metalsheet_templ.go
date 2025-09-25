@@ -16,8 +16,8 @@ import (
 )
 
 type EditMetalSheetProps struct {
-	Tool         *models.Tool
-	MetalSheetID int64
+	MetalSheet *models.MetalSheet
+	Tool       *models.Tool
 
 	CloseDialog bool // Standalone prop
 }
@@ -53,12 +53,12 @@ func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
 			submitButtonText = "Erstellen"
 		)
 
-		if props.MetalSheetID > 0 {
+		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
 				"%s/htmx/tools/cycle/edit?id=%d",
 				env.ServerPathPrefix,
-				props.MetalSheetID,
+				props.MetalSheet.ID,
 			)
 			submitButtonText = "Aktualisieren"
 		}

@@ -31,20 +31,6 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
 							<td class="button-group flex justify-end items-center">
 								<button
-									class="info small ghost"
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/view?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Details anzeigen"
-								>
-									<i class="bi bi-eye"></i>
-								</button>
-								<button
 									class="primary small ghost"
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
@@ -114,20 +100,6 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
 							<td class="button-group flex justify-end items-center">
-								<button
-									class="info small ghost"
-									hx-get={ fmt.Sprintf(
-										"%s/htmx/metal-sheets/view?id=%d",
-										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Details anzeigen"
-								>
-									<i class="bi bi-eye"></i>
-								</button>
 								<button
 									class="primary small ghost"
 									hx-get={ fmt.Sprintf(

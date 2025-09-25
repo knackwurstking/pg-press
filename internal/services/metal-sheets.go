@@ -39,11 +39,11 @@ func (s *MetalSheets) createTable() error {
 			marke_height INTEGER NOT NULL,
 			stf REAL NOT NULL,
 			stf_max REAL NOT NULL,
-			tool_id INTEGER,
+			tool_id INTEGER NOT NULL,
 			notes BLOB NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL,
+			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -173,39 +173,11 @@ func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	return sheets, nil
 }
 
-// GetAvailable returns all available metal sheets
+// GetAvailable returns all metal sheets (tool_id is now required so all sheets are assigned)
+// This method is kept for backward compatibility but now returns all sheets
 func (s *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
-	logger.DBMetalSheets().Info("Getting available metal sheets")
-
-	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
-		FROM metal_sheets
-		WHERE tool_id IS NULL
-		ORDER BY id DESC;
-	`
-
-	rows, err := s.db.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
-	}
-	defer rows.Close()
-
-	var sheets []*models.MetalSheet
-
-	for rows.Next() {
-		sheet, err := s.scanMetalSheet(rows)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
-		}
-		sheets = append(sheets, sheet)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
-	}
-
-	logger.DBMetalSheets().Debug("Found %d available metal sheets", len(sheets))
-	return sheets, nil
+	logger.DBMetalSheets().Info("Getting all metal sheets (tool_id is now required)")
+	return s.List()
 }
 
 // Add inserts a new metal sheet
@@ -273,7 +245,7 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 }
 
 // AssignTool assigns a metal sheet to a tool
-func (s *MetalSheets) AssignTool(sheetID int64, toolID *int64) error {
+func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
 	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
@@ -324,7 +296,7 @@ func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.Meta
 
 	var (
 		linkedNotes []byte
-		toolID      sql.NullInt64
+		toolID      int64
 	)
 
 	if err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
@@ -335,10 +307,8 @@ func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.Meta
 		return nil, fmt.Errorf("scan error: metal_sheets: %v", err)
 	}
 
-	// Handle nullable tool_id
-	if toolID.Valid {
-		sheet.ToolID = &toolID.Int64
-	}
+	// tool_id is now required
+	sheet.ToolID = toolID
 
 	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
 		return nil, fmt.Errorf("scan error: metal_sheets: %v", err)

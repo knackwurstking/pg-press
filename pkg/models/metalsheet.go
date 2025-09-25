@@ -12,19 +12,19 @@ type MetalSheet struct {
 	MarkeHeight int     `json:"marke_height"` // Marke height
 	STF         float64 `json:"stf"`          // STF value
 	STFMax      float64 `json:"stf_max"`      // STF max value
-	ToolID      *int64  `json:"tool_id"`      // Currently assigned tool (nullable)
+	ToolID      int64   `json:"tool_id"`      // Currently assigned tool
 	LinkedNotes []int64 `json:"notes"`        // Contains note ids from the "notes" table
 }
 
 // New creates a new MetalSheet with default values
-func NewMetalSheet(u *User) *MetalSheet {
+func NewMetalSheet(u *User, toolID int64) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,
 		MarkeHeight: 0,
 		STF:         0,
 		STFMax:      0,
-		ToolID:      nil,
+		ToolID:      toolID,
 		LinkedNotes: make([]int64, 0),
 	}
 
@@ -35,11 +35,6 @@ func NewMetalSheet(u *User) *MetalSheet {
 func (ms *MetalSheet) String() string {
 	return fmt.Sprintf("Blech #%d (TH: %.1f, V: %.1f, MH: %d, STF: %.1f/%.1f)",
 		ms.ID, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
-}
-
-// IsAssigned checks if the metal sheet is assigned to a tool
-func (ms *MetalSheet) IsAssigned() bool {
-	return ms.ToolID != nil
 }
 
 // MetalSheetWithNotes represents a metal sheet with its related notes loaded
