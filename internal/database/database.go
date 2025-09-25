@@ -19,7 +19,7 @@ type DB struct {
 	MetalSheets    *services.MetalSheets
 
 	Attachments       *services.Attachment
-	Cookies           *services.Cookie
+	Cookies           *services.Cookies
 	ToolRegenerations *services.ToolRegenerations
 	Feeds             *services.Feed
 	Modifications     *services.Modifications
@@ -45,7 +45,7 @@ func New(db *sql.DB) *DB {
 
 	dbInstance := &DB{
 		Users:             services.NewUser(db, feeds),
-		Cookies:           services.NewCookie(db),
+		Cookies:           services.NewCookies(db),
 		Attachments:       attachments,
 		TroubleReports:    troubleReports,
 		Notes:             notes,

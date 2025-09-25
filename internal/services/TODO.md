@@ -8,6 +8,6 @@
 - [x] modifications
 - [x] metal sheets
 - [ ] feeds
-- [ ] cookies
+- [x] cookies
 - [ ] attachments
 - [ ] users
