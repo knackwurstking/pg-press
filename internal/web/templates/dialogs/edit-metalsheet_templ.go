@@ -16,10 +16,10 @@ import (
 )
 
 type EditMetalSheetProps struct {
-	MetalSheet *models.MetalSheet
+	MetalSheet *models.MetalSheet // MetalSheet can be nullable
 	Tool       *models.Tool
 
-	CloseDialog bool // Standalone prop
+	CloseDialog bool // ClosingDialog is a standalone prop
 }
 
 func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
