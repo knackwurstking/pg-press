@@ -2,7 +2,7 @@
 
 - [x] press cycles
 - [x] tool regenerations
-- [ ] tools
+- [x] tools
 - [ ] trouble reports
 - [ ] notes
 - [ ] modifications

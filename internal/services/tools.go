@@ -11,17 +11,15 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type Tool struct {
+type Tools struct {
 	db    *sql.DB
 	notes *Note
-	feeds *Feed
 }
 
-func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
-	t := &Tool{
+func NewTools(db *sql.DB, notes *Note) *Tools {
+	t := &Tools{
 		db:    db,
 		notes: notes,
-		feeds: feeds,
 	}
 
 	if err := t.createTable(); err != nil {
@@ -31,7 +29,7 @@ func NewTool(db *sql.DB, notes *Note, feeds *Feed) *Tool {
 	return t
 }
 
-func (t *Tool) createTable() error {
+func (t *Tools) createTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS tools (
 			id INTEGER NOT NULL,
@@ -53,7 +51,7 @@ func (t *Tool) createTable() error {
 	return nil
 }
 
-func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
+func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
 		return 0, err
 	}
@@ -78,14 +76,10 @@ func (t *Tool) Add(tool *models.Tool, user *models.User) (int64, error) {
 		return 0, fmt.Errorf("insert error: tools: %v", err)
 	}
 
-	tool.ID = id
-	t.createFeedUpdate("Neues Werkzeug hinzugefügt",
-		fmt.Sprintf("Benutzer %s hat ein neues Werkzeug %s zur Werkzeugliste hinzugefügt.", user.Name, tool.String()), user)
-
 	return id, nil
 }
 
-func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
+func (t *Tools) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
 	var noteIDs []int64
 	for _, note := range notes {
 		noteID, err := t.notes.Add(note, user)
@@ -105,31 +99,17 @@ func (t *Tool) AddWithNotes(tool *models.Tool, user *models.User, notes ...*mode
 	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
-func (t *Tool) Delete(id int64, user *models.User) error {
-	tool, err := t.Get(id)
-	if err != nil {
-		return err
-	}
-
+func (t *Tools) Delete(id int64, user *models.User) error {
 	const deleteQuery = `DELETE FROM tools WHERE id = $1`
-	_, err = t.db.Exec(deleteQuery, id)
+	_, err := t.db.Exec(deleteQuery, id)
 	if err != nil {
 		return fmt.Errorf("delete error: tools: %v", err)
 	}
 
-	t.createFeedUpdate(
-		"Werkzeug entfernt",
-		fmt.Sprintf(
-			"Benutzer %s hat das Werkzeug %s entfernt.",
-			user.Name, tool.String(),
-		),
-		user,
-	)
-
 	return nil
 }
 
-func (t *Tool) Get(id int64) (*models.Tool, error) {
+func (t *Tools) Get(id int64) (*models.Tool, error) {
 	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools WHERE id = $1`
 	row := t.db.QueryRow(query, id)
 
@@ -144,7 +124,7 @@ func (t *Tool) Get(id int64) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
+func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
 	const query = `
 		SELECT id, position, format, type, code, regenerating, press, notes
 		FROM tools WHERE regenerating = 0 AND press = ?
@@ -172,7 +152,7 @@ func (t *Tool) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.
 	return tools
 }
 
-func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
+func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
@@ -203,7 +183,7 @@ func (t *Tool) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, erro
 	return tools, nil
 }
 
-func (t *Tool) GetPressUtilization() ([]models.PressUtilization, error) {
+func (t *Tools) GetPressUtilization() ([]models.PressUtilization, error) {
 	var utilization []models.PressUtilization
 
 	// Valid press numbers: 0, 2, 3, 4, 5
@@ -224,7 +204,7 @@ func (t *Tool) GetPressUtilization() ([]models.PressUtilization, error) {
 	return utilization, nil
 }
 
-func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
+func (t *Tools) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 	tool, err := t.Get(id)
 	if err != nil {
 		return nil, err
@@ -238,7 +218,7 @@ func (t *Tool) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
-func (t *Tool) List() ([]*models.Tool, error) {
+func (t *Tools) List() ([]*models.Tool, error) {
 	const query = `
 		SELECT
 			id, position, format, type, code, regenerating, press, notes
@@ -269,7 +249,7 @@ func (t *Tool) List() ([]*models.Tool, error) {
 	return tools, nil
 }
 
-func (t *Tool) ListWithNotes() ([]*models.ToolWithNotes, error) {
+func (t *Tools) ListWithNotes() ([]*models.ToolWithNotes, error) {
 	tools, err := t.List()
 	if err != nil {
 		return nil, err
@@ -288,7 +268,7 @@ func (t *Tool) ListWithNotes() ([]*models.ToolWithNotes, error) {
 	return result, nil
 }
 
-func (t *Tool) Update(tool *models.Tool, user *models.User) error {
+func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
 		return err
 	}
@@ -308,13 +288,10 @@ func (t *Tool) Update(tool *models.Tool, user *models.User) error {
 		return fmt.Errorf("update error: tools: %v", err)
 	}
 
-	t.createFeedUpdate("Werkzeug aktualisiert",
-		fmt.Sprintf("Benutzer %s hat das Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
-
 	return nil
 }
 
-func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
+func (t *Tools) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {
 	tool, err := t.Get(toolID)
 	if err != nil {
 		return fmt.Errorf("failed to get tool for press update: %v", err)
@@ -334,14 +311,10 @@ func (t *Tool) UpdatePress(toolID int64, press *models.PressNumber, user *models
 		return fmt.Errorf("update error: tools: %v", err)
 	}
 
-	tool.Press = press
-	t.createFeedUpdate("Werkzeug Pressendaten aktualisiert",
-		fmt.Sprintf("Benutzer %s hat die Pressendaten für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
-
 	return nil
 }
 
-func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
+func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
 	tool, err := t.Get(toolID)
 	if err != nil {
 		return fmt.Errorf("failed to get tool for regenerating status update: %v", err)
@@ -357,22 +330,10 @@ func (t *Tool) UpdateRegenerating(toolID int64, regenerating bool, user *models.
 		return fmt.Errorf("update error: tools: %v", err)
 	}
 
-	t.createFeedUpdate("Werkzeug Regenerierung aktualisiert",
-		fmt.Sprintf("Benutzer %s hat die Regenerierung für Werkzeug %s aktualisiert.", user.Name, tool.String()), user)
-
 	return nil
 }
 
-func (t *Tool) createFeedUpdate(title, message string, user *models.User) {
-	if t.feeds != nil {
-		feed := models.NewFeed(title, message, user.TelegramID)
-		if err := t.feeds.Add(feed); err != nil {
-			logger.DBTools().Warn("Failed to create feed update: %v", err)
-		}
-	}
-}
-
-func (t *Tool) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
+func (t *Tools) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
 		return nil, nil, fmt.Errorf("marshal error: tools: %v", err)
@@ -386,7 +347,7 @@ func (t *Tool) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
 	return formatBytes, notesBytes, nil
 }
 
-func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
+func (t *Tools) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
 	var format, linkedNotes []byte
 
@@ -406,7 +367,7 @@ func (t *Tool) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	return tool, nil
 }
 
-func (t *Tool) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
+func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
 		return fmt.Errorf("failed to marshal format data: %v", err)

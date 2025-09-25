@@ -15,7 +15,7 @@ type DB struct {
 	Users          *services.User
 	TroubleReports *services.TroubleReport
 	Notes          *services.Note
-	Tools          *services.Tool
+	Tools          *services.Tools
 	MetalSheets    *services.MetalSheet
 
 	Attachments       *services.Attachment
@@ -38,10 +38,10 @@ func New(db *sql.DB) *DB {
 	pressCycles := services.NewPressCycles(db)
 
 	notes := services.NewNote(db)
-	tools := services.NewTool(db, notes, feeds)
+	tools := services.NewTools(db, notes)
 
 	metalSheets := services.NewMetalSheet(db, feeds, notes)
-	toolRegenerations := services.NewRegeneration(db, tools)
+	toolRegenerations := services.NewToolRegenerations(db, tools)
 
 	dbInstance := &DB{
 		Users:             services.NewUser(db, feeds),
