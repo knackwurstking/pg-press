@@ -17,11 +17,6 @@ type ToolRegenerations struct {
 }
 
 func NewToolRegenerations(db *sql.DB, tools *Tools) *ToolRegenerations {
-	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
-	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
-	//}
-
 	query := `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,

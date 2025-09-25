@@ -19,11 +19,6 @@ type Feeds struct {
 
 // NewFeeds creates a new Feed instance and initializes the database table
 func NewFeeds(db *sql.DB) *Feeds {
-	//dropQuery := `DROP TABLE IF EXISTS feeds;`
-	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop feeds table: %v", err))
-	//}
-
 	query := `
 		CREATE TABLE IF NOT EXISTS feeds (
 			id INTEGER NOT NULL,

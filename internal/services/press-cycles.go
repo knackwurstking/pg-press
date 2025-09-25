@@ -16,11 +16,6 @@ type PressCycles struct {
 }
 
 func NewPressCycles(db *sql.DB) *PressCycles {
-	//dropQuery := `DROP TABLE IF EXISTS press_cycles;`
-	//if _, err := db.Exec(dropQuery); err != nil {
-	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
-	//}
-
 	// Create new table with tool_id and tool_position instead of slot fields
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
