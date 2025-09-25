@@ -26,6 +26,19 @@ type (
 	PressNumber int8
 )
 
+func (p Position) String() string {
+	switch p {
+	case PositionTop:
+		return "Oberteil"
+	case PositionTopCassette:
+		return "Oberteil Kassette"
+	case PositionBottom:
+		return "Unterteil"
+	default:
+		return "unknown"
+	}
+}
+
 // IsValid checks if the press number is within the valid range (0-5)
 func IsValidPressNumber(n *PressNumber) bool {
 	if n == nil {

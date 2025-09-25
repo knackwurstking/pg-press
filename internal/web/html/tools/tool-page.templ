@@ -12,8 +12,8 @@ import (
 templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
 	@layouts.Main(
 		layouts.MainOptions{
-			PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
-			AppBarTitle: tool.String(),
+			PageTitle:   fmt.Sprintf("PG Presse | %s %s", tool.String(), tool.Position.String()),
+			AppBarTitle: fmt.Sprintf("%s %s", tool.String(), tool.Position.String()),
 			NavContent:  toolsPageNavContent(),
 		},
 	) {

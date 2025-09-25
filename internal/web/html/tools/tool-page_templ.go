@@ -80,8 +80,8 @@ func ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mode
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
-				PageTitle:   fmt.Sprintf("PG Presse | %s", tool.String()),
-				AppBarTitle: tool.String(),
+				PageTitle:   fmt.Sprintf("PG Presse | %s %s", tool.String(), tool.Position.String()),
+				AppBarTitle: fmt.Sprintf("%s %s", tool.String(), tool.Position.String()),
 				NavContent:  toolsPageNavContent(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
