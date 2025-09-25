@@ -13,10 +13,10 @@ import (
 
 type ToolRegenerations struct {
 	db    *sql.DB
-	tools *Tool
+	tools *Tools
 }
 
-func NewRegeneration(db *sql.DB, tools *Tool) *ToolRegenerations {
+func NewToolRegenerations(db *sql.DB, tools *Tools) *ToolRegenerations {
 	//dropQuery := `DROP TABLE IF EXISTS tool_regenerations;`
 	//if _, err := db.Exec(dropQuery); err != nil {
 	//	panic(fmt.Errorf("failed to drop existing press_cycles table: %v", err))
