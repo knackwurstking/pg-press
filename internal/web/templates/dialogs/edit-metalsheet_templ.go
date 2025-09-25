@@ -127,7 +127,7 @@ func metalSheetDialogContentPositionTop(props *EditMetalSheetProps) templ.Compon
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"form-group\"><label for=\"tile-height\">Stärke (mm)</label> <input type=\"number\" id=\"tile-height\" name=\"tile_height\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex flex-col\"><label for=\"tile-height\">Stärke (mm)</label> <input type=\"number\" id=\"tile-height\" name=\"tile_height\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +150,7 @@ func metalSheetDialogContentPositionTop(props *EditMetalSheetProps) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "></div><div class=\"form-group\"><label for=\"value\">Blech (mm)</label> <input type=\"number\" id=\"value\" name=\"value\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "></div><div class=\"flex flex-col\"><label for=\"value\">Blech (mm)</label> <input type=\"number\" id=\"value\" name=\"value\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -202,7 +202,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"form-group\"><label for=\"tile-height\">Stärke (mm)</label> <input type=\"number\" id=\"tile-height\" name=\"tile_height\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex flex-col\"><label for=\"tile-height\">Stärke (mm)</label> <input type=\"number\" id=\"tile-height\" name=\"tile_height\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -225,7 +225,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "></div><div class=\"form-group\"><label for=\"value\">Blech (mm)</label> <input type=\"number\" id=\"value\" name=\"value\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "></div><div class=\"flex flex-col\"><label for=\"value\">Blech (mm)</label> <input type=\"number\" id=\"value\" name=\"value\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -248,7 +248,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "></div><div class=\"form-group\"><label for=\"marke-height\">Marke (mm)</label> <input type=\"number\" id=\"marke-height\" name=\"marke_height\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "></div><div class=\"flex flex-col\"><label for=\"marke-height\">Marke (mm)</label> <input type=\"number\" id=\"marke-height\" name=\"marke_height\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -271,7 +271,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "></div><div class=\"form-group\"><label for=\"stf\">Stf.</label> <input type=\"number\" id=\"stf\" name=\"stf\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "></div><div class=\"flex flex-col\"><label for=\"stf\">Stf.</label> <input type=\"number\" id=\"stf\" name=\"stf\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -294,7 +294,7 @@ func metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) templ.Com
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "></div><div class=\"form-group\"><label for=\"stf-max\">Stf. Max</label> <input type=\"number\" id=\"stf-max\" name=\"stf_max\" step=\"0.1\" required")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "></div><div class=\"flex flex-col\"><label for=\"stf-max\">Stf. Max</label> <input type=\"number\" id=\"stf-max\" name=\"stf_max\" step=\"0.1\" required")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

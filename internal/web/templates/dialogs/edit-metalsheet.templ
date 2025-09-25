@@ -53,7 +53,7 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 }
 
 templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
 			type="number"
@@ -66,7 +66,7 @@ templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
 			}
 		/>
 	</div>
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="value">Blech (mm)</label>
 		<input
 			type="number"
@@ -82,7 +82,7 @@ templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
 }
 
 templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
 			type="number"
@@ -95,7 +95,7 @@ templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
 			}
 		/>
 	</div>
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="value">Blech (mm)</label>
 		<input
 			type="number"
@@ -108,7 +108,7 @@ templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
 			}
 		/>
 	</div>
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="marke-height">Marke (mm)</label>
 		<input
 			type="number"
@@ -120,7 +120,7 @@ templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
 			}
 		/>
 	</div>
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="stf">Stf.</label>
 		<input
 			type="number"
@@ -133,7 +133,7 @@ templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
 			}
 		/>
 	</div>
-	<div class="form-group">
+	<div class="flex flex-col">
 		<label for="stf-max">Stf. Max</label>
 		<input
 			type="number"
