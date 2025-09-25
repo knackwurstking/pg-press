@@ -16,6 +16,7 @@ type MetalSheets struct {
 	*handlers.BaseHandler
 }
 
+// TODO: Do not forget the feeds
 func NewMetalSheets(db *database.DB) *MetalSheets {
 	return &MetalSheets{
 		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerMetalSheets()),
