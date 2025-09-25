@@ -161,7 +161,6 @@ func (h *Tools) GetUmbauPage(c echo.Context) error {
 	return nil
 }
 
-// TODO: Create a feed
 func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 	// Get user from context
 	user, err := h.GetUserFromContext(c)
