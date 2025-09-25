@@ -210,7 +210,7 @@ func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 }
 
 // Delete removes a press cycle from the database.
-func (p *PressCycles) Delete(id int64, user *models.User) error {
+func (p *PressCycles) Delete(id int64) error {
 	logger.DBPressCycles().Info("Deleting press cycle: id=%d", id)
 
 	// No need to get cycle data for simplified feed system
