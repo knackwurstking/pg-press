@@ -28,7 +28,7 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d",
+				"%s/htmx/metal-sheets/edit?id=%d",
 				env.ServerPathPrefix,
 				props.MetalSheet.ID,
 			)
@@ -42,6 +42,108 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 		SubmitButtonText: submitButtonText,
 		CloseDialog:      props.CloseDialog,
 	}) {
-		// TOOD: Dialog content here
+		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
+		switch props.Tool.Position {
+			case models.PositionTop:
+				@metalSheetDialogContentPositionTop(props)
+			case models.PositionBottom:
+				@metalSheetDialogContentPositionBottom(props)
+		}
 	}
+}
+
+templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
+	<div class="form-group">
+		<label for="tile-height">Stärke (mm)</label>
+		<input
+			type="number"
+			id="tile-height"
+			name="tile_height"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.TileHeight) }
+			}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="value">Blech (mm)</label>
+		<input
+			type="number"
+			id="value"
+			name="value"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.Value) }
+			}
+		/>
+	</div>
+}
+
+templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
+	<div class="form-group">
+		<label for="tile-height">Stärke (mm)</label>
+		<input
+			type="number"
+			id="tile-height"
+			name="tile_height"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.TileHeight) }
+			}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="value">Blech (mm)</label>
+		<input
+			type="number"
+			id="value"
+			name="value"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.Value) }
+			}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="marke-height">Marke (mm)</label>
+		<input
+			type="number"
+			id="marke-height"
+			name="marke_height"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%d", props.MetalSheet.MarkeHeight) }
+			}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="stf">Stf.</label>
+		<input
+			type="number"
+			id="stf"
+			name="stf"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.STF) }
+			}
+		/>
+	</div>
+	<div class="form-group">
+		<label for="stf-max">Stf. Max</label>
+		<input
+			type="number"
+			id="stf-max"
+			name="stf_max"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.STFMax) }
+			}
+		/>
+	</div>
 }
