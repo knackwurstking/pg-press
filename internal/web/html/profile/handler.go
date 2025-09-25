@@ -58,6 +58,7 @@ func (h *Profile) HandleProfile(c echo.Context) error {
 	return nil
 }
 
+// TOOD: Create a feed entry
 func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
 	userName := h.GetSanitizedFormValue(c, constants.UserNameFormField)
 

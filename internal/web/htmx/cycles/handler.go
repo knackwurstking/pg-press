@@ -45,7 +45,7 @@ func (h *Cycles) RegisterRoutes(e *echo.Echo) {
 				h.GetSection),
 
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles",
-				h.HandleTotalCycles),
+				h.GetTotalCycles),
 
 			// Get, add or edit a cycles table entry
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit",
@@ -116,7 +116,7 @@ func (h *Cycles) GetSection(c echo.Context) error {
 	return nil
 }
 
-func (h *Cycles) HandleTotalCycles(c echo.Context) error {
+func (h *Cycles) GetTotalCycles(c echo.Context) error {
 	// Get tool and position parameters
 	toolID, err := h.ParseInt64Query(c, "tool_id")
 	if err != nil {
@@ -188,6 +188,7 @@ func (h *Cycles) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
+// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleEditPOST(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -236,6 +237,7 @@ func (h *Cycles) HandleEditPOST(c echo.Context) error {
 	return h.closeDialog(c)
 }
 
+// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleEditPUT(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -308,8 +310,9 @@ func (h *Cycles) closeDialog(c echo.Context) error {
 	return nil
 }
 
+// TODO: Create a feed entry for the cycle edit
 func (h *Cycles) HandleDELETE(c echo.Context) error {
-	user, err := h.GetUserFromContext(c)
+	_, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -319,7 +322,7 @@ func (h *Cycles) HandleDELETE(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse ID query: "+err.Error())
 	}
 
-	if err := h.DB.PressCycles.Delete(cycleID, user); err != nil {
+	if err := h.DB.PressCycles.Delete(cycleID); err != nil {
 		return h.HandleError(c, err, "failed to delete press cycle")
 	}
 
