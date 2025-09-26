@@ -1,6 +1,7 @@
 package troublereports
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,62 +14,152 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
+	"github.com/knackwurstking/pgpress/internal/web/features/troublereports/templates"
+	"github.com/knackwurstking/pgpress/internal/web/shared/base"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/pkg/modification"
 
 	"github.com/labstack/echo/v4"
 )
 
-type TroubleReports struct {
+type Handler struct {
 	*handlers.BaseHandler
 }
 
-func NewTroubleReports(db *database.DB) *TroubleReports {
-	return &TroubleReports{
-		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerTroubleReports()),
+func NewHandler(db *database.DB) *Handler {
+	return &Handler{
+		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
 	}
 }
 
-func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
-	helpers.RegisterEchoRoutes(
-		e,
-		[]*helpers.EchoRoute{
-			// Data routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data",
-				h.GetData,
-			),
+func (h *Handler) GetTroubleReports(c echo.Context) error {
+	h.LogDebug("Rendering trouble reports page")
 
-			helpers.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data",
-				h.DeleteTroubleReport,
-			),
-
-			// Attachments preview routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview",
-				h.GetAttachmentsPreview),
-
-			// Dialog edit routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
-				h.GetEditDialog),
-
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
-				h.AddTroubleReportOnEditDialogSubmit),
-
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit",
-				h.UpdateTroubleReportOnEditDialogSubmit),
-
-			// Rollback route
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
-				h.Rollback),
-		},
-	)
+	page := templates.TroubleReportsPage()
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render trouble reports page: "+err.Error())
+	}
+	return nil
 }
 
-func (h *TroubleReports) GetData(c echo.Context) error {
+func (h *Handler) GetSharePDF(c echo.Context) error {
+	id, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, err.Error())
+	}
+
+	h.LogInfo("Generating PDF for trouble report %d", id)
+
+	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve trouble report")
+	}
+
+	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
+	if err != nil {
+		return h.HandleError(c, err, "failed to generate PDF")
+	}
+
+	h.LogInfo("Successfully generated PDF for trouble report %d (size: %d bytes)",
+		tr.ID, pdfBuffer.Len())
+
+	return h.shareResponse(c, tr, pdfBuffer)
+}
+
+func (h *Handler) GetAttachment(c echo.Context) error {
+	attachmentID, err := h.ParseInt64Query(c, "attachment_id")
+	if err != nil {
+		return h.RenderBadRequest(c, err.Error())
+	}
+
+	h.LogDebug("Fetching attachment %d", attachmentID)
+
+	// Get the attachment from the attachments table
+	attachment, err := h.DB.Attachments.Get(attachmentID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get attachment")
+	}
+
+	// Set appropriate headers
+	c.Response().Header().Set("Content-Type", attachment.MimeType)
+	c.Response().Header().Set("Content-Length", strconv.Itoa(len(attachment.Data)))
+
+	// Try to determine filename from attachment ID
+	filename := fmt.Sprintf("attachment_%d", attachmentID)
+	if ext := attachment.GetFileExtension(); ext != "" {
+		filename += ext
+	}
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	h.LogInfo("Serving attachment %d (size: %d bytes, type: %s)",
+		attachmentID, len(attachment.Data), attachment.MimeType)
+
+	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
+}
+
+func (h *Handler) GetModificationsForID(c echo.Context) error {
+	h.LogInfo("Handling modifications for trouble report")
+
+	// Parse ID parameter
+	id, err := h.ParseInt64Param(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, err.Error())
+	}
+
+	// Fetch modifications for this trouble report
+	h.LogDebug("Fetching modifications for trouble report %d", id)
+
+	modifications, err := h.DB.Modifications.ListWithUser(
+		services.ModificationTypeTroubleReport, id, 100, 0)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve modifications")
+	}
+
+	h.LogDebug(
+		"Found %d modifications for trouble report %d",
+		len(modifications), id)
+
+	// Convert to the format expected by the modifications page
+	var m modification.Mods[models.TroubleReportModData]
+	for _, mod := range modifications {
+		var data models.TroubleReportModData
+		if err := json.Unmarshal(mod.Modification.Data, &data); err != nil {
+			continue
+		}
+
+		modEntry := modification.NewMod(&mod.User, data)
+		modEntry.Time = mod.Modification.CreatedAt.UnixMilli()
+		m = append(m, modEntry)
+	}
+
+	// Get user from context to check permissions
+	currentUser, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to retrieve user from context")
+	}
+	canRollback := currentUser != nil && currentUser.IsAdmin()
+
+	// Create render function using the new template
+	f := templates.CreateModificationRenderer(id, canRollback)
+
+	// Rendering the page template
+	page := base.ModPage(m, f)
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render page: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXGetData(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -91,7 +182,7 @@ func (h *TroubleReports) GetData(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
+func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse trouble report ID: "+err.Error())
@@ -124,10 +215,10 @@ func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
 		}
 	}
 
-	return h.GetData(c)
+	return h.HTMXGetData(c)
 }
 
-func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
+func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse ID from query")
@@ -153,7 +244,7 @@ func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) GetEditDialog(c echo.Context) error {
+func (h *Handler) HTMXGetEditTroubleReportDialog(c echo.Context) error {
 	props := &dialogs.EditTroubleReportProps{}
 	props.ID, _ = h.ParseInt64Query(c, "id")
 
@@ -190,7 +281,7 @@ func (h *TroubleReports) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) AddTroubleReportOnEditDialogSubmit(c echo.Context) error {
+func (h *Handler) HTMXPostEditTroubleReportDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -231,7 +322,7 @@ func (h *TroubleReports) AddTroubleReportOnEditDialogSubmit(c echo.Context) erro
 	return h.closeDialog(c)
 }
 
-func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) error {
+func (h *Handler) HTMXPutEditTroubleReportDialog(c echo.Context) error {
 	// Get ID from query parameter
 	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
@@ -302,20 +393,7 @@ func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) e
 	return h.closeDialog(c)
 }
 
-func (h *TroubleReports) closeDialog(c echo.Context) error {
-	dialog := dialogs.EditTroubleReport(&dialogs.EditTroubleReportProps{
-		CloseDialog: true,
-	})
-
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render trouble report edit dialog: "+err.Error())
-	}
-
-	return nil
-}
-
-func (h *TroubleReports) Rollback(c echo.Context) error {
+func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	h.LogInfo("Handling HTMX rollback for trouble report")
 
 	// Parse ID parameter from query
@@ -412,12 +490,11 @@ func (h *TroubleReports) Rollback(c echo.Context) error {
 	return nil
 }
 
-func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
+func (h *Handler) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
 	attachments []*models.Attachment,
 	err error,
 ) {
-
 	title = h.GetSanitizedFormValue(ctx, constants.TitleFormField)
 	if title == "" {
 		return "", "", nil, fmt.Errorf("missing title")
@@ -437,7 +514,7 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	return title, content, attachments, nil
 }
 
-func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
+func (h *Handler) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
 	var attachments []*models.Attachment
 
 	// Get existing attachments if editing
@@ -495,10 +572,9 @@ func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachm
 	return attachments, nil
 }
 
-func (h *TroubleReports) processFileUpload(
+func (h *Handler) processFileUpload(
 	fileHeader *multipart.FileHeader, index int,
 ) (*models.Attachment, error) {
-
 	if fileHeader.Size > models.MaxDataSize {
 		return nil, fmt.Errorf("file %s is too large (max 10MB)",
 			fileHeader.Filename)
@@ -564,7 +640,7 @@ func (h *TroubleReports) processFileUpload(
 	return attachment, nil
 }
 
-func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
+func (h *Handler) getMimeTypeFromFilename(filename string) string {
 	ext := strings.ToLower(filename)
 	if idx := strings.LastIndex(ext, "."); idx >= 0 {
 		ext = ext[idx:]
@@ -586,4 +662,34 @@ func (h *TroubleReports) getMimeTypeFromFilename(filename string) string {
 	}
 
 	return "application/octet-stream"
+}
+
+func (h *Handler) shareResponse(
+	c echo.Context,
+	tr *models.TroubleReportWithAttachments,
+	buf *bytes.Buffer,
+) error {
+	filename := fmt.Sprintf("fehlerbericht_%d_%s.pdf",
+		tr.ID, time.Now().Format("2006-01-02"))
+
+	c.Response().Header().Set("Content-Type", "application/pdf")
+	c.Response().Header().Set("Content-Disposition",
+		fmt.Sprintf("attachment; filename=%s", filename))
+	c.Response().Header().Set("Content-Length",
+		fmt.Sprintf("%d", buf.Len()))
+
+	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
+}
+
+func (h *Handler) closeDialog(c echo.Context) error {
+	dialog := dialogs.EditTroubleReport(&dialogs.EditTroubleReportProps{
+		CloseDialog: true,
+	})
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render trouble report edit dialog: "+err.Error())
+	}
+
+	return nil
 }

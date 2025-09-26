@@ -1,18 +1,19 @@
-package components
+package base
 
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
-templ BaseModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) {
+templ ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Problemberichte",
 			AppBarTitle: "Problemberichte",
-			NavContent:  baseModPageNavContent(),
+			NavContent:  modPageNavContent(),
 		},
 	) {
 		<div class="h-screen">
@@ -103,10 +104,10 @@ templ BaseModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) 
 	}
 }
 
-templ baseModPageNavContent() {
+templ modPageNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
-		@NavFeedButton()
-		@NavProfileButton()
-		@NavHomeButton()
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
 	</div>
 }
