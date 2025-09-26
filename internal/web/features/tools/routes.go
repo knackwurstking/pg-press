@@ -64,11 +64,32 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 
 			// Press page sections
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/active-tools",
-				r.handler.HTMXGetActiveToolsSection),
+				r.handler.HTMXGetPressActiveTools),
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/metal-sheets",
-				r.handler.HTMXGetMetalSheetsSection),
+				r.handler.HTMXGetPressMetalSheets),
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/cycles",
-				r.handler.HTMXGetCyclesSection),
+				r.handler.HTMXGetPressCycles),
+
+			// Cycles table rows
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles",
+				r.handler.HTMXGetToolCycles),
+
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles",
+				r.handler.HTMXGetToolTotalCycles),
+
+			// Get, add or edit a cycles table entry
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit",
+				r.handler.HTMXGetToolCycleEditDialog),
+
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit",
+				r.handler.HTMXPostToolCycleEditDialog),
+
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit",
+				r.handler.HTMXPutToolCycleEditDialog),
+
+			// Delete a cycle table entry
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete",
+				r.handler.HTMXDeleteToolCycle),
 		},
 	)
 }

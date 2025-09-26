@@ -33,9 +33,8 @@ func Serve(e *echo.Echo, db *database.DB) {
 	wsh := startWebSocketHandlers(db)
 
 	// HTMX Handler (Old)
-	htmx.NewNav(db, wsh).RegisterRoutes(e)
-	htmx.NewMetalSheets(db).RegisterRoutes(e)
-	htmx.NewCycles(db).RegisterRoutes(e)
+	htmx.NewNav(db, wsh).RegisterRoutes(e)    // TODO: ...
+	htmx.NewMetalSheets(db).RegisterRoutes(e) // TODO: ...
 
 	// TODO: New Handlers here
 	auth.NewRoutes(db).RegisterRoutes(e)
