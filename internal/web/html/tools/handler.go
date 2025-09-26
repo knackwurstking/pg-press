@@ -194,7 +194,7 @@ func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 	}
 
 	// Parse form values
-	totalCyclesStr := c.FormValue("press-total-cycles")
+	totalCyclesStr := h.GetSanitizedFormValue(c, "press-total-cycles")
 	if totalCyclesStr == "" {
 		return h.RenderBadRequest(c, "missing total cycles")
 	}
@@ -204,17 +204,17 @@ func (h *Tools) HandleUmbauPagePOST(c echo.Context) error {
 		return h.RenderBadRequest(c, "invalid total cycles: "+err.Error())
 	}
 
-	topToolStr := c.FormValue("top")
+	topToolStr := h.GetSanitizedFormValue(c, "top")
 	if topToolStr == "" {
 		return h.RenderBadRequest(c, "missing top tool")
 	}
 
-	bottomToolStr := c.FormValue("bottom")
+	bottomToolStr := h.GetSanitizedFormValue(c, "bottom")
 	if bottomToolStr == "" {
 		return h.RenderBadRequest(c, "missing bottom tool")
 	}
 
-	topCassetteToolStr := c.FormValue("top-cassette") // Optional
+	topCassetteToolStr := h.GetSanitizedFormValue(c, "top-cassette") // Optional
 
 	// Get all tools to find by string representation
 	tools, err := h.DB.Tools.List()
