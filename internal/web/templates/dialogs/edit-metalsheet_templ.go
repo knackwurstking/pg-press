@@ -47,7 +47,7 @@ func EditMetalSheet(props *EditMetalSheetProps) templ.Component {
 		var (
 			baseType = "POST"
 			baseHref = fmt.Sprintf(
-				"%s/htmx/tools/metal-sheets/edit?tool_id=%d",
+				"%s/htmx/metal-sheets/edit?tool_id=%d",
 				env.ServerPathPrefix, props.Tool.ID,
 			)
 			submitButtonText = "Erstellen"
