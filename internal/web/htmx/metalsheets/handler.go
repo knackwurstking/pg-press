@@ -15,155 +15,149 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// MetalSheets handles HTTP requests related to metal sheet operations
 type MetalSheets struct {
 	*handlers.BaseHandler
 }
 
+// NewMetalSheets creates a new MetalSheets handler instance
 func NewMetalSheets(db *database.DB) *MetalSheets {
 	return &MetalSheets{
 		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerMetalSheets()),
 	}
 }
 
+// RegisterRoutes registers all metal sheet related HTTP routes
 func (h *MetalSheets) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
+			// GET route for displaying the edit dialog
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/metal-sheets/edit",
 				h.GetEditDialog),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/metal-sheets/edit",
+
+			// POST route for creating a new metal sheet
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/metal-sheets/edit",
 				h.PostCreateMetalSheet),
+
+			// PUT route for updating an existing metal sheet
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/metal-sheets/edit",
 				h.PutUpdateMetalSheet),
+
+			// DELETE route for removing a metal sheet
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/metal-sheets/delete",
 				h.DeleteMetalSheet),
 		},
 	)
 }
 
+// GetEditDialog renders the edit/create dialog for metal sheets
 func (h *MetalSheets) GetEditDialog(c echo.Context) error {
 	renderProps := &dialogs.EditMetalSheetProps{}
+	var toolID int64
+	var err error
 
-	var (
-		toolID int64
-		err    error
-	)
-
-	// Open edit dialog for adding or editing a metal sheet entry
-	// First get the metal sheet id from query param
+	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	if metalSheetID, _ := h.ParseInt64Query(c, "id"); metalSheetID > 0 {
-		// Render dialog content for editing an existing metal sheet
-		// Store metal sheet to render props
+		// Fetch existing metal sheet for editing
 		if renderProps.MetalSheet, err = h.DB.MetalSheets.Get(metalSheetID); err != nil {
 			return h.HandleError(c, err, "failed to fetch metal sheet from database")
 		}
 		toolID = renderProps.MetalSheet.ToolID
 	} else {
-		// No ID, render dialog content for adding a new metal sheet
+		// Creating new metal sheet, get tool_id from query
 		if toolID, err = h.ParseInt64Query(c, "tool_id"); err != nil {
 			return h.HandleError(c, err, "failed to get the tool id from query")
 		}
 	}
 
-	// Store tool to render props
+	// Fetch the associated tool for the dialog
 	if renderProps.Tool, err = h.DB.Tools.Get(toolID); err != nil {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	d := dialogs.EditMetalSheet(renderProps)
-	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
+	// Render the edit dialog template
+	if err := dialogs.EditMetalSheet(renderProps).Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render edit metal sheet dialog: "+err.Error())
 	}
 
 	return nil
 }
 
+// PostCreateMetalSheet handles the creation of a new metal sheet
 func (h *MetalSheets) PostCreateMetalSheet(c echo.Context) error {
-	// Get user from context
+	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	// Get tool ID from query parameter
+	// Extract tool ID from query parameters
 	toolID, err := h.ParseInt64Query(c, "tool_id")
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool_id from query")
 	}
 
-	// Get tool for feed content
+	// Fetch the associated tool
 	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	// Parse form data
+	// Parse form data into metal sheet model
 	metalSheet, err := h.parseMetalSheetForm(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to parse metal sheet form data")
 	}
 
-	// Set the tool ID
+	// Associate metal sheet with the tool
 	metalSheet.ToolID = toolID
 
-	// Create the metal sheet in database
+	// Save new metal sheet to database
 	if _, err := h.DB.MetalSheets.Add(metalSheet); err != nil {
 		return h.HandleError(c, err, "failed to create metal sheet in database")
 	}
 
-	// Create feed entry
-	title := "Blech erstellt"
-	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
-		tool.String(), metalSheet.TileHeight, metalSheet.Value)
-
-	// Add position-specific details for bottom tools
-	if tool.Position == models.PositionBottom {
-		content += fmt.Sprintf("\nMarke: %d mm\nStf.: %.1f\nStf. Max: %.1f",
-			metalSheet.MarkeHeight, metalSheet.STF, metalSheet.STFMax)
-	}
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for metal sheet creation: %v", err)
-	}
-
-	// Return success response that closes dialog and refreshes the page
+	// Create feed entry for the new metal sheet
+	h.createFeed(user, tool, metalSheet, "Blech erstellt")
+	// Refresh the page via HTMX
 	c.Response().Header().Set("HX-Refresh", "true")
 	return c.NoContent(http.StatusOK)
 }
 
+// PutUpdateMetalSheet handles updates to existing metal sheets
 func (h *MetalSheets) PutUpdateMetalSheet(c echo.Context) error {
-	// Get user from context
+	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	// Get metal sheet ID from query parameter
+	// Extract metal sheet ID from query parameters
 	metalSheetID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.HandleError(c, err, "failed to get id from query")
 	}
 
-	// Get existing metal sheet
+	// Fetch the existing metal sheet to preserve ID and tool association
 	existingSheet, err := h.DB.MetalSheets.Get(metalSheetID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get existing metal sheet from database")
 	}
 
-	// Get tool for feed content
+	// Fetch the associated tool for feed creation
 	tool, err := h.DB.Tools.Get(existingSheet.ToolID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	// Parse form data
+	// Parse updated form data
 	metalSheet, err := h.parseMetalSheetForm(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to parse metal sheet form data")
 	}
 
-	// Keep the original ID and tool ID
+	// Preserve the original ID and tool association
 	metalSheet.ID = existingSheet.ID
 	metalSheet.ToolID = existingSheet.ToolID
 
@@ -172,47 +166,34 @@ func (h *MetalSheets) PutUpdateMetalSheet(c echo.Context) error {
 		return h.HandleError(c, err, "failed to update metal sheet in database")
 	}
 
-	// Create feed entry
-	title := "Blech aktualisiert"
-	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
-		tool.String(), metalSheet.TileHeight, metalSheet.Value)
-
-	// Add position-specific details for bottom tools
-	if tool.Position == models.PositionBottom {
-		content += fmt.Sprintf("\nMarke: %d mm\nStf.: %.1f\nStf. Max: %.1f",
-			metalSheet.MarkeHeight, metalSheet.STF, metalSheet.STFMax)
-	}
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for metal sheet update: %v", err)
-	}
-
-	// Return success response that closes dialog and refreshes the page
+	// Create feed entry for the updated metal sheet showing changes
+	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
+	// Refresh the page via HTMX
 	c.Response().Header().Set("HX-Refresh", "true")
 	return c.NoContent(http.StatusOK)
 }
 
+// DeleteMetalSheet handles the deletion of metal sheets
 func (h *MetalSheets) DeleteMetalSheet(c echo.Context) error {
-	// Get user from context
+	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	// Get metal sheet ID from query parameter
+	// Extract metal sheet ID from query parameters
 	metalSheetID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.HandleError(c, err, "failed to get id from query")
 	}
 
-	// Get existing metal sheet for feed content before deletion
+	// Fetch the existing metal sheet before deletion for feed creation
 	existingSheet, err := h.DB.MetalSheets.Get(metalSheetID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get existing metal sheet from database")
 	}
 
-	// Get tool for feed content
+	// Fetch the associated tool for feed creation
 	tool, err := h.DB.Tools.Get(existingSheet.ToolID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool from database")
@@ -223,58 +204,112 @@ func (h *MetalSheets) DeleteMetalSheet(c echo.Context) error {
 		return h.HandleError(c, err, "failed to delete metal sheet from database")
 	}
 
-	// Create feed entry
-	title := "Blech gelöscht"
-	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
-		tool.String(), existingSheet.TileHeight, existingSheet.Value)
-
-	// Add position-specific details for bottom tools
-	if tool.Position == models.PositionBottom {
-		content += fmt.Sprintf("\nMarke: %d mm\nStf.: %.1f\nStf. Max: %.1f",
-			existingSheet.MarkeHeight, existingSheet.STF, existingSheet.STFMax)
-	}
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for metal sheet deletion: %v", err)
-	}
-
-	// Return empty response (the row will be removed by HTMX)
+	// Create feed entry for the deleted metal sheet
+	h.createFeed(user, tool, existingSheet, "Blech gelöscht")
 	return c.NoContent(http.StatusOK)
 }
 
+// createFeed creates a feed entry for metal sheet operations
+func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
+	// Build base feed content with tool and metal sheet info
+	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
+		tool.String(), metalSheet.TileHeight, metalSheet.Value)
+
+	// Add additional fields for bottom position tools
+	if tool.Position == models.PositionBottom {
+		content += fmt.Sprintf("\nMarke: %d mm\nStf.: %.1f\nStf. Max: %.1f",
+			metalSheet.MarkeHeight, metalSheet.STF, metalSheet.STFMax)
+	}
+
+	// Create and save the feed entry
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed: %v", err)
+	}
+}
+
+// createUpdateFeed creates a feed entry for metal sheet updates showing old vs new values
+func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
+	content := fmt.Sprintf("Werkzeug: %s", tool.String())
+
+	// Check for changes in TileHeight
+	if oldSheet.TileHeight != newSheet.TileHeight {
+		content += fmt.Sprintf("\nStärke: %.1f mm → %.1f mm", oldSheet.TileHeight, newSheet.TileHeight)
+	} else {
+		content += fmt.Sprintf("\nStärke: %.1f mm", newSheet.TileHeight)
+	}
+
+	// Check for changes in Value
+	if oldSheet.Value != newSheet.Value {
+		content += fmt.Sprintf("\nBlech: %.1f mm → %.1f mm", oldSheet.Value, newSheet.Value)
+	} else {
+		content += fmt.Sprintf("\nBlech: %.1f mm", newSheet.Value)
+	}
+
+	// Add additional fields for bottom position tools
+	if tool.Position == models.PositionBottom {
+		// Check for changes in MarkeHeight
+		if oldSheet.MarkeHeight != newSheet.MarkeHeight {
+			content += fmt.Sprintf("\nMarke: %d mm → %d mm", oldSheet.MarkeHeight, newSheet.MarkeHeight)
+		} else {
+			content += fmt.Sprintf("\nMarke: %d mm", newSheet.MarkeHeight)
+		}
+
+		// Check for changes in STF
+		if oldSheet.STF != newSheet.STF {
+			content += fmt.Sprintf("\nStf.: %.1f → %.1f", oldSheet.STF, newSheet.STF)
+		} else {
+			content += fmt.Sprintf("\nStf.: %.1f", newSheet.STF)
+		}
+
+		// Check for changes in STFMax
+		if oldSheet.STFMax != newSheet.STFMax {
+			content += fmt.Sprintf("\nStf. Max: %.1f → %.1f", oldSheet.STFMax, newSheet.STFMax)
+		} else {
+			content += fmt.Sprintf("\nStf. Max: %.1f", newSheet.STFMax)
+		}
+	}
+
+	// Create and save the feed entry
+	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create update feed: %v", err)
+	}
+}
+
+// parseMetalSheetForm extracts metal sheet data from form submission
 func (h *MetalSheets) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error) {
 	metalSheet := &models.MetalSheet{}
 
-	// Parse tile height (required)
-	if tileHeight, err := strconv.ParseFloat(c.FormValue("tile_height"), 64); err != nil {
+	// Parse required tile height field
+	tileHeight, err := strconv.ParseFloat(c.FormValue("tile_height"), 64)
+	if err != nil {
 		return nil, err
-	} else {
-		metalSheet.TileHeight = tileHeight
 	}
+	metalSheet.TileHeight = tileHeight
 
-	// Parse value (required)
-	if value, err := strconv.ParseFloat(c.FormValue("value"), 64); err != nil {
+	// Parse required value field
+	value, err := strconv.ParseFloat(c.FormValue("value"), 64)
+	if err != nil {
 		return nil, err
-	} else {
-		metalSheet.Value = value
 	}
+	metalSheet.Value = value
 
-	// Parse marke height (optional, for bottom position only)
+	// Parse optional marke height field
 	if markeHeightStr := c.FormValue("marke_height"); markeHeightStr != "" {
 		if markeHeight, err := strconv.Atoi(markeHeightStr); err == nil {
 			metalSheet.MarkeHeight = markeHeight
 		}
 	}
 
-	// Parse STF (optional, for bottom position only)
+	// Parse optional STF field
 	if stfStr := c.FormValue("stf"); stfStr != "" {
 		if stf, err := strconv.ParseFloat(stfStr, 64); err == nil {
 			metalSheet.STF = stf
 		}
 	}
 
-	// Parse STF Max (optional, for bottom position only)
+	// Parse optional STF Max field
 	if stfMaxStr := c.FormValue("stf_max"); stfMaxStr != "" {
 		if stfMax, err := strconv.ParseFloat(stfMaxStr, 64); err == nil {
 			metalSheet.STFMax = stfMax
