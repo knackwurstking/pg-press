@@ -24,10 +24,10 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			// Pages
-			helpers.NewEchoRoute(http.MethodGet, "/login", r.handler.LoginPage),
+			helpers.NewEchoRoute(http.MethodGet, "/feed", r.handler.FeedPage),
 
-			// Handler & Redirects
-			helpers.NewEchoRoute(http.MethodGet, "/logout", r.handler.Logout),
+			// HTMX
+			// TODO: Register htmx handler here
 		},
 	)
 }

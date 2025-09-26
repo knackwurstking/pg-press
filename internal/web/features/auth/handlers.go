@@ -27,8 +27,7 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-// handleLogin handles the login page and form submission.
-func (h *Handler) Login(c echo.Context) error {
+func (h *Handler) LoginPage(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	apiKey := h.GetSanitizedFormValue(c, constants.APIKeyFormField)
