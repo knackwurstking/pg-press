@@ -28,7 +28,7 @@ func DBRegenerations() *logger.Logger  { return logger.GetComponentLogger("DB To
 
 // HTML Hanlders
 
-func HandlerAuth() *logger.Logger    { return logger.GetComponentLogger("Handler Auth") }
+// func HandlerAuth() *logger.Logger    { return logger.GetComponentLogger("Handler Auth") }
 func HandlerFeed() *logger.Logger    { return logger.GetComponentLogger("Handler Feed") }
 func HandlerHome() *logger.Logger    { return logger.GetComponentLogger("Handler Home") }
 func HandlerProfile() *logger.Logger { return logger.GetComponentLogger("Handler Profile") }

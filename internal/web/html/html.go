@@ -1,7 +1,6 @@
 package html
 
 import (
-	"github.com/knackwurstking/pgpress/internal/web/html/auth"
 	"github.com/knackwurstking/pgpress/internal/web/html/feed"
 	"github.com/knackwurstking/pgpress/internal/web/html/home"
 	"github.com/knackwurstking/pgpress/internal/web/html/profile"
@@ -10,7 +9,6 @@ import (
 )
 
 type (
-	Auth           = auth.Auth
 	Feed           = feed.Feed
 	Home           = home.Home
 	Profile        = profile.Profile
@@ -19,7 +17,6 @@ type (
 )
 
 var (
-	NewAuth           = auth.NewAuth
 	NewFeed           = feed.NewFeed
 	NewHome           = home.NewHome
 	NewProfile        = profile.NewProfile

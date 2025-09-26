@@ -11,7 +11,7 @@ import (
 	"os"
 
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/router"
+	"github.com/knackwurstking/pgpress/internal/web"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -66,7 +66,7 @@ func serverCommand() cli.Command {
 				e.Use(staticCacheMiddleware())
 				e.Use(middlewareKeyAuth(db))
 
-				router.Serve(e, db)
+				web.Serve(e, db)
 
 				logger.Server().Info("Starting HTTP server on %s", *addr)
 				if err := e.Start(*addr); err != nil &&

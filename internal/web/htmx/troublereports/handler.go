@@ -6,7 +6,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -16,11 +15,10 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/internal/web/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components"
-	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
-
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
@@ -99,7 +97,7 @@ func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse trouble report ID: "+err.Error())
 	}
 
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -130,7 +128,7 @@ func (h *TroubleReports) DeleteTroubleReport(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
-	id, err := helpers.ParseInt64Query(c, "id")
+	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse ID from query")
 	}
@@ -157,7 +155,7 @@ func (h *TroubleReports) GetAttachmentsPreview(c echo.Context) error {
 
 func (h *TroubleReports) GetEditDialog(c echo.Context) error {
 	props := &dialogs.EditTroubleReportProps{}
-	props.ID, _ = helpers.ParseInt64Query(c, "id")
+	props.ID, _ = h.ParseInt64Query(c, "id")
 
 	if props.ID > 0 {
 		h.LogDebug("Open edit dialog for trouble report %d", props.ID)
@@ -235,7 +233,7 @@ func (h *TroubleReports) AddTroubleReportOnEditDialogSubmit(c echo.Context) erro
 
 func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) error {
 	// Get ID from query parameter
-	id, err := helpers.ParseInt64Query(c, "id")
+	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse ID query")
 	}
@@ -243,7 +241,7 @@ func (h *TroubleReports) UpdateTroubleReportOnEditDialogSubmit(c echo.Context) e
 	h.LogDebug("Updating trouble report %d", id)
 
 	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -321,7 +319,7 @@ func (h *TroubleReports) Rollback(c echo.Context) error {
 	h.LogInfo("Handling HTMX rollback for trouble report")
 
 	// Parse ID parameter from query
-	id, err := helpers.ParseInt64Query(c, "id")
+	id, err := h.ParseInt64Query(c, "id")
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse ID query")
 	}
@@ -338,7 +336,7 @@ func (h *TroubleReports) Rollback(c echo.Context) error {
 	}
 
 	// Get user from context
-	user, err := helpers.GetUserFromContext(c)
+	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
@@ -420,32 +418,26 @@ func (h *TroubleReports) validateDialogEditFormData(ctx echo.Context) (
 	err error,
 ) {
 
-	title, err = url.QueryUnescape(ctx.FormValue(constants.TitleFormField))
-	if err != nil {
-		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("invalid title form value: %v", err))
+	title = h.GetSanitizedFormValue(ctx, constants.TitleFormField)
+	if title == "" {
+		return "", "", nil, fmt.Errorf("missing title")
 	}
-	title = helpers.SanitizeInput(title)
 
-	content, err = url.QueryUnescape(ctx.FormValue(constants.ContentFormField))
-	if err != nil {
-		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("invalid content form value: %v", err))
+	content = h.GetSanitizedFormValue(ctx, constants.ContentFormField)
+	if content == "" {
+		return "", "", nil, fmt.Errorf("missing content")
 	}
-	content = helpers.SanitizeInput(content)
 
 	// Process existing attachments and their order
 	attachments, err = h.processAttachments(ctx)
 	if err != nil {
-		return "", "", nil, echo.NewHTTPError(http.StatusBadRequest,
-			fmt.Errorf("failed to process attachments: %v", err))
+		return "", "", nil, fmt.Errorf("failed to process attachments: %v", err)
 	}
 
 	return title, content, attachments, nil
 }
 
 func (h *TroubleReports) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
-
 	var attachments []*models.Attachment
 
 	// Get existing attachments if editing
@@ -524,7 +516,7 @@ func (h *TroubleReports) processFileUpload(
 	}
 
 	// Create temporary ID
-	sanitizedFilename := helpers.SanitizeFilename(fileHeader.Filename)
+	sanitizedFilename := h.SanitizeFilename(fileHeader.Filename)
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
 	attachmentID := fmt.Sprintf("temp_%s_%s_%d",
 		sanitizedFilename, timestamp, index)

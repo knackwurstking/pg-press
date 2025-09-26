@@ -8,7 +8,7 @@ package tools
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/knackwurstking/pgpress/internal/web/templates/components"
+import "github.com/knackwurstking/pgpress/internal/web/shared/components"
 
 type DataListOption struct {
 	ToolID int64
