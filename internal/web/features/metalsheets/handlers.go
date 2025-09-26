@@ -6,53 +6,26 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 
 	"github.com/labstack/echo/v4"
 )
 
-// MetalSheets handles HTTP requests related to metal sheet operations
-type MetalSheets struct {
+type Handler struct {
 	*handlers.BaseHandler
 }
 
-// NewMetalSheets creates a new MetalSheets handler instance
-func NewMetalSheets(db *database.DB) *MetalSheets {
-	return &MetalSheets{
-		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerMetalSheets()),
+func NewHandler(db *database.DB) *Handler {
+	return &Handler{
+		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Metal Sheets")),
 	}
 }
 
-// RegisterRoutes registers all metal sheet related HTTP routes
-func (h *MetalSheets) RegisterRoutes(e *echo.Echo) {
-	helpers.RegisterEchoRoutes(
-		e,
-		[]*helpers.EchoRoute{
-			// GET route for displaying the edit dialog
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/metal-sheets/edit",
-				h.GetEditDialog),
-
-			// POST route for creating a new metal sheet
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/metal-sheets/edit",
-				h.PostCreateMetalSheet),
-
-			// PUT route for updating an existing metal sheet
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/metal-sheets/edit",
-				h.PutUpdateMetalSheet),
-
-			// DELETE route for removing a metal sheet
-			helpers.NewEchoRoute(http.MethodDelete, "/htmx/metal-sheets/delete",
-				h.DeleteMetalSheet),
-		},
-	)
-}
-
 // GetEditDialog renders the edit/create dialog for metal sheets
-func (h *MetalSheets) GetEditDialog(c echo.Context) error {
+func (h *Handler) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 	renderProps := &dialogs.EditMetalSheetProps{}
 	var toolID int64
 	var err error
@@ -85,7 +58,7 @@ func (h *MetalSheets) GetEditDialog(c echo.Context) error {
 }
 
 // PostCreateMetalSheet handles the creation of a new metal sheet
-func (h *MetalSheets) PostCreateMetalSheet(c echo.Context) error {
+func (h *Handler) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -126,7 +99,7 @@ func (h *MetalSheets) PostCreateMetalSheet(c echo.Context) error {
 }
 
 // PutUpdateMetalSheet handles updates to existing metal sheets
-func (h *MetalSheets) PutUpdateMetalSheet(c echo.Context) error {
+func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -174,7 +147,7 @@ func (h *MetalSheets) PutUpdateMetalSheet(c echo.Context) error {
 }
 
 // DeleteMetalSheet handles the deletion of metal sheets
-func (h *MetalSheets) DeleteMetalSheet(c echo.Context) error {
+func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -210,7 +183,7 @@ func (h *MetalSheets) DeleteMetalSheet(c echo.Context) error {
 }
 
 // createFeed creates a feed entry for metal sheet operations
-func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
+func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
 	// Build base feed content with tool and metal sheet info
 	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
 		tool.String(), metalSheet.TileHeight, metalSheet.Value)
@@ -229,7 +202,7 @@ func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalShee
 }
 
 // createUpdateFeed creates a feed entry for metal sheet updates showing old vs new values
-func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
+func (h *Handler) createUpdateFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
 	content := fmt.Sprintf("Werkzeug: %s", tool.String())
 
 	// Check for changes in TileHeight
@@ -278,7 +251,7 @@ func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, old
 }
 
 // parseMetalSheetForm extracts metal sheet data from form submission
-func (h *MetalSheets) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error) {
+func (h *Handler) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error) {
 	metalSheet := &models.MetalSheet{}
 
 	// Parse required tile height field

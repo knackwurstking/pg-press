@@ -11,11 +11,18 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func AttachmentsPreview(attachments []*models.Attachment) templ.Component {
+const (
+	AttachmentPathTroubleReports = "trouble-reports"
+)
+
+type AttachmentPath string
+
+func AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -44,7 +51,7 @@ func AttachmentsPreview(attachments []*models.Attachment) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(len(attachments))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 15, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 22, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -75,7 +82,7 @@ func AttachmentsPreview(attachments []*models.Attachment) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Bild %s anzeigen", attachment.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 24, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 31, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -86,9 +93,10 @@ func AttachmentsPreview(attachments []*models.Attachment) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("./trouble-reports/attachment?attachment_id=%s", attachment.ID))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s/attachment?attachment_id=%s",
+					env.ServerPathPrefix, path, attachment.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 29, Col: 89}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 37, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -101,7 +109,7 @@ func AttachmentsPreview(attachments []*models.Attachment) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Anhang %s", attachment.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 30, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/attachments-preview.templ`, Line: 38, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

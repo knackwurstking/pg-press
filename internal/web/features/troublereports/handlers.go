@@ -34,7 +34,7 @@ type Handler struct {
 
 func NewHandler(db *database.DB) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Trouble Reports")),
 	}
 }
 
@@ -174,7 +174,7 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 
 	h.LogDebug("Found %d trouble reports for user %s", len(trs), user.Name)
 
-	troubleReportsList := components.TroubleReportsList(user, trs)
+	troubleReportsList := templates.TroubleReportsList(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
 		h.HandleError(c, err, "failed to render trouble reports list component")
 	}
@@ -234,7 +234,11 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 	h.LogDebug("Rendering attachments preview with %d attachments",
 		len(tr.LoadedAttachments))
 
-	attachmentsPreview := components.AttachmentsPreview(tr.LoadedAttachments)
+	attachmentsPreview := components.AttachmentsPreview(
+		components.AttachmentPathTroubleReports,
+		tr.LoadedAttachments,
+	)
+
 	err = attachmentsPreview.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return h.RenderInternalError(c,
@@ -480,7 +484,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	}
 
 	// Return success message for HTMX
-	err = components.RollbackResponseStatusOK().Render(
+	err = templates.RollbackResponseStatusOK().Render(
 		c.Request().Context(), c.Response(),
 	)
 	if err != nil {

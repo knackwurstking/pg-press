@@ -16,8 +16,8 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// ActiveToolsSection renders the active tools section content for HTMX
-func ActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
+// PressActiveToolsSection renders the active tools section content for HTMX
+func PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -131,8 +131,8 @@ func MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*mo
 	})
 }
 
-// CyclesSection renders the cycles section content for HTMX
-func CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
+// PressCyclesSection renders the cycles section content for HTMX
+func PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -157,7 +157,7 @@ func CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = renderCyclesRows(cycles, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = renderPressCyclesRows(cycles, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -170,7 +170,7 @@ func CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user
 }
 
 // renderCyclesRows renders the cycle table rows
-func renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) templ.Component {
+func renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -198,7 +198,7 @@ func renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, u
 			}
 		} else {
 			for _, cycle := range cycles {
-				templ_7745c5c3_Err = renderCycleRow(cycle, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = renderPressCycleRow(cycle, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -209,7 +209,7 @@ func renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, u
 }
 
 // renderCycleRow renders a single cycle table row
-func renderCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) templ.Component {
+func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

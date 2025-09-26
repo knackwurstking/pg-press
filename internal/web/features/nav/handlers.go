@@ -1,42 +1,28 @@
 package nav
 
 import (
-	"net/http"
-
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
 )
 
-type Nav struct {
+type Handler struct {
 	*handlers.BaseHandler
 
-	WSFeedHandler *wshandlers.FeedHandler
+	wsFeedHandler *wshandlers.FeedHandler
 }
 
-func NewNav(db *database.DB, wsFeedHandler *wshandlers.FeedHandler) *Nav {
-	return &Nav{
-		BaseHandler:   handlers.NewBaseHandler(db, logger.HTMXHandlerNav()),
-		WSFeedHandler: wsFeedHandler,
+func NewHandler(db *database.DB, ws *wshandlers.FeedHandler) *Handler {
+	return &Handler{
+		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Nav")),
 	}
 }
 
-func (h *Nav) RegisterRoutes(e *echo.Echo) {
-	helpers.RegisterEchoRoutes(
-		e,
-		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.HandleFeedCounterWebSocketEcho),
-		},
-	)
-}
-
-// handleFeedCounterWebSocketEcho creates an echo-compatible WebSocket handler
-func (h *Nav) HandleFeedCounterWebSocketEcho(c echo.Context) error {
+func (h *Handler) GetFeedCounter(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	// Create a WebSocket handler that can work with Echo
@@ -52,7 +38,7 @@ func (h *Nav) HandleFeedCounterWebSocketEcho(c echo.Context) error {
 		h.LogInfo("WebSocket connection established for user %s from %s", user.Name, remoteIP)
 
 		// Register the connection with the feed notifier
-		feedConn := h.WSFeedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
+		feedConn := h.wsFeedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
 			h.LogError("Failed to register WebSocket connection for user %s from %s",
 				user.Name, remoteIP)
@@ -70,7 +56,7 @@ func (h *Nav) HandleFeedCounterWebSocketEcho(c echo.Context) error {
 		go feedConn.WritePump()
 
 		// Start the read pump (this will block until connection closes)
-		feedConn.ReadPump(h.WSFeedHandler)
+		feedConn.ReadPump(h.wsFeedHandler)
 	})
 
 	// Serve the WebSocket connection

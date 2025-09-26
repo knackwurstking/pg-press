@@ -3,11 +3,18 @@ package components
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ AttachmentsPreview(attachments []*models.Attachment) {
+const (
+	AttachmentPathTroubleReports = "trouble-reports"
+)
+
+type AttachmentPath string
+
+templ AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) {
 	if len(attachments) > 0 {
 		<div class="attachments-preview-container">
 			<div class="attachments-preview-label flex gap items-center select-none">
@@ -26,7 +33,8 @@ templ AttachmentsPreview(attachments []*models.Attachment) {
 						<div class="attachment-preview-image">
 							<img
 								loading="lazy"
-								src={ fmt.Sprintf("./trouble-reports/attachment?attachment_id=%s", attachment.ID) }
+								src={ fmt.Sprintf("%s/%s/attachment?attachment_id=%s",
+								 env.ServerPathPrefix, path, attachment.ID) }
 								alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
 								class="preview-thumbnail select-none"
 								loading="lazy"

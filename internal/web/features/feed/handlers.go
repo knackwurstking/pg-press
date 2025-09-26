@@ -4,7 +4,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/feed/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -18,7 +17,7 @@ type Handler struct {
 
 func NewHandler(db *database.DB) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Feed")),
 	}
 }
 
@@ -56,7 +55,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 		userMap[feed.UserID] = user
 	}
 
-	feedData := components.FeedsList(feeds, user.LastFeed, userMap)
+	feedData := templates.FeedsList(feeds, user.LastFeed, userMap)
 	err = feedData.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return h.RenderInternalError(c,

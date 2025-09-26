@@ -47,7 +47,7 @@ type Handler struct {
 
 func NewHandler(db *database.DB) *Handler {
 	return &Handler{
-		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Tools")),
 		userNameMinLength: 1,
 		userNameMaxLength: 100,
 	}
@@ -368,7 +368,7 @@ func (h *Handler) HTMXGetToolsList(c echo.Context) error {
 		h.LogWarn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
 	}
 
-	toolsList := components.ToolsList(tools)
+	toolsList := templates.ToolsList(tools)
 	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render tools list all: "+err.Error())
@@ -705,7 +705,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		}
 	}
 
-	activeToolsSection := h.renderActiveToolsSection(toolsMap, press)
+	activeToolsSection := templates.PressActiveToolsSection(toolsMap, press)
 	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
 	}
@@ -750,7 +750,7 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		metalSheets = append(metalSheets, sheets...)
 	}
 
-	metalSheetsSection := h.renderMetalSheetsSection(metalSheets, toolsMap)
+	metalSheetsSection := templates.MetalSheetsSection(metalSheets, toolsMap)
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
 	}
@@ -793,7 +793,7 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		toolsMap[tool.ID] = tool
 	}
 
-	cyclesSection := h.renderCyclesSection(cycles, toolsMap, user, press)
+	cyclesSection := templates.PressCyclesSection(cycles, toolsMap, user, press)
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render cycles section: "+err.Error())
 	}
@@ -835,7 +835,7 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	cyclesSection := components.CyclesSection(&components.CyclesSectionProps{
+	cyclesSection := templates.ToolCycles(&templates.ToolCyclesProps{
 		User:             user,
 		Tool:             tool,
 		TotalCycles:      totalCycles,
@@ -1105,21 +1105,6 @@ func (h *Handler) findToolByString(tools []*models.Tool, toolStr string, positio
 		}
 	}
 	return nil, fmt.Errorf("tool not found: %s", toolStr)
-}
-
-// renderActiveToolsSection renders the active tools section content
-func (h *Handler) renderActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
-	return templates.ActiveToolsSection(toolsMap, press)
-}
-
-// renderMetalSheetsSection renders the metal sheets section content
-func (h *Handler) renderMetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
-	return templates.MetalSheetsSection(metalSheets, toolsMap)
-}
-
-// renderCyclesSection renders the cycles section content
-func (h *Handler) renderCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
-	return templates.CyclesSection(cycles, toolsMap, user, press)
 }
 
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {

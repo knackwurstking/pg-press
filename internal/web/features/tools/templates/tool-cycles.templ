@@ -1,13 +1,14 @@
-package components
+package templates
 
 import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type CyclesSectionProps struct {
+type ToolCyclesProps struct {
 	User             *models.User
 	Tool             *models.Tool
 	ToolPosition     string
@@ -16,7 +17,7 @@ type CyclesSectionProps struct {
 	LastRegeneration *models.Regeneration
 }
 
-templ CyclesSection(props *CyclesSectionProps) {
+templ ToolCycles(props *ToolCyclesProps) {
 	<div class="flex justify-between items-center mb">
 		<h5>Pressennutzungsverlauf</h5>
 		<button
@@ -62,7 +63,7 @@ templ CyclesSection(props *CyclesSectionProps) {
     			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
 		</h6>
 		<span>
-			@TotalCycles(props.TotalCycles, true)
+			@components.TotalCycles(props.TotalCycles, true)
 		</span>
 	</section>
 	<figure class="w-full overflow-x-scroll">
@@ -77,13 +78,13 @@ templ CyclesSection(props *CyclesSectionProps) {
 				</tr>
 			</thead>
 			<tbody>
-				@cyclesTableRows(props)
+				@toolCyclesTableRows(props)
 			</tbody>
 		</table>
 	</figure>
 }
 
-templ cyclesTableRows(props *CyclesSectionProps) {
+templ toolCyclesTableRows(props *ToolCyclesProps) {
 	if len(props.Cycles) == 0 {
 		<tr>
 			<td colspan="5" class="text-center">
@@ -92,14 +93,12 @@ templ cyclesTableRows(props *CyclesSectionProps) {
 		</tr>
 	} else {
 		for _, cycle := range props.Cycles {
-			@renderCycleRowWithPartialCalc(props, cycle)
+			@renderToolCycleRowWithPartialCalc(props, cycle)
 		}
 	}
 }
 
-// renderCycleRowWithPartialCalc renders a cycle row with dynamically calculated partial cycles
-// Partial cycles = total_cycles - previous_total_cycles
-templ renderCycleRowWithPartialCalc(props *CyclesSectionProps, cycle *models.Cycle) {
+templ renderToolCycleRowWithPartialCalc(props *ToolCyclesProps, cycle *models.Cycle) {
 	<tr
 		if props.LastRegeneration != nil && props.LastRegeneration.CycleID == cycle.ID {
 			style="color: var(--ui-muted);"

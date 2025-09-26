@@ -9,10 +9,11 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/features/auth"
 	"github.com/knackwurstking/pgpress/internal/web/features/feed"
 	"github.com/knackwurstking/pgpress/internal/web/features/home"
+	"github.com/knackwurstking/pgpress/internal/web/features/metalsheets"
+	"github.com/knackwurstking/pgpress/internal/web/features/nav"
 	"github.com/knackwurstking/pgpress/internal/web/features/profile"
 	"github.com/knackwurstking/pgpress/internal/web/features/tools"
 	"github.com/knackwurstking/pgpress/internal/web/features/troublereports"
-	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 
 	"github.com/labstack/echo/v4"
@@ -30,11 +31,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 	e.StaticFS(serverPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
 	// WebSocket Handlers
-	wsh := startWebSocketHandlers(db)
-
-	// HTMX Handler (Old)
-	htmx.NewNav(db, wsh).RegisterRoutes(e)    // TODO: ...
-	htmx.NewMetalSheets(db).RegisterRoutes(e) // TODO: ...
+	wsFeedHandler := startWsFeedHandler(db)
 
 	// TODO: New Handlers here
 	auth.NewRoutes(db).RegisterRoutes(e)
@@ -43,10 +40,12 @@ func Serve(e *echo.Echo, db *database.DB) {
 	profile.NewRoutes(db).RegisterRoutes(e)
 	tools.NewRoutes(db).RegisterRoutes(e)
 	troublereports.NewRoutes(db).RegisterRoutes(e)
+	nav.NewRoutes(db, wsFeedHandler).RegisterRoutes(e)
+	metalsheets.NewRoutes(db).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type
-func startWebSocketHandlers(db *database.DB) *wshandlers.FeedHandler {
+func startWsFeedHandler(db *database.DB) *wshandlers.FeedHandler {
 	wsfh := wshandlers.NewFeedHandler(db)
 
 	// Start the feed notification manager in a goroutine

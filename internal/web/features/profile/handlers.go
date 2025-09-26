@@ -6,7 +6,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/profile/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -24,7 +23,7 @@ type Handler struct {
 
 func NewHandler(db *database.DB) *Handler {
 	return &Handler{
-		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Profile")),
 		userNameMinLength: 1,
 		userNameMaxLength: 100,
 	}
@@ -64,7 +63,7 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 
 	h.LogDebug("Found %d cookies for user %s", len(cookies), user.Name)
 
-	cookiesTable := components.CookiesDetails(models.SortCookies(cookies))
+	cookiesTable := templates.CookiesDetails(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return h.RenderInternalError(c,

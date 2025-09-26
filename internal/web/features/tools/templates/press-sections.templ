@@ -8,8 +8,8 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// ActiveToolsSection renders the active tools section content for HTMX
-templ ActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) {
+// PressActiveToolsSection renders the active tools section content for HTMX
+templ PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) {
 	<div class="flex flex-col gap">
 		if len(toolsMap) == 0 {
 			<div class="text-center text-muted">
@@ -46,8 +46,8 @@ templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*m
 	@MetalSheetTablesCollapsible(metalSheets, toolsMap)
 }
 
-// CyclesSection renders the cycles section content for HTMX
-templ CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) {
+// PressCyclesSection renders the cycles section content for HTMX
+templ PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) {
 	<figure class="w-full overflow-x-scroll">
 		<table name="additional-cycles-table" class="table borderless compact">
 			<thead>
@@ -61,14 +61,14 @@ templ CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, use
 				</tr>
 			</thead>
 			<tbody>
-				@renderCyclesRows(cycles, toolsMap, user)
+				@renderPressCyclesRows(cycles, toolsMap, user)
 			</tbody>
 		</table>
 	</figure>
 }
 
 // renderCyclesRows renders the cycle table rows
-templ renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
+templ renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
 	if len(cycles) == 0 {
 		<tr>
 			<td colspan="6" class="text-center">
@@ -77,13 +77,13 @@ templ renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, 
 		</tr>
 	} else {
 		for _, cycle := range cycles {
-			@renderCycleRow(cycle, toolsMap, user)
+			@renderPressCycleRow(cycle, toolsMap, user)
 		}
 	}
 }
 
 // renderCycleRow renders a single cycle table row
-templ renderCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
+templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
 	<tr>
 		// Cycle Date
 		<td>

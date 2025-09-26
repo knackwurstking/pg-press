@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/wshandlers/templates"
 
 	"golang.org/x/net/websocket"
 )
@@ -180,7 +180,7 @@ func (fn *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	err = components.FeedCounter(count).Render(context.Background(), &buf)
+	err = templates.FeedCounter(count).Render(context.Background(), &buf)
 	if err != nil {
 		return nil, err
 	}
