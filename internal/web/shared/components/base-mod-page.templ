@@ -1,21 +1,18 @@
-// TODO: Move to shared components and rename to BaseModPage
-package modpage
+package components
 
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/modification"
 )
 
-// Generic modifications page template with enhanced layout
-templ BasePage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) {
+templ BaseModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Problemberichte",
 			AppBarTitle: "Problemberichte",
-			NavContent:  navContent(),
+			NavContent:  baseModPageNavContent(),
 		},
 	) {
 		<div class="h-screen">
@@ -106,10 +103,10 @@ templ BasePage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) tem
 	}
 }
 
-templ navContent() {
+templ baseModPageNavContent() {
 	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
+		@NavFeedButton()
+		@NavProfileButton()
+		@NavHomeButton()
 	</div>
 }

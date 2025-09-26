@@ -14,7 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/internal/web/html/modpage"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 
@@ -164,7 +164,7 @@ func (h *TroubleReports) HandleModificationsGET(c echo.Context) error {
 	f := CreateModificationRenderer(id, canRollback)
 
 	// Rendering the page template
-	page := modpage.BasePage(m, f)
+	page := components.BaseModPage(m, f)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render page: "+err.Error())
 	}
