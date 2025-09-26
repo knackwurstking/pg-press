@@ -4,14 +4,12 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/htmx/cycles"
 	"github.com/knackwurstking/pgpress/internal/web/htmx/metalsheets"
 	"github.com/knackwurstking/pgpress/internal/web/htmx/nav"
-	"github.com/knackwurstking/pgpress/internal/web/htmx/profile"
 	"github.com/knackwurstking/pgpress/internal/web/htmx/tools"
 	"github.com/knackwurstking/pgpress/internal/web/htmx/troublereports"
 )
 
 type (
 	Nav            = nav.Nav
-	Profile        = profile.Profile
 	Tools          = tools.Tools
 	Cycles         = cycles.Cycles
 	TroubleReports = troublereports.TroubleReports
@@ -20,7 +18,6 @@ type (
 
 var (
 	NewNav            = nav.NewNav
-	NewProfile        = profile.NewProfile
 	NewTools          = tools.NewTools
 	NewCycles         = cycles.NewCycles
 	NewTroubleReports = troublereports.NewTroubleReports

@@ -2,45 +2,35 @@ package profile
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/internal/web/features/profile/templates"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
-
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	UserNameMinLength = 1
-	UserNameMaxLength = 100
-)
-
-type Profile struct {
+type Handler struct {
 	*handlers.BaseHandler
+
+	userNameMinLength int
+	userNameMaxLength int
 }
 
-func NewProfile(db *database.DB) *Profile {
-	return &Profile{
-		BaseHandler: handlers.NewBaseHandler(db, logger.HandlerProfile()),
+func NewHandler(db *database.DB) *Handler {
+	return &Handler{
+		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		userNameMinLength: 1,
+		userNameMaxLength: 100,
 	}
 }
 
-func (h *Profile) RegisterRoutes(e *echo.Echo) {
-	helpers.RegisterEchoRoutes(
-		e,
-		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/profile", h.HandleProfile),
-		},
-	)
-}
-
-func (h *Profile) HandleProfile(c echo.Context) error {
+func (h *Handler) ProfilePage(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -52,21 +42,61 @@ func (h *Profile) HandleProfile(c echo.Context) error {
 		return h.HandleError(c, err, "error updating username")
 	}
 
-	page := ProfilePage(user)
+	page := templates.ProfilePage(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render profile page: "+err.Error())
 	}
 	return nil
 }
 
-func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error {
+func (h *Handler) HTMXGetCookies(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	h.LogDebug("Fetching cookies for user %s", user.Name)
+
+	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
+	if err != nil {
+		return h.HandleError(c, err, "failed to list cookies: "+err.Error())
+	}
+
+	h.LogDebug("Found %d cookies for user %s", len(cookies), user.Name)
+
+	cookiesTable := components.CookiesDetails(models.SortCookies(cookies))
+	err = cookiesTable.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return h.RenderInternalError(c,
+			"failed to render cookies table: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXDeleteCookies(c echo.Context) error {
+	value, err := h.ParseStringQuery(c, "value")
+	if err != nil {
+		return h.RenderBadRequest(c, err.Error())
+	}
+
+	h.LogInfo("Deleting cookie with value: %s", value)
+
+	if err := h.DB.Cookies.Remove(value); err != nil {
+		return h.HandleError(c, err, "failed to delete cookie")
+	}
+
+	return h.HTMXGetCookies(c)
+}
+
+func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error {
 	userName := h.GetSanitizedFormValue(c, constants.UserNameFormField)
 
 	if userName == "" || userName == user.Name {
 		return nil
 	}
 
-	if len(userName) < UserNameMinLength || len(userName) > UserNameMaxLength {
+	if len(userName) < h.userNameMinLength || len(userName) > h.userNameMaxLength {
 		return utils.NewValidationError(constants.UserNameFormField + ": " +
 			"username must be between 1 and 100 characters")
 	}
