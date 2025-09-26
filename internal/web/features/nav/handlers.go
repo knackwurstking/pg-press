@@ -18,7 +18,8 @@ type Handler struct {
 
 func NewHandler(db *database.DB, ws *wshandlers.FeedHandler) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Nav")),
+		BaseHandler:   handlers.NewBaseHandler(db, logger.NewComponentLogger("Nav")),
+		wsFeedHandler: ws,
 	}
 }
 
