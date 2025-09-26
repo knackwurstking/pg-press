@@ -1,4 +1,4 @@
-package auth
+package feed
 
 import (
 	"net/http"
@@ -27,7 +27,7 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/feed", r.handler.FeedPage),
 
 			// HTMX
-			// TODO: Register htmx handler here
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/feed/list", r.handler.HTMXGetFeedsList),
 		},
 	)
 }
