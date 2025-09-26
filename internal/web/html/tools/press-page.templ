@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -17,6 +16,7 @@ type PressPageProps struct {
 	MetalSheets []*models.MetalSheet
 }
 
+// TODO: Replace all "animate-spin" with my own spinner
 templ PressPage(props PressPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -42,38 +42,40 @@ templ PressPage(props PressPageProps) {
 				<div class="flex justify-between items-center mb">
 					<h5>Aktive Werkzeuge</h5>
 				</div>
-				<div class="flex flex-col gap">
-					for _, tool := range props.ToolsMap {
-						if tool.Press != nil && *tool.Press == props.Press {
-							<a
-								role="button"
-								class="outline contrast flex justify-between items-center p"
-								href={ fmt.Sprintf("%s/tools/tool/%d",
-									env.ServerPathPrefix, tool.ID) }
-							>
-								<span class="flex flex-wrap flex-col gap-0 justify-start w-full">
-									<span class="text-semibold">
-										{ fmt.Sprintf("%s %s %s",
-											tool.Format.String(), tool.Code, tool.Type) }
-									</span>
-									<span>
-										@components.PositionBadge(
-											tool.Position, "primary text-bold",
-										)
-									</span>
-								</span>
-								<i class="bi bi-chevron-right"></i>
-							</a>
-						}
-					}
+				<div
+					id="active-tools-content"
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/active-tools?press=%d",
+						env.ServerPathPrefix, props.Press) }
+					hx-trigger="load, pageLoaded from:body"
+					hx-indicator="#active-tools-loading"
+					hx-on:htmx:before-request="document.getElementById('active-tools-loading').style.display = 'block'"
+					hx-on:htmx:after-request="document.getElementById('active-tools-loading').style.display = 'none'"
+					hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
+				>
+					<div id="active-tools-loading" class="text-center p" style="display: none;">
+						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Werkzeuge...
+					</div>
 				</div>
 			</section>
 			<br/>
-			<section>
+			<section id="metal-sheets-section">
 				<div class="flex justify-between items-center mb">
 					<h5>Blech Listen</h5>
 				</div>
-				@MetalSheetTablesCollapsible(props.MetalSheets, props.ToolsMap)
+				<div
+					id="metal-sheets-content"
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/metal-sheets?press=%d",
+						env.ServerPathPrefix, props.Press) }
+					hx-trigger="load, pageLoaded from:body"
+					hx-indicator="#metal-sheets-loading"
+					hx-on:htmx:before-request="document.getElementById('metal-sheets-loading').style.display = 'block'"
+					hx-on:htmx:after-request="document.getElementById('metal-sheets-loading').style.display = 'none'"
+					hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
+				>
+					<div id="metal-sheets-loading" class="text-center p" style="display: none;">
+						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Blech Listen...
+					</div>
+				</div>
 			</section>
 			<br/>
 			<!-- Press Cycles Table -->
@@ -81,116 +83,59 @@ templ PressPage(props PressPageProps) {
 				<div class="flex justify-between items-center mb">
 					<h5>Pressennutzungsverlauf</h5>
 				</div>
-				<figure class="w-full overflow-x-scroll">
-					<table name="additional-cycles-table" class="table borderless compact">
-						<thead>
-							<tr>
-								<th>Datum</th>
-								<th>Werkzeug</th>
-								<th>Position</th>
-								<th>Gesamtzyklen</th>
-								<th>Teilzyklen (berechnet)</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							@renderCycles(props)
-						</tbody>
-					</table>
-				</figure>
+				<div
+					id="cycles-content"
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/cycles?press=%d",
+						env.ServerPathPrefix, props.Press) }
+					hx-trigger="load, pageLoaded from:body"
+					hx-indicator="#cycles-loading"
+					hx-on:htmx:before-request="document.getElementById('cycles-loading').style.display = 'block'"
+					hx-on:htmx:after-request="document.getElementById('cycles-loading').style.display = 'none'"
+					hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
+				>
+					<div id="cycles-loading" class="text-center p" style="display: none;">
+						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Pressennutzungsverlauf...
+					</div>
+				</div>
 			</section>
+			<script>
+				// Debounce function to prevent rapid reloads
+				function debounce(func, wait) {
+					let timeout;
+					return function executedFunction(...args) {
+						const later = function() {
+							clearTimeout(timeout);
+							func(...args);
+						};
+						clearTimeout(timeout);
+						timeout = setTimeout(later, wait);
+					};
+				}
+
+				// Debounced reload function
+				const debouncedReload = debounce(function() {
+					if (document.visibilityState === 'visible') {
+						console.log('Page became visible - reloading HTMX sections');
+						document.body.dispatchEvent(new CustomEvent('pageLoaded'));
+					}
+				}, 500);
+
+				// Listen for visibility changes
+				window.addEventListener("visibilitychange", debouncedReload);
+
+				// Add manual refresh functionality
+				window.refreshPressSections = function() {
+					console.log('Manual refresh triggered');
+					document.body.dispatchEvent(new CustomEvent('pageLoaded'));
+				};
+
+				// Show initial loading indicators on page load
+				document.addEventListener('DOMContentLoaded', function() {
+					document.getElementById('active-tools-loading').style.display = 'block';
+					document.getElementById('metal-sheets-loading').style.display = 'block';
+					document.getElementById('cycles-loading').style.display = 'block';
+				});
+			</script>
 		</main>
 	}
-}
-
-templ renderCycles(props PressPageProps) {
-	if len(props.Cycles) == 0 {
-		<tr>
-			<td colspan="6" class="text-center">
-				Kein Pressenverlauf verfügbar
-			</td>
-		</tr>
-	} else {
-		for _, cycle := range props.Cycles {
-			@renderCycle(props, cycle)
-		}
-	}
-}
-
-templ renderCycle(props PressPageProps, cycle *models.Cycle) {
-	<tr>
-		// Cycle Date
-		<td>
-			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
-		</td>
-		// Cycle Tool
-		<td>
-			{{ tool, _ := props.ToolsMap[cycle.ToolID] }}
-			if tool != nil {
-				<span class="text-xs">
-					{  fmt.Sprintf("%s %s %s",
-						tool.Format.String(), tool.Code, tool.Type) }
-				</span>
-			} else {
-				<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
-			}
-		</td>
-		// Cycle Position
-		<td>
-			<span class="text-xs">{ cycle.ToolPosition }</span>
-		</td>
-		// Total Cycles
-		<td>
-			{ fmt.Sprintf("%d", cycle.TotalCycles) }
-		</td>
-		// Partial Cycles
-		<td>
-			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ fmt.Sprintf("%d", cycle.PartialCycles) }
-			</span>
-		</td>
-		// Actions
-		<td>
-			<span class="button-group flex justify-end items-center">
-				// HTMX Button: Goto: Edit cycle entry dialog
-				<button
-					class="small ghost"
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
-					) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Bearbeiten"
-					if !props.User.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-pencil"></i>
-				</button>
-				// HTMX Button: Delete cycle from database table and reload section.cycles
-				<button
-					class="destructive small ghost"
-					hx-delete={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
-					) }
-					hx-trigger="click"
-					hx-swap="none"
-					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
-       					cycle.TotalCycles) }
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-					hx-on:htmx:after-request="window.location.reload();"
-					title="Löschen"
-					if !props.User.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-trash"></i>
-				</button>
-			</span>
-		</td>
-	</tr>
 }

@@ -1,0 +1,162 @@
+package tools
+
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/templates/components"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+// ActiveToolsSection renders the active tools section content for HTMX
+templ ActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) {
+	<div class="flex flex-col gap">
+		if len(toolsMap) == 0 {
+			<div class="text-center text-muted">
+				Keine aktiven Werkzeuge für diese Presse
+			</div>
+		} else {
+			for _, tool := range toolsMap {
+				<a
+					role="button"
+					class="outline contrast flex justify-between items-center p"
+					href={ fmt.Sprintf("%s/tools/tool/%d",
+						env.ServerPathPrefix, tool.ID) }
+				>
+					<span class="flex flex-wrap flex-col gap-0 justify-start w-full">
+						<span class="text-semibold">
+							{ fmt.Sprintf("%s %s %s",
+								tool.Format.String(), tool.Code, tool.Type) }
+						</span>
+						<span>
+							@components.PositionBadge(
+								tool.Position, "primary text-bold",
+							)
+						</span>
+					</span>
+					<i class="bi bi-chevron-right"></i>
+				</a>
+			}
+		}
+	</div>
+}
+
+// MetalSheetsSection renders the metal sheets section content for HTMX
+templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
+	@MetalSheetTablesCollapsible(metalSheets, toolsMap)
+}
+
+// CyclesSection renders the cycles section content for HTMX
+templ CyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) {
+	<figure class="w-full overflow-x-scroll">
+		<table name="additional-cycles-table" class="table borderless compact">
+			<thead>
+				<tr>
+					<th>Datum</th>
+					<th>Werkzeug</th>
+					<th>Position</th>
+					<th>Gesamtzyklen</th>
+					<th>Teilzyklen (berechnet)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@renderCyclesRows(cycles, toolsMap, user)
+			</tbody>
+		</table>
+	</figure>
+}
+
+// renderCyclesRows renders the cycle table rows
+templ renderCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
+	if len(cycles) == 0 {
+		<tr>
+			<td colspan="6" class="text-center">
+				Kein Pressenverlauf verfügbar
+			</td>
+		</tr>
+	} else {
+		for _, cycle := range cycles {
+			@renderCycleRow(cycle, toolsMap, user)
+		}
+	}
+}
+
+// renderCycleRow renders a single cycle table row
+templ renderCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
+	<tr>
+		// Cycle Date
+		<td>
+			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
+		</td>
+		// Cycle Tool
+		<td>
+			{{ tool, exists := toolsMap[cycle.ToolID] }}
+			if exists && tool != nil {
+				<span class="text-xs">
+					{ fmt.Sprintf("%s %s %s",
+						tool.Format.String(), tool.Code, tool.Type) }
+				</span>
+			} else {
+				<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
+			}
+		</td>
+		// Cycle Position
+		<td>
+			<span class="text-xs">{ cycle.ToolPosition }</span>
+		</td>
+		// Total Cycles
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+		// Partial Cycles
+		<td>
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
+				{ fmt.Sprintf("%d", cycle.PartialCycles) }
+			</span>
+		</td>
+		// Actions
+		<td>
+			<span class="button-group flex justify-end items-center">
+				// HTMX Button: Edit cycle entry dialog
+				<button
+					class="small ghost"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
+					) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Bearbeiten"
+					if !user.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-pencil"></i>
+				</button>
+				// HTMX Button: Delete cycle from database table and reload section
+				<button
+					class="destructive small ghost"
+					hx-delete={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
+						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
+					) }
+					hx-trigger="click"
+					hx-swap="none"
+					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
+						cycle.TotalCycles) }
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+					hx-on:htmx:after-request="window.location.reload();"
+					title="Löschen"
+					if !user.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</span>
+		</td>
+	</tr>
+}

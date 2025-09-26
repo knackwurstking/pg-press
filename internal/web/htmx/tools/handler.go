@@ -15,6 +15,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/helpers"
 
+	"github.com/knackwurstking/pgpress/internal/web/html/tools"
 	"github.com/knackwurstking/pgpress/internal/web/templates/components"
 	"github.com/knackwurstking/pgpress/internal/web/templates/dialogs"
 
@@ -63,6 +64,11 @@ func (h *Tools) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-edit", h.GetStatusEdit),
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-display", h.GetStatusDisplay),
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status", h.UpdateToolStatus),
+
+			// Press page sections
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/active-tools", h.GetActiveToolsSection),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/metal-sheets", h.GetMetalSheetsSection),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/cycles", h.GetCyclesSection),
 		},
 	)
 }
@@ -491,4 +497,144 @@ func (h *Tools) getEditToolFormData(c echo.Context) (*EditFormData, error) {
 	}
 
 	return data, nil
+}
+
+// GetActiveToolsSection handles HTMX requests for the active tools section
+func (h *Tools) GetActiveToolsSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get tools from database
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Filter tools for this press and create toolsMap
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		if tool.Press != nil && *tool.Press == press {
+			toolsMap[tool.ID] = tool
+		}
+	}
+
+	activeToolsSection := h.renderActiveToolsSection(toolsMap, press)
+	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
+	}
+
+	return nil
+}
+
+// GetMetalSheetsSection handles HTMX requests for the metal sheets section
+func (h *Tools) GetMetalSheetsSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get tools for this press
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Filter tools for this press and create toolsMap
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		if tool.Press != nil && *tool.Press == press {
+			toolsMap[tool.ID] = tool
+		}
+	}
+
+	// Get metal sheets for tools on this press
+	var metalSheets []*models.MetalSheet
+	for toolID := range toolsMap {
+		sheets, err := h.DB.MetalSheets.GetByToolID(toolID)
+		if err != nil {
+			h.LogError("Failed to get metal sheets for tool %d: %v", toolID, err)
+			continue
+		}
+		metalSheets = append(metalSheets, sheets...)
+	}
+
+	metalSheetsSection := h.renderMetalSheetsSection(metalSheets, toolsMap)
+	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
+	}
+
+	return nil
+}
+
+// GetCyclesSection handles HTMX requests for the cycles section
+func (h *Tools) GetCyclesSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get user for permissions
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get cycles for this press
+	cycles, err := h.DB.PressCycles.GetPressCycles(press, nil, nil)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get cycles from database")
+	}
+
+	// Get tools for this press to create toolsMap
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		toolsMap[tool.ID] = tool
+	}
+
+	cyclesSection := h.renderCyclesSection(cycles, toolsMap, user, press)
+	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render cycles section: "+err.Error())
+	}
+
+	return nil
+}
+
+// renderActiveToolsSection renders the active tools section content
+func (h *Tools) renderActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
+	return tools.ActiveToolsSection(toolsMap, press)
+}
+
+// renderMetalSheetsSection renders the metal sheets section content
+func (h *Tools) renderMetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
+	return tools.MetalSheetsSection(metalSheets, toolsMap)
+}
+
+// renderCyclesSection renders the cycles section content
+func (h *Tools) renderCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
+	return tools.CyclesSection(cycles, toolsMap, user, press)
 }
