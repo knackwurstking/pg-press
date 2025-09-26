@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/auth"
 	"github.com/knackwurstking/pgpress/internal/web/features/feed"
+	"github.com/knackwurstking/pgpress/internal/web/features/home"
 	"github.com/knackwurstking/pgpress/internal/web/html"
 	"github.com/knackwurstking/pgpress/internal/web/htmx"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
@@ -30,7 +31,6 @@ func Serve(e *echo.Echo, db *database.DB) {
 	wsh := startWebSocketHandlers(db)
 
 	// HTML Handler (Old)
-	html.NewHome(db).RegisterRoutes(e)
 	html.NewProfile(db).RegisterRoutes(e)
 	html.NewTroubleReports(db).RegisterRoutes(e)
 	html.NewTools(db).RegisterRoutes(e)
@@ -46,6 +46,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 	// TODO: New Handlers here
 	auth.NewRoutes(db).RegisterRoutes(e)
 	feed.NewRoutes(db).RegisterRoutes(e)
+	home.NewRoutes(db).RegisterRoutes(e)
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type
