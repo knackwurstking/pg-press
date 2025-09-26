@@ -27,7 +27,7 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-func (h *Handler) LoginPage(c echo.Context) error {
+func (h *Handler) GetLoginPage(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	apiKey := h.GetSanitizedFormValue(c, constants.APIKeyFormField)
@@ -53,7 +53,7 @@ func (h *Handler) LoginPage(c echo.Context) error {
 }
 
 // handleLogout handles user logout.
-func (h *Handler) Logout(c echo.Context) error {
+func (h *Handler) GetLogout(c echo.Context) error {
 	remoteIP := c.RealIP()
 
 	// Try to get user info before logout for better logging

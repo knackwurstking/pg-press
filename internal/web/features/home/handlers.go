@@ -18,7 +18,7 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-func (h *Handler) HomePage(c echo.Context) error {
+func (h *Handler) GetHomePage(c echo.Context) error {
 	page := templates.HomePage()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,

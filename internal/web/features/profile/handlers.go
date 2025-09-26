@@ -30,7 +30,7 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-func (h *Handler) ProfilePage(c echo.Context) error {
+func (h *Handler) GetProfilePage(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")

@@ -24,7 +24,7 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			// Pages
-			helpers.NewEchoRoute(http.MethodGet, "/profile", r.handler.ProfilePage),
+			helpers.NewEchoRoute(http.MethodGet, "/profile", r.handler.GetProfilePage),
 
 			// HTMX
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/profile/cookies", r.handler.HTMXGetCookies),

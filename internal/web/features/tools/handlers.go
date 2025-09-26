@@ -11,12 +11,11 @@ import (
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/logger"
-	"github.com/knackwurstking/pgpress/internal/web/html/tools"
+	"github.com/knackwurstking/pgpress/internal/web/features/tools/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -31,47 +30,324 @@ type EditFormData struct {
 	Press    *models.PressNumber // Press form field name "press-selection"
 }
 
-type Tools struct {
+type Handler struct {
 	*handlers.BaseHandler
+
+	userNameMinLength int
+	userNameMaxLength int
 }
 
-func NewTools(db *database.DB) *Tools {
-	return &Tools{
-		BaseHandler: handlers.NewBaseHandler(db, logger.HTMXHandlerTools()),
+func NewHandler(db *database.DB) *Handler {
+	return &Handler{
+		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		userNameMinLength: 1,
+		userNameMaxLength: 100,
 	}
 }
 
-func (h *Tools) RegisterRoutes(e *echo.Echo) {
-	helpers.RegisterEchoRoutes(
-		e,
-		[]*helpers.EchoRoute{
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", h.GetToolsList),
+func (h *Handler) GetToolsPage(c echo.Context) error {
+	h.LogInfo("Rendering tools page")
 
-			// Get, Post or Edit a tool
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.GetEditDialog),
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/edit",
-				h.AddToolOnEditDialogSubmit),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/edit",
-				h.UpdateToolOnEditDialogSubmit),
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools")
+	}
 
-			// Delete a tool
-			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete",
-				h.DeleteTool),
+	h.LogDebug("Retrieved %d tools", len(tools))
 
-			// Tool status management
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-edit", h.GetStatusEdit),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-display", h.GetStatusDisplay),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status", h.UpdateToolStatus),
+	pressUtilization, err := h.DB.Tools.GetPressUtilization()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get press utilization")
+	}
 
-			// Press page sections
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/active-tools", h.GetActiveToolsSection),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/metal-sheets", h.GetMetalSheetsSection),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/cycles", h.GetCyclesSection),
-		},
-	)
+	page := templates.ToolsPage(&templates.ToolsPageProps{
+		Tools:            tools,
+		PressUtilization: pressUtilization,
+	})
+
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render tools page: "+err.Error())
+	}
+
+	return nil
 }
 
-func (h *Tools) GetToolsList(c echo.Context) error {
+func (h *Handler) GetPressPage(c echo.Context) error {
+	// Get user from context
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get press number from param
+	var pn models.PressNumber
+	pns, err := h.ParseInt64Param(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return h.RenderBadRequest(c, fmt.Sprintf("invalid press number: %d", pn))
+	}
+
+	// Get cycles for this press
+	cycles, err := h.DB.PressCycles.GetPressCycles(pn, nil, nil)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get press cycles")
+	}
+
+	// Get tools
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools map")
+	}
+	// Convert tools to map[int64]*Tool
+	toolsMap := make(map[int64]*models.Tool)
+	for _, tool := range tools {
+		toolsMap[tool.ID] = tool
+	}
+
+	// Get metal sheets for tools assigned to this press
+	var metalSheets []*models.MetalSheet
+	for _, tool := range tools {
+		if tool.Press != nil && *tool.Press == pn {
+			toolSheets, err := h.DB.MetalSheets.GetByToolID(tool.ID)
+			if err != nil {
+				h.LogError("Failed to fetch metal sheets for tool %d: %v", tool.ID, err)
+				continue
+			}
+			metalSheets = append(metalSheets, toolSheets...)
+		}
+	}
+
+	// Render page
+	h.LogDebug("Rendering page for press %d with %d metal sheets", pn, len(metalSheets))
+	page := templates.PressPage(templates.PressPageProps{
+		Press:       pn,
+		Cycles:      cycles,
+		User:        user,
+		ToolsMap:    toolsMap,
+		MetalSheets: metalSheets,
+	})
+
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render press page: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) GetUmbauPage(c echo.Context) error {
+	// Get user from context
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get press number from param
+	var pn models.PressNumber
+	pns, err := h.ParseInt8Param(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to list tools")
+	}
+
+	umbaupage := templates.UmbauPage(&templates.UmbauPageProps{
+		PressNumber: pn,
+		User:        user,
+		Tools:       tools,
+	})
+
+	if err := umbaupage.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render press umbau page: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) PostUmbauPage(c echo.Context) error {
+	// Get user from context
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get press number from param
+	var pn models.PressNumber
+	pns, err := h.ParseInt8Param(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
+	}
+	pn = models.PressNumber(pns)
+	if !models.IsValidPressNumber(&pn) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Parse form values
+	totalCyclesStr := h.GetSanitizedFormValue(c, "press-total-cycles")
+	if totalCyclesStr == "" {
+		return h.RenderBadRequest(c, "missing total cycles")
+	}
+
+	totalCycles, err := strconv.ParseInt(totalCyclesStr, 10, 64)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid total cycles: "+err.Error())
+	}
+
+	topToolStr := h.GetSanitizedFormValue(c, "top")
+	if topToolStr == "" {
+		return h.RenderBadRequest(c, "missing top tool")
+	}
+
+	bottomToolStr := h.GetSanitizedFormValue(c, "bottom")
+	if bottomToolStr == "" {
+		return h.RenderBadRequest(c, "missing bottom tool")
+	}
+
+	topCassetteToolStr := h.GetSanitizedFormValue(c, "top-cassette") // Optional
+
+	// Get all tools to find by string representation
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools")
+	}
+
+	// Find tools by their string representation
+	topTool, err := h.findToolByString(tools, topToolStr, models.PositionTop)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid top tool: "+err.Error())
+	}
+
+	bottomTool, err := h.findToolByString(tools, bottomToolStr, models.PositionBottom)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid bottom tool: "+err.Error())
+	}
+
+	var topCassetteTool *models.Tool
+	if topCassetteToolStr != "" {
+		topCassetteTool, err = h.findToolByString(tools, topCassetteToolStr, models.PositionTopCassette)
+		if err != nil {
+			return h.RenderBadRequest(c, "invalid top cassette tool: "+err.Error())
+		}
+	}
+
+	// Get currently assigned tools for this press
+	currentTools, err := h.DB.Tools.GetByPress(&pn)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get current tools for press")
+	}
+
+	// Create final cycle entries for current tools (being removed) with the total cycles
+	for _, tool := range currentTools {
+		cycle := &models.Cycle{
+			PressNumber:  pn,
+			ToolID:       tool.ID,
+			ToolPosition: tool.Position,
+			TotalCycles:  totalCycles,
+		}
+
+		_, err := h.DB.PressCycles.Add(cycle, user)
+		if err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to create final cycle for outgoing tool %d", tool.ID))
+		}
+	}
+
+	// Unassign current tools from press
+	for _, tool := range currentTools {
+		if err := h.DB.Tools.UpdatePress(tool.ID, nil, user); err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to unassign tool %d", tool.ID))
+		}
+	}
+
+	// Assign new tools to press (without creating initial cycles)
+	toolsToAssign := []*models.Tool{topTool, bottomTool}
+	if topCassetteTool != nil {
+		toolsToAssign = append(toolsToAssign, topCassetteTool)
+	}
+
+	for _, tool := range toolsToAssign {
+		// Assign tool to press
+		if err := h.DB.Tools.UpdatePress(tool.ID, &pn, user); err != nil {
+			return h.HandleError(c, err,
+				fmt.Sprintf("failed to assign tool %d to press", tool.ID))
+		}
+	}
+
+	// Create a feed
+	title := fmt.Sprintf("Werkzeugwechsel Presse %d", pn)
+	content := fmt.Sprintf(
+		"Umbau abgeschlossen für Presse %d.\n"+
+			"Eingebautes Oberteil: %s\n"+
+			"Eingebautes Unterteil: %s",
+		pn, topTool.String(), bottomTool.String(),
+	)
+	if topCassetteTool != nil {
+		content += fmt.Sprintf("\nEingebaute Obere Kassette: %s", topCassetteTool.String())
+	}
+	content += fmt.Sprintf("\nGesamtzyklen: %d", totalCycles)
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for press %d: %v", pn, err)
+	}
+
+	h.LogInfo("Successfully completed tool change for press %d", pn)
+
+	// Set redirect header for HTMX
+	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("%s/tools/press/%d",
+		env.ServerPathPrefix, pn))
+	return c.NoContent(http.StatusOK)
+}
+
+func (h *Handler) GetToolPage(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	id, err := h.ParseInt64Param(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c,
+			"failed to parse id from query parameter:"+err.Error())
+	}
+
+	h.LogDebug("Fetching tool %d with notes", id)
+
+	tool, err := h.DB.Tools.GetWithNotes(id)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool")
+	}
+
+	h.LogDebug("Successfully fetched tool %d: Type=%s, Code=%s",
+		id, tool.Type, tool.Code)
+
+	// Fetch metal sheets assigned to this tool
+	metalSheets, err := h.DB.MetalSheets.GetByToolID(id)
+	if err != nil {
+		// Log error but don't fail - metal sheets are supplementary data
+		h.LogError("Failed to fetch metal sheets: %v", err)
+		metalSheets = []*models.MetalSheet{}
+	}
+
+	h.LogDebug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
+
+	page := templates.ToolPage(user, tool, metalSheets)
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render tool page: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXGetToolsList(c echo.Context) error {
 	start := time.Now()
 	// Get tools from database
 	tools, err := h.DB.Tools.ListWithNotes()
@@ -93,7 +369,7 @@ func (h *Tools) GetToolsList(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) GetEditDialog(c echo.Context) error {
+func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
 	h.LogDebug("Rendering edit tool dialog")
 
 	props := &dialogs.EditToolProps{}
@@ -123,7 +399,7 @@ func (h *Tools) GetEditDialog(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) AddToolOnEditDialogSubmit(c echo.Context) error {
+func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -164,7 +440,7 @@ func (h *Tools) AddToolOnEditDialogSubmit(c echo.Context) error {
 	return h.closeDialog(c)
 }
 
-func (h *Tools) UpdateToolOnEditDialogSubmit(c echo.Context) error {
+func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -212,20 +488,7 @@ func (h *Tools) UpdateToolOnEditDialogSubmit(c echo.Context) error {
 	return h.closeDialog(c)
 }
 
-func (h *Tools) closeDialog(c echo.Context) error {
-	dialog := dialogs.EditTool(&dialogs.EditToolProps{
-		CloseDialog: true,
-	})
-
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render tool edit dialog: "+err.Error())
-	}
-
-	return nil
-}
-
-func (h *Tools) DeleteTool(c echo.Context) error {
+func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	// Get tool ID from query parameter
 	toolID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
@@ -270,7 +533,7 @@ func (h *Tools) DeleteTool(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Tools) GetStatusEdit(c echo.Context) error {
+func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -294,7 +557,7 @@ func (h *Tools) GetStatusEdit(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) GetStatusDisplay(c echo.Context) error {
+func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -318,7 +581,7 @@ func (h *Tools) GetStatusDisplay(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) UpdateToolStatus(c echo.Context) error {
+func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
@@ -408,7 +671,156 @@ func (h *Tools) UpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
+// GetActiveToolsSection handles HTMX requests for the active tools section
+func (h *Handler) HTMXGetActiveToolsSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get tools from database
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Filter tools for this press and create toolsMap
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		if tool.Press != nil && *tool.Press == press {
+			toolsMap[tool.ID] = tool
+		}
+	}
+
+	activeToolsSection := h.renderActiveToolsSection(toolsMap, press)
+	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
+	}
+
+	return nil
+}
+
+// GetMetalSheetsSection handles HTMX requests for the metal sheets section
+func (h *Handler) HTMXGetMetalSheetsSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get tools for this press
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Filter tools for this press and create toolsMap
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		if tool.Press != nil && *tool.Press == press {
+			toolsMap[tool.ID] = tool
+		}
+	}
+
+	// Get metal sheets for tools on this press
+	var metalSheets []*models.MetalSheet
+	for toolID := range toolsMap {
+		sheets, err := h.DB.MetalSheets.GetByToolID(toolID)
+		if err != nil {
+			h.LogError("Failed to get metal sheets for tool %d: %v", toolID, err)
+			continue
+		}
+		metalSheets = append(metalSheets, sheets...)
+	}
+
+	metalSheetsSection := h.renderMetalSheetsSection(metalSheets, toolsMap)
+	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
+	}
+
+	return nil
+}
+
+// GetCyclesSection handles HTMX requests for the cycles section
+func (h *Handler) HTMXGetCyclesSection(c echo.Context) error {
+	pressNum, err := h.ParseInt64Query(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get user for permissions
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get cycles for this press
+	cycles, err := h.DB.PressCycles.GetPressCycles(press, nil, nil)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get cycles from database")
+	}
+
+	// Get tools for this press to create toolsMap
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		toolsMap[tool.ID] = tool
+	}
+
+	cyclesSection := h.renderCyclesSection(cycles, toolsMap, user, press)
+	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render cycles section: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) findToolByString(tools []*models.Tool, toolStr string, position models.Position) (*models.Tool, error) {
+	for _, tool := range tools {
+		if tool.Position == position && tool.String() == toolStr {
+			return tool, nil
+		}
+	}
+	return nil, fmt.Errorf("tool not found: %s", toolStr)
+}
+
+// renderActiveToolsSection renders the active tools section content
+func (h *Handler) renderActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
+	return templates.ActiveToolsSection(toolsMap, press)
+}
+
+// renderMetalSheetsSection renders the metal sheets section content
+func (h *Handler) renderMetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
+	return templates.MetalSheetsSection(metalSheets, toolsMap)
+}
+
+// renderCyclesSection renders the cycles section content
+func (h *Handler) renderCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
+	return templates.CyclesSection(cycles, toolsMap, user, press)
+}
+
+func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
 	return components.ToolStatusEdit(&components.ToolStatusEditProps{
 		Tool:              tool,
 		Editable:          editable,
@@ -416,7 +828,7 @@ func (h *Tools) renderStatusComponent(tool *models.Tool, editable bool, user *mo
 	})
 }
 
-func (h *Tools) getEditToolFormData(c echo.Context) (*EditFormData, error) {
+func (h *Handler) getEditToolFormData(c echo.Context) (*EditFormData, error) {
 	// Parse position with validation
 	var position models.Position
 
@@ -497,142 +909,15 @@ func (h *Tools) getEditToolFormData(c echo.Context) (*EditFormData, error) {
 	return data, nil
 }
 
-// GetActiveToolsSection handles HTMX requests for the active tools section
-func (h *Tools) GetActiveToolsSection(c echo.Context) error {
-	pressNum, err := h.ParseInt64Query(c, "press")
-	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
+func (h *Handler) closeDialog(c echo.Context) error {
+	dialog := dialogs.EditTool(&dialogs.EditToolProps{
+		CloseDialog: true,
+	})
 
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
-	}
-
-	// Get tools from database
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	// Filter tools for this press and create toolsMap
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		if tool.Press != nil && *tool.Press == press {
-			toolsMap[tool.ID] = tool
-		}
-	}
-
-	activeToolsSection := h.renderActiveToolsSection(toolsMap, press)
-	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render tool edit dialog: "+err.Error())
 	}
 
 	return nil
-}
-
-// GetMetalSheetsSection handles HTMX requests for the metal sheets section
-func (h *Tools) GetMetalSheetsSection(c echo.Context) error {
-	pressNum, err := h.ParseInt64Query(c, "press")
-	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
-	}
-
-	// Get tools for this press
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	// Filter tools for this press and create toolsMap
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		if tool.Press != nil && *tool.Press == press {
-			toolsMap[tool.ID] = tool
-		}
-	}
-
-	// Get metal sheets for tools on this press
-	var metalSheets []*models.MetalSheet
-	for toolID := range toolsMap {
-		sheets, err := h.DB.MetalSheets.GetByToolID(toolID)
-		if err != nil {
-			h.LogError("Failed to get metal sheets for tool %d: %v", toolID, err)
-			continue
-		}
-		metalSheets = append(metalSheets, sheets...)
-	}
-
-	metalSheetsSection := h.renderMetalSheetsSection(metalSheets, toolsMap)
-	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
-	}
-
-	return nil
-}
-
-// GetCyclesSection handles HTMX requests for the cycles section
-func (h *Tools) GetCyclesSection(c echo.Context) error {
-	pressNum, err := h.ParseInt64Query(c, "press")
-	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
-	}
-
-	// Get user for permissions
-	user, err := h.GetUserFromContext(c)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
-	}
-
-	// Get cycles for this press
-	cycles, err := h.DB.PressCycles.GetPressCycles(press, nil, nil)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get cycles from database")
-	}
-
-	// Get tools for this press to create toolsMap
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		toolsMap[tool.ID] = tool
-	}
-
-	cyclesSection := h.renderCyclesSection(cycles, toolsMap, user, press)
-	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render cycles section: "+err.Error())
-	}
-
-	return nil
-}
-
-// renderActiveToolsSection renders the active tools section content
-func (h *Tools) renderActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
-	return tools.ActiveToolsSection(toolsMap, press)
-}
-
-// renderMetalSheetsSection renders the metal sheets section content
-func (h *Tools) renderMetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
-	return tools.MetalSheetsSection(metalSheets, toolsMap)
-}
-
-// renderCyclesSection renders the cycles section content
-func (h *Tools) renderCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
-	return tools.CyclesSection(cycles, toolsMap, user, press)
 }

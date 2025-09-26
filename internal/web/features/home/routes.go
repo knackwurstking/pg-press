@@ -24,7 +24,7 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			// Pages
-			helpers.NewEchoRoute(http.MethodGet, "", r.handler.HomePage),
+			helpers.NewEchoRoute(http.MethodGet, "", r.handler.GetHomePage),
 		},
 	)
 }

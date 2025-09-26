@@ -24,7 +24,7 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 		e,
 		[]*helpers.EchoRoute{
 			// Pages
-			helpers.NewEchoRoute(http.MethodGet, "/feed", r.handler.FeedPage),
+			helpers.NewEchoRoute(http.MethodGet, "/feed", r.handler.GetFeedPage),
 
 			// HTMX
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/feed/list", r.handler.HTMXGetFeedsList),

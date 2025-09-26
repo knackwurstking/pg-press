@@ -22,7 +22,7 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-func (h *Handler) FeedPage(c echo.Context) error {
+func (h *Handler) GetFeedPage(c echo.Context) error {
 	page := templates.FeedPage()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
