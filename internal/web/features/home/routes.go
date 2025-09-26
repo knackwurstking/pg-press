@@ -25,8 +25,6 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 		[]*helpers.EchoRoute{
 			// Pages
 			helpers.NewEchoRoute(http.MethodGet, "", r.handler.HomePage),
-
-			// TODO: HTMX
 		},
 	)
 }
