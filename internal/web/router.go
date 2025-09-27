@@ -33,7 +33,6 @@ func Serve(e *echo.Echo, db *database.DB) {
 	// WebSocket Handlers
 	wsFeedHandler := startWsFeedHandler(db)
 
-	// TODO: New Handlers here
 	auth.NewRoutes(db).RegisterRoutes(e)
 	feed.NewRoutes(db).RegisterRoutes(e)
 	home.NewRoutes(db).RegisterRoutes(e)
