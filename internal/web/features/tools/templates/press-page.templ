@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -16,7 +17,6 @@ type PressPageProps struct {
 	MetalSheets []*models.MetalSheet
 }
 
-// TODO: Replace all "animate-spin" with my own spinner
 templ PressPage(props PressPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
@@ -52,9 +52,7 @@ templ PressPage(props PressPageProps) {
 					hx-on:htmx:after-request="document.getElementById('active-tools-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 				>
-					<div id="active-tools-loading" class="text-center p" style="display: none;">
-						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Werkzeuge...
-					</div>
+					@components.Spinner()
 				</div>
 			</section>
 			<br/>
@@ -72,9 +70,7 @@ templ PressPage(props PressPageProps) {
 					hx-on:htmx:after-request="document.getElementById('metal-sheets-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 				>
-					<div id="metal-sheets-loading" class="text-center p" style="display: none;">
-						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Blech Listen...
-					</div>
+					@components.Spinner()
 				</div>
 			</section>
 			<br/>
@@ -93,9 +89,7 @@ templ PressPage(props PressPageProps) {
 					hx-on:htmx:after-request="document.getElementById('cycles-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 				>
-					<div id="cycles-loading" class="text-center p" style="display: none;">
-						<i class="bi bi-arrow-clockwise animate-spin"></i> Lade Pressennutzungsverlauf...
-					</div>
+					@components.Spinner()
 				</div>
 			</section>
 			<script>
@@ -128,13 +122,6 @@ templ PressPage(props PressPageProps) {
 					console.log('Manual refresh triggered');
 					document.body.dispatchEvent(new CustomEvent('pageLoaded'));
 				};
-
-				// Show initial loading indicators on page load
-				document.addEventListener('DOMContentLoaded', function() {
-					document.getElementById('active-tools-loading').style.display = 'block';
-					document.getElementById('metal-sheets-loading').style.display = 'block';
-					document.getElementById('cycles-loading').style.display = 'block';
-				});
 			</script>
 		</main>
 	}

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -24,7 +25,6 @@ type PressPageProps struct {
 	MetalSheets []*models.MetalSheet
 }
 
-// TODO: Replace all "animate-spin" with my own spinner
 func PressPage(props PressPageProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -86,7 +86,15 @@ func PressPage(props PressPageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#active-tools-loading\" hx-on:htmx:before-request=\"document.getElementById('active-tools-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('active-tools-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)\"><div id=\"active-tools-loading\" class=\"text-center p\" style=\"display: none;\"><i class=\"bi bi-arrow-clockwise animate-spin\"></i> Lade Werkzeuge...</div></div></section><br><section id=\"metal-sheets-section\"><div class=\"flex justify-between items-center mb\"><h5>Blech Listen</h5></div><div id=\"metal-sheets-content\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#active-tools-loading\" hx-on:htmx:before-request=\"document.getElementById('active-tools-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('active-tools-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></section><br><section id=\"metal-sheets-section\"><div class=\"flex justify-between items-center mb\"><h5>Blech Listen</h5></div><div id=\"metal-sheets-content\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -94,13 +102,21 @@ func PressPage(props PressPageProps) templ.Component {
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/press/metal-sheets?press=%d",
 				env.ServerPathPrefix, props.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/press-page.templ`, Line: 68, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/press-page.templ`, Line: 66, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#metal-sheets-loading\" hx-on:htmx:before-request=\"document.getElementById('metal-sheets-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('metal-sheets-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)\"><div id=\"metal-sheets-loading\" class=\"text-center p\" style=\"display: none;\"><i class=\"bi bi-arrow-clockwise animate-spin\"></i> Lade Blech Listen...</div></div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div id=\"cycles-content\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#metal-sheets-loading\" hx-on:htmx:before-request=\"document.getElementById('metal-sheets-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('metal-sheets-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div id=\"cycles-content\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -108,13 +124,21 @@ func PressPage(props PressPageProps) templ.Component {
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/press/cycles?press=%d",
 				env.ServerPathPrefix, props.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/press-page.templ`, Line: 89, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/press-page.templ`, Line: 85, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#cycles-loading\" hx-on:htmx:before-request=\"document.getElementById('cycles-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('cycles-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)\"><div id=\"cycles-loading\" class=\"text-center p\" style=\"display: none;\"><i class=\"bi bi-arrow-clockwise animate-spin\"></i> Lade Pressennutzungsverlauf...</div></div></section><script>\n\t\t\t\t// Debounce function to prevent rapid reloads\n\t\t\t\tfunction debounce(func, wait) {\n\t\t\t\t\tlet timeout;\n\t\t\t\t\treturn function executedFunction(...args) {\n\t\t\t\t\t\tconst later = function() {\n\t\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\t\tfunc(...args);\n\t\t\t\t\t\t};\n\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\ttimeout = setTimeout(later, wait);\n\t\t\t\t\t};\n\t\t\t\t}\n\n\t\t\t\t// Debounced reload function\n\t\t\t\tconst debouncedReload = debounce(function() {\n\t\t\t\t\tif (document.visibilityState === 'visible') {\n\t\t\t\t\t\tconsole.log('Page became visible - reloading HTMX sections');\n\t\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t\t}\n\t\t\t\t}, 500);\n\n\t\t\t\t// Listen for visibility changes\n\t\t\t\twindow.addEventListener(\"visibilitychange\", debouncedReload);\n\n\t\t\t\t// Add manual refresh functionality\n\t\t\t\twindow.refreshPressSections = function() {\n\t\t\t\t\tconsole.log('Manual refresh triggered');\n\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t};\n\n\t\t\t\t// Show initial loading indicators on page load\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\tdocument.getElementById('active-tools-loading').style.display = 'block';\n\t\t\t\t\tdocument.getElementById('metal-sheets-loading').style.display = 'block';\n\t\t\t\t\tdocument.getElementById('cycles-loading').style.display = 'block';\n\t\t\t\t});\n\t\t\t</script></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"load, pageLoaded from:body\" hx-indicator=\"#cycles-loading\" hx-on:htmx:before-request=\"document.getElementById('cycles-loading').style.display = 'block'\" hx-on:htmx:after-request=\"document.getElementById('cycles-loading').style.display = 'none'\" hx-on:htmx:response-error=\"alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><script>\n\t\t\t\t// Debounce function to prevent rapid reloads\n\t\t\t\tfunction debounce(func, wait) {\n\t\t\t\t\tlet timeout;\n\t\t\t\t\treturn function executedFunction(...args) {\n\t\t\t\t\t\tconst later = function() {\n\t\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\t\tfunc(...args);\n\t\t\t\t\t\t};\n\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\ttimeout = setTimeout(later, wait);\n\t\t\t\t\t};\n\t\t\t\t}\n\n\t\t\t\t// Debounced reload function\n\t\t\t\tconst debouncedReload = debounce(function() {\n\t\t\t\t\tif (document.visibilityState === 'visible') {\n\t\t\t\t\t\tconsole.log('Page became visible - reloading HTMX sections');\n\t\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t\t}\n\t\t\t\t}, 500);\n\n\t\t\t\t// Listen for visibility changes\n\t\t\t\twindow.addEventListener(\"visibilitychange\", debouncedReload);\n\n\t\t\t\t// Add manual refresh functionality\n\t\t\t\twindow.refreshPressSections = function() {\n\t\t\t\t\tconsole.log('Manual refresh triggered');\n\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t};\n\t\t\t</script></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
