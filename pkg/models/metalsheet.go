@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+// TODO: Adding a `MetalSheets` type with a sorting method here
+
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
 	ID          int64   `json:"id"`
