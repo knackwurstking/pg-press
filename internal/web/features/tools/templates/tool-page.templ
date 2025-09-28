@@ -9,21 +9,30 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) {
+type ToolPageProps struct {
+	User        *models.User
+	Tool        *models.ToolWithNotes
+	MetalSheets models.MetalSheetList
+}
+
+templ ToolPage(props *ToolPageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
-			PageTitle:   fmt.Sprintf("PG Presse | %s %s", tool.String(), tool.Position.String()),
-			AppBarTitle: fmt.Sprintf("%s %s", tool.String(), tool.Position.String()),
-			NavContent:  toolsPageNavContent(),
+			PageTitle: fmt.Sprintf("PG Presse | %s %s",
+				props.Tool.String(), props.Tool.Position.String()),
+			AppBarTitle: fmt.Sprintf("%s %s",
+				props.Tool.String(), props.Tool.Position.String()),
+			NavContent: toolsPageNavContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			@sectionActions(user, tool)
-			@sectionNotes(tool)
-			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-				@sectionMetalSheets(user, metalSheets, tool)
+			@sectionActions(props.User, props.Tool)
+			@sectionNotes(props.Tool)
+			if props.Tool.Position == models.PositionTop ||
+				props.Tool.Position == models.PositionBottom {
+				@sectionMetalSheets(props.User, props.MetalSheets, props.Tool)
 			}
-			@sectionCycles(tool, user)
+			@sectionCycles(props.Tool, props.User)
 		</main>
 	}
 }
@@ -97,7 +106,10 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 	}
 }
 
-templ sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes) {
+templ sectionMetalSheets(
+	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
+) {
+	{{ metalSheets := metalSheets.Sort() }}
 	// NOTE: For now only top and bottom position can contain metal sheets
 	if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 		<section>

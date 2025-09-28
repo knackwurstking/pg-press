@@ -81,12 +81,6 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 }
 
 func (h *Handler) GetPressPage(c echo.Context) error {
-	// Get user from context
-	user, err := h.GetUserFromContext(c)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
-	}
-
 	// Get press number from param
 	var pn models.PressNumber
 	pns, err := h.ParseInt64Param(c, "press")
@@ -98,44 +92,9 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 		return h.RenderBadRequest(c, fmt.Sprintf("invalid press number: %d", pn))
 	}
 
-	// Get cycles for this press
-	cycles, err := h.DB.PressCycles.GetPressCycles(pn, nil, nil)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get press cycles")
-	}
-
-	// Get tools
-	tools, err := h.DB.Tools.List()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools map")
-	}
-	// Convert tools to map[int64]*Tool
-	toolsMap := make(map[int64]*models.Tool)
-	for _, tool := range tools {
-		toolsMap[tool.ID] = tool
-	}
-
-	// Get metal sheets for tools assigned to this press
-	var metalSheets []*models.MetalSheet
-	for _, tool := range tools {
-		if tool.Press != nil && *tool.Press == pn {
-			toolSheets, err := h.DB.MetalSheets.GetByToolID(tool.ID)
-			if err != nil {
-				h.LogError("Failed to fetch metal sheets for tool %d: %v", tool.ID, err)
-				continue
-			}
-			metalSheets = append(metalSheets, toolSheets...)
-		}
-	}
-
 	// Render page
-	h.LogDebug("Rendering page for press %d with %d metal sheets", pn, len(metalSheets))
 	page := templates.PressPage(templates.PressPageProps{
-		Press:       pn,
-		Cycles:      cycles,
-		User:        user,
-		ToolsMap:    toolsMap,
-		MetalSheets: metalSheets,
+		Press: pn,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -345,9 +304,12 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		metalSheets = []*models.MetalSheet{}
 	}
 
-	h.LogDebug("Rendering tool page for tool %d with %d metal sheets", id, len(metalSheets))
+	page := templates.ToolPage(&templates.ToolPageProps{
+		User:        user,
+		Tool:        tool,
+		MetalSheets: metalSheets,
+	})
 
-	page := templates.ToolPage(user, tool, metalSheets)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tool page: "+err.Error())
 	}
@@ -740,7 +702,7 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 	}
 
 	// Get metal sheets for tools on this press
-	var metalSheets []*models.MetalSheet
+	var metalSheets models.MetalSheetList
 	for toolID := range toolsMap {
 		sheets, err := h.DB.MetalSheets.GetByToolID(toolID)
 		if err != nil {

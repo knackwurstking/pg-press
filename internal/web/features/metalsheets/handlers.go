@@ -20,7 +20,10 @@ type Handler struct {
 
 func NewHandler(db *database.DB) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Metal Sheets")),
+		BaseHandler: handlers.NewBaseHandler(
+			db,
+			logger.NewComponentLogger("Metal Sheets"),
+		),
 	}
 }
 

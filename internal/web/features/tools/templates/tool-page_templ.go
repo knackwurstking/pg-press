@@ -17,7 +17,13 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*models.MetalSheet) templ.Component {
+type ToolPageProps struct {
+	User        *models.User
+	Tool        *models.ToolWithNotes
+	MetalSheets models.MetalSheetList
+}
+
+func ToolPage(props *ToolPageProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -54,21 +60,22 @@ func ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mode
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = sectionActions(user, tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = sectionActions(props.User, props.Tool).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = sectionNotes(tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = sectionNotes(props.Tool).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-				templ_7745c5c3_Err = sectionMetalSheets(user, metalSheets, tool).Render(ctx, templ_7745c5c3_Buffer)
+			if props.Tool.Position == models.PositionTop ||
+				props.Tool.Position == models.PositionBottom {
+				templ_7745c5c3_Err = sectionMetalSheets(props.User, props.MetalSheets, props.Tool).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = sectionCycles(tool, user).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = sectionCycles(props.Tool, props.User).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,9 +87,11 @@ func ToolPage(user *models.User, tool *models.ToolWithNotes, metalSheets []*mode
 		})
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
-				PageTitle:   fmt.Sprintf("PG Presse | %s %s", tool.String(), tool.Position.String()),
-				AppBarTitle: fmt.Sprintf("%s %s", tool.String(), tool.Position.String()),
-				NavContent:  toolsPageNavContent(),
+				PageTitle: fmt.Sprintf("PG Presse | %s %s",
+					props.Tool.String(), props.Tool.Position.String()),
+				AppBarTitle: fmt.Sprintf("%s %s",
+					props.Tool.String(), props.Tool.Position.String()),
+				NavContent: toolsPageNavContent(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -120,7 +129,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 35, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 44, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -136,7 +145,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 			env.ServerPathPrefix, tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 49, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 58, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -215,7 +224,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 87, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 96, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -228,7 +237,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 91, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 100, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -248,7 +257,9 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 	})
 }
 
-func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, tool *models.ToolWithNotes) templ.Component {
+func sectionMetalSheets(
+	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
+) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -269,6 +280,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		metalSheets := metalSheets.Sort()
 		if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<section><div class=\"flex justify-between items-center mb\"><h4>Bleche</h4><button class=\"secondary small flex\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
@@ -280,7 +292,7 @@ func sectionMetalSheets(user *models.User, metalSheets []*models.MetalSheet, too
 				env.ServerPathPrefix, tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 111, Col: 5}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 123, Col: 5}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -358,7 +370,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 				env.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 157, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 169, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -371,7 +383,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 161, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 173, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -392,7 +404,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 172, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/tool-page.templ`, Line: 184, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {

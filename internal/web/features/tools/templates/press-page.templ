@@ -10,11 +10,7 @@ import (
 )
 
 type PressPageProps struct {
-	Press       models.PressNumber
-	Cycles      []*models.Cycle
-	User        *models.User
-	ToolsMap    map[int64]*models.Tool
-	MetalSheets []*models.MetalSheet
+	Press models.PressNumber
 }
 
 templ PressPage(props PressPageProps) {

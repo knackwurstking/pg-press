@@ -2,9 +2,26 @@ package models
 
 import (
 	"fmt"
+	"sort"
 )
 
-// TODO: Adding a `MetalSheets` type with a sorting method here
+type MetalSheetList []*MetalSheet
+
+func (msl *MetalSheetList) Sort() MetalSheetList {
+	// Create a copy of the slice
+	result := make(MetalSheetList, len(*msl))
+	copy(result, *msl)
+
+	sort.Slice(result, func(i, j int) bool {
+		// First sort by TileHeight (low to high)
+		if result[i].TileHeight != result[j].TileHeight {
+			return result[i].TileHeight < result[j].TileHeight
+		}
+		// If TileHeight is equal, sort by Value (low to high)
+		return result[i].Value < result[j].Value
+	})
+	return result
+}
 
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {

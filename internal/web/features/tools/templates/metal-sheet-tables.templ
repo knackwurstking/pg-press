@@ -78,7 +78,16 @@ templ MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map
 }
 
 templ MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
-	{{ topSheets := filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionTop, models.PositionTopCassette}) }}
+	{{
+		topSheets := filterMetalSheetsByPosition(
+			metalSheets,
+			toolsMap,
+			[]models.Position{
+				models.PositionTop,
+				models.PositionTopCassette,
+			},
+		)
+	}}
 	<details
 		class="mb"
 		if len(topSheets) > 0 {
@@ -185,8 +194,10 @@ templ MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 	</details>
 }
 
-func filterMetalSheetsByPosition(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, positions []models.Position) []*models.MetalSheet {
-	var filtered []*models.MetalSheet
+func filterMetalSheetsByPosition(
+	metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, positions []models.Position,
+) []*models.MetalSheet {
+	var filtered models.MetalSheetList
 	for _, sheet := range metalSheets {
 		if tool, exists := toolsMap[sheet.ToolID]; exists && tool != nil {
 			for _, pos := range positions {
@@ -197,7 +208,7 @@ func filterMetalSheetsByPosition(metalSheets []*models.MetalSheet, toolsMap map[
 			}
 		}
 	}
-	return filtered
+	return filtered.Sort()
 }
 
 templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet) {
