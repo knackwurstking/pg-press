@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/features/umbau/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -192,9 +191,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 
 	h.LogInfo("Successfully completed tool change for press %d", pn)
 
-	// Set redirect header for HTMX
-	c.Response().Header().Set("HX-Redirect", fmt.Sprintf("%s/tools/press/%d",
-		env.ServerPathPrefix, pn))
 	return c.NoContent(http.StatusOK)
 }
 

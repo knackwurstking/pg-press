@@ -43,9 +43,6 @@ templ Page(props PageProps) {
 					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/active-tools",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
-					hx-indicator="#active-tools-loading"
-					hx-on:htmx:before-request="document.getElementById('active-tools-loading').style.display = 'block'"
-					hx-on:htmx:after-request="document.getElementById('active-tools-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 				>
 					@components.Spinner()
@@ -61,9 +58,6 @@ templ Page(props PageProps) {
 					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/metal-sheets",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
-					hx-indicator="#metal-sheets-loading"
-					hx-on:htmx:before-request="document.getElementById('metal-sheets-loading').style.display = 'block'"
-					hx-on:htmx:after-request="document.getElementById('metal-sheets-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 				>
 					@components.Spinner()
@@ -80,9 +74,6 @@ templ Page(props PageProps) {
 					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/cycles",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
-					hx-indicator="#cycles-loading"
-					hx-on:htmx:before-request="document.getElementById('cycles-loading').style.display = 'block'"
-					hx-on:htmx:after-request="document.getElementById('cycles-loading').style.display = 'none'"
 					hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 				>
 					@components.Spinner()

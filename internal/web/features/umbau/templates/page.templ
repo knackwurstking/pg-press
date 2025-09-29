@@ -61,16 +61,12 @@ templ Page(props *PageProps) {
 		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
-			<div class="card compact info">
-				<div class="card-body">
-					In Bearbeitung
-				</div>
-			</div>
 			@toolsDataLists(props)
 			<form
 				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau",
-    				env.ServerPathPrefix, props.PressNumber) }
+					env.ServerPathPrefix, props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
 				@cyclesSection()
 				<hr/>
