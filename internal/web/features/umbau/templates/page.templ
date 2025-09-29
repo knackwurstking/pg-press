@@ -60,7 +60,7 @@ templ Page(props *PageProps) {
 	) {
 		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
-			<h1>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h1>
+			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
 			@toolsDataLists(props)
 			<form
 				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau",
@@ -117,7 +117,7 @@ templ cyclesSection() {
 
 templ sectionTop(tool *models.Tool) {
 	<section>
-		<h2>Oberteil</h2>
+		<h3>Oberteil</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
@@ -139,7 +139,7 @@ templ sectionTop(tool *models.Tool) {
 
 templ sectionTopCassette(tool *models.Tool) {
 	<section>
-		<h2>Kassette Oberteil (optional)</h2>
+		<h3>Kassette Oberteil (optional)</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
@@ -160,7 +160,7 @@ templ sectionTopCassette(tool *models.Tool) {
 
 templ sectionBottom(tool *models.Tool) {
 	<section>
-		<h2>Unterteil</h2>
+		<h3>Unterteil</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
