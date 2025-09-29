@@ -19,7 +19,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/features/troublereports/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/base"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
-	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -249,7 +248,7 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetEditTroubleReportDialog(c echo.Context) error {
-	props := &dialogs.EditTroubleReportProps{}
+	props := &templates.DialogEditTroubleReportProps{}
 	props.ID, _ = h.ParseInt64Query(c, "id")
 
 	if props.ID > 0 {
@@ -276,7 +275,7 @@ func (h *Handler) HTMXGetEditTroubleReportDialog(c echo.Context) error {
 		}
 	}
 
-	dialog := dialogs.EditTroubleReport(props)
+	dialog := templates.DialogEditTroubleReport(props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render trouble report edit dialog: "+err.Error())
@@ -686,7 +685,7 @@ func (h *Handler) shareResponse(
 }
 
 func (h *Handler) closeDialog(c echo.Context) error {
-	dialog := dialogs.EditTroubleReport(&dialogs.EditTroubleReportProps{
+	dialog := templates.DialogEditTroubleReport(&templates.DialogEditTroubleReportProps{
 		CloseDialog: true,
 	})
 
