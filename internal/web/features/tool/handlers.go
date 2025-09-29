@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/tool/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
-	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -301,7 +300,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
-	props := &dialogs.EditCycleProps{}
+	props := &templates.DialogEditCycleProps{}
 
 	if c.QueryParam("id") != "" {
 		cycleID, err := h.ParseInt64Query(c, "id")
@@ -335,7 +334,7 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 		return h.RenderBadRequest(c, "missing tool or cycle ID")
 	}
 
-	cycleEditDialog := dialogs.EditCycle(props)
+	cycleEditDialog := templates.DialogEditCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render cycle edit dialog")
 	}
@@ -517,10 +516,10 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 }
 
 func (h *Handler) closeEditToolCycleDialog(c echo.Context) error {
-	props := &dialogs.EditCycleProps{
+	props := &templates.DialogEditCycleProps{
 		CloseDialog: true,
 	}
-	cycleEditDialog := dialogs.EditCycle(props)
+	cycleEditDialog := templates.DialogEditCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render cycle edit dialog")
 	}

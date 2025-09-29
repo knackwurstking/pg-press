@@ -1,4 +1,4 @@
-package dialogs
+package templates
 
 import (
 	"fmt"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type EditCycleProps struct {
+type DialogEditCycleProps struct {
 	Tool    *models.Tool
 	CycleID int64
 
@@ -20,7 +21,7 @@ type EditCycleProps struct {
 	CloseDialog bool // Standalone prop
 }
 
-templ EditCycle(props *EditCycleProps) {
+templ DialogEditCycle(props *DialogEditCycleProps) {
 	{{
 		var (
 			baseType         = "POST"
@@ -40,7 +41,7 @@ templ EditCycle(props *EditCycleProps) {
 				env.ServerPathPrefix, props.CycleID)
 		}
 	}}
-	@Base(BaseProps{
+	@dialogs.Base(dialogs.BaseProps{
 		Type:             baseType,
 		Href:             baseHref,
 		ID:               "cycle-edit-dialog",
