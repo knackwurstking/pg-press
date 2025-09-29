@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/features/metalsheets/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -29,7 +29,7 @@ func NewHandler(db *database.DB) *Handler {
 
 // GetEditDialog renders the edit/create dialog for metal sheets
 func (h *Handler) HTMXGetEditMetalSheetDialog(c echo.Context) error {
-	renderProps := &dialogs.EditMetalSheetProps{}
+	renderProps := &templates.DialogEditMetalSheetProps{}
 	var toolID int64
 	var err error
 
@@ -53,8 +53,10 @@ func (h *Handler) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 	}
 
 	// Render the edit dialog template
-	if err := dialogs.EditMetalSheet(renderProps).Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render edit metal sheet dialog: "+err.Error())
+	d := templates.DialogEditMetalSheet(renderProps)
+	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c,
+			"failed to render edit metal sheet dialog: "+err.Error())
 	}
 
 	return nil

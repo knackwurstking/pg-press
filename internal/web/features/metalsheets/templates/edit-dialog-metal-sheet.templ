@@ -1,20 +1,21 @@
-package dialogs
+package templates
 
 import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type EditMetalSheetProps struct {
+type DialogEditMetalSheetProps struct {
 	MetalSheet *models.MetalSheet // MetalSheet can be nullable
 	Tool       *models.Tool
 
 	CloseDialog bool // ClosingDialog is a standalone prop
 }
 
-templ EditMetalSheet(props *EditMetalSheetProps) {
+templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
 		var (
 			baseType = "POST"
@@ -35,7 +36,7 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 			submitButtonText = "Aktualisieren"
 		}
 	}}
-	@Base(BaseProps{
+	@dialogs.Base(dialogs.BaseProps{
 		ID:               "metal-sheet-edit-dialog",
 		Type:             baseType,
 		Href:             baseHref,
@@ -45,14 +46,14 @@ templ EditMetalSheet(props *EditMetalSheetProps) {
 		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
 		switch props.Tool.Position {
 			case models.PositionTop:
-				@metalSheetDialogContentPositionTop(props)
+				@DialogEditMetalSheetContentPositionTop(props)
 			case models.PositionBottom:
-				@metalSheetDialogContentPositionBottom(props)
+				@DialogEditMetalSheetContentPositionBottom(props)
 		}
 	}
 }
 
-templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
+templ DialogEditMetalSheetContentPositionTop(props *DialogEditMetalSheetProps) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
@@ -81,7 +82,7 @@ templ metalSheetDialogContentPositionTop(props *EditMetalSheetProps) {
 	</div>
 }
 
-templ metalSheetDialogContentPositionBottom(props *EditMetalSheetProps) {
+templ DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
