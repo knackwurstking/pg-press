@@ -11,7 +11,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/features/tools/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -96,7 +95,7 @@ func (h *Handler) HTMXGetToolsList(c echo.Context) error {
 func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
 	h.LogDebug("Rendering edit tool dialog")
 
-	props := &dialogs.EditToolProps{}
+	props := &templates.DialogEditToolProps{}
 
 	toolID, _ := h.ParseInt64Query(c, "id")
 	if toolID > 0 {
@@ -114,7 +113,7 @@ func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
 		props.InputPressSelection = props.Tool.Press
 	}
 
-	toolEdit := dialogs.EditTool(props)
+	toolEdit := templates.DialogEditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render tool edit dialog: "+err.Error())
@@ -339,7 +338,7 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 }
 
 func (h *Handler) closeEditToolDialog(c echo.Context) error {
-	dialog := dialogs.EditTool(&dialogs.EditToolProps{
+	dialog := templates.DialogEditTool(&templates.DialogEditToolProps{
 		CloseDialog: true,
 	})
 
