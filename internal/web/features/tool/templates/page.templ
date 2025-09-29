@@ -9,20 +9,20 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type ToolPageProps struct {
+type PageProps struct {
 	User        *models.User
 	Tool        *models.ToolWithNotes
 	MetalSheets models.MetalSheetList
 }
 
-templ ToolPage(props *ToolPageProps) {
+templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle: fmt.Sprintf("PG Presse | %s %s",
 				props.Tool.String(), props.Tool.Position.String()),
 			AppBarTitle: fmt.Sprintf("%s %s",
 				props.Tool.String(), props.Tool.Position.String()),
-			NavContent: toolsPageNavContent(),
+			NavContent: navContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
@@ -189,7 +189,7 @@ templ sectionCycles(tool *models.ToolWithNotes, user *models.User) {
 	</section>
 }
 
-templ toolsPageNavContent() {
+templ navContent() {
 	<div class="flex flex-row gap justify-end items-center">
 		@components.NavFeedButton()
 		@components.NavProfileButton()

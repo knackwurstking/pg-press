@@ -27,17 +27,6 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/tools",
 				r.handler.GetToolsPage),
 
-			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press",
-				r.handler.GetPressPage),
-
-			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau",
-				r.handler.GetUmbauPage),
-			helpers.NewEchoRoute(http.MethodPost, "/tools/press/:press/umbau",
-				r.handler.PostUmbauPage),
-
-			helpers.NewEchoRoute(http.MethodGet, "/tools/tool/:id",
-				r.handler.GetToolPage),
-
 			// HTMX
 			// List tools
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", r.handler.HTMXGetToolsList),
@@ -55,39 +44,40 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.HTMXDeleteTool),
 
 			// Tool status management
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-edit",
 				r.handler.HTMXGetStatusEdit),
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-display",
 				r.handler.HTMXGetStatusDisplay),
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status",
 				r.handler.HTMXUpdateToolStatus),
 
-			// Press page sections
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/active-tools",
-				r.handler.HTMXGetPressActiveTools),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/metal-sheets",
-				r.handler.HTMXGetPressMetalSheets),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/cycles",
-				r.handler.HTMXGetPressCycles),
-
 			// Cycles table rows
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles",
 				r.handler.HTMXGetToolCycles),
 
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles",
 				r.handler.HTMXGetToolTotalCycles),
 
 			// Get, add or edit a cycles table entry
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit",
 				r.handler.HTMXGetToolCycleEditDialog),
 
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit",
 				r.handler.HTMXPostToolCycleEditDialog),
 
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit",
 				r.handler.HTMXPutToolCycleEditDialog),
 
 			// Delete a cycle table entry
+			// TODO: Move to tool/
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete",
 				r.handler.HTMXDeleteToolCycle),
 		},

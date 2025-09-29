@@ -9,11 +9,11 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type PressPageProps struct {
+type PageProps struct {
 	Press models.PressNumber
 }
 
-templ PressPage(props PressPageProps) {
+templ Page(props PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", props.Press),
@@ -40,7 +40,7 @@ templ PressPage(props PressPageProps) {
 				</div>
 				<div
 					id="active-tools-content"
-					hx-get={ fmt.Sprintf("%s/htmx/tools/press/active-tools?press=%d",
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/active-tools",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
 					hx-indicator="#active-tools-loading"
@@ -58,7 +58,7 @@ templ PressPage(props PressPageProps) {
 				</div>
 				<div
 					id="metal-sheets-content"
-					hx-get={ fmt.Sprintf("%s/htmx/tools/press/metal-sheets?press=%d",
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/metal-sheets",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
 					hx-indicator="#metal-sheets-loading"
@@ -77,7 +77,7 @@ templ PressPage(props PressPageProps) {
 				</div>
 				<div
 					id="cycles-content"
-					hx-get={ fmt.Sprintf("%s/htmx/tools/press/cycles?press=%d",
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/cycles",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"
 					hx-indicator="#cycles-loading"
@@ -121,4 +121,12 @@ templ PressPage(props PressPageProps) {
 			</script>
 		</main>
 	}
+}
+
+templ navContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
+	</div>
 }

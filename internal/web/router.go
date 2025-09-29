@@ -11,9 +11,12 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/features/home"
 	"github.com/knackwurstking/pgpress/internal/web/features/metalsheets"
 	"github.com/knackwurstking/pgpress/internal/web/features/nav"
+	"github.com/knackwurstking/pgpress/internal/web/features/press"
 	"github.com/knackwurstking/pgpress/internal/web/features/profile"
+	"github.com/knackwurstking/pgpress/internal/web/features/tool"
 	"github.com/knackwurstking/pgpress/internal/web/features/tools"
 	"github.com/knackwurstking/pgpress/internal/web/features/troublereports"
+	"github.com/knackwurstking/pgpress/internal/web/features/umbau"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 
 	"github.com/labstack/echo/v4"
@@ -38,6 +41,9 @@ func Serve(e *echo.Echo, db *database.DB) {
 	home.NewRoutes(db).RegisterRoutes(e)
 	profile.NewRoutes(db).RegisterRoutes(e)
 	tools.NewRoutes(db).RegisterRoutes(e)
+	tool.NewRoutes(db).RegisterRoutes(e)
+	press.NewRoutes(db).RegisterRoutes(e)
+	umbau.NewRoutes(db).RegisterRoutes(e)
 	troublereports.NewRoutes(db).RegisterRoutes(e)
 	nav.NewRoutes(db, wsFeedHandler).RegisterRoutes(e)
 	metalsheets.NewRoutes(db).RegisterRoutes(e)

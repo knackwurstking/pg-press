@@ -9,12 +9,12 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type ToolsPageProps struct {
+type PageProps struct {
 	Tools            []*models.ToolWithNotes
 	PressUtilization []models.PressUtilization
 }
 
-templ ToolsPage(props *ToolsPageProps) {
+templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Werkzeuge",
@@ -36,7 +36,7 @@ templ ToolsPage(props *ToolsPageProps) {
 	}
 }
 
-templ sectionPress(props *ToolsPageProps) {
+templ sectionPress(props *PageProps) {
 	<details class="active-tools" open>
 		<summary class="mb">
 			<h4>
@@ -120,7 +120,7 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 	</li>
 }
 
-templ sectionTools(props *ToolsPageProps) {
+templ sectionTools(props *PageProps) {
 	<div class="all-tools p">
 		<h4 class="mb p">
 			<i class="bi bi-archive mr"></i>
@@ -157,5 +157,13 @@ templ sectionTools(props *ToolsPageProps) {
     			}
     		});
 		</script>
+	</div>
+}
+
+templ navContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
 	</div>
 }

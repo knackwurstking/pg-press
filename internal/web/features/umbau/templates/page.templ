@@ -3,17 +3,23 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type UmbauPageProps struct {
+type PageProps struct {
 	PressNumber models.PressNumber
 	User        *models.User
 	Tools       []*models.Tool
 }
 
-func (pp *UmbauPageProps) GetDataListOptions(position models.Position) []DataListOption {
+type DataListOption struct {
+	ToolID int64
+	Label  string
+}
+
+func (pp *PageProps) GetDataListOptions(position models.Position) []DataListOption {
 	var options []DataListOption
 
 	for _, tool := range pp.Tools {
@@ -28,7 +34,7 @@ func (pp *UmbauPageProps) GetDataListOptions(position models.Position) []DataLis
 	return options
 }
 
-func (pp *UmbauPageProps) GetSlotsMap() map[models.Position]*models.Tool {
+func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
 		models.PositionTop:         nil,
 		models.PositionTopCassette: nil,
@@ -44,7 +50,7 @@ func (pp *UmbauPageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	return slots
 }
 
-templ UmbauPage(props *UmbauPageProps) {
+templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
@@ -66,21 +72,21 @@ templ UmbauPage(props *UmbauPageProps) {
     				env.ServerPathPrefix, props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			>
-				@umbauPagePressCyclesSection()
+				@cyclesSection()
 				<hr/>
-				@umbauPageSectionTop(slots[models.PositionTop])
+				@sectionTop(slots[models.PositionTop])
 				<hr/>
-				@umbauPageSectionTopCassette(slots[models.PositionTopCassette])
+				@sectionTopCassette(slots[models.PositionTopCassette])
 				<hr/>
-				@umbauPageSectionBottom(slots[models.PositionBottom])
+				@sectionBottom(slots[models.PositionBottom])
 				<hr/>
-				@umbauPageFormActions(props.User)
+				@formActions(props.User)
 			</form>
 		</main>
 	}
 }
 
-templ toolsDataLists(props *UmbauPageProps) {
+templ toolsDataLists(props *PageProps) {
 	<datalist id="tools-list-top">
 		for _, o := range props.GetDataListOptions(models.PositionTop) {
 			<option value={ o.Label }></option>
@@ -98,7 +104,7 @@ templ toolsDataLists(props *UmbauPageProps) {
 	</datalist>
 }
 
-templ umbauPagePressCyclesSection() {
+templ cyclesSection() {
 	<section>
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
@@ -113,7 +119,7 @@ templ umbauPagePressCyclesSection() {
 	</section>
 }
 
-templ umbauPageSectionTop(tool *models.Tool) {
+templ sectionTop(tool *models.Tool) {
 	<section>
 		<h2>Oberteil</h2>
 		if tool != nil {
@@ -135,7 +141,7 @@ templ umbauPageSectionTop(tool *models.Tool) {
 	</section>
 }
 
-templ umbauPageSectionTopCassette(tool *models.Tool) {
+templ sectionTopCassette(tool *models.Tool) {
 	<section>
 		<h2>Kassette Oberteil (optional)</h2>
 		if tool != nil {
@@ -156,7 +162,7 @@ templ umbauPageSectionTopCassette(tool *models.Tool) {
 	</section>
 }
 
-templ umbauPageSectionBottom(tool *models.Tool) {
+templ sectionBottom(tool *models.Tool) {
 	<section>
 		<h2>Unterteil</h2>
 		if tool != nil {
@@ -178,11 +184,19 @@ templ umbauPageSectionBottom(tool *models.Tool) {
 	</section>
 }
 
-templ umbauPageFormActions(user *models.User) {
+templ formActions(user *models.User) {
 	<footer class="flex justify-end items-center">
 		<button
 			type="submit"
 			disabled?={ !user.IsAdmin() }
 		>Umbau speichern</button>
 	</footer>
+}
+
+templ navContent() {
+	<div class="flex flex-row gap justify-end items-center">
+		@components.NavFeedButton()
+		@components.NavProfileButton()
+		@components.NavHomeButton()
+	</div>
 }
