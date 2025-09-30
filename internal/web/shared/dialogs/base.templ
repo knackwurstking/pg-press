@@ -40,7 +40,7 @@ templ Base(props BaseProps) {
 			hx-target="body"
 			hx-swap="beforeend"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			hx-on:htmx:after-request="if (event.details.success) this.closest('dialog').close();"
+			hx-on:htmx:after-request="if (event.detail.successful) this.closest('dialog').close();"
 			enctype="multipart/form-data"
 		>
 			if props.Error != "" {

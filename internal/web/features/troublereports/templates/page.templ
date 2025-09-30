@@ -46,7 +46,6 @@ templ Page() {
 				<span
 					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
 					hx-trigger="load, pageLoaded from:body"
-					hx-swap="outerHTML"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					id="data"
 				></span>

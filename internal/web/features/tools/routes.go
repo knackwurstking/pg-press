@@ -42,6 +42,12 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			// Delete a tool
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete",
 				r.handler.HTMXDeleteTool),
+
+			// Section handlers
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/section/press",
+				r.handler.HTMXGetSectionPress),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/section/tools",
+				r.handler.HTMXGetSectionTools),
 		},
 	)
 }

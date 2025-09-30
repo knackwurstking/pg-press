@@ -46,23 +46,7 @@ func NewHandler(db *database.DB) *Handler {
 func (h *Handler) GetToolsPage(c echo.Context) error {
 	h.LogInfo("Rendering tools page")
 
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools")
-	}
-
-	h.LogDebug("Retrieved %d tools", len(tools))
-
-	pressUtilization, err := h.DB.Tools.GetPressUtilization()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get press utilization")
-	}
-
-	page := templates.Page(&templates.PageProps{
-		Tools:            tools,
-		PressUtilization: pressUtilization,
-	})
-
+	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tools page: "+err.Error())
 	}
@@ -254,6 +238,34 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	// Set redirect header to tools page
 	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
 	return c.NoContent(http.StatusOK)
+}
+
+func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
+	h.LogDebug("Rendering press section")
+
+	pressUtilization, err := h.DB.Tools.GetPressUtilization()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get press utilization")
+	}
+
+	sectionPress := templates.SectionPress(pressUtilization)
+
+	if err := sectionPress.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render press section: "+err.Error())
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
+	h.LogDebug("Rendering tools section")
+
+	sectionTools := templates.SectionTools()
+	if err := sectionTools.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render tools section: "+err.Error())
+	}
+
+	return nil
 }
 
 func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, error) {

@@ -10,14 +10,6 @@ import (
 )
 
 templ ToolsList(tools []*models.ToolWithNotes) {
-	if len(tools) == 0 {
-		<div class="flex justify-center items-center mt">
-			<div class="text-center muted ghost">
-				<i class="bi bi-inbox mb text-4xl"></i>
-				<p class="m-0">Keine Werkzeuge gefunden.</p>
-			</div>
-		</div>
-	}
 	for _, t := range tools {
 		@toolListItem(t.ID, t)
 	}
