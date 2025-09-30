@@ -15,12 +15,7 @@ templ Page() {
 		},
 	) {
 		<main class="container fluid">
-			<div class="tools" style="display: flex; flex-direction: column; gap: 1.5rem;">
-				<div class="card compact info">
-					<div class="card-body">
-						Fürs erste passt das, später mehr. :)
-					</div>
-				</div>
+			<div class="tools flex flex-col gap">
 				<div
 					id="section-press"
 					hx-get={ env.ServerPathPrefix + "/htmx/tools/section/press" }
