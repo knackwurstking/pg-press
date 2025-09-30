@@ -13,21 +13,28 @@ type BaseProps struct {
 	Href             string
 	SubmitButtonText string
 
-	Error     string
-	JSOnClose string
+	Error        string
+	JSOnClose    string
+	SkipDispatch bool
 }
 
 templ Base(props BaseProps) {
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		onclose={ templ.ComponentScript{
-			Call: fmt.Sprintf(`
-				window.dispatchEvent(new Event('visibilitychange'));
-				this.remove();
-				%s;
-			`, props.JSOnClose),
-		} }
+		if props.SkipDispatch {
+			onclose={ templ.ComponentScript{
+				Call: fmt.Sprintf(`this.remove(); %s; `, props.JSOnClose),
+			} }
+		} else {
+			onclose={ templ.ComponentScript{
+				Call: fmt.Sprintf(`
+					window.dispatchEvent(new Event('visibilitychange'));
+					this.remove();
+					%s;
+				`, props.JSOnClose),
+			} }
+		}
 	>
 		<form
 			class="flex flex-col gap"

@@ -10,38 +10,74 @@ import (
 )
 
 type PageProps struct {
-	User        *models.User
-	Tool        *models.ToolWithNotes
-	MetalSheets models.MetalSheetList
+	User *models.User
+
+	ToolString string
+	ToolID     int64
+	Position   models.Position
 }
 
 templ Page(props *PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle: fmt.Sprintf("PG Presse | %s %s",
-				props.Tool.String(), props.Tool.Position.String()),
+				props.ToolString, props.Position.String()),
 			AppBarTitle: fmt.Sprintf("%s %s",
-				props.Tool.String(), props.Tool.Position.String()),
+				props.ToolString, props.Position.String()),
 			NavContent: navContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			@sectionActions(props.User, props.Tool)
-			@sectionNotes(props.Tool)
-			if props.Tool.Position == models.PositionTop ||
-				props.Tool.Position == models.PositionBottom {
-				@sectionMetalSheets(props.User, props.MetalSheets, props.Tool)
+			@sectionActions(props.User, props.ToolID)
+			<section
+				id="notes-section"
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/notes?tool_id=%d",
+					env.ServerPathPrefix, props.ToolID,
+				) }
+				hx-trigger="load, pageLoaded from:body"
+				hx-swap="innerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			>
+				@components.Spinner()
+			</section>
+			if props.Position == models.PositionTop ||
+				props.Position == models.PositionBottom {
+				<section
+					id="metal-sheets-section"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/metal-sheets?tool_id=%d",
+						env.ServerPathPrefix, props.ToolID,
+					) }
+					hx-trigger="load, pageLoaded from:body"
+					hx-swap="innerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				>
+					@components.Spinner()
+				</section>
 			}
-			@sectionCycles(props.Tool, props.User)
+			<section
+				id="cycles-section"
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/cycles?tool_id=%d",
+					env.ServerPathPrefix, props.ToolID,
+				) }
+				hx-trigger="load, pageLoaded from:body"
+				hx-swap="innerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			>
+				@components.Spinner()
+			</section>
 		</main>
 	}
 }
 
-templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
-	<div class="action-bar flex gap justify-end items-center">
+templ sectionActions(user *models.User, toolID int64) {
+	<section class="action-bar flex gap justify-end items-center">
 		<button
 			class="primary flex gap"
-			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, tool.ID) }
+			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d&reload_page=true",
+				env.ServerPathPrefix, toolID) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -54,11 +90,10 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			class="destructive flex gap"
 			hx-delete={ fmt.Sprintf(
 				"%s/htmx/tools/delete?id=%d",
-				env.ServerPathPrefix, tool.ID,
+				env.ServerPathPrefix, toolID,
 			) }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="destructive flex gap"
 			if !user.IsAdmin() {
@@ -68,127 +103,6 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 			<i class="bi bi-trash"></i>
 			Löschen
 		</button>
-	</div>
-}
-
-// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
-templ sectionNotes(tool *models.ToolWithNotes) {
-	if len(tool.LoadedNotes) > 0 {
-		<section>
-			<h4>Notizen</h4>
-			<div class="notes-list">
-				for _, note := range tool.LoadedNotes {
-					<div class="card">
-						<div class="card-header">
-							<span class="note-importance">
-								switch note.Level {
-									case models.INFO:
-										<i class="bi bi-info-circle"></i>
-										Info
-									case models.ATTENTION:
-										<i class="bi bi-exclamation-triangle text-warning"></i>
-										<strong>Achtung</strong>
-									case models.BROKEN:
-										<i class="bi bi-x-circle text-danger"></i>
-										<strong>Defekt</strong>
-								}
-							</span>
-							<span class="note-date">
-								{ note.CreatedAt.Format("2006-01-02 15:04") }
-							</span>
-						</div>
-						<div class="card-body">
-							<p>{ note.Content }</p>
-						</div>
-					</div>
-				}
-			</div>
-		</section>
-	}
-}
-
-// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
-templ sectionMetalSheets(
-	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
-) {
-	{{ metalSheets := metalSheets.Sort() }}
-	// NOTE: For now only top and bottom position can contain metal sheets
-	if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-		<section>
-			<div class="flex justify-between items-center mb">
-				<h4>Bleche</h4>
-				<button
-					class="secondary small flex"
-					hx-get={ fmt.Sprintf(
-					"%s/htmx/metal-sheets/edit?tool_id=%d",
-					env.ServerPathPrefix, tool.ID,
-				) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Neues Blech hinzufügen"
-				>
-					<i class="bi bi-plus-lg"></i>
-				</button>
-			</div>
-			<div class="table-container">
-				switch tool.Position {
-					case models.PositionBottom:
-						@MetalSheetTableBottom(
-							user, metalSheets,
-						)
-					case models.PositionTop:
-						@MetalSheetTableTop(
-							user, metalSheets,
-						)
-				}
-			</div>
-		</section>
-	}
-}
-
-// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
-templ sectionCycles(tool *models.ToolWithNotes, user *models.User) {
-	<section class="flex flex-col gap">
-		<h4>Werkzeugnutzung & Zyklen</h4>
-		<section class="status">
-			<div class="flex justify-between items-center mb">
-				<h5>Aktueller Status</h5>
-			</div>
-			<div class="flex gap justify-between items-center">
-				<span class="flex gap-lg">
-					@components.ToolStatusEdit(&components.ToolStatusEditProps{
-						Tool:              tool.Tool,
-						UserHasPermission: user.IsAdmin(),
-					})
-					if tool.IsActive() {
-						<a
-							role="button"
-							class="small ghost flex gap"
-							href={ fmt.Sprintf(
-							"%s/tools/press/%d",
-							env.ServerPathPrefix, *tool.Press,
-						) }
-							title="Zur Pressenübersicht"
-						>
-							<i class="bi bi-arrow-right"></i>
-							Presse { fmt.Sprintf("%d", *tool.Press) }
-						</a>
-					}
-				</span>
-			</div>
-		</section>
-		<section
-			class="cycles"
-			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycles?tool_id=%d&tool_position=%s",
-				env.ServerPathPrefix, tool.ID, tool.Position,
-			) }
-			hx-trigger="load"
-			hx-swap="innerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-		></section>
 	</section>
 }
 

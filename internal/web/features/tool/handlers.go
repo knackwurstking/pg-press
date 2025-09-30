@@ -59,18 +59,11 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 	h.LogDebug("Successfully fetched tool %d: Type=%s, Code=%s",
 		id, tool.Type, tool.Code)
 
-	// Fetch metal sheets assigned to this tool
-	metalSheets, err := h.DB.MetalSheets.GetByToolID(id)
-	if err != nil {
-		// Log error but don't fail - metal sheets are supplementary data
-		h.LogError("Failed to fetch metal sheets: %v", err)
-		metalSheets = []*models.MetalSheet{}
-	}
-
 	page := templates.Page(&templates.PageProps{
-		User:        user,
-		Tool:        tool,
-		MetalSheets: metalSheets,
+		User:       user,
+		ToolString: tool.String(),
+		ToolID:     tool.ID,
+		Position:   tool.Position,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -515,16 +508,6 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	return h.HTMXGetToolCycles(c)
 }
 
-func (h *Handler) closeEditToolCycleDialog(c echo.Context) error {
-	props := &templates.DialogEditCycleProps{}
-	cycleEditDialog := templates.DialogEditCycle(props)
-	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.HandleError(c, err, "failed to render cycle edit dialog")
-	}
-
-	return nil
-}
-
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
 	return components.ToolStatusEdit(&components.ToolStatusEditProps{
 		Tool:              tool,
@@ -603,4 +586,65 @@ func (h *Handler) getToolFromQuery(c echo.Context) (*models.Tool, error) {
 	}
 
 	return tool, nil
+}
+
+func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
+	toolID, err := h.ParseInt64Query(c, "tool_id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
+	}
+
+	h.LogDebug("Fetching notes for tool %d", toolID)
+
+	tool, err := h.DB.Tools.GetWithNotes(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool with notes")
+	}
+
+	notesSection := templates.SectionNotes(tool)
+
+	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.HandleError(c, err, "failed to render tool notes section")
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	toolID, err := h.ParseInt64Query(c, "tool_id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
+	}
+
+	h.LogDebug("Fetching metal sheets for tool %d", toolID)
+
+	tool, err := h.DB.Tools.GetWithNotes(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool")
+	}
+
+	// Fetch metal sheets assigned to this tool
+	metalSheets, err := h.DB.MetalSheets.GetByToolID(toolID)
+	if err != nil {
+		// Log error but don't fail - metal sheets are supplementary data
+		h.LogError("Failed to fetch metal sheets: %v", err)
+		metalSheets = []*models.MetalSheet{}
+	}
+
+	metalSheetsSection := templates.SectionMetalSheets(user, metalSheets, tool)
+
+	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.HandleError(c, err, "failed to render tool metal sheets section")
+	}
+
+	return nil
+}
+
+func (h *Handler) closeEditToolCycleDialog(c echo.Context) error {
+	return h.HTMXGetToolCycles(c)
 }

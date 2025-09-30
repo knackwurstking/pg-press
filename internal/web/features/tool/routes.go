@@ -36,6 +36,12 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status",
 				r.handler.HTMXUpdateToolStatus),
 
+			// Section loading
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/notes",
+				r.handler.HTMXGetToolNotes),
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/metal-sheets",
+				r.handler.HTMXGetToolMetalSheets),
+
 			// Cycles table rows
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles",
 				r.handler.HTMXGetToolCycles),

@@ -44,7 +44,6 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 		Href:             baseHref,
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: submitButtonText,
-		JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 	}) {
 		<!-- Display active tool information -->
 		if props.Tool != nil {

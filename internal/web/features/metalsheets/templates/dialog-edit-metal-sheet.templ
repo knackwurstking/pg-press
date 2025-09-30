@@ -39,7 +39,6 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 		Type:             baseType,
 		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
-		JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 	}) {
 		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
 		switch props.Tool.Position {

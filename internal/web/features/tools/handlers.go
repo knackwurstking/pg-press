@@ -97,6 +97,8 @@ func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
 		props.InputPressSelection = props.Tool.Press
 	}
 
+	props.ReloadPage = h.ParseBoolQuery(c, "reload_page")
+
 	toolEdit := templates.DialogEditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,

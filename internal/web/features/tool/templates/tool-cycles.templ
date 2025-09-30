@@ -18,70 +18,102 @@ type ToolCyclesProps struct {
 }
 
 templ ToolCycles(props *ToolCyclesProps) {
-	<div class="flex justify-between items-center mb">
-		<h5>Pressennutzungsverlauf</h5>
-		<button
-			class="secondary small flex"
-			hx-get={ fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID,
-			) }
-			hx-trigger="click"
-			hx-target="body"
-			hx-swap="beforeend"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			title="Neuen Eintrag hinzufügen"
-			if !props.User.IsAdmin() {
-				disabled
-			}
-		>
-			<i class="bi bi-plus-lg"></i>
-		</button>
-	</div>
-	<div class="card compact info my text-sm">
-		<div class="card-body text-sm">
-			Sollte soweit alles stimmen, muss natürlich immer mal kontrolliert werden fürs Erste.
-			<br/>
-			Bei jeder Werkzeug-Regenerierung werden die Gesamtzyklen auf 0 zurückgesetzt.
-			<br/>
-			Die Werkzeuge, die noch nicht regeneriert wurden seit Bestehen dieser Liste, sind bei den Gesamtzyklen nicht zwingend vollständig.
-		</div>
-	</div>
-	<div class="card compact warning my text-base">
-		<div class="card-header">
-			Entwicklernotiz
-		</div>
-		<div class="card-body text-sm">
-			Eine bessere Hervorhebung der Regenerierungen wird hier bald hinzugefügt.
-			<br/>
-			Das "120x60 G05" ist momentan das einzige Werkzeug, bei dem ich schon eine Regenerierung verzeichnet habe.
-		</div>
-	</div>
-	<section>
-		<h6 class="mb">
-			Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
+	<div class="flex flex-col gap">
+		<h4>Werkzeugnutzung & Zyklen</h4>
+		<section class="status">
+			<div class="flex justify-between items-center mb">
+				<h5>Aktueller Status</h5>
+			</div>
+			<div class="flex gap justify-between items-center">
+				<span class="flex gap-lg">
+					@components.ToolStatusEdit(&components.ToolStatusEditProps{
+						Tool:              props.Tool,
+						UserHasPermission: props.User.IsAdmin(),
+					})
+					if props.Tool.IsActive() {
+						<a
+							role="button"
+							class="small ghost flex gap"
+							href={ fmt.Sprintf(
+							"%s/tools/press/%d",
+							env.ServerPathPrefix, *props.Tool.Press,
+						) }
+							title="Zur Pressenübersicht"
+						>
+							<i class="bi bi-arrow-right"></i>
+							Presse { fmt.Sprintf("%d", *props.Tool.Press) }
+						</a>
+					}
+				</span>
+			</div>
+		</section>
+		<section class="cycles">
+			<div class="flex justify-between items-center mb">
+				<h5>Pressennutzungsverlauf</h5>
+				<button
+					class="secondary small flex"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/cycle/edit?tool_id=%d",
+						env.ServerPathPrefix, props.Tool.ID,
+					) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Neuen Eintrag hinzufügen"
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-plus-lg"></i>
+				</button>
+			</div>
+			<div class="card compact info my text-sm">
+				<div class="card-body text-sm">
+					Sollte soweit alles stimmen, muss natürlich immer mal kontrolliert werden fürs Erste.
+					<br/>
+					Bei jeder Werkzeug-Regenerierung werden die Gesamtzyklen auf 0 zurückgesetzt.
+					<br/>
+					Die Werkzeuge, die noch nicht regeneriert wurden seit Bestehen dieser Liste, sind bei den Gesamtzyklen nicht zwingend vollständig.
+				</div>
+			</div>
+			<div class="card compact warning my text-base">
+				<div class="card-header">
+					Entwicklernotiz
+				</div>
+				<div class="card-body text-sm">
+					Eine bessere Hervorhebung der Regenerierungen wird hier bald hinzugefügt.
+					<br/>
+					Das "120x60 G05" ist momentan das einzige Werkzeug, bei dem ich schon eine Regenerierung verzeichnet habe.
+				</div>
+			</div>
+			<section>
+				<h6 class="mb">
+					Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
     			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
-		</h6>
-		<span>
-			@components.TotalCycles(props.TotalCycles, true)
-		</span>
-	</section>
-	<figure class="w-full overflow-x-scroll">
-		<table name="tool-cycles-table" class="table borderless compact">
-			<thead>
-				<tr>
-					<th name="press">Presse</th>
-					<th name="date">Datum</th>
-					<th name="total">Gesamtzyklen</th>
-					<th name="partial">Teilzyklen (berechnet)</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				@toolCyclesTableRows(props)
-			</tbody>
-		</table>
-	</figure>
+				</h6>
+				<span>
+					@components.TotalCycles(props.TotalCycles, true)
+				</span>
+			</section>
+			<figure class="w-full overflow-x-scroll">
+				<table name="tool-cycles-table" class="table borderless compact">
+					<thead>
+						<tr>
+							<th name="press">Presse</th>
+							<th name="date">Datum</th>
+							<th name="total">Gesamtzyklen</th>
+							<th name="partial">Teilzyklen (berechnet)</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@toolCyclesTableRows(props)
+					</tbody>
+				</table>
+			</figure>
+		</section>
+	</div>
 }
 
 templ toolCyclesTableRows(props *ToolCyclesProps) {

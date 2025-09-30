@@ -1,0 +1,81 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+// SectionNotes renders the notes section for HTMX loading
+templ SectionNotes(tool *models.ToolWithNotes) {
+	if len(tool.LoadedNotes) > 0 {
+		<h4>Notizen</h4>
+		<div class="notes-list">
+			for _, note := range tool.LoadedNotes {
+				<div class="card">
+					<div class="card-header">
+						<span class="note-importance">
+							switch note.Level {
+								case models.INFO:
+									<i class="bi bi-info-circle"></i>
+									Info
+								case models.ATTENTION:
+									<i class="bi bi-exclamation-triangle text-warning"></i>
+									<strong>Achtung</strong>
+								case models.BROKEN:
+									<i class="bi bi-x-circle text-danger"></i>
+									<strong>Defekt</strong>
+							}
+						</span>
+						<span class="note-date">
+							{ note.CreatedAt.Format("2006-01-02 15:04") }
+						</span>
+					</div>
+					<div class="card-body">
+						<p>{ note.Content }</p>
+					</div>
+				</div>
+			}
+		</div>
+	}
+}
+
+// SectionMetalSheets renders the metal sheets section for HTMX loading
+templ SectionMetalSheets(
+	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
+) {
+	{{ metalSheets := metalSheets.Sort() }}
+	// NOTE: For now only top and bottom position can contain metal sheets
+	if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
+		<div class="flex justify-between items-center mb">
+			<h4>Bleche</h4>
+			<button
+				class="secondary small flex"
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/metal-sheets/edit?tool_id=%d",
+					env.ServerPathPrefix, tool.ID,
+				) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neues Blech hinzufügen"
+			>
+				<i class="bi bi-plus-lg"></i>
+			</button>
+		</div>
+		<div class="table-container">
+			switch tool.Position {
+				case models.PositionBottom:
+					@MetalSheetTableBottom(
+						user, metalSheets,
+					)
+				case models.PositionTop:
+					@MetalSheetTableTop(
+						user, metalSheets,
+					)
+			}
+		</div>
+	}
+}
