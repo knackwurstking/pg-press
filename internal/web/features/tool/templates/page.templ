@@ -71,6 +71,7 @@ templ sectionActions(user *models.User, tool *models.ToolWithNotes) {
 	</div>
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 templ sectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<section>
@@ -106,6 +107,7 @@ templ sectionNotes(tool *models.ToolWithNotes) {
 	}
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 templ sectionMetalSheets(
 	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
 ) {
@@ -146,6 +148,7 @@ templ sectionMetalSheets(
 	}
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 templ sectionCycles(tool *models.ToolWithNotes, user *models.User) {
 	<section class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>

@@ -169,6 +169,7 @@ func sectionActions(user *models.User, tool *models.ToolWithNotes) templ.Compone
 	})
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -224,7 +225,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 96, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 97, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -237,7 +238,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 100, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 101, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -257,6 +258,7 @@ func sectionNotes(tool *models.ToolWithNotes) templ.Component {
 	})
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 func sectionMetalSheets(
 	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
 ) templ.Component {
@@ -292,7 +294,7 @@ func sectionMetalSheets(
 				env.ServerPathPrefix, tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 123, Col: 5}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 125, Col: 5}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -327,6 +329,7 @@ func sectionMetalSheets(
 	})
 }
 
+// TODO: Load section via HTMX using the trigger "load, pageLoaded from:body"
 func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -370,7 +373,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 				env.ServerPathPrefix, *tool.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 169, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 172, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -383,7 +386,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", *tool.Press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 173, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 176, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -404,7 +407,7 @@ func sectionCycles(tool *models.ToolWithNotes, user *models.User) templ.Componen
 			env.ServerPathPrefix, tool.ID, tool.Position,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 184, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/page.templ`, Line: 187, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
