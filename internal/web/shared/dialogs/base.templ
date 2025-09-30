@@ -1,5 +1,7 @@
 package dialogs
 
+import "fmt"
+
 const (
 	DialogContentID = "dialog-content"
 )
@@ -11,70 +13,64 @@ type BaseProps struct {
 	Href             string
 	SubmitButtonText string
 
-	Error string
-
-	CloseDialog bool
+	Error     string
+	JSOnClose string
 }
 
 templ Base(props BaseProps) {
-	if props.CloseDialog {
-		<script>
-			var dialog = document.querySelector(`dialog#{{ props.ID }}`);
-			dialog.close();
-			location.reload();
-	    </script>
-	} else {
-		<dialog
-			id={ props.ID }
-			class="fullscreen clean flex flex-col justify-center items-center"
-			onclose="this.parentElement.removeChild(this);"
+	<dialog
+		id={ props.ID }
+		class="fullscreen clean flex flex-col justify-center items-center"
+		onclose={ templ.ComponentScript{
+			Call: fmt.Sprintf("this.remove(); %s", props.JSOnClose),
+		} }
+	>
+		<form
+			class="flex flex-col gap"
+			if props.Type == "POST" {
+				hx-post={ props.Href }
+			}
+			if props.Type == "PUT" {
+				hx-put={ props.Href }
+			}
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			hx-on:htmx:after-request="if (event.details.success) this.closest('dialog').close();"
+			enctype="multipart/form-data"
 		>
-			<form
-				class="flex flex-col gap"
-				if props.Type == "POST" {
-					hx-post={ props.Href }
-				}
-				if props.Type == "PUT" {
-					hx-put={ props.Href }
-				}
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				enctype="multipart/form-data"
-			>
-				if props.Error != "" {
-					<div class="card compact destructive">
-						<div class="card-body">
-							{ props.Error }
-						</div>
+			if props.Error != "" {
+				<div class="card compact destructive">
+					<div class="card-body">
+						{ props.Error }
 					</div>
-				}
-				// Content
-				<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
-					{ children... }
 				</div>
-				<footer class="flex gap justify-end">
-					<button
-						name="close"
-						class="secondary flex gap"
-						type="button"
-						onclick="this.closest('dialog').close()"
-					>
-						<i class="bi bi-x-circle"></i>
-						Schließen
-					</button>
-					<button
-						type="submit"
-						class="flex gap"
-					>
-						<i class="bi bi-check-circle"></i>
-						{ props.SubmitButtonText }
-					</button>
-				</footer>
-			</form>
-			<script defer>
+			}
+			// Content
+			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
+				{ children... }
+			</div>
+			<footer class="flex gap justify-end">
+				<button
+					name="close"
+					class="secondary flex gap"
+					type="button"
+					onclick="this.closest('dialog').close()"
+				>
+					<i class="bi bi-x-circle"></i>
+					Schließen
+				</button>
+				<button
+					type="submit"
+					class="flex gap"
+				>
+					<i class="bi bi-check-circle"></i>
+					{ props.SubmitButtonText }
+				</button>
+			</footer>
+		</form>
+		<script defer>
                 document.querySelector('#{{ props.ID }}').showModal();
             </script>
-		</dialog>
-	}
+	</dialog>
 }

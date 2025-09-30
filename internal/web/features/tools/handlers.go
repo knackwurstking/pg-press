@@ -338,9 +338,7 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 }
 
 func (h *Handler) closeEditToolDialog(c echo.Context) error {
-	dialog := templates.DialogEditTool(&templates.DialogEditToolProps{
-		CloseDialog: true,
-	})
+	dialog := templates.DialogEditTool(&templates.DialogEditToolProps{})
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,

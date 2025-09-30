@@ -19,8 +19,6 @@ import (
 type DialogEditMetalSheetProps struct {
 	MetalSheet *models.MetalSheet // MetalSheet can be nullable
 	Tool       *models.Tool
-
-	CloseDialog bool // ClosingDialog is a standalone prop
 }
 
 func DialogEditMetalSheet(props *DialogEditMetalSheetProps) templ.Component {
@@ -98,7 +96,7 @@ func DialogEditMetalSheet(props *DialogEditMetalSheetProps) templ.Component {
 			Type:             baseType,
 			Href:             baseHref,
 			SubmitButtonText: submitButtonText,
-			CloseDialog:      props.CloseDialog,
+			JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -140,7 +138,7 @@ func DialogEditMetalSheetContentPositionTop(props *DialogEditMetalSheetProps) te
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.TileHeight))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 66, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 64, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -163,7 +161,7 @@ func DialogEditMetalSheetContentPositionTop(props *DialogEditMetalSheetProps) te
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 79, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 77, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -215,7 +213,7 @@ func DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps)
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.TileHeight))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 95, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 93, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -238,7 +236,7 @@ func DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps)
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.Value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 108, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 106, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -261,7 +259,7 @@ func DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps)
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.MetalSheet.MarkeHeight))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 120, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 118, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -284,7 +282,7 @@ func DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps)
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.STF))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 133, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 131, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -307,7 +305,7 @@ func DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps)
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", props.MetalSheet.STFMax))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 146, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/metalsheets/templates/dialog-edit-metal-sheet.templ`, Line: 144, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {

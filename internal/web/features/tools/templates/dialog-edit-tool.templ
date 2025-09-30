@@ -17,8 +17,6 @@ type DialogEditToolProps struct {
 	InputType           string
 	InputCode           string
 	InputPressSelection *models.PressNumber
-
-	CloseDialog bool // Standalone prop
 }
 
 templ DialogEditTool(props *DialogEditToolProps) {
@@ -39,7 +37,7 @@ templ DialogEditTool(props *DialogEditToolProps) {
 		Href:             baseHref,
 		ID:               "tool-edit-dialog",
 		SubmitButtonText: submitButtonText,
-		CloseDialog:      props.CloseDialog,
+		JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 	}) {
 		<span class="flex flex-row gap flex-wrap justify-between items-center">
 			<span class="flex flex-col gap-0">

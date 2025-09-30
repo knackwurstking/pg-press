@@ -516,9 +516,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 }
 
 func (h *Handler) closeEditToolCycleDialog(c echo.Context) error {
-	props := &templates.DialogEditCycleProps{
-		CloseDialog: true,
-	}
+	props := &templates.DialogEditCycleProps{}
 	cycleEditDialog := templates.DialogEditCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render cycle edit dialog")

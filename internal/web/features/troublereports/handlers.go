@@ -685,9 +685,8 @@ func (h *Handler) shareResponse(
 }
 
 func (h *Handler) closeDialog(c echo.Context) error {
-	dialog := templates.DialogEditTroubleReport(&templates.DialogEditTroubleReportProps{
-		CloseDialog: true,
-	})
+	dialog := templates.DialogEditTroubleReport(
+		&templates.DialogEditTroubleReportProps{})
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,

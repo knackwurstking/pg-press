@@ -11,8 +11,6 @@ import (
 type DialogEditMetalSheetProps struct {
 	MetalSheet *models.MetalSheet // MetalSheet can be nullable
 	Tool       *models.Tool
-
-	CloseDialog bool // ClosingDialog is a standalone prop
 }
 
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
@@ -41,7 +39,7 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 		Type:             baseType,
 		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
-		CloseDialog:      props.CloseDialog,
+		JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 	}) {
 		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
 		switch props.Tool.Position {
