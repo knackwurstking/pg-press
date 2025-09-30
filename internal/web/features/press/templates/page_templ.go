@@ -134,7 +134,7 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><script>\n\t\t\t\t// Debounce function to prevent rapid reloads\n\t\t\t\tfunction debounce(func, wait) {\n\t\t\t\t\tlet timeout;\n\t\t\t\t\treturn function executedFunction(...args) {\n\t\t\t\t\t\tconst later = function() {\n\t\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\t\tfunc(...args);\n\t\t\t\t\t\t};\n\t\t\t\t\t\tclearTimeout(timeout);\n\t\t\t\t\t\ttimeout = setTimeout(later, wait);\n\t\t\t\t\t};\n\t\t\t\t}\n\n\t\t\t\t// Debounced reload function\n\t\t\t\tconst debouncedReload = debounce(function() {\n\t\t\t\t\tif (document.visibilityState === 'visible') {\n\t\t\t\t\t\tconsole.log('Page became visible - reloading HTMX sections');\n\t\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t\t}\n\t\t\t\t}, 500);\n\n\t\t\t\t// Listen for visibility changes\n\t\t\t\twindow.addEventListener(\"visibilitychange\", debouncedReload);\n\n\t\t\t\t// Add manual refresh functionality\n\t\t\t\twindow.refreshPressSections = function() {\n\t\t\t\t\tconsole.log('Manual refresh triggered');\n\t\t\t\t\tdocument.body.dispatchEvent(new CustomEvent('pageLoaded'));\n\t\t\t\t};\n\t\t\t</script></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

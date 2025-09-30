@@ -37,10 +37,10 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
-func (h *Handler) GetTroubleReports(c echo.Context) error {
+func (h *Handler) GetPage(c echo.Context) error {
 	h.LogDebug("Rendering trouble reports page")
 
-	page := templates.TroubleReportsPage()
+	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c,
 			"failed to render trouble reports page: "+err.Error())

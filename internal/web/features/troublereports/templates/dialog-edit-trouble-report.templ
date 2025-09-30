@@ -43,7 +43,6 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		Type:             baseType,
 		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
-		JSOnClose:        "location.reload();", // TODO: Reload content via htmx, see press page template
 	}) {
 		<script>
             var selectedFiles = []; // Used by the file input change event handler

@@ -22,7 +22,11 @@ templ Base(props BaseProps) {
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
 		onclose={ templ.ComponentScript{
-			Call: fmt.Sprintf("this.remove(); %s", props.JSOnClose),
+			Call: fmt.Sprintf(`
+				window.dispatchEvent(new Event('visibilitychange'));
+				this.remove();
+				%s;
+			`, props.JSOnClose),
 		} }
 	>
 		<form
