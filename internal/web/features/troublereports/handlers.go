@@ -672,14 +672,39 @@ func (h *Handler) shareResponse(
 	tr *models.TroubleReportWithAttachments,
 	buf *bytes.Buffer,
 ) error {
-	filename := fmt.Sprintf("fehlerbericht_%d_%s.pdf",
-		tr.ID, time.Now().Format("2006-01-02"))
+	// Check if buffer is empty or nil
+	if buf == nil || buf.Len() == 0 {
+		return h.RenderInternalError(c, "PDF buffer is empty")
+	}
 
+	// Sanitize the title for filename
+	sanitizedTitle := h.SanitizeFilename(tr.Title)
+	if sanitizedTitle == "" {
+		sanitizedTitle = "fehlerbericht"
+	}
+
+	filename := fmt.Sprintf("%s_%d_%s.pdf",
+		sanitizedTitle, tr.ID, time.Now().Format("2006-01-02"))
+
+	// Set comprehensive PDF headers
 	c.Response().Header().Set("Content-Type", "application/pdf")
 	c.Response().Header().Set("Content-Disposition",
-		fmt.Sprintf("attachment; filename=%s", filename))
+		fmt.Sprintf("attachment; filename=\"%s\"", filename))
 	c.Response().Header().Set("Content-Length",
 		fmt.Sprintf("%d", buf.Len()))
+
+	// Add caching headers
+	c.Response().Header().Set("Cache-Control", "private, max-age=0, no-cache, no-store, must-revalidate")
+	c.Response().Header().Set("Pragma", "no-cache")
+	c.Response().Header().Set("Expires", "0")
+
+	// Add security headers
+	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
+	c.Response().Header().Set("X-Frame-Options", "DENY")
+	c.Response().Header().Set("X-XSS-Protection", "1; mode=block")
+
+	// Add content description
+	c.Response().Header().Set("Content-Description", "Trouble Report PDF")
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
 }
