@@ -29,6 +29,7 @@ templ Page(props *PageProps) {
 	) {
 		<main class="container fluid flex flex-col gap">
 			@sectionActions(props.User, props.ToolID)
+			// TODO: Create the notes section (add, edit and delete)
 			<section
 				id="notes-section"
 				hx-get={ fmt.Sprintf(
