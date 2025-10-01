@@ -76,6 +76,14 @@ templ additionalHead() {
 
     		// Set new timer for lazy search (300ms delay)
     		searchTimer = setTimeout(function() {
+    			// Update URL search parameters
+    			var url = new URL(window.location);
+    			if (searchValue) {
+    				url.searchParams.set('search', searchValue);
+    			} else {
+    				url.searchParams.delete('search');
+    			}
+    			history.replaceState(null, '', url);
     			// Split search value on spaces to get individual search terms
     			var searchTerms = searchValue.split(/\s+/).filter(function(term) {
     				return term.length > 0;
@@ -124,5 +132,20 @@ templ additionalHead() {
 
     	// Make search function available globally
     	window.search = search;
+
+    	// Initialize search from URL parameters on page load
+    	document.addEventListener('DOMContentLoaded', function() {
+    		var urlParams = new URLSearchParams(window.location.search);
+    		var searchParam = urlParams.get('search');
+    		if (searchParam) {
+    			var searchInput = document.querySelector('input[name="search"]');
+    			if (searchInput) {
+    				searchInput.value = searchParam;
+				// Trigger input event to properly initialize search
+				var inputEvent = new Event('input', { bubbles: true });
+				searchInput.dispatchEvent(inputEvent);
+    			}
+    		}
+    	});
 	</script>
 }

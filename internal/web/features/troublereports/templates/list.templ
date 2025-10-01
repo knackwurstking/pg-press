@@ -12,6 +12,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 		<span class="trouble-report">
 			<details
 				id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
+				ontoggle={ updateURLHash(templ.JSExpression("event")) }
 			>
 				<summary>{ tr.Title }</summary>
 				<pre>{ tr.Content }</pre>
@@ -22,9 +23,9 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 						class="attachments-preview-placeholder"
 						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
 						hx-get={ fmt.Sprintf(
-									"%s/htmx/trouble-reports/attachments-preview?id=%d",
-									env.ServerPathPrefix, tr.ID,
-								) }
+							"%s/htmx/trouble-reports/attachments-preview?id=%d",
+							env.ServerPathPrefix, tr.ID,
+						) }
 						hx-trigger="click"
 						hx-swap="outerHTML"
 						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -74,9 +75,9 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				// Admin only: Delete Report
 				<button
 					hx-delete={ fmt.Sprintf(
-									"%s/htmx/trouble-reports/data?id=%d",
-									env.ServerPathPrefix, tr.ID,
-								) }
+						"%s/htmx/trouble-reports/data?id=%d",
+						env.ServerPathPrefix, tr.ID,
+					) }
 					hx-trigger="click"
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
@@ -93,6 +94,17 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 		</span>
 	}
 	@listReportsScript()
+}
+
+script updateURLHash(event templ.JSExpression) {
+	var details = event.target;
+	if (details.open) {
+		// Update URL hash when details is opened
+		history.replaceState(null, '', '#' + details.id);
+	} else {
+		// Clear hash when details is closed
+		history.replaceState(null, '', window.location.pathname + window.location.search);
+	}
 }
 
 script listReportsScript() {
