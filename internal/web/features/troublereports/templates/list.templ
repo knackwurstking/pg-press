@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
+templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
 	for _, tr := range troubleReports {
 		<span class="trouble-report">
 			<details
@@ -65,7 +65,7 @@ templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleRepo
 				// Share Report (PDF)
 				<button
 					id={ fmt.Sprintf("share-btn-%d", tr.ID) }
-					onclick={ shareTroubleReportPDF(templ.JSExpression("event"), tr.ID, tr.Title) }
+					onclick={ shareReportToPDF(templ.JSExpression("event"), tr.ID, tr.Title) }
 					class="ghost icon info"
 					title="Als PDF teilen"
 				>
@@ -92,10 +92,10 @@ templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleRepo
 			<hr/>
 		</span>
 	}
-	@listTroubleReportsScript()
+	@listReportsScript()
 }
 
-script listTroubleReportsScript() {
+script listReportsScript() {
 	if (location.hash === "") {
 		return;
 	}
@@ -110,7 +110,7 @@ script listTroubleReportsScript() {
 	}
 }
 
-script shareTroubleReportPDF(event templ.JSExpression, troubleReportId int64, title string) {
+script shareReportToPDF(event templ.JSExpression, troubleReportId int64, title string) {
     var button = event.target.closest("button");
     if (!button) {
         alert("Fehler: Share-Button nicht gefunden.");

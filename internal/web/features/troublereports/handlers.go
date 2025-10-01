@@ -173,7 +173,7 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 
 	h.LogDebug("Found %d trouble reports for user %s", len(trs), user.Name)
 
-	troubleReportsList := templates.TroubleReportsList(user, trs)
+	troubleReportsList := templates.ListReports(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
 		h.HandleError(c, err, "failed to render trouble reports list component")
 	}
