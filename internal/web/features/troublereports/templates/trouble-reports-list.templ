@@ -37,21 +37,23 @@ templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleRepo
 				}
 			</details>
 			<div class="actions flex gap justify-end items-center">
+				// GoTo: Modifications
 				<a
 					role="button"
 					class="ghost secondary icon"
 					href={ fmt.Sprintf(
-								"%s/trouble-reports/modifications/%d",
-								env.ServerPathPrefix, tr.ID,
-							) }
+						"%s/trouble-reports/modifications/%d",
+						env.ServerPathPrefix, tr.ID,
+					) }
 				>
 					<i class="bi bi-clock-history"></i>
 				</a>
+				// Edit Report Dialog
 				<button
 					hx-get={ fmt.Sprintf(
-								"%s/htmx/trouble-reports/edit?id=%d",
-								env.ServerPathPrefix, tr.ID,
-							) }
+						"%s/htmx/trouble-reports/edit?id=%d",
+						env.ServerPathPrefix, tr.ID,
+					) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -60,6 +62,7 @@ templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleRepo
 				>
 					<i class="bi bi-pen"></i>
 				</button>
+				// Share Report (PDF)
 				<button
 					id={ fmt.Sprintf("share-btn-%d", tr.ID) }
 					onclick={ shareTroubleReportPDF(templ.JSExpression("event"), tr.ID, tr.Title) }
@@ -68,39 +71,23 @@ templ TroubleReportsList(user *models.User, troubleReports []*models.TroubleRepo
 				>
 					<i class="bi bi-share"></i>
 				</button>
-				if user.IsAdmin() {
-					<button
-						hx-delete={ fmt.Sprintf(
+				// Admin only: Delete Report
+				<button
+					hx-delete={ fmt.Sprintf(
 									"%s/htmx/trouble-reports/data?id=%d",
 									env.ServerPathPrefix, tr.ID,
 								) }
-						hx-trigger="click"
-						hx-target="#data"
-						hx-swap="outerHTML"
-						hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
-						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-						class="ghost destructive icon"
-					>
-						<i class="bi bi-trash"></i>
-					</button>
-				} else {
-					<!-- TODO: Benutzer ist kein Administrator, Abstimmungssystem zum Löschen von Problemberichten hinzufügen, noch nicht implementiert -->
-					<button
-						id="vote-for-delete"
-						hx-post={ fmt.Sprintf(
-									"%s/htmx/trouble-reports/vote?id=%d&mode=delete",
-									env.ServerPathPrefix, tr.ID,
-								) }
-						hx-trigger="click"
-						hx-swap="outerHTML"
-						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-						class="ghost destructive flex flex-col justify-between items-center"
+					hx-trigger="click"
+					hx-target="#data"
+					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					class="ghost destructive icon"
+					if !user.IsAdmin() {
 						disabled
-					>
-						<i class="bi bi-trash"></i>
-						<small>ABSTIMMEN</small>
-					</button>
-				}
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
 			</div>
 			<hr/>
 		</span>

@@ -42,14 +42,12 @@ templ Page() {
 				</button>
 			</section>
 			<!-- Trouble Reports Entries -->
-			<section>
-				<span
-					hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
-					hx-trigger="load, pageLoaded from:body"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					id="data"
-				></span>
-			</section>
+			<section
+				hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
+				hx-trigger="load, pageLoaded from:body"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				id="data"
+			></section>
 		</main>
 	}
 }
