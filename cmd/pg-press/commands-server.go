@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -43,17 +42,17 @@ func serverCommand() cli.Command {
 				if *logFile != "" {
 					f, err := os.OpenFile(*logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 					if err != nil {
-						logger.Server().Error("Failed to open log file %s: %v", *logFile, err)
+						log().Error("Failed to open log file %s: %v", *logFile, err)
 						return err
 					} else {
-						logger.Server().SetOutput(f)
-						logger.Server().Info("Redirected logs to file: %s", *logFile)
+						log().SetOutput(f)
+						log().Info("Redirected logs to file: %s", *logFile)
 					}
 				}
 
 				db, err := openDB(*customDBPath)
 				if err != nil {
-					logger.Server().Error("Failed to open database: %v", err)
+					log().Error("Failed to open database: %v", err)
 					return err
 				}
 
@@ -68,11 +67,11 @@ func serverCommand() cli.Command {
 
 				web.Serve(e, db)
 
-				logger.Server().Info("Starting HTTP server on %s", *addr)
+				log().Info("Starting HTTP server on %s", *addr)
 				if err := e.Start(*addr); err != nil &&
 					err != http.ErrServerClosed {
-					logger.Server().Error("Server startup failed on %s: %v", *addr, err)
-					logger.Server().Error("Common causes: port already in use, permission denied, invalid address format")
+					log().Error("Server startup failed on %s: %v", *addr, err)
+					log().Error("Common causes: port already in use, permission denied, invalid address format")
 					os.Exit(exitCodeServerStart)
 				}
 
@@ -94,7 +93,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		// Handle nil error case (should never happen, but be defensive)
 		if err == nil {
-			logger.Server().Error("HTTP error handler received nil error - " +
+			log().Error("HTTP error handler received nil error - " +
 				"this indicates a bug in the application")
 
 			err = errors.New("unexpected nil error")
@@ -127,23 +126,23 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 		userAgent := req.UserAgent()
 
 		if code >= 500 {
-			logger.Server().Error("HTTP %d: %s [%s %s] from %s (UA: %s)",
+			log().Error("HTTP %d: %s [%s %s] from %s (UA: %s)",
 				code, message, method, uri, remoteIP, userAgent)
 		} else if code >= 400 {
 			switch code {
 			case 401, 403:
-				logger.Server().Warn(
+				log().Warn(
 					"HTTP %d: Authentication/Authorization failed [%s %s] from %s",
 					code, method, uri, remoteIP)
 			case 404:
-				logger.Server().Warn("HTTP %d: Not found [%s %s] from %s",
+				log().Warn("HTTP %d: Not found [%s %s] from %s",
 					code, method, uri, remoteIP)
 			default:
-				logger.Server().Warn("HTTP %d: %s [%s %s] from %s",
+				log().Warn("HTTP %d: %s [%s %s] from %s",
 					code, message, method, uri, remoteIP)
 			}
 		} else {
-			logger.Server().Warn("HTTP %d: %s [%s %s] from %s",
+			log().Warn("HTTP %d: %s [%s %s] from %s",
 				code, message, method, uri, remoteIP)
 		}
 
@@ -155,15 +154,15 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 					"code":   code,
 					"status": http.StatusText(code),
 				}); err != nil {
-					logger.Server().Error("Failed to send JSON error response: %v", err)
+					log().Error("Failed to send JSON error response: %v", err)
 				}
 			} else {
 				if err := c.String(code, message); err != nil {
-					logger.Server().Error("Failed to send string error response: %v", err)
+					log().Error("Failed to send string error response: %v", err)
 				}
 			}
 		} else {
-			logger.Server().Error(
+			log().Error(
 				"Cannot send HTTP %d response - "+
 					"headers already committed [%s %s] from %s",
 				code, method, uri, remoteIP)

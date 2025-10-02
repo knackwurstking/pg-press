@@ -5,14 +5,22 @@ import (
 	"path/filepath"
 
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func log() *logger.Logger {
+	return logger.GetComponentLogger("Server")
+}
+
+func clog(component string) *logger.Logger {
+	return logger.GetComponentLogger(component)
+}
+
 func openDB(customPath string) (*database.DB, error) {
 	path := filepath.Join(configPath, databaseFile)
-	logger.Server().Debug("Database path: %s", path)
+	log().Debug("Database path: %s", path)
 
 	if customPath != "" {
 		var err error

@@ -9,7 +9,6 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -96,37 +95,37 @@ func middlewareLogger() echo.MiddlewareFunc {
 				userInfo = " " + user.String()
 				// Log critical admin actions
 				if user.IsAdmin() && (method == "DELETE" || (method == "POST" && status < 400)) {
-					logger.Server().Info("Admin %s: %s %s", user.Name, method, uri)
+					log().Info("Admin %s: %s %s", user.Name, method, uri)
 				}
 			} else {
 				// Log unauthorized modification attempts
 				if method != "GET" && !keyAuthSkipper(c) && status >= 400 {
-					logger.Server().Warn("Unauthorized %s to %s from %s (HTTP %d)", method, uri, remoteIP, status)
+					log().Warn("Unauthorized %s to %s from %s (HTTP %d)", method, uri, remoteIP, status)
 				}
 			}
 
 			// Log slow requests for performance monitoring
 			if latency > 2*time.Second {
-				logger.Server().Warn("Slow request: %s %s took %v from %s", method, uri, latency, remoteIP)
+				log().Warn("Slow request: %s %s took %v from %s", method, uri, latency, remoteIP)
 			}
 
 			// Log unusually large request bodies
 			if contentLength > 50*1024*1024 { // 50MB
-				logger.Server().Info("Large upload: %s %s (%.1fMB) from %s", method, uri, float64(contentLength)/1024/1024, remoteIP)
+				log().Info("Large upload: %s %s (%.1fMB) from %s", method, uri, float64(contentLength)/1024/1024, remoteIP)
 			}
 
 			// Log HTTP request with status-appropriate level
 			if status >= 500 {
 				// Server errors are already logged in error handler with more context
-				logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+				log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 			} else if status >= 400 {
 				// Only log client errors for non-routine cases
 				if status != 404 || method != "GET" {
-					logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+					log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 				}
 			} else {
 				// Success cases - use debug level for routine requests
-				logger.Server().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+				log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 			}
 
 			return err
@@ -145,7 +144,7 @@ func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
 			remoteIP := c.RealIP()
-			logger.Middleware().Info("Authentication required for %s %s from %s",
+			clog("Middleware: Auth").Info("Authentication required for %s %s from %s",
 				c.Request().Method, c.Request().URL.Path, remoteIP)
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
@@ -162,15 +161,16 @@ func keyAuthSkipper(ctx echo.Context) bool {
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
+	l := clog("Middleware: Auth Validator")
 	remoteIP := ctx.RealIP()
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			logger.Middleware().Info("Authentication failed from %s", remoteIP)
+			l.Info("Authentication failed from %s", remoteIP)
 			return false, echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
 		}
-		logger.Middleware().Debug("API key auth successful for user %s from %s", user.Name, remoteIP)
+		l.Debug("API key auth successful for user %s from %s", user.Name, remoteIP)
 	}
 
 	ctx.Set("user", user)
@@ -178,42 +178,44 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 }
 
 func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, error) {
+	l := clog("Middleware: Cookie Validation")
+
 	remoteIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
-		logger.Middleware().Debug("No cookie found for request from %s: %v", remoteIP, err)
+		l.Debug("No cookie found for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
-	logger.Middleware().Debug("Found cookie for request from %s: expires=%v, secure=%v",
+	l.Debug("Found cookie for request from %s: expires=%v, secure=%v",
 		remoteIP, httpCookie.Expires, httpCookie.Secure)
 
 	cookie, err := db.Cookies.Get(httpCookie.Value)
 	if err != nil {
-		logger.Middleware().Debug("Cookie not found in database for request from %s: %v", remoteIP, err)
+		l.Debug("Cookie not found in database for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
 
-	logger.Middleware().Debug("Cookie found in database for request from %s: lastLogin=%d, userAgent='%s'",
+	l.Debug("Cookie found in database for request from %s: lastLogin=%d, userAgent='%s'",
 		remoteIP, cookie.LastLogin, cookie.UserAgent)
 
 	// Check if cookie has expired
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if cookie.LastLogin < expirationTime {
-		logger.Middleware().Debug("Expired cookie from %s: lastLogin=%d, expirationTime=%d",
+		l.Debug("Expired cookie from %s: lastLogin=%d, expirationTime=%d",
 			remoteIP, cookie.LastLogin, expirationTime)
 		return nil, utils.NewValidationError("cookie: cookie has expired")
 	}
 
-	logger.Middleware().Debug("Cookie is valid (not expired) for request from %s", remoteIP)
+	l.Debug("Cookie is valid (not expired) for request from %s", remoteIP)
 
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
 	if err != nil {
-		logger.Middleware().Error("Failed to get user for cookie from %s: %v", remoteIP, err)
+		l.Error("Failed to get user for cookie from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}
 
-	logger.Middleware().Debug("User validated from cookie for request from %s: user=%s", remoteIP, user.Name)
+	l.Debug("User validated from cookie for request from %s: user=%s", remoteIP, user.Name)
 
 	// Log user agent mismatch as potential security concern
 	// Be more lenient for PWA compatibility - only log significant changes
@@ -221,9 +223,9 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 	if cookie.UserAgent != requestUserAgent {
 		// Only log if the change seems significant (different browser/version, not just PWA vs browser mode)
 		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
-			logger.Middleware().Info("Significant user agent change for %s from %s", user.Name, remoteIP)
+			l.Info("Significant user agent change for %s from %s", user.Name, remoteIP)
 		} else {
-			logger.Middleware().Debug("Minor user agent variation for %s from %s (likely PWA)", user.Name, remoteIP)
+			l.Debug("Minor user agent variation for %s from %s (likely PWA)", user.Name, remoteIP)
 		}
 	}
 
@@ -232,17 +234,17 @@ func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, er
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(constants.CookieExpirationDuration)
 
-		logger.Middleware().Debug("Updating cookie for page visit by user %s from %s: path=%s",
+		l.Debug("Updating cookie for page visit by user %s from %s: path=%s",
 			user.Name, remoteIP, ctx.Request().URL.Path)
 
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
-			logger.Middleware().Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
+			l.Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
 		} else {
-			logger.Middleware().Debug("Cookie successfully updated for user %s from %s", user.Name, remoteIP)
+			l.Debug("Cookie successfully updated for user %s from %s", user.Name, remoteIP)
 		}
 	}
 
-	logger.Middleware().Debug("Cookie validation successful for user %s from %s", user.Name, remoteIP)
+	l.Debug("Cookie validation successful for user %s from %s", user.Name, remoteIP)
 	return user, nil
 }
 

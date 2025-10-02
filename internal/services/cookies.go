@@ -6,14 +6,15 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Cookies provides database operations for managing authentication cookies and sessions.
 type Cookies struct {
-	db *sql.DB
+	db  *sql.DB
+	log logger.Logger
 }
 
 // NewCookies creates a new Service instance and initializes the database table.
@@ -31,12 +32,12 @@ func NewCookies(db *sql.DB) *Cookies {
 		panic(fmt.Errorf("failed to create cookies table: %v", err))
 	}
 
-	return &Cookies{db: db}
+	return &Cookies{db: db, log: *logger.GetComponentLogger("Service: Cookies")}
 }
 
 // List retrieves all cookies ordered by last login time (most recent first).
 func (c *Cookies) List() ([]*models.Cookie, error) {
-	logger.DBCookies().Info("Listing all cookies")
+	c.log.Info("Listing all cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.db.Query(query)
@@ -58,16 +59,16 @@ func (c *Cookies) List() ([]*models.Cookie, error) {
 		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Listed %d cookies", len(cookies))
+	c.log.Debug("Listed %d cookies", len(cookies))
 	return cookies, nil
 }
 
 // ListApiKey retrieves all cookies associated with a specific API key.
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
-	logger.DBCookies().Info("Listing cookies by API key")
+	c.log.Info("Listing cookies by API key")
 
 	if apiKey == "" {
-		logger.DBCookies().Debug("Validation failed: empty API key")
+		c.log.Debug("Validation failed: empty API key")
 		return nil, utils.NewValidationError("api_key: API key cannot be empty")
 	}
 
@@ -92,16 +93,16 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 		return nil, fmt.Errorf("select error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Found %d cookies for API key", len(cookies))
+	c.log.Debug("Found %d cookies for API key", len(cookies))
 	return cookies, nil
 }
 
 // Get retrieves a specific cookie by its value.
 func (c *Cookies) Get(value string) (*models.Cookie, error) {
-	logger.DBCookies().Debug("Getting cookie by value")
+	c.log.Debug("Getting cookie by value")
 
 	if value == "" {
-		logger.DBCookies().Debug("Validation failed: empty cookie value")
+		c.log.Debug("Validation failed: empty cookie value")
 		return nil, utils.NewValidationError("value: cookie value cannot be empty")
 	}
 
@@ -121,25 +122,25 @@ func (c *Cookies) Get(value string) (*models.Cookie, error) {
 
 // Add creates a new cookie session in the database.
 func (c *Cookies) Add(cookie *models.Cookie) error {
-	logger.DBCookies().Info("Adding cookie: %+v", cookie)
+	c.log.Info("Adding cookie: %+v", cookie)
 
 	if cookie == nil {
-		logger.DBCookies().Debug("Validation failed: cookie is nil")
+		c.log.Debug("Validation failed: cookie is nil")
 		return utils.NewValidationError("cookie: cookie cannot be nil")
 	}
 
 	if cookie.Value == "" {
-		logger.DBCookies().Debug("Validation failed: empty cookie value")
+		c.log.Debug("Validation failed: empty cookie value")
 		return utils.NewValidationError("value: cookie value cannot be empty")
 	}
 
 	if cookie.ApiKey == "" {
-		logger.DBCookies().Debug("Validation failed: empty API key")
+		c.log.Debug("Validation failed: empty API key")
 		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
 
 	if cookie.LastLogin <= 0 {
-		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
+		c.log.Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
 		return utils.NewValidationError("last_login: last login timestamp must be positive")
 	}
 
@@ -150,7 +151,7 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 		return fmt.Errorf("select error: cookies: %v", err)
 	}
 	if count > 0 {
-		logger.DBCookies().Debug("Cookie already exists with value")
+		c.log.Debug("Cookie already exists with value")
 		return utils.NewAlreadyExistsError("cookie already exists")
 	}
 
@@ -162,32 +163,32 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 		return fmt.Errorf("insert error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Successfully added cookie")
+	c.log.Debug("Successfully added cookie")
 	return nil
 }
 
 // Update modifies an existing cookie session.
 func (c *Cookies) Update(value string, cookie *models.Cookie) error {
-	logger.DBCookies().Info("Updating cookie: %+v, value: %s", cookie, value)
+	c.log.Info("Updating cookie: %+v, value: %s", cookie, value)
 
 	if value == "" {
-		logger.DBCookies().Debug("Validation failed: empty current cookie value")
+		c.log.Debug("Validation failed: empty current cookie value")
 		return utils.NewValidationError("value: current cookie value cannot be empty")
 	}
 	if cookie == nil {
-		logger.DBCookies().Debug("Validation failed: cookie is nil")
+		c.log.Debug("Validation failed: cookie is nil")
 		return utils.NewValidationError("cookie: cookie cannot be nil")
 	}
 	if cookie.Value == "" {
-		logger.DBCookies().Debug("Validation failed: empty new cookie value")
+		c.log.Debug("Validation failed: empty new cookie value")
 		return utils.NewValidationError("value: new cookie value cannot be empty")
 	}
 	if cookie.ApiKey == "" {
-		logger.DBCookies().Debug("Validation failed: empty API key")
+		c.log.Debug("Validation failed: empty API key")
 		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
 	if cookie.LastLogin <= 0 {
-		logger.DBCookies().Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
+		c.log.Debug("Validation failed: invalid last login timestamp %d", cookie.LastLogin)
 		return utils.NewValidationError("last_login: last login timestamp must be positive")
 	}
 
@@ -204,20 +205,20 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 		return fmt.Errorf("update error: cookies: %v", err)
 	}
 	if rowsAffected == 0 {
-		logger.DBCookies().Debug("No cookie found to update")
+		c.log.Debug("No cookie found to update")
 		return utils.NewNotFoundError(value)
 	}
 
-	logger.DBCookies().Debug("Successfully updated cookie")
+	c.log.Debug("Successfully updated cookie")
 	return nil
 }
 
 // Remove deletes a cookie session by its value.
 func (c *Cookies) Remove(value string) error {
-	logger.DBCookies().Info("Removing cookie, value: %s", value)
+	c.log.Info("Removing cookie, value: %s", value)
 
 	if value == "" {
-		logger.DBCookies().Debug("Validation failed: empty cookie value")
+		c.log.Debug("Validation failed: empty cookie value")
 		return utils.NewValidationError("value: cookie value cannot be empty")
 	}
 
@@ -227,16 +228,16 @@ func (c *Cookies) Remove(value string) error {
 		return fmt.Errorf("delete error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Successfully removed cookie")
+	c.log.Debug("Successfully removed cookie")
 	return nil
 }
 
 // RemoveApiKey removes all cookie sessions associated with a specific API key.
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	logger.DBCookies().Info("Removing cookies by API key")
+	c.log.Info("Removing cookies by API key")
 
 	if apiKey == "" {
-		logger.DBCookies().Debug("Validation failed: empty API key")
+		c.log.Debug("Validation failed: empty API key")
 		return utils.NewValidationError("api_key: API key cannot be empty")
 	}
 
@@ -246,16 +247,16 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 		return fmt.Errorf("delete error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Successfully removed cookies for API key")
+	c.log.Debug("Successfully removed cookies for API key")
 	return nil
 }
 
 // RemoveExpired removes all cookie sessions that are older than the specified timestamp.
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
-	logger.DBCookies().Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
+	c.log.Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	if beforeTimestamp <= 0 {
-		logger.DBCookies().Debug("Validation failed: invalid timestamp %d", beforeTimestamp)
+		c.log.Debug("Validation failed: invalid timestamp %d", beforeTimestamp)
 		return 0, utils.NewValidationError("timestamp: timestamp must be positive")
 	}
 
@@ -270,7 +271,7 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
 		return 0, fmt.Errorf("delete error: cookies: %v", err)
 	}
 
-	logger.DBCookies().Debug("Removed %d expired cookies", rowsAffected)
+	c.log.Debug("Removed %d expired cookies", rowsAffected)
 	return rowsAffected, nil
 }
 

@@ -1,3 +1,4 @@
+// TODO: Remove this package
 package logger
 
 import "github.com/knackwurstking/pgpress/pkg/logger"

@@ -6,14 +6,15 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Attachments provides database operations for managing attachments with lazy loading.
 type Attachments struct {
-	db *sql.DB
+	db  *sql.DB
+	log *logger.Logger
 }
 
 // NewAttachment creates a new Service instance and initializes the database table.
@@ -32,13 +33,14 @@ func NewAttachments(db *sql.DB) *Attachments {
 	}
 
 	return &Attachments{
-		db: db,
+		db:  db,
+		log: logger.GetComponentLogger("Service: Attachments"),
 	}
 }
 
 // List retrieves all attachments ordered by ID ascending.
 func (a *Attachments) List() ([]*models.Attachment, error) {
-	logger.DBAttachments().Debug("Listing all attachments")
+	a.log.Debug("Listing all attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
 	rows, err := a.db.Query(query)
@@ -66,7 +68,7 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 
 // Get retrieves a specific attachment by ID.
 func (a *Attachments) Get(id int64) (*models.Attachment, error) {
-	logger.DBAttachments().Debug("Getting attachment, id: %d", id)
+	a.log.Debug("Getting attachment, id: %d", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
 	row := a.db.QueryRow(query, id)
@@ -88,7 +90,7 @@ func (s *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 		return []*models.Attachment{}, nil
 	}
 
-	logger.DBAttachments().Debug("Getting attachments by IDs: %v", ids)
+	s.log.Debug("Getting attachments by IDs: %v", ids)
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -141,7 +143,7 @@ func (s *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 
 // Add creates a new attachment and returns its generated ID.
 func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
-	logger.DBAttachments().Debug("Adding attachment: %s", attachment.String())
+	a.log.Debug("Adding attachment: %s", attachment.String())
 
 	if attachment == nil {
 		return 0, utils.NewValidationError("attachment cannot be nil")
@@ -168,7 +170,7 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 // Update modifies an existing attachment.
 func (a *Attachments) Update(attachment *models.Attachment) error {
 	id := attachment.GetID()
-	logger.DBAttachments().Debug("Updating attachment, id: %d", id)
+	a.log.Debug("Updating attachment, id: %d", id)
 
 	if attachment == nil {
 		return utils.NewValidationError("attachment: attachment cannot be nil")
@@ -198,7 +200,7 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 
 // Delete deletes an attachment by ID.
 func (a *Attachments) Delete(id int64) error {
-	logger.DBAttachments().Debug("Removing attachment, id: %d", id)
+	a.log.Debug("Removing attachment, id: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.db.Exec(query, id)

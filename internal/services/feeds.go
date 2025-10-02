@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -15,6 +15,7 @@ import (
 type Feeds struct {
 	db          *sql.DB
 	broadcaster interfaces.Broadcaster
+	log         logger.Logger
 }
 
 // NewFeeds creates a new Feed instance and initializes the database table
@@ -35,12 +36,12 @@ func NewFeeds(db *sql.DB) *Feeds {
 	if _, err := db.Exec(query); err != nil {
 		panic(fmt.Errorf("failed to create feeds table: %v", err))
 	}
-	return &Feeds{db: db}
+	return &Feeds{db: db, log: *logger.GetComponentLogger("Service: Feeds")}
 }
 
 // SetBroadcaster sets the feed notifier for real-time updates
 func (f *Feeds) SetBroadcaster(broadcaster interfaces.Broadcaster) {
-	logger.DBFeeds().Debug("Setting broadcaster for real-time updates")
+	f.log.Debug("Setting broadcaster for real-time updates")
 	f.broadcaster = broadcaster
 }
 
@@ -63,7 +64,7 @@ func (f *Feeds) List() ([]*models.Feed, error) {
 	}
 
 	if elapsed > 100*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed list query took %v for %d feeds", elapsed, len(feeds))
+		f.log.Warn("Slow feed list query took %v for %d feeds", elapsed, len(feeds))
 	}
 
 	return feeds, nil
@@ -99,7 +100,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 	}
 
 	if elapsed > 100*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed range query took %v (offset=%d, limit=%d, returned=%d)", elapsed, offset, limit, len(feeds))
+		f.log.Warn("Slow feed range query took %v (offset=%d, limit=%d, returned=%d)", elapsed, offset, limit, len(feeds))
 	}
 
 	return feeds, nil
@@ -138,7 +139,7 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 	}
 
 	if elapsed > 100*time.Millisecond {
-		logger.DBFeeds().Warn("Slow user feeds query took %v (userID=%d, offset=%d, limit=%d, returned=%d)", elapsed, userID, offset, limit, len(feeds))
+		f.log.Warn("Slow user feeds query took %v (userID=%d, offset=%d, limit=%d, returned=%d)", elapsed, userID, offset, limit, len(feeds))
 	}
 
 	return feeds, nil
@@ -176,7 +177,7 @@ func (f *Feeds) Add(feedData *models.Feed) error {
 
 	elapsed := time.Since(start)
 	if elapsed > 50*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed insert took %v for user %d", elapsed, feedData.UserID)
+		f.log.Warn("Slow feed insert took %v for user %d", elapsed, feedData.UserID)
 	}
 
 	return nil
@@ -195,7 +196,7 @@ func (f *Feeds) Count() (int, error) {
 
 	elapsed := time.Since(start)
 	if elapsed > 50*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed count query took %v (result: %d)", elapsed, count)
+		f.log.Warn("Slow feed count query took %v (result: %d)", elapsed, count)
 	}
 
 	return count, nil
@@ -218,7 +219,7 @@ func (f *Feeds) CountByUser(userID int64) (int, error) {
 
 	elapsed := time.Since(start)
 	if elapsed > 50*time.Millisecond {
-		logger.DBFeeds().Warn("Slow user feed count query took %v (userID=%d, result=%d)", elapsed, userID, count)
+		f.log.Warn("Slow user feed count query took %v (userID=%d, result=%d)", elapsed, userID, count)
 	}
 
 	return count, nil
@@ -244,10 +245,10 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int64, error) {
 	}
 
 	elapsed := time.Since(start)
-	logger.DBFeeds().Info("Deleted %d feeds before timestamp %d in %v", rowsAffected, timestamp, elapsed)
+	f.log.Info("Deleted %d feeds before timestamp %d in %v", rowsAffected, timestamp, elapsed)
 
 	if elapsed > 100*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed deletion took %v (timestamp=%d, deleted=%d)", elapsed, timestamp, rowsAffected)
+		f.log.Warn("Slow feed deletion took %v (timestamp=%d, deleted=%d)", elapsed, timestamp, rowsAffected)
 	}
 
 	return rowsAffected, nil
@@ -314,7 +315,7 @@ func (f *Feeds) scanAllRows(rows *sql.Rows) ([]*models.Feed, error) {
 
 	scanElapsed := time.Since(scanStart)
 	if scanElapsed > 50*time.Millisecond {
-		logger.DBFeeds().Warn("Slow feed row scanning took %v for %d rows", scanElapsed, len(feeds))
+		f.log.Warn("Slow feed row scanning took %v for %d rows", scanElapsed, len(feeds))
 	}
 
 	return feeds, nil
