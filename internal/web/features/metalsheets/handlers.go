@@ -188,8 +188,8 @@ func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 // createFeed creates a feed entry for metal sheet operations
 func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
 	// Build base feed content with tool and metal sheet info
-	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm",
-		tool.String(), metalSheet.TileHeight, metalSheet.Value)
+	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm\nTyp: %s",
+		tool.String(), metalSheet.TileHeight, metalSheet.Value, metalSheet.Identifier.String())
 
 	// Add additional fields for bottom position tools
 	if tool.Position == models.PositionBottom {
@@ -220,6 +220,13 @@ func (h *Handler) createUpdateFeed(user *models.User, tool *models.Tool, oldShee
 		content += fmt.Sprintf("\nBlech: %.1f mm → %.1f mm", oldSheet.Value, newSheet.Value)
 	} else {
 		content += fmt.Sprintf("\nBlech: %.1f mm", newSheet.Value)
+	}
+
+	// Check for changes in machine type
+	if oldSheet.Identifier != newSheet.Identifier {
+		content += fmt.Sprintf("\nTyp: %s → %s", oldSheet.Identifier.String(), newSheet.Identifier.String())
+	} else {
+		content += fmt.Sprintf("\nTyp: %s", newSheet.Identifier.String())
 	}
 
 	// Add additional fields for bottom position tools
