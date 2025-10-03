@@ -14,13 +14,14 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 				<tr>
 					<th>Stärke (mm)</th>
 					<th>Blech (mm)</th>
+					<th>Typ</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				if len(metalSheets) == 0 {
 					<tr>
-						<td colspan="3" class="text-center">
+						<td colspan="4" class="text-center">
 							Keine Bleche für dieses Werkzeug gefunden
 						</td>
 					</tr>
@@ -29,6 +30,9 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 						<tr>
 							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+							<td>
+								<span class="badge small">{ sheet.Identifier.String() }</span>
+							</td>
 							<td class="button-group flex justify-end items-center">
 								<button
 									class="primary small ghost"
