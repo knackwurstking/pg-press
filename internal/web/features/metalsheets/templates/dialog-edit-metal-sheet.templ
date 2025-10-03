@@ -144,4 +144,29 @@ templ DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps
 			}
 		/>
 	</div>
+	<div class="flex flex-col">
+		<label for="identifier">Maschinentyp</label>
+		<select
+			id="identifier"
+			name="identifier"
+			required
+		>
+			<option
+				value="SACMI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SACMI" {
+					selected
+				}
+				else
+				if props.MetalSheet == nil {
+					selected
+				}
+			>SACMI</option>
+			<option
+				value="SITI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SITI" {
+					selected
+				}
+			>SITI</option>
+		</select>
+	</div>
 }

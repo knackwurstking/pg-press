@@ -1,10 +1,105 @@
-// TODO: Need to add a identifier field for the metal sheet to detect if stf_max is from type "SACMI" or "SITI"
 package models
 
 import (
 	"fmt"
 	"sort"
 )
+
+// MachineType represents the type of machine (SACMI or SITI)
+type MachineType string
+
+// Machine type identifiers
+const (
+	MachineTypeSACMI MachineType = "SACMI"
+	MachineTypeSITI  MachineType = "SITI"
+)
+
+// String returns the string representation of the machine type
+func (mt MachineType) String() string {
+	return string(mt)
+}
+
+// IsValid checks if the machine type is valid
+func (mt MachineType) IsValid() bool {
+	return mt == MachineTypeSACMI || mt == MachineTypeSITI
+}
+
+// IsSACMI returns true if the machine type is SACMI
+func (mt MachineType) IsSACMI() bool {
+	return mt == MachineTypeSACMI
+}
+
+// IsSITI returns true if the machine type is SITI
+func (mt MachineType) IsSITI() bool {
+	return mt == MachineTypeSITI
+}
+
+// ParseMachineType parses a string into a MachineType with validation
+func ParseMachineType(s string) (MachineType, error) {
+	mt := MachineType(s)
+	if !mt.IsValid() {
+		return "", fmt.Errorf("invalid machine type: %s (must be %s or %s)", s, MachineTypeSACMI, MachineTypeSITI)
+	}
+	return mt, nil
+}
+
+// MustParseMachineType parses a string into a MachineType, panicking on invalid input
+func MustParseMachineType(s string) MachineType {
+	mt, err := ParseMachineType(s)
+	if err != nil {
+		panic(err)
+	}
+	return mt
+}
+
+// GetAllMachineTypes returns all valid machine types
+func GetAllMachineTypes() []MachineType {
+	return []MachineType{MachineTypeSACMI, MachineTypeSITI}
+}
+
+// GetAllMachineTypeStrings returns all valid machine types as strings
+func GetAllMachineTypeStrings() []string {
+	types := GetAllMachineTypes()
+	result := make([]string, len(types))
+	for i, mt := range types {
+		result[i] = mt.String()
+	}
+	return result
+}
+
+// DisplayName returns a human-readable display name for the machine type
+func (mt MachineType) DisplayName() string {
+	switch mt {
+	case MachineTypeSACMI:
+		return "SACMI Machine"
+	case MachineTypeSITI:
+		return "SITI Machine"
+	default:
+		return string(mt)
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface
+func (mt MachineType) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + string(mt) + `"`), nil
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (mt *MachineType) UnmarshalJSON(data []byte) error {
+	// Remove quotes from JSON string
+	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
+		return fmt.Errorf("invalid JSON string for MachineType: %s", string(data))
+	}
+
+	str := string(data[1 : len(data)-1])
+	parsed, err := ParseMachineType(str)
+	if err != nil {
+		return err
+	}
+
+	*mt = parsed
+	return nil
+}
 
 type MetalSheetList []*MetalSheet
 
@@ -26,14 +121,15 @@ func (msl *MetalSheetList) Sort() MetalSheetList {
 
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
-	ID          int64   `json:"id"`
-	TileHeight  float64 `json:"tile_height"`  // Tile height in mm
-	Value       float64 `json:"value"`        // Value
-	MarkeHeight int     `json:"marke_height"` // Marke height
-	STF         float64 `json:"stf"`          // STF value
-	STFMax      float64 `json:"stf_max"`      // STF max value
-	ToolID      int64   `json:"tool_id"`      // Currently assigned tool
-	LinkedNotes []int64 `json:"notes"`        // Contains note ids from the "notes" table
+	ID          int64       `json:"id"`
+	TileHeight  float64     `json:"tile_height"`  // Tile height in mm
+	Value       float64     `json:"value"`        // Value
+	MarkeHeight int         `json:"marke_height"` // Marke height
+	STF         float64     `json:"stf"`          // STF value
+	STFMax      float64     `json:"stf_max"`      // STF max value
+	Identifier  MachineType `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
+	ToolID      int64       `json:"tool_id"`      // Currently assigned tool
+	LinkedNotes []int64     `json:"notes"`        // Contains note ids from the "notes" table
 }
 
 // New creates a new MetalSheet with default values
@@ -44,6 +140,7 @@ func NewMetalSheet(u *User, toolID int64) *MetalSheet {
 		MarkeHeight: 0,
 		STF:         0,
 		STFMax:      0,
+		Identifier:  MachineTypeSACMI, // Default to SACMI
 		ToolID:      toolID,
 		LinkedNotes: make([]int64, 0),
 	}
@@ -53,8 +150,39 @@ func NewMetalSheet(u *User, toolID int64) *MetalSheet {
 
 // String returns a string representation of the metal sheet
 func (ms *MetalSheet) String() string {
-	return fmt.Sprintf("Blech #%d (TH: %.1f, V: %.1f, MH: %d, STF: %.1f/%.1f)",
-		ms.ID, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
+	return fmt.Sprintf("Blech #%d [%s] (TH: %.1f, V: %.1f, MH: %d, STF: %.1f/%.1f)",
+		ms.ID, ms.Identifier, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
+}
+
+// IsValidIdentifier checks if the identifier is a valid machine type
+func (ms *MetalSheet) IsValidIdentifier() bool {
+	return ms.Identifier.IsValid()
+}
+
+// IsSACMI returns true if the metal sheet is from a SACMI machine
+func (ms *MetalSheet) IsSACMI() bool {
+	return ms.Identifier.IsSACMI()
+}
+
+// IsSITI returns true if the metal sheet is from a SITI machine
+func (ms *MetalSheet) IsSITI() bool {
+	return ms.Identifier.IsSITI()
+}
+
+// SetMachineType sets the machine type identifier with validation
+func (ms *MetalSheet) SetMachineType(machineType MachineType) error {
+	if !machineType.IsValid() {
+		return fmt.Errorf("invalid machine type: %s (must be %s or %s)",
+			machineType, MachineTypeSACMI, MachineTypeSITI)
+	}
+	ms.Identifier = machineType
+	return nil
+}
+
+// GetValidMachineTypes returns a slice of all valid machine types
+// Deprecated: Use GetAllMachineTypes() instead
+func GetValidMachineTypes() []MachineType {
+	return GetAllMachineTypes()
 }
 
 // MetalSheetWithNotes represents a metal sheet with its related notes loaded

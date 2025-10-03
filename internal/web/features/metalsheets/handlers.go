@@ -292,5 +292,14 @@ func (h *Handler) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error
 		}
 	}
 
+	// Parse identifier field with validation
+	identifierStr := c.FormValue("identifier")
+	if machineType, err := models.ParseMachineType(identifierStr); err == nil {
+		metalSheet.Identifier = machineType
+	} else {
+		// Log the invalid value but don't fail - default to SACMI
+		metalSheet.Identifier = models.MachineTypeSACMI // Default to SACMI
+	}
+
 	return metalSheet, nil
 }
