@@ -98,8 +98,7 @@ func (h *Handler) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 
 	// Create feed entry for the new metal sheet
 	h.createFeed(user, tool, metalSheet, "Blech erstellt")
-	// Refresh the page via HTMX
-	c.Response().Header().Set("HX-Refresh", "true")
+
 	return c.NoContent(http.StatusOK)
 }
 
@@ -146,8 +145,7 @@ func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 
 	// Create feed entry for the updated metal sheet showing changes
 	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
-	// Refresh the page via HTMX
-	c.Response().Header().Set("HX-Refresh", "true")
+
 	return c.NoContent(http.StatusOK)
 }
 

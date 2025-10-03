@@ -61,6 +61,7 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 }
 
 // HTMXPostEditNoteDialog creates a new note
+// TODO: Create a feed entry
 func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -82,13 +83,11 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s created note %d", user.Name, noteID)
 
-	// Close the dialog and refresh the target
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
-	c.Response().WriteHeader(200)
 	return nil
 }
 
 // HTMXPutEditNoteDialog updates an existing note
+// TODO: Create a feed entry
 func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -117,9 +116,6 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s updated note %d", user.Name, noteID)
 
-	// Close the dialog and refresh the target
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
-	c.Response().WriteHeader(200)
 	return nil
 }
 
