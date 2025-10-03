@@ -83,13 +83,12 @@ templ MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 							<th>Marke (mm)</th>
 							<th>Stf.</th>
 							<th>Hubende</th>
-							<th>Typ</th>
 						</tr>
 					</thead>
 					<tbody>
 						if len(bottomSheets) == 0 {
 							<tr>
-								<td colspan="6" class="text-center">
+								<td colspan="5" class="text-center">
 									Keine Bleche für Unterteil gefunden
 								</td>
 							</tr>
@@ -118,9 +117,6 @@ templ MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 										} else {
 											<span class="text-muted">-</span>
 										}
-									</td>
-									<td>
-										<span class="badge small">{ sheet.Identifier.String() }</span>
 									</td>
 								</tr>
 							}
