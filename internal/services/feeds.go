@@ -15,7 +15,7 @@ import (
 type Feeds struct {
 	db          *sql.DB
 	broadcaster interfaces.Broadcaster
-	log         logger.Logger
+	log         *logger.Logger
 }
 
 // NewFeeds creates a new Feed instance and initializes the database table
@@ -36,7 +36,7 @@ func NewFeeds(db *sql.DB) *Feeds {
 	if _, err := db.Exec(query); err != nil {
 		panic(fmt.Errorf("failed to create feeds table: %v", err))
 	}
-	return &Feeds{db: db, log: *logger.GetComponentLogger("Service: Feeds")}
+	return &Feeds{db: db, log: logger.GetComponentLogger("Service: Feeds")}
 }
 
 // SetBroadcaster sets the feed notifier for real-time updates

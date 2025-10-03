@@ -10,8 +10,8 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/database"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers/templates"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 
 	"golang.org/x/net/websocket"
 )
@@ -29,6 +29,8 @@ type FeedHandler struct {
 	broadcast   chan struct{}
 	db          *database.DB
 	mu          sync.RWMutex
+
+	log *logger.Logger
 }
 
 // NewFeedHandler creates a new feed notification manager
@@ -39,24 +41,25 @@ func NewFeedHandler(db *database.DB) *FeedHandler {
 		unregister:  make(chan *FeedConnection),
 		broadcast:   make(chan struct{}, 100), // Buffered channel to prevent blocking
 		db:          db,
+		log:         logger.GetComponentLogger("WS Feeds"),
 	}
 }
 
 // Start begins the notification manager's main loop
 func (fn *FeedHandler) Start(ctx context.Context) {
-	logger.WSFeedHandler().Info("Starting feed notification manager")
+	fn.log.Info("Starting feed notification manager")
 
 	for {
 		select {
 		case <-ctx.Done():
-			logger.WSFeedHandler().Info("Shutting down feed notification manager")
+			fn.log.Info("Shutting down feed notification manager")
 			fn.closeAllConnections()
 			return
 		case conn := <-fn.register:
 			fn.mu.Lock()
 			fn.connections[conn] = true
 			fn.mu.Unlock()
-			logger.WSFeedHandler().Info("Registered new connection for user ID %d", conn.UserID)
+			fn.log.Info("Registered new connection for user ID %d", conn.UserID)
 
 			// Send initial feed counter to new connection
 			go fn.sendInitialFeedCounter(conn)
@@ -69,7 +72,7 @@ func (fn *FeedHandler) Start(ctx context.Context) {
 				close(conn.Done)
 			}
 			fn.mu.Unlock()
-			logger.WSFeedHandler().Info("Unregistered connection for user ID %d", conn.UserID)
+			fn.log.Info("Unregistered connection for user ID %d", conn.UserID)
 
 		case <-fn.broadcast:
 			fn.broadcastToAllConnections()
@@ -82,13 +85,8 @@ func (fn *FeedHandler) RegisterConnection(
 	userID, lastFeed int64,
 	conn *websocket.Conn,
 ) *FeedConnection {
-	feedConn := &FeedConnection{
-		UserID:   userID,
-		LastFeed: lastFeed,
-		Conn:     conn,
-		Send:     make(chan []byte, 256),
-		Done:     make(chan struct{}),
-	}
+	feedConn := NewFeedConnection(userID, conn)
+	feedConn.LastFeed = lastFeed
 
 	fn.register <- feedConn
 	return feedConn
@@ -103,9 +101,9 @@ func (fn *FeedHandler) UnregisterConnection(conn *FeedConnection) {
 func (fn *FeedHandler) Broadcast() {
 	select {
 	case fn.broadcast <- struct{}{}:
-		logger.WSFeedHandler().Info("Feed update notification queued")
+		fn.log.Info("Feed update notification queued")
 	default:
-		logger.WSFeedHandler().Warn("Broadcast channel full, skipping notification")
+		fn.log.Warn("Broadcast channel full, skipping notification")
 	}
 }
 
@@ -113,7 +111,7 @@ func (fn *FeedHandler) Broadcast() {
 func (fn *FeedHandler) sendInitialFeedCounter(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
-		logger.WSFeedHandler().Error("Error rendering initial feed counter for user %d: %v", conn.UserID, err)
+		fn.log.Error("Error rendering initial feed counter for user %d: %v", conn.UserID, err)
 		return
 	}
 
@@ -124,7 +122,7 @@ func (fn *FeedHandler) sendInitialFeedCounter(conn *FeedConnection) {
 		// Connection was closed
 		return
 	case <-time.After(30 * time.Second):
-		logger.WSFeedHandler().Warn("Timeout sending initial feed counter to user %d", conn.UserID)
+		fn.log.Warn("Timeout sending initial feed counter to user %d", conn.UserID)
 	}
 }
 
@@ -137,7 +135,7 @@ func (fn *FeedHandler) broadcastToAllConnections() {
 	}
 	fn.mu.RUnlock()
 
-	logger.WSFeedHandler().Info("Broadcasting feed counter update to %d connections", len(connections))
+	fn.log.Info("Broadcasting feed counter update to %d connections", len(connections))
 
 	for _, conn := range connections {
 		go fn.sendFeedCounterUpdate(conn)
@@ -148,7 +146,7 @@ func (fn *FeedHandler) broadcastToAllConnections() {
 func (fn *FeedHandler) sendFeedCounterUpdate(conn *FeedConnection) {
 	html, err := fn.renderFeedCounter(conn.LastFeed)
 	if err != nil {
-		logger.WSFeedHandler().Error("Error rendering feed counter for user %d: %v", conn.UserID, err)
+		fn.log.Error("Error rendering feed counter for user %d: %v", conn.UserID, err)
 		return
 	}
 
@@ -159,7 +157,7 @@ func (fn *FeedHandler) sendFeedCounterUpdate(conn *FeedConnection) {
 		// Connection was closed, unregister it
 		fn.UnregisterConnection(conn)
 	case <-time.After(30 * time.Second):
-		logger.WSFeedHandler().Warn("Timeout sending feed counter update to user %d", conn.UserID)
+		fn.log.Warn("Timeout sending feed counter update to user %d", conn.UserID)
 		// Don't unregister on timeout, the connection might just be slow or suspended
 	}
 }
@@ -200,7 +198,7 @@ func (fn *FeedHandler) closeAllConnections() {
 		delete(fn.connections, conn)
 	}
 
-	logger.WSFeedHandler().Info("Closed all WebSocket connections")
+	fn.log.Info("Closed all WebSocket connections")
 }
 
 // ConnectionCount returns the number of active connections
@@ -217,6 +215,18 @@ type FeedConnection struct {
 	Conn     *websocket.Conn
 	Send     chan []byte
 	Done     chan struct{}
+
+	log *logger.Logger
+}
+
+func NewFeedConnection(userID int64, conn *websocket.Conn) *FeedConnection {
+	return &FeedConnection{
+		UserID: userID,
+		Conn:   conn,
+		Send:   make(chan []byte, 256),
+		Done:   make(chan struct{}),
+		log:    logger.GetComponentLogger("WS Connection"),
+	}
 }
 
 // WritePump handles writing messages to the WebSocket connection
@@ -235,12 +245,12 @@ func (conn *FeedConnection) WritePump() {
 
 			// Set write deadline - longer timeout for suspended connections
 			if err := conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second)); err != nil {
-				logger.WSFeedConnection().Error("Error setting write deadline for user %d: %v", conn.UserID, err)
+				conn.log.Error("Error setting write deadline for user %d: %v", conn.UserID, err)
 				return
 			}
 
 			if err := websocket.Message.Send(conn.Conn, string(message)); err != nil {
-				logger.WSFeedConnection().Error("Error writing message to user %d: %v", conn.UserID, err)
+				conn.log.Error("Error writing message to user %d: %v", conn.UserID, err)
 				return
 			}
 
@@ -248,11 +258,11 @@ func (conn *FeedConnection) WritePump() {
 			// Send ping message - golang.org/x/net/websocket doesn't have built-in ping/pong
 			// We'll send a simple ping message instead
 			if err := conn.Conn.SetWriteDeadline(time.Now().Add(30 * time.Second)); err != nil {
-				logger.WSFeedConnection().Error("Error setting ping write deadline for user %d: %v", conn.UserID, err)
+				conn.log.Error("Error setting ping write deadline for user %d: %v", conn.UserID, err)
 				return
 			}
 			if err := websocket.Message.Send(conn.Conn, "ping"); err != nil {
-				logger.WSFeedConnection().Error("Error sending ping to user %d: %v", conn.UserID, err)
+				conn.log.Error("Error sending ping to user %d: %v", conn.UserID, err)
 				return
 			}
 
@@ -274,17 +284,17 @@ func (conn *FeedConnection) ReadPump(handler *FeedHandler) {
 		err := websocket.Message.Receive(conn.Conn, &message)
 		if err != nil {
 			if err == io.EOF {
-				logger.WSFeedConnection().Info("Connection closed normally for user %d", conn.UserID)
+				conn.log.Info("Connection closed normally for user %d", conn.UserID)
 			} else {
 				// Check if error is due to timeout or suspension-related issues
 				if isTemporaryError(err) {
-					logger.WSFeedConnection().Warn(
+					conn.log.Warn(
 						"Temporary error for user %d (possibly suspended): %v",
 						conn.UserID, err)
 					// Continue without breaking - browser might be suspended
 					continue
 				}
-				logger.WSFeedConnection().Error("Error reading message from user %d: %v", conn.UserID, err)
+				conn.log.Error("Error reading message from user %d: %v", conn.UserID, err)
 			}
 			break
 		}
@@ -293,7 +303,7 @@ func (conn *FeedConnection) ReadPump(handler *FeedHandler) {
 		if message == "ping" {
 			// Respond with pong
 			if err := websocket.Message.Send(conn.Conn, "pong"); err != nil {
-				logger.WSFeedConnection().Error("Error sending pong to user %d: %v", conn.UserID, err)
+				conn.log.Error("Error sending pong to user %d: %v", conn.UserID, err)
 				break
 			}
 		} else if message == "pong" {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -14,12 +14,14 @@ import (
 type Tools struct {
 	db    *sql.DB
 	notes *Notes
+	log   *logger.Logger
 }
 
 func NewTools(db *sql.DB, notes *Notes) *Tools {
 	t := &Tools{
 		db:    db,
 		notes: notes,
+		log:   logger.GetComponentLogger("Service: Tools"),
 	}
 
 	if err := t.createTable(); err != nil {
@@ -131,7 +133,7 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 	`
 	rows, err := t.db.Query(query, pressNumber)
 	if err != nil {
-		logger.DBTools().Error("Failed to query active tools: %v", err)
+		t.log.Error("Failed to query active tools: %v", err)
 		return nil
 	}
 	defer rows.Close()
@@ -146,7 +148,7 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBTools().Error("Error iterating over tool rows: %v", err)
+		t.log.Error("Error iterating over tool rows: %v", err)
 		return nil
 	}
 	return tools

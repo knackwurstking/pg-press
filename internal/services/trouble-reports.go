@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -15,6 +15,7 @@ type TroubleReports struct {
 	db            *sql.DB
 	attachments   *Attachments
 	modifications *Modifications
+	log           *logger.Logger
 }
 
 func NewTroubleReports(db *sql.DB, a *Attachments, m *Modifications) *TroubleReports {
@@ -22,6 +23,7 @@ func NewTroubleReports(db *sql.DB, a *Attachments, m *Modifications) *TroubleRep
 		db:            db,
 		attachments:   a,
 		modifications: m,
+		log:           logger.GetComponentLogger("Service: Trouble Reports"),
 	}
 
 	if err := troubleReport.createTable(db); err != nil {
@@ -50,12 +52,12 @@ func (s *TroubleReports) createTable(db *sql.DB) error {
 
 // List retrieves all trouble reports ordered by ID descending.
 func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
-	logger.DBTroubleReports().Debug("Starting trouble reports list query")
+	s.log.Debug("Starting trouble reports list query")
 
 	const listQuery string = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := s.db.Query(listQuery)
 	if err != nil {
-		logger.DBTroubleReports().Error("Failed to execute trouble reports list query: %v", err)
+		s.log.Error("Failed to execute trouble reports list query: %v", err)
 		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 	defer rows.Close()
@@ -73,17 +75,17 @@ func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.DBTroubleReports().Error("Error iterating over %d trouble report rows: %v", reportCount, err)
+		s.log.Error("Error iterating over %d trouble report rows: %v", reportCount, err)
 		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 
-	logger.DBTroubleReports().Info("Listed %d trouble reports", len(reports))
+	s.log.Info("Listed %d trouble reports", len(reports))
 	return reports, nil
 }
 
 // Get retrieves a specific trouble report by ID.
 func (s *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
-	logger.DBTroubleReports().Debug("Getting trouble report by ID: %d", id)
+	s.log.Debug("Getting trouble report by ID: %d", id)
 
 	const getQuery = `SELECT * FROM trouble_reports WHERE id = ?`
 	row := s.db.QueryRow(getQuery, id)
@@ -98,7 +100,7 @@ func (s *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
 		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
 	}
 
-	logger.DBTroubleReports().Debug("Retrieved trouble report %d (title='%s')", id, report.Title)
+	s.log.Debug("Retrieved trouble report %d (title='%s')", id, report.Title)
 	return report, nil
 }
 
@@ -115,7 +117,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 
 	userInfo := createUserInfo(u)
 
-	logger.DBTroubleReports().Info("Adding trouble report by %s: title='%s', attachments=%d",
+	s.log.Info("Adding trouble report by %s: title='%s', attachments=%d",
 		userInfo, tr.Title, len(tr.LinkedAttachments))
 
 	// Marshal linked attachments
@@ -138,7 +140,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 	// Get ID of inserted trouble report
 	id, err := result.LastInsertId()
 	if err != nil {
-		logger.DBTroubleReports().Error("Failed to get last insert ID for trouble report by %s: %v", userInfo, err)
+		s.log.Error("Failed to get last insert ID for trouble report by %s: %v", userInfo, err)
 		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
 	}
 	tr.ID = id
@@ -150,11 +152,11 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 		LinkedAttachments: tr.LinkedAttachments,
 	}
 	if err := s.modifications.AddTroubleReportMod(u.TelegramID, id, modData); err != nil {
-		logger.DBTroubleReports().Error("Failed to save initial modification for trouble report %d: %v", id, err)
+		s.log.Error("Failed to save initial modification for trouble report %d: %v", id, err)
 		// Don't fail the entire operation for modification tracking
 	}
 
-	logger.DBTroubleReports().Info("Successfully added trouble report %d by %s", id, userInfo)
+	s.log.Info("Successfully added trouble report %d by %s", id, userInfo)
 
 	return id, nil
 }
@@ -172,7 +174,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 
 	userInfo := createUserInfo(u)
 
-	logger.DBTroubleReports().Info("Updating trouble report %d by %s: title='%s', attachments=%d",
+	s.log.Info("Updating trouble report %d by %s: title='%s', attachments=%d",
 		tr.ID, userInfo, tr.Title, len(tr.LinkedAttachments))
 
 	// Unmarshal linked attachments
@@ -199,14 +201,14 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 		LinkedAttachments: tr.LinkedAttachments,
 	}
 	if err := s.modifications.AddTroubleReportMod(u.TelegramID, tr.ID, modData); err != nil {
-		logger.DBTroubleReports().Error(
+		s.log.Error(
 			"Failed to save modification for trouble report %d: %v",
 			tr.ID, err,
 		)
 		// Don't fail the entire operation for modification tracking
 	}
 
-	logger.DBTroubleReports().Info("Successfully updated trouble report %d by %s",
+	s.log.Info("Successfully updated trouble report %d by %s",
 		tr.ID, userInfo)
 
 	return nil
@@ -220,14 +222,14 @@ func (s *TroubleReports) Delete(id int64, user *models.User) error {
 
 	userInfo := createUserInfo(user)
 
-	logger.DBTroubleReports().Info("Removing trouble report %d by %s", id, userInfo)
+	s.log.Info("Removing trouble report %d by %s", id, userInfo)
 
 	// Get the report before deleting for the feed entry and logging
 	report, err := s.Get(id)
 	if err != nil {
 		return err
 	}
-	logger.DBTroubleReports().Debug("Retrieved trouble report %d (title='%s') for deletion", id, report.Title)
+	s.log.Debug("Retrieved trouble report %d (title='%s') for deletion", id, report.Title)
 
 	const deleteQuery = `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := s.db.Exec(deleteQuery, id)
@@ -246,11 +248,11 @@ func (s *TroubleReports) Delete(id int64, user *models.User) error {
 
 	// Delete modification
 	if err := s.modifications.DeleteAll(ModificationTypeTroubleReport, report.ID); err != nil {
-		logger.DBTroubleReports().Error("Failed to delete all modifications for entity type \"%s\" and entity ID %d",
+		s.log.Error("Failed to delete all modifications for entity type \"%s\" and entity ID %d",
 			ModificationTypeTroubleReport, report.ID)
 	}
 
-	logger.DBTroubleReports().Info(
+	s.log.Info(
 		"Successfully deleted trouble report %d (title='%s') by %s",
 		id, report.Title, userInfo,
 	)
@@ -262,7 +264,7 @@ func (s *TroubleReports) Delete(id int64, user *models.User) error {
 func (s *TroubleReports) GetWithAttachments(
 	id int64,
 ) (*models.TroubleReportWithAttachments, error) {
-	logger.DBTroubleReports().Debug("Getting trouble report with attachments, id: %d", id)
+	s.log.Debug("Getting trouble report with attachments, id: %d", id)
 
 	// Get the trouble report
 	tr, err := s.Get(id)
@@ -276,7 +278,7 @@ func (s *TroubleReports) GetWithAttachments(
 		return nil, err
 	}
 
-	logger.DBTroubleReports().Debug("Retrieved trouble report %d (title='%s') with %d attachments",
+	s.log.Debug("Retrieved trouble report %d (title='%s') with %d attachments",
 		id, tr.Title, len(attachments))
 
 	return &models.TroubleReportWithAttachments{
@@ -287,7 +289,7 @@ func (s *TroubleReports) GetWithAttachments(
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
 func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
-	logger.DBTroubleReports().Debug("Starting trouble reports with attachments list query")
+	s.log.Debug("Starting trouble reports with attachments list query")
 
 	// Get all trouble reports
 	reports, err := s.List()
@@ -312,7 +314,7 @@ func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttac
 		})
 	}
 
-	logger.DBTroubleReports().Info(
+	s.log.Info(
 		"Listed %d trouble reports with %d total attachments",
 		len(result), totalAttachments,
 	)
@@ -330,29 +332,29 @@ func (s *TroubleReports) AddWithAttachments(
 
 	userInfo := createUserInfo(user)
 
-	logger.DBTroubleReports().Info("Adding trouble report with %d attachments by %s: title='%s'",
+	s.log.Info("Adding trouble report with %d attachments by %s: title='%s'",
 		len(attachments), userInfo, troubleReport.Title)
 
 	// First, add the attachments and collect their IDs
 	var attachmentIDs []int64
 	for i, attachment := range attachments {
 		if attachment == nil {
-			logger.DBTroubleReports().Debug("Skipping nil attachment %d for %s", i, userInfo)
+			s.log.Debug("Skipping nil attachment %d for %s", i, userInfo)
 			continue
 		}
 
-		logger.DBTroubleReports().Debug("Adding attachment %d/%d (size: %d bytes) for %s",
+		s.log.Debug("Adding attachment %d/%d (size: %d bytes) for %s",
 			i+1, len(attachments), len(attachment.Data), userInfo)
 
 		id, err := s.attachments.Add(attachment)
 		if err != nil {
 			// Cleanup already added attachments on failure
-			logger.DBTroubleReports().Error("Failed to add attachment %d for %s, cleaning up %d existing: %v",
+			s.log.Error("Failed to add attachment %d for %s, cleaning up %d existing: %v",
 				i+1, userInfo, len(attachmentIDs), err)
 
 			for _, addedID := range attachmentIDs {
 				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
-					logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", addedID, cleanupErr)
+					s.log.Error("Failed to cleanup attachment %d: %v", addedID, cleanupErr)
 				}
 			}
 
@@ -367,7 +369,7 @@ func (s *TroubleReports) AddWithAttachments(
 
 	// Add the trouble report
 	if _, err := s.Add(troubleReport, user); err != nil {
-		logger.DBTroubleReports().Error(
+		s.log.Error(
 			"Failed to add trouble report for %s, cleaning up %d attachments: %v",
 			userInfo, len(attachmentIDs), err,
 		)
@@ -375,7 +377,7 @@ func (s *TroubleReports) AddWithAttachments(
 		// Cleanup attachments on failure
 		for _, id := range attachmentIDs {
 			if cleanupErr := s.attachments.Delete(id); cleanupErr != nil {
-				logger.DBTroubleReports().Error("Failed to cleanup attachment %d: %v", id, cleanupErr)
+				s.log.Error("Failed to cleanup attachment %d: %v", id, cleanupErr)
 			}
 		}
 
@@ -398,7 +400,7 @@ func (s *TroubleReports) UpdateWithAttachments(
 
 	userInfo := createUserInfo(user)
 
-	logger.DBTroubleReports().Info(
+	s.log.Info(
 		"Updating trouble report %d with %d new attachments by %s: title='%s'",
 		id, len(newAttachments), userInfo, tr.Title,
 	)
@@ -407,23 +409,23 @@ func (s *TroubleReports) UpdateWithAttachments(
 	var newAttachmentIDs []int64
 	for i, attachment := range newAttachments {
 		if attachment == nil {
-			logger.DBTroubleReports().Debug("Skipping nil attachment %d for update %d by %s", i, id, userInfo)
+			s.log.Debug("Skipping nil attachment %d for update %d by %s", i, id, userInfo)
 			continue
 		}
 
-		logger.DBTroubleReports().Debug("Adding new attachment %d/%d (size: %d bytes) for update %d by %s",
+		s.log.Debug("Adding new attachment %d/%d (size: %d bytes) for update %d by %s",
 			i+1, len(newAttachments), len(attachment.Data), id, userInfo)
 
 		attachmentID, err := s.attachments.Add(attachment)
 
 		if err != nil {
 			// Cleanup already added attachments on failure
-			logger.DBTroubleReports().Error("Failed to add new attachment %d for update %d by %s, cleaning up %d existing: %v",
+			s.log.Error("Failed to add new attachment %d for update %d by %s, cleaning up %d existing: %v",
 				i+1, id, userInfo, len(newAttachmentIDs), err)
 
 			for _, addedID := range newAttachmentIDs {
 				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
-					logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", addedID, cleanupErr)
+					s.log.Error("Failed to cleanup new attachment %d: %v", addedID, cleanupErr)
 				}
 			}
 
@@ -439,25 +441,25 @@ func (s *TroubleReports) UpdateWithAttachments(
 	tr.LinkedAttachments = allAttachmentIDs
 	tr.ID = id
 
-	logger.DBTroubleReports().Debug("Combined attachments for update %d: %d existing + %d new = %d total",
+	s.log.Debug("Combined attachments for update %d: %d existing + %d new = %d total",
 		id, originalAttachmentCount, len(newAttachmentIDs), len(allAttachmentIDs))
 
 	// Update the trouble report
 	if err := s.Update(tr, user); err != nil {
-		logger.DBTroubleReports().Error("Failed to update trouble report %d by %s, cleaning up %d new attachments: %v",
+		s.log.Error("Failed to update trouble report %d by %s, cleaning up %d new attachments: %v",
 			id, userInfo, len(newAttachmentIDs), err)
 
 		// Cleanup new attachments on failure
 		for _, attachmentID := range newAttachmentIDs {
 			if cleanupErr := s.attachments.Delete(attachmentID); cleanupErr != nil {
-				logger.DBTroubleReports().Error("Failed to cleanup new attachment %d: %v", attachmentID, cleanupErr)
+				s.log.Error("Failed to cleanup new attachment %d: %v", attachmentID, cleanupErr)
 			}
 		}
 
 		return err
 	}
 
-	logger.DBTroubleReports().Info(
+	s.log.Info(
 		"Successfully updated trouble report %d with %d new attachments by %s",
 		id, len(newAttachmentIDs), userInfo,
 	)
@@ -473,7 +475,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 
 	userInfo := createUserInfo(user)
 
-	logger.DBTroubleReports().Info("Removing trouble report %d with attachments by %s", id, userInfo)
+	s.log.Info("Removing trouble report %d with attachments by %s", id, userInfo)
 
 	// Get the trouble report to find its attachments
 	tr, err := s.Get(id)
@@ -481,7 +483,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 		return tr, err
 	}
 
-	logger.DBTroubleReports().Debug(
+	s.log.Debug(
 		"Retrieved trouble report %d (title='%s') with %d attachments for removal by %s",
 		id, tr.Title, len(tr.LinkedAttachments), userInfo,
 	)
@@ -496,7 +498,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 	failedAttachmentDeletes := 0
 	for _, attachmentID := range tr.LinkedAttachments {
 		if err := s.attachments.Delete(attachmentID); err != nil {
-			logger.DBTroubleReports().Warn(
+			s.log.Warn(
 				"Failed to remove attachment %d for trouble report %d by %s: %v",
 				attachmentID, id, userInfo, err,
 			)
@@ -508,7 +510,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 	}
 
 	if failedAttachmentDeletes > 0 {
-		logger.DBTroubleReports().Warn(
+		s.log.Warn(
 			"Failed to remove %d/%d attachments for trouble report %d",
 			failedAttachmentDeletes, len(tr.LinkedAttachments), id,
 		)
@@ -519,7 +521,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 
 // LoadAttachments loads attachments for a trouble report.
 func (s *TroubleReports) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachment, error) {
-	logger.DBTroubleReports().Debug(
+	s.log.Debug(
 		"Loading %d attachments for trouble report %d (title='%s')",
 		len(tr.LinkedAttachments), tr.ID, tr.Title,
 	)
@@ -529,7 +531,7 @@ func (s *TroubleReports) LoadAttachments(tr *models.TroubleReport) ([]*models.At
 		return nil, err
 	}
 
-	logger.DBTroubleReports().Debug("Successfully loaded %d/%d attachments for trouble report %d",
+	s.log.Debug("Successfully loaded %d/%d attachments for trouble report %d",
 		len(attachments), len(tr.LinkedAttachments), tr.ID)
 
 	return attachments, nil
@@ -549,7 +551,7 @@ func (s *TroubleReports) scanTroubleReport(scanner interfaces.Scannable) (*model
 
 	// Try to unmarshal as new format (array of int64 IDs) first
 	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		logger.DBTroubleReports().Error("Failed to unmarshal linked attachments for report %d: %v", report.ID, err)
+		s.log.Error("Failed to unmarshal linked attachments for report %d: %v", report.ID, err)
 		return nil, fmt.Errorf("failed to unmarshal linked attachments: %v", err)
 	}
 

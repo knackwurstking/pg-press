@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -32,13 +32,15 @@ type ModificationWithUser struct {
 
 // Modification handles database operations for modifications
 type Modifications struct {
-	db *sql.DB
+	db  *sql.DB
+	log *logger.Logger
 }
 
 // NewModification creates a new ModificationService instance
 func NewModifications(db *sql.DB) *Modifications {
 	service := &Modifications{
-		db: db,
+		db:  db,
+		log: logger.GetComponentLogger("Service: Modifications"),
 	}
 
 	service.createTable()
@@ -72,7 +74,7 @@ func (s *Modifications) createTable() {
 func (s *Modifications) Add(
 	userID int64, entityType ModificationType, entityID int64, data any,
 ) (*models.Modification[any], error) {
-	logger.DBModifications().Info("Adding modification: user_id=%d, entity_type=%s, entity_id=%d", userID, entityType, entityID)
+	s.log.Info("Adding modification: user_id=%d, entity_type=%s, entity_id=%d", userID, entityType, entityID)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -102,13 +104,13 @@ func (s *Modifications) Add(
 		CreatedAt: now,
 	}
 
-	logger.DBModifications().Info("Successfully added modification: id=%d", id)
+	s.log.Info("Successfully added modification: id=%d", id)
 	return mod, nil
 }
 
 // Get retrieves a specific modification by ID
 func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
-	logger.DBModifications().Debug("Getting modification: id=%d", id)
+	s.log.Debug("Getting modification: id=%d", id)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -134,7 +136,7 @@ func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
 func (s *Modifications) List(
 	entityType ModificationType, entityID int64, limit, offset int,
 ) ([]*models.Modification[any], error) {
-	logger.DBModifications().Debug("Listing modifications: entity_type=%s, entity_id=%d, limit=%d, offset=%d", entityType, entityID, limit, offset)
+	s.log.Debug("Listing modifications: entity_type=%s, entity_id=%d, limit=%d, offset=%d", entityType, entityID, limit, offset)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -164,7 +166,7 @@ func (s *Modifications) List(
 		return nil, fmt.Errorf("error iterating modifications: %v", err)
 	}
 
-	logger.DBModifications().Debug("Found %d modifications", len(modifications))
+	s.log.Debug("Found %d modifications", len(modifications))
 	return modifications, nil
 }
 
@@ -177,7 +179,7 @@ func (s *Modifications) ListAll(
 
 // Count returns the total number of modifications for a specific entity
 func (s *Modifications) Count(entityType ModificationType, entityID int64) (int64, error) {
-	logger.DBModifications().Debug("Counting modifications: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.log.Debug("Counting modifications: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
 		SELECT COUNT(*)
@@ -198,7 +200,7 @@ func (s *Modifications) Count(entityType ModificationType, entityID int64) (int6
 func (s *Modifications) GetLatest(
 	entityType ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
-	logger.DBModifications().Debug("Getting latest modification: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.log.Debug("Getting latest modification: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -226,7 +228,7 @@ func (s *Modifications) GetLatest(
 func (s *Modifications) GetOldest(
 	entityType ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
-	logger.DBModifications().Debug("Getting oldest modification: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.log.Debug("Getting oldest modification: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -252,7 +254,7 @@ func (s *Modifications) GetOldest(
 
 // Delete removes a specific modification by ID
 func (s *Modifications) Delete(id int64) error {
-	logger.DBModifications().Info("Deleting modification: id=%d", id)
+	s.log.Info("Deleting modification: id=%d", id)
 
 	query := `DELETE FROM modifications WHERE id = ?`
 	result, err := s.db.Exec(query, id)
@@ -269,13 +271,13 @@ func (s *Modifications) Delete(id int64) error {
 		return utils.NewNotFoundError("modification")
 	}
 
-	logger.DBModifications().Info("Successfully deleted modification: id=%d", id)
+	s.log.Info("Successfully deleted modification: id=%d", id)
 	return nil
 }
 
 // DeleteAll removes all modifications for a specific entity
 func (s *Modifications) DeleteAll(entityType ModificationType, entityID int64) error {
-	logger.DBModifications().Info("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.log.Info("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `DELETE FROM modifications WHERE entity_type = ? AND entity_id = ?`
 	result, err := s.db.Exec(query, string(entityType), entityID)
@@ -288,7 +290,7 @@ func (s *Modifications) DeleteAll(entityType ModificationType, entityID int64) e
 		return fmt.Errorf("failed to get affected rows: %v", err)
 	}
 
-	logger.DBModifications().Info("Successfully deleted %d modifications", rowsAffected)
+	s.log.Info("Successfully deleted %d modifications", rowsAffected)
 	return nil
 }
 
@@ -296,7 +298,7 @@ func (s *Modifications) DeleteAll(entityType ModificationType, entityID int64) e
 func (s *Modifications) GetByUser(
 	userID int64, limit, offset int,
 ) ([]*models.Modification[any], error) {
-	logger.DBModifications().Debug("Getting modifications by user: user_id=%d, limit=%d, offset=%d", userID, limit, offset)
+	s.log.Debug("Getting modifications by user: user_id=%d, limit=%d, offset=%d", userID, limit, offset)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -333,7 +335,7 @@ func (s *Modifications) GetByUser(
 func (s *Modifications) GetByDateRange(
 	entityType ModificationType, entityID int64, from, to time.Time,
 ) ([]*models.Modification[any], error) {
-	logger.DBModifications().Debug("Getting modifications by date range: entity_type=%s, entity_id=%d, from=%s, to=%s",
+	s.log.Debug("Getting modifications by date range: entity_type=%s, entity_id=%d, from=%s, to=%s",
 		entityType, entityID, from.Format(time.RFC3339), to.Format(time.RFC3339))
 
 	query := `
@@ -400,7 +402,7 @@ func (s *Modifications) AddUserMod(userID, targetUserID int64, data any) error {
 
 // GetWithUser retrieves a modification with user information
 func (s *Modifications) GetWithUser(id int64) (*ModificationWithUser, error) {
-	logger.DBModifications().Debug("Getting modification with user: id=%d", id)
+	s.log.Debug("Getting modification with user: id=%d", id)
 
 	query := `
 		SELECT m.id, m.user_id, m.data, m.created_at, u.user_name
@@ -434,7 +436,7 @@ func (s *Modifications) GetWithUser(id int64) (*ModificationWithUser, error) {
 func (s *Modifications) ListWithUser(
 	entityType ModificationType, entityID int64, limit, offset int,
 ) ([]*ModificationWithUser, error) {
-	logger.DBModifications().Debug("Listing modifications with user: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.log.Debug("Listing modifications with user: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `
 		SELECT m.id, m.user_id, m.data, m.created_at, u.user_name

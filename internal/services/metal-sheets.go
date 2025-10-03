@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -15,12 +15,14 @@ import (
 type MetalSheets struct {
 	db    *sql.DB
 	notes *Notes
+	log   *logger.Logger
 }
 
 func NewMetalSheets(db *sql.DB, notes *Notes) *MetalSheets {
 	metalSheet := &MetalSheets{
 		db:    db,
 		notes: notes,
+		log:   logger.GetComponentLogger("Service: Metal Sheets"),
 	}
 
 	if err := metalSheet.createTable(); err != nil {
@@ -57,7 +59,7 @@ func (s *MetalSheets) createTable() error {
 
 // List returns all metal sheets
 func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
-	logger.DBMetalSheets().Info("Listing metal sheets")
+	s.log.Info("Listing metal sheets")
 
 	query := `
 		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
@@ -84,13 +86,13 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
-	logger.DBMetalSheets().Debug("Listed %d metal sheets", len(sheets))
+	s.log.Debug("Listed %d metal sheets", len(sheets))
 	return sheets, nil
 }
 
 // Get returns a metal sheet by ID
 func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
-	logger.DBMetalSheets().Info("Getting metal sheet, id: %d", id)
+	s.log.Info("Getting metal sheet, id: %d", id)
 
 	query := `
 		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
@@ -112,7 +114,7 @@ func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
 
 // GetWithNotes returns a metal sheet with its related notes loaded
 func (s *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error) {
-	logger.DBMetalSheets().Info("Getting metal sheet with notes, id: %d", id)
+	s.log.Info("Getting metal sheet with notes, id: %d", id)
 
 	sheet, err := s.Get(id)
 	if err != nil {
@@ -126,10 +128,10 @@ func (s *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error
 
 	// Load notes if there are any linked
 	if len(sheet.LinkedNotes) > 0 && s.notes != nil {
-		logger.DBMetalSheets().Debug("Loading %d notes for metal sheet %d", len(sheet.LinkedNotes), id)
+		s.log.Debug("Loading %d notes for metal sheet %d", len(sheet.LinkedNotes), id)
 		notes, err := s.notes.GetByIDs(sheet.LinkedNotes)
 		if err != nil {
-			logger.DBMetalSheets().Error("Failed to load notes for metal sheet %d: %v", id, err)
+			s.log.Error("Failed to load notes for metal sheet %d: %v", id, err)
 			// Don't fail the entire operation if notes can't be loaded
 		} else {
 			result.LoadedNotes = notes
@@ -141,7 +143,7 @@ func (s *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error
 
 // GetByToolID returns all metal sheets assigned to a specific tool
 func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
-	logger.DBMetalSheets().Info("Getting metal sheets for tool, id: %d", toolID)
+	s.log.Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
 		SELECT id, tile_height, value, marke_height, stf, stf_max, tool_id, notes
@@ -169,20 +171,20 @@ func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
 	}
 
-	logger.DBMetalSheets().Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
+	s.log.Debug("Found %d metal sheets for tool %d", len(sheets), toolID)
 	return sheets, nil
 }
 
 // GetAvailable returns all metal sheets (tool_id is now required so all sheets are assigned)
 // This method is kept for backward compatibility but now returns all sheets
 func (s *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
-	logger.DBMetalSheets().Info("Getting all metal sheets (tool_id is now required)")
+	s.log.Info("Getting all metal sheets (tool_id is now required)")
 	return s.List()
 }
 
 // Add inserts a new metal sheet
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
-	logger.DBMetalSheets().Info("Adding metal sheet: %s", sheet.String())
+	s.log.Info("Adding metal sheet: %s", sheet.String())
 
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
@@ -210,14 +212,14 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 	// Set sheet ID for return
 	sheet.ID = id
 
-	logger.DBMetalSheets().Debug("Added metal sheet with ID %d", id)
+	s.log.Debug("Added metal sheet with ID %d", id)
 
 	return id, nil
 }
 
 // Update updates an existing metal sheet
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
-	logger.DBMetalSheets().Info("Updating metal sheet: %d", sheet.ID)
+	s.log.Info("Updating metal sheet: %d", sheet.ID)
 
 	// Marshal JSON fields
 	notesBytes, err := json.Marshal(sheet.LinkedNotes)
@@ -239,14 +241,14 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
 
-	logger.DBMetalSheets().Debug("Updated metal sheet with ID %d", sheet.ID)
+	s.log.Debug("Updated metal sheet with ID %d", sheet.ID)
 
 	return nil
 }
 
 // AssignTool assigns a metal sheet to a tool
 func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
-	logger.DBMetalSheets().Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
+	s.log.Info("Assigning tool to metal sheet: sheet_id=%d, tool_id=%v", sheetID, toolID)
 
 	// Get current sheet to track changes
 	sheet, err := s.Get(sheetID)
@@ -268,14 +270,14 @@ func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
 		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
 
-	logger.DBMetalSheets().Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
+	s.log.Debug("Assigned tool %v to metal sheet %d", toolID, sheetID)
 
 	return nil
 }
 
 // Delete deletes a metal sheet
 func (s *MetalSheets) Delete(id int64) error {
-	logger.DBMetalSheets().Info("Deleting metal sheet: %d", id)
+	s.log.Info("Deleting metal sheet: %d", id)
 
 	query := `
 		DELETE FROM metal_sheets WHERE id = $1;
@@ -285,13 +287,13 @@ func (s *MetalSheets) Delete(id int64) error {
 		return fmt.Errorf("delete error: metal_sheets: %v", err)
 	}
 
-	logger.DBMetalSheets().Debug("Deleted metal sheet with ID %d", id)
+	s.log.Debug("Deleted metal sheet with ID %d", id)
 
 	return nil
 }
 
 func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
-	logger.DBMetalSheets().Debug("Scanning metal sheet")
+	s.log.Debug("Scanning metal sheet")
 	sheet := &models.MetalSheet{}
 
 	var (

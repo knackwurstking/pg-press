@@ -12,14 +12,15 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
 	"github.com/knackwurstking/pgpress/pkg/constants"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type Users struct {
-	db *sql.DB
+	db  *sql.DB
+	log *logger.Logger
 }
 
 func NewUsers(db *sql.DB) *Users {
@@ -37,7 +38,8 @@ func NewUsers(db *sql.DB) *Users {
 	}
 
 	return &Users{
-		db: db,
+		db:  db,
+		log: logger.GetComponentLogger("Service: Users"),
 	}
 }
 
@@ -48,7 +50,7 @@ func (u *Users) List() ([]*models.User, error) {
 	query := `SELECT * FROM users`
 	rows, err := u.db.Query(query)
 	if err != nil {
-		logger.DBUsers().Error("Failed to execute user list query: %v", err)
+		u.log.Error("Failed to execute user list query: %v", err)
 		return nil, fmt.Errorf("select error: users: %v", err)
 	}
 	defer rows.Close()
@@ -70,7 +72,7 @@ func (u *Users) List() ([]*models.User, error) {
 
 	elapsed := time.Since(start)
 	if elapsed > 100*time.Millisecond {
-		logger.DBUsers().Warn("Slow user list query took %v for %d users", elapsed, len(users))
+		u.log.Warn("Slow user list query took %v for %d users", elapsed, len(users))
 	}
 
 	return users, nil
@@ -96,11 +98,11 @@ func (u *Users) Get(telegramID int64) (*models.User, error) {
 // Add creates a new user and generates a corresponding activity feed entry.
 func (u *Users) Add(user *models.User) (int64, error) {
 	if user == nil {
-		logger.DBUsers().Error("Attempted to add nil user")
+		u.log.Error("Attempted to add nil user")
 		return 0, utils.NewValidationError("user: user cannot be nil")
 	}
 
-	logger.DBUsers().Info("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
+	u.log.Info("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
 
 	if err := user.Validate(); err != nil {
 		return 0, err
@@ -130,13 +132,13 @@ func (u *Users) Add(user *models.User) (int64, error) {
 
 // Delete deletes a user by Telegram ID and generates an activity feed entry.
 func (u *Users) Delete(telegramID int64) error {
-	logger.DBUsers().Info("Removing user %d", telegramID)
+	u.log.Info("Removing user %d", telegramID)
 
 	// Get the user before deleting for the feed entry and logging
 	if _, err := u.Get(telegramID); utils.IsNotFoundError(err) {
 		return err
 	} else if err != nil {
-		logger.DBUsers().Error("Failed to get user before deletion (ID: %d): %v", telegramID, err)
+		u.log.Error("Failed to get user before deletion (ID: %d): %v", telegramID, err)
 	}
 
 	query := `DELETE FROM users WHERE telegram_id = ?`
@@ -166,7 +168,7 @@ func (u *Users) Update(user *models.User) error {
 	}
 
 	telegramID := user.TelegramID
-	logger.DBUsers().Info("Updating user %d: new_name=%s", telegramID, user.Name)
+	u.log.Info("Updating user %d: new_name=%s", telegramID, user.Name)
 
 	if user.Name == "" {
 		return utils.NewValidationError("user_name: username cannot be empty")
@@ -218,7 +220,7 @@ func (s *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
 
 	elapsed := time.Since(start)
 	if elapsed > 50*time.Millisecond {
-		logger.DBUsers().Warn("Slow API key lookup took %v", elapsed)
+		s.log.Warn("Slow API key lookup took %v", elapsed)
 	}
 
 	return user, nil

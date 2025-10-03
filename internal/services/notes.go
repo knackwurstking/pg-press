@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/internal/logger"
+	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type Notes struct {
-	db *sql.DB
+	db  *sql.DB
+	log *logger.Logger
 }
 
 func NewNotes(db *sql.DB) *Notes {
@@ -31,12 +32,13 @@ func NewNotes(db *sql.DB) *Notes {
 	}
 
 	return &Notes{
-		db: db,
+		db:  db,
+		log: logger.GetComponentLogger("Service: Notes"),
 	}
 }
 
 func (n *Notes) List() ([]*models.Note, error) {
-	logger.DBNotes().Info("Listing notes")
+	n.log.Info("Listing notes")
 
 	query := `
 		SELECT id, level, content, created_at FROM notes;
@@ -66,7 +68,7 @@ func (n *Notes) List() ([]*models.Note, error) {
 }
 
 func (n *Notes) Get(id int64) (*models.Note, error) {
-	logger.DBNotes().Info("Getting note, id: %d", id)
+	n.log.Info("Getting note, id: %d", id)
 
 	query := `
 		SELECT id, level, content, created_at FROM notes WHERE id = $1;
@@ -90,7 +92,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 		return []*models.Note{}, nil
 	}
 
-	logger.DBNotes().Debug("Getting notes by IDs: %v", ids)
+	n.log.Debug("Getting notes by IDs: %v", ids)
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -138,7 +140,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 }
 
 func (n *Notes) Add(note *models.Note) (int64, error) {
-	logger.DBNotes().Info("Adding note: level=%d", note.Level)
+	n.log.Info("Adding note: level=%d", note.Level)
 
 	query := `
 		INSERT INTO notes (level, content) VALUES ($1, $2);

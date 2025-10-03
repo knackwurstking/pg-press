@@ -14,7 +14,7 @@ import (
 // Cookies provides database operations for managing authentication cookies and sessions.
 type Cookies struct {
 	db  *sql.DB
-	log logger.Logger
+	log *logger.Logger
 }
 
 // NewCookies creates a new Service instance and initializes the database table.
@@ -32,7 +32,7 @@ func NewCookies(db *sql.DB) *Cookies {
 		panic(fmt.Errorf("failed to create cookies table: %v", err))
 	}
 
-	return &Cookies{db: db, log: *logger.GetComponentLogger("Service: Cookies")}
+	return &Cookies{db: db, log: logger.GetComponentLogger("Service: Cookies")}
 }
 
 // List retrieves all cookies ordered by last login time (most recent first).
