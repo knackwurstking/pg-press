@@ -185,6 +185,27 @@ func GetValidMachineTypes() []MachineType {
 	return GetAllMachineTypes()
 }
 
+// GetMachineTypeForPress returns the machine type for a given press number
+// Press 0 and 5 use SACMI machines, all others use SITI machines
+func GetMachineTypeForPress(pressNumber PressNumber) MachineType {
+	if pressNumber == 0 || pressNumber == 5 {
+		return MachineTypeSACMI
+	}
+	return MachineTypeSITI
+}
+
+// IsSACMIPress returns true if the given press number uses SACMI machines
+// Press 0 and 5 use SACMI machines
+func IsSACMIPress(pressNumber PressNumber) bool {
+	return pressNumber == 0 || pressNumber == 5
+}
+
+// IsSITIPress returns true if the given press number uses SITI machines
+// All presses except 0 and 5 use SITI machines
+func IsSITIPress(pressNumber PressNumber) bool {
+	return !IsSACMIPress(pressNumber)
+}
+
 // MetalSheetWithNotes represents a metal sheet with its related notes loaded
 type MetalSheetWithNotes struct {
 	*MetalSheet

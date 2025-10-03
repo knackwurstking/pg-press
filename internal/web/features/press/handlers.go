@@ -109,18 +109,14 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		}
 	}
 
-	// Get metal sheets for tools on this press
-	var metalSheets models.MetalSheetList
-	for toolID := range toolsMap {
-		sheets, err := h.DB.MetalSheets.GetByToolID(toolID)
-		if err != nil {
-			h.LogError("Failed to get metal sheets for tool %d: %v", toolID, err)
-			continue
-		}
-		metalSheets = append(metalSheets, sheets...)
+	// Get metal sheets for tools on this press with automatic machine type filtering
+	// Press 0 and 5 use SACMI machines, all others use SITI machines
+	metalSheets, err := h.DB.MetalSheets.GetForPress(press, toolsMap)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get metal sheets for press")
 	}
 
-	metalSheetsSection := templates.MetalSheetsSection(metalSheets, toolsMap)
+	metalSheetsSection := templates.MetalSheetsSection(metalSheets, toolsMap, press)
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
 	}

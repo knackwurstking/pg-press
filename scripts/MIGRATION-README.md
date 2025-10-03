@@ -81,6 +81,14 @@ After running the migration:
 3. New metal sheets created through the application will default to "SACMI"
 4. You can update individual records through the application UI or directly in the database
 
+**Press Filtering Feature**:
+The identifier field enables automatic filtering of metal sheets on press pages:
+
+- **Press 0 and Press 5**: Show only SACMI metal sheets
+- **All other presses** (2, 3, 4): Show only SITI metal sheets
+
+This ensures operators only see metal sheets that are compatible with their specific press/machine combination. The filtering happens automatically when viewing press pages - no additional configuration is needed.
+
 **Manual updates**:
 If you need to update specific records to SITI type:
 
@@ -121,7 +129,7 @@ If you need to rollback:
 - This migration is designed for development mode and uses simple ALTER TABLE statements
 - For production environments, consider more robust migration strategies
 - The migration script includes safety checks and creates backups automatically
-- The identifier field is used by the application to determine STF_MAX calculation methods
+- The identifier field is used by the application to determine STF_MAX calculation methods and automatic press filtering
 
 ## General Migration Guidelines
 

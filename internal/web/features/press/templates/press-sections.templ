@@ -42,8 +42,17 @@ templ PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.Pres
 }
 
 // MetalSheetsSection renders the metal sheets section content for HTMX
-templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
-	@MetalSheetTablesCollapsible(metalSheets, toolsMap)
+templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, press models.PressNumber) {
+	{{ expectedMachineType := models.GetMachineTypeForPress(press) }}
+	<div class="flex flex-col gap-sm">
+		<div class="text-center">
+			<small class="text-muted">
+				Zeigt nur Bleche für { expectedMachineType.DisplayName() }
+				(Presse { fmt.Sprintf("%d", press) })
+			</small>
+		</div>
+		@MetalSheetTablesCollapsible(metalSheets, toolsMap)
+	</div>
 }
 
 // PressCyclesSection renders the cycles section content for HTMX

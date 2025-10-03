@@ -176,6 +176,94 @@ func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	return sheets, nil
 }
 
+// GetByMachineType returns all metal sheets of the specified machine type
+func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*models.MetalSheet, error) {
+	s.log.Info("Getting metal sheets for machine type: %s", machineType)
+
+	if !machineType.IsValid() {
+		return nil, fmt.Errorf("invalid machine type: %s", machineType)
+	}
+
+	query := `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes
+		FROM metal_sheets
+		WHERE identifier = $1
+		ORDER BY id DESC;
+	`
+	rows, err := s.db.Query(query, machineType.String())
+	if err != nil {
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
+	}
+	defer rows.Close()
+
+	var sheets []*models.MetalSheet
+
+	for rows.Next() {
+		sheet, err := s.scanMetalSheet(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
+		}
+		sheets = append(sheets, sheet)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("select error: metal_sheets: %v", err)
+	}
+
+	s.log.Debug("Found %d metal sheets for machine type %s", len(sheets), machineType)
+	return sheets, nil
+}
+
+// GetForPress returns metal sheets for tools on the specified press, filtered by the appropriate machine type
+// Press 0 and 5 use SACMI machines, all others use SITI machines
+func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[int64]*models.Tool) ([]*models.MetalSheet, error) {
+	s.log.Info("Getting metal sheets for press %d with machine type filtering", pressNumber)
+
+	// Get the expected machine type for this press
+	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
+	s.log.Debug("Press %d should use %s machines", pressNumber, expectedMachineType)
+
+	// Get metal sheets for all tools on this press
+	var allSheets models.MetalSheetList
+	for toolID := range toolsMap {
+		sheets, err := s.GetByToolID(toolID)
+		if err != nil {
+			s.log.Error("Failed to get metal sheets for tool %d: %v", toolID, err)
+			continue
+		}
+		s.log.Debug("Tool %d has %d metal sheets", toolID, len(sheets))
+		allSheets = append(allSheets, sheets...)
+	}
+
+	// Filter by machine type and count by type
+	var filteredSheets models.MetalSheetList
+	var sacmiCount, sitiCount, otherCount int
+
+	for _, sheet := range allSheets {
+		switch sheet.Identifier {
+		case models.MachineTypeSACMI:
+			sacmiCount++
+			if sheet.Identifier == expectedMachineType {
+				filteredSheets = append(filteredSheets, sheet)
+			}
+		case models.MachineTypeSITI:
+			sitiCount++
+			if sheet.Identifier == expectedMachineType {
+				filteredSheets = append(filteredSheets, sheet)
+			}
+		default:
+			otherCount++
+			s.log.Warn("Found metal sheet %d with unexpected identifier: %s", sheet.ID, sheet.Identifier)
+		}
+	}
+
+	s.log.Debug("Metal sheet distribution for press %d: %d SACMI, %d SITI, %d other (total: %d)",
+		pressNumber, sacmiCount, sitiCount, otherCount, len(allSheets))
+	s.log.Debug("Filtered to %d %s metal sheets for press %d",
+		len(filteredSheets), expectedMachineType, pressNumber)
+	return filteredSheets, nil
+}
+
 // GetAvailable returns all metal sheets (tool_id is now required so all sheets are assigned)
 // This method is kept for backward compatibility but now returns all sheets
 func (s *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
