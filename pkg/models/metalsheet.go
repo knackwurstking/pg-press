@@ -1,3 +1,4 @@
+// TODO: Need to add a identifier field for the metal sheet to detect if stf_max is from type "SACMI" or "SITI"
 package models
 
 import (
