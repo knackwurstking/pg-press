@@ -23,6 +23,10 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
+			// Notes page
+			helpers.NewEchoRoute(http.MethodGet, "/notes",
+				r.handler.GetNotesPage),
+
 			// HTMX routes for notes dialog editing
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/notes/edit",
 				r.handler.HTMXGetEditNoteDialog),
@@ -32,6 +36,9 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 
 			helpers.NewEchoRoute(http.MethodPut, "/htmx/notes/edit",
 				r.handler.HTMXPutEditNoteDialog),
+
+			helpers.NewEchoRoute(http.MethodDelete, "/htmx/notes/delete",
+				r.handler.HTMXDeleteNote),
 		},
 	)
 }

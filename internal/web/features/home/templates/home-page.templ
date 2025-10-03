@@ -33,6 +33,13 @@ templ HomePage() {
 						"Werkzeuglisten",
 						"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 					)
+					<!-- Anchor Button => Notes Page -->
+					@pageItem(
+						env.ServerPathPrefix+"/notes",
+						"journal-text",
+						"Notizen Verwaltung",
+						"Verwalten Sie Notizen für Werkzeuge und Pressen",
+					)
 				</div>
 			</nav>
 		</main>
@@ -42,6 +49,7 @@ templ HomePage() {
 templ navContent(relPath string) {
 	<div class="flex flex-row gap justify-end items-center">
 		@components.NavFeedButton()
+		@components.NavNotesButton()
 		@components.NavProfileButton()
 		@components.NavHomeButton()
 	</div>

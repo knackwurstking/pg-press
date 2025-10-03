@@ -82,10 +82,11 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s created note %d", user.Name, noteID)
 
-	// TODO: Link and Unlink tables for this note
-	h.LogDebug("Link to tables: %v", linkedTables)
-
-	// ...
+	// Link tables to this note
+	if err := h.linkTablesToNote(noteID, linkedTables); err != nil {
+		h.LogError("Failed to link tables to note %d: %v", noteID, err)
+		// Don't fail the entire operation if linking fails
+	}
 
 	// Create feed entry
 	title := "Neue Notiz erstellt"
@@ -101,6 +102,8 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 		h.LogError("Failed to create feed for cycle creation: %v", err)
 	}
 
+	// Trigger reload of notes sections
+	c.Response().Header().Set("HX-Trigger", "noteCreated, pageLoaded")
 	return nil
 }
 
@@ -133,10 +136,11 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s updated note %d", user.Name, noteID)
 
-	// TODO: Link and Unlink tables for this note
-	h.LogDebug("Link to tables: %v", linkedTables)
-
-	// ...
+	// Update table links for this note
+	if err := h.updateTableLinksForNote(noteID, linkedTables); err != nil {
+		h.LogError("Failed to update table links for note %d: %v", noteID, err)
+		// Don't fail the entire operation if linking fails
+	}
 
 	// Create feed entry
 	title := "Notiz aktualisiert"
@@ -150,6 +154,90 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
 		h.LogError("Failed to create feed for cycle creation: %v", err)
+	}
+
+	// Trigger reload of notes sections
+	c.Response().Header().Set("HX-Trigger", "noteUpdated, pageLoaded")
+	return nil
+}
+
+// HTMXDeleteNote deletes a note and unlinks it from all tools
+func (h *Handler) HTMXDeleteNote(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	noteID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse note ID: "+err.Error())
+	}
+
+	h.LogDebug("User %s deleting note %d", user.Name, noteID)
+
+	// First unlink the note from all tools that reference it
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		h.LogError("Failed to get tools list for note cleanup: %v", err)
+		// Continue with deletion even if we can't clean up tool references
+	} else {
+		for _, tool := range tools {
+			for _, linkedNoteID := range tool.LinkedNotes {
+				if linkedNoteID == noteID {
+					if err := h.unlinkNoteFromTool(noteID, tool.ID); err != nil {
+						h.LogError("Failed to unlink note %d from tool %d: %v", noteID, tool.ID, err)
+					}
+					break
+				}
+			}
+		}
+	}
+
+	// Delete the note
+	if err := h.DB.Notes.Delete(noteID, user); err != nil {
+		return h.HandleError(c, err, "failed to delete note")
+	}
+
+	h.LogInfo("User %s deleted note %d", user.Name, noteID)
+
+	// Create feed entry
+	feed := models.NewFeed("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for note deletion: %v", err)
+	}
+
+	// Trigger reload of notes sections
+	c.Response().Header().Set("HX-Trigger", "noteDeleted, pageLoaded")
+	return nil
+}
+
+// GetNotesPage serves the main notes page
+func (h *Handler) GetNotesPage(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	// Get all notes
+	notes, err := h.DB.Notes.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get notes from database")
+	}
+
+	// Get all tools to show relationships
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	page := templates.Page(&templates.PageProps{
+		User:  user,
+		Notes: notes,
+		Tools: tools,
+	})
+
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render notes page: "+err.Error())
 	}
 
 	return nil
@@ -187,4 +275,174 @@ func (h *Handler) parseNoteFromForm(c echo.Context) (note *models.Note, linkedTa
 	linkedTables = c.Request().Form["linked_tables"]
 
 	return note, linkedTables, nil
+}
+
+// linkTablesToNote links a note to the specified tables
+func (h *Handler) linkTablesToNote(noteID int64, linkedTables []string) error {
+	for _, tableRef := range linkedTables {
+		if err := h.linkNoteToTable(noteID, tableRef); err != nil {
+			return fmt.Errorf("failed to link note to table %s: %v", tableRef, err)
+		}
+	}
+	return nil
+}
+
+// updateTableLinksForNote updates the table links for a note (unlinks old, links new)
+func (h *Handler) updateTableLinksForNote(noteID int64, newLinkedTables []string) error {
+	// For updates, we need to handle unlinking from tools that no longer have this note
+	// First, get all tools and check which ones currently have this note
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		return fmt.Errorf("failed to get tools list: %v", err)
+	}
+
+	// Unlink from tools that currently have this note but shouldn't anymore
+	for _, tool := range tools {
+		hasNote := false
+		for _, linkedNoteID := range tool.LinkedNotes {
+			if linkedNoteID == noteID {
+				hasNote = true
+				break
+			}
+		}
+
+		if hasNote {
+			shouldKeepNote := false
+			for _, tableRef := range newLinkedTables {
+				if tableRef == fmt.Sprintf("tool_%d", tool.ID) {
+					shouldKeepNote = true
+					break
+				}
+				// Check if this tool is on a press that should have this note
+				if tool.Press != nil {
+					if tableRef == fmt.Sprintf("press_%d", *tool.Press) {
+						shouldKeepNote = true
+						break
+					}
+				}
+			}
+
+			if !shouldKeepNote {
+				if err := h.unlinkNoteFromTool(noteID, tool.ID); err != nil {
+					h.LogError("Failed to unlink note %d from tool %d: %v", noteID, tool.ID, err)
+				}
+			}
+		}
+	}
+
+	// Now link to new tables
+	return h.linkTablesToNote(noteID, newLinkedTables)
+}
+
+// linkNoteToTable links a note to a specific table (tool_ID or press_ID)
+func (h *Handler) linkNoteToTable(noteID int64, tableRef string) error {
+	parts := strings.Split(tableRef, "_")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid table reference format: %s", tableRef)
+	}
+
+	tableType := parts[0]
+	tableIDStr := parts[1]
+
+	switch tableType {
+	case "tool":
+		toolID, err := strconv.ParseInt(tableIDStr, 10, 64)
+		if err != nil {
+			return fmt.Errorf("invalid tool ID in table reference %s: %v", tableRef, err)
+		}
+		return h.linkNoteToTool(noteID, toolID)
+
+	case "press":
+		pressNum, err := strconv.ParseInt(tableIDStr, 10, 8)
+		if err != nil {
+			return fmt.Errorf("invalid press number in table reference %s: %v", tableRef, err)
+		}
+		return h.linkNoteToPress(noteID, int8(pressNum))
+
+	default:
+		return fmt.Errorf("unsupported table type: %s", tableType)
+	}
+}
+
+// linkNoteToTool adds a note ID to a tool's LinkedNotes
+func (h *Handler) linkNoteToTool(noteID, toolID int64) error {
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return fmt.Errorf("failed to get tool %d: %v", toolID, err)
+	}
+
+	// Check if note is already linked
+	for _, linkedNoteID := range tool.LinkedNotes {
+		if linkedNoteID == noteID {
+			h.LogDebug("Note %d already linked to tool %d", noteID, toolID)
+			return nil
+		}
+	}
+
+	// Add note ID to tool's LinkedNotes
+	tool.LinkedNotes = append(tool.LinkedNotes, noteID)
+
+	// Create a dummy user for the update (we need this for the API but it's not used for note linking)
+	// TODO: This should be improved to get the actual user from context
+	dummyUser := &models.User{TelegramID: 1, Name: "system"}
+
+	if err := h.DB.Tools.Update(tool, dummyUser); err != nil {
+		return fmt.Errorf("failed to update tool %d with note link: %v", toolID, err)
+	}
+
+	h.LogDebug("Successfully linked note %d to tool %d", noteID, toolID)
+	return nil
+}
+
+// linkNoteToPress links a note to all tools on a specific press
+func (h *Handler) linkNoteToPress(noteID int64, pressNum int8) error {
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return fmt.Errorf("invalid press number: %d", pressNum)
+	}
+
+	// Get all tools on this press
+	tools, err := h.DB.Tools.GetByPress(&press)
+	if err != nil {
+		return fmt.Errorf("failed to get tools for press %d: %v", pressNum, err)
+	}
+
+	// Link note to each tool on the press
+	for _, tool := range tools {
+		if err := h.linkNoteToTool(noteID, tool.ID); err != nil {
+			h.LogError("Failed to link note %d to tool %d on press %d: %v", noteID, tool.ID, pressNum, err)
+			// Continue with other tools even if one fails
+		}
+	}
+
+	h.LogDebug("Successfully linked note %d to press %d (%d tools)", noteID, pressNum, len(tools))
+	return nil
+}
+
+// unlinkNoteFromTool removes a note ID from a tool's LinkedNotes
+func (h *Handler) unlinkNoteFromTool(noteID, toolID int64) error {
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return fmt.Errorf("failed to get tool %d: %v", toolID, err)
+	}
+
+	// Remove note ID from tool's LinkedNotes
+	var newLinkedNotes []int64
+	for _, linkedNoteID := range tool.LinkedNotes {
+		if linkedNoteID != noteID {
+			newLinkedNotes = append(newLinkedNotes, linkedNoteID)
+		}
+	}
+
+	tool.LinkedNotes = newLinkedNotes
+
+	// Create a dummy user for the update
+	dummyUser := &models.User{TelegramID: 1, Name: "system"}
+
+	if err := h.DB.Tools.Update(tool, dummyUser); err != nil {
+		return fmt.Errorf("failed to update tool %d to unlink note: %v", toolID, err)
+	}
+
+	h.LogDebug("Successfully unlinked note %d from tool %d", noteID, toolID)
+	return nil
 }

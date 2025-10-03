@@ -184,7 +184,27 @@ func (n *Notes) Update(note *models.Note) error {
 }
 
 func (n *Notes) Delete(id int64, user *models.User) error {
-	return fmt.Errorf("under construction") // TODO: ...
+	n.log.Info("Deleting note: id=%d by user=%s", id, user.Name)
+
+	query := `
+		DELETE FROM notes WHERE id = $1;
+	`
+
+	result, err := n.db.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("delete error: notes: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return utils.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
+	}
+
+	return nil
 }
 
 func (n *Notes) scanNote(scanner interfaces.Scannable) (*models.Note, error) {

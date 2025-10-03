@@ -23,18 +23,22 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			// HTML
+			// Press page
 			helpers.NewEchoRoute(http.MethodGet, "/tools/press/:press",
 				r.handler.GetPressPage),
 
-			// HTMX
-			// Page Sections
+			// HTMX endpoints for press content
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/active-tools",
 				r.handler.HTMXGetPressActiveTools),
+
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/metal-sheets",
 				r.handler.HTMXGetPressMetalSheets),
+
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/cycles",
 				r.handler.HTMXGetPressCycles),
+
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/notes",
+				r.handler.HTMXGetPressNotes),
 		},
 	)
 }

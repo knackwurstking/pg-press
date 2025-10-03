@@ -1,8 +1,6 @@
 package components
 
-import (
-	"github.com/knackwurstking/pgpress/internal/env"
-)
+import "github.com/knackwurstking/pgpress/internal/env"
 
 templ NavProfileButton() {
 	<a
@@ -32,5 +30,16 @@ templ NavFeedButton() {
 	>
 		<i class="bi bi-bell"></i>
 		<span id="feed-counter"></span>
+	</a>
+}
+
+templ NavNotesButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ env.ServerPathPrefix + "/notes" }
+		title="Notizen"
+	>
+		<i class="bi bi-journal-text"></i>
 	</a>
 }

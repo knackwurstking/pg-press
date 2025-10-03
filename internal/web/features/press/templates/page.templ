@@ -33,7 +33,22 @@ templ Page(props PageProps) {
 					Umbau
 				</a>
 			</section>
-			// TODO: Add a notes section, just like the tools page has one
+			// Notes section
+			<section id="notes-section" class="mt">
+				<div class="flex justify-between items-center mb">
+					<h5>Notizen</h5>
+				</div>
+				<div
+					id="notes-content"
+					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/notes",
+						env.ServerPathPrefix, props.Press) }
+					hx-trigger="load, pageLoaded from:body"
+					hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
+				>
+					@components.Spinner()
+				</div>
+			</section>
+			<br/>
 			// Aktive tools table
 			<section id="tool-state-section" class="mt">
 				<div class="flex justify-between items-center mb">

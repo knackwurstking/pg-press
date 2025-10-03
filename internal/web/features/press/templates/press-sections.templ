@@ -8,6 +8,94 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// PressNotesSection renders the notes section for all tools on a press
+templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
+	if len(notes) > 0 {
+		<h4>Notizen für Werkzeuge auf Presse { fmt.Sprintf("%d", press) }</h4>
+		<div class="notes-list">
+			for _, note := range notes {
+				<div class="card">
+					<div class="card-header">
+						<span class="note-importance">
+							switch note.Level {
+								case models.INFO:
+									<i class="bi bi-info-circle"></i>
+									Info
+								case models.ATTENTION:
+									<i class="bi bi-exclamation-triangle text-warning"></i>
+									<strong>Achtung</strong>
+								case models.BROKEN:
+									<i class="bi bi-x-circle text-danger"></i>
+									<strong>Defekt</strong>
+							}
+						</span>
+						<span class="note-date">
+							{ note.CreatedAt.Format("2006-01-02 15:04") }
+						</span>
+					</div>
+					<div class="card-body">
+						<p>{ note.Content }</p>
+						<div class="note-tools mt-sm">
+							<small class="text-muted">
+								Betrifft Werkzeuge:
+								{{ toolCount := 0 }}
+								for _, tool := range tools {
+									for _, linkedNoteID := range tool.LinkedNotes {
+										if linkedNoteID == note.ID {
+											if toolCount > 0 {
+												,
+											}
+											<a href={ fmt.Sprintf("%s/tools/%d", env.ServerPathPrefix, tool.ID) }>
+												{ fmt.Sprintf("%s %s", tool.Format.String(), tool.Code) }
+											</a>
+											{{ toolCount++ }}
+											break
+										}
+									}
+								}
+								if toolCount == 0 {
+									<span class="text-muted">Keine Werkzeuge verknüpft</span>
+								}
+							</small>
+						</div>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="flex justify-center mt">
+			<button
+				class="primary"
+				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neue Notiz für diese Presse hinzufügen"
+			>
+				<i class="bi bi-plus-lg"></i>
+				Notiz hinzufügen
+			</button>
+		</div>
+	} else {
+		<div class="empty-state">
+			<h4>Keine Notizen</h4>
+			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
+			<button
+				class="primary"
+				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neue Notiz für diese Presse hinzufügen"
+			>
+				<i class="bi bi-plus-lg"></i>
+				Erste Notiz hinzufügen
+			</button>
+		</div>
+	}
+}
+
 // PressActiveToolsSection renders the active tools section content for HTMX
 templ PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
 	<div class="flex flex-col gap">
