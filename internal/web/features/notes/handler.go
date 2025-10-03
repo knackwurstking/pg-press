@@ -61,7 +61,6 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 }
 
 // HTMXPostEditNoteDialog creates a new note
-// TODO: Create a feed entry
 func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -70,7 +69,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 
 	h.LogDebug("User %s creating new note", user.Name)
 
-	note, err := h.parseNoteFromForm(c)
+	note, linkedTables, err := h.parseNoteFromForm(c)
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse note form data: "+err.Error())
 	}
@@ -83,11 +82,29 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s created note %d", user.Name, noteID)
 
+	// TODO: Link and Unlink tables for this note
+	h.LogDebug("Link to tables: %v", linkedTables)
+
+	// ...
+
+	// Create feed entry
+	title := "Neue Notiz erstellt"
+	content := fmt.Sprintf("Eine neue Notiz wurde erstellt: %s", note.Content)
+
+	// Add linked tables info if any
+	if len(linkedTables) > 0 {
+		content += fmt.Sprintf("\nVerknüpfte Tabellen: %s", strings.Join(linkedTables, ", "))
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for cycle creation: %v", err)
+	}
+
 	return nil
 }
 
 // HTMXPutEditNoteDialog updates an existing note
-// TODO: Create a feed entry
 func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
@@ -101,7 +118,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	h.LogDebug("User %s updating note %d", user.Name, noteID)
 
-	note, err := h.parseNoteFromForm(c)
+	note, linkedTables, err := h.parseNoteFromForm(c)
 	if err != nil {
 		return h.RenderBadRequest(c, "failed to parse note form data: "+err.Error())
 	}
@@ -116,27 +133,46 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	h.LogInfo("User %s updated note %d", user.Name, noteID)
 
+	// TODO: Link and Unlink tables for this note
+	h.LogDebug("Link to tables: %v", linkedTables)
+
+	// ...
+
+	// Create feed entry
+	title := "Notiz aktualisiert"
+	content := fmt.Sprintf("Eine Notiz wurde aktualisiert: %s", note.Content)
+
+	// Add linked tables info if any
+	if len(linkedTables) > 0 {
+		content += fmt.Sprintf("\nVerknüpfte Tabellen: %s", strings.Join(linkedTables, ", "))
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.LogError("Failed to create feed for cycle creation: %v", err)
+	}
+
 	return nil
 }
 
 // parseNoteFromForm parses note data from form submission
-func (h *Handler) parseNoteFromForm(c echo.Context) (*models.Note, error) {
-	note := &models.Note{}
+func (h *Handler) parseNoteFromForm(c echo.Context) (note *models.Note, linkedTables []string, err error) {
+	note = &models.Note{}
 
 	// Parse level
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
-		return nil, fmt.Errorf("level is required")
+		return nil, nil, fmt.Errorf("level is required")
 	}
 
 	levelInt, err := strconv.Atoi(levelStr)
 	if err != nil {
-		return nil, fmt.Errorf("invalid level format: %v", err)
+		return nil, nil, fmt.Errorf("invalid level format: %v", err)
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
 	if levelInt < 0 || levelInt > 2 {
-		return nil, fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt)
+		return nil, nil, fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt)
 	}
 
 	note.Level = models.Level(levelInt)
@@ -144,11 +180,11 @@ func (h *Handler) parseNoteFromForm(c echo.Context) (*models.Note, error) {
 	// Parse content
 	note.Content = strings.TrimSpace(c.FormValue("content"))
 	if note.Content == "" {
-		return nil, fmt.Errorf("content is required")
+		return nil, nil, fmt.Errorf("content is required")
 	}
 
-	// TODO: Handle linked_tables when the feature is implemented
-	// linkedTables := c.Request().Form["linked_tables"]
+	// Handle linked_tables
+	linkedTables = c.Request().Form["linked_tables"]
 
-	return note, nil
+	return note, linkedTables, nil
 }

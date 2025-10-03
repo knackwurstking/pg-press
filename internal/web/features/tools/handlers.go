@@ -146,7 +146,7 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 		}
 	}
 
-	return h.closeEditToolDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
@@ -194,7 +194,7 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 		}
 	}
 
-	return h.closeEditToolDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXDeleteTool(c echo.Context) error {
@@ -349,15 +349,4 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 	}
 
 	return data, nil
-}
-
-func (h *Handler) closeEditToolDialog(c echo.Context) error {
-	dialog := templates.DialogEditTool(&templates.DialogEditToolProps{})
-
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render tool edit dialog: "+err.Error())
-	}
-
-	return nil
 }

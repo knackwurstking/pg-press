@@ -322,7 +322,7 @@ func (h *Handler) HTMXPostEditTroubleReportDialog(c echo.Context) error {
 		h.LogError("Failed to create feed for trouble report creation: %v", err)
 	}
 
-	return h.closeDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXPutEditTroubleReportDialog(c echo.Context) error {
@@ -393,7 +393,7 @@ func (h *Handler) HTMXPutEditTroubleReportDialog(c echo.Context) error {
 		h.LogError("Failed to create feed for trouble report update: %v", err)
 	}
 
-	return h.closeDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
@@ -707,16 +707,4 @@ func (h *Handler) shareResponse(
 	c.Response().Header().Set("Content-Description", "Trouble Report PDF")
 
 	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
-}
-
-func (h *Handler) closeDialog(c echo.Context) error {
-	dialog := templates.DialogEditTroubleReport(
-		&templates.DialogEditTroubleReportProps{})
-
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render trouble report edit dialog: "+err.Error())
-	}
-
-	return nil
 }

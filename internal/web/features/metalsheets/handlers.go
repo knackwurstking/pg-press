@@ -99,7 +99,7 @@ func (h *Handler) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the new metal sheet
 	h.createFeed(user, tool, metalSheet, "Blech erstellt")
 
-	return c.NoContent(http.StatusOK)
+	return nil
 }
 
 // PutUpdateMetalSheet handles updates to existing metal sheets
@@ -146,7 +146,7 @@ func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the updated metal sheet showing changes
 	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
 
-	return c.NoContent(http.StatusOK)
+	return nil
 }
 
 // DeleteMetalSheet handles the deletion of metal sheets

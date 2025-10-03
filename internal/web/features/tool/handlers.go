@@ -393,7 +393,7 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 		h.LogError("Failed to create feed for cycle creation: %v", err)
 	}
 
-	return h.closeEditToolCycleDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
@@ -466,7 +466,7 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		h.LogError("Failed to create feed for cycle update: %v", err)
 	}
 
-	return h.closeEditToolCycleDialog(c)
+	return nil
 }
 
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
@@ -643,8 +643,4 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	}
 
 	return nil
-}
-
-func (h *Handler) closeEditToolCycleDialog(c echo.Context) error {
-	return h.HTMXGetToolCycles(c)
 }
