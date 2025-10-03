@@ -1,0 +1,97 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"strings"
+)
+
+type DialogEditNoteProps struct {
+	Note         *models.Note
+	LinkToTables []string
+}
+
+templ DialogEditNote(props DialogEditNoteProps) {
+	{{
+		var (
+			baseType         = "POST"
+			submitButtonText = "Erstellen"
+			baseHref         = fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix)
+		)
+
+		if props.Note.ID <= 0 {
+			baseType = "POST"
+			submitButtonText = "Erstellen"
+			baseHref = fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=%s",
+				env.ServerPathPrefix, strings.Join(props.LinkToTables, ","))
+		} else {
+			baseType = "PUT"
+			submitButtonText = "Aktualisieren"
+			baseHref = fmt.Sprintf("%s/htmx/notes/edit?id=%d&link_to_tables=%s",
+				env.ServerPathPrefix, props.Note.ID, strings.Join(props.LinkToTables, ","))
+		}
+	}}
+	@dialogs.Base(dialogs.BaseProps{
+		Type:             baseType,
+		Href:             baseHref,
+		ID:               "notes-edit-dialog",
+		SubmitButtonText: submitButtonText,
+	}) {
+		<!-- Level Selection -->
+		<label for="level" class="flex flex-col">
+			Priorität
+			<select id="level" name="level" required>
+				<option
+					value="0"
+					selected?={ props.Note.Level == 0 }
+				>
+					Info
+				</option>
+				<option
+					value="1"
+					selected?={ props.Note.Level == 1 }
+				>
+					Achtung
+				</option>
+				<option
+					value="2"
+					selected?={ props.Note.Level == 2 }
+				>
+					Defekt
+				</option>
+			</select>
+		</label>
+		<!-- Content Field -->
+		<label for="content" class="flex flex-col">
+			Inhalt
+			<textarea
+				name="content"
+				id="content"
+				placeholder="Notiz-Inhalt eingeben..."
+				rows="4"
+				required
+			>{ props.Note.Content }</textarea>
+		</label>
+		<!-- Linked Tables Selector -->
+		if len(props.LinkToTables) > 0 {
+			<fieldset class="flex flex-col">
+				<legend>Verknüpfte Tabellen</legend>
+				<div class="flex flex-col gap-sm">
+					for _, table := range props.LinkToTables {
+						<label class="flex flex-row gap items-center">
+							<input
+								type="checkbox"
+								name="linked_tables"
+								value={ table }
+								checked
+							/>
+							{ table }
+						</label>
+					}
+				</div>
+			</fieldset>
+		}
+	}
+}
