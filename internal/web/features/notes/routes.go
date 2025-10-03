@@ -1,6 +1,8 @@
 package notes
 
 import (
+	"net/http"
+
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 
@@ -21,7 +23,15 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 	helpers.RegisterEchoRoutes(
 		e,
 		[]*helpers.EchoRoute{
-			// TODO: HTMX
+			// HTMX routes for notes dialog editing
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/notes/edit",
+				r.handler.HTMXGetEditNoteDialog),
+
+			helpers.NewEchoRoute(http.MethodPost, "/htmx/notes/edit",
+				r.handler.HTMXPostEditNoteDialog),
+
+			helpers.NewEchoRoute(http.MethodPut, "/htmx/notes/edit",
+				r.handler.HTMXPutEditNoteDialog),
 		},
 	)
 }

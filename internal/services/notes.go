@@ -160,7 +160,27 @@ func (n *Notes) Add(note *models.Note) (int64, error) {
 }
 
 func (n *Notes) Update(note *models.Note) error {
-	return fmt.Errorf("under construction") // TODO: ...
+	n.log.Info("Updating note: id=%d, level=%d", note.ID, note.Level)
+
+	query := `
+		UPDATE notes SET level = $1, content = $2 WHERE id = $3;
+	`
+
+	result, err := n.db.Exec(query, note.Level, note.Content, note.ID)
+	if err != nil {
+		return fmt.Errorf("update error: notes: %v", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("note with id %d not found", note.ID)
+	}
+
+	return nil
 }
 
 func (n *Notes) Delete(id int64, user *models.User) error {
