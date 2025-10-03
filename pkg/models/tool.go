@@ -26,7 +26,7 @@ type (
 	PressNumber int8
 )
 
-func (p Position) String() string {
+func (p Position) GermanString() string {
 	switch p {
 	case PositionTop:
 		return "Oberteil"

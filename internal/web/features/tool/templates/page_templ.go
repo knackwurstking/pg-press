@@ -158,9 +158,9 @@ func Page(props *PageProps) templ.Component {
 		templ_7745c5c3_Err = layouts.Main(
 			layouts.MainOptions{
 				PageTitle: fmt.Sprintf("PG Presse | %s %s",
-					props.ToolString, props.Position.String()),
+					props.ToolString, props.Position.GermanString()),
 				AppBarTitle: fmt.Sprintf("%s %s",
-					props.ToolString, props.Position.String()),
+					props.ToolString, props.Position.GermanString()),
 				NavContent: navContent(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
