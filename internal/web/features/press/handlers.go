@@ -25,6 +25,65 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
+// getOrderedToolsForPress gets tools for a press, validates unique positions, and returns ordered tools + toolsMap
+func (h *Handler) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[int64]*models.Tool, error) {
+	// Get tools from database
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Filter tools for this press
+	var pressTools []*models.Tool
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		if tool.Press != nil && *tool.Press == press {
+			pressTools = append(pressTools, tool)
+		}
+	}
+
+	// Validate that each position is unique (only one tool per position)
+	if err := models.ValidateUniquePositions(pressTools); err != nil {
+		return nil, nil, err
+	}
+
+	// Sort tools by position: top, top cassette, bottom
+	sortedTools := models.SortToolsByPosition(pressTools)
+
+	// Create toolsMap for lookup purposes
+	toolsMap := make(map[int64]*models.Tool)
+	for _, tool := range sortedTools {
+		toolsMap[tool.ID] = tool
+	}
+
+	return sortedTools, toolsMap, nil
+}
+
+func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
+	pressNum, err := h.ParseInt8Param(c, "press")
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return h.RenderBadRequest(c, "invalid press number")
+	}
+
+	// Get ordered tools for this press with validation
+	sortedTools, _, err := h.getOrderedToolsForPress(press)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools for press")
+	}
+
+	activeToolsSection := templates.PressActiveToolsSection(sortedTools, press)
+	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
+	}
+
+	return nil
+}
+
 func (h *Handler) GetPressPage(c echo.Context) error {
 	// Get press number from param
 	var pn models.PressNumber
@@ -49,40 +108,6 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
-	pressNum, err := h.ParseInt8Param(c, "press")
-	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
-	}
-
-	// Get tools from database
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	// Filter tools for this press and create toolsMap
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		if tool.Press != nil && *tool.Press == press {
-			toolsMap[tool.ID] = tool
-		}
-	}
-
-	activeToolsSection := templates.PressActiveToolsSection(toolsMap, press)
-	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render active tools section: "+err.Error())
-	}
-
-	return nil
-}
-
 func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 	pressNum, err := h.ParseInt8Param(c, "press")
 	if err != nil {
@@ -94,19 +119,10 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		return h.RenderBadRequest(c, "invalid press number")
 	}
 
-	// Get tools for this press
-	tools, err := h.DB.Tools.ListWithNotes()
+	// Get ordered tools for this press with validation
+	_, toolsMap, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	// Filter tools for this press and create toolsMap
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		if tool.Press != nil && *tool.Press == press {
-			toolsMap[tool.ID] = tool
-		}
+		return h.HandleError(c, err, "failed to get tools for press")
 	}
 
 	// Get metal sheets for tools on this press with automatic machine type filtering

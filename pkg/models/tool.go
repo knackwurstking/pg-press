@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"slices"
+	"sort"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -142,4 +144,54 @@ func (t *Tool) GetPressString() string {
 type ToolWithNotes struct {
 	*Tool
 	LoadedNotes []*Note `json:"loaded_notes"`
+}
+
+// GetPositionOrder returns the sort order for a position (lower number = higher priority)
+func GetPositionOrder(position Position) int {
+	switch position {
+	case PositionTop:
+		return 1
+	case PositionTopCassette:
+		return 2
+	case PositionBottom:
+		return 3
+	default:
+		return 999 // Unknown positions go to the end
+	}
+}
+
+// SortToolsByPosition sorts tools by position: top, top cassette, bottom
+func SortToolsByPosition(tools []*Tool) []*Tool {
+	sorted := make([]*Tool, len(tools))
+	copy(sorted, tools)
+
+	sort.Slice(sorted, func(i, j int) bool {
+		return GetPositionOrder(sorted[i].Position) < GetPositionOrder(sorted[j].Position)
+	})
+
+	return sorted
+}
+
+// ValidateUniquePositions checks that there's only one tool per position
+// Returns an error if duplicates are found
+func ValidateUniquePositions(tools []*Tool) error {
+	positionCount := make(map[Position][]int64)
+
+	for _, tool := range tools {
+		positionCount[tool.Position] = append(positionCount[tool.Position], tool.ID)
+	}
+
+	var duplicates []string
+	for position, toolIDs := range positionCount {
+		if len(toolIDs) > 1 {
+			duplicates = append(duplicates, fmt.Sprintf("%s (%s): Tools %v",
+				position, position.GermanString(), toolIDs))
+		}
+	}
+
+	if len(duplicates) > 0 {
+		return fmt.Errorf("duplicate tool positions found: %s", strings.Join(duplicates, ", "))
+	}
+
+	return nil
 }

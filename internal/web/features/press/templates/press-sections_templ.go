@@ -17,7 +17,7 @@ import (
 )
 
 // PressActiveToolsSection renders the active tools section content for HTMX
-func PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) templ.Component {
+func PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,13 +42,13 @@ func PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.Press
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(toolsMap) == 0 {
+		if len(tools) == 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"text-center text-muted\">Keine aktiven Werkzeuge für diese Presse</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, tool := range toolsMap {
+			for _, tool := range tools {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a role=\"button\" class=\"outline contrast flex justify-between items-center p\" href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

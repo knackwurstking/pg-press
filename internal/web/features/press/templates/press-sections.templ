@@ -9,14 +9,14 @@ import (
 )
 
 // PressActiveToolsSection renders the active tools section content for HTMX
-templ PressActiveToolsSection(toolsMap map[int64]*models.Tool, press models.PressNumber) {
+templ PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
 	<div class="flex flex-col gap">
-		if len(toolsMap) == 0 {
+		if len(tools) == 0 {
 			<div class="text-center text-muted">
 				Keine aktiven Werkzeuge für diese Presse
 			</div>
 		} else {
-			for _, tool := range toolsMap {
+			for _, tool := range tools {
 				<a
 					role="button"
 					class="outline contrast flex justify-between items-center p"
