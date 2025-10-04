@@ -41,7 +41,6 @@ func (t *Tools) createTable() error {
 			code TEXT NOT NULL,
 			regenerating BOOLEAN NOT NULL DEFAULT 0,
 			press INTEGER,
-			notes BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -58,17 +57,18 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 		return 0, err
 	}
 
-	formatBytes, notesBytes, err := t.marshalToolData(tool)
+	formatBytes, err := t.marshalToolData(tool)
 	if err != nil {
 		return 0, err
 	}
 
 	const insertQuery = `
-		INSERT INTO tools (position, format, type, code, regenerating, press, notes)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO tools (position, format, type, code, regenerating, press)
+		VALUES ($1, $2, $3, $4, $5, $6)
 	`
+
 	result, err := t.db.Exec(insertQuery, tool.Position, formatBytes, tool.Type, tool.Code,
-		tool.Regenerating, tool.Press, notesBytes)
+		tool.Regenerating, tool.Press)
 	if err != nil {
 		return 0, fmt.Errorf("insert error: tools: %v", err)
 	}
@@ -82,23 +82,25 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 }
 
 func (t *Tools) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
-	var noteIDs []int64
+	var createdNotes []*models.Note
 	for _, note := range notes {
+		// Link the note to this tool using the generic linked field
+		note.Linked = fmt.Sprintf("tool_%d", tool.ID)
 		noteID, err := t.notes.Add(note)
 		if err != nil {
 			return nil, err
 		}
-		noteIDs = append(noteIDs, noteID)
+		note.ID = noteID
+		createdNotes = append(createdNotes, note)
 	}
 
-	tool.LinkedNotes = noteIDs
 	toolID, err := t.Add(tool, user)
 	if err != nil {
 		return nil, err
 	}
 
 	tool.ID = toolID
-	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
+	return &models.ToolWithNotes{Tool: tool, LoadedNotes: createdNotes}, nil
 }
 
 func (t *Tools) Delete(id int64, user *models.User) error {
@@ -112,7 +114,7 @@ func (t *Tools) Delete(id int64, user *models.User) error {
 }
 
 func (t *Tools) Get(id int64) (*models.Tool, error) {
-	const query = `SELECT id, position, format, type, code, regenerating, press, notes FROM tools WHERE id = $1`
+	const query = `SELECT id, position, format, type, code, regenerating, press FROM tools WHERE id = $1`
 	row := t.db.QueryRow(query, id)
 
 	tool, err := t.scanTool(row)
@@ -128,7 +130,7 @@ func (t *Tools) Get(id int64) (*models.Tool, error) {
 
 func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press, notes
+		SELECT id, position, format, type, code, regenerating, press
 		FROM tools WHERE regenerating = 0 AND press = ?
 	`
 	rows, err := t.db.Query(query, pressNumber)
@@ -160,7 +162,7 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, err
 	}
 
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press, notes
+		SELECT id, position, format, type, code, regenerating, press
 		FROM tools WHERE press = $1 AND regenerating = 0
 	`
 	rows, err := t.db.Query(query, pressNumber)
@@ -212,7 +214,7 @@ func (t *Tools) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 		return nil, err
 	}
 
-	notes, err := t.notes.GetByIDs(tool.LinkedNotes)
+	notes, err := t.notes.GetByTool(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load notes for tool")
 	}
@@ -223,7 +225,7 @@ func (t *Tools) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 func (t *Tools) List() ([]*models.Tool, error) {
 	const query = `
 		SELECT
-			id, position, format, type, code, regenerating, press, notes
+			id, position, format, type, code, regenerating, press
 		FROM
 			tools
 		ORDER BY format ASC, code ASC
@@ -259,7 +261,7 @@ func (t *Tools) ListWithNotes() ([]*models.ToolWithNotes, error) {
 
 	var result []*models.ToolWithNotes
 	for _, tool := range tools {
-		notes, err := t.notes.GetByIDs(tool.LinkedNotes)
+		notes, err := t.notes.GetByTool(tool.ID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load notes for tool %d: %v", tool.ID, err)
 		}
@@ -275,17 +277,18 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 		return err
 	}
 
-	formatBytes, notesBytes, err := t.marshalToolData(tool)
+	formatBytes, err := t.marshalToolData(tool)
 	if err != nil {
 		return err
 	}
 
 	const updateQuery = `
 		UPDATE tools SET position = $1, format = $2, type = $3, code = $4,
-		regenerating = $5, press = $6, notes = $7 WHERE id = $8
+		regenerating = $5, press = $6 WHERE id = $7
 	`
+
 	_, err = t.db.Exec(updateQuery, tool.Position, formatBytes, tool.Type, tool.Code,
-		tool.Regenerating, tool.Press, notesBytes, tool.ID)
+		tool.Regenerating, tool.Press, tool.ID)
 	if err != nil {
 		return fmt.Errorf("update error: tools: %v", err)
 	}
@@ -335,35 +338,26 @@ func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models
 	return nil
 }
 
-func (t *Tools) marshalToolData(tool *models.Tool) ([]byte, []byte, error) {
+func (t *Tools) marshalToolData(tool *models.Tool) ([]byte, error) {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
-		return nil, nil, fmt.Errorf("marshal error: tools: %v", err)
+		return nil, fmt.Errorf("marshal error: tools: %v", err)
 	}
 
-	notesBytes, err := json.Marshal(tool.LinkedNotes)
-	if err != nil {
-		return nil, nil, fmt.Errorf("marshal error: tools: %v", err)
-	}
-
-	return formatBytes, notesBytes, nil
+	return formatBytes, nil
 }
 
 func (t *Tools) scanTool(scanner interfaces.Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
-	var format, linkedNotes []byte
+	var format []byte
 
 	if err := scanner.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &tool.Regenerating, &tool.Press, &linkedNotes); err != nil {
+		&tool.Code, &tool.Regenerating, &tool.Press); err != nil {
 		return nil, err
 	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal format data")
-	}
-
-	if err := json.Unmarshal(linkedNotes, &tool.LinkedNotes); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal linked notes data")
 	}
 
 	return tool, nil

@@ -35,27 +35,10 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 					</div>
 					<div class="card-body">
 						<p>{ note.Content }</p>
-						<div class="note-tools mt-sm">
+						<div class="note-info mt-sm">
 							<small class="text-muted">
-								Betrifft Werkzeuge:
-								{{ toolCount := 0 }}
-								for _, tool := range tools {
-									for _, linkedNoteID := range tool.LinkedNotes {
-										if linkedNoteID == note.ID {
-											if toolCount > 0 {
-												,
-											}
-											<a href={ fmt.Sprintf("%s/tools/%d", env.ServerPathPrefix, tool.ID) }>
-												{ fmt.Sprintf("%s %s", tool.Format.String(), tool.Code) }
-											</a>
-											{{ toolCount++ }}
-											break
-										}
-									}
-								}
-								if toolCount == 0 {
-									<span class="text-muted">Keine Werkzeuge verknüpft</span>
-								}
+								<i class="bi bi-gear"></i>
+								Presse { fmt.Sprintf("%d", press) } Notiz
 							</small>
 						</div>
 					</div>

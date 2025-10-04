@@ -4,7 +4,7 @@ The PG Press Notes System provides comprehensive note management functionality f
 
 ## Overview
 
-The notes system allows users to create, manage, and link notes to tools and presses with different priority levels. Notes help track maintenance issues, operational instructions, and other important information.
+The notes system allows users to create, manage, and link notes to any entity using a generic linking system. Notes help track maintenance issues, operational instructions, and other important information across tools, presses, and other system components.
 
 ## Features
 
@@ -18,15 +18,19 @@ Notes support three priority levels:
 
 ### Note Linking System
 
-Notes can be linked to:
+Notes can be linked to any entity using a flexible string-based system:
 
-1. **Individual Tools**: Notes appear only for the specific tool
+1. **Individual Tools**: Notes specific to a single tool
    - Format: `tool_{ID}` (e.g., `tool_123`)
    - Use case: Tool-specific maintenance notes, calibration info
 
-2. **Entire Presses**: Notes appear for all tools currently on that press
+2. **Entire Presses**: Notes specific to a press
    - Format: `press_{ID}` (e.g., `press_5`)
    - Use case: Press-wide issues, operational procedures
+
+3. **Any Other Entity**: The system supports linking to any entity type
+   - Format: `{type}_{ID}` (e.g., `machine_42`, `line_7`)
+   - Use case: Extensible for future system components
 
 ### User Interface
 
@@ -40,15 +44,15 @@ Notes can be linked to:
 
 #### Tool Pages (`/tools/{id}`)
 
-- **Tool-Specific Notes**: Display notes linked to the individual tool
+- **Tool-Specific Notes**: Display notes directly linked to the individual tool
 - **Add Note Button**: Quick access to create notes for the tool
 - **Edit Capabilities**: Modify existing notes directly from the tool page
 
 #### Press Pages (`/tools/press/{id}`)
 
-- **Press-Wide Notes**: Show all notes for tools currently on the press
-- **Contextual Display**: Notes show which tools they affect
-- **Add Press Note**: Create notes that apply to all tools on the press
+- **Press-Specific Notes**: Show notes directly linked to the press
+- **Contextual Display**: Notes are specific to the press, not dependent on current tools
+- **Add Press Note**: Create notes that stay with the press regardless of tool changes
 
 ## Technical Implementation
 
@@ -60,6 +64,7 @@ CREATE TABLE IF NOT EXISTS notes (
     level INTEGER NOT NULL,        -- 0=INFO, 1=ATTENTION, 2=BROKEN
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    linked TEXT,                   -- Generic entity link (e.g., "tool_123", "press_5")
     PRIMARY KEY("id" AUTOINCREMENT)
 );
 ```
@@ -74,19 +79,18 @@ type Note struct {
     Level     Level     `json:"level"`     // 0, 1, or 2
     Content   string    `json:"content"`
     CreatedAt time.Time `json:"created_at"`
+    Linked    string    `json:"linked,omitempty"` // Generic entity link
 }
 ```
 
-#### Tool-Note Linking
+#### Generic Linking System
 
-Tools store note relationships in their `LinkedNotes` field:
+Notes use a simple string field to link to any entity:
 
-```go
-type Tool struct {
-    // ... other fields
-    LinkedNotes []int64 `json:"notes"` // Note IDs linked to this tool
-}
-```
+- `"tool_123"` - Links to tool with ID 123
+- `"press_5"` - Links to press number 5
+- `"machine_42"` - Could link to any future entity type
+- `""` - Empty string for unlinked notes
 
 ### API Endpoints
 
@@ -105,7 +109,7 @@ type Tool struct {
 
 #### Press Notes
 
-- `GET /htmx/tools/press/{id}/notes` - Get notes for all tools on press
+- `GET /htmx/tools/press/{id}/notes` - Get notes for specific press
 
 ### Linking Logic
 
@@ -113,31 +117,26 @@ type Tool struct {
 
 When creating a note with `link_to_tables` parameter:
 
-1. **Tool Linking** (`tool_{id}`):
-   - Add note ID to tool's `LinkedNotes` array
-   - Update tool record in database
-
-2. **Press Linking** (`press_{id}`):
-   - Find all active tools on the press
-   - Add note ID to each tool's `LinkedNotes` array
-   - Update all affected tool records
+1. **Direct Entity Linking**:
+   - Set note's `Linked` field to the entity reference (e.g., `"tool_123"`)
+   - Store note record in database
+   - No additional table updates required
 
 #### Updating Note Links
 
 When updating notes:
 
-1. Remove note ID from previously linked tools
-2. Add note ID to newly linked tools
-3. Handle press linking by updating all tools on the press
+1. Simply update the note's `Linked` field to new entity reference
+2. No complex relationship management needed
+3. Single database operation
 
 #### Deleting Notes
 
 When deleting notes:
 
-1. Find all tools with the note ID in their `LinkedNotes`
-2. Remove note ID from all affected tools
-3. Delete the note record
-4. Update tool records
+1. Delete the note record directly
+2. No cleanup of related tables required
+3. Linking is self-contained within note record
 
 ## Usage Examples
 
@@ -218,9 +217,9 @@ Notes sections automatically reload when:
 
 ### Database Queries
 
-- Indexed queries for note retrieval
-- Batch operations for multi-tool updates
-- Optimized JOIN queries for tool-note relationships
+- Indexed queries for note retrieval by entity
+- Simple WHERE clauses on `linked` field
+- No complex JOIN operations required
 
 ### Frontend Optimization
 
@@ -234,29 +233,29 @@ Notes sections automatically reload when:
 
 **Notes not appearing on tool pages:**
 
-- Check if note is properly linked to tool in `LinkedNotes` array
+- Check if note's `linked` field equals `"tool_{id}"`
 - Verify tool and note IDs are correct
-- Check database consistency
+- Check database query for proper filtering
 
 **Press notes not showing:**
 
-- Ensure tools are properly assigned to press
+- Check if note's `linked` field equals `"press_{number}"`
 - Verify press number is valid (0-5)
-- Check if tools have press assignment
+- Ensure press notes query is working correctly
 
 **Linking failures:**
 
-- Tool must exist before linking notes
-- Press must have active tools for linking
-- Database constraints prevent invalid references
+- Verify `linked` field format is correct
+- Check for typos in entity references
+- Ensure proper form data submission
 
 ### Debug Information
 
 Enable debug logging to see:
 
-- Note linking operations
-- Tool updates during note operations
-- Press-to-tool relationship resolution
+- Note creation and linking operations
+- Entity reference resolution
+- Simple linked field queries
 
 ## Future Enhancements
 

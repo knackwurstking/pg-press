@@ -4,22 +4,24 @@ package templates
 //
 // This page provides comprehensive notes management for the PG Press system:
 // - Create, edit, and delete notes with priority levels (INFO, ATTENTION, BROKEN)
-// - Link notes to specific tools or entire presses
+// - Link notes to specific entities using generic "linked" field
 // - Filter notes by priority level with live JavaScript filtering
-// - Display tools associated with each note with direct links
+// - Display linked entities with direct links where applicable
 // - Automatic sorting: BROKEN notes first, then ATTENTION, then INFO, newest first
 // - Real-time updates via HTMX triggers after note operations
 //
-// Notes can be linked to:
-// - Individual tools (tool_ID format) - note appears only for that tool
-// - Entire presses (press_ID format) - note appears for all tools on that press
+// Notes can be linked to any entity using the format "type_id":
+// - Individual tools: "tool_123" - note appears only for that tool
+// - Entire presses: "press_5" - note is specific to that press
+// - Or any other entity type as needed
 //
-// The linking system automatically manages tool.LinkedNotes arrays when notes
-// are created, updated, or deleted, ensuring data consistency.
+// The linking system uses a simple string field for maximum flexibility.
 
 import (
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
@@ -56,18 +58,6 @@ templ Page(props *PageProps) {
 			<!-- Actions Section -->
 			<section class="flex justify-between items-center mb">
 				<h2>Alle Notizen ({ fmt.Sprintf("%d", len(sortedNotes)) })</h2>
-				<button
-					class="primary flex gap"
-					hx-get={ fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Neue Notiz erstellen"
-				>
-					<i class="bi bi-plus-lg"></i>
-					Neue Notiz
-				</button>
 			</section>
 			<!-- Filter Section -->
 			<section class="filter-section mb">
@@ -171,39 +161,34 @@ case models.INFO:
 								</div>
 								<div class="card-body">
 									<p class="note-content">{ note.Content }</p>
-									{{ linkedToolCount := 0 }}
-									for _, tool := range props.Tools {
-										for _, linkedNoteID := range tool.LinkedNotes {
-											if linkedNoteID == note.ID {
-												{{ linkedToolCount++ }}
-												break
-											}
-										}
-									}
-									if linkedToolCount > 0 {
-										<div class="linked-tools mt-sm">
+									if note.Linked != "" {
+										<div class="linked-info mt-sm">
 											<small class="text-muted">
-												<strong>Verknüpfte Werkzeuge:</strong>
-												{{ toolIndex := 0 }}
-												for _, tool := range props.Tools {
-													for _, linkedNoteID := range tool.LinkedNotes {
-														if linkedNoteID == note.ID {
-															if toolIndex > 0 {
-																,
-															}
+												<strong>Verknüpft mit:</strong>
+												if strings.HasPrefix(note.Linked, "tool_") {
+													{{ toolIDStr := strings.TrimPrefix(note.Linked, "tool_") }}
+													{{ toolID, _ := strconv.ParseInt(toolIDStr, 10, 64) }}
+													for _, tool := range props.Tools {
+														if tool.ID == toolID {
 															<a
 																href={ fmt.Sprintf("%s/tools/%d", env.ServerPathPrefix, tool.ID) }
 																class="tool-link"
 															>
-																{ fmt.Sprintf("%s %s", tool.Format.String(), tool.Code) }
+																{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
 																if tool.Press != nil {
 																	({ fmt.Sprintf("Presse %d", *tool.Press) })
 																}
 															</a>
-															{{ toolIndex++ }}
 															break
 														}
 													}
+												} else if strings.HasPrefix(note.Linked, "press_") {
+													{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
+													<span class="press-link">
+														{ fmt.Sprintf("Presse %s", pressIDStr) }
+													</span>
+												} else {
+													<span>{ note.Linked }</span>
 												}
 											</small>
 										</div>
@@ -216,18 +201,7 @@ case models.INFO:
 					<div class="empty-state text-center">
 						<i class="bi bi-clipboard-x display-4 text-muted"></i>
 						<h3>Keine Notizen vorhanden</h3>
-						<p class="text-muted">Erstellen Sie Ihre erste Notiz, um Wichtige Informationen zu Werkzeugen und Pressen zu dokumentieren.</p>
-						<button
-							class="primary"
-							hx-get={ fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix) }
-							hx-trigger="click"
-							hx-target="body"
-							hx-swap="beforeend"
-							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-						>
-							<i class="bi bi-plus-lg"></i>
-							Erste Notiz erstellen
-						</button>
+						<p class="text-muted">Notizen können über die jeweiligen Werkzeug- oder Pressenseiten erstellt werden.</p>
 					</div>
 				}
 			</section>
@@ -329,12 +303,13 @@ case models.INFO:
 				align-items: center;
 			}
 
-			.linked-tools .tool-link {
+			.linked-info .tool-link,
+			.linked-info .press-link {
 				color: var(--primary-color, #0d6efd);
 				text-decoration: none;
 			}
 
-			.linked-tools .tool-link:hover {
+			.linked-info .tool-link:hover {
 				text-decoration: underline;
 			}
 

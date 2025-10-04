@@ -194,26 +194,19 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		return h.RenderBadRequest(c, "invalid press number")
 	}
 
-	// Get ordered tools for this press with validation
+	// Get notes directly linked to this press
+	notes, err := h.DB.Notes.GetByPress(press)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get notes for press")
+	}
+
+	// Get tools for this press for context
 	sortedTools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tools for press")
 	}
 
-	// Get all notes for tools on this press
-	var allNotes []*models.Note
-	for _, tool := range sortedTools {
-		if len(tool.LinkedNotes) > 0 {
-			notes, err := h.DB.Notes.GetByIDs(tool.LinkedNotes)
-			if err != nil {
-				h.LogError("Failed to get notes for tool %d: %v", tool.ID, err)
-				continue
-			}
-			allNotes = append(allNotes, notes...)
-		}
-	}
-
-	notesSection := templates.PressNotesSection(allNotes, sortedTools, press)
+	notesSection := templates.PressNotesSection(notes, sortedTools, press)
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render press notes section: "+err.Error())
 	}

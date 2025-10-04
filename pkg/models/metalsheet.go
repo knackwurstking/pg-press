@@ -129,7 +129,7 @@ type MetalSheet struct {
 	STFMax      float64     `json:"stf_max"`      // STF max value
 	Identifier  MachineType `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
 	ToolID      int64       `json:"tool_id"`      // Currently assigned tool
-	LinkedNotes []int64     `json:"notes"`        // Contains note ids from the "notes" table
+
 }
 
 // New creates a new MetalSheet with default values
@@ -142,7 +142,6 @@ func NewMetalSheet(u *User, toolID int64) *MetalSheet {
 		STFMax:      0,
 		Identifier:  MachineTypeSACMI, // Default to SACMI
 		ToolID:      toolID,
-		LinkedNotes: make([]int64, 0),
 	}
 
 	return sheet

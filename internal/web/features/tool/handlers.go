@@ -596,12 +596,25 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 
 	h.LogDebug("Fetching notes for tool %d", toolID)
 
-	tool, err := h.DB.Tools.GetWithNotes(toolID)
+	// Get the tool
+	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool with notes")
+		return h.HandleError(c, err, "failed to get tool")
 	}
 
-	notesSection := templates.SectionNotes(tool)
+	// Get notes for this tool
+	notes, err := h.DB.Notes.GetByTool(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get notes for tool")
+	}
+
+	// Create ToolWithNotes for template compatibility
+	toolWithNotes := &models.ToolWithNotes{
+		Tool:        tool,
+		LoadedNotes: notes,
+	}
+
+	notesSection := templates.SectionNotes(toolWithNotes)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render tool notes section")

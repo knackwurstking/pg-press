@@ -17,7 +17,6 @@ type MetalSheetModData struct {
 	STF         float64 `json:"stf"`
 	STFMax      float64 `json:"stf_max"`
 	ToolID      *int64  `json:"tool_id"`
-	LinkedNotes []int64 `json:"linked_notes"`
 }
 
 // ToolModData represents the data structure for tool modifications
@@ -28,7 +27,6 @@ type ToolModData struct {
 	Code         string   `json:"code"`
 	Regenerating bool     `json:"regenerating"`
 	Press        *int     `json:"press"`
-	LinkedNotes  []int64  `json:"linked_notes"`
 }
 
 // PressCycleModData represents the data structure for press cycle modifications

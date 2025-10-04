@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
@@ -41,13 +40,11 @@ func (s *MetalSheets) createTable() error {
 			marke_height INTEGER NOT NULL,
 			stf REAL NOT NULL,
 			stf_max REAL NOT NULL,
-			identifier TEXT NOT NULL DEFAULT 'SACMI',
+			identifier TEXT NOT NULL,
 			tool_id INTEGER NOT NULL,
-			notes BLOB NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE,
-			PRIMARY KEY("id" AUTOINCREMENT)
+			PRIMARY KEY("id" AUTOINCREMENT),
+			FOREIGN KEY("tool_id") REFERENCES "tools"("id") ON DELETE CASCADE
 		);
 	`
 
@@ -63,7 +60,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 	s.log.Info("Listing metal sheets")
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM metal_sheets
 		ORDER BY id DESC;
 	`
@@ -96,7 +93,7 @@ func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
 	s.log.Info("Getting metal sheet, id: %d", id)
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM metal_sheets
 		WHERE id = $1;
 	`
@@ -127,18 +124,6 @@ func (s *MetalSheets) GetWithNotes(id int64) (*models.MetalSheetWithNotes, error
 		LoadedNotes: []*models.Note{},
 	}
 
-	// Load notes if there are any linked
-	if len(sheet.LinkedNotes) > 0 && s.notes != nil {
-		s.log.Debug("Loading %d notes for metal sheet %d", len(sheet.LinkedNotes), id)
-		notes, err := s.notes.GetByIDs(sheet.LinkedNotes)
-		if err != nil {
-			s.log.Error("Failed to load notes for metal sheet %d: %v", id, err)
-			// Don't fail the entire operation if notes can't be loaded
-		} else {
-			result.LoadedNotes = notes
-		}
-	}
-
 	return result, nil
 }
 
@@ -147,7 +132,7 @@ func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	s.log.Info("Getting metal sheets for tool, id: %d", toolID)
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM metal_sheets
 		WHERE tool_id = $1
 		ORDER BY id DESC;
@@ -185,7 +170,7 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 	}
 
 	query := `
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM metal_sheets
 		WHERE identifier = $1
 		ORDER BY id DESC;
@@ -275,20 +260,14 @@ func (s *MetalSheets) GetAvailable() ([]*models.MetalSheet, error) {
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 	s.log.Info("Adding metal sheet: %s", sheet.String())
 
-	// Marshal JSON fields
-	notesBytes, err := json.Marshal(sheet.LinkedNotes)
-	if err != nil {
-		return 0, fmt.Errorf("insert error: metal_sheets: %v", err)
-	}
-
 	query := `
-		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, identifier, tool_id, notes)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, identifier, tool_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7);
 	`
 
 	result, err := s.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
-		sheet.Identifier.String(), sheet.ToolID, notesBytes)
+		sheet.Identifier.String(), sheet.ToolID)
 	if err != nil {
 		return 0, fmt.Errorf("insert error: metal_sheets: %v", err)
 	}
@@ -310,22 +289,16 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 	s.log.Info("Updating metal sheet: %d", sheet.ID)
 
-	// Marshal JSON fields
-	notesBytes, err := json.Marshal(sheet.LinkedNotes)
-	if err != nil {
-		return fmt.Errorf("update error: metal_sheets: %v", err)
-	}
-
 	query := `
 		UPDATE metal_sheets
 		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
-						identifier = $6, tool_id = $7, notes = $8, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $9;
+						identifier = $6, tool_id = $7, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $8;
 	`
 
-	_, err = s.db.Exec(query,
+	_, err := s.db.Exec(query,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
-		sheet.Identifier.String(), sheet.ToolID, notesBytes, sheet.ID)
+		sheet.Identifier.String(), sheet.ToolID, sheet.ID)
 	if err != nil {
 		return fmt.Errorf("update error: metal_sheets: %v", err)
 	}
@@ -382,17 +355,15 @@ func (s *MetalSheets) Delete(id int64) error {
 }
 
 func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
-	s.log.Debug("Scanning metal sheet")
 	sheet := &models.MetalSheet{}
 
 	var (
-		linkedNotes []byte
-		toolID      int64
+		toolID int64
 	)
 
 	var identifierStr string
 	if err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight, &sheet.STF, &sheet.STFMax,
-		&identifierStr, &toolID, &linkedNotes); err != nil {
+		&identifierStr, &toolID); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
@@ -404,10 +375,6 @@ func (s *MetalSheets) scanMetalSheet(scanner interfaces.Scannable) (*models.Meta
 
 	// Convert string identifier to MachineType
 	sheet.Identifier = models.MachineType(identifierStr)
-
-	if err := json.Unmarshal(linkedNotes, &sheet.LinkedNotes); err != nil {
-		return nil, fmt.Errorf("scan error: metal_sheets: %v", err)
-	}
 
 	return sheet, nil
 }

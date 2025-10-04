@@ -23,6 +23,7 @@ func NewNotes(db *sql.DB) *Notes {
 			level INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			linked TEXT,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
@@ -41,7 +42,7 @@ func (n *Notes) List() ([]*models.Note, error) {
 	n.log.Info("Listing notes")
 
 	query := `
-		SELECT id, level, content, created_at FROM notes;
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked FROM notes;
 	`
 
 	rows, err := n.db.Query(query)
@@ -71,7 +72,7 @@ func (n *Notes) Get(id int64) (*models.Note, error) {
 	n.log.Info("Getting note, id: %d", id)
 
 	query := `
-		SELECT id, level, content, created_at FROM notes WHERE id = $1;
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked FROM notes WHERE id = $1;
 	`
 
 	row := n.db.QueryRow(query, id)
@@ -103,7 +104,7 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 	}
 
 	query := fmt.Sprintf(
-		`SELECT id, level, content, created_at FROM notes WHERE id IN (%s);`,
+		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked FROM notes WHERE id IN (%s);`,
 		strings.Join(placeholders, ","),
 	)
 
@@ -139,14 +140,88 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 	return notes, nil
 }
 
+func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
+	n.log.Debug("Getting notes for press %d", press)
+
+	query := `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+		WHERE linked = $1;
+	`
+
+	pressLinked := fmt.Sprintf("press_%d", press)
+	rows, err := n.db.Query(query, pressLinked)
+	if err != nil {
+		return nil, fmt.Errorf("select error: notes by press: %v", err)
+	}
+	defer rows.Close()
+
+	var notes []*models.Note
+
+	for rows.Next() {
+		note, err := n.scanNote(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan note: %v", err)
+		}
+		notes = append(notes, note)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("select error: notes by press: %v", err)
+	}
+
+	return notes, nil
+}
+
+func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
+	n.log.Debug("Getting notes for tool %d", toolID)
+
+	query := `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+		WHERE linked = $1;
+	`
+
+	toolLinked := fmt.Sprintf("tool_%d", toolID)
+	rows, err := n.db.Query(query, toolLinked)
+	if err != nil {
+		return nil, fmt.Errorf("select error: notes by tool: %v", err)
+	}
+	defer rows.Close()
+
+	var notes []*models.Note
+
+	for rows.Next() {
+		note, err := n.scanNote(rows)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan note: %v", err)
+		}
+		notes = append(notes, note)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("select error: notes by tool: %v", err)
+	}
+
+	return notes, nil
+}
+
 func (n *Notes) Add(note *models.Note) (int64, error) {
 	n.log.Info("Adding note: level=%d", note.Level)
 
 	query := `
-		INSERT INTO notes (level, content) VALUES ($1, $2);
+		INSERT INTO notes (level, content, linked) VALUES ($1, $2, $3);
 	`
 
-	result, err := n.db.Exec(query, note.Level, note.Content)
+	// Convert empty string to NULL for database storage
+	var linkedValue interface{}
+	if note.Linked == "" {
+		linkedValue = nil
+	} else {
+		linkedValue = note.Linked
+	}
+
+	result, err := n.db.Exec(query, note.Level, note.Content, linkedValue)
 	if err != nil {
 		return 0, fmt.Errorf("insert error: notes: %v", err)
 	}
@@ -163,10 +238,18 @@ func (n *Notes) Update(note *models.Note) error {
 	n.log.Info("Updating note: id=%d, level=%d", note.ID, note.Level)
 
 	query := `
-		UPDATE notes SET level = $1, content = $2 WHERE id = $3;
+		UPDATE notes SET level = $1, content = $2, linked = $3 WHERE id = $4;
 	`
 
-	result, err := n.db.Exec(query, note.Level, note.Content, note.ID)
+	// Convert empty string to NULL for database storage
+	var linkedValue interface{}
+	if note.Linked == "" {
+		linkedValue = nil
+	} else {
+		linkedValue = note.Linked
+	}
+
+	result, err := n.db.Exec(query, note.Level, note.Content, linkedValue, note.ID)
 	if err != nil {
 		return fmt.Errorf("update error: notes: %v", err)
 	}
@@ -210,7 +293,7 @@ func (n *Notes) Delete(id int64, user *models.User) error {
 func (n *Notes) scanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
 
-	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt); err != nil {
+	if err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt, &note.Linked); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}

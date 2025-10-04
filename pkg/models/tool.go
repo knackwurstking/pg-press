@@ -69,7 +69,6 @@ type Tool struct {
 	Code         string       `json:"code"` // Ex: G01, G02, ...
 	Regenerating bool         `json:"regenerating"`
 	Press        *PressNumber `json:"press"` // Press number (0-5) when status is active
-	LinkedNotes  []int64      `json:"notes"` // Contains note ids from the "notes" table
 }
 
 func NewTool(position Position, format Format, code string, _type string) *Tool {
@@ -80,7 +79,6 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 		Code:         code,
 		Regenerating: false,
 		Press:        nil,
-		LinkedNotes:  make([]int64, 0),
 	}
 }
 
