@@ -144,6 +144,7 @@ templ Page(props *PageProps) {
 												hx-swap="beforeend"
 												hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 												title="Notiz bearbeiten"
+												disabled
 											>
 												<i class="bi bi-pencil"></i>
 											</button>

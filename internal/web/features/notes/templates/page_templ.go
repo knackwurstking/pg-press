@@ -270,7 +270,7 @@ func Page(props *PageProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button class=\"icon small destructive\" hx-delete=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz bearbeiten\" disabled><i class=\"bi bi-pencil\"></i></button> <button class=\"icon small destructive\" hx-delete=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -280,7 +280,7 @@ func Page(props *PageProps) templ.Component {
 						env.ServerPathPrefix, note.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 155, Col: 12}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 156, Col: 12}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -293,7 +293,7 @@ func Page(props *PageProps) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 167, Col: 47}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 168, Col: 47}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -320,7 +320,7 @@ func Page(props *PageProps) templ.Component {
 									var templ_7745c5c3_Var15 templ.SafeURL
 									templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 178, Col: 85}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 179, Col: 85}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 									if templ_7745c5c3_Err != nil {
@@ -333,7 +333,7 @@ func Page(props *PageProps) templ.Component {
 									var templ_7745c5c3_Var16 string
 									templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 181, Col: 80}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 182, Col: 80}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 									if templ_7745c5c3_Err != nil {
@@ -351,7 +351,7 @@ func Page(props *PageProps) templ.Component {
 										var templ_7745c5c3_Var17 string
 										templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Presse %d", *tool.Press))
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 183, Col: 57}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 184, Col: 57}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 										if templ_7745c5c3_Err != nil {
@@ -377,7 +377,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var18 templ.SafeURL
 							templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 191, Col: 87}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 192, Col: 87}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 							if templ_7745c5c3_Err != nil {
@@ -390,7 +390,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var19 string
 							templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Presse %s", pressIDStr))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 194, Col: 52}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 195, Col: 52}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 							if templ_7745c5c3_Err != nil {
@@ -408,7 +408,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var20 string
 							templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(note.Linked)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 197, Col: 32}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 198, Col: 32}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 							if templ_7745c5c3_Err != nil {
