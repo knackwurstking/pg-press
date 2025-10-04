@@ -136,15 +136,14 @@ templ Page(props *PageProps) {
 											<button
 												class="icon small secondary"
 												hx-get={ fmt.Sprintf(
-												"%s/htmx/notes/edit?id=%d",
-												env.ServerPathPrefix, note.ID,
+												"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
+												env.ServerPathPrefix, note.ID, note.Linked,
 											) }
 												hx-trigger="click"
 												hx-target="body"
 												hx-swap="beforeend"
 												hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 												title="Notiz bearbeiten"
-												disabled
 											>
 												<i class="bi bi-pencil"></i>
 											</button>
