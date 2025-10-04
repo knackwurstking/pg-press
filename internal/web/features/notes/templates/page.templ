@@ -173,7 +173,7 @@ templ Page(props *PageProps) {
 													for _, tool := range props.Tools {
 														if tool.ID == toolID {
 															<a
-																href={ fmt.Sprintf("%s/tools/%d", env.ServerPathPrefix, tool.ID) }
+																href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
 																class="tool-link"
 															>
 																{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
@@ -181,14 +181,16 @@ templ Page(props *PageProps) {
 																	({ fmt.Sprintf("Presse %d", *tool.Press) })
 																}
 															</a>
-															break
 														}
 													}
 												} else if strings.HasPrefix(note.Linked, "press_") {
 													{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
-													<span class="press-link">
+													<a
+														href={ fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr) }
+														class="press-link"
+													>
 														{ fmt.Sprintf("Presse %s", pressIDStr) }
-													</span>
+													</a>
 												} else {
 													<span>{ note.Linked }</span>
 												}
