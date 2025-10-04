@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -29,46 +30,7 @@ templ SectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<div class="notes-list">
 			for _, note := range tool.LoadedNotes {
-				// TODO: Create a shared note (card) component
-				<div class="card">
-					<div class="card-header flex flex-col gap-sm">
-						<span class="note-importance flex gap">
-							switch note.Level {
-								case models.INFO:
-									<i class="bi bi-info-circle"></i>
-									Info
-								case models.ATTENTION:
-									<i class="bi bi-exclamation-triangle text-warning"></i>
-									<strong>Achtung</strong>
-								case models.BROKEN:
-									<i class="bi bi-x-circle text-danger"></i>
-									<strong>Defekt</strong>
-							}
-						</span>
-						<div class="flex gap-sm w-full justify-between">
-							<span class="note-date">
-								{ note.CreatedAt.Format("2006-01-02 15:04") }
-							</span>
-							<button
-								class="small secondary"
-								hx-get={ fmt.Sprintf(
-									"%s/htmx/notes/edit?id=%d&link_to_tables=tool_%d",
-									env.ServerPathPrefix, note.ID, tool.ID,
-								) }
-								hx-trigger="click"
-								hx-target="body"
-								hx-swap="beforeend"
-								hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-								title="Notiz bearbeiten"
-							>
-								<i class="bi bi-pencil"></i>
-							</button>
-						</div>
-					</div>
-					<div class="card-body">
-						<p>{ note.Content }</p>
-					</div>
-				</div>
+				@components.NoteCard(note, fmt.Sprintf("tool_%d", tool.ID))
 			}
 		</div>
 	} else {
