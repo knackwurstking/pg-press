@@ -61,33 +61,34 @@ templ Page(props *PageProps) {
 			</section>
 			<!-- Filter Section -->
 			<section class="filter-section mb">
-				<div class="flex gap">
-					<button class="filter-btn active" data-filter="all">
+				<div class="flex gap justify-center align-center">
+					<button class="filter-btn active small" data-filter="all">
 						Alle ({ fmt.Sprintf("%d", len(sortedNotes)) })
 					</button>
 					{{ brokenCount := 0 }}
 					{{ attentionCount := 0 }}
 					{{ infoCount := 0 }}
-					{{for _, note := range sortedNotes {
-	switch note.Level {
-	case models.BROKEN:
-		brokenCount++
-	case models.ATTENTION:
-		attentionCount++
-	case models.INFO:
-		infoCount++
-	}
-}
+					{{
+						for _, note := range sortedNotes {
+							switch note.Level {
+							case models.BROKEN:
+								brokenCount++
+							case models.ATTENTION:
+								attentionCount++
+							case models.INFO:
+								infoCount++
+							}
+						}
 					}}
-					<button class="filter-btn" data-filter="broken">
+					<button class="filter-btn small destructive" data-filter="broken">
 						<i class="bi bi-x-circle text-danger"></i>
 						Defekt ({ fmt.Sprintf("%d", brokenCount) })
 					</button>
-					<button class="filter-btn" data-filter="attention">
+					<button class="filter-btn small warning" data-filter="attention">
 						<i class="bi bi-exclamation-triangle text-warning"></i>
 						Achtung ({ fmt.Sprintf("%d", attentionCount) })
 					</button>
-					<button class="filter-btn" data-filter="info">
+					<button class="filter-btn small info" data-filter="info">
 						<i class="bi bi-info-circle"></i>
 						Info ({ fmt.Sprintf("%d", infoCount) })
 					</button>
@@ -99,14 +100,15 @@ templ Page(props *PageProps) {
 					<div class="notes-list">
 						for _, note := range sortedNotes {
 							{{ filterClass := "info" }}
-							{{switch note.Level {
-case models.BROKEN:
-	filterClass = "broken"
-case models.ATTENTION:
-	filterClass = "attention"
-case models.INFO:
-	filterClass = "info"
-}
+							{{
+								switch note.Level {
+								case models.BROKEN:
+									filterClass = "broken"
+								case models.ATTENTION:
+									filterClass = "attention"
+								case models.INFO:
+									filterClass = "info"
+								}
 							}}
 							<div
 								class={ fmt.Sprintf("note-card card %s", filterClass) }
@@ -271,25 +273,6 @@ case models.INFO:
 			.note-card:hover {
 				transform: translateY(-2px);
 				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-			}
-
-			.filter-section .filter-btn {
-				padding: 0.5rem 1rem;
-				border: 1px solid var(--border-color, #dee2e6);
-				background: var(--background-color, #fff);
-				border-radius: 0.25rem;
-				cursor: pointer;
-				transition: all 0.2s ease;
-			}
-
-			.filter-section .filter-btn.active {
-				background: var(--primary-color, #0d6efd);
-				color: white;
-				border-color: var(--primary-color, #0d6efd);
-			}
-
-			.filter-section .filter-btn:hover:not(.active) {
-				background: var(--hover-background, #f8f9fa);
 			}
 
 			.note-importance {
