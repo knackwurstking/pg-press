@@ -1,0 +1,126 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"strconv"
+	"strings"
+)
+
+templ NotesGrid(tools []*models.Tool, notes []*models.Note) {
+	if len(notes) > 0 {
+		<div class="notes-list">
+			for _, note := range notes {
+				{{ filterClass := "info" }}
+				{{
+					switch note.Level {
+					case models.BROKEN:
+						filterClass = "broken"
+					case models.ATTENTION:
+						filterClass = "attention"
+					case models.INFO:
+						filterClass = "info"
+					}
+				}}
+				<div
+					class={ fmt.Sprintf("note-card card %s", filterClass) }
+					data-note-level={ fmt.Sprintf("%d", note.Level) }
+				>
+					<div class="card-header">
+						<div class="note-importance">
+							switch note.Level {
+								case models.INFO:
+									<i class="bi bi-info-circle"></i>
+									<span>Info</span>
+								case models.ATTENTION:
+									<i class="bi bi-exclamation-triangle text-warning"></i>
+									<strong>Achtung</strong>
+								case models.BROKEN:
+									<i class="bi bi-x-circle text-danger"></i>
+									<strong>Defekt</strong>
+							}
+						</div>
+						<div class="note-actions flex gap-sm justify-between items-center">
+							<span class="note-date text-sm text-muted">
+								{ note.CreatedAt.Format("2006-01-02 15:04") }
+							</span>
+							<span>
+								<button
+									class="icon small secondary"
+									hx-get={ fmt.Sprintf(
+										"%s/htmx/notes/edit?id=%d&link_to_tables=%s&reload=true",
+										env.ServerPathPrefix, note.ID, note.Linked,
+									) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+									title="Notiz bearbeiten"
+								>
+									<i class="bi bi-pencil"></i>
+								</button>
+								<button
+									class="icon small destructive"
+									hx-delete={ fmt.Sprintf(
+										"%s/htmx/notes/delete?id=%d",
+										env.ServerPathPrefix, note.ID,
+									) }
+									hx-trigger="click"
+									hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
+									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+									title="Notiz löschen"
+								>
+									<i class="bi bi-trash"></i>
+								</button>
+							</span>
+						</div>
+					</div>
+					<div class="card-body">
+						<p class="note-content">{ note.Content }</p>
+						if note.Linked != "" {
+							<div class="linked-info mt-sm">
+								<small class="text-muted">
+									<strong>Verknüpft mit:</strong>
+									if strings.HasPrefix(note.Linked, "tool_") {
+										{{ toolIDStr := strings.TrimPrefix(note.Linked, "tool_") }}
+										{{ toolID, _ := strconv.ParseInt(toolIDStr, 10, 64) }}
+										for _, tool := range tools {
+											if tool.ID == toolID {
+												<a
+													href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
+													class="tool-link"
+												>
+													{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
+													if tool.Press != nil {
+														({ fmt.Sprintf("Presse %d", *tool.Press) })
+													}
+												</a>
+											}
+										}
+									} else if strings.HasPrefix(note.Linked, "press_") {
+										{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
+										<a
+											href={ fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr) }
+											class="press-link"
+										>
+											{ fmt.Sprintf("Presse %s", pressIDStr) }
+										</a>
+									} else {
+										<span>{ note.Linked }</span>
+									}
+								</small>
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	} else {
+		<div class="empty-state text-center">
+			<i class="bi bi-clipboard-x display-4 text-muted"></i>
+			<h3>Keine Notizen vorhanden</h3>
+			<p class="text-muted">Notizen können über die jeweiligen Werkzeug- oder Pressenseiten erstellt werden.</p>
+		</div>
+	}
+}

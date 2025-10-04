@@ -27,6 +27,50 @@ func NewHandler(db *database.DB) *Handler {
 	}
 }
 
+// GetNotesPage serves the main notes page
+func (h *Handler) GetNotesPage(c echo.Context) error {
+	// Get all notes with defensive error handling
+	notes, err := h.DB.Notes.List()
+	if err != nil {
+		h.LogError("Failed to retrieve notes from database: %v", err)
+		return h.HandleError(c, err, "failed to get notes from database")
+	}
+
+	// Handle case where notes might be nil
+	if notes == nil {
+		h.LogDebug("No notes found in database, initializing empty slice")
+		notes = []*models.Note{}
+	}
+
+	h.LogDebug("Retrieved %d notes from database", len(notes))
+
+	// Get all tools to show relationships
+	tools, err := h.DB.Tools.List()
+	if err != nil {
+		h.LogError("Failed to retrieve tools from database: %v", err)
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Handle case where tools might be nil
+	if tools == nil {
+		h.LogDebug("No tools found in database, initializing empty slice")
+		tools = []*models.Tool{}
+	}
+
+	h.LogDebug("Retrieved %d tools from database", len(tools))
+
+	page := templates.Page(&templates.PageProps{
+		Notes: notes,
+		Tools: tools,
+	})
+
+	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render notes page: "+err.Error())
+	}
+
+	return nil
+}
+
 // HTMXGetEditNoteDialog renders the edit note dialog
 func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 	user, err := h.GetUserFromContext(c)
@@ -38,6 +82,11 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 		Note:         &models.Note{}, // Default empty note for creation
 		LinkToTables: []string{},
 		User:         user,
+	}
+
+	// Reload query param
+	if reload := h.ParseBoolQuery(c, "reload"); reload {
+		props.Reload = true
 	}
 
 	// Parse linked tables from query parameter
@@ -184,56 +233,6 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 
 	// Trigger reload of notes sections
 	c.Response().Header().Set("HX-Trigger", "noteDeleted, pageLoaded")
-	return nil
-}
-
-// GetNotesPage serves the main notes page
-func (h *Handler) GetNotesPage(c echo.Context) error {
-	user, err := h.GetUserFromContext(c)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
-	}
-
-	// Get all notes with defensive error handling
-	notes, err := h.DB.Notes.List()
-	if err != nil {
-		h.LogError("Failed to retrieve notes from database: %v", err)
-		return h.HandleError(c, err, "failed to get notes from database")
-	}
-
-	// Handle case where notes might be nil
-	if notes == nil {
-		h.LogDebug("No notes found in database, initializing empty slice")
-		notes = []*models.Note{}
-	}
-
-	h.LogDebug("Retrieved %d notes from database", len(notes))
-
-	// Get all tools to show relationships
-	tools, err := h.DB.Tools.List()
-	if err != nil {
-		h.LogError("Failed to retrieve tools from database: %v", err)
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	// Handle case where tools might be nil
-	if tools == nil {
-		h.LogDebug("No tools found in database, initializing empty slice")
-		tools = []*models.Tool{}
-	}
-
-	h.LogDebug("Retrieved %d tools from database", len(tools))
-
-	page := templates.Page(&templates.PageProps{
-		User:  user,
-		Notes: notes,
-		Tools: tools,
-	})
-
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render notes page: "+err.Error())
-	}
-
 	return nil
 }
 
