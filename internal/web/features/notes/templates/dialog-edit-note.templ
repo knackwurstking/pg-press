@@ -11,6 +11,7 @@ import (
 type DialogEditNoteProps struct {
 	Note         *models.Note
 	LinkToTables []string
+	User         *models.User
 }
 
 templ DialogEditNote(props DialogEditNoteProps) {
@@ -74,24 +75,26 @@ templ DialogEditNote(props DialogEditNoteProps) {
 				required
 			>{ props.Note.Content }</textarea>
 		</label>
-		<!-- Linked Tables Selector -->
-		if len(props.LinkToTables) > 0 {
-			<fieldset class="flex flex-col">
-				<legend>Verknüpfte Tabellen</legend>
-				<div class="flex flex-col gap-sm">
-					for _, table := range props.LinkToTables {
-						<label class="flex flex-row gap items-center">
-							<input
-								type="checkbox"
-								name="linked_tables"
-								value={ table }
-								checked
-							/>
-							{ table }
-						</label>
-					}
+		if props.User.IsAdmin() {
+			<!-- Linked Tables Selector -->
+			if len(props.LinkToTables) > 0 {
+				<div class="flex flex-col gap">
+					<h3>Verknüpfte Tabellen</h3>
+					<div class="flex flex-col gap-sm">
+						for _, table := range props.LinkToTables {
+							<label class="flex flex-row gap items-center" disabled>
+								<input
+									type="checkbox"
+									name="linked_tables"
+									value={ table }
+									checked
+								/>
+								{ table }
+							</label>
+						}
+					</div>
 				</div>
-			</fieldset>
+			}
 		}
 	}
 }

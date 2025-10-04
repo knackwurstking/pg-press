@@ -29,9 +29,15 @@ func NewHandler(db *database.DB) *Handler {
 
 // HTMXGetEditNoteDialog renders the edit note dialog
 func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to get user from context: "+err.Error())
+	}
+
 	props := &templates.DialogEditNoteProps{
 		Note:         &models.Note{}, // Default empty note for creation
 		LinkToTables: []string{},
+		User:         user,
 	}
 
 	// Parse linked tables from query parameter
