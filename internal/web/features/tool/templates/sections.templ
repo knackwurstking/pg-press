@@ -29,9 +29,10 @@ templ SectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<div class="notes-list">
 			for _, note := range tool.LoadedNotes {
+				// TODO: Create a shared note (card) component
 				<div class="card">
-					<div class="card-header">
-						<span class="note-importance">
+					<div class="card-header flex flex-col gap-sm">
+						<span class="note-importance flex gap">
 							switch note.Level {
 								case models.INFO:
 									<i class="bi bi-info-circle"></i>
@@ -44,7 +45,7 @@ templ SectionNotes(tool *models.ToolWithNotes) {
 									<strong>Defekt</strong>
 							}
 						</span>
-						<div class="flex gap-sm">
+						<div class="flex gap-sm w-full justify-between">
 							<span class="note-date">
 								{ note.CreatedAt.Format("2006-01-02 15:04") }
 							</span>

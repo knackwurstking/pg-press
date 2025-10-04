@@ -63,7 +63,7 @@ func SectionNotes(tool *models.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, note := range tool.LoadedNotes {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"card\"><div class=\"card-header\"><span class=\"note-importance\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " <div class=\"card\"><div class=\"card-header flex flex-col gap-sm\"><span class=\"note-importance flex gap\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -84,14 +84,14 @@ func SectionNotes(tool *models.ToolWithNotes) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span><div class=\"flex gap-sm\"><span class=\"note-date\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span><div class=\"flex gap-sm w-full justify-between\"><span class=\"note-date\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 49, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 50, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -107,7 +107,7 @@ func SectionNotes(tool *models.ToolWithNotes) templ.Component {
 					env.ServerPathPrefix, note.ID, tool.ID,
 				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 56, Col: 9}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 57, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -120,7 +120,7 @@ func SectionNotes(tool *models.ToolWithNotes) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 68, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 69, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +181,7 @@ func SectionMetalSheets(
 				env.ServerPathPrefix, tool.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 94, Col: 5}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/sections.templ`, Line: 95, Col: 5}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

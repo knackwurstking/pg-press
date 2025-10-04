@@ -14,9 +14,10 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 		<h4>Notizen für Werkzeuge auf Presse { fmt.Sprintf("%d", press) }</h4>
 		<div class="notes-list">
 			for _, note := range notes {
+				// TODO: Create a shared note (card) component
 				<div class="card">
-					<div class="card-header">
-						<span class="note-importance">
+					<div class="card-header flex flex-col gap-sm">
+						<span class="note-importance flex gap">
 							switch note.Level {
 								case models.INFO:
 									<i class="bi bi-info-circle"></i>
@@ -29,18 +30,28 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 									<strong>Defekt</strong>
 							}
 						</span>
-						<span class="note-date">
-							{ note.CreatedAt.Format("2006-01-02 15:04") }
-						</span>
+						<div class="flex gap-sm w-full justify-between">
+							<span class="note-date">
+								{ note.CreatedAt.Format("2006-01-02 15:04") }
+							</span>
+							<button
+								class="small secondary"
+								hx-get={ fmt.Sprintf(
+									"%s/htmx/notes/edit?id=%d&link_to_tables=press_%d",
+									env.ServerPathPrefix, note.ID, press,
+								) }
+								hx-trigger="click"
+								hx-target="body"
+								hx-swap="beforeend"
+								hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+								title="Notiz bearbeiten"
+							>
+								<i class="bi bi-pencil"></i>
+							</button>
+						</div>
 					</div>
 					<div class="card-body">
 						<p>{ note.Content }</p>
-						<div class="note-info mt-sm">
-							<small class="text-muted">
-								<i class="bi bi-gear"></i>
-								Presse { fmt.Sprintf("%d", press) } Notiz
-							</small>
-						</div>
 					</div>
 				</div>
 			}

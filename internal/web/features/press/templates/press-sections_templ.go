@@ -57,7 +57,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 				return templ_7745c5c3_Err
 			}
 			for _, note := range notes {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"card\"><div class=\"card-header\"><span class=\"note-importance\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <div class=\"card\"><div class=\"card-header flex flex-col gap-sm\"><span class=\"note-importance flex gap\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -78,46 +78,49 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <span class=\"note-date\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span><div class=\"flex gap-sm w-full justify-between\"><span class=\"note-date\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 33, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 35, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"card-body\"><p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span> <button class=\"small secondary\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+					"%s/htmx/notes/edit?id=%d&link_to_tables=press_%d",
+					env.ServerPathPrefix, note.ID, press,
+				))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 37, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 42, Col: 9}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p><div class=\"note-info mt-sm\"><small class=\"text-muted\"><i class=\"bi bi-gear\"></i> Presse ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz bearbeiten\"><i class=\"bi bi-pencil\"></i></button></div></div><div class=\"card-body\"><p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", press))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 41, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 54, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " Notiz</small></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -129,7 +132,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 51, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 62, Col: 99}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -147,7 +150,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 68, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 79, Col: 99}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -203,7 +206,7 @@ func PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) tem
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d",
 					env.ServerPathPrefix, tool.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 95, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 106, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -217,7 +220,7 @@ func PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) tem
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s %s",
 					tool.Format.String(), tool.Code, tool.Type))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 100, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 111, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -277,7 +280,7 @@ func MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*mo
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(expectedMachineType.DisplayName())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 121, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 132, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -290,7 +293,7 @@ func MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*mo
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", press))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 122, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 133, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -418,7 +421,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format("02.01.2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 170, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 181, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -438,7 +441,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s %s",
 				tool.Format.String(), tool.Code, tool.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 178, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 189, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -456,7 +459,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.ToolID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 181, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 192, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -474,7 +477,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.ToolPosition)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 186, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 197, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -487,7 +490,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 190, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 201, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -500,7 +503,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PartialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 195, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 206, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -516,7 +519,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 207, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 218, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -542,7 +545,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 225, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 236, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -556,7 +559,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
 			cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 229, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 240, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
