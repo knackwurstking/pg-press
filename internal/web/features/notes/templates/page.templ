@@ -128,37 +128,39 @@ templ Page(props *PageProps) {
 												<strong>Defekt</strong>
 										}
 									</div>
-									<div class="note-actions flex gap-sm">
+									<div class="note-actions flex gap-sm justify-between items-center">
 										<span class="note-date text-sm text-muted">
 											{ note.CreatedAt.Format("2006-01-02 15:04") }
 										</span>
-										<button
-											class="small secondary"
-											hx-get={ fmt.Sprintf(
+										<span>
+											<button
+												class="icon small secondary"
+												hx-get={ fmt.Sprintf(
 												"%s/htmx/notes/edit?id=%d",
 												env.ServerPathPrefix, note.ID,
 											) }
-											hx-trigger="click"
-											hx-target="body"
-											hx-swap="beforeend"
-											hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-											title="Notiz bearbeiten"
-										>
-											<i class="bi bi-pencil"></i>
-										</button>
-										<button
-											class="small destructive"
-											hx-delete={ fmt.Sprintf(
+												hx-trigger="click"
+												hx-target="body"
+												hx-swap="beforeend"
+												hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+												title="Notiz bearbeiten"
+											>
+												<i class="bi bi-pencil"></i>
+											</button>
+											<button
+												class="icon small destructive"
+												hx-delete={ fmt.Sprintf(
 												"%s/htmx/notes/delete?id=%d",
 												env.ServerPathPrefix, note.ID,
 											) }
-											hx-trigger="click"
-											hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
-											hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-											title="Notiz löschen"
-										>
-											<i class="bi bi-trash"></i>
-										</button>
+												hx-trigger="click"
+												hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
+												hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+												title="Notiz löschen"
+											>
+												<i class="bi bi-trash"></i>
+											</button>
+										</span>
 									</div>
 								</div>
 								<div class="card-body">
@@ -245,19 +247,22 @@ templ Page(props *PageProps) {
 		<!-- CSS for notes page -->
 		<style>
 			.notes-grid {
-				max-width: 1200px;
+				max-width: 100%;
 				margin: 0 auto;
 			}
 
 			.notes-list {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+				display: flex;
+				flex-wrap: wrap;
 				gap: 1rem;
+				justify-content: flex-start;
 			}
 
 			.note-card {
 				border-left: 4px solid;
 				transition: all 0.2s ease;
+				width: fit-content;
+				max-width: 500px;
 			}
 
 			.note-card.broken {

@@ -241,7 +241,7 @@ func Page(props *PageProps) templ.Component {
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div class=\"note-actions flex gap-sm\"><span class=\"note-date text-sm text-muted\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div><div class=\"note-actions flex gap-sm justify-between items-center\"><span class=\"note-date text-sm text-muted\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -254,7 +254,7 @@ func Page(props *PageProps) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <button class=\"small secondary\" hx-get=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <span><button class=\"icon small secondary\" hx-get=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -264,13 +264,13 @@ func Page(props *PageProps) templ.Component {
 						env.ServerPathPrefix, note.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 140, Col: 12}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 141, Col: 12}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button class=\"small destructive\" hx-delete=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz bearbeiten\"><i class=\"bi bi-pencil\"></i></button> <button class=\"icon small destructive\" hx-delete=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -280,20 +280,20 @@ func Page(props *PageProps) templ.Component {
 						env.ServerPathPrefix, note.ID,
 					))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 154, Col: 12}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 155, Col: 12}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-trigger=\"click\" hx-confirm=\"Sind Sie sicher, dass Sie diese Notiz löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz löschen\"><i class=\"bi bi-trash\"></i></button></div></div><div class=\"card-body\"><p class=\"note-content\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" hx-trigger=\"click\" hx-confirm=\"Sind Sie sicher, dass Sie diese Notiz löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" title=\"Notiz löschen\"><i class=\"bi bi-trash\"></i></button></span></div></div><div class=\"card-body\"><p class=\"note-content\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 165, Col: 47}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 167, Col: 47}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -320,7 +320,7 @@ func Page(props *PageProps) templ.Component {
 									var templ_7745c5c3_Var15 templ.SafeURL
 									templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 176, Col: 85}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 178, Col: 85}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 									if templ_7745c5c3_Err != nil {
@@ -333,7 +333,7 @@ func Page(props *PageProps) templ.Component {
 									var templ_7745c5c3_Var16 string
 									templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code))
 									if templ_7745c5c3_Err != nil {
-										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 179, Col: 80}
+										return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 181, Col: 80}
 									}
 									_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 									if templ_7745c5c3_Err != nil {
@@ -351,7 +351,7 @@ func Page(props *PageProps) templ.Component {
 										var templ_7745c5c3_Var17 string
 										templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Presse %d", *tool.Press))
 										if templ_7745c5c3_Err != nil {
-											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 181, Col: 57}
+											return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 183, Col: 57}
 										}
 										_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 										if templ_7745c5c3_Err != nil {
@@ -377,7 +377,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var18 templ.SafeURL
 							templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 189, Col: 87}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 191, Col: 87}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 							if templ_7745c5c3_Err != nil {
@@ -390,7 +390,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var19 string
 							templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Presse %s", pressIDStr))
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 192, Col: 52}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 194, Col: 52}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 							if templ_7745c5c3_Err != nil {
@@ -408,7 +408,7 @@ func Page(props *PageProps) templ.Component {
 							var templ_7745c5c3_Var20 string
 							templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(note.Linked)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 195, Col: 32}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 197, Col: 32}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 							if templ_7745c5c3_Err != nil {
@@ -439,7 +439,7 @@ func Page(props *PageProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</section></main><!-- JavaScript for filtering --> <script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tconst filterButtons = document.querySelectorAll('.filter-btn');\n\t\t\t\tconst noteCards = document.querySelectorAll('.note-card');\n\n\t\t\t\tfilterButtons.forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst filter = this.dataset.filter;\n\n\t\t\t\t\t\t// Update active button\n\t\t\t\t\t\tfilterButtons.forEach(btn => btn.classList.remove('active'));\n\t\t\t\t\t\tthis.classList.add('active');\n\n\t\t\t\t\t\t// Show/hide cards based on filter\n\t\t\t\t\t\tnoteCards.forEach(card => {\n\t\t\t\t\t\t\tconst level = card.dataset.noteLevel;\n\t\t\t\t\t\t\tconst shouldShow = filter === 'all' ||\n\t\t\t\t\t\t\t\t(filter === 'broken' && level === '2') ||\n\t\t\t\t\t\t\t\t(filter === 'attention' && level === '1') ||\n\t\t\t\t\t\t\t\t(filter === 'info' && level === '0');\n\n\t\t\t\t\t\t\tif (shouldShow) {\n\t\t\t\t\t\t\t\tcard.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tcard.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script> <!-- CSS for notes page --> <style>\n\t\t\t.notes-grid {\n\t\t\t\tmax-width: 1200px;\n\t\t\t\tmargin: 0 auto;\n\t\t\t}\n\n\t\t\t.notes-list {\n\t\t\t\tdisplay: grid;\n\t\t\t\tgrid-template-columns: repeat(auto-fill, minmax(400px, 1fr));\n\t\t\t\tgap: 1rem;\n\t\t\t}\n\n\t\t\t.note-card {\n\t\t\t\tborder-left: 4px solid;\n\t\t\t\ttransition: all 0.2s ease;\n\t\t\t}\n\n\t\t\t.note-card.broken {\n\t\t\t\tborder-left-color: var(--color-danger, #dc3545);\n\t\t\t}\n\n\t\t\t.note-card.attention {\n\t\t\t\tborder-left-color: var(--color-warning, #ffc107);\n\t\t\t}\n\n\t\t\t.note-card.info {\n\t\t\t\tborder-left-color: var(--color-info, #0dcaf0);\n\t\t\t}\n\n\t\t\t.note-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n\t\t\t}\n\n\t\t\t.note-importance {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tgap: 0.5rem;\n\t\t\t}\n\n\t\t\t.note-actions {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link,\n\t\t\t.linked-info .press-link {\n\t\t\t\tcolor: var(--primary-color, #0d6efd);\n\t\t\t\ttext-decoration: none;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link:hover {\n\t\t\t\ttext-decoration: underline;\n\t\t\t}\n\n\t\t\t.empty-state {\n\t\t\t\tpadding: 3rem 1rem;\n\t\t\t}\n\n\t\t\t.note-content {\n\t\t\t\twhite-space: pre-wrap;\n\t\t\t\tword-wrap: break-word;\n\t\t\t}\n\t\t</style>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</section></main><!-- JavaScript for filtering --> <script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tconst filterButtons = document.querySelectorAll('.filter-btn');\n\t\t\t\tconst noteCards = document.querySelectorAll('.note-card');\n\n\t\t\t\tfilterButtons.forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst filter = this.dataset.filter;\n\n\t\t\t\t\t\t// Update active button\n\t\t\t\t\t\tfilterButtons.forEach(btn => btn.classList.remove('active'));\n\t\t\t\t\t\tthis.classList.add('active');\n\n\t\t\t\t\t\t// Show/hide cards based on filter\n\t\t\t\t\t\tnoteCards.forEach(card => {\n\t\t\t\t\t\t\tconst level = card.dataset.noteLevel;\n\t\t\t\t\t\t\tconst shouldShow = filter === 'all' ||\n\t\t\t\t\t\t\t\t(filter === 'broken' && level === '2') ||\n\t\t\t\t\t\t\t\t(filter === 'attention' && level === '1') ||\n\t\t\t\t\t\t\t\t(filter === 'info' && level === '0');\n\n\t\t\t\t\t\t\tif (shouldShow) {\n\t\t\t\t\t\t\t\tcard.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tcard.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script> <!-- CSS for notes page --> <style>\n\t\t\t.notes-grid {\n\t\t\t\tmax-width: 100%;\n\t\t\t\tmargin: 0 auto;\n\t\t\t}\n\n\t\t\t.notes-list {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-wrap: wrap;\n\t\t\t\tgap: 1rem;\n\t\t\t\tjustify-content: flex-start;\n\t\t\t}\n\n\t\t\t.note-card {\n\t\t\t\tborder-left: 4px solid;\n\t\t\t\ttransition: all 0.2s ease;\n\t\t\t\twidth: fit-content;\n\t\t\t\tmax-width: 500px;\n\t\t\t}\n\n\t\t\t.note-card.broken {\n\t\t\t\tborder-left-color: var(--color-danger, #dc3545);\n\t\t\t}\n\n\t\t\t.note-card.attention {\n\t\t\t\tborder-left-color: var(--color-warning, #ffc107);\n\t\t\t}\n\n\t\t\t.note-card.info {\n\t\t\t\tborder-left-color: var(--color-info, #0dcaf0);\n\t\t\t}\n\n\t\t\t.note-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n\t\t\t}\n\n\t\t\t.note-importance {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tgap: 0.5rem;\n\t\t\t}\n\n\t\t\t.note-actions {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link,\n\t\t\t.linked-info .press-link {\n\t\t\t\tcolor: var(--primary-color, #0d6efd);\n\t\t\t\ttext-decoration: none;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link:hover {\n\t\t\t\ttext-decoration: underline;\n\t\t\t}\n\n\t\t\t.empty-state {\n\t\t\t\tpadding: 3rem 1rem;\n\t\t\t}\n\n\t\t\t.note-content {\n\t\t\t\twhite-space: pre-wrap;\n\t\t\t\tword-wrap: break-word;\n\t\t\t}\n\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
