@@ -99,7 +99,7 @@ func Page(props *PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</h2></section><!-- Filter Section --><section class=\"filter-section mb\"><div class=\"flex gap justify-center align-center\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</h2></section><!-- Filter Section --><section class=\"filter-section mb\"><div class=\"flex gap justify-center items-center\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -130,7 +130,7 @@ func Page(props *PageProps) templ.Component {
 					infoCount++
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button class=\"filter-btn small destructive\" data-filter=\"broken\"><i class=\"bi bi-x-circle text-danger\"></i> Defekt (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button class=\"filter-btn small destructive flex gap-sm\" data-filter=\"broken\"><i class=\"bi bi-x-circle text-danger\"></i> Defekt (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -143,7 +143,7 @@ func Page(props *PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ")</button> <button class=\"filter-btn small warning\" data-filter=\"attention\"><i class=\"bi bi-exclamation-triangle text-warning\"></i> Achtung (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ")</button> <button class=\"filter-btn small warning flex gap-sm\" data-filter=\"attention\"><i class=\"bi bi-exclamation-triangle text-warning\"></i> Achtung (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -156,7 +156,7 @@ func Page(props *PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</button> <button class=\"filter-btn small info\" data-filter=\"info\"><i class=\"bi bi-info-circle\"></i> Info (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</button> <button class=\"filter-btn small info flex gap-sm\" data-filter=\"info\"><i class=\"bi bi-info-circle\"></i> Info (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

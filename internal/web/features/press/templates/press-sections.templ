@@ -172,7 +172,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 			<span class="button-group flex justify-end items-center">
 				// HTMX Button: Edit cycle entry dialog
 				<button
-					class="small ghost"
+					class="icon small ghost"
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
@@ -190,7 +190,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 				</button>
 				// HTMX Button: Delete cycle from database table and reload section
 				<button
-					class="destructive small ghost"
+					class="icon destructive small ghost"
 					hx-delete={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,

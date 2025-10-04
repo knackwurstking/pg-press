@@ -7,39 +7,41 @@ import (
 )
 
 templ NoteCard(note *models.Note, linkToTables string) {
-	<div class="card">
+	<div class="card compact">
 		<div class="card-header flex flex-col gap-sm">
 			<span class="note-importance flex gap">
 				switch note.Level {
 					case models.INFO:
-						<i class="bi bi-info-circle"></i>
+						<i class="bi bi-info-circle info ghost"></i>
 						Info
 					case models.ATTENTION:
-						<i class="bi bi-exclamation-triangle text-warning"></i>
+						<i class="bi bi-exclamation-triangle warning ghost"></i>
 						<strong>Achtung</strong>
 					case models.BROKEN:
-						<i class="bi bi-x-circle text-danger"></i>
+						<i class="bi bi-x-circle text-danger destructive ghost"></i>
 						<strong>Defekt</strong>
 				}
 			</span>
-			<div class="flex gap-sm w-full justify-between">
+			<div class="flex gap-sm w-full justify-between items-center">
 				<span class="note-date">
 					{ note.CreatedAt.Format("2006-01-02 15:04") }
 				</span>
-				<button
-					class="small secondary"
-					hx-get={ fmt.Sprintf(
+				<span>
+					<button
+						class="icon secondary small"
+						hx-get={ fmt.Sprintf(
 						"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
 						env.ServerPathPrefix, note.ID, linkToTables,
 					) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Notiz bearbeiten"
-				>
-					<i class="bi bi-pencil"></i>
-				</button>
+						hx-trigger="click"
+						hx-target="body"
+						hx-swap="beforeend"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+						title="Notiz bearbeiten"
+					>
+						<i class="bi bi-pencil"></i>
+					</button>
+				</span>
 			</div>
 		</div>
 		<div class="card-body">

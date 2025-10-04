@@ -13,7 +13,7 @@ templ SectionNotes(tool *models.ToolWithNotes) {
 	<div class="flex justify-between items-center mb">
 		<h4>Notizen</h4>
 		<button
-			class="secondary small flex"
+			class="icon secondary small flex"
 			hx-get={ fmt.Sprintf(
 				"%s/htmx/notes/edit?link_to_tables=tool_%d",
 				env.ServerPathPrefix, tool.ID,
@@ -50,7 +50,7 @@ templ SectionMetalSheets(
 		<div class="flex justify-between items-center mb">
 			<h4>Bleche</h4>
 			<button
-				class="secondary small flex"
+				class="icon secondary small flex"
 				hx-get={ fmt.Sprintf(
 					"%s/htmx/metal-sheets/edit?tool_id=%d",
 					env.ServerPathPrefix, tool.ID,

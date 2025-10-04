@@ -51,7 +51,7 @@ templ ToolCycles(props *ToolCyclesProps) {
 			<div class="flex justify-between items-center mb">
 				<h5>Pressennutzungsverlauf</h5>
 				<button
-					class="secondary small flex"
+					class="icon secondary small flex"
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?tool_id=%d",
 						env.ServerPathPrefix, props.Tool.ID,
@@ -154,7 +154,7 @@ templ renderToolCycleRowWithPartialCalc(props *ToolCyclesProps, cycle *models.Cy
 			<span class="button-group flex justify-end items-center">
 				// HTMX Button: Goto: Edit cycle entry dialog
 				<button
-					class="small ghost"
+					class="icon small ghost"
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
@@ -172,7 +172,7 @@ templ renderToolCycleRowWithPartialCalc(props *ToolCyclesProps, cycle *models.Cy
 				</button>
 				// HTMX Button: Delete cycle from database table and reload section.cycles
 				<button
-					class="destructive small ghost"
+					class="icon destructive small ghost"
 					hx-delete={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, props.Tool.ID,

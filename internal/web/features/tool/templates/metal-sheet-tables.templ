@@ -35,7 +35,7 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 							</td>
 							<td class="button-group flex justify-end items-center">
 								<button
-									class="primary small ghost"
+									class="icon primary small ghost"
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -49,7 +49,7 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 									<i class="bi bi-pencil"></i>
 								</button>
 								<button
-									class="destructive small ghost"
+									class="icon destructive small ghost"
 									hx-delete={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -109,7 +109,7 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 							</td>
 							<td class="button-group flex justify-end items-center">
 								<button
-									class="primary small ghost"
+									class="icon primary small ghost"
 									hx-get={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
@@ -123,7 +123,7 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 									<i class="bi bi-pencil"></i>
 								</button>
 								<button
-									class="destructive small ghost"
+									class="icon destructive small ghost"
 									hx-delete={ fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d", env.ServerPathPrefix, sheet.ID,
 									) }
