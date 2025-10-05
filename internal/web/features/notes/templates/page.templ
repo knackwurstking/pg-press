@@ -44,8 +44,8 @@ templ Page(props *PageProps) {
 				<h2>Alle Notizen ({ fmt.Sprintf("%d", len(props.Notes)) })</h2>
 			</section>
 			<!-- Filter Section -->
-			<section class="filter-section mb">
-				<div class="flex gap justify-center items-center">
+			<section class="filter-section mb overflow-x-auto">
+				<div class="flex gap-sm justify-center w-fit">
 					<button class="filter-btn active small" data-filter="all">
 						Alle ({ fmt.Sprintf("%d", len(props.Notes)) })
 					</button>

@@ -84,7 +84,7 @@ func Page(props *PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</h2></section><!-- Filter Section --><section class=\"filter-section mb\"><div class=\"flex gap justify-center items-center\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</h2></section><!-- Filter Section --><section class=\"filter-section mb overflow-x-auto\"><div class=\"flex gap-sm justify-center w-fit\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
