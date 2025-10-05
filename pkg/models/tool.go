@@ -1,3 +1,4 @@
+// TODO: Add a new field to the tool for locking cycle tracking, need this for some top cassete position tools which are not trackable, also need to change the service after that
 package models
 
 import (
