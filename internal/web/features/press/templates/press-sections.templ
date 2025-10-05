@@ -11,6 +11,7 @@ import (
 // PressNotesSection renders the notes section for all tools on a press
 templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
 	if len(notes) > 0 {
+		// Press Notes
 		<div class="notes-list flex flex-col gap">
 			for _, note := range notes {
 				@components.NoteCard(note, fmt.Sprintf("press_%d", press))
@@ -48,6 +49,8 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 			</button>
 		</div>
 	}
+	// TODO: TOOL Notes
+	// TODO: Display active tool notes for this press in separate sections
 }
 
 // PressActiveToolsSection renders the active tools section content for HTMX
