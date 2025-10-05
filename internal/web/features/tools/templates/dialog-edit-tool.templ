@@ -35,20 +35,18 @@ templ DialogEditTool(props *DialogEditToolProps) {
 			submitButtonText = "Aktualisieren"
 		}
 
-		// NOTE: Skip dispatching the "pageLoaded" HTMX event and just reload the page
-		jsOnClose := ""
-		skipDispatch := false
+		behavior := "custom"
 		if props.ReloadPage {
-			jsOnClose = "location.reload()"
-			skipDispatch = true
+			behavior = "reload"
 		}
 	}}
-	@dialogs.Base(dialogs.BaseProps{Type: baseType,
-		Href:             baseHref,
-		ID:               "tool-edit-dialog",
-		SubmitButtonText: submitButtonText,
-		JSOnClose:        jsOnClose,
-		SkipDispatch:     skipDispatch,
+	@dialogs.Base(dialogs.BaseProps{
+		Type:                  baseType,
+		Href:                  baseHref,
+		ID:                    "tool-edit-dialog",
+		SubmitButtonText:      submitButtonText,
+		Behavior:              behavior,
+		CustomWindowEventName: "visibilitychange",
 	}) {
 		<span class="flex flex-row gap flex-wrap justify-between items-center">
 			<span class="flex flex-col gap-0">

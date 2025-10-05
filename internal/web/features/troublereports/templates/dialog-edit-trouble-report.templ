@@ -39,10 +39,12 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		ID:               "metal-sheet-edit-dialog",
-		Type:             baseType,
-		Href:             baseHref,
-		SubmitButtonText: submitButtonText,
+		ID:                    "metal-sheet-edit-dialog",
+		Type:                  baseType,
+		Href:                  baseHref,
+		SubmitButtonText:      submitButtonText,
+		Behavior:              "custom",
+		CustomWindowEventName: "visibilitychange",
 	}) {
 		<script>
             var selectedFiles = []; // Used by the file input change event handler

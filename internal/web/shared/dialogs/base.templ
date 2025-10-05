@@ -14,28 +14,31 @@ type BaseProps struct {
 	SubmitButtonText string
 
 	Error string
-	// TODO: Implement the Window Reload, this will auto skip the dispatch visibilitychange event
-	JSOnClose    string
-	SkipDispatch bool
+
+	// Dialog closing setup
+	Behavior              string // Behaviors: "reload", "custom"
+	CustomWindowEventName string // (defaults to dispatching the visibility change event)
 }
 
 templ Base(props BaseProps) {
+	{{
+		onclose := templ.ComponentScript{
+			Call: `this.remove();`,
+		}
+		switch props.Behavior {
+		case "reload":
+			onclose.Call = `this.remove(); window.location.reload();`
+		case "custom":
+			onclose.Call = fmt.Sprintf(`
+				this.remove();
+				window.dispatchEvent(new Event('%s'));
+			`, props.CustomWindowEventName)
+		}
+	}}
 	<dialog
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
-		if props.SkipDispatch {
-			onclose={ templ.ComponentScript{
-				Call: fmt.Sprintf(`this.remove(); %s; `, props.JSOnClose),
-			} }
-		} else {
-			onclose={ templ.ComponentScript{
-				Call: fmt.Sprintf(`
-					window.dispatchEvent(new Event('visibilitychange'));
-					this.remove();
-					%s;
-				`, props.JSOnClose),
-			} }
-		}
+		onclose={ onclose }
 	>
 		<form
 			class="flex flex-col gap p"

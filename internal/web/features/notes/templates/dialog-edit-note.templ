@@ -36,20 +36,18 @@ templ DialogEditNote(props DialogEditNoteProps) {
 		}
 
 		// NOTE: Skip dispatching the "pageLoaded" HTMX event and just reload the page
-		jsOnClose := ""
-		skipDispatch := false
+		behavior := "custom"
 		if props.Reload {
-			jsOnClose = "location.reload()"
-			skipDispatch = true
+			behavior = "reload"
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		Type:             baseType,
-		Href:             baseHref,
-		ID:               "notes-edit-dialog",
-		SubmitButtonText: submitButtonText,
-		JSOnClose:        jsOnClose,
-		SkipDispatch:     skipDispatch,
+		Type:                  baseType,
+		Href:                  baseHref,
+		ID:                    "notes-edit-dialog",
+		SubmitButtonText:      submitButtonText,
+		Behavior:              behavior,
+		CustomWindowEventName: "visibilitychange",
 	}) {
 		<!-- Level Selection -->
 		<label for="level" class="flex flex-col">
