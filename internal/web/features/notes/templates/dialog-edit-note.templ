@@ -84,26 +84,29 @@ templ DialogEditNote(props DialogEditNoteProps) {
 				required
 			>{ props.Note.Content }</textarea>
 		</label>
-		if props.User.IsAdmin() {
-			<!-- Linked Tables Selector -->
-			if len(props.LinkToTables) > 0 {
-				<div class="flex flex-col gap">
-					<h3>Verknüpfte Tabellen</h3>
-					<div class="flex flex-col gap-sm">
-						for _, table := range props.LinkToTables {
-							<label class="flex flex-row gap items-center" disabled>
-								<input
-									type="checkbox"
-									name="linked_tables"
-									value={ table }
-									checked
-								/>
-								{ table }
-							</label>
-						}
-					</div>
+		<!-- Linked Tables Selector -->
+		if len(props.LinkToTables) > 0 {
+			<div
+				class="flex flex-col gap"
+				if !props.User.IsAdmin() {
+					style="display: none;"
+				}
+			>
+				<h3>Verknüpfte Tabellen</h3>
+				<div class="flex flex-col gap-sm">
+					for _, table := range props.LinkToTables {
+						<label class="flex flex-row gap items-center" disabled>
+							<input
+								type="checkbox"
+								name="linked_tables"
+								value={ table }
+								checked
+							/>
+							{ table }
+						</label>
+					}
 				</div>
-			}
+			</div>
 		}
 	}
 }

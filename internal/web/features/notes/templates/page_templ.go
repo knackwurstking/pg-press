@@ -71,33 +71,20 @@ func Page(props *PageProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><!-- Actions Section --><section class=\"flex justify-between items-center mb\"><h2>Alle Notizen (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><!-- Filter Section --><section class=\"filter-section mb\"><div class=\"flex gap-sm justify-center items-center w-full flex-wrap\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(props.Notes)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 44, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 46, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</h2></section><!-- Filter Section --><section class=\"filter-section mb overflow-x-auto\"><div class=\"flex gap-sm justify-center w-fit\"><button class=\"filter-btn active small\" data-filter=\"all\">Alle (")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(props.Notes)))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 50, Col: 49}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, ")</button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ")</button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -115,54 +102,58 @@ func Page(props *PageProps) templ.Component {
 					infoCount++
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button class=\"filter-btn small destructive flex gap-sm\" data-filter=\"broken\"><i class=\"bi bi-x-circle text-danger\"></i> Defekt (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<button class=\"filter-btn small destructive flex gap-sm\" data-filter=\"broken\"><i class=\"bi bi-x-circle text-danger\"></i> Defekt (")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", brokenCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 65, Col: 46}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, ")</button> <button class=\"filter-btn small warning flex gap-sm\" data-filter=\"attention\"><i class=\"bi bi-exclamation-triangle text-warning\"></i> Achtung (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", brokenCount))
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attentionCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 69, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 69, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ")</button> <button class=\"filter-btn small warning flex gap-sm\" data-filter=\"attention\"><i class=\"bi bi-exclamation-triangle text-warning\"></i> Achtung (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, ")</button> <button class=\"filter-btn small info flex gap-sm\" data-filter=\"info\"><i class=\"bi bi-info-circle\"></i> Info (")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attentionCount))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", infoCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 73, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 73, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</button> <button class=\"filter-btn small info flex gap-sm\" data-filter=\"info\"><i class=\"bi bi-info-circle\"></i> Info (")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ")</button></div></section><!-- Notes List --><section class=\"notes-grid max-w-full\" style=\"margin: 0 auto;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", infoCount))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/page.templ`, Line: 77, Col: 42}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			templ_7745c5c3_Err = NotesGrid(props.Notes, props.Tools).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ")</button></div></section><!-- Notes List --><section class=\"notes-grid\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</section></main><!-- JavaScript for filtering --> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = NotesGrid(props.Tools, props.Notes).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</section></main><!-- JavaScript for filtering --> <script>\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tconst filterButtons = document.querySelectorAll('.filter-btn');\n\t\t\t\tconst noteCards = document.querySelectorAll('.note-card');\n\n\t\t\t\tfilterButtons.forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst filter = this.dataset.filter;\n\n\t\t\t\t\t\t// Update active button\n\t\t\t\t\t\tfilterButtons.forEach(btn => btn.classList.remove('active'));\n\t\t\t\t\t\tthis.classList.add('active');\n\n\t\t\t\t\t\t// Show/hide cards based on filter\n\t\t\t\t\t\tnoteCards.forEach(card => {\n\t\t\t\t\t\t\tconst level = card.dataset.noteLevel;\n\t\t\t\t\t\t\tconst shouldShow = filter === 'all' ||\n\t\t\t\t\t\t\t\t(filter === 'broken' && level === '2') ||\n\t\t\t\t\t\t\t\t(filter === 'attention' && level === '1') ||\n\t\t\t\t\t\t\t\t(filter === 'info' && level === '0');\n\n\t\t\t\t\t\t\tif (shouldShow) {\n\t\t\t\t\t\t\t\tcard.style.display = 'block';\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\tcard.style.display = 'none';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script> <!-- CSS for notes page --> <style>\n\t\t\t.notes-grid {\n\t\t\t\tmax-width: 100%;\n\t\t\t\tmargin: 0 auto;\n\t\t\t}\n\n\t\t\t.notes-list {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-wrap: wrap;\n\t\t\t\tgap: 1rem;\n\t\t\t\tjustify-content: flex-start;\n\t\t\t}\n\n\t\t\t.note-card {\n\t\t\t\tborder-left: 4px solid;\n\t\t\t\ttransition: all 0.2s ease;\n\t\t\t\twidth: fit-content;\n\t\t\t\tmax-width: 500px;\n\t\t\t}\n\n\t\t\t.note-card.broken {\n\t\t\t\tborder-left-color: var(--color-danger, #dc3545);\n\t\t\t}\n\n\t\t\t.note-card.attention {\n\t\t\t\tborder-left-color: var(--color-warning, #ffc107);\n\t\t\t}\n\n\t\t\t.note-card.info {\n\t\t\t\tborder-left-color: var(--color-info, #0dcaf0);\n\t\t\t}\n\n\t\t\t.note-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);\n\t\t\t}\n\n\t\t\t.note-importance {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tgap: 0.5rem;\n\t\t\t}\n\n\t\t\t.note-actions {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link,\n\t\t\t.linked-info .press-link {\n\t\t\t\tcolor: var(--primary-color, #0d6efd);\n\t\t\t\ttext-decoration: none;\n\t\t\t}\n\n\t\t\t.linked-info .tool-link:hover {\n\t\t\t\ttext-decoration: underline;\n\t\t\t}\n\n\t\t\t.empty-state {\n\t\t\t\tpadding: 3rem 1rem;\n\t\t\t}\n\n\t\t\t.note-content {\n\t\t\t\twhite-space: pre-wrap;\n\t\t\t\tword-wrap: break-word;\n\t\t\t}\n\t\t</style>")
+			templ_7745c5c3_Err = pageScript().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -198,12 +189,12 @@ func navContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -219,12 +210,50 @@ func navContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+func pageScript() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_pageScript_7811`,
+		Function: `function __templ_pageScript_7811(){document.addEventListener('DOMContentLoaded', function() {
+		const filterButtons = document.querySelectorAll('.filter-btn');
+		const noteCards = document.querySelectorAll('.note-card');
+
+		filterButtons.forEach(button => {
+			button.addEventListener('click', function() {
+				const filter = this.dataset.filter;
+
+				// Update active button
+				filterButtons.forEach(btn => btn.classList.remove('active'));
+				this.classList.add('active');
+
+				// Show/hide cards based on filter
+				noteCards.forEach(card => {
+					const level = card.dataset.noteLevel;
+					const shouldShow = filter === 'all' ||
+						(filter === 'broken' && level === '2') ||
+						(filter === 'attention' && level === '1') ||
+						(filter === 'info' && level === '0');
+
+					if (shouldShow) {
+						card.style.display = 'block';
+					} else {
+						card.style.display = 'none';
+					}
+				});
+			});
+		});
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_pageScript_7811`),
+		CallInline: templ.SafeScriptInline(`__templ_pageScript_7811`),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

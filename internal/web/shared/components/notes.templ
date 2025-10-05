@@ -7,42 +7,62 @@ import (
 )
 
 templ NoteCard(note *models.Note, linkToTables string) {
-	<div class="card compact">
-		<div class="card-header flex flex-col gap-sm">
+	{{
+		filterClass := ""
+		switch note.Level {
+		case models.INFO:
+			filterClass = "info ghost"
+		case models.ATTENTION:
+			filterClass = "warning ghost"
+		case models.BROKEN:
+			filterClass = "destructive ghost"
+		}
+	}}
+	<div class={ fmt.Sprintf("card compact %s", filterClass) }>
+		<div class="card-header flex gap-sm justify-between items-center">
 			<span class="note-importance flex gap">
 				switch note.Level {
 					case models.INFO:
-						<i class="bi bi-info-circle info ghost"></i>
-						Info
+						<i class="bi bi-info-circle"></i>
 					case models.ATTENTION:
-						<i class="bi bi-exclamation-triangle warning ghost"></i>
-						<strong>Achtung</strong>
+						<i class="bi bi-exclamation-triangle"></i>
 					case models.BROKEN:
-						<i class="bi bi-x-circle text-danger destructive ghost"></i>
-						<strong>Defekt</strong>
+						<i class="bi bi-x-circle"></i>
 				}
-			</span>
-			<div class="flex gap-sm w-full justify-between items-center">
 				<span class="note-date">
 					{ note.CreatedAt.Format("2006-01-02 15:04") }
 				</span>
-				<span>
-					<button
-						class="icon secondary small"
-						hx-get={ fmt.Sprintf(
-						"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
-						env.ServerPathPrefix, note.ID, linkToTables,
+			</span>
+			<span class="flex gap">
+				<button
+					class="icon secondary small"
+					hx-get={ fmt.Sprintf(
+					"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
+					env.ServerPathPrefix, note.ID, linkToTables,
+				) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Notiz bearbeiten"
+				>
+					<i class="bi bi-pencil"></i>
+				</button>
+				<button
+					class="icon small destructive"
+					hx-delete={ fmt.Sprintf(
+						"%s/htmx/notes/delete?id=%d",
+						env.ServerPathPrefix, note.ID,
 					) }
-						hx-trigger="click"
-						hx-target="body"
-						hx-swap="beforeend"
-						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-						title="Notiz bearbeiten"
-					>
-						<i class="bi bi-pencil"></i>
-					</button>
-				</span>
-			</div>
+					hx-trigger="click"
+					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					hx-on:htmx:after-request="if(event.detail.successful) window.dispatchEvent(new Event('visibilitychange'))"
+					title="Notiz löschen"
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</span>
 		</div>
 		<div class="card-body">
 			<p>{ note.Content }</p>

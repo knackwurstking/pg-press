@@ -39,13 +39,9 @@ templ Page(props *PageProps) {
 		},
 	) {
 		<main class="container fluid">
-			<!-- Actions Section -->
-			<section class="flex justify-between items-center mb">
-				<h2>Alle Notizen ({ fmt.Sprintf("%d", len(props.Notes)) })</h2>
-			</section>
 			<!-- Filter Section -->
-			<section class="filter-section mb overflow-x-auto">
-				<div class="flex gap-sm justify-center w-fit">
+			<section class="filter-section mb">
+				<div class="flex gap-sm justify-center items-center w-full flex-wrap">
 					<button class="filter-btn active small" data-filter="all">
 						Alle ({ fmt.Sprintf("%d", len(props.Notes)) })
 					</button>
@@ -79,110 +75,12 @@ templ Page(props *PageProps) {
 				</div>
 			</section>
 			<!-- Notes List -->
-			<section class="notes-grid">
-				@NotesGrid(props.Tools, props.Notes)
+			<section class="notes-grid max-w-full" style="margin: 0 auto;">
+				@NotesGrid(props.Notes, props.Tools)
 			</section>
 		</main>
 		<!-- JavaScript for filtering -->
-		<script>
-			document.addEventListener('DOMContentLoaded', function() {
-				const filterButtons = document.querySelectorAll('.filter-btn');
-				const noteCards = document.querySelectorAll('.note-card');
-
-				filterButtons.forEach(button => {
-					button.addEventListener('click', function() {
-						const filter = this.dataset.filter;
-
-						// Update active button
-						filterButtons.forEach(btn => btn.classList.remove('active'));
-						this.classList.add('active');
-
-						// Show/hide cards based on filter
-						noteCards.forEach(card => {
-							const level = card.dataset.noteLevel;
-							const shouldShow = filter === 'all' ||
-								(filter === 'broken' && level === '2') ||
-								(filter === 'attention' && level === '1') ||
-								(filter === 'info' && level === '0');
-
-							if (shouldShow) {
-								card.style.display = 'block';
-							} else {
-								card.style.display = 'none';
-							}
-						});
-					});
-				});
-			});
-		</script>
-		<!-- CSS for notes page -->
-		<style>
-			.notes-grid {
-				max-width: 100%;
-				margin: 0 auto;
-			}
-
-			.notes-list {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 1rem;
-				justify-content: flex-start;
-			}
-
-			.note-card {
-				border-left: 4px solid;
-				transition: all 0.2s ease;
-				width: fit-content;
-				max-width: 500px;
-			}
-
-			.note-card.broken {
-				border-left-color: var(--color-danger, #dc3545);
-			}
-
-			.note-card.attention {
-				border-left-color: var(--color-warning, #ffc107);
-			}
-
-			.note-card.info {
-				border-left-color: var(--color-info, #0dcaf0);
-			}
-
-			.note-card:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-			}
-
-			.note-importance {
-				display: flex;
-				align-items: center;
-				gap: 0.5rem;
-			}
-
-			.note-actions {
-				display: flex;
-				align-items: center;
-			}
-
-			.linked-info .tool-link,
-			.linked-info .press-link {
-				color: var(--primary-color, #0d6efd);
-				text-decoration: none;
-			}
-
-			.linked-info .tool-link:hover {
-				text-decoration: underline;
-			}
-
-			.empty-state {
-				padding: 3rem 1rem;
-			}
-
-			.note-content {
-				white-space: pre-wrap;
-				word-wrap: break-word;
-			}
-		</style>
+		@pageScript()
 	}
 }
 
@@ -192,4 +90,36 @@ templ navContent() {
 		@components.NavProfileButton()
 		@components.NavHomeButton()
 	</div>
+}
+
+script pageScript() {
+	document.addEventListener('DOMContentLoaded', function() {
+		const filterButtons = document.querySelectorAll('.filter-btn');
+		const noteCards = document.querySelectorAll('.note-card');
+
+		filterButtons.forEach(button => {
+			button.addEventListener('click', function() {
+				const filter = this.dataset.filter;
+
+				// Update active button
+				filterButtons.forEach(btn => btn.classList.remove('active'));
+				this.classList.add('active');
+
+				// Show/hide cards based on filter
+				noteCards.forEach(card => {
+					const level = card.dataset.noteLevel;
+					const shouldShow = filter === 'all' ||
+						(filter === 'broken' && level === '2') ||
+						(filter === 'attention' && level === '1') ||
+						(filter === 'info' && level === '0');
+
+					if (shouldShow) {
+						card.style.display = 'block';
+					} else {
+						card.style.display = 'none';
+					}
+				});
+			});
+		});
+	});
 }

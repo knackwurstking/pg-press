@@ -39,7 +39,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(notes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"notes-list\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"notes-list flex flex-col gap\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

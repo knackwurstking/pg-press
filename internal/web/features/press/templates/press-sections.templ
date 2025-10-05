@@ -11,7 +11,7 @@ import (
 // PressNotesSection renders the notes section for all tools on a press
 templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
 	if len(notes) > 0 {
-		<div class="notes-list">
+		<div class="notes-list flex flex-col gap">
 			for _, note := range notes {
 				@components.NoteCard(note, fmt.Sprintf("press_%d", press))
 			}
