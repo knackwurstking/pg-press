@@ -28,9 +28,6 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.GetToolsPage),
 
 			// HTMX
-			// List tools
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/list", r.handler.HTMXGetToolsList),
-
 			// Get, Post or Edit a tool
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/edit",
 				r.handler.HTMXGetEditToolDialog),

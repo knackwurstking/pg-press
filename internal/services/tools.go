@@ -254,6 +254,8 @@ func (t *Tools) List() ([]*models.Tool, error) {
 }
 
 func (t *Tools) ListWithNotes() ([]*models.ToolWithNotes, error) {
+	t.log.Info("Listing tools with notes")
+
 	tools, err := t.List()
 	if err != nil {
 		return nil, err

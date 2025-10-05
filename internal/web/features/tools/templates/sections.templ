@@ -51,7 +51,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 	</details>
 }
 
-templ SectionTools() {
+templ SectionTools(tools []*models.ToolWithNotes) {
 	<div class="all-tools p">
 		<h4 class="mb p">
 			<i class="bi bi-archive mr"></i>
@@ -73,12 +73,11 @@ templ SectionTools() {
 		</div>
 		<ul
 			id="all-tools-list"
-			hx-get={ env.ServerPathPrefix + "/htmx/tools/list" }
-			hx-trigger="load, pageLoaded from:body"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			class="flex flex-col gap m-t p-0"
 			style="list-style: none;"
-		></ul>
+		>
+			@ToolsList(tools)
+		</ul>
 	</div>
 }
 

@@ -73,7 +73,7 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load, pageLoaded from:body\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></div></div><script>\n\t\t\t\twindow.addEventListener(\"visibilitychange\", function() {\n\t\t\t\t\tif (document.visibilityState === 'visible') {\n\t\t\t\t\t\tconsole.debug(\"Refreshing sections due to visibility change\");\n\t\t\t\t\t\thtmx.trigger(\"#section-press\", 'load');\n\t\t\t\t\t\thtmx.trigger(\"#section-tools\", 'load');\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"load, pageLoaded from:body\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
@@ -49,28 +48,6 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tools page: "+err.Error())
-	}
-
-	return nil
-}
-
-func (h *Handler) HTMXGetToolsList(c echo.Context) error {
-	start := time.Now()
-	// Get tools from database
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	dbElapsed := time.Since(start)
-	if dbElapsed > 100*time.Millisecond {
-		h.LogWarn("Slow tools query took %v for %d tools", dbElapsed, len(tools))
-	}
-
-	toolsList := templates.ToolsList(tools)
-	if err := toolsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render tools list all: "+err.Error())
 	}
 
 	return nil
@@ -262,7 +239,13 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	h.LogDebug("Rendering tools section")
 
-	sectionTools := templates.SectionTools()
+	// Get tools from database
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	sectionTools := templates.SectionTools(tools)
 	if err := sectionTools.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render tools section: "+err.Error())
 	}

@@ -29,15 +29,6 @@ templ Page() {
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				></div>
 			</div>
-			<script>
-				window.addEventListener("visibilitychange", function() {
-					if (document.visibilityState === 'visible') {
-						console.debug("Refreshing sections due to visibility change");
-						htmx.trigger("#section-press", 'load');
-						htmx.trigger("#section-tools", 'load');
-					}
-				});
-			</script>
 		</main>
 	}
 }
