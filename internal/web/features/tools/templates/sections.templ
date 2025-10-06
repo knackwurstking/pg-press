@@ -159,10 +159,12 @@ templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 		<label class="flex flex-1 flex-col gap-0" style="max-width: 8rem;">
 			Format
 			<input
+				id="tool-format-input"
 				type="text"
 				list="formats"
 				placeholder="Format"
 				oninput={ filterToolsList() }
+				hx-preserve="true"
 			/>
 			<datalist id="formats">
 				for _, f := range formats {
@@ -174,10 +176,12 @@ templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 		<label class="flex flex-1 flex-col gap-0" style="max-width: 10rem;">
 			Code
 			<input
+				id="tool-code-input"
 				type="text"
 				list="codes"
 				placeholder="Code"
 				oninput={ filterToolsList() }
+				hx-preserve="true"
 			/>
 			<datalist id="codes">
 				for _, c := range codes {
@@ -189,10 +193,12 @@ templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 		<label class="flex flex-1 flex-col gap-0" style="max-width: 13rem;">
 			Type
 			<input
+				id="tool-type-input"
 				type="text"
 				list="types"
 				placeholder="Type"
 				oninput={ filterToolsList() }
+				hx-preserve="true"
 			/>
 			<datalist id="types">
 				for _, t := range types {
@@ -204,10 +210,12 @@ templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 		<label class="flex flex-1 flex-col gap-0" style="max-width: 13rem;">
 			Position
 			<input
+				id="tool-position-input"
 				type="text"
 				list="positions"
 				placeholder="Position"
 				oninput={ filterToolsList() }
+				hx-preserve="true"
 			/>
 			<datalist id="positions">
 				for _, p := range positions {
