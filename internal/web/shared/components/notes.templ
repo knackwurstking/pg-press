@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// TODO: linkToTables param is useless because we could use `note.Linked` instead
 templ NoteCard(note *models.Note, linkToTables string) {
 	{{
 		filterClass := ""

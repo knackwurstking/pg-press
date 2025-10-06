@@ -206,6 +206,15 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tools for press")
 	}
 
+	// Get notes for tools
+	for _, t := range sortedTools {
+		n, err := h.DB.Notes.GetByTool(t.ID)
+		if err != nil {
+			return h.HandleError(c, err, fmt.Sprintf("failed to get notes for tool %d", t.ID))
+		}
+		notes = append(notes, n...)
+	}
+
 	notesSection := templates.PressNotesSection(notes, sortedTools, press)
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render press notes section: "+err.Error())

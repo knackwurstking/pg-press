@@ -2,22 +2,35 @@ package templates
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"strings"
 )
 
 // PressNotesSection renders the notes section for all tools on a press
 templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
-	if len(notes) > 0 {
-		// Press Notes
-		<div class="notes-list flex flex-col gap">
-			for _, note := range notes {
-				@components.NoteCard(note, fmt.Sprintf("press_%d", press))
+	{{
+		pressNotes := make([]*models.Note, 0)
+		toolNotes := make([]*models.Note, 0)
+		for _, n := range notes {
+			if strings.HasPrefix(n.Linked, "press_") {
+				pressNotes = append(pressNotes, n)
+			} else if strings.HasPrefix(n.Linked, "tool_") {
+				toolNotes = append(toolNotes, n)
 			}
-		</div>
-		<div class="flex justify-center mt">
+		}
+	}}
+	if len(pressNotes) > 0 {
+		// Press Notes
+		<section class="notes-list flex flex-col gap">
+			for _, note := range pressNotes {
+				@components.NoteCard(note, note.Linked)
+			}
+		</section>
+		<section class="flex justify-center mt">
 			<button
 				class="primary"
 				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press) }
@@ -30,9 +43,9 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 				<i class="bi bi-plus-lg"></i>
 				Notiz hinzufügen
 			</button>
-		</div>
+		</section>
 	} else {
-		<div class="empty-state">
+		<section class="empty-state">
 			<h4>Keine Notizen</h4>
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
@@ -47,10 +60,53 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 				<i class="bi bi-plus-lg"></i>
 				Erste Notiz hinzufügen
 			</button>
-		</div>
+		</section>
 	}
-	// TODO: TOOL Notes
-	// TODO: Display active tool notes for this press in separate sections
+	if len(toolNotes) > 0 {
+		<section class="notes-list flex flex-col gap">
+			{{
+				topToolNotes := make([]*models.Note, 0)
+				topCassetteToolNotes := make([]*models.Note, 0)
+				bottomToolNotes := make([]*models.Note, 0)
+				for _, n := range toolNotes {
+					sID, _ := strings.CutPrefix(n.Linked, "tool_")
+					id, _ := strconv.ParseInt(sID, 10, 64)
+					for _, t := range tools {
+						if t.ID != id {
+							continue
+						}
+
+						switch t.Position {
+						case models.PositionTop:
+							topToolNotes = append(topToolNotes, n)
+						case models.PositionTopCassette:
+							topCassetteToolNotes = append(topCassetteToolNotes, n)
+						case models.PositionBottom:
+							bottomToolNotes = append(bottomToolNotes, n)
+						}
+					}
+				}
+			}}
+			if len(topToolNotes) > 0 {
+				<h4>{ models.PositionTop.GermanString() }</h4>
+				for _, n := range topToolNotes {
+					@components.NoteCard(n, n.Linked)
+				}
+			}
+			if len(topCassetteToolNotes) > 0 {
+				<h4>{ models.PositionTopCassette.GermanString() }</h4>
+				for _, n := range topCassetteToolNotes {
+					@components.NoteCard(n, n.Linked)
+				}
+			}
+			if len(bottomToolNotes) > 0 {
+				<h4>{ models.PositionBottom.GermanString() }</h4>
+				for _, n := range bottomToolNotes {
+					@components.NoteCard(n, n.Linked)
+				}
+			}
+		</section>
+	}
 }
 
 // PressActiveToolsSection renders the active tools section content for HTMX

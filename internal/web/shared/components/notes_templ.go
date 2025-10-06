@@ -14,6 +14,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// TODO: linkToTables param is useless because we could use `note.Linked` instead
 func NoteCard(note *models.Note, linkToTables string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -91,7 +92,7 @@ func NoteCard(note *models.Note, linkToTables string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(note.CreatedAt.Format("2006-01-02 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 33, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 34, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -107,7 +108,7 @@ func NoteCard(note *models.Note, linkToTables string) templ.Component {
 			env.ServerPathPrefix, note.ID, linkToTables,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 42, Col: 5}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 43, Col: 5}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -123,7 +124,7 @@ func NoteCard(note *models.Note, linkToTables string) templ.Component {
 			env.ServerPathPrefix, note.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 56, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 57, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -136,7 +137,7 @@ func NoteCard(note *models.Note, linkToTables string) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 68, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 69, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
