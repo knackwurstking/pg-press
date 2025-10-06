@@ -117,7 +117,7 @@ templ cyclesSection() {
 
 templ sectionTop(tool *models.Tool) {
 	<section>
-		<h3>Oberteil</h3>
+		<h3>{ models.PositionTop.GermanString() }</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
@@ -139,7 +139,7 @@ templ sectionTop(tool *models.Tool) {
 
 templ sectionTopCassette(tool *models.Tool) {
 	<section>
-		<h3>Kassette Oberteil (optional)</h3>
+		<h3>{ models.PositionTopCassette.GermanString() } (optional)</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {
@@ -160,7 +160,7 @@ templ sectionTopCassette(tool *models.Tool) {
 
 templ sectionBottom(tool *models.Tool) {
 	<section>
-		<h3>Unterteil</h3>
+		<h3>{ models.PositionBottom.GermanString() }</h3>
 		if tool != nil {
 			<p>Aktuelles Werkzeug: { tool.String() }</p>
 		} else {

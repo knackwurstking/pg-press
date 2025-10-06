@@ -34,7 +34,7 @@ func (p Position) GermanString() string {
 	case PositionTop:
 		return "Oberteil"
 	case PositionTopCassette:
-		return "Oberteil Kassette"
+		return "Kassette"
 	case PositionBottom:
 		return "Unterteil"
 	default:
