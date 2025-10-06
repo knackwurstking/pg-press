@@ -109,13 +109,14 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 
 	// Create individual cycle summaries without combining by ToolID
 	type toolSummary struct {
-		toolID       int64
-		toolCode     string
-		position     models.Position
-		startDate    time.Time
-		endDate      time.Time
-		maxCycles    int64
-		totalPartial int64
+		toolID            int64
+		toolCode          string
+		position          models.Position
+		startDate         time.Time
+		endDate           time.Time
+		maxCycles         int64
+		totalPartial      int64
+		isFirstAppearance bool
 	}
 
 	var toolSummaries []*toolSummary
@@ -129,13 +130,14 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		}
 
 		toolSummaries = append(toolSummaries, &toolSummary{
-			toolID:       cycle.ToolID,
-			toolCode:     toolCode,
-			position:     cycle.ToolPosition,
-			startDate:    cycle.Date,
-			endDate:      cycle.Date,
-			maxCycles:    cycle.TotalCycles,
-			totalPartial: cycle.PartialCycles,
+			toolID:            cycle.ToolID,
+			toolCode:          toolCode,
+			position:          cycle.ToolPosition,
+			startDate:         cycle.Date,
+			endDate:           cycle.Date,
+			maxCycles:         cycle.TotalCycles,
+			totalPartial:      cycle.PartialCycles,
+			isFirstAppearance: false, // Will be set during consolidation
 		})
 	}
 
@@ -161,6 +163,69 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			}
 		}
 	}
+
+	// Consolidate entries for the same tool in the same position
+	var consolidatedSummaries []*toolSummary
+	lastToolByPosition := make(map[models.Position]int64)
+	positionIndexMap := make(map[models.Position]int)
+	toolEndDates := make(map[models.Position]time.Time) // key: position only
+
+	for _, summary := range toolSummaries {
+		lastToolID, hasLastTool := lastToolByPosition[summary.position]
+
+		// Check if this is the same tool as the last one in this position
+		if hasLastTool && lastToolID == summary.toolID {
+			// Consolidate with the existing entry for this position
+			existingIndex := positionIndexMap[summary.position]
+			existingSummary := consolidatedSummaries[existingIndex]
+
+			// Update end date (keep the latest)
+			if summary.endDate.After(existingSummary.endDate) {
+				existingSummary.endDate = summary.endDate
+			}
+
+			// Take highest total cycles
+			if summary.maxCycles > existingSummary.maxCycles {
+				existingSummary.maxCycles = summary.maxCycles
+			}
+
+			// Sum partial cycles
+			existingSummary.totalPartial += summary.totalPartial
+		} else {
+			// Create new entry with appropriate start date
+			newSummary := &toolSummary{
+				toolID:            summary.toolID,
+				toolCode:          summary.toolCode,
+				position:          summary.position,
+				startDate:         summary.startDate, // Will be overridden below
+				endDate:           summary.endDate,
+				maxCycles:         summary.maxCycles,
+				totalPartial:      summary.totalPartial,
+				isFirstAppearance: false, // Will be set below
+			}
+
+			// Set start date and first appearance flag based on previous usage in this position
+			if previousEndDate, hasPrevious := toolEndDates[summary.position]; hasPrevious {
+				// Use previous end date as start date
+				newSummary.startDate = previousEndDate
+				newSummary.isFirstAppearance = false
+			} else {
+				// This is the first tool in this position
+				newSummary.isFirstAppearance = true
+			}
+
+			consolidatedSummaries = append(consolidatedSummaries, newSummary)
+
+			// Update tracking maps
+			lastToolByPosition[summary.position] = summary.toolID
+			positionIndexMap[summary.position] = len(consolidatedSummaries) - 1
+		}
+
+		// Always update the end date for this position
+		toolEndDates[summary.position] = summary.endDate
+	}
+
+	toolSummaries = consolidatedSummaries
 
 	// Table data
 	o.PDF.SetFont("Arial", "", 9)
@@ -192,8 +257,14 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		// Position
 		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.position.GermanString()), "1", 0, "C", fill, 0, "")
 
-		// Start date
-		startDateStr := summary.startDate.Format("02.01.06")
+		// Start date - show '?' for first appearance of tool
+		var startDateStr string
+		if summary.isFirstAppearance {
+			startDateStr = "?"
+		} else {
+			startDateStr = summary.startDate.Format("02.01.06")
+		}
+
 		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
 		// End date
