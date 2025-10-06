@@ -16,7 +16,13 @@ templ ToolsList(tools []*models.ToolWithNotes) {
 }
 
 templ toolListItem(id int64, tool *models.ToolWithNotes) {
-	<li id={ fmt.Sprintf("tool-%d", id) }>
+	<li
+		id={ fmt.Sprintf("tool-%d", id) }
+		data-format={ tool.Format.String() }
+		data-code={ tool.Code }
+		data-type={ tool.Type }
+		data-position={ tool.Position.GermanString() }
+	>
 		<a
 			role="button"
 			href={ fmt.Sprintf(env.ServerPathPrefix+"/tools/tool/%d", id) }

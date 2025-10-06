@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
+	"slices"
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
@@ -65,6 +66,7 @@ templ SectionTools(tools []*models.ToolWithNotes) {
 			Alle Werkzeuge
 		</h4>
 	</summary>
+	@sectionToolsFilter(tools)
 	<div class="all-tools p">
 		<div class="actions-bar flex gap justify-end items-center">
 			<button
@@ -125,4 +127,118 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 			<i class="bi bi-chevron-right"></i>
 		</a>
 	</li>
+}
+
+templ sectionToolsFilter(tools []*models.ToolWithNotes) {
+	{{
+		formats := []string{}
+		codes := []string{}
+		types := []string{}
+		positions := []string{}
+
+		for _, t := range tools {
+			if f := t.Format.String(); !slices.Contains(formats, f) {
+				formats = append(formats, f)
+			}
+
+			if c := t.Code; !slices.Contains(codes, c) {
+				codes = append(codes, c)
+			}
+
+			if t := t.Type; !slices.Contains(types, t) {
+				types = append(types, t)
+			}
+
+			if p := t.Position.GermanString(); !slices.Contains(positions, p) {
+				positions = append(positions, p)
+			}
+		}
+	}}
+	<div class="flex gap-sm flex-wrap justify-evenly">
+		<!-- Filter for Tool Format -->
+		<label class="flex flex-1 flex-col gap-0" style="max-width: 8rem;">
+			Format
+			<input
+				type="text"
+				list="formats"
+				placeholder="Format"
+				oninput={ filterToolsList() }
+			/>
+			<datalist id="formats">
+				for _, f := range formats {
+					<option value={ f }></option>
+				}
+			</datalist>
+		</label>
+		<!-- Filter for Tool Code -->
+		<label class="flex flex-1 flex-col gap-0" style="max-width: 10rem;">
+			Code
+			<input
+				type="text"
+				list="codes"
+				placeholder="Code"
+				oninput={ filterToolsList() }
+			/>
+			<datalist id="codes">
+				for _, c := range codes {
+					<option value={ c }></option>
+				}
+			</datalist>
+		</label>
+		<!-- Filter for Tool Type -->
+		<label class="flex flex-1 flex-col gap-0" style="max-width: 13rem;">
+			Type
+			<input
+				type="text"
+				list="types"
+				placeholder="Type"
+				oninput={ filterToolsList() }
+			/>
+			<datalist id="types">
+				for _, t := range types {
+					<option value={ t }></option>
+				}
+			</datalist>
+		</label>
+		<!-- Filter for Tool Position -->
+		<label class="flex flex-1 flex-col gap-0" style="max-width: 13rem;">
+			Position
+			<input
+				type="text"
+				list="positions"
+				placeholder="Position"
+				oninput={ filterToolsList() }
+			/>
+			<datalist id="positions">
+				for _, p := range positions {
+					<option value={ p }></option>
+				}
+			</datalist>
+		</label>
+	</div>
+}
+
+script filterToolsList() {
+	var formatInput = document.querySelector(`input[list="formats"]`).value.toLowerCase();
+	var codeInput = document.querySelector(`input[list="codes"]`).value.toLowerCase();
+	var typeInput = document.querySelector(`input[list="types"]`).value.toLowerCase();
+	var positionInput = document.querySelector(`input[list="positions"]`).value.toLowerCase();
+
+	for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
+	    var format = el.getAttribute("data-format").toLowerCase();
+	    var code = el.getAttribute("data-code").toLowerCase();
+	    var type = el.getAttribute("data-type").toLowerCase();
+	    var position = el.getAttribute("data-position").toLowerCase();
+
+		if (
+    		(format.includes(formatInput) || formatInput === "") &&
+			(code.includes(codeInput) || codeInput === "") &&
+			(type.includes(typeInput) || typeInput === "") &&
+			(position.includes(positionInput) || positionInput === "")
+		) {
+            el.style.display = "block";
+		} else {
+		    el.style.display = "none";
+		}
+	}
 }
