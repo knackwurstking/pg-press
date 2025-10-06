@@ -111,8 +111,8 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	o.PDF.SetFont("Arial", "B", 10)
 	o.PDF.SetFillColor(220, 220, 220)
 
-	colWidths := []float64{25, 25, 35, 25, 25, 35, 25}
-	headers := []string{"Datum", "Zyklen", "Teil-Zyklen", "Werkzeug", "Position", "Durchgeführt von", "ID"}
+	colWidths := []float64{25, 25, 35, 25, 25}
+	headers := []string{"Datum", "Zyklen", "Teil-Zyklen", "Werkzeug", "Position"}
 
 	for i, header := range headers {
 		o.PDF.CellFormat(colWidths[i], 8, o.Translator(header), "1", 0, "C", true, 0, "")
@@ -147,20 +147,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		o.PDF.CellFormat(colWidths[3], 6, o.Translator(toolCode), "1", 0, "C", fill, 0, "")
 
 		// Position
-		o.PDF.CellFormat(colWidths[4], 6, string(cycle.ToolPosition), "1", 0, "C", fill, 0, "")
-
-		// Performed by
-		userName := "Unbekannt"
-		if user, exists := o.UsersMap[cycle.PerformedBy]; exists && user != nil {
-			userName = user.Name
-		}
-		if len(userName) > 12 {
-			userName = userName[:9] + "..."
-		}
-		o.PDF.CellFormat(colWidths[5], 6, o.Translator(userName), "1", 0, "C", fill, 0, "")
-
-		// ID
-		o.PDF.CellFormat(colWidths[6], 6, fmt.Sprintf("%d", cycle.ID), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[4], 6, o.Translator(cycle.ToolPosition.GermanString()), "1", 0, "C", fill, 0, "")
 
 		o.PDF.Ln(6)
 
