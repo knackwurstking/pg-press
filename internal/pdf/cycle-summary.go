@@ -153,7 +153,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	}
 	o.PDF.Ln(8)
 
-	// Sort by start date first, then by position, then by end date to show chronological tool changes
+	// First sort chronologically for proper consolidation
 	for i := 0; i < len(toolSummaries)-1; i++ {
 		for j := i + 1; j < len(toolSummaries); j++ {
 			if toolSummaries[i].startDate.After(toolSummaries[j].startDate) ||
@@ -227,6 +227,21 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 
 	toolSummaries = consolidatedSummaries
 
+	// Sort by total cycle count from low to high, then by position
+	for i := 0; i < len(toolSummaries)-1; i++ {
+		for j := i + 1; j < len(toolSummaries); j++ {
+			// Primary sort: by cycle count
+			if toolSummaries[i].maxCycles > toolSummaries[j].maxCycles {
+				toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
+			} else if toolSummaries[i].maxCycles == toolSummaries[j].maxCycles {
+				// Secondary sort: by position (top, top cassette, bottom)
+				if getPositionOrder(toolSummaries[i].position) > getPositionOrder(toolSummaries[j].position) {
+					toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
+				}
+			}
+		}
+	}
+
 	// Table data
 	o.PDF.SetFont("Arial", "", 9)
 
@@ -257,10 +272,10 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		// Position
 		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.position.GermanString()), "1", 0, "C", fill, 0, "")
 
-		// Start date - show '?' for first appearance of tool
+		// Start date - show empty for first appearance of tool
 		var startDateStr string
 		if summary.isFirstAppearance {
-			startDateStr = "?"
+			startDateStr = ""
 		} else {
 			startDateStr = summary.startDate.Format("02.01.06")
 		}
