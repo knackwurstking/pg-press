@@ -56,7 +56,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 				return templ_7745c5c3_Err
 			}
 			for _, note := range pressNotes {
-				templ_7745c5c3_Err = components.NoteCard(note, note.Linked).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = components.NoteCard(note).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -143,7 +143,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 					return templ_7745c5c3_Err
 				}
 				for _, n := range topToolNotes {
-					templ_7745c5c3_Err = components.NoteCard(n, n.Linked).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.NoteCard(n).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -168,7 +168,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 					return templ_7745c5c3_Err
 				}
 				for _, n := range topCassetteToolNotes {
-					templ_7745c5c3_Err = components.NoteCard(n, n.Linked).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.NoteCard(n).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -193,7 +193,7 @@ func PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.
 					return templ_7745c5c3_Err
 				}
 				for _, n := range bottomToolNotes {
-					templ_7745c5c3_Err = components.NoteCard(n, n.Linked).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.NoteCard(n).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

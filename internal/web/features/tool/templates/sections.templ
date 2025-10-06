@@ -30,7 +30,7 @@ templ SectionNotes(tool *models.ToolWithNotes) {
 	if len(tool.LoadedNotes) > 0 {
 		<div class="notes-list">
 			for _, note := range tool.LoadedNotes {
-				@components.NoteCard(note, fmt.Sprintf("tool_%d", tool.ID))
+				@components.NoteCard(note)
 			}
 		</div>
 	} else {

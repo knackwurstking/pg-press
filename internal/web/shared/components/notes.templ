@@ -6,8 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// TODO: linkToTables param is useless because we could use `note.Linked` instead
-templ NoteCard(note *models.Note, linkToTables string) {
+templ NoteCard(note *models.Note) {
 	{{
 		filterClass := ""
 		switch note.Level {
@@ -39,7 +38,7 @@ templ NoteCard(note *models.Note, linkToTables string) {
 					class="icon secondary small"
 					hx-get={ fmt.Sprintf(
 					"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
-					env.ServerPathPrefix, note.ID, linkToTables,
+					env.ServerPathPrefix, note.ID, note.Linked,
 				) }
 					hx-trigger="click"
 					hx-target="body"

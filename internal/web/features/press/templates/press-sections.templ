@@ -27,7 +27,7 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 		// Press Notes
 		<section class="notes-list flex flex-col gap">
 			for _, note := range pressNotes {
-				@components.NoteCard(note, note.Linked)
+				@components.NoteCard(note)
 			}
 		</section>
 		<section class="flex justify-center mt">
@@ -90,19 +90,19 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 			if len(topToolNotes) > 0 {
 				<h4>{ models.PositionTop.GermanString() }</h4>
 				for _, n := range topToolNotes {
-					@components.NoteCard(n, n.Linked)
+					@components.NoteCard(n)
 				}
 			}
 			if len(topCassetteToolNotes) > 0 {
 				<h4>{ models.PositionTopCassette.GermanString() }</h4>
 				for _, n := range topCassetteToolNotes {
-					@components.NoteCard(n, n.Linked)
+					@components.NoteCard(n)
 				}
 			}
 			if len(bottomToolNotes) > 0 {
 				<h4>{ models.PositionBottom.GermanString() }</h4>
 				for _, n := range bottomToolNotes {
-					@components.NoteCard(n, n.Linked)
+					@components.NoteCard(n)
 				}
 			}
 		</section>

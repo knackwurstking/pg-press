@@ -64,7 +64,7 @@ func SectionNotes(tool *models.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, note := range tool.LoadedNotes {
-				templ_7745c5c3_Err = components.NoteCard(note, fmt.Sprintf("tool_%d", tool.ID)).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = components.NoteCard(note).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
