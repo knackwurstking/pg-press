@@ -132,7 +132,7 @@ templ SectionTools(tools []*models.ToolWithNotes) {
               		(format.includes(formatInput) || formatInput === "") &&
     				(code.includes(codeInput) || codeInput === "") &&
     				(type.includes(typeInput) || typeInput === "") &&
-    				(position === positionInput || positionInput === "")
+    				(position.includes(positionInput) || positionInput === "")
     			) {
                     el.style.display = "block";
     			} else {
