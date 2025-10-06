@@ -155,7 +155,7 @@ func SectionTools(tools []*models.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</ul></div><script>\n\t\tfunction filterToolsList() {\n    \t\tvar formatInput = document.querySelector(`input[list=\"formats\"]`).value.toLowerCase();\n    \t\tvar codeInput = document.querySelector(`input[list=\"codes\"]`).value.toLowerCase();\n    \t\tvar typeInput = document.querySelector(`input[list=\"types\"]`).value.toLowerCase();\n    \t\tvar positionInput = document.querySelector(`input[list=\"positions\"]`).value.toLowerCase();\n\n    \t\tfor (var el of document.querySelectorAll(`.all-tools ul > *`)) {\n    \t\t    var format = el.getAttribute(\"data-format\").toLowerCase();\n    \t\t    var code = el.getAttribute(\"data-code\").toLowerCase();\n    \t\t    var type = el.getAttribute(\"data-type\").toLowerCase();\n    \t\t    var position = el.getAttribute(\"data-position\").toLowerCase();\n\n    \t\t\tif (\n              \t\t(format.includes(formatInput) || formatInput === \"\") &&\n    \t\t\t\t(code.includes(codeInput) || codeInput === \"\") &&\n    \t\t\t\t(type.includes(typeInput) || typeInput === \"\") &&\n    \t\t\t\t(position === positionInput || positionInput === \"\")\n    \t\t\t) {\n                    el.style.display = \"block\";\n    \t\t\t} else {\n    \t\t\t    el.style.display = \"none\";\n    \t\t\t}\n    \t\t}\n\t\t}\n\n        setTimeout(filterToolsList, 100);\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</ul></div><script>\n\t\tfunction filterToolsList() {\n\t\t    var params = new URLSearchParams(location.search);\n\n    \t\tvar formatInput = document.querySelector(`input[list=\"formats\"]`).value;\n            if (formatInput) {\n                params.set(\"format\", formatInput);\n            } else {\n                params.delete(\"format\");\n            }\n            formatInput = formatInput.toLowerCase();\n\n    \t\tvar codeInput = document.querySelector(`input[list=\"codes\"]`).value;\n            if (codeInput) {\n                params.set(\"code\", codeInput);\n            } else {\n                params.delete(\"code\");\n            }\n            codeInput = codeInput.toLowerCase();\n\n    \t\tvar typeInput = document.querySelector(`input[list=\"types\"]`).value;\n            if (typeInput) {\n                params.set(\"type\", typeInput);\n            } else {\n                params.delete(\"type\");\n            }\n            typeInput = typeInput.toLowerCase();\n\n    \t\tvar positionInput = document.querySelector(`input[list=\"positions\"]`).value;\n            if (positionInput) {\n                params.set(\"position\", positionInput);\n            } else {\n                params.delete(\"position\");\n            }\n            positionInput = positionInput.toLowerCase();\n\n    \t\tfor (var el of document.querySelectorAll(`.all-tools ul > *`)) {\n    \t\t    var format = el.getAttribute(\"data-format\").toLowerCase();\n    \t\t    var code = el.getAttribute(\"data-code\").toLowerCase();\n    \t\t    var type = el.getAttribute(\"data-type\").toLowerCase();\n    \t\t    var position = el.getAttribute(\"data-position\").toLowerCase();\n\n    \t\t\tif (\n              \t\t(format.includes(formatInput) || formatInput === \"\") &&\n    \t\t\t\t(code.includes(codeInput) || codeInput === \"\") &&\n    \t\t\t\t(type.includes(typeInput) || typeInput === \"\") &&\n    \t\t\t\t(position === positionInput || positionInput === \"\")\n    \t\t\t) {\n                    el.style.display = \"block\";\n    \t\t\t} else {\n    \t\t\t    el.style.display = \"none\";\n    \t\t\t}\n    \t\t}\n\n            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');\n \t\t\twindow.history.replaceState({}, '', newUrl);\n\t\t}\n\n        setTimeout(function() {\n            // Load URL Query\n            var params = new URLSearchParams(window.location.search);\n\n\t\t\tvar formatInput = document.querySelector(`input[list=\"formats\"]`);\n\t\t\tvar codeInput = document.querySelector(`input[list=\"codes\"]`);\n\t\t\tvar typeInput = document.querySelector(`input[list=\"types\"]`);\n\t\t\tvar positionInput = document.querySelector(`input[list=\"positions\"]`);\n\n\t\t\tif (formatInput && params.has('format')) {\n\t\t\t\tformatInput.value = params.get('format');\n\t\t\t}\n\t\t\tif (codeInput && params.has('code')) {\n\t\t\t\tcodeInput.value = params.get('code');\n\t\t\t}\n\t\t\tif (typeInput && params.has('type')) {\n\t\t\t\ttypeInput.value = params.get('type');\n\t\t\t}\n\t\t\tif (positionInput && params.has('position')) {\n\t\t\t\tpositionInput.value = params.get('position');\n\t\t\t}\n\n        \tfilterToolsList();\n        }, 100);\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -191,7 +191,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 120, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 175, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -204,7 +204,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var8 templ.SafeURL
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 123, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 178, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -217,7 +217,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 127, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 182, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -248,7 +248,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(top)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 135, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 190, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -275,7 +275,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(topCassette)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 141, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 196, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -307,7 +307,7 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(bottom)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 150, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 205, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -326,7 +326,6 @@ func sectionPressListItem(title, top, topCassette, bottom, href string) templ.Co
 	})
 }
 
-// TODO: Maybe i should modify the url query on input here
 func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -383,7 +382,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(f)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 200, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 254, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -406,7 +405,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(c)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 217, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 271, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -429,7 +428,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 234, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 288, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -452,7 +451,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(p)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 251, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 305, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {

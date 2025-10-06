@@ -47,6 +47,21 @@ templ Page() {
 					@components.Spinner()
 				</details>
 			</div>
+			<script>
+				// Auto-open tools section if query parameters are present.
+				// Currently only the tools section will set these parameters.
+				document.addEventListener('DOMContentLoaded', function() {
+					var params = new URLSearchParams(window.location.search);
+					if (params.toString()) {
+						var toolsSection = document.getElementById('section-tools-list');
+						if (toolsSection) {
+							toolsSection.open = true;
+							// Trigger the HTMX load
+							htmx.trigger(toolsSection, 'toggle');
+						}
+					}
+				});
+			</script>
 		</main>
 	}
 }

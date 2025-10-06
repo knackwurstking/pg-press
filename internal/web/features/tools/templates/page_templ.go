@@ -89,7 +89,7 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</details></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</details></div><script>\n\t\t\t\t// Auto-open tools section if query parameters are present.\n\t\t\t\t// Currently only the tools section will set these parameters.\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\tvar params = new URLSearchParams(window.location.search);\n\t\t\t\t\tif (params.toString()) {\n\t\t\t\t\t\tvar toolsSection = document.getElementById('section-tools-list');\n\t\t\t\t\t\tif (toolsSection) {\n\t\t\t\t\t\t\ttoolsSection.open = true;\n\t\t\t\t\t\t\t// Trigger the HTMX load\n\t\t\t\t\t\t\thtmx.trigger(toolsSection, 'toggle');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

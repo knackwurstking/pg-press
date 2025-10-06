@@ -88,10 +88,39 @@ templ SectionTools(tools []*models.ToolWithNotes) {
 	</div>
 	<script>
 		function filterToolsList() {
-    		var formatInput = document.querySelector(`input[list="formats"]`).value.toLowerCase();
-    		var codeInput = document.querySelector(`input[list="codes"]`).value.toLowerCase();
-    		var typeInput = document.querySelector(`input[list="types"]`).value.toLowerCase();
-    		var positionInput = document.querySelector(`input[list="positions"]`).value.toLowerCase();
+		    var params = new URLSearchParams(location.search);
+
+    		var formatInput = document.querySelector(`input[list="formats"]`).value;
+            if (formatInput) {
+                params.set("format", formatInput);
+            } else {
+                params.delete("format");
+            }
+            formatInput = formatInput.toLowerCase();
+
+    		var codeInput = document.querySelector(`input[list="codes"]`).value;
+            if (codeInput) {
+                params.set("code", codeInput);
+            } else {
+                params.delete("code");
+            }
+            codeInput = codeInput.toLowerCase();
+
+    		var typeInput = document.querySelector(`input[list="types"]`).value;
+            if (typeInput) {
+                params.set("type", typeInput);
+            } else {
+                params.delete("type");
+            }
+            typeInput = typeInput.toLowerCase();
+
+    		var positionInput = document.querySelector(`input[list="positions"]`).value;
+            if (positionInput) {
+                params.set("position", positionInput);
+            } else {
+                params.delete("position");
+            }
+            positionInput = positionInput.toLowerCase();
 
     		for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
     		    var format = el.getAttribute("data-format").toLowerCase();
@@ -110,9 +139,35 @@ templ SectionTools(tools []*models.ToolWithNotes) {
     			    el.style.display = "none";
     			}
     		}
+
+            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+ 			window.history.replaceState({}, '', newUrl);
 		}
 
-        setTimeout(filterToolsList, 100);
+        setTimeout(function() {
+            // Load URL Query
+            var params = new URLSearchParams(window.location.search);
+
+			var formatInput = document.querySelector(`input[list="formats"]`);
+			var codeInput = document.querySelector(`input[list="codes"]`);
+			var typeInput = document.querySelector(`input[list="types"]`);
+			var positionInput = document.querySelector(`input[list="positions"]`);
+
+			if (formatInput && params.has('format')) {
+				formatInput.value = params.get('format');
+			}
+			if (codeInput && params.has('code')) {
+				codeInput.value = params.get('code');
+			}
+			if (typeInput && params.has('type')) {
+				typeInput.value = params.get('type');
+			}
+			if (positionInput && params.has('position')) {
+				positionInput.value = params.get('position');
+			}
+
+        	filterToolsList();
+        }, 100);
 	</script>
 }
 
@@ -157,7 +212,6 @@ templ sectionPressListItem(title, top, topCassette, bottom, href string) {
 	</li>
 }
 
-// TODO: Maybe i should modify the url query on input here
 templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 	{{
 		formats := []string{}
