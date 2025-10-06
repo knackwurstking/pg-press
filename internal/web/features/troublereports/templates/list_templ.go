@@ -177,63 +177,49 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost icon\"><i class=\"bi bi-pen\"></i></button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost icon\"><i class=\"bi bi-pen\"></i></button><a role=\"button\" class=\"info ghost icon\" title=\"Als PDF teilen\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, shareReportToPDF(templ.JSExpression("event"), tr.ID, tr.Title))
+			var templ_7745c5c3_Var11 templ.SafeURL
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
+				"%s/trouble-reports/share-pdf?id=%d",
+				env.ServerPathPrefix, tr.ID,
+			))
 			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("share-btn-%d", tr.ID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 68, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 74, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" onclick=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" target=\"_blank\"><i class=\"bi bi-share\"></i></a><button hx-delete=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 templ.ComponentScript = shareReportToPDF(templ.JSExpression("event"), tr.ID, tr.Title)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12.Call)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" class=\"ghost icon info\" title=\"Als PDF teilen\"><i class=\"bi bi-share\"></i></button><button hx-delete=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 				"%s/htmx/trouble-reports/data?id=%d",
 				env.ServerPathPrefix, tr.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 80, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 84, Col: 6}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if !user.IsAdmin() {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -281,81 +267,6 @@ func listReportsScript() templ.ComponentScript {
 }`,
 		Call:       templ.SafeScript(`__templ_listReportsScript_b69d`),
 		CallInline: templ.SafeScriptInline(`__templ_listReportsScript_b69d`),
-	}
-}
-
-func shareReportToPDF(event templ.JSExpression, troubleReportId int64, title string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_shareReportToPDF_2652`,
-		Function: `function __templ_shareReportToPDF_2652(event, troubleReportId, title){var button = event.target.closest("button");
-    if (!button) {
-        alert("Fehler: Share-Button nicht gefunden.");
-        return;
-    }
-
-    var originalContent = button.innerHTML;
-    button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-    button.disabled = true;
-
-    function resetButton() {
-        button.innerHTML = originalContent;
-        button.style.color = "blue";
-        button.disabled = false;
-    }
-
-    function showSuccess(icon) {
-        button.innerHTML = icon;
-        button.style.color = "green";
-        setTimeout(resetButton, 1500);
-    }
-
-    function downloadPDF(blob) {
-        var filename = ` + "`" + `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf` + "`" + `;
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showSuccess('<i class="bi bi-download"></i>');
-    }
-
-    fetch(` + "`" + `${serverPathPrefix}/trouble-reports/share-pdf?id=${troubleReportId}` + "`" + `)
-        .then(response => {
-            if (!response.ok) throw new Error(` + "`" + `HTTP error! status: ${response.status}` + "`" + `);
-            return response.blob();
-        })
-        .then(blob => {
-            var filename = ` + "`" + `fehlerbericht_${troubleReportId}_${new Date().toISOString().split("T")[0]}.pdf` + "`" + `;
-            var isHTTPS = location.protocol === "https:";
-
-            if (isHTTPS && navigator.share && navigator.canShare) {
-                var file = new File([blob], filename, { type: "application/pdf" });
-                var shareData = {
-                    title: ` + "`" + `Fehlerbericht: ${title}` + "`" + `,
-                    text: ` + "`" + `Fehlerbericht #${troubleReportId}` + "`" + `,
-                    files: [file]
-                };
-
-                if (navigator.canShare(shareData)) {
-                    return navigator.share(shareData)
-                        .then(() => showSuccess('<i class="bi bi-check-circle"></i>'))
-                        .catch(() => downloadPDF(blob));
-                }
-            }
-            downloadPDF(blob);
-        })
-        .catch(error => {
-            console.error("Error sharing/downloading PDF:", error);
-            alert("Fehler beim Erstellen oder Teilen der PDF. Bitte versuchen Sie es erneut.");
-            resetButton();
-        });
-}`,
-		Call:       templ.SafeScript(`__templ_shareReportToPDF_2652`, event, troubleReportId, title),
-		CallInline: templ.SafeScriptInline(`__templ_shareReportToPDF_2652`, event, troubleReportId, title),
 	}
 }
 
