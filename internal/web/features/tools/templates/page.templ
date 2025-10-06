@@ -1,7 +1,5 @@
 // TODO: Improve this page
 // 	- Add filter for the tools list, filter for format, code, type and position
-// 	- use details for press and tools section
-// 	- load content with htmx if details was opened by the user
 package templates
 
 import (
@@ -19,19 +17,37 @@ templ Page() {
 		},
 	) {
 		<main class="container fluid">
-			<div class="tools flex flex-col gap">
-				<div
+			<div class="flex flex-col gap">
+				<details
 					id="section-press"
 					hx-get={ env.ServerPathPrefix + "/htmx/tools/section/press" }
-					hx-trigger="load, pageLoaded from:body"
+					hx-trigger="toggle[event.target.open]"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				></div>
-				<div
-					id="section-tools"
+					hx-on:toggle="if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML"
+				>
+					<summary class="mb">
+						<h4>
+							<i class="bi bi-gear-fill mr"></i>
+							Eingebaute Werkzeuge
+						</h4>
+					</summary>
+					@components.Spinner()
+				</details>
+				<details
+					id="section-tools-list"
 					hx-get={ env.ServerPathPrefix + "/htmx/tools/section/tools" }
-					hx-trigger="load, pageLoaded from:body"
+					hx-trigger="toggle[event.target.open]"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				></div>
+					hx-on:toggle="if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML"
+				>
+					<summary class="mb">
+						<h4>
+							<i class="bi bi-archive mr"></i>
+							Alle Werkzeuge
+						</h4>
+					</summary>
+					@components.Spinner()
+				</details>
 			</div>
 		</main>
 	}

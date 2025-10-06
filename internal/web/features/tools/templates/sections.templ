@@ -9,19 +9,21 @@ import (
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
-	<details class="active-tools" open>
-		<summary class="mb">
-			<h4>
-				<i class="bi bi-gear-fill mr"></i>
-				Eingebaute Werkzeuge
-			</h4>
-		</summary>
-		<ul
-			class="flex flex-col gap m-0 p-0"
-			style="list-style: none;"
-		>
-			for _, u := range pressUtilization {
-				{{
+	<span
+		hx-get={ env.ServerPathPrefix + "/htmx/tools/section/press" }
+		hx-trigger="pageLoaded from:body"
+		hx-target="#section-press"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary>
+		<h4>
+			<i class="bi bi-gear-fill mr"></i>
+			Eingebaute Werkzeuge
+		</h4>
+	</summary>
+	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
+		for _, u := range pressUtilization {
+			{{
 					var (
 						top         string
 						topCassette string
@@ -38,25 +40,32 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 							bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
 						}
 					}
-				}}
-				@sectionPressListItem(
-					fmt.Sprintf("Presse %d", u.PressNumber),
-					top,
-					topCassette,
-					bottom,
-					fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
-				)
-			}
-		</ul>
-	</details>
+			}}
+			@sectionPressListItem(
+				fmt.Sprintf("Presse %d", u.PressNumber),
+				top,
+				topCassette,
+				bottom,
+				fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
+			)
+		}
+	</ul>
 }
 
 templ SectionTools(tools []*models.ToolWithNotes) {
-	<div class="all-tools p">
-		<h4 class="mb p">
+	<span
+		hx-get={ env.ServerPathPrefix + "/htmx/tools/section/tools" }
+		hx-trigger="pageLoaded from:body"
+		hx-target="#section-tools-list"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary>
+		<h4>
 			<i class="bi bi-archive mr"></i>
 			Alle Werkzeuge
 		</h4>
+	</summary>
+	<div class="all-tools p">
 		<div class="actions-bar flex gap justify-end items-center">
 			<button
 				type="button"
@@ -71,11 +80,7 @@ templ SectionTools(tools []*models.ToolWithNotes) {
 				<span>Erstellen</span>
 			</button>
 		</div>
-		<ul
-			id="all-tools-list"
-			class="flex flex-col gap m-t p-0"
-			style="list-style: none;"
-		>
+		<ul class="flex flex-col gap m-t p-0" style="list-style: none;">
 			@ToolsList(tools)
 		</ul>
 	</div>
