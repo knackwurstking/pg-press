@@ -416,7 +416,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</datalist></label><!-- Filter for Tool Type --><label class=\"flex flex-1 flex-col gap-0\" style=\"max-width: 11rem;\">Type <input id=\"tool-type-input\" type=\"text\" list=\"types\" placeholder=\"Type\" oninput=\"filterToolsList();\" hx-preserve=\"true\"> <datalist id=\"types\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</datalist></label><!-- Filter for Tool Type --><label class=\"flex flex-1 flex-col gap-0\" style=\"max-width: 12rem;\">Type <input id=\"tool-type-input\" type=\"text\" list=\"types\" placeholder=\"Type\" oninput=\"filterToolsList();\" hx-preserve=\"true\"> <datalist id=\"types\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -439,7 +439,7 @@ func sectionToolsFilter(tools []*models.ToolWithNotes) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</datalist></label><!-- Filter for Tool Position --><label class=\"flex flex-1 flex-col gap-0\" style=\"max-width: 12rem;\">Position <input id=\"tool-position-input\" type=\"text\" list=\"positions\" placeholder=\"Position\" oninput=\"filterToolsList();\" hx-preserve=\"true\"> <datalist id=\"positions\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</datalist></label><!-- Filter for Tool Position --><label class=\"flex flex-1 flex-col gap-0\" style=\"max-width: 8rem;\">Position <input id=\"tool-position-input\" type=\"text\" list=\"positions\" placeholder=\"Position\" oninput=\"filterToolsList();\" hx-preserve=\"true\"> <datalist id=\"positions\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
