@@ -134,23 +134,23 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div class=\"mx w-full flex justify-end align-center\"><!-- Request a summary in PDF form from the server --><button class=\"info\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div class=\"mx w-full flex justify-end align-center\"><!-- Request a summary in PDF form from the server --><a role=\"button\" class=\"info\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+			var templ_7745c5c3_Var7 templ.SafeURL
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
 				"%s/htmx/tools/press/%d/cycle-summary-pdf",
 				env.ServerPathPrefix, props.Press,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/page.templ`, Line: 95, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/page.templ`, Line: 96, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-trigger=\"click\" hx-on:htmx:response-error=\"alert('Fehler beim Laden der Zusammenfassung: ' + event.detail.xhr.responseText)\"></button></div><div id=\"cycles-content\" class=\"mt\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" target=\"_blank\">Zusammenfassung (PDF)</a></div><div id=\"cycles-content\" class=\"mt\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

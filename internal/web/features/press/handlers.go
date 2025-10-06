@@ -2,8 +2,11 @@ package press
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/web/features/press/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -197,13 +200,63 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	return nil
 }
 
+// TODO: Now Modify the PDF content to show start and end datum for each tool with cycle count, remove the user name and the ID from the table,
 func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
 		return err
 	}
 
-	// TODO: ...
+	// Get user for logging purposes
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	h.LogInfo("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
+
+	// Get cycles for this press
+	cycles, err := h.DB.PressCycles.GetPressCycles(press, nil, nil)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get cycles from database")
+	}
+
+	// Get tools for this press to create toolsMap
+	tools, err := h.DB.Tools.ListWithNotes()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	toolsMap := make(map[int64]*models.Tool)
+	for _, toolWithNotes := range tools {
+		tool := toolWithNotes.Tool
+		toolsMap[tool.ID] = tool
+	}
+
+	// Get users map for performed_by names
+	users, err := h.DB.Users.List()
+	if err != nil {
+		return h.HandleError(c, err, "failed to get users from database")
+	}
+
+	usersMap := make(map[int64]*models.User)
+	for _, u := range users {
+		usersMap[u.TelegramID] = u
+	}
+
+	// Generate PDF
+	pdfBuffer, err := pdf.GenerateCycleSummaryPDF(press, cycles, toolsMap, usersMap)
+	if err != nil {
+		return h.HandleError(c, err, "failed to generate PDF")
+	}
+
+	// Set response headers
+	filename := fmt.Sprintf("press_%d_cycle_summary_%s.pdf", press, time.Now().Format("2006-01-02"))
+	c.Response().Header().Set("Content-Type", "application/pdf")
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Response().Header().Set("Content-Length", fmt.Sprintf("%d", pdfBuffer.Len()))
+
+	return c.Stream(http.StatusOK, "application/pdf", pdfBuffer)
 }
 
 // ********************** //
