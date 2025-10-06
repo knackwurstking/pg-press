@@ -85,8 +85,21 @@ templ Page(props PageProps) {
 				<div class="flex justify-between items-center mb">
 					<h5>Pressennutzungsverlauf</h5>
 				</div>
+				<div class="mx w-full flex justify-end align-center">
+					<!-- Request a summary in PDF form from the server -->
+					<button
+						class="info"
+						hx-get={ fmt.Sprintf(
+							"%s/htmx/tools/press/%d/cycle-summary-pdf",
+							env.ServerPathPrefix, props.Press,
+						) }
+						hx-trigger="click"
+						hx-on:htmx:response-error="alert('Fehler beim Laden der Zusammenfassung: ' + event.detail.xhr.responseText)"
+					></button>
+				</div>
 				<div
 					id="cycles-content"
+					class="mt"
 					hx-get={ fmt.Sprintf("%s/htmx/tools/press/%d/cycles",
 						env.ServerPathPrefix, props.Press) }
 					hx-trigger="load, pageLoaded from:body"

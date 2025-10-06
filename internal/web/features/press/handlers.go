@@ -60,14 +60,9 @@ func (h *Handler) getOrderedToolsForPress(press models.PressNumber) ([]*models.T
 }
 
 func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
-	pressNum, err := h.ParseInt8Param(c, "press")
+	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
+		return err
 	}
 
 	// Get ordered tools for this press with validation
@@ -85,20 +80,14 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 }
 
 func (h *Handler) GetPressPage(c echo.Context) error {
-	// Get press number from param
-	var pn models.PressNumber
-	pns, err := h.ParseInt8Param(c, "press")
+	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "failed to parse id: "+err.Error())
-	}
-	pn = models.PressNumber(pns)
-	if !models.IsValidPressNumber(&pn) {
-		return h.RenderBadRequest(c, fmt.Sprintf("invalid press number: %d", pn))
+		return err
 	}
 
 	// Render page
 	page := templates.Page(templates.PageProps{
-		Press: pn,
+		Press: press,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -109,14 +98,9 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
-	pressNum, err := h.ParseInt8Param(c, "press")
+	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
+		return err
 	}
 
 	// Get ordered tools for this press with validation
@@ -141,14 +125,9 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
-	pressNum, err := h.ParseInt8Param(c, "press")
+	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
+		return err
 	}
 
 	// Get user for permissions
@@ -184,14 +163,9 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
-	pressNum, err := h.ParseInt8Param(c, "press")
+	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return h.RenderBadRequest(c, "invalid press number")
+		return err
 	}
 
 	// Get notes directly linked to this press
@@ -221,4 +195,31 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
+	press, err := h.getPressNumberFromParam(c)
+	if err != nil {
+		return err
+	}
+
+	// TODO: ...
+}
+
+// ********************** //
+// Request Helper Methods //
+// ********************** //
+
+func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, error) {
+	pressNum, err := h.ParseInt8Param(c, "press")
+	if err != nil {
+		return -1, h.RenderBadRequest(c, "invalid or missing press parameter: "+err.Error())
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return -1, h.RenderBadRequest(c, "invalid press number")
+	}
+
+	return press, nil
 }

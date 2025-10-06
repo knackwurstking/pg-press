@@ -39,6 +39,10 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/notes",
 				r.handler.HTMXGetPressNotes),
+
+			// PDF Handlers
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/cycle-summary-pdf",
+				r.handler.HTMXGetCycleSummaryPDF),
 		},
 	)
 }
