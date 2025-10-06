@@ -64,19 +64,17 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 					<i class="bi bi-pen"></i>
 				</button>
 				// Share Report (PDF)
-				// TODO: Create s loading animation while the request is running somehow
-				<a
+				<button
 					role="button"
 					class="info ghost icon"
 					title="Als PDF teilen"
-					href={ fmt.Sprintf(
-						"%s/trouble-reports/share-pdf?id=%d",
-						env.ServerPathPrefix, tr.ID,
+					onclick={ downloadTroubleReportPDF(
+						fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+							env.ServerPathPrefix, tr.ID),
 					) }
-					target="_blank"
 				>
 					<i class="bi bi-share"></i>
-				</a>
+				</button>
 				// Admin only: Delete Report
 				<button
 					hx-delete={ fmt.Sprintf(
@@ -125,4 +123,64 @@ script listReportsScript() {
 			details.scrollIntoView({ behavior: 'smooth', block: 'start' }),
 		100);
 	}
+}
+
+script downloadTroubleReportPDF(url string) {
+	async function download() {
+		try {
+			// Show loading state
+			const button = event.target.closest('button');
+			const originalHTML = button.innerHTML;
+			button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+			button.disabled = true;
+
+			// Fetch the PDF
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('PDF konnte nicht geladen werden');
+			}
+
+			// Get the blob
+			const blob = await response.blob();
+
+			// Create download link
+			const downloadUrl = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = downloadUrl;
+
+			// Get filename from response headers or use default
+			const contentDisposition = response.headers.get('Content-Disposition');
+			let filename = 'trouble_report.pdf';
+			if (contentDisposition) {
+				const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+				if (filenameMatch) {
+					filename = filenameMatch[1];
+				}
+			}
+			a.download = filename;
+
+			// Trigger download
+			document.body.appendChild(a);
+			a.click();
+
+			// Cleanup
+			window.URL.revokeObjectURL(downloadUrl);
+			document.body.removeChild(a);
+
+			// Reset button
+			button.innerHTML = originalHTML;
+			button.disabled = false;
+		} catch (error) {
+			console.error('Download failed:', error);
+			alert('Fehler beim Download: ' + error.message);
+
+			// Reset button
+			const button = event.target.closest('button');
+			button.innerHTML = '<i class="bi bi-share"></i>';
+			button.disabled = false;
+		}
+	}
+
+	download();
 }

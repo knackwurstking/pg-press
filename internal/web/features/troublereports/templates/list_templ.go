@@ -177,23 +177,30 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost icon\"><i class=\"bi bi-pen\"></i></button><a role=\"button\" class=\"info ghost icon\" title=\"Als PDF teilen\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost icon\"><i class=\"bi bi-pen\"></i></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 templ.SafeURL
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
-				"%s/trouble-reports/share-pdf?id=%d",
-				env.ServerPathPrefix, tr.ID,
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, downloadTroubleReportPDF(
+				fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+					env.ServerPathPrefix, tr.ID),
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 75, Col: 6}
+				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button role=\"button\" class=\"info ghost icon\" title=\"Als PDF teilen\" onclick=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" target=\"_blank\"><i class=\"bi bi-share\"></i></a><button hx-delete=\"")
+			var templ_7745c5c3_Var11 templ.ComponentScript = downloadTroubleReportPDF(
+				fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+					env.ServerPathPrefix, tr.ID),
+			)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11.Call)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><i class=\"bi bi-share\"></i></button><button hx-delete=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -203,23 +210,23 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 				env.ServerPathPrefix, tr.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 85, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/list.templ`, Line: 83, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if !user.IsAdmin() {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -267,6 +274,72 @@ func listReportsScript() templ.ComponentScript {
 }`,
 		Call:       templ.SafeScript(`__templ_listReportsScript_b69d`),
 		CallInline: templ.SafeScriptInline(`__templ_listReportsScript_b69d`),
+	}
+}
+
+func downloadTroubleReportPDF(url string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_downloadTroubleReportPDF_0b18`,
+		Function: `function __templ_downloadTroubleReportPDF_0b18(url){async function download() {
+		try {
+			// Show loading state
+			const button = event.target.closest('button');
+			const originalHTML = button.innerHTML;
+			button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+			button.disabled = true;
+
+			// Fetch the PDF
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('PDF konnte nicht geladen werden');
+			}
+
+			// Get the blob
+			const blob = await response.blob();
+
+			// Create download link
+			const downloadUrl = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.style.display = 'none';
+			a.href = downloadUrl;
+
+			// Get filename from response headers or use default
+			const contentDisposition = response.headers.get('Content-Disposition');
+			let filename = 'trouble_report.pdf';
+			if (contentDisposition) {
+				const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+				if (filenameMatch) {
+					filename = filenameMatch[1];
+				}
+			}
+			a.download = filename;
+
+			// Trigger download
+			document.body.appendChild(a);
+			a.click();
+
+			// Cleanup
+			window.URL.revokeObjectURL(downloadUrl);
+			document.body.removeChild(a);
+
+			// Reset button
+			button.innerHTML = originalHTML;
+			button.disabled = false;
+		} catch (error) {
+			console.error('Download failed:', error);
+			alert('Fehler beim Download: ' + error.message);
+
+			// Reset button
+			const button = event.target.closest('button');
+			button.innerHTML = '<i class="bi bi-share"></i>';
+			button.disabled = false;
+		}
+	}
+
+	download();
+}`,
+		Call:       templ.SafeScript(`__templ_downloadTroubleReportPDF_0b18`, url),
+		CallInline: templ.SafeScriptInline(`__templ_downloadTroubleReportPDF_0b18`, url),
 	}
 }
 

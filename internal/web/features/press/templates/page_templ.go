@@ -134,23 +134,32 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div class=\"mx w-full flex justify-end align-center\"><!-- Request a summary in PDF form from the server --><a role=\"button\" class=\"info\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></section><br><!-- Press Cycles Table --><section id=\"cycle-table-section\" class=\"mt\"><div class=\"flex justify-between items-center mb\"><h5>Pressennutzungsverlauf</h5></div><div class=\"mx w-full flex justify-end align-center\"><!-- Request a summary in PDF form from the server -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 templ.SafeURL
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf(
-				"%s/htmx/tools/press/%d/cycle-summary-pdf",
-				env.ServerPathPrefix, props.Press,
-			))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/page.templ`, Line: 96, Col: 7}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{
+				Call: fmt.Sprintf(
+					"downloadPDF('%s/htmx/tools/press/%d/cycle-summary-pdf')",
+					env.ServerPathPrefix, props.Press),
+			})
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" target=\"_blank\">Zusammenfassung (PDF)</a></div><div id=\"cycles-content\" class=\"mt\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button role=\"button\" class=\"info\" onclick=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 templ.ComponentScript = templ.ComponentScript{
+				Call: fmt.Sprintf(
+					"downloadPDF('%s/htmx/tools/press/%d/cycle-summary-pdf')",
+					env.ServerPathPrefix, props.Press),
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7.Call)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\">Zusammenfassung (PDF)</button></div><div id=\"cycles-content\" class=\"mt\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -164,7 +173,7 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-trigger=\"load, pageLoaded from:body\" hx-on:htmx:response-error=\"alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" hx-trigger=\"load, pageLoaded from:body\" hx-on:htmx:response-error=\"alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,7 +181,7 @@ func Page(props PageProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></section></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></section></main><script>\n\t\t\tasync function downloadPDF(url) {\n\t\t\t\ttry {\n\t\t\t\t\t// Show loading state\n\t\t\t\t\tconst button = event.target;\n\t\t\t\t\tconst originalText = button.textContent;\n\t\t\t\t\tbutton.textContent = 'Lädt...';\n\t\t\t\t\tbutton.disabled = true;\n\n\t\t\t\t\t// Fetch the PDF\n\t\t\t\t\tconst response = await fetch(url);\n\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\tthrow new Error('PDF konnte nicht geladen werden');\n\t\t\t\t\t}\n\n\t\t\t\t\t// Get the blob\n\t\t\t\t\tconst blob = await response.blob();\n\n\t\t\t\t\t// Create download link\n\t\t\t\t\tconst downloadUrl = window.URL.createObjectURL(blob);\n\t\t\t\t\tconst a = document.createElement('a');\n\t\t\t\t\ta.style.display = 'none';\n\t\t\t\t\ta.href = downloadUrl;\n\n\t\t\t\t\t// Get filename from response headers or use default\n\t\t\t\t\tconst contentDisposition = response.headers.get('Content-Disposition');\n\t\t\t\t\tlet filename = 'cycle_summary.pdf';\n\t\t\t\t\tif (contentDisposition) {\n\t\t\t\t\t\tconst filenameMatch = contentDisposition.match(/filename=\"(.+)\"/);\n\t\t\t\t\t\tif (filenameMatch) {\n\t\t\t\t\t\t\tfilename = filenameMatch[1];\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\ta.download = filename;\n\n\t\t\t\t\t// Trigger download\n\t\t\t\t\tdocument.body.appendChild(a);\n\t\t\t\t\ta.click();\n\n\t\t\t\t\t// Cleanup\n\t\t\t\t\twindow.URL.revokeObjectURL(downloadUrl);\n\t\t\t\t\tdocument.body.removeChild(a);\n\n\t\t\t\t\t// Reset button\n\t\t\t\t\tbutton.textContent = originalText;\n\t\t\t\t\tbutton.disabled = false;\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.error('Download failed:', error);\n\t\t\t\t\talert('Fehler beim Download: ' + error.message);\n\n\t\t\t\t\t// Reset button\n\t\t\t\t\tconst button = event.target;\n\t\t\t\t\tbutton.textContent = 'Zusammenfassung (PDF)';\n\t\t\t\t\tbutton.disabled = false;\n\t\t\t\t}\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -213,7 +222,7 @@ func navContent() templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -229,7 +238,7 @@ func navContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
