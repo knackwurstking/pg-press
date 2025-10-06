@@ -107,105 +107,36 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	o.PDF.CellFormat(0, 10, o.Translator("WERKZEUG-ÜBERSICHT"), "1", 1, "L", true, 0, "")
 	o.PDF.Ln(5)
 
-	// Group cycles by date range
-	type toolInfo struct {
+	// Create individual cycle summaries without combining by ToolID
+	type toolSummary struct {
 		toolID       int64
 		toolCode     string
 		position     models.Position
-		maxCycles    int64
-		totalPartial int64
-	}
-
-	type dateRangeSummary struct {
 		startDate    time.Time
 		endDate      time.Time
-		tools        []*toolInfo
 		maxCycles    int64
 		totalPartial int64
 	}
 
-	toolSummaries := make(map[int64]*toolInfo)
-	dateRangeSummaries := make(map[string]*dateRangeSummary)
+	var toolSummaries []*toolSummary
 
-	// First pass: group cycles by tool
+	// Create a summary for each individual cycle
 	for _, cycle := range o.Cycles {
-		if summary, exists := toolSummaries[cycle.ToolID]; exists {
-			// Update existing summary
-			if cycle.TotalCycles > summary.maxCycles {
-				summary.maxCycles = cycle.TotalCycles
-			}
-			summary.totalPartial += cycle.PartialCycles
-		} else {
-			// Create new summary
-			toolCode := "Unbekannt"
-			if tool, exists := o.ToolsMap[cycle.ToolID]; exists && tool != nil {
-				toolCode = fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
-			}
-
-			toolSummaries[cycle.ToolID] = &toolInfo{
-				toolID:       cycle.ToolID,
-				toolCode:     toolCode,
-				position:     cycle.ToolPosition,
-				maxCycles:    cycle.TotalCycles,
-				totalPartial: cycle.PartialCycles,
-			}
+		// Create tool code string - handle missing tools gracefully
+		toolCode := fmt.Sprintf("Tool ID %d", cycle.ToolID)
+		if tool, exists := o.ToolsMap[cycle.ToolID]; exists && tool != nil {
+			toolCode = fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
 		}
-	}
 
-	// Second pass: find date ranges for each tool
-	toolDateRanges := make(map[int64]struct{ start, end time.Time })
-	for _, cycle := range o.Cycles {
-		if existing, exists := toolDateRanges[cycle.ToolID]; exists {
-			start := existing.start
-			end := existing.end
-			if cycle.Date.Before(start) {
-				start = cycle.Date
-			}
-			if cycle.Date.After(end) {
-				end = cycle.Date
-			}
-			toolDateRanges[cycle.ToolID] = struct{ start, end time.Time }{start, end}
-		} else {
-			toolDateRanges[cycle.ToolID] = struct{ start, end time.Time }{cycle.Date, cycle.Date}
-		}
-	}
-
-	// Third pass: group tools by identical date ranges
-	for toolID, tool := range toolSummaries {
-		dateRange := toolDateRanges[toolID]
-		dateKey := fmt.Sprintf("%s-%s", dateRange.start.Format("2006-01-02"), dateRange.end.Format("2006-01-02"))
-
-		if dateSummary, exists := dateRangeSummaries[dateKey]; exists {
-			// Add tool to existing date range
-			dateSummary.tools = append(dateSummary.tools, tool)
-			if tool.maxCycles > dateSummary.maxCycles {
-				dateSummary.maxCycles = tool.maxCycles
-			}
-			dateSummary.totalPartial += tool.totalPartial
-		} else {
-			// Create new date range summary
-			dateRangeSummaries[dateKey] = &dateRangeSummary{
-				startDate:    dateRange.start,
-				endDate:      dateRange.end,
-				tools:        []*toolInfo{tool},
-				maxCycles:    tool.maxCycles,
-				totalPartial: tool.totalPartial,
-			}
-		}
-	}
-
-	// Sort tools within each date range group by position
-	for _, dateSummary := range dateRangeSummaries {
-		// Sort tools by position order
-		for i := 0; i < len(dateSummary.tools)-1; i++ {
-			for j := i + 1; j < len(dateSummary.tools); j++ {
-				iOrder := getPositionOrder(dateSummary.tools[i].position)
-				jOrder := getPositionOrder(dateSummary.tools[j].position)
-				if iOrder > jOrder {
-					dateSummary.tools[i], dateSummary.tools[j] = dateSummary.tools[j], dateSummary.tools[i]
-				}
-			}
-		}
+		toolSummaries = append(toolSummaries, &toolSummary{
+			toolID:       cycle.ToolID,
+			toolCode:     toolCode,
+			position:     cycle.ToolPosition,
+			startDate:    cycle.Date,
+			endDate:      cycle.Date,
+			maxCycles:    cycle.TotalCycles,
+			totalPartial: cycle.PartialCycles,
+		})
 	}
 
 	// Table headers
@@ -220,83 +151,67 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	}
 	o.PDF.Ln(8)
 
-	// Sort date range summaries by max cycles from low to high
-	var summaries []*dateRangeSummary
-	for _, summary := range dateRangeSummaries {
-		summaries = append(summaries, summary)
-	}
-
-	// Sort by total press cycles from low to high
-	for i := 0; i < len(summaries)-1; i++ {
-		for j := i + 1; j < len(summaries); j++ {
-			if summaries[i].maxCycles > summaries[j].maxCycles {
-				summaries[i], summaries[j] = summaries[j], summaries[i]
+	// Sort by start date first, then by position, then by end date to show chronological tool changes
+	for i := 0; i < len(toolSummaries)-1; i++ {
+		for j := i + 1; j < len(toolSummaries); j++ {
+			if toolSummaries[i].startDate.After(toolSummaries[j].startDate) ||
+				(toolSummaries[i].startDate.Equal(toolSummaries[j].startDate) && getPositionOrder(toolSummaries[i].position) > getPositionOrder(toolSummaries[j].position)) ||
+				(toolSummaries[i].startDate.Equal(toolSummaries[j].startDate) && toolSummaries[i].position == toolSummaries[j].position && toolSummaries[i].endDate.After(toolSummaries[j].endDate)) {
+				toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
 			}
 		}
 	}
 
 	// Table data
 	o.PDF.SetFont("Arial", "", 9)
-	o.PDF.SetFillColor(250, 250, 250)
 
-	for i, summary := range summaries {
-		fill := i%2 == 0 // Alternate row colors
+	// Group tools by date for highlighting
+	var currentDate time.Time
+	var dateGroupIndex int
 
-		// Create separate rows for each tool in the group
-		for j, tool := range summary.tools {
-			// Determine border style based on position in group
-			var border string
-			if len(summary.tools) == 1 {
-				// Single tool - all borders
-				border = "1"
-			} else if j == 0 {
-				// First tool in group - top, left, right borders
-				border = "TLR"
-			} else if j == len(summary.tools)-1 {
-				// Last tool in group - bottom, left, right borders
-				border = "BLR"
-			} else {
-				// Middle tools in group - left, right borders only
-				border = "LR"
-			}
+	for _, summary := range toolSummaries {
+		// Check if this is a new date group (only compare year/month/day)
+		currentDateStr := currentDate.Format("2006-01-02")
+		summaryDateStr := summary.startDate.Format("2006-01-02")
+		if summaryDateStr != currentDateStr {
+			currentDate = summary.startDate
+			dateGroupIndex++
+		}
 
-			// Tool code with format
-			o.PDF.CellFormat(colWidths[0], 6, o.Translator(tool.toolCode), border, 0, "C", fill, 0, "")
+		// Use different background colors for different date groups
+		fill := dateGroupIndex%2 == 0
+		if fill {
+			o.PDF.SetFillColor(240, 248, 255) // Light blue for even groups
+		} else {
+			o.PDF.SetFillColor(255, 248, 240) // Light orange for odd groups
+		}
 
-			// Position
-			o.PDF.CellFormat(colWidths[1], 6, o.Translator(tool.position.GermanString()), border, 0, "C", fill, 0, "")
+		// Tool code with format
+		o.PDF.CellFormat(colWidths[0], 6, o.Translator(summary.toolCode), "1", 0, "C", fill, 0, "")
 
-			// Show date and cycle info on the middle row of each group for centering
-			middleIndex := len(summary.tools) / 2
-			if j == middleIndex {
-				// Start date
-				startDateStr := summary.startDate.Format("02.01.06")
-				o.PDF.CellFormat(colWidths[2], 6, startDateStr, border, 0, "C", fill, 0, "")
+		// Position
+		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.position.GermanString()), "1", 0, "C", fill, 0, "")
 
-				// End date
-				endDateStr := summary.endDate.Format("02.01.06")
-				o.PDF.CellFormat(colWidths[3], 6, endDateStr, border, 0, "C", fill, 0, "")
+		// Start date
+		startDateStr := summary.startDate.Format("02.01.06")
+		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
-				// Max cycles
-				o.PDF.CellFormat(colWidths[4], 6, fmt.Sprintf("%d", summary.maxCycles), border, 0, "C", fill, 0, "")
+		// End date
+		endDateStr := summary.endDate.Format("02.01.06")
+		o.PDF.CellFormat(colWidths[3], 6, endDateStr, "1", 0, "C", fill, 0, "")
 
-				// Total partial cycles
-				o.PDF.CellFormat(colWidths[5], 6, fmt.Sprintf("%d", summary.totalPartial), border, 0, "C", fill, 0, "")
-			} else {
-				// Empty cells for subsequent tools in the same date group
-				o.PDF.CellFormat(colWidths[2], 6, "", border, 0, "C", fill, 0, "")
-				o.PDF.CellFormat(colWidths[3], 6, "", border, 0, "C", fill, 0, "")
-				o.PDF.CellFormat(colWidths[4], 6, "", border, 0, "C", fill, 0, "")
-				o.PDF.CellFormat(colWidths[5], 6, "", border, 0, "C", fill, 0, "")
-			}
+		// Max cycles
+		o.PDF.CellFormat(colWidths[4], 6, fmt.Sprintf("%d", summary.maxCycles), "1", 0, "C", fill, 0, "")
 
-			o.PDF.Ln(6)
+		// Total partial cycles
+		o.PDF.CellFormat(colWidths[5], 6, fmt.Sprintf("%d", summary.totalPartial), "1", 0, "C", fill, 0, "")
 
-			// Add new page if needed
-			_, y := o.PDF.GetXY()
-			if y > 250 {
-				o.PDF.AddPage()
-			}
+		o.PDF.Ln(6)
+
+		// Add new page if needed
+		_, y := o.PDF.GetXY()
+		if y > 250 {
+			o.PDF.AddPage()
 		}
 	}
 }
