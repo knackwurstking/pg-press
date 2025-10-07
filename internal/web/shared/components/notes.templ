@@ -11,11 +11,11 @@ templ NoteCard(note *models.Note) {
 		filterClass := ""
 		switch note.Level {
 		case models.INFO:
-			filterClass = "info ghost"
+			filterClass = "outline"
 		case models.ATTENTION:
-			filterClass = "warning ghost"
+			filterClass = "warning outline"
 		case models.BROKEN:
-			filterClass = "destructive ghost"
+			filterClass = "destructive outline"
 		}
 	}}
 	<div class={ fmt.Sprintf("card compact %s", filterClass) }>
@@ -65,7 +65,7 @@ templ NoteCard(note *models.Note) {
 			</span>
 		</div>
 		<div class="card-body">
-			<p>{ note.Content }</p>
+			{ note.Content }
 		</div>
 	</div>
 }

@@ -39,11 +39,11 @@ func NoteCard(note *models.Note) templ.Component {
 		filterClass := ""
 		switch note.Level {
 		case models.INFO:
-			filterClass = "info ghost"
+			filterClass = "outline"
 		case models.ATTENTION:
-			filterClass = "warning ghost"
+			filterClass = "warning outline"
 		case models.BROKEN:
-			filterClass = "destructive ghost"
+			filterClass = "destructive outline"
 		}
 		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("card compact %s", filterClass)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
@@ -129,20 +129,20 @@ func NoteCard(note *models.Note) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-trigger=\"click\" hx-confirm=\"Sind Sie sicher, dass Sie diese Notiz löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:htmx:after-request=\"if(event.detail.successful) window.dispatchEvent(new Event('visibilitychange'))\" title=\"Notiz löschen\"><i class=\"bi bi-trash\"></i></button></span></div><div class=\"card-body\"><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-trigger=\"click\" hx-confirm=\"Sind Sie sicher, dass Sie diese Notiz löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:htmx:after-request=\"if(event.detail.successful) window.dispatchEvent(new Event('visibilitychange'))\" title=\"Notiz löschen\"><i class=\"bi bi-trash\"></i></button></span></div><div class=\"card-body\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(note.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 68, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 68, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
