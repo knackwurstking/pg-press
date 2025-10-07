@@ -323,8 +323,8 @@ func listReportsScript() templ.ComponentScript {
 
 func renderMarkdownToHTML() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_renderMarkdownToHTML_6956`,
-		Function: `function __templ_renderMarkdownToHTML_6956(){window.renderMarkdownToHTML = function(content) {
+		Name: `__templ_renderMarkdownToHTML_cac8`,
+		Function: `function __templ_renderMarkdownToHTML_cac8(){window.renderMarkdownToHTML = function(content) {
 		// First, process inline formatting and structural elements
 		var processed = content
 			.replace(/### (.*$)/gm, '<h3>$1</h3>')
@@ -335,9 +335,12 @@ func renderMarkdownToHTML() templ.ComponentScript {
 			.replace(/` + "`" + `(.*?)` + "`" + `/g, '<code>$1</code>')
 			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
 			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
 			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
 			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-			.replace(/class="[uo]l-item"/g, '');
+			.replace(/(<bq-line>.*?<\/bq-line>(?:\s*<bq-line>.*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/<\/?bq-line>/g, '');
 
 		// Split content by double newlines to create paragraphs
 		var paragraphs = processed.split(/\n\s*\n/);
@@ -385,8 +388,8 @@ func renderMarkdownToHTML() templ.ComponentScript {
 		document.body.dispatchEvent(new CustomEvent('pageLoaded'));
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_renderMarkdownToHTML_6956`),
-		CallInline: templ.SafeScriptInline(`__templ_renderMarkdownToHTML_6956`),
+		Call:       templ.SafeScript(`__templ_renderMarkdownToHTML_cac8`),
+		CallInline: templ.SafeScriptInline(`__templ_renderMarkdownToHTML_cac8`),
 	}
 }
 

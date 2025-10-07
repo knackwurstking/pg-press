@@ -331,11 +331,15 @@ details[id^="trouble-report-"] {
 }
 
 .markdown-content blockquote {
-    border-left: 4px solid var(--ui-border-color);
-    padding-left: 1em;
-    margin: 1em 0;
-    font-style: italic;
-    color: var(--ui-muted-text);
+    border-left: 4px solid var(--ui-border-color) !important;
+    padding: 1em 1.5em !important;
+    margin: 1.5em 0 !important;
+    font-style: italic !important;
+    background-color: var(--ui-muted) !important;
+    border-radius: 0 var(--ui-radius) var(--ui-radius) 0 !important;
+    color: var(--ui-muted-text) !important;
+    position: relative !important;
+    overflow: visible !important;
 }
 
 .markdown-content code {
@@ -644,36 +648,55 @@ details[id^="trouble-report-"] {
     letter-spacing: 0.05em;
 }
 
-/* Enhanced blockquote styling */
+/* Enhanced blockquote styling - Override ui.min.css */
+.trouble-report .markdown-content blockquote,
 .markdown-content blockquote {
-    border-left: 4px solid var(--ui-border-color);
-    padding: 1em 1.5em;
-    margin: 1.5em 0;
-    font-style: italic;
-    background-color: var(--ui-muted);
-    border-radius: 0 var(--ui-radius) var(--ui-radius) 0;
-    position: relative;
+    border-left: 4px solid var(--ui-border-color) !important;
+    padding: 1em 1.5em !important;
+    margin: 1.5em 0 !important;
+    font-style: italic !important;
+    background-color: var(--ui-muted) !important;
+    border-radius: 0 var(--ui-radius) var(--ui-radius) 0 !important;
+    position: relative !important;
+    color: var(--ui-muted-text) !important;
+    overflow: visible !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
 }
 
+/* Override ui.min.css blockquote::before */
+.trouble-report .markdown-content blockquote:before,
+.markdown-content blockquote:before {
+    display: none !important;
+    content: none !important;
+}
+
+.trouble-report .markdown-content blockquote p,
 .markdown-content blockquote p {
-    margin: 0;
-    color: var(--ui-muted-text, #555);
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--ui-muted-text, #555) !important;
+    font-style: inherit !important;
 }
 
+.trouble-report .markdown-content blockquote p + p,
 .markdown-content blockquote p + p {
-    margin-top: 1em;
+    margin-top: 1em !important;
 }
 
+.trouble-report .markdown-content blockquote cite,
 .markdown-content blockquote cite {
-    display: block;
-    margin-top: 1em;
-    font-style: normal;
-    font-size: 0.875em;
-    color: var(--ui-muted-text, #666);
+    display: block !important;
+    margin-top: 1em !important;
+    font-style: normal !important;
+    font-size: 0.875em !important;
+    color: var(--ui-muted-text, #666) !important;
 }
 
+.trouble-report .markdown-content blockquote cite:before,
 .markdown-content blockquote cite:before {
-    content: "— ";
+    content: "— " !important;
 }
 
 /* Image styling */

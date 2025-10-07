@@ -148,9 +148,12 @@ script renderMarkdownToHTML() {
 			.replace(/`(.*?)`/g, '<code>$1</code>')
 			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
 			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
 			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
 			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-			.replace(/class="[uo]l-item"/g, '');
+			.replace(/(<bq-line>.*?<\/bq-line>(?:\s*<bq-line>.*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/<\/?bq-line>/g, '');
 
 		// Split content by double newlines to create paragraphs
 		var paragraphs = processed.split(/\n\s*\n/);

@@ -227,7 +227,7 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 				}
 			/>
 			<span>Markdown-Formatierung verwenden</span>
-			<small class="muted">(unterstützt **fett**, *kursiv*, # Überschriften, automatische Zeilenumbrüche, etc.)</small>
+			<small class="muted">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small>
 		</label>
 		<!-- Markdown Tools -->
 		<div id="markdown-tools" style="display: none;">
@@ -246,6 +246,9 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 				</button>
 				<button type="button" onclick="insertMarkdown('- ', '')" class="secondary small">
 					List
+				</button>
+				<button type="button" onclick="insertMarkdown('> ', '')" class="secondary small">
+					Quote
 				</button>
 				<button type="button" onclick="insertMarkdown('`', '`')" class="secondary small">
 					Code

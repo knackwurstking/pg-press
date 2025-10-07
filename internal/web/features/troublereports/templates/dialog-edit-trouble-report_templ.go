@@ -134,7 +134,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "> <span>Markdown-Formatierung verwenden</span> <small class=\"muted\">(unterstützt **fett**, *kursiv*, # Überschriften, automatische Zeilenumbrüche, etc.)</small></label><!-- Markdown Tools --> <div id=\"markdown-tools\" style=\"display: none;\"><div class=\"flex gap items-center\" style=\"margin: calc(var(--ui-spacing) / 2) 0;\"><button type=\"button\" onclick=\"insertMarkdown('**', '**')\" class=\"secondary small\"><strong>B</strong></button> <button type=\"button\" onclick=\"insertMarkdown('*', '*')\" class=\"secondary small\"><em>I</em></button> <button type=\"button\" onclick=\"insertMarkdown('# ', '')\" class=\"secondary small\">H1</button> <button type=\"button\" onclick=\"insertMarkdown('## ', '')\" class=\"secondary small\">H2</button> <button type=\"button\" onclick=\"insertMarkdown('- ', '')\" class=\"secondary small\">List</button> <button type=\"button\" onclick=\"insertMarkdown('`', '`')\" class=\"secondary small\">Code</button></div><div id=\"markdown-preview\" class=\"markdown-preview\"><div id=\"preview-content\"></div></div></div><!-- Attachments Section --> <div id=\"attachments-section\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "> <span>Markdown-Formatierung verwenden</span> <small class=\"muted\">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small></label><!-- Markdown Tools --> <div id=\"markdown-tools\" style=\"display: none;\"><div class=\"flex gap items-center\" style=\"margin: calc(var(--ui-spacing) / 2) 0;\"><button type=\"button\" onclick=\"insertMarkdown('**', '**')\" class=\"secondary small\"><strong>B</strong></button> <button type=\"button\" onclick=\"insertMarkdown('*', '*')\" class=\"secondary small\"><em>I</em></button> <button type=\"button\" onclick=\"insertMarkdown('# ', '')\" class=\"secondary small\">H1</button> <button type=\"button\" onclick=\"insertMarkdown('## ', '')\" class=\"secondary small\">H2</button> <button type=\"button\" onclick=\"insertMarkdown('- ', '')\" class=\"secondary small\">List</button> <button type=\"button\" onclick=\"insertMarkdown('> ', '')\" class=\"secondary small\">Quote</button> <button type=\"button\" onclick=\"insertMarkdown('`', '`')\" class=\"secondary small\">Code</button></div><div id=\"markdown-preview\" class=\"markdown-preview\"><div id=\"preview-content\"></div></div></div><!-- Attachments Section --> <div id=\"attachments-section\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -152,7 +152,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 270, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 273, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -175,7 +175,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 284, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 287, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -193,7 +193,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 290, Col: 50}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 293, Col: 50}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -206,7 +206,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 293, Col: 58}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 296, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -219,7 +219,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 294, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 297, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
