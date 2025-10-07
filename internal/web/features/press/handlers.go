@@ -200,7 +200,6 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	return nil
 }
 
-// TODO: Now Modify the PDF content to show start and end datum for each tool with cycle count, remove the user name and the ID from the table,
 func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
