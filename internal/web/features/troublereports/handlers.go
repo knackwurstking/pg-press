@@ -264,6 +264,7 @@ func (h *Handler) HTMXGetEditTroubleReportDialog(c echo.Context) error {
 		}
 		props.Title = tr.Title
 		props.Content = tr.Content
+		props.UseMarkdown = tr.UseMarkdown
 
 		// Load attachments for display
 		loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr)
@@ -292,7 +293,7 @@ func (h *Handler) HTMXPostEditTroubleReportDialog(c echo.Context) error {
 
 	h.LogDebug("User %s is creating a new trouble report", user.Name)
 
-	title, content, attachments, err := h.validateDialogEditFormData(c)
+	title, content, useMarkdown, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
 		return h.RenderBadRequest(c,
 			"failed to get trouble report form data: "+err.Error())
@@ -302,6 +303,7 @@ func (h *Handler) HTMXPostEditTroubleReportDialog(c echo.Context) error {
 	}
 
 	tr := models.NewTroubleReport(title, content)
+	tr.UseMarkdown = useMarkdown
 
 	h.LogDebug("Creating trouble report: title='%s', attachments=%d",
 		title, len(attachments))
@@ -341,7 +343,7 @@ func (h *Handler) HTMXPutEditTroubleReportDialog(c echo.Context) error {
 	}
 
 	// Get Title, Content and Attachments from form data
-	title, content, attachments, err := h.validateDialogEditFormData(c)
+	title, content, useMarkdown, attachments, err := h.validateDialogEditFormData(c)
 	if err != nil {
 		return h.RenderBadRequest(c,
 			"failed to get trouble report form data: "+err.Error())
@@ -374,6 +376,7 @@ func (h *Handler) HTMXPutEditTroubleReportDialog(c echo.Context) error {
 	// Update the previous trouble report
 	tr.Title = title
 	tr.Content = content
+	tr.UseMarkdown = useMarkdown
 	tr.LinkedAttachments = existingAttachmentIDs
 
 	err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
@@ -495,26 +498,29 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 
 func (h *Handler) validateDialogEditFormData(ctx echo.Context) (
 	title, content string,
+	useMarkdown bool,
 	attachments []*models.Attachment,
 	err error,
 ) {
 	title = h.GetSanitizedFormValue(ctx, constants.TitleFormField)
 	if title == "" {
-		return "", "", nil, fmt.Errorf("missing title")
+		return "", "", false, nil, fmt.Errorf("missing title")
 	}
 
 	content = h.GetSanitizedFormValue(ctx, constants.ContentFormField)
 	if content == "" {
-		return "", "", nil, fmt.Errorf("missing content")
+		return "", "", false, nil, fmt.Errorf("missing content")
 	}
+
+	useMarkdown = ctx.FormValue("use_markdown") == "on"
 
 	// Process existing attachments and their order
 	attachments, err = h.processAttachments(ctx)
 	if err != nil {
-		return "", "", nil, fmt.Errorf("failed to process attachments: %v", err)
+		return "", "", false, nil, fmt.Errorf("failed to process attachments: %v", err)
 	}
 
-	return title, content, attachments, nil
+	return title, content, useMarkdown, attachments, nil
 }
 
 func (h *Handler) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {

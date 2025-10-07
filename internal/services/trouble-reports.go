@@ -40,11 +40,60 @@ func (s *TroubleReports) createTable(db *sql.DB) error {
 			title TEXT NOT NULL,
 			content TEXT NOT NULL,
 			linked_attachments TEXT NOT NULL,
+			use_markdown BOOLEAN DEFAULT 0,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	if _, err := db.Exec(createQuery); err != nil {
 		return fmt.Errorf("failed to create trouble_reports table: %v", err)
+	}
+
+	// Run migration to add use_markdown column if it doesn't exist
+	if err := s.migrateUseMarkdownColumn(db); err != nil {
+		return fmt.Errorf("failed to migrate use_markdown column: %v", err)
+	}
+
+	return nil
+}
+
+func (s *TroubleReports) migrateUseMarkdownColumn(db *sql.DB) error {
+	// Check if use_markdown column exists
+	const checkColumnQuery = `PRAGMA table_info(trouble_reports)`
+	rows, err := db.Query(checkColumnQuery)
+	if err != nil {
+		return fmt.Errorf("failed to check table schema: %v", err)
+	}
+	defer rows.Close()
+
+	hasUseMarkdownColumn := false
+	for rows.Next() {
+		var cid int
+		var name, dataType string
+		var notNull, pk int
+		var defaultValue interface{}
+
+		if err := rows.Scan(&cid, &name, &dataType, &notNull, &defaultValue, &pk); err != nil {
+			return fmt.Errorf("failed to scan column info: %v", err)
+		}
+
+		if name == "use_markdown" {
+			hasUseMarkdownColumn = true
+			break
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("error checking columns: %v", err)
+	}
+
+	// Add use_markdown column if it doesn't exist
+	if !hasUseMarkdownColumn {
+		s.log.Info("Adding use_markdown column to existing trouble_reports table")
+		const addColumnQuery = `ALTER TABLE trouble_reports ADD COLUMN use_markdown BOOLEAN DEFAULT 0`
+		if _, err := db.Exec(addColumnQuery); err != nil {
+			return fmt.Errorf("failed to add use_markdown column: %v", err)
+		}
+		s.log.Info("Successfully added use_markdown column")
 	}
 
 	return nil
@@ -128,10 +177,10 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 
 	// Insert trouble report
 	const addQuery = `INSERT INTO trouble_reports
-		(title, content, linked_attachments) VALUES (?, ?, ?)`
+		(title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`
 
 	result, err := s.db.Exec(
-		addQuery, tr.Title, tr.Content, string(linkedAttachments),
+		addQuery, tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown,
 	)
 	if err != nil {
 		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
@@ -150,6 +199,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 		Title:             tr.Title,
 		Content:           tr.Content,
 		LinkedAttachments: tr.LinkedAttachments,
+		UseMarkdown:       tr.UseMarkdown,
 	}
 	if err := s.modifications.AddTroubleReportMod(u.TelegramID, id, modData); err != nil {
 		s.log.Error("Failed to save initial modification for trouble report %d: %v", id, err)
@@ -184,10 +234,10 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 	}
 
 	const updateQuery string = `UPDATE trouble_reports
-		SET title = ?, content = ?, linked_attachments = ? WHERE id = ?`
+		SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`
 	_, err = s.db.Exec(
 		updateQuery,
-		tr.Title, tr.Content, string(linkedAttachments), // SET
+		tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown, // SET
 		tr.ID, // WHERE
 	)
 	if err != nil {
@@ -199,6 +249,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 		Title:             tr.Title,
 		Content:           tr.Content,
 		LinkedAttachments: tr.LinkedAttachments,
+		UseMarkdown:       tr.UseMarkdown,
 	}
 	if err := s.modifications.AddTroubleReportMod(u.TelegramID, tr.ID, modData); err != nil {
 		s.log.Error(
@@ -541,7 +592,7 @@ func (s *TroubleReports) scanTroubleReport(scanner interfaces.Scannable) (*model
 	report := &models.TroubleReport{}
 	var linkedAttachments string
 
-	if err := scanner.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments); err != nil {
+	if err := scanner.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &report.UseMarkdown); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}

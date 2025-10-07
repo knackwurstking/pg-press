@@ -428,7 +428,7 @@ main() {
     print_header "Migration Completed Successfully"
     print_success "Database has been migrated to the new generic notes system"
     print_warning "Remember to restart your application to pick up the database changes"
-    print_info "The old migration script (migrate-add-identifier.sh) is no longer needed"
+
 }
 
 # Handle command line arguments

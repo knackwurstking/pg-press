@@ -32,19 +32,9 @@ Assets include version parameters for cache invalidation:
 - Version based on server startup timestamp
 - Automatic cache invalidation on server restarts/deployments
 
-### Testing Cache Implementation
+### Cache Implementation
 
-Run the caching test script to verify headers:
-
-```bash
-# Start the development server
-make dev
-
-# In another terminal, test caching
-./scripts/test-caching.sh
-```
-
-See [docs/CACHING.md](docs/CACHING.md) for detailed implementation details.
+The application includes HTTP caching headers for static assets and API responses. See [docs/CACHING.md](docs/CACHING.md) for detailed implementation details.
 
 ## Documentation
 

@@ -16,7 +16,17 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				ontoggle={ updateURLHash(templ.JSExpression("event")) }
 			>
 				<summary>{ tr.Title }</summary>
-				<pre>{ tr.Content }</pre>
+				if tr.UseMarkdown {
+					<div
+						class="markdown-content"
+						id={ fmt.Sprintf("markdown-content-%d", tr.ID) }
+						data-markdown-content={ tr.Content }
+					>
+						Loading...
+					</div>
+				} else {
+					<pre>{ tr.Content }</pre>
+				}
 				<!-- Attachments Preview Container -->
 				if len(tr.LoadedAttachments) > 0 {
 					<br/>
@@ -96,6 +106,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 			<hr/>
 		</span>
 	}
+	@renderMarkdownToHTML()
 	@listReportsScript()
 }
 
@@ -123,4 +134,54 @@ script listReportsScript() {
 			details.scrollIntoView({ behavior: 'smooth', block: 'start' }),
 		100);
 	}
+}
+
+script renderMarkdownToHTML() {
+	window.renderMarkdownToHTML = function(content) {
+		return content
+			.replace(/### (.*$)/gm, '<h3>$1</h3>')
+			.replace(/## (.*$)/gm, '<h2>$1</h2>')
+			.replace(/# (.*$)/gm, '<h1>$1</h1>')
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*(.*?)\*/g, '<em>$1</em>')
+			.replace(/`(.*?)`/g, '<code>$1</code>')
+			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
+			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
+			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/\n\n/g, '</p><p>')
+			.replace(/^(.+)$/gm, function(match) {
+				if (match.startsWith('<h') || match.startsWith('<ul') || match.startsWith('<ol') || match.startsWith('<li')) {
+					return match;
+				}
+				return '<p>' + match + '</p>';
+			});
+	};
+
+	// Function to process markdown content from data attributes
+	window.processMarkdownContent = function() {
+		var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
+		containers.forEach(function(container) {
+			var content = container.getAttribute('data-markdown-content');
+			if (content && window.renderMarkdownToHTML) {
+				container.innerHTML = window.renderMarkdownToHTML(content);
+			} else if (content) {
+				container.innerHTML = '<pre>' + content + '</pre>';
+			}
+		});
+	};
+
+	// Process immediately
+	setTimeout(window.processMarkdownContent, 10);
+
+	// Listen for HTMX afterSwap events to re-process markdown
+	document.addEventListener('htmx:afterSwap', function(event) {
+		setTimeout(window.processMarkdownContent, 50);
+	});
+
+	// Listen for troubleReportSaved event from dialog to trigger data refresh
+	window.addEventListener('troubleReportSaved', function() {
+		document.body.dispatchEvent(new CustomEvent('pageLoaded'));
+	});
 }

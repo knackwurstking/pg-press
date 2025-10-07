@@ -14,6 +14,7 @@ type DialogEditTroubleReportProps struct {
 
 	Title       string
 	Content     string
+	UseMarkdown bool
 	Attachments []*models.Attachment
 
 	InvalidTitle    bool
@@ -44,18 +45,96 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		Href:                  baseHref,
 		SubmitButtonText:      submitButtonText,
 		Behavior:              "custom",
-		CustomWindowEventName: "visibilitychange",
+		CustomWindowEventName: "troubleReportSaved",
 	}) {
 		<script>
-            var selectedFiles = []; // Used by the file input change event handler
-            var existingAttachmentsRemoval = [];
+		            var selectedFiles = []; // Used by the file input change event handler
+		            var existingAttachmentsRemoval = [];
 
-            function updateExistingAttachmentsRemoval() {
-                var input = document.getElementById('existing-attachments-removal');
-                input.value = existingAttachmentsRemoval.join(',');
-            }
+		            function updateExistingAttachmentsRemoval() {
+		                var input = document.getElementById('existing-attachments-removal');
+		                input.value = existingAttachmentsRemoval.join(',');
+		            }
 
-            function onAttachments(event) {
+		            // Markdown functionality
+		            function toggleMarkdownFeatures() {
+		                var checkbox = document.getElementById('use_markdown');
+		                var tools = document.getElementById('markdown-tools');
+		                var textarea = document.getElementById('content');
+
+		                if (checkbox.checked) {
+		                    tools.style.display = 'block';
+		                    textarea.setAttribute('placeholder', 'Bericht (Markdown-Formatierung aktiviert)');
+		                } else {
+		                    tools.style.display = 'none';
+		                    document.getElementById('markdown-preview').classList.remove('active');
+		                    textarea.setAttribute('placeholder', 'Bericht');
+		                }
+		            }
+
+		            function insertMarkdown(before, after) {
+		                var textarea = document.getElementById('content');
+		                var start = textarea.selectionStart;
+		                var end = textarea.selectionEnd;
+		                var selectedText = textarea.value.substring(start, end);
+
+		                var newText = before + selectedText + after;
+
+		                textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+
+		                // Set cursor position
+		                var newStart = start + before.length;
+		                var newEnd = newStart + selectedText.length;
+		                textarea.setSelectionRange(newStart, newEnd);
+		                textarea.focus();
+		            }
+
+		            function togglePreview() {
+		                var preview = document.getElementById('markdown-preview');
+		                var btn = document.getElementById('preview-btn');
+		                var textarea = document.getElementById('content');
+
+		                if (preview.classList.contains('active')) {
+		                    preview.classList.remove('active');
+		                    btn.textContent = 'Vorschau';
+		                    btn.className = 'info small';
+		                } else {
+		                    updatePreview();
+		                    preview.classList.add('active');
+		                    btn.textContent = 'Bearbeiten';
+		                    btn.className = 'secondary small';
+		                }
+		            }
+
+		            function updatePreview() {
+		                var textarea = document.getElementById('content');
+		                var previewContent = document.getElementById('preview-content');
+
+		                // Use shared markdown rendering function
+		                var html = '';
+		                if (typeof window.renderMarkdownToHTML === 'function') {
+		                    html = window.renderMarkdownToHTML(textarea.value);
+		                } else {
+		                    // Fallback if shared function not available
+		                    html = '<pre>' + textarea.value + '</pre>';
+		                }
+
+		                // Wrap in markdown-content class for proper styling
+		                previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
+		            }
+
+		            // Initialize markdown features when dialog loads
+		            function initializeMarkdownFeatures() {
+		                var checkbox = document.getElementById('use_markdown');
+		                if (checkbox) {
+		                    toggleMarkdownFeatures();
+		                }
+		            }
+
+		            // Call initialization after a small delay to ensure all DOM elements are ready
+		            setTimeout(initializeMarkdownFeatures, 50);
+
+		            function onAttachments(event) {
                 selectedFiles = Array.from(event.target.files);
 
                 function formatFileSize(bytes) {
@@ -145,6 +224,48 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 				}
 			>{ props.Content }</textarea>
 		</label>
+		<label for="use_markdown" class="flex gap items-center">
+			<input
+				type="checkbox"
+				name="use_markdown"
+				id="use_markdown"
+				onchange="toggleMarkdownFeatures()"
+				if props.UseMarkdown {
+					checked
+				}
+			/>
+			<span>Markdown-Formatierung verwenden</span>
+			<small class="muted">(unterstützt **fett**, *kursiv*, # Überschriften, automatische Zeilenumbrüche, etc.)</small>
+		</label>
+		<!-- Markdown Tools -->
+		<div id="markdown-tools" style="display: none;">
+			<div class="flex gap items-center" style="margin: calc(var(--ui-spacing) / 2) 0;">
+				<button type="button" onclick="insertMarkdown('**', '**')" class="secondary small">
+					<strong>B</strong>
+				</button>
+				<button type="button" onclick="insertMarkdown('*', '*')" class="secondary small">
+					<em>I</em>
+				</button>
+				<button type="button" onclick="insertMarkdown('# ', '')" class="secondary small">
+					H1
+				</button>
+				<button type="button" onclick="insertMarkdown('## ', '')" class="secondary small">
+					H2
+				</button>
+				<button type="button" onclick="insertMarkdown('- ', '')" class="secondary small">
+					List
+				</button>
+				<button type="button" onclick="insertMarkdown('`', '`')" class="secondary small">
+					Code
+				</button>
+				<button type="button" onclick="togglePreview()" id="preview-btn" class="info small">
+					Vorschau
+				</button>
+			</div>
+			<div id="markdown-preview" class="markdown-preview">
+				<div id="preview-content"></div>
+			</div>
+		</div>
 		<!-- Attachments Section -->
 		<div id="attachments-section" class="attachments-container flex flex-col gap">
 			<small class="attachments-label">

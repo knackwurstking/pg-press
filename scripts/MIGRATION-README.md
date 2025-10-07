@@ -4,6 +4,129 @@ This directory contains database migration scripts for the pg-press application.
 
 ## Available Migrations
 
+### migrate-trouble-reports-markdown.sh
+
+**Purpose**: Adds markdown support to trouble reports by adding a `use_markdown` column to the `trouble_reports` table.
+
+**What it does**:
+
+- Adds a `use_markdown BOOLEAN DEFAULT 0` column to the trouble_reports table
+- Sets all existing records to `use_markdown = 0` for backward compatibility
+- Creates a backup of your database before making changes
+- Validates the migration was successful
+
+**Prerequisites**:
+
+- SQLite3 must be installed on your system
+- The pg-press database must exist (`pg-press.db`)
+- You must run the script from the project root directory
+- **Stop your application before running this migration**
+
+**Usage**:
+
+```bash
+# From the project root directory
+./scripts/migrate-trouble-reports-markdown.sh
+
+# For help
+./scripts/migrate-trouble-reports-markdown.sh --help
+
+# Dry-run to see what would be changed
+./scripts/migrate-trouble-reports-markdown.sh --dry-run
+```
+
+**What gets changed**:
+
+Before migration:
+
+```sql
+CREATE TABLE trouble_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    linked_attachments TEXT NOT NULL
+);
+```
+
+After migration:
+
+```sql
+CREATE TABLE trouble_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    linked_attachments TEXT NOT NULL,
+    use_markdown BOOLEAN DEFAULT 0  -- NEW FIELD
+);
+```
+
+**New Features Enabled**:
+
+- **Optional Markdown**: Users can opt-in to markdown formatting via checkbox
+- **Rich Formatting**: Support for headers, bold, italic, lists, code blocks, links, tables
+- **HTML Rendering**: Markdown content displays as formatted HTML in web interface
+- **PDF Integration**: Markdown content is properly formatted in PDF exports
+- **Security**: Built-in XSS prevention and HTML sanitization
+- **Backward Compatibility**: All existing reports continue to work as plain text
+
+**Supported Markdown Syntax**:
+
+```markdown
+# Header 1
+
+## Header 2
+
+### Header 3
+
+**Bold text**
+_Italic text_
+~~Strikethrough~~
+
+- Unordered list
+- Another item
+
+1. Ordered list
+2. Another item
+
+`Inline code`
+```
+
+Code block
+
+```
+
+[Link text](https://example.com)
+
+| Table | Header |
+|-------|--------|
+| Cell  | Value  |
+```
+
+**Post-migration**:
+After running the migration:
+
+1. Restart your pg-press application
+2. Users will see a "Markdown-Formatierung verwenden" checkbox in the edit dialog
+3. When enabled, content will be rendered as HTML with proper formatting
+4. PDF exports will include formatted content
+5. All existing reports continue to display as plain text
+6. New reports default to plain text unless markdown is explicitly enabled
+
+**Security Features**:
+
+- **XSS Prevention**: Dangerous HTML tags and scripts are automatically removed
+- **Safe Rendering**: Uses Go's template.HTML for secure output
+- **Input Sanitization**: Event handlers and dangerous protocols are filtered
+- **Whitelist Approach**: Only safe HTML elements are allowed in output
+
+**Backup and Recovery**:
+
+- The script automatically creates a timestamped backup in `scripts/backups/`
+- Backup format: `pg-press_before_markdown_migration_YYYYMMDD_HHMMSS.db`
+- To restore from backup: `cp backups/backup_file.db pg-press.db`
+
+---
+
 ### migrate-notes-system-refactor.sh
 
 **Purpose**: Migrates the database to the new generic notes linking system, removing complex tool-specific linking.
@@ -115,7 +238,7 @@ After running the migration:
 
 - The script automatically creates a timestamped backup in `scripts/backups/`
 - Backup format: `pg-press_before_notes_refactor_YYYYMMDD_HHMMSS.db`
-- To restore from backup: `cp backups/backup_file.db ../pg-press.db`
+- To restore from backup: `cp backups/backup_file.db pg-press.db`
 
 **Troubleshooting NULL Values**:
 
@@ -124,9 +247,6 @@ If you encounter an error like "converting NULL to string is unsupported" when a
 ```bash
 # Quick manual fix using SQLite
 sqlite3 pg-press.db "UPDATE notes SET linked = '' WHERE linked IS NULL;"
-
-# Or use the automated fix script
-./scripts/fix-null-linked-values.sh
 ```
 
 **Manual SQL Fix**:
@@ -151,134 +271,12 @@ SELECT
 FROM notes GROUP BY type;
 ```
 
----
+## Migration Order
 
-### migrate-add-identifier.sh (DEPRECATED)
+If you're setting up a fresh database or need to run multiple migrations, run them in this order:
 
-**Purpose**: Adds an `identifier` field to the `metal_sheets` table to distinguish between SACMI and SITI machine types.
-
-**What it does**:
-
-- Adds a new `identifier` column to the `metal_sheets` table
-- Sets the default value to "SACMI" for all existing records
-- Creates a backup of your database before making changes
-- Validates the migration was successful
-
-**Prerequisites**:
-
-- SQLite3 must be installed on your system
-- The pg-press database must exist (`pg-press.db`)
-- You must run the script from the project root directory
-
-**Usage**:
-
-```bash
-# From the project root directory
-./scripts/migrate-add-identifier.sh
-
-# For help
-./scripts/migrate-add-identifier.sh --help
-```
-
-**What gets changed**:
-
-Before migration:
-
-```sql
-CREATE TABLE metal_sheets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tile_height REAL NOT NULL,
-    value REAL NOT NULL,
-    marke_height INTEGER NOT NULL,
-    stf REAL NOT NULL,
-    stf_max REAL NOT NULL,
-    tool_id INTEGER NOT NULL,
-    notes BLOB NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-After migration:
-
-```sql
-CREATE TABLE metal_sheets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tile_height REAL NOT NULL,
-    value REAL NOT NULL,
-    marke_height INTEGER NOT NULL,
-    stf REAL NOT NULL,
-    stf_max REAL NOT NULL,
-    identifier TEXT NOT NULL DEFAULT 'SACMI',  -- NEW FIELD
-    tool_id INTEGER NOT NULL,
-    notes BLOB NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-**Valid identifier values**:
-
-- `"SACMI"` - For SACMI type machines
-- `"SITI"` - For SITI type machines
-
-**Post-migration**:
-After running the migration:
-
-1. Restart your application to pick up the database schema changes
-2. All existing metal sheets will have identifier set to "SACMI"
-3. New metal sheets created through the application will default to "SACMI"
-4. You can update individual records through the application UI or directly in the database
-
-**Press Filtering Feature**:
-The identifier field enables automatic filtering of metal sheets on press pages:
-
-- **Press 0 and Press 5**: Show only SACMI metal sheets
-- **All other presses** (2, 3, 4): Show only SITI metal sheets
-
-This ensures operators only see metal sheets that are compatible with their specific press/machine combination. The filtering happens automatically when viewing press pages - no additional configuration is needed.
-
-**Manual updates**:
-If you need to update specific records to SITI type:
-
-```bash
-# Update a specific metal sheet to SITI type
-sqlite3 pg-press.db "UPDATE metal_sheets SET identifier='SITI' WHERE id=123;"
-
-# Update multiple sheets based on some criteria
-sqlite3 pg-press.db "UPDATE metal_sheets SET identifier='SITI' WHERE tool_id IN (1,2,3);"
-
-# Check current identifier distribution
-sqlite3 pg-press.db "SELECT identifier, COUNT(*) FROM metal_sheets GROUP BY identifier;"
-```
-
-**Backup and Recovery**:
-
-- The script automatically creates a timestamped backup in `scripts/backups/`
-- Backup format: `pg-press_before_identifier_migration_YYYYMMDD_HHMMSS.db`
-- To restore from backup: `cp backups/backup_file.db ../pg-press.db`
-
-**Troubleshooting**:
-
-If the migration fails:
-
-1. Check that you're running from the project root directory
-2. Ensure SQLite3 is installed: `sqlite3 --version`
-3. Verify database file exists: `ls -la pg-press.db`
-4. Check database permissions are correct
-
-If you need to rollback:
-
-1. Stop the application
-2. Restore from the backup: `cp scripts/backups/backup_file.db pg-press.db`
-3. Restart the application
-
-**Development Notes**:
-
-- This migration is designed for development mode and uses simple ALTER TABLE statements
-- For production environments, consider more robust migration strategies
-- The migration script includes safety checks and creates backups automatically
-- The identifier field is used by the application to determine STF_MAX calculation methods and automatic press filtering
+1. `migrate-notes-system-refactor.sh` - Updates notes system (if needed)
+2. `migrate-trouble-reports-markdown.sh` - Adds markdown support to trouble reports
 
 ## General Migration Guidelines
 
@@ -287,59 +285,51 @@ If you need to rollback:
 3. **Run from the project root** directory unless otherwise specified
 4. **Stop the application** before running migrations
 5. **Restart the application** after successful migrations
+6. **Check logs** after restart to ensure everything works correctly
 
----
+## Safety Features
 
-### cleanup-old-migrations.sh
+All migration scripts include:
 
-**Purpose**: Removes deprecated migration scripts that are no longer needed after system refactoring.
+- **Automatic Backups**: Database is backed up before any changes
+- **Validation**: Migration success is verified before completion
+- **Dry-run Mode**: See what would be changed without making changes
+- **Error Handling**: Scripts stop on first error to prevent data corruption
+- **Detailed Logging**: Color-coded output shows progress and results
 
-**What it does**:
+## Backup Directory Structure
 
-- Identifies and removes old migration files that have been superseded
-- Creates backups of removed files before deletion
-- Provides information about why migrations are deprecated
-- Helps keep the scripts directory clean and up-to-date
-
-**Prerequisites**:
-
-- Must be run from the `scripts` directory
-- Will create backups in `scripts/backups/` before removal
-
-**Usage**:
-
-```bash
-# From the scripts directory
-cd scripts
-./cleanup-old-migrations.sh
-
-# List files that would be removed (dry run)
-./cleanup-old-migrations.sh --list
-
-# Force cleanup without confirmation
-./cleanup-old-migrations.sh --force
-
-# For help
-./cleanup-old-migrations.sh --help
+```
+scripts/backups/
+├── pg-press_before_notes_refactor_20240101_120000.db
+└── pg-press_before_markdown_migration_20240101_130000.db
 ```
 
-**Files removed by this script**:
+## Rollback Procedures
 
-- `migrate-add-identifier.sh` - Superseded by `migrate-notes-system-refactor.sh`
-- `test-migration.sh` - No longer relevant testing script
+To rollback a migration:
 
-**When to use**:
+1. **Stop the application**
+2. **Identify the backup** file you want to restore from
+3. **Restore the database**: `cp scripts/backups/backup_file.db pg-press.db`
+4. **Restart the application**
+5. **Verify** the application works with the restored database
 
-- After successfully running the new notes system migration
-- When cleaning up development environments
-- Before deploying to ensure only current migrations are present
+## Getting Help
 
-**Safety features**:
+- Use `--help` flag with any migration script for detailed usage information
+- Use `--dry-run` flag to see what would be changed without making changes
+- Check the backup directory if you need to restore previous state
+- Ensure SQLite3 is installed: `sqlite3 --version`
+- Verify you're in the correct directory (project root)
 
-- Always creates backups before removing files
-- Requires confirmation before proceeding
-- Provides detailed information about why files are deprecated
-- Can be run multiple times safely (idempotent)
+## Development Notes
+
+- All migration scripts follow the same pattern for consistency
+- Scripts are designed to be idempotent where possible
+- Color-coded output helps distinguish between different types of messages
+- Comprehensive error checking prevents partial migrations
+- Scripts create detailed logs of all changes made
 
 ## Future Migrations
 
@@ -347,7 +337,7 @@ When adding new migration scripts:
 
 1. Use descriptive names: `migrate-description-of-change.sh`
 2. Include backup functionality
-3. Add verification steps
+3. Add validation steps
 4. Document in this README
 5. Make scripts executable: `chmod +x script-name.sh`
-6. Update cleanup script if superseding old migrations
+6. Follow the established pattern for consistency

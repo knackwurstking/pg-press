@@ -3,6 +3,8 @@ package pdf
 import (
 	"bytes"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/pkg/models"
 
@@ -74,9 +76,95 @@ func addTroubleReportContentSection(o *troubleReportOptions) {
 	o.PDF.SetFillColor(240, 248, 255)
 	o.PDF.CellFormat(0, 10, "INHALT", "1", 1, "L", true, 0, "")
 	o.PDF.Ln(5)
-	o.PDF.SetFont("Arial", "", 11)
-	o.PDF.MultiCell(0, 6, o.Translator(o.Report.Content), "", "", false)
+
+	if o.Report.UseMarkdown {
+		renderMarkdownContentToPDF(o)
+	} else {
+		o.PDF.SetFont("Arial", "", 11)
+		o.PDF.MultiCell(0, 6, o.Translator(o.Report.Content), "", "", false)
+	}
 	o.PDF.Ln(8)
+}
+
+// renderMarkdownContentToPDF renders markdown content with basic formatting in PDF
+func renderMarkdownContentToPDF(o *troubleReportOptions) {
+	content := o.Report.Content
+	lines := strings.Split(content, "\n")
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			o.PDF.Ln(3)
+			continue
+		}
+
+		// Handle headers
+		if strings.HasPrefix(line, "### ") {
+			o.PDF.SetFont("Arial", "B", 11)
+			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[4:])), "", "", false)
+			o.PDF.Ln(2)
+			continue
+		}
+		if strings.HasPrefix(line, "## ") {
+			o.PDF.SetFont("Arial", "B", 12)
+			o.PDF.MultiCell(0, 7, o.Translator(strings.TrimSpace(line[3:])), "", "", false)
+			o.PDF.Ln(2)
+			continue
+		}
+		if strings.HasPrefix(line, "# ") {
+			o.PDF.SetFont("Arial", "B", 13)
+			o.PDF.MultiCell(0, 8, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			o.PDF.Ln(3)
+			continue
+		}
+
+		// Handle lists
+		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
+			o.PDF.SetFont("Arial", "", 10)
+			o.PDF.Cell(10, 6, "•")
+			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			continue
+		}
+
+		// Handle numbered lists
+		if matched, _ := regexp.MatchString(`^\d+\.\s`, line); matched {
+			o.PDF.SetFont("Arial", "", 10)
+			parts := regexp.MustCompile(`^(\d+\.\s)(.*)`).FindStringSubmatch(line)
+			if len(parts) == 3 {
+				o.PDF.Cell(10, 6, parts[1])
+				o.PDF.MultiCell(0, 6, o.Translator(parts[2]), "", "", false)
+			}
+			continue
+		}
+
+		// Handle regular paragraphs with basic formatting
+		o.PDF.SetFont("Arial", "", 10)
+		formattedLine := renderBasicMarkdownFormatting(line)
+		o.PDF.MultiCell(0, 6, o.Translator(formattedLine), "", "", false)
+		o.PDF.Ln(1)
+	}
+}
+
+// renderBasicMarkdownFormatting removes markdown syntax for PDF rendering
+func renderBasicMarkdownFormatting(text string) string {
+	// Remove bold formatting
+	text = regexp.MustCompile(`\*\*(.*?)\*\*`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`__(.*?)__`).ReplaceAllString(text, "$1")
+
+	// Remove italic formatting
+	text = regexp.MustCompile(`\*(.*?)\*`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`_(.*?)_`).ReplaceAllString(text, "$1")
+
+	// Remove strikethrough
+	text = regexp.MustCompile(`~~(.*?)~~`).ReplaceAllString(text, "$1")
+
+	// Remove code formatting
+	text = regexp.MustCompile("`([^`]*)`").ReplaceAllString(text, "$1")
+
+	// Remove link formatting, keep text
+	text = regexp.MustCompile(`\[([^\]]+)\]\([^\)]+\)`).ReplaceAllString(text, "$1")
+
+	return text
 }
 
 func addTroubleReportImagesSection(o *troubleReportOptions) {

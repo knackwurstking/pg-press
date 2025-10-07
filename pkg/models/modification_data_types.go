@@ -7,6 +7,7 @@ type TroubleReportModData struct {
 	Title             string  `json:"title"`
 	Content           string  `json:"content"`
 	LinkedAttachments []int64 `json:"linked_attachments"`
+	UseMarkdown       bool    `json:"use_markdown"`
 }
 
 // MetalSheetModData represents the data structure for metal sheet modifications

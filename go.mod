@@ -10,6 +10,7 @@ require (
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/labstack/gommon v0.4.2
 	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/stretchr/testify v1.11.1
 	github.com/williepotgieter/keymaker v1.0.0
 	golang.org/x/net v0.44.0

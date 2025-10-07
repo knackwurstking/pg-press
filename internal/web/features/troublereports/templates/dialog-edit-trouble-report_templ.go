@@ -22,6 +22,7 @@ type DialogEditTroubleReportProps struct {
 
 	Title       string
 	Content     string
+	UseMarkdown bool
 	Attachments []*models.Attachment
 
 	InvalidTitle    bool
@@ -77,14 +78,14 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n            var selectedFiles = []; // Used by the file input change event handler\n            var existingAttachmentsRemoval = [];\n\n            function updateExistingAttachmentsRemoval() {\n                var input = document.getElementById('existing-attachments-removal');\n                input.value = existingAttachmentsRemoval.join(',');\n            }\n\n            function onAttachments(event) {\n                selectedFiles = Array.from(event.target.files);\n\n                function formatFileSize(bytes) {\n                    if (bytes === 0) return \"0 Bytes\";\n                    var k = 1024;\n                    var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                    var i = Math.floor(Math.log(bytes) / Math.log(k));\n                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n                }\n\n                var previewArea = document.getElementById(\"file-preview\");\n                var container = document.getElementById(\"new-attachments\");\n                container.innerHTML = \"\";\n\n                if (selectedFiles.length > 0) {\n                    previewArea.style.display = \"block\";\n\n                    selectedFiles.forEach((file, index) => {\n                        var sizeClass =\n                            file.size > 10 * 1024 * 1024\n                                ? \"attachment-error\"\n                                : \"muted text-sm\";\n                        var sizeText =\n                            file.size > 10 * 1024 * 1024\n                                ? \"ZU GROSS!\"\n                                : formatFileSize(file.size);\n\n                        /** @type {HTMLTemplateElement} */\n                        var t = previewArea.querySelector(\n                            `template[name=\"attachment-item\"]`,\n                        );\n\n                        /** @type {HTMLElement} */\n                        var item = t.content.cloneNode(true);\n\n                        item.querySelector(`.name`).innerText = file.name;\n\n                        var sizeTextElement = item.querySelector(`.size-text`);\n                        sizeTextElement.innerText = sizeText;\n                        sizeTextElement.className += sizeClass;\n\n                        item.querySelector(`button.delete`).onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments(event);\n                        };\n\n                        container.appendChild(item);\n                    });\n\n                    setTimeout(() => {\n                        previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                    }, 100);\n                } else {\n                    previewArea.style.display = \"none\";\n                }\n            }\n        </script> <!-- Hidden field for attachment order --> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"existing-attachments-removal\" value=\"\"> <label for=\"title\" class=\"flex flex-col\">Titel <input name=\"title\" id=\"title\" placeholder=\"Titel\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t            var selectedFiles = []; // Used by the file input change event handler\n\t\t            var existingAttachmentsRemoval = [];\n\n\t\t            function updateExistingAttachmentsRemoval() {\n\t\t                var input = document.getElementById('existing-attachments-removal');\n\t\t                input.value = existingAttachmentsRemoval.join(',');\n\t\t            }\n\n\t\t            // Markdown functionality\n\t\t            function toggleMarkdownFeatures() {\n\t\t                var checkbox = document.getElementById('use_markdown');\n\t\t                var tools = document.getElementById('markdown-tools');\n\t\t                var textarea = document.getElementById('content');\n\n\t\t                if (checkbox.checked) {\n\t\t                    tools.style.display = 'block';\n\t\t                    textarea.setAttribute('placeholder', 'Bericht (Markdown-Formatierung aktiviert)');\n\t\t                } else {\n\t\t                    tools.style.display = 'none';\n\t\t                    document.getElementById('markdown-preview').classList.remove('active');\n\t\t                    textarea.setAttribute('placeholder', 'Bericht');\n\t\t                }\n\t\t            }\n\n\t\t            function insertMarkdown(before, after) {\n\t\t                var textarea = document.getElementById('content');\n\t\t                var start = textarea.selectionStart;\n\t\t                var end = textarea.selectionEnd;\n\t\t                var selectedText = textarea.value.substring(start, end);\n\n\t\t                var newText = before + selectedText + after;\n\n\t\t                textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);\n\n\t\t                // Set cursor position\n\t\t                var newStart = start + before.length;\n\t\t                var newEnd = newStart + selectedText.length;\n\t\t                textarea.setSelectionRange(newStart, newEnd);\n\t\t                textarea.focus();\n\t\t            }\n\n\t\t            function togglePreview() {\n\t\t                var preview = document.getElementById('markdown-preview');\n\t\t                var btn = document.getElementById('preview-btn');\n\t\t                var textarea = document.getElementById('content');\n\n\t\t                if (preview.classList.contains('active')) {\n\t\t                    preview.classList.remove('active');\n\t\t                    btn.textContent = 'Vorschau';\n\t\t                    btn.className = 'info small';\n\t\t                } else {\n\t\t                    updatePreview();\n\t\t                    preview.classList.add('active');\n\t\t                    btn.textContent = 'Bearbeiten';\n\t\t                    btn.className = 'secondary small';\n\t\t                }\n\t\t            }\n\n\t\t            function updatePreview() {\n\t\t                var textarea = document.getElementById('content');\n\t\t                var previewContent = document.getElementById('preview-content');\n\n\t\t                // Use shared markdown rendering function\n\t\t                var html = '';\n\t\t                if (typeof window.renderMarkdownToHTML === 'function') {\n\t\t                    html = window.renderMarkdownToHTML(textarea.value);\n\t\t                } else {\n\t\t                    // Fallback if shared function not available\n\t\t                    html = '<pre>' + textarea.value + '</pre>';\n\t\t                }\n\n\t\t                // Wrap in markdown-content class for proper styling\n\t\t                previewContent.innerHTML = '<div class=\"markdown-content\">' + html + '</div>';\n\t\t            }\n\n\t\t            // Initialize markdown features when dialog loads\n\t\t            function initializeMarkdownFeatures() {\n\t\t                var checkbox = document.getElementById('use_markdown');\n\t\t                if (checkbox) {\n\t\t                    toggleMarkdownFeatures();\n\t\t                }\n\t\t            }\n\n\t\t            // Call initialization after a small delay to ensure all DOM elements are ready\n\t\t            setTimeout(initializeMarkdownFeatures, 50);\n\n\t\t            function onAttachments(event) {\n                selectedFiles = Array.from(event.target.files);\n\n                function formatFileSize(bytes) {\n                    if (bytes === 0) return \"0 Bytes\";\n                    var k = 1024;\n                    var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                    var i = Math.floor(Math.log(bytes) / Math.log(k));\n                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n                }\n\n                var previewArea = document.getElementById(\"file-preview\");\n                var container = document.getElementById(\"new-attachments\");\n                container.innerHTML = \"\";\n\n                if (selectedFiles.length > 0) {\n                    previewArea.style.display = \"block\";\n\n                    selectedFiles.forEach((file, index) => {\n                        var sizeClass =\n                            file.size > 10 * 1024 * 1024\n                                ? \"attachment-error\"\n                                : \"muted text-sm\";\n                        var sizeText =\n                            file.size > 10 * 1024 * 1024\n                                ? \"ZU GROSS!\"\n                                : formatFileSize(file.size);\n\n                        /** @type {HTMLTemplateElement} */\n                        var t = previewArea.querySelector(\n                            `template[name=\"attachment-item\"]`,\n                        );\n\n                        /** @type {HTMLElement} */\n                        var item = t.content.cloneNode(true);\n\n                        item.querySelector(`.name`).innerText = file.name;\n\n                        var sizeTextElement = item.querySelector(`.size-text`);\n                        sizeTextElement.innerText = sizeText;\n                        sizeTextElement.className += sizeClass;\n\n                        item.querySelector(`button.delete`).onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments(event);\n                        };\n\n                        container.appendChild(item);\n                    });\n\n                    setTimeout(() => {\n                        previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                    }, 100);\n                } else {\n                    previewArea.style.display = \"none\";\n                }\n            }\n        </script> <!-- Hidden field for attachment order --> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"existing-attachments-removal\" value=\"\"> <label for=\"title\" class=\"flex flex-col\">Titel <input name=\"title\" id=\"title\" placeholder=\"Titel\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 131, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 210, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -117,104 +118,114 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 146, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 225, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></label><!-- Attachments Section --> <div id=\"attachments-section\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></label> <label for=\"use_markdown\" class=\"flex gap items-center\"><input type=\"checkbox\" name=\"use_markdown\" id=\"use_markdown\" onchange=\"toggleMarkdownFeatures()\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if props.UseMarkdown {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " checked")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "> <span>Markdown-Formatierung verwenden</span> <small class=\"muted\">(unterstützt **fett**, *kursiv*, # Überschriften, automatische Zeilenumbrüche, etc.)</small></label><!-- Markdown Tools --> <div id=\"markdown-tools\" style=\"display: none;\"><div class=\"flex gap items-center\" style=\"margin: calc(var(--ui-spacing) / 2) 0;\"><button type=\"button\" onclick=\"insertMarkdown('**', '**')\" class=\"secondary small\"><strong>B</strong></button> <button type=\"button\" onclick=\"insertMarkdown('*', '*')\" class=\"secondary small\"><em>I</em></button> <button type=\"button\" onclick=\"insertMarkdown('# ', '')\" class=\"secondary small\">H1</button> <button type=\"button\" onclick=\"insertMarkdown('## ', '')\" class=\"secondary small\">H2</button> <button type=\"button\" onclick=\"insertMarkdown('- ', '')\" class=\"secondary small\">List</button> <button type=\"button\" onclick=\"insertMarkdown('`', '`')\" class=\"secondary small\">Code</button> <button type=\"button\" onclick=\"togglePreview()\" id=\"preview-btn\" class=\"info small\">Vorschau</button></div><div id=\"markdown-preview\" class=\"markdown-preview\"><div id=\"preview-content\"></div></div></div><!-- Attachments Section --> <div id=\"attachments-section\" class=\"attachments-container flex flex-col gap\"><small class=\"attachments-label\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.InvalidTitle || props.InvalidContent {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"attachment-error\"><i class=\"bi bi-exclamation-triangle\"></i> Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"attachment-error\"><i class=\"bi bi-exclamation-triangle\"></i> Anhänge wurden aufgrund von Validierungsfehlern entfernt. Bitte korrigieren Sie die Fehler und laden Sie die Dateien erneut hoch.</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if props.AttachmentError != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"attachment-error\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"attachment-error\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.AttachmentError)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 160, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 281, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Existing Attachments -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- Existing Attachments -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(props.Attachments) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\tif(this.open) setTimeout(() => {\n\t\t\t\t\t\t\tthis.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t}, 100);\n\t\t\t\t\t'><summary class=\"attachments-label flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<details class=\"attachments-section border\" ontoggle='\n\t\t\t\t\t\tif(this.open) setTimeout(() => {\n\t\t\t\t\t\t\tthis.parentElement.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t\t\t}, 100);\n\t\t\t\t\t'><summary class=\"attachments-label flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(len(props.Attachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 174, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 295, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ")</summary><div id=\"existing-attachments\" class=\"flex flex-col gap\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ")</summary><div id=\"existing-attachments\" class=\"flex flex-col gap\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for attachmentIndex, attachment := range props.Attachments {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"attachment-item flex gap justify-between items-center border\" data-id=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"attachment-item flex gap justify-between items-center border\" data-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s", attachment.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 180, Col: 50}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 301, Col: 50}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"><div class=\"attachment-info flex gap items-center\"><span class=\"ellipsis\">Anhang ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><div class=\"attachment-info flex gap items-center\"><span class=\"ellipsis\">Anhang ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 183, Col: 58}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 304, Col: 58}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <span class=\"muted text-sm ellipsis\">(")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span> <span class=\"muted text-sm ellipsis\">(")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 184, Col: 73}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/dialog-edit-trouble-report.templ`, Line: 305, Col: 73}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, ")</span></div><div class=\"attachment-actions flex gap\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, ")</span></div><div class=\"attachment-actions flex gap\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -222,7 +233,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<button type=\"button\" class=\"secondary flex gap items-center\" onclick=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button type=\"button\" class=\"secondary flex gap items-center\" onclick=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -231,7 +242,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-eye\"></i> Anzeigen</small></button> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-eye\"></i> Anzeigen</small></button> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -239,7 +250,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button type=\"button\" class=\"destructive flex gap items-center\" onclick=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<button type=\"button\" class=\"destructive flex gap items-center\" onclick=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -248,17 +259,17 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Löschen</small></button></div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Löschen</small></button></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></details>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div></details>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- File Upload Area --><div class=\"file-input-area flex flex-col justify-center items-center\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div><input type=\"file\" name=\"attachments\" id=\"attachments\" multiple accept=\"image/*\" onchange=\"onAttachments(event)\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<!-- File Upload Area --><div class=\"file-input-area flex flex-col justify-center items-center\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"window.dialogEditFunctions.handleFileDrop(event)\" ondragover=\"window.dialogEditFunctions.handleDragOver(event)\" ondragleave=\"window.dialogEditFunctions.handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"text-center\">Bilder hochladen</div><input type=\"file\" name=\"attachments\" id=\"attachments\" multiple accept=\"image/*\" onchange=\"onAttachments(event)\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview flex flex-col gap border\"><div class=\"attachments-label\">Neue Bilder:</div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"name ellipsis\"></span> <span class=\"size-text ellipsis\"></span></div><div class=\"attachment-actions flex gap\"><button type=\"button\" class=\"delete destructive flex gap items-center\"><small class=\"flex gap items-center\"><i class=\"bi bi-trash\"></i> Entfernen</small></button></div></div></template></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -270,7 +281,7 @@ func DialogEditTroubleReport(props *DialogEditTroubleReportProps) templ.Componen
 			Href:                  baseHref,
 			SubmitButtonText:      submitButtonText,
 			Behavior:              "custom",
-			CustomWindowEventName: "visibilitychange",
+			CustomWindowEventName: "troubleReportSaved",
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

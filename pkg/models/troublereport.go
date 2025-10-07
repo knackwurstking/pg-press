@@ -20,6 +20,7 @@ type TroubleReport struct {
 	Title             string  `json:"title"`
 	Content           string  `json:"content"`
 	LinkedAttachments []int64 `json:"linked_attachments"`
+	UseMarkdown       bool    `json:"use_markdown"`
 }
 
 // New creates a new trouble report with the provided details.
@@ -28,6 +29,7 @@ func NewTroubleReport(title, content string, linkedAttachments ...int64) *Troubl
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
 		LinkedAttachments: linkedAttachments,
+		UseMarkdown:       false,
 	}
 }
 
@@ -138,7 +140,7 @@ func (tr *TroubleReport) Equals(other *TroubleReport) bool {
 	if other == nil {
 		return false
 	}
-	if tr.ID != other.ID || tr.Title != other.Title || tr.Content != other.Content {
+	if tr.ID != other.ID || tr.Title != other.Title || tr.Content != other.Content || tr.UseMarkdown != other.UseMarkdown {
 		return false
 	}
 	if tr.AttachmentCount() != other.AttachmentCount() {
