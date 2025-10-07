@@ -23,24 +23,14 @@ type EditorOptions struct {
 templ EditorPage(options *EditorOptions) {
 	@layouts.Main(layouts.MainOptions{
 		PageTitle:      getPageTitle(options),
-		AppBarTitle:    "Editor",
+		AppBarTitle:    getEditorTitle(options),
 		AdditionalHead: editorStyles(),
+		NavContent:     navContent(options),
 	}) {
 		<main class="container fluid">
 			<div class="editor-container">
-				<div class="editor-header flex gap justify-between items-center">
-					<h2>{ getEditorTitle(options) }</h2>
-					<div class="editor-actions flex gap">
-						if options.ReturnURL != "" {
-							<a href={ templ.URL(options.ReturnURL) } class="secondary">
-								<i class="bi bi-arrow-left"></i>
-								Zurück
-							</a>
-						}
-					</div>
-				</div>
 				<form
-					class="editor-form flex flex-col gap"
+					class="editor-form flex flex-col gap px"
 					method="POST"
 					action={ templ.URL(fmt.Sprintf("%s/editor/save", env.ServerPathPrefix)) }
 					enctype="multipart/form-data"
@@ -51,22 +41,22 @@ templ EditorPage(options *EditorOptions) {
 					<input type="hidden" name="return_url" value={ options.ReturnURL }/>
 					<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
 					<!-- Title Input -->
-					<div class="form-group">
-						<label for="title" class="form-label">Titel</label>
+					<div class="flex flex-col gap-sm w-full">
+						<label for="title" class="text-sm text-medium">Titel</label>
 						<input
 							type="text"
 							name="title"
 							id="title"
-							class="form-input"
+							class="w-full"
 							placeholder="Titel eingeben..."
 							value={ options.Title }
 							required
 						/>
 					</div>
 					<!-- Markdown Toggle -->
-					<div class="form-group">
-						<div class="markdown-container">
-							<label for="use_markdown" class="markdown-checkbox-container flex gap items-center">
+					<div class="my">
+						<div class="p border muted cursor-pointer transition-all" style="border-radius: var(--ui-radius);">
+							<label for="use_markdown" class="flex gap items-center cursor-pointer">
 								<input
 									type="checkbox"
 									name="use_markdown"
@@ -76,99 +66,104 @@ templ EditorPage(options *EditorOptions) {
 										checked
 									}
 								/>
-								<span class="markdown-label">Markdown-Formatierung verwenden</span>
-								<small class="muted markdown-help">
+								<span class="text-medium">Markdown-Formatierung verwenden</span>
+								<small class="muted text-sm italic ml-auto">
 									(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)
 								</small>
 							</label>
 						</div>
 					</div>
 					<!-- Markdown Tools -->
-					<div id="markdown-tools" class="markdown-tools-container" style="display: none;">
-						<div class="tools-header">
-							<span class="tools-label">Markdown-Werkzeuge</span>
+					<div id="markdown-tools" class="border p my transition-all" style="display: none; border-radius: var(--ui-radius);">
+						<div class="mb text-sm text-semibold">
+							<span>Markdown-Werkzeuge</span>
 						</div>
-						<div class="tools-grid">
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('**', '**')" title="Fett">
+						<div class="flex gap-sm flex-wrap">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('**', '**')" title="Fett">
 								<i class="bi bi-type-bold"></i>
 							</button>
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('*', '*')" title="Kursiv">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('*', '*')" title="Kursiv">
 								<i class="bi bi-type-italic"></i>
 							</button>
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('# ', '')" title="Überschrift">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('# ', '')" title="Überschrift">
 								<i class="bi bi-type-h1"></i>
 							</button>
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('> ', '')" title="Zitat">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('> ', '')" title="Zitat">
 								<i class="bi bi-quote"></i>
 							</button>
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('`', '`')" title="Code">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('`', '`')" title="Code">
 								<i class="bi bi-code"></i>
 							</button>
-							<button type="button" class="tool-btn secondary small" onclick="insertMarkdown('- ', '')" title="Liste">
+							<button type="button" class="icon secondary small" onclick="insertMarkdown('- ', '')" title="Liste">
 								<i class="bi bi-list-ul"></i>
 							</button>
 						</div>
 					</div>
 					<!-- Content Textarea -->
-					<div class="form-group">
-						<label for="content" class="form-label">Inhalt</label>
-						<div class="editor-content-container">
+					<div class="flex flex-col gap-sm">
+						<label for="content" class="text-sm text-medium">Inhalt</label>
+						<div class="flex flex-col gap">
 							<textarea
 								name="content"
 								id="content"
-								class="form-textarea editor-textarea"
+								class="w-full resize-y"
 								placeholder="Inhalt eingeben..."
 								required
 								rows="15"
+								style="font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; min-height: 400px;"
 							>{ options.Content }</textarea>
 							<!-- Markdown Preview -->
 						</div>
 					</div>
 					<!-- Markdown Preview -->
-					<div id="markdown-preview-container" class="markdown-preview-container" style="display: none;">
-						<div id="markdown-preview" class="markdown-preview">
-							<div class="preview-header">
-								<span class="preview-label">Live-Vorschau</span>
-								<button type="button" class="preview-toggle secondary small" onclick="togglePreviewMode()">
+					<div id="markdown-preview-container" class="my transition-all" style="display: none;">
+						<div id="markdown-preview" class="border flex flex-col overflow-hidden" style="height: 400px; border-radius: var(--ui-radius);">
+							<div class="px py-sm border-bottom muted flex justify-between items-center text-semibold text-sm">
+								<span>Live-Vorschau</span>
+								<button type="button" class="secondary small flex gap-sm items-center" onclick="togglePreviewMode()">
 									<i class="bi bi-arrows-angle-expand"></i>
 									<span id="preview-toggle-text">Vollbild</span>
 								</button>
 							</div>
-							<div id="preview-content" class="preview-content markdown-content"></div>
+							<div id="preview-content" class="p flex-1 overflow-y-auto markdown-content"></div>
 						</div>
 					</div>
 					<!-- Separator between preview and attachments -->
-					<div class="section-separator"></div>
+					<div class="my-lg relative flex items-center justify-center">
+						<hr class="w-full"/>
+						<div class="absolute px text-lg" style="background: var(--ui-bg);">📎</div>
+					</div>
 					if supportsAttachments(options.Type) {
 						<!-- Attachments Section -->
-						<div class="attachments-section">
-							<div class="attachments-header">
-								<h3 class="form-label attachments-title">
+						<div class="border-2 p-lg muted mt transition-all" style="border-radius: var(--ui-radius);">
+							<div class="mb-lg">
+								<h3 class="text-lg text-semibold primary ghost flex gap-sm items-center mb">
 									<i class="bi bi-paperclip"></i>
 									Dateien & Anhänge
 								</h3>
-								<small class="attachments-help">
+								<div class="p border-left primary text-sm text-medium muted" style="border-left-width: 4px;">
 									Bilder (max. 10MB pro Datei, max. 10 Dateien)
-								</small>
+								</div>
 							</div>
 							if len(options.Attachments) > 0 {
 								<!-- Existing Attachments -->
-								<details class="existing-attachments border">
-									<summary class="attachments-summary flex gap items-center">
+								<details class="border mb" style="border-radius: var(--ui-radius);">
+									<summary class="p cursor-pointer text-medium flex gap items-center">
 										<i class="bi bi-images"></i>
 										Vorhandene Bilder ({ len(options.Attachments) })
 									</summary>
-									<div id="existing-attachments" class="attachments-list">
+									<div id="existing-attachments" class="flex flex-col gap mt">
 										for attachmentIndex, attachment := range options.Attachments {
 											<div
-												class="attachment-item flex gap justify-between items-center border"
+												class="p border flex gap justify-between items-center"
 												data-id={ fmt.Sprintf("%d", attachment.GetID()) }
+												style="border-radius: var(--ui-radius);"
 											>
-												<div class="attachment-info flex gap items-center">
-													<span class="attachment-name">Anhang { attachmentIndex+1 }</span>
-													<span class="attachment-type muted text-sm">({ attachment.GetMimeType() })</span>
+												<div class="flex gap items-center">
+													<span class="text-medium">Anhang { attachmentIndex+1 }</span>
+													<span class="muted text-sm">({ attachment.GetMimeType() })</span>
 												</div>
-												<div class="attachment-actions flex gap">
+												<div class="flex gap-sm">
 													<button
 														type="button"
 														class="secondary small"
@@ -193,15 +188,16 @@ templ EditorPage(options *EditorOptions) {
 							}
 							<!-- File Upload Area -->
 							<div
-								class="file-upload-area"
+								class="border-2 border-dashed p-xl text-center cursor-pointer transition-all mb"
 								onclick='document.getElementById("attachments").click();'
 								ondrop="handleFileDrop(event)"
 								ondragover="handleDragOver(event)"
 								ondragleave="handleDragLeave(event)"
+								style="border-radius: var(--ui-radius);"
 							>
-								<i class="bi bi-cloud-upload"></i>
-								<div class="upload-text">Bilder hochladen</div>
-								<div class="upload-hint">Klicken oder Dateien hierher ziehen</div>
+								<i class="bi bi-cloud-upload text-2xl mb-sm"></i>
+								<div class="text-medium mb-sm">Bilder hochladen</div>
+								<div class="text-sm opacity-75">Klicken oder Dateien hierher ziehen</div>
 								<input
 									type="file"
 									name="attachments"
@@ -209,21 +205,22 @@ templ EditorPage(options *EditorOptions) {
 									multiple
 									accept="image/*"
 									onchange="onAttachments(event)"
+									class="hidden"
 								/>
 							</div>
 							<!-- File Preview Area -->
-							<div id="file-preview" class="file-preview" style="display: none;">
-								<div class="preview-header">
-									<span class="preview-label">Neue Bilder:</span>
+							<div id="file-preview" class="border p" style="display: none; border-radius: var(--ui-radius);">
+								<div class="mb text-medium">
+									<span>Neue Bilder:</span>
 								</div>
-								<div id="new-attachments" class="attachments-list"></div>
+								<div id="new-attachments" class="flex flex-col gap"></div>
 								<template name="attachment-item">
-									<div class="attachment-item flex gap justify-between items-center border">
-										<div class="attachment-info flex gap items-center">
-											<span class="attachment-name name"></span>
-											<span class="attachment-size size-text"></span>
+									<div class="p border flex gap justify-between items-center" style="border-radius: var(--ui-radius);">
+										<div class="flex gap items-center">
+											<span class="attachment-name name text-medium"></span>
+											<span class="attachment-size size-text text-sm muted"></span>
 										</div>
-										<div class="attachment-actions">
+										<div>
 											<button
 												type="button"
 												class="delete destructive small"
@@ -238,13 +235,18 @@ templ EditorPage(options *EditorOptions) {
 						</div>
 					}
 					<!-- Form Actions -->
-					<div class="form-actions flex gap justify-end">
+					<div class="mt-lg pt border-top flex gap justify-end">
 						if options.ReturnURL != "" {
-							<a href={ templ.URL(options.ReturnURL) } class="secondary">
+							<a
+								role="button"
+								href={ templ.URL(options.ReturnURL) }
+								class="secondary flex gap-sm items-center"
+							>
+								<i class="bi bi-x-circle"></i>
 								Abbrechen
 							</a>
 						}
-						<button type="submit" class="primary">
+						<button type="submit" class="primary flex gap-sm items-center">
 							if options.ID > 0 {
 								<i class="bi bi-check-circle"></i>
 								Aktualisieren
@@ -258,179 +260,26 @@ templ EditorPage(options *EditorOptions) {
 			</div>
 		</main>
 		@components.MarkdownScript()
+		@editorStyles()
 		@editorScripts()
 	}
+}
+
+templ navContent(options *EditorOptions) {
+	<div class="flex flex-row gap justify-end items-center">
+		if options.ReturnURL != "" {
+			<a href={ templ.URL(options.ReturnURL) } class="secondary flex gap">
+				<i class="bi bi-arrow-left"></i>
+				Zurück
+			</a>
+		}
+	</div>
 }
 
 templ editorStyles() {
 	@components.MarkdownStyles()
 	<style>
-        .editor-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        .editor-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .editor-content-container {
-            position: relative;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .editor-textarea {
-            flex: 1;
-            min-height: 400px;
-            resize: vertical;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        }
-
-        .markdown-preview {
-            flex: 1;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-
-        .preview-header {
-            padding: 0.5rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: 500;
-        }
-
-        .preview-content {
-            padding: 1rem;
-            min-height: 350px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        /* Markdown container styling */
-        .markdown-container {
-            margin: 1rem 0;
-        }
-
-        .markdown-checkbox-container {
-            padding: 1rem;
-            background-color: var(--ui-muted);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .markdown-checkbox-container:hover {
-            border-color: var(--primary-color);
-        }
-
-        .markdown-label {
-            font-weight: 500;
-        }
-
-        .markdown-help {
-            margin-left: auto;
-            font-style: italic;
-        }
-
-        /* Markdown tools styling */
-        .markdown-tools-container {
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 1rem;
-            margin: 1rem 0;
-            transition: all 0.3s ease;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .tools-header {
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .tools-grid {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tool-btn {
-            min-width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Markdown preview styling */
-        .markdown-preview-container {
-            margin: 1rem 0;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        .markdown-preview {
-            border: 3px solid var(--border-color, #ccc) !important;
-            border-radius: 8px !important;
-            height: 400px !important;
-            position: relative !important;
-            background: var(--ui-bg, #fff) !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-            display: flex !important;
-            flex-direction: column !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            overflow: hidden !important;
-        }
-
-
-
-        .markdown-preview-container .markdown-preview {
-            border: 3px solid var(--border-color, #ccc) !important;
-            border-radius: 8px !important;
-            background-color: var(--ui-bg, #fff) !important;
-        }
-
-        /* Highly specific selector to override any framework styles */
-        .editor-form .markdown-preview-container #markdown-preview.markdown-preview {
-            border: 3px solid var(--border-color, #ccc) !important;
-            border-radius: 8px !important;
-            background-color: var(--ui-bg, #fff) !important;
-            outline: none !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-            height: 400px !important;
-            overflow: hidden !important;
-        }
-
-
-
-        .preview-header {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color, #ccc) !important;
-            background-color: var(--ui-muted, #f8f9fa) !important;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 4px 4px 0 0;
-            flex-shrink: 0;
-        }
-
-        .preview-content {
-            padding: 1rem;
-            flex: 1;
-            overflow-y: auto;
-            line-height: 1.6;
-            font-size: 0.9rem;
-            box-sizing: border-box;
-            border-radius: 0 0 4px 4px;
-        }
-
-        /* Markdown content styling within preview */
+        /* Essential custom styles */
         .markdown-content h1,
         .markdown-content h2,
         .markdown-content h3,
@@ -484,194 +333,42 @@ templ editorStyles() {
             font-style: italic;
         }
 
-
-
-        /* Animation keyframes */
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-                max-height: 0;
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-                max-height: 100vh;
-            }
-        }
-
-        /* Section separator styling */
-        .section-separator {
-            margin: 3rem 0;
-            height: 2px;
-            background: linear-gradient(to right, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
-            position: relative;
-        }
-
-        .section-separator::before {
-            content: "📎";
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--ui-bg);
-            padding: 0.5rem 1rem;
-            font-size: 1.1rem;
-            color: var(--muted-text);
-        }
-
-        .attachments-section {
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            background: var(--ui-muted);
-            margin-top: 1rem;
-            transition: all 0.2s ease;
-        }
-
-        .attachments-section:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .attachments-help {
-            display: block;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-            color: var(--muted-text);
-            background: var(--ui-bg);
-            padding: 0.75rem;
-            border-radius: 4px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .existing-attachments {
-            margin-bottom: 1rem;
-        }
-
-        .attachments-summary {
-            padding: 0.5rem;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .attachments-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .attachments-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .attachments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .attachment-item {
-            padding: 0.75rem;
-            border-radius: 4px;
-        }
-
-        .attachment-info {
-            flex: 1;
-        }
-
-        .attachment-name {
-            font-weight: 500;
-        }
-
-        .attachment-type {
-            opacity: 0.7;
-        }
-
-        .attachment-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .file-upload-area {
-            border: 2px dashed var(--border-color);
-            border-radius: 4px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 1rem;
-        }
-
-        .file-upload-area:hover {
-            border-color: var(--primary-color);
-        }
-
-        .file-upload-area.drag-over {
-            border-color: var(--primary-color);
-        }
-
-        .upload-text {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .upload-hint {
-            font-size: 0.875rem;
-            opacity: 0.7;
-        }
-
-        .file-upload-area input[type="file"] {
-            display: none;
-        }
-
-        .file-preview {
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 1rem;
-        }
-
-        .preview-header {
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .form-actions {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
         /* Responsive design */
         @media (max-width: 768px) {
-            .editor-content-container {
-                flex-direction: column;
-            }
-
-            .markdown-preview {
+            #markdown-preview {
                 min-height: 200px;
             }
 
-            .tools-grid {
+            .flex-wrap {
                 justify-content: center;
             }
         }
 
-        /* Preview fullscreen mode */
-        .preview-fullscreen .editor-content-container {
-            flex-direction: column;
+        /* Custom hover states */
+        .transition-all:hover {
+            border-color: var(--ui-primary);
         }
 
-        .preview-fullscreen .editor-textarea {
+        .border-2:hover {
+            border-color: var(--ui-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* File upload hover states */
+        .file-upload-area:hover {
+            border-color: var(--ui-primary);
+        }
+
+        .file-upload-area.drag-over {
+            border-color: var(--ui-primary);
+        }
+
+        /* Preview fullscreen mode */
+        .preview-fullscreen textarea {
             display: none;
         }
 
-        .preview-fullscreen .markdown-preview {
+        .preview-fullscreen #markdown-preview {
             min-height: 600px;
         }
     </style>

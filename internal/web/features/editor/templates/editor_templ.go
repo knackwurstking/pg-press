@@ -61,198 +61,162 @@ func EditorPage(options *EditorOptions) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"editor-container\"><div class=\"editor-header flex gap justify-between items-center\"><h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"editor-container\"><form class=\"editor-form flex flex-col gap px\" method=\"POST\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(getEditorTitle(options))
+			var templ_7745c5c3_Var3 templ.SafeURL
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/editor/save", env.ServerPathPrefix)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 32, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 35, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h2><div class=\"editor-actions flex gap\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" enctype=\"multipart/form-data\"><!-- Hidden fields --><input type=\"hidden\" name=\"type\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if options.ReturnURL != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a href=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var4 templ.SafeURL
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 35, Col: 45}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"secondary\"><i class=\"bi bi-arrow-left\"></i> Zurück</a>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(options.Type)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 39, Col: 58}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><form class=\"editor-form flex flex-col gap\" method=\"POST\" action=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 templ.SafeURL
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/editor/save", env.ServerPathPrefix)))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"> <input type=\"hidden\" name=\"id\" value=\"")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 45, Col: 76}
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatInt(options.ID, 10))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 40, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" enctype=\"multipart/form-data\"><!-- Hidden fields --><input type=\"hidden\" name=\"type\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"> <input type=\"hidden\" name=\"return_url\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(options.Type)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(options.ReturnURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 49, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 41, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"> <input type=\"hidden\" name=\"id\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"existing-attachments-removal\" value=\"\"><!-- Title Input --><div class=\"flex flex-col gap-sm w-full\"><label for=\"title\" class=\"text-sm text-medium\">Titel</label> <input type=\"text\" name=\"title\" id=\"title\" class=\"w-full\" placeholder=\"Titel eingeben...\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatInt(options.ID, 10))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(options.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 50, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 52, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"> <input type=\"hidden\" name=\"return_url\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" required></div><!-- Markdown Toggle --><div class=\"my\"><div class=\"p border muted cursor-pointer transition-all\" style=\"border-radius: var(--ui-radius);\"><label for=\"use_markdown\" class=\"flex gap items-center cursor-pointer\"><input type=\"checkbox\" name=\"use_markdown\" id=\"use_markdown\" onchange=\"toggleMarkdownFeatures()\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if options.UseMarkdown {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " checked")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> <span class=\"text-medium\">Markdown-Formatierung verwenden</span> <small class=\"muted text-sm italic ml-auto\">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small></label></div></div><!-- Markdown Tools --><div id=\"markdown-tools\" class=\"border p my transition-all\" style=\"display: none; border-radius: var(--ui-radius);\"><div class=\"mb text-sm text-semibold\"><span>Markdown-Werkzeuge</span></div><div class=\"flex gap-sm flex-wrap\"><button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('**', '**')\" title=\"Fett\"><i class=\"bi bi-type-bold\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('*', '*')\" title=\"Kursiv\"><i class=\"bi bi-type-italic\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('# ', '')\" title=\"Überschrift\"><i class=\"bi bi-type-h1\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('> ', '')\" title=\"Zitat\"><i class=\"bi bi-quote\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('`', '`')\" title=\"Code\"><i class=\"bi bi-code\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('- ', '')\" title=\"Liste\"><i class=\"bi bi-list-ul\"></i></button></div></div><!-- Content Textarea --><div class=\"flex flex-col gap-sm\"><label for=\"content\" class=\"text-sm text-medium\">Inhalt</label><div class=\"flex flex-col gap\"><textarea name=\"content\" id=\"content\" class=\"w-full resize-y\" placeholder=\"Inhalt eingeben...\" required rows=\"15\" style=\"font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; min-height: 400px;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(options.ReturnURL)
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(options.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 51, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 114, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"> <input type=\"hidden\" name=\"existing_attachments_removal\" id=\"existing-attachments-removal\" value=\"\"><!-- Title Input --><div class=\"form-group\"><label for=\"title\" class=\"form-label\">Titel</label> <input type=\"text\" name=\"title\" id=\"title\" class=\"form-input\" placeholder=\"Titel eingeben...\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(options.Title)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 62, Col: 28}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" required></div><!-- Markdown Toggle --><div class=\"form-group\"><div class=\"markdown-container\"><label for=\"use_markdown\" class=\"markdown-checkbox-container flex gap items-center\"><input type=\"checkbox\" name=\"use_markdown\" id=\"use_markdown\" onchange=\"toggleMarkdownFeatures()\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if options.UseMarkdown {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "> <span class=\"markdown-label\">Markdown-Formatierung verwenden</span> <small class=\"muted markdown-help\">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small></label></div></div><!-- Markdown Tools --><div id=\"markdown-tools\" class=\"markdown-tools-container\" style=\"display: none;\"><div class=\"tools-header\"><span class=\"tools-label\">Markdown-Werkzeuge</span></div><div class=\"tools-grid\"><button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('**', '**')\" title=\"Fett\"><i class=\"bi bi-type-bold\"></i></button> <button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('*', '*')\" title=\"Kursiv\"><i class=\"bi bi-type-italic\"></i></button> <button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('# ', '')\" title=\"Überschrift\"><i class=\"bi bi-type-h1\"></i></button> <button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('> ', '')\" title=\"Zitat\"><i class=\"bi bi-quote\"></i></button> <button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('`', '`')\" title=\"Code\"><i class=\"bi bi-code\"></i></button> <button type=\"button\" class=\"tool-btn secondary small\" onclick=\"insertMarkdown('- ', '')\" title=\"Liste\"><i class=\"bi bi-list-ul\"></i></button></div></div><!-- Content Textarea --><div class=\"form-group\"><label for=\"content\" class=\"form-label\">Inhalt</label><div class=\"editor-content-container\"><textarea name=\"content\" id=\"content\" class=\"form-textarea editor-textarea\" placeholder=\"Inhalt eingeben...\" required rows=\"15\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(options.Content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 123, Col: 25}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</textarea><!-- Markdown Preview --></div></div><!-- Markdown Preview --><div id=\"markdown-preview-container\" class=\"markdown-preview-container\" style=\"display: none;\"><div id=\"markdown-preview\" class=\"markdown-preview\"><div class=\"preview-header\"><span class=\"preview-label\">Live-Vorschau</span> <button type=\"button\" class=\"preview-toggle secondary small\" onclick=\"togglePreviewMode()\"><i class=\"bi bi-arrows-angle-expand\"></i> <span id=\"preview-toggle-text\">Vollbild</span></button></div><div id=\"preview-content\" class=\"preview-content markdown-content\"></div></div></div><!-- Separator between preview and attachments --><div class=\"section-separator\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</textarea><!-- Markdown Preview --></div></div><!-- Markdown Preview --><div id=\"markdown-preview-container\" class=\"my transition-all\" style=\"display: none;\"><div id=\"markdown-preview\" class=\"border flex flex-col overflow-hidden\" style=\"height: 400px; border-radius: var(--ui-radius);\"><div class=\"px py-sm border-bottom muted flex justify-between items-center text-semibold text-sm\"><span>Live-Vorschau</span> <button type=\"button\" class=\"secondary small flex gap-sm items-center\" onclick=\"togglePreviewMode()\"><i class=\"bi bi-arrows-angle-expand\"></i> <span id=\"preview-toggle-text\">Vollbild</span></button></div><div id=\"preview-content\" class=\"p flex-1 overflow-y-auto markdown-content\"></div></div></div><!-- Separator between preview and attachments --><div class=\"my-lg relative flex items-center justify-center\"><hr class=\"w-full\"><div class=\"absolute px text-lg\" style=\"background: var(--ui-bg);\">📎</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if supportsAttachments(options.Type) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<!-- Attachments Section --> <div class=\"attachments-section\"><div class=\"attachments-header\"><h3 class=\"form-label attachments-title\"><i class=\"bi bi-paperclip\"></i> Dateien & Anhänge</h3><small class=\"attachments-help\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</small></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Attachments Section --> <div class=\"border-2 p-lg muted mt transition-all\" style=\"border-radius: var(--ui-radius);\"><div class=\"mb-lg\"><h3 class=\"text-lg text-semibold primary ghost flex gap-sm items-center mb\"><i class=\"bi bi-paperclip\"></i> Dateien & Anhänge</h3><div class=\"p border-left primary text-sm text-medium muted\" style=\"border-left-width: 4px;\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if len(options.Attachments) > 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<!-- Existing Attachments --> <details class=\"existing-attachments border\"><summary class=\"attachments-summary flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Existing Attachments --> <details class=\"border mb\" style=\"border-radius: var(--ui-radius);\"><summary class=\"p cursor-pointer text-medium flex gap items-center\"><i class=\"bi bi-images\"></i> Vorhandene Bilder (")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var11 string
-					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(len(options.Attachments))
+					var templ_7745c5c3_Var9 string
+					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(len(options.Attachments))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 159, Col: 55}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 153, Col: 55}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ")</summary><div id=\"existing-attachments\" class=\"attachments-list\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, ")</summary><div id=\"existing-attachments\" class=\"flex flex-col gap mt\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					for attachmentIndex, attachment := range options.Attachments {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"attachment-item flex gap justify-between items-center border\" data-id=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"p border flex gap justify-between items-center\" data-id=\"")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var10 string
+						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attachment.GetID()))
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 159, Col: 59}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" style=\"border-radius: var(--ui-radius);\"><div class=\"flex gap items-center\"><span class=\"text-medium\">Anhang ")
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						var templ_7745c5c3_Var11 string
+						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
+						if templ_7745c5c3_Err != nil {
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 163, Col: 65}
+						}
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+						if templ_7745c5c3_Err != nil {
+							return templ_7745c5c3_Err
+						}
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</span> <span class=\"muted text-sm\">(")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var12 string
-						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attachment.GetID()))
+						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 165, Col: 59}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 164, Col: 68}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><div class=\"attachment-info flex gap items-center\"><span class=\"attachment-name\">Anhang ")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var13 string
-						templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 168, Col: 69}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span> <span class=\"attachment-type muted text-sm\">(")
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						var templ_7745c5c3_Var14 string
-						templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
-						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 169, Col: 84}
-						}
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-						if templ_7745c5c3_Err != nil {
-							return templ_7745c5c3_Err
-						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, ")</span></div><div class=\"attachment-actions flex gap\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ")</span></div><div class=\"flex gap-sm\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -260,16 +224,16 @@ func EditorPage(options *EditorOptions) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<button type=\"button\" class=\"secondary small\" onclick=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<button type=\"button\" class=\"secondary small\" onclick=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var15 templ.ComponentScript = layouts.OpenImageViewer(attachment.GetID())
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15.Call)
+						var templ_7745c5c3_Var13 templ.ComponentScript = layouts.OpenImageViewer(attachment.GetID())
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13.Call)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\"><i class=\"bi bi-eye\"></i> Anzeigen</button> ")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\"><i class=\"bi bi-eye\"></i> Anzeigen</button> ")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -277,69 +241,69 @@ func EditorPage(options *EditorOptions) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button type=\"button\" class=\"destructive small\" onclick=\"")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<button type=\"button\" class=\"destructive small\" onclick=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var16 templ.ComponentScript = deleteAttachment(attachment.GetID())
-						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16.Call)
+						var templ_7745c5c3_Var14 templ.ComponentScript = deleteAttachment(attachment.GetID())
+						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14.Call)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\"><i class=\"bi bi-trash\"></i> Löschen</button></div></div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><i class=\"bi bi-trash\"></i> Löschen</button></div></div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div></details>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></details>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<!-- File Upload Area --><div class=\"file-upload-area\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"handleFileDrop(event)\" ondragover=\"handleDragOver(event)\" ondragleave=\"handleDragLeave(event)\"><i class=\"bi bi-cloud-upload\"></i><div class=\"upload-text\">Bilder hochladen</div><div class=\"upload-hint\">Klicken oder Dateien hierher ziehen</div><input type=\"file\" name=\"attachments\" id=\"attachments\" multiple accept=\"image/*\" onchange=\"onAttachments(event)\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"file-preview\" style=\"display: none;\"><div class=\"preview-header\"><span class=\"preview-label\">Neue Bilder:</span></div><div id=\"new-attachments\" class=\"attachments-list\"></div><template name=\"attachment-item\"><div class=\"attachment-item flex gap justify-between items-center border\"><div class=\"attachment-info flex gap items-center\"><span class=\"attachment-name name\"></span> <span class=\"attachment-size size-text\"></span></div><div class=\"attachment-actions\"><button type=\"button\" class=\"delete destructive small\"><i class=\"bi bi-trash\"></i> Entfernen</button></div></div></template></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- File Upload Area --><div class=\"border-2 border-dashed p-xl text-center cursor-pointer transition-all mb\" onclick='document.getElementById(\"attachments\").click();' ondrop=\"handleFileDrop(event)\" ondragover=\"handleDragOver(event)\" ondragleave=\"handleDragLeave(event)\" style=\"border-radius: var(--ui-radius);\"><i class=\"bi bi-cloud-upload text-2xl mb-sm\"></i><div class=\"text-medium mb-sm\">Bilder hochladen</div><div class=\"text-sm opacity-75\">Klicken oder Dateien hierher ziehen</div><input type=\"file\" name=\"attachments\" id=\"attachments\" multiple accept=\"image/*\" onchange=\"onAttachments(event)\" class=\"hidden\"></div><!-- File Preview Area --><div id=\"file-preview\" class=\"border p\" style=\"display: none; border-radius: var(--ui-radius);\"><div class=\"mb text-medium\"><span>Neue Bilder:</span></div><div id=\"new-attachments\" class=\"flex flex-col gap\"></div><template name=\"attachment-item\"><div class=\"p border flex gap justify-between items-center\" style=\"border-radius: var(--ui-radius);\"><div class=\"flex gap items-center\"><span class=\"attachment-name name text-medium\"></span> <span class=\"attachment-size size-text text-sm muted\"></span></div><div><button type=\"button\" class=\"delete destructive small\"><i class=\"bi bi-trash\"></i> Entfernen</button></div></div></template></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<!-- Form Actions --><div class=\"form-actions flex gap justify-end\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<!-- Form Actions --><div class=\"mt-lg pt border-top flex gap justify-end\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if options.ReturnURL != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<a role=\"button\" href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var17 templ.SafeURL
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
+				var templ_7745c5c3_Var15 templ.SafeURL
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 243, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 242, Col: 43}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" class=\"secondary\">Abbrechen</a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" class=\"secondary flex gap-sm items-center\"><i class=\"bi bi-x-circle\"></i> Abbrechen</a> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<button type=\"submit\" class=\"primary\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<button type=\"submit\" class=\"primary flex gap-sm items-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if options.ID > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<i class=\"bi bi-check-circle\"></i> Aktualisieren")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<i class=\"bi bi-check-circle\"></i> Aktualisieren")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<i class=\"bi bi-plus-circle\"></i> Erstellen")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<i class=\"bi bi-plus-circle\"></i> Erstellen")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</button></div></form></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</button></div></form></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -347,7 +311,15 @@ func EditorPage(options *EditorOptions) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = editorStyles().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -359,9 +331,62 @@ func EditorPage(options *EditorOptions) templ.Component {
 		})
 		templ_7745c5c3_Err = layouts.Main(layouts.MainOptions{
 			PageTitle:      getPageTitle(options),
-			AppBarTitle:    "Editor",
+			AppBarTitle:    getEditorTitle(options),
 			AdditionalHead: editorStyles(),
+			NavContent:     navContent(options),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func navContent(options *EditorOptions) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var16 == nil {
+			templ_7745c5c3_Var16 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"flex flex-row gap justify-end items-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if options.ReturnURL != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var17 templ.SafeURL
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 271, Col: 41}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" class=\"secondary flex gap\"><i class=\"bi bi-arrow-left\"></i> Zurück</a>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -394,7 +419,7 @@ func editorStyles() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<style>\n        .editor-container {\n            max-width: 1200px;\n            margin: 0 auto;\n            padding: 2rem 1rem;\n        }\n\n        .editor-header {\n            margin-bottom: 2rem;\n            padding-bottom: 1rem;\n            border-bottom: 1px solid var(--border-color);\n        }\n\n        .editor-content-container {\n            position: relative;\n            display: flex;\n            gap: 1rem;\n        }\n\n        .editor-textarea {\n            flex: 1;\n            min-height: 400px;\n            resize: vertical;\n            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n        }\n\n        .markdown-preview {\n            flex: 1;\n            border: 1px solid var(--border-color);\n            border-radius: 4px;\n        }\n\n        .preview-header {\n            padding: 0.5rem 1rem;\n            border-bottom: 1px solid var(--border-color);\n            font-weight: 500;\n        }\n\n        .preview-content {\n            padding: 1rem;\n            min-height: 350px;\n            max-height: 400px;\n            overflow-y: auto;\n        }\n\n        /* Markdown container styling */\n        .markdown-container {\n            margin: 1rem 0;\n        }\n\n        .markdown-checkbox-container {\n            padding: 1rem;\n            background-color: var(--ui-muted);\n            border: 1px solid var(--border-color);\n            border-radius: 4px;\n            transition: all 0.2s ease;\n            cursor: pointer;\n        }\n\n        .markdown-checkbox-container:hover {\n            border-color: var(--primary-color);\n        }\n\n        .markdown-label {\n            font-weight: 500;\n        }\n\n        .markdown-help {\n            margin-left: auto;\n            font-style: italic;\n        }\n\n        /* Markdown tools styling */\n        .markdown-tools-container {\n            border: 1px solid var(--border-color);\n            border-radius: 4px;\n            padding: 1rem;\n            margin: 1rem 0;\n            transition: all 0.3s ease;\n            animation: slideDown 0.3s ease-out;\n        }\n\n        .tools-header {\n            margin-bottom: 0.75rem;\n            font-weight: 600;\n            font-size: 0.9rem;\n        }\n\n        .tools-grid {\n            display: flex;\n            gap: 0.5rem;\n            flex-wrap: wrap;\n        }\n\n        .tool-btn {\n            min-width: 2.5rem;\n            height: 2.5rem;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n        }\n\n        /* Markdown preview styling */\n        .markdown-preview-container {\n            margin: 1rem 0;\n            animation: slideDown 0.3s ease-out;\n        }\n\n        .markdown-preview {\n            border: 3px solid var(--border-color, #ccc) !important;\n            border-radius: 8px !important;\n            height: 400px !important;\n            position: relative !important;\n            background: var(--ui-bg, #fff) !important;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;\n            display: flex !important;\n            flex-direction: column !important;\n            width: 100% !important;\n            box-sizing: border-box !important;\n            overflow: hidden !important;\n        }\n\n\n\n        .markdown-preview-container .markdown-preview {\n            border: 3px solid var(--border-color, #ccc) !important;\n            border-radius: 8px !important;\n            background-color: var(--ui-bg, #fff) !important;\n        }\n\n        /* Highly specific selector to override any framework styles */\n        .editor-form .markdown-preview-container #markdown-preview.markdown-preview {\n            border: 3px solid var(--border-color, #ccc) !important;\n            border-radius: 8px !important;\n            background-color: var(--ui-bg, #fff) !important;\n            outline: none !important;\n            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;\n            height: 400px !important;\n            overflow: hidden !important;\n        }\n\n\n\n        .preview-header {\n            padding: 0.75rem 1rem;\n            border-bottom: 1px solid var(--border-color, #ccc) !important;\n            background-color: var(--ui-muted, #f8f9fa) !important;\n            font-weight: 600;\n            font-size: 0.9rem;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            border-radius: 4px 4px 0 0;\n            flex-shrink: 0;\n        }\n\n        .preview-content {\n            padding: 1rem;\n            flex: 1;\n            overflow-y: auto;\n            line-height: 1.6;\n            font-size: 0.9rem;\n            box-sizing: border-box;\n            border-radius: 0 0 4px 4px;\n        }\n\n        /* Markdown content styling within preview */\n        .markdown-content h1,\n        .markdown-content h2,\n        .markdown-content h3,\n        .markdown-content h4,\n        .markdown-content h5,\n        .markdown-content h6 {\n            margin: 0.8em 0 0.4em 0;\n            font-weight: bold;\n            line-height: 1.3;\n        }\n\n        .markdown-content h1 { font-size: 1.4em; }\n        .markdown-content h2 { font-size: 1.2em; }\n        .markdown-content h3 { font-size: 1.1em; }\n\n        .markdown-content p {\n            margin: 0.5em 0 1em 0;\n        }\n\n        .markdown-content ul,\n        .markdown-content ol {\n            margin: 0.5em 0;\n            padding-left: 1.5em;\n            list-style: inherit;\n        }\n\n        .markdown-content ul {\n            list-style-type: disc;\n        }\n\n        .markdown-content ol {\n            list-style-type: decimal;\n        }\n\n        .markdown-content li {\n            margin: 0.25em 0;\n            display: list-item;\n        }\n\n        .markdown-content code {\n            font-size: 0.85em;\n            padding: 0.125em 0.25em;\n            border-radius: 2px;\n        }\n\n        .markdown-content strong {\n            font-weight: 600;\n        }\n\n        .markdown-content em {\n            font-style: italic;\n        }\n\n\n\n        /* Animation keyframes */\n        @keyframes slideDown {\n            from {\n                opacity: 0;\n                transform: translateY(-10px);\n                max-height: 0;\n            }\n            to {\n                opacity: 1;\n                transform: translateY(0);\n                max-height: 100vh;\n            }\n        }\n\n        /* Section separator styling */\n        .section-separator {\n            margin: 3rem 0;\n            height: 2px;\n            background: linear-gradient(to right, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);\n            position: relative;\n        }\n\n        .section-separator::before {\n            content: \"📎\";\n            position: absolute;\n            left: 50%;\n            top: 50%;\n            transform: translate(-50%, -50%);\n            background: var(--ui-bg);\n            padding: 0.5rem 1rem;\n            font-size: 1.1rem;\n            color: var(--muted-text);\n        }\n\n        .attachments-section {\n            border: 2px solid var(--border-color);\n            border-radius: 8px;\n            padding: 1.5rem;\n            background: var(--ui-muted);\n            margin-top: 1rem;\n            transition: all 0.2s ease;\n        }\n\n        .attachments-section:hover {\n            border-color: var(--primary-color);\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }\n\n        .attachments-help {\n            display: block;\n            margin-bottom: 1.5rem;\n            font-weight: 500;\n            color: var(--muted-text);\n            background: var(--ui-bg);\n            padding: 0.75rem;\n            border-radius: 4px;\n            border-left: 4px solid var(--primary-color);\n        }\n\n        .existing-attachments {\n            margin-bottom: 1rem;\n        }\n\n        .attachments-summary {\n            padding: 0.5rem;\n            cursor: pointer;\n            font-weight: 500;\n        }\n\n        .attachments-header {\n            margin-bottom: 1.5rem;\n        }\n\n        .attachments-title {\n            font-size: 1.1rem;\n            font-weight: 600;\n            color: var(--primary-color);\n            margin-bottom: 0.75rem;\n            display: flex;\n            align-items: center;\n            gap: 0.5rem;\n        }\n\n        .attachments-list {\n            display: flex;\n            flex-direction: column;\n            gap: 0.75rem;\n            margin-top: 1.5rem;\n        }\n\n        .attachment-item {\n            padding: 0.75rem;\n            border-radius: 4px;\n        }\n\n        .attachment-info {\n            flex: 1;\n        }\n\n        .attachment-name {\n            font-weight: 500;\n        }\n\n        .attachment-type {\n            opacity: 0.7;\n        }\n\n        .attachment-actions {\n            display: flex;\n            gap: 0.5rem;\n        }\n\n        .file-upload-area {\n            border: 2px dashed var(--border-color);\n            border-radius: 4px;\n            padding: 2rem;\n            text-align: center;\n            cursor: pointer;\n            transition: all 0.2s ease;\n            margin-bottom: 1rem;\n        }\n\n        .file-upload-area:hover {\n            border-color: var(--primary-color);\n        }\n\n        .file-upload-area.drag-over {\n            border-color: var(--primary-color);\n        }\n\n        .upload-text {\n            font-weight: 500;\n            margin-bottom: 0.25rem;\n        }\n\n        .upload-hint {\n            font-size: 0.875rem;\n            opacity: 0.7;\n        }\n\n        .file-upload-area input[type=\"file\"] {\n            display: none;\n        }\n\n        .file-preview {\n            border: 1px solid var(--border-color);\n            border-radius: 4px;\n            padding: 1rem;\n        }\n\n        .preview-header {\n            margin-bottom: 1rem;\n            font-weight: 500;\n        }\n\n        .form-actions {\n            margin-top: 2rem;\n            padding-top: 1rem;\n            border-top: 1px solid var(--border-color);\n        }\n\n        /* Responsive design */\n        @media (max-width: 768px) {\n            .editor-content-container {\n                flex-direction: column;\n            }\n\n            .markdown-preview {\n                min-height: 200px;\n            }\n\n            .tools-grid {\n                justify-content: center;\n            }\n        }\n\n        /* Preview fullscreen mode */\n        .preview-fullscreen .editor-content-container {\n            flex-direction: column;\n        }\n\n        .preview-fullscreen .editor-textarea {\n            display: none;\n        }\n\n        .preview-fullscreen .markdown-preview {\n            min-height: 600px;\n        }\n    </style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<style>\n        /* Essential custom styles */\n        .markdown-content h1,\n        .markdown-content h2,\n        .markdown-content h3,\n        .markdown-content h4,\n        .markdown-content h5,\n        .markdown-content h6 {\n            margin: 0.8em 0 0.4em 0;\n            font-weight: bold;\n            line-height: 1.3;\n        }\n\n        .markdown-content h1 { font-size: 1.4em; }\n        .markdown-content h2 { font-size: 1.2em; }\n        .markdown-content h3 { font-size: 1.1em; }\n\n        .markdown-content p {\n            margin: 0.5em 0 1em 0;\n        }\n\n        .markdown-content ul,\n        .markdown-content ol {\n            margin: 0.5em 0;\n            padding-left: 1.5em;\n            list-style: inherit;\n        }\n\n        .markdown-content ul {\n            list-style-type: disc;\n        }\n\n        .markdown-content ol {\n            list-style-type: decimal;\n        }\n\n        .markdown-content li {\n            margin: 0.25em 0;\n            display: list-item;\n        }\n\n        .markdown-content code {\n            font-size: 0.85em;\n            padding: 0.125em 0.25em;\n            border-radius: 2px;\n        }\n\n        .markdown-content strong {\n            font-weight: 600;\n        }\n\n        .markdown-content em {\n            font-style: italic;\n        }\n\n        /* Responsive design */\n        @media (max-width: 768px) {\n            #markdown-preview {\n                min-height: 200px;\n            }\n\n            .flex-wrap {\n                justify-content: center;\n            }\n        }\n\n        /* Custom hover states */\n        .transition-all:hover {\n            border-color: var(--ui-primary);\n        }\n\n        .border-2:hover {\n            border-color: var(--ui-primary);\n            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n        }\n\n        /* File upload hover states */\n        .file-upload-area:hover {\n            border-color: var(--ui-primary);\n        }\n\n        .file-upload-area.drag-over {\n            border-color: var(--ui-primary);\n        }\n\n        /* Preview fullscreen mode */\n        .preview-fullscreen textarea {\n            display: none;\n        }\n\n        .preview-fullscreen #markdown-preview {\n            min-height: 600px;\n        }\n    </style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -423,7 +448,7 @@ func editorScripts() templ.Component {
 			templ_7745c5c3_Var19 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<script>\n        // Global variables\n        var selectedFiles = [];\n        var existingAttachmentsRemoval = [];\n        var isPreviewFullscreen = false;\n\n        // Initialize editor when page loads\n        document.addEventListener('DOMContentLoaded', function() {\n            initializeMarkdownFeatures();\n        });\n\n        function initializeMarkdownFeatures() {\n            var checkbox = document.getElementById('use_markdown');\n            if (checkbox) {\n                toggleMarkdownFeatures();\n            }\n        }\n\n        function toggleMarkdownFeatures() {\n            var checkbox = document.getElementById('use_markdown');\n            var tools = document.getElementById('markdown-tools');\n            var previewContainer = document.getElementById('markdown-preview-container');\n            var textarea = document.getElementById('content');\n\n            if (checkbox.checked) {\n                tools.style.display = 'block';\n                previewContainer.style.display = 'block';\n                textarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');\n                updatePreview();\n\n                // Add real-time preview updates\n                textarea.addEventListener('input', updatePreview);\n            } else {\n                tools.style.display = 'none';\n                previewContainer.style.display = 'none';\n                textarea.removeEventListener('input', updatePreview);\n                textarea.setAttribute('placeholder', 'Inhalt');\n            }\n        }\n\n\n\n        function updatePreview() {\n            window.updateMarkdownPreview('content', 'preview-content');\n        }\n\n        function togglePreviewMode() {\n            var container = document.querySelector('.editor-container');\n            var toggleText = document.getElementById('preview-toggle-text');\n            var toggleIcon = document.querySelector('.preview-toggle i');\n\n            isPreviewFullscreen = !isPreviewFullscreen;\n\n            if (isPreviewFullscreen) {\n                container.classList.add('preview-fullscreen');\n                toggleText.textContent = 'Split';\n                toggleIcon.className = 'bi bi-arrows-angle-contract';\n            } else {\n                container.classList.remove('preview-fullscreen');\n                toggleText.textContent = 'Vollbild';\n                toggleIcon.className = 'bi bi-arrows-angle-expand';\n            }\n        }\n\n        function insertMarkdown(before, after) {\n            var textarea = document.getElementById('content');\n            if (!textarea) return;\n\n            var start = textarea.selectionStart;\n            var end = textarea.selectionEnd;\n            var selectedText = textarea.value.substring(start, end);\n            var newText = before + selectedText + after;\n\n            textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);\n\n            // Set cursor position\n            var newPos = start + before.length + selectedText.length + after.length;\n            if (selectedText === '') {\n                newPos = start + before.length;\n            }\n\n            textarea.focus();\n            textarea.setSelectionRange(newPos, newPos);\n\n            // Update preview\n            updatePreview();\n        }\n\n        function updateExistingAttachmentsRemoval() {\n            var input = document.getElementById('existing-attachments-removal');\n            if (input) {\n                input.value = existingAttachmentsRemoval.join(',');\n            }\n        }\n\n        function onAttachments(event) {\n            selectedFiles = Array.from(event.target.files);\n\n            function formatFileSize(bytes) {\n                if (bytes === 0) return \"0 Bytes\";\n                var k = 1024;\n                var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                var i = Math.floor(Math.log(bytes) / Math.log(k));\n                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n            }\n\n            var previewArea = document.getElementById(\"file-preview\");\n            var container = document.getElementById(\"new-attachments\");\n\n            if (!previewArea || !container) return;\n\n            container.innerHTML = \"\";\n\n            if (selectedFiles.length > 0) {\n                previewArea.style.display = \"block\";\n\n                selectedFiles.forEach((file, index) => {\n                    var sizeClass = file.size > 10 * 1024 * 1024 ? \"attachment-error text-red\" : \"muted text-sm\";\n                    var sizeText = file.size > 10 * 1024 * 1024 ? \"ZU GROSS!\" : formatFileSize(file.size);\n\n                    var template = previewArea.querySelector('template[name=\"attachment-item\"]');\n                    if (!template) return;\n\n                    var item = template.content.cloneNode(true);\n\n                    var nameElement = item.querySelector('.name');\n                    if (nameElement) nameElement.textContent = file.name;\n\n                    var sizeElement = item.querySelector('.size-text');\n                    if (sizeElement) {\n                        sizeElement.textContent = sizeText;\n                        sizeElement.className += ' ' + sizeClass;\n                    }\n\n                    var deleteBtn = item.querySelector('button.delete');\n                    if (deleteBtn) {\n                        deleteBtn.onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments(event);\n                        };\n                    }\n\n                    container.appendChild(item);\n                });\n\n                setTimeout(() => {\n                    previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                }, 100);\n            } else {\n                previewArea.style.display = \"none\";\n            }\n        }\n\n        // Drag and drop functionality\n        function handleDragOver(event) {\n            event.preventDefault();\n            event.currentTarget.classList.add('drag-over');\n        }\n\n        function handleDragLeave(event) {\n            event.preventDefault();\n            event.currentTarget.classList.remove('drag-over');\n        }\n\n        function handleFileDrop(event) {\n            event.preventDefault();\n            event.currentTarget.classList.remove('drag-over');\n\n            var files = event.dataTransfer.files;\n            if (files.length > 0) {\n                var fileInput = document.getElementById('attachments');\n                if (fileInput) {\n                    fileInput.files = files;\n                    onAttachments({ target: fileInput });\n                }\n            }\n        }\n\n        // Delete attachment function (for existing attachments)\n        function deleteAttachment(attachmentId) {\n            if (!confirm(\"Sind Sie sicher, dass Sie diesen Anhang löschen möchten?\")) {\n                return;\n            }\n\n            var attachmentItem = document.querySelector(\n                '#existing-attachments .attachment-item[data-id=\"' + attachmentId + '\"]'\n            );\n\n            if (attachmentItem) {\n                attachmentItem.remove();\n                existingAttachmentsRemoval.push(attachmentId);\n                updateExistingAttachmentsRemoval();\n\n                var existingAttachments = document.getElementById('existing-attachments');\n                if (existingAttachments && existingAttachments.children.length === 0) {\n                    var detailsSection = existingAttachments.closest('details');\n                    if (detailsSection) {\n                        detailsSection.style.display = 'none';\n                    }\n                }\n            }\n        }\n    </script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<script>\n        // Global variables\n        var selectedFiles = [];\n        var existingAttachmentsRemoval = [];\n        var isPreviewFullscreen = false;\n\n        // Initialize editor when page loads\n        document.addEventListener('DOMContentLoaded', function() {\n            initializeMarkdownFeatures();\n        });\n\n        function initializeMarkdownFeatures() {\n            var checkbox = document.getElementById('use_markdown');\n            if (checkbox) {\n                toggleMarkdownFeatures();\n            }\n        }\n\n        function toggleMarkdownFeatures() {\n            var checkbox = document.getElementById('use_markdown');\n            var tools = document.getElementById('markdown-tools');\n            var previewContainer = document.getElementById('markdown-preview-container');\n            var textarea = document.getElementById('content');\n\n            if (checkbox.checked) {\n                tools.style.display = 'block';\n                previewContainer.style.display = 'block';\n                textarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');\n                updatePreview();\n\n                // Add real-time preview updates\n                textarea.addEventListener('input', updatePreview);\n            } else {\n                tools.style.display = 'none';\n                previewContainer.style.display = 'none';\n                textarea.removeEventListener('input', updatePreview);\n                textarea.setAttribute('placeholder', 'Inhalt');\n            }\n        }\n\n\n\n        function updatePreview() {\n            window.updateMarkdownPreview('content', 'preview-content');\n        }\n\n        function togglePreviewMode() {\n            var container = document.querySelector('.editor-container');\n            var toggleText = document.getElementById('preview-toggle-text');\n            var toggleIcon = document.querySelector('.preview-toggle i');\n\n            isPreviewFullscreen = !isPreviewFullscreen;\n\n            if (isPreviewFullscreen) {\n                container.classList.add('preview-fullscreen');\n                toggleText.textContent = 'Split';\n                toggleIcon.className = 'bi bi-arrows-angle-contract';\n            } else {\n                container.classList.remove('preview-fullscreen');\n                toggleText.textContent = 'Vollbild';\n                toggleIcon.className = 'bi bi-arrows-angle-expand';\n            }\n        }\n\n        function insertMarkdown(before, after) {\n            var textarea = document.getElementById('content');\n            if (!textarea) return;\n\n            var start = textarea.selectionStart;\n            var end = textarea.selectionEnd;\n            var selectedText = textarea.value.substring(start, end);\n            var newText = before + selectedText + after;\n\n            textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);\n\n            // Set cursor position\n            var newPos = start + before.length + selectedText.length + after.length;\n            if (selectedText === '') {\n                newPos = start + before.length;\n            }\n\n            textarea.focus();\n            textarea.setSelectionRange(newPos, newPos);\n\n            // Update preview\n            updatePreview();\n        }\n\n        function updateExistingAttachmentsRemoval() {\n            var input = document.getElementById('existing-attachments-removal');\n            if (input) {\n                input.value = existingAttachmentsRemoval.join(',');\n            }\n        }\n\n        function onAttachments(event) {\n            selectedFiles = Array.from(event.target.files);\n\n            function formatFileSize(bytes) {\n                if (bytes === 0) return \"0 Bytes\";\n                var k = 1024;\n                var sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n                var i = Math.floor(Math.log(bytes) / Math.log(k));\n                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n            }\n\n            var previewArea = document.getElementById(\"file-preview\");\n            var container = document.getElementById(\"new-attachments\");\n\n            if (!previewArea || !container) return;\n\n            container.innerHTML = \"\";\n\n            if (selectedFiles.length > 0) {\n                previewArea.style.display = \"block\";\n\n                selectedFiles.forEach((file, index) => {\n                    var sizeClass = file.size > 10 * 1024 * 1024 ? \"attachment-error text-red\" : \"muted text-sm\";\n                    var sizeText = file.size > 10 * 1024 * 1024 ? \"ZU GROSS!\" : formatFileSize(file.size);\n\n                    var template = previewArea.querySelector('template[name=\"attachment-item\"]');\n                    if (!template) return;\n\n                    var item = template.content.cloneNode(true);\n\n                    var nameElement = item.querySelector('.name');\n                    if (nameElement) nameElement.textContent = file.name;\n\n                    var sizeElement = item.querySelector('.size-text');\n                    if (sizeElement) {\n                        sizeElement.textContent = sizeText;\n                        sizeElement.className += ' ' + sizeClass;\n                    }\n\n                    var deleteBtn = item.querySelector('button.delete');\n                    if (deleteBtn) {\n                        deleteBtn.onclick = () => {\n                            selectedFiles.splice(index, 1);\n\n                            // Update the file input\n                            var fileInput = document.getElementById(\"attachments\");\n                            var dt = new DataTransfer();\n                            selectedFiles.forEach((file) => dt.items.add(file));\n                            fileInput.files = dt.files;\n\n                            onAttachments(event);\n                        };\n                    }\n\n                    container.appendChild(item);\n                });\n\n                setTimeout(() => {\n                    previewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n                }, 100);\n            } else {\n                previewArea.style.display = \"none\";\n            }\n        }\n\n        // Drag and drop functionality\n        function handleDragOver(event) {\n            event.preventDefault();\n            event.currentTarget.classList.add('drag-over');\n        }\n\n        function handleDragLeave(event) {\n            event.preventDefault();\n            event.currentTarget.classList.remove('drag-over');\n        }\n\n        function handleFileDrop(event) {\n            event.preventDefault();\n            event.currentTarget.classList.remove('drag-over');\n\n            var files = event.dataTransfer.files;\n            if (files.length > 0) {\n                var fileInput = document.getElementById('attachments');\n                if (fileInput) {\n                    fileInput.files = files;\n                    onAttachments({ target: fileInput });\n                }\n            }\n        }\n\n        // Delete attachment function (for existing attachments)\n        function deleteAttachment(attachmentId) {\n            if (!confirm(\"Sind Sie sicher, dass Sie diesen Anhang löschen möchten?\")) {\n                return;\n            }\n\n            var attachmentItem = document.querySelector(\n                '#existing-attachments .attachment-item[data-id=\"' + attachmentId + '\"]'\n            );\n\n            if (attachmentItem) {\n                attachmentItem.remove();\n                existingAttachmentsRemoval.push(attachmentId);\n                updateExistingAttachmentsRemoval();\n\n                var existingAttachments = document.getElementById('existing-attachments');\n                if (existingAttachments && existingAttachments.children.length === 0) {\n                    var detailsSection = existingAttachments.closest('details');\n                    if (detailsSection) {\n                        detailsSection.style.display = 'none';\n                    }\n                }\n            }\n        }\n    </script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
