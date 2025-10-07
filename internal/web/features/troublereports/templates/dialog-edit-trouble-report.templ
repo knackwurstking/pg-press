@@ -61,13 +61,20 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		                var checkbox = document.getElementById('use_markdown');
 		                var tools = document.getElementById('markdown-tools');
 		                var textarea = document.getElementById('content');
+		                var preview = document.getElementById('markdown-preview');
 
 		                if (checkbox.checked) {
 		                    tools.style.display = 'block';
 		                    textarea.setAttribute('placeholder', 'Bericht (Markdown-Formatierung aktiviert)');
+		                    preview.classList.add('active');
+		                    updatePreview();
+
+		                    // Add real-time preview updates
+		                    textarea.addEventListener('input', updatePreview);
 		                } else {
 		                    tools.style.display = 'none';
-		                    document.getElementById('markdown-preview').classList.remove('active');
+		                    preview.classList.remove('active');
+		                    textarea.removeEventListener('input', updatePreview);
 		                    textarea.setAttribute('placeholder', 'Bericht');
 		                }
 		            }
@@ -89,22 +96,7 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		                textarea.focus();
 		            }
 
-		            function togglePreview() {
-		                var preview = document.getElementById('markdown-preview');
-		                var btn = document.getElementById('preview-btn');
-		                var textarea = document.getElementById('content');
 
-		                if (preview.classList.contains('active')) {
-		                    preview.classList.remove('active');
-		                    btn.textContent = 'Vorschau';
-		                    btn.className = 'info small';
-		                } else {
-		                    updatePreview();
-		                    preview.classList.add('active');
-		                    btn.textContent = 'Bearbeiten';
-		                    btn.className = 'secondary small';
-		                }
-		            }
 
 		            function updatePreview() {
 		                var textarea = document.getElementById('content');
@@ -257,9 +249,6 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 				</button>
 				<button type="button" onclick="insertMarkdown('`', '`')" class="secondary small">
 					Code
-				</button>
-				<button type="button" onclick="togglePreview()" id="preview-btn" class="info small">
-					Vorschau
 				</button>
 			</div>
 			<div id="markdown-preview" class="markdown-preview">
