@@ -9,6 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
+
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
@@ -48,27 +50,27 @@ func Page() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><!-- Search Bar --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-between\"><input style=\"margin: auto 0; width: 100%\" type=\"search\" name=\"search\" placeholder=\"Suche\" aria-label=\"Suche\" oninput=\"window.search(event)\"></section><!-- Page Actions: Create --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-end\"><button hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><!-- Search Bar --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-between\"><input style=\"margin: auto 0; width: 100%\" type=\"search\" name=\"search\" placeholder=\"Suche\" aria-label=\"Suche\" oninput=\"window.search(event)\"></section><!-- Page Actions: Create --><section style=\"margin-top: 0\" class=\"flex flex-row gap justify-end\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/edit")
+			var templ_7745c5c3_Var3 templ.SafeURL
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/editor?type=troublereport&return_url=%s/trouble-reports", env.ServerPathPrefix, env.ServerPathPrefix)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 34, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 36, Col: 140}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"click\" hx-target=\"body\" hx-swap=\"beforeend\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"flex flex-row gap justify-between items-center\"><i class=\"bi bi-plus-lg\"></i> Erstellen</button></section><!-- Trouble Reports Entries --><section hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex flex-row gap justify-between items-center\" role=\"button\"><i class=\"bi bi-plus-lg\"></i> Erstellen</a></section><!-- Trouble Reports Entries --><section hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 47, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 46, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -167,29 +169,15 @@ func additionalHead() templ.Component {
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(helpers.AssetURL(
-			env.ServerPathPrefix, "/css/trouble-reports/edit.css"))
+			env.ServerPathPrefix, "/css/trouble-reports/data.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 68, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 67, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><link rel=\"stylesheet\" href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(helpers.AssetURL(
-			env.ServerPathPrefix, "/css/trouble-reports/data.css"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 73, Col: 57}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><script>\n    \t// Initialize search timer variable\n    \tvar searchTimer;\n\n    \t// Search function with debouncing and client-side filtering\n    \tfunction search(event) {\n    \t\tvar searchValue = event.target.value.toLowerCase().trim();\n\n    \t\t// Clear existing timer\n    \t\tclearTimeout(searchTimer);\n\n    \t\t// Set new timer for lazy search (300ms delay)\n    \t\tsearchTimer = setTimeout(function() {\n    \t\t\t// Update URL search parameters\n    \t\t\tvar url = new URL(window.location);\n    \t\t\tif (searchValue) {\n    \t\t\t\turl.searchParams.set('search', searchValue);\n    \t\t\t} else {\n    \t\t\t\turl.searchParams.delete('search');\n    \t\t\t}\n    \t\t\thistory.replaceState(null, '', url);\n    \t\t\t// Split search value on spaces to get individual search terms\n    \t\t\tvar searchTerms = searchValue.split(/\\s+/).filter(function(term) {\n    \t\t\t\treturn term.length > 0;\n    \t\t\t});\n\n    \t\t\t// Get all trouble report elements\n    \t\t\tvar troubleReports = document.querySelectorAll('span.trouble-report');\n\n    \t\t\tfor (var i = 0; i < troubleReports.length; i++) {\n    \t\t\t\tvar report = troubleReports[i];\n    \t\t\t\tif (searchTerms.length === 0) {\n    \t\t\t\t\t// Show all if search is empty\n    \t\t\t\t\treport.style.display = '';\n    \t\t\t\t} else {\n    \t\t\t\t\t// Get the text content from the summary and pre elements\n    \t\t\t\t\tvar summary = report.querySelector('summary');\n    \t\t\t\t\tvar content = report.querySelector('pre');\n\n    \t\t\t\t\tvar summaryText = summary ? summary.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar contentText = content ? content.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar combinedText = summaryText + ' ' + contentText;\n\n    \t\t\t\t\t// Check if ALL search terms are found in either summary or content\n    \t\t\t\t\tvar allTermsFound = true;\n    \t\t\t\t\tfor (var j = 0; j < searchTerms.length; j++) {\n    \t\t\t\t\t\tif (!combinedText.includes(searchTerms[j])) {\n    \t\t\t\t\t\t\tallTermsFound = false;\n    \t\t\t\t\t\t\tbreak;\n    \t\t\t\t\t\t}\n    \t\t\t\t\t}\n\n    \t\t\t\t\tif (allTermsFound) {\n    \t\t\t\t\t\treport.style.display = '';\n    \t\t\t\t\t} else {\n    \t\t\t\t\t\treport.style.display = 'none';\n    \t\t\t\t\t}\n    \t\t\t\t}\n    \t\t\t}\n    \t\t}, 300);\n    \t}\n\n    \t// Clear timer on page unload to prevent memory leaks\n    \twindow.addEventListener('beforeunload', function() {\n    \t\tclearTimeout(searchTimer);\n    \t});\n\n    \t// Make search function available globally\n    \twindow.search = search;\n\n    \t// Initialize search from URL parameters on page load\n    \tdocument.addEventListener('DOMContentLoaded', function() {\n    \t\tvar urlParams = new URLSearchParams(window.location.search);\n    \t\tvar searchParam = urlParams.get('search');\n    \t\tif (searchParam) {\n    \t\t\tvar searchInput = document.querySelector('input[name=\"search\"]');\n    \t\t\tif (searchInput) {\n    \t\t\t\tsearchInput.value = searchParam;\n\t\t\t\t// Trigger input event to properly initialize search\n\t\t\t\tvar inputEvent = new Event('input', { bubbles: true });\n\t\t\t\tsearchInput.dispatchEvent(inputEvent);\n    \t\t\t}\n    \t\t}\n    \t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><script>\n    \t// Initialize search timer variable\n    \tvar searchTimer;\n\n    \t// Search function with debouncing and client-side filtering\n    \tfunction search(event) {\n    \t\tvar searchValue = event.target.value.toLowerCase().trim();\n\n    \t\t// Clear existing timer\n    \t\tclearTimeout(searchTimer);\n\n    \t\t// Set new timer for lazy search (300ms delay)\n    \t\tsearchTimer = setTimeout(function() {\n    \t\t\t// Update URL search parameters\n    \t\t\tvar url = new URL(window.location);\n    \t\t\tif (searchValue) {\n    \t\t\t\turl.searchParams.set('search', searchValue);\n    \t\t\t} else {\n    \t\t\t\turl.searchParams.delete('search');\n    \t\t\t}\n    \t\t\thistory.replaceState(null, '', url);\n    \t\t\t// Split search value on spaces to get individual search terms\n    \t\t\tvar searchTerms = searchValue.split(/\\s+/).filter(function(term) {\n    \t\t\t\treturn term.length > 0;\n    \t\t\t});\n\n    \t\t\t// Get all trouble report elements\n    \t\t\tvar troubleReports = document.querySelectorAll('span.trouble-report');\n\n    \t\t\tfor (var i = 0; i < troubleReports.length; i++) {\n    \t\t\t\tvar report = troubleReports[i];\n    \t\t\t\tif (searchTerms.length === 0) {\n    \t\t\t\t\t// Show all if search is empty\n    \t\t\t\t\treport.style.display = '';\n    \t\t\t\t} else {\n    \t\t\t\t\t// Get the text content from the summary and pre elements\n    \t\t\t\t\tvar summary = report.querySelector('summary');\n    \t\t\t\t\tvar content = report.querySelector('pre');\n\n    \t\t\t\t\tvar summaryText = summary ? summary.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar contentText = content ? content.textContent.toLowerCase() : '';\n    \t\t\t\t\tvar combinedText = summaryText + ' ' + contentText;\n\n    \t\t\t\t\t// Check if ALL search terms are found in either summary or content\n    \t\t\t\t\tvar allTermsFound = true;\n    \t\t\t\t\tfor (var j = 0; j < searchTerms.length; j++) {\n    \t\t\t\t\t\tif (!combinedText.includes(searchTerms[j])) {\n    \t\t\t\t\t\t\tallTermsFound = false;\n    \t\t\t\t\t\t\tbreak;\n    \t\t\t\t\t\t}\n    \t\t\t\t\t}\n\n    \t\t\t\t\tif (allTermsFound) {\n    \t\t\t\t\t\treport.style.display = '';\n    \t\t\t\t\t} else {\n    \t\t\t\t\t\treport.style.display = 'none';\n    \t\t\t\t\t}\n    \t\t\t\t}\n    \t\t\t}\n    \t\t}, 300);\n    \t}\n\n    \t// Clear timer on page unload to prevent memory leaks\n    \twindow.addEventListener('beforeunload', function() {\n    \t\tclearTimeout(searchTimer);\n    \t});\n\n    \t// Make search function available globally\n    \twindow.search = search;\n\n    \t// Initialize search from URL parameters on page load\n    \tdocument.addEventListener('DOMContentLoaded', function() {\n    \t\tvar urlParams = new URLSearchParams(window.location.search);\n    \t\tvar searchParam = urlParams.get('search');\n    \t\tif (searchParam) {\n    \t\t\tvar searchInput = document.querySelector('input[name=\"search\"]');\n    \t\t\tif (searchInput) {\n    \t\t\t\tsearchInput.value = searchParam;\n\t\t\t\t// Trigger input event to properly initialize search\n\t\t\t\tvar inputEvent = new Event('input', { bubbles: true });\n\t\t\t\tsearchInput.dispatchEvent(inputEvent);\n    \t\t\t}\n    \t\t}\n    \t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

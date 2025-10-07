@@ -50,16 +50,6 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview",
 				r.handler.HTMXGetAttachmentsPreview),
 
-			// Dialog edit routes
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/edit",
-				r.handler.HTMXGetEditTroubleReportDialog),
-
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/edit",
-				r.handler.HTMXPostEditTroubleReportDialog),
-
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/trouble-reports/edit",
-				r.handler.HTMXPutEditTroubleReportDialog),
-
 			// Rollback route
 			helpers.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback",
 				r.handler.HTMXPostRollback),
