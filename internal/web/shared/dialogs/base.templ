@@ -39,6 +39,8 @@ templ Base(props BaseProps) {
 		id={ props.ID }
 		class="fullscreen clean flex flex-col justify-center items-center"
 		onclose={ onclose }
+		oncancel="event.preventDefault()"
+		onclick="if (event.target === this) event.preventDefault()"
 	>
 		<form
 			class="flex flex-col gap p"
@@ -53,6 +55,7 @@ templ Base(props BaseProps) {
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			hx-on:htmx:after-request="if (event.detail.successful) this.closest('dialog').close();"
 			enctype="multipart/form-data"
+			onclick="event.stopPropagation()"
 		>
 			if props.Error != "" {
 				<div class="card compact destructive">
