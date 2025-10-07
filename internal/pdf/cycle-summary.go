@@ -92,8 +92,7 @@ func addCycleSummaryStats(o *cycleSummaryOptions) {
 	o.PDF.SetFont("Arial", "", 12)
 	o.PDF.Cell(0, 8, o.Translator(fmt.Sprintf("Gesamte Zyklen: %d", totalCycles)))
 	o.PDF.Ln(6)
-	o.PDF.Cell(0, 8, o.Translator(fmt.Sprintf("Teilzyklen insgesamt: %d", totalPartialCycles)))
-	o.PDF.Ln(6)
+
 	o.PDF.Cell(0, 8, o.Translator(fmt.Sprintf("Aktive Werkzeuge: %d", len(activeTools))))
 	o.PDF.Ln(6)
 	o.PDF.Cell(0, 8, o.Translator(fmt.Sprintf("Anzahl Einträge: %d", len(o.Cycles))))
