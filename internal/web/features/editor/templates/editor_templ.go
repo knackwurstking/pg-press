@@ -154,7 +154,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if supportsAttachments(options.Type) {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Attachments Section --> <div class=\"border-2 p-lg muted mt transition-all\" style=\"border-radius: var(--ui-radius);\"><div class=\"mb-lg\"><h3 class=\"text-lg text-semibold primary ghost flex gap-sm items-center mb\"><i class=\"bi bi-paperclip\"></i> Dateien & Anhänge</h3><div class=\"p border-left primary text-sm text-medium muted\" style=\"border-left-width: 4px;\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Attachments Section --> <div class=\"border-2 p-lg muted mt transition-all\" style=\"border-radius: var(--ui-radius);\"><div class=\"mb\"><h3 class=\"text-lg text-semibold primary ghost flex gap-sm items-center mb\"><i class=\"bi bi-paperclip\"></i> Dateien & Anhänge</h3><div class=\"p border-left primary text-sm text-medium muted\" style=\"border-left-width: 4px;\">Bilder (max. 10MB pro Datei, max. 10 Dateien)</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
