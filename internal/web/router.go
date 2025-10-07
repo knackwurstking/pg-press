@@ -37,6 +37,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 	// WebSocket Handlers
 	wsFeedHandler := startWsFeedHandler(db)
 
+	// TODO: Create a Markdown editor page i can use for ex. the trouble reports edit dialog as a replacement
 	auth.NewRoutes(db).RegisterRoutes(e)
 	feed.NewRoutes(db).RegisterRoutes(e)
 	home.NewRoutes(db).RegisterRoutes(e)
