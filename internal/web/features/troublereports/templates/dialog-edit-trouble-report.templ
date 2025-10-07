@@ -79,23 +79,6 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		                }
 		            }
 
-		            function insertMarkdown(before, after) {
-		                var textarea = document.getElementById('content');
-		                var start = textarea.selectionStart;
-		                var end = textarea.selectionEnd;
-		                var selectedText = textarea.value.substring(start, end);
-
-		                var newText = before + selectedText + after;
-
-		                textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-
-		                // Set cursor position
-		                var newStart = start + before.length;
-		                var newEnd = newStart + selectedText.length;
-		                textarea.setSelectionRange(newStart, newEnd);
-		                textarea.focus();
-		            }
-
 
 
 		            function updatePreview() {
@@ -231,29 +214,6 @@ templ DialogEditTroubleReport(props *DialogEditTroubleReportProps) {
 		</label>
 		<!-- Markdown Tools -->
 		<div id="markdown-tools" style="display: none;">
-			<div class="flex gap items-center" style="margin: calc(var(--ui-spacing) / 2) 0;">
-				<button type="button" onclick="insertMarkdown('**', '**')" class="secondary small">
-					<strong>B</strong>
-				</button>
-				<button type="button" onclick="insertMarkdown('*', '*')" class="secondary small">
-					<em>I</em>
-				</button>
-				<button type="button" onclick="insertMarkdown('# ', '')" class="secondary small">
-					H1
-				</button>
-				<button type="button" onclick="insertMarkdown('## ', '')" class="secondary small">
-					H2
-				</button>
-				<button type="button" onclick="insertMarkdown('- ', '')" class="secondary small">
-					List
-				</button>
-				<button type="button" onclick="insertMarkdown('> ', '')" class="secondary small">
-					Quote
-				</button>
-				<button type="button" onclick="insertMarkdown('`', '`')" class="secondary small">
-					Code
-				</button>
-			</div>
 			<div id="markdown-preview" class="markdown-preview">
 				<div id="preview-content"></div>
 			</div>
