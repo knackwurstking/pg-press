@@ -323,9 +323,10 @@ func listReportsScript() templ.ComponentScript {
 
 func renderMarkdownToHTML() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_renderMarkdownToHTML_d8ee`,
-		Function: `function __templ_renderMarkdownToHTML_d8ee(){window.renderMarkdownToHTML = function(content) {
-		return content
+		Name: `__templ_renderMarkdownToHTML_6956`,
+		Function: `function __templ_renderMarkdownToHTML_6956(){window.renderMarkdownToHTML = function(content) {
+		// First, process inline formatting and structural elements
+		var processed = content
 			.replace(/### (.*$)/gm, '<h3>$1</h3>')
 			.replace(/## (.*$)/gm, '<h2>$1</h2>')
 			.replace(/# (.*$)/gm, '<h1>$1</h1>')
@@ -336,14 +337,26 @@ func renderMarkdownToHTML() templ.ComponentScript {
 			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
 			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
 			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-			.replace(/class="[uo]l-item"/g, '')
-			.replace(/\n\n/g, '</p><p>')
-			.replace(/^(.+)$/gm, function(match) {
-				if (match.startsWith('<h') || match.startsWith('<ul') || match.startsWith('<ol') || match.startsWith('<li')) {
-					return match;
-				}
-				return '<p>' + match + '</p>';
-			});
+			.replace(/class="[uo]l-item"/g, '');
+
+		// Split content by double newlines to create paragraphs
+		var paragraphs = processed.split(/\n\s*\n/);
+
+		return paragraphs.map(function(paragraph) {
+			paragraph = paragraph.trim();
+			if (!paragraph) return '';
+
+			// Skip if it's already an HTML block element
+			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
+				return paragraph;
+			}
+
+			// Convert single newlines to line breaks within paragraphs
+			var withLineBreaks = paragraph.replace(/\n/g, '<br>');
+
+			// Wrap in paragraph tags if it's not already a block element
+			return '<p>' + withLineBreaks + '</p>';
+		}).join('\n\n');
 	};
 
 	// Function to process markdown content from data attributes
@@ -372,8 +385,8 @@ func renderMarkdownToHTML() templ.ComponentScript {
 		document.body.dispatchEvent(new CustomEvent('pageLoaded'));
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_renderMarkdownToHTML_d8ee`),
-		CallInline: templ.SafeScriptInline(`__templ_renderMarkdownToHTML_d8ee`),
+		Call:       templ.SafeScript(`__templ_renderMarkdownToHTML_6956`),
+		CallInline: templ.SafeScriptInline(`__templ_renderMarkdownToHTML_6956`),
 	}
 }
 
