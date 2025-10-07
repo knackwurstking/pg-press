@@ -90,11 +90,9 @@ templ Page(props PageProps) {
 					<button
 						role="button"
 						class="info"
-						onclick={ templ.ComponentScript{
-							Call: fmt.Sprintf(
-								"downloadPDF('%s/htmx/tools/press/%d/cycle-summary-pdf')",
-								env.ServerPathPrefix, props.Press),
-						} }
+						onclick={ components.DownloadCycleSummaryPDF(fmt.Sprintf(
+							"%s/htmx/tools/press/%d/cycle-summary-pdf",
+							env.ServerPathPrefix, props.Press)) }
 					>Zusammenfassung (PDF)</button>
 				</div>
 				<div
@@ -109,63 +107,6 @@ templ Page(props PageProps) {
 				</div>
 			</section>
 		</main>
-		<script>
-			async function downloadPDF(url) {
-				try {
-					// Show loading state
-					const button = event.target;
-					const originalText = button.textContent;
-					button.textContent = 'Lädt...';
-					button.disabled = true;
-
-					// Fetch the PDF
-					const response = await fetch(url);
-					if (!response.ok) {
-						throw new Error('PDF konnte nicht geladen werden');
-					}
-
-					// Get the blob
-					const blob = await response.blob();
-
-					// Create download link
-					const downloadUrl = window.URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.style.display = 'none';
-					a.href = downloadUrl;
-
-					// Get filename from response headers or use default
-					const contentDisposition = response.headers.get('Content-Disposition');
-					let filename = 'cycle_summary.pdf';
-					if (contentDisposition) {
-						const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-						if (filenameMatch) {
-							filename = filenameMatch[1];
-						}
-					}
-					a.download = filename;
-
-					// Trigger download
-					document.body.appendChild(a);
-					a.click();
-
-					// Cleanup
-					window.URL.revokeObjectURL(downloadUrl);
-					document.body.removeChild(a);
-
-					// Reset button
-					button.textContent = originalText;
-					button.disabled = false;
-				} catch (error) {
-					console.error('Download failed:', error);
-					alert('Fehler beim Download: ' + error.message);
-
-					// Reset button
-					const button = event.target;
-					button.textContent = 'Zusammenfassung (PDF)';
-					button.disabled = false;
-				}
-			}
-		</script>
 	}
 }
 
