@@ -164,11 +164,10 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		}
 	}
 
-	// Consolidate entries for the same tool in the same position
+	// Consolidate consecutive entries for the same tool in the same position
 	var consolidatedSummaries []*toolSummary
 	lastToolByPosition := make(map[models.Position]int64)
 	positionIndexMap := make(map[models.Position]int)
-	toolEndDates := make(map[models.Position]time.Time) // key: position only
 
 	for _, summary := range toolSummaries {
 		lastToolID, hasLastTool := lastToolByPosition[summary.position]
@@ -179,7 +178,10 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			existingIndex := positionIndexMap[summary.position]
 			existingSummary := consolidatedSummaries[existingIndex]
 
-			// Update end date (keep the latest)
+			// Extend the date range
+			if summary.startDate.Before(existingSummary.startDate) {
+				existingSummary.startDate = summary.startDate
+			}
 			if summary.endDate.After(existingSummary.endDate) {
 				existingSummary.endDate = summary.endDate
 			}
@@ -192,26 +194,16 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			// Sum partial cycles
 			existingSummary.totalPartial += summary.totalPartial
 		} else {
-			// Create new entry with appropriate start date
+			// Create new entry (start date will be fixed in second pass)
 			newSummary := &toolSummary{
 				toolID:            summary.toolID,
 				toolCode:          summary.toolCode,
 				position:          summary.position,
-				startDate:         summary.startDate, // Will be overridden below
+				startDate:         summary.startDate,
 				endDate:           summary.endDate,
 				maxCycles:         summary.maxCycles,
 				totalPartial:      summary.totalPartial,
-				isFirstAppearance: false, // Will be set below
-			}
-
-			// Set start date and first appearance flag based on previous usage in this position
-			if previousEndDate, hasPrevious := toolEndDates[summary.position]; hasPrevious {
-				// Use previous end date as start date
-				newSummary.startDate = previousEndDate
-				newSummary.isFirstAppearance = false
-			} else {
-				// This is the first tool in this position
-				newSummary.isFirstAppearance = true
+				isFirstAppearance: false, // Will be set in second pass
 			}
 
 			consolidatedSummaries = append(consolidatedSummaries, newSummary)
@@ -220,9 +212,36 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			lastToolByPosition[summary.position] = summary.toolID
 			positionIndexMap[summary.position] = len(consolidatedSummaries) - 1
 		}
+	}
 
-		// Always update the end date for this position
-		toolEndDates[summary.position] = summary.endDate
+	// Second pass: Fix start dates based on tool changes per position
+	positionEntries := make(map[models.Position][]*toolSummary)
+	for _, summary := range consolidatedSummaries {
+		positionEntries[summary.position] = append(positionEntries[summary.position], summary)
+	}
+
+	// For each position, sort by start date and fix start dates
+	for _, entries := range positionEntries {
+		// Sort entries by original start date
+		for i := 0; i < len(entries)-1; i++ {
+			for j := i + 1; j < len(entries); j++ {
+				if entries[i].startDate.After(entries[j].startDate) {
+					entries[i], entries[j] = entries[j], entries[i]
+				}
+			}
+		}
+
+		// Fix start dates: first entry is unknown, others start when previous ended
+		for i, entry := range entries {
+			if i == 0 {
+				// First tool in this position - unknown start date
+				entry.isFirstAppearance = true
+			} else {
+				// Tool replacement - starts when previous tool ended
+				entry.startDate = entries[i-1].endDate
+				entry.isFirstAppearance = false
+			}
+		}
 	}
 
 	toolSummaries = consolidatedSummaries
@@ -245,21 +264,19 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	// Table data
 	o.PDF.SetFont("Arial", "", 9)
 
-	// Group tools by date for highlighting
-	var currentDate time.Time
-	var dateGroupIndex int
+	// Group tools by total cycle count for highlighting
+	var currentCycleCount int64 = -1
+	var cycleGroupIndex int
 
 	for _, summary := range toolSummaries {
-		// Check if this is a new date group (only compare year/month/day)
-		currentDateStr := currentDate.Format("2006-01-02")
-		summaryDateStr := summary.startDate.Format("2006-01-02")
-		if summaryDateStr != currentDateStr {
-			currentDate = summary.startDate
-			dateGroupIndex++
+		// Check if this is a new cycle count group
+		if summary.maxCycles != currentCycleCount {
+			currentCycleCount = summary.maxCycles
+			cycleGroupIndex++
 		}
 
-		// Use different background colors for different date groups
-		fill := dateGroupIndex%2 == 0
+		// Use different background colors for different cycle count groups
+		fill := cycleGroupIndex%2 == 0
 		if fill {
 			o.PDF.SetFillColor(240, 248, 255) // Light blue for even groups
 		} else {
