@@ -10,17 +10,17 @@ import (
 
 templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 	if len(notes) > 0 {
-		<div class="notes-list flex flex-wrap gap justify-start">
+		<div class="notes-list grid gap" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
 			for _, note := range notes {
-				{{ filterClass := "info" }}
 				{{
+					filterClass := ""
 					switch note.Level {
-					case models.BROKEN:
-						filterClass = "destructive ghost"
-					case models.ATTENTION:
-						filterClass = "warning ghost"
 					case models.INFO:
-						filterClass = "info ghost"
+						filterClass = "outline"
+					case models.ATTENTION:
+						filterClass = "warning outline"
+					case models.BROKEN:
+						filterClass = "destructive outline"
 					}
 				}}
 				@NotesCard(note, filterClass, tools)
@@ -37,7 +37,7 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 
 templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 	<div
-		class={ fmt.Sprintf("note-card w-fit card compact %s", filterClass) }
+		class={ fmt.Sprintf("note-card card compact %s", filterClass) }
 		data-note-level={ fmt.Sprintf("%d", note.Level) }
 	>
 		<div class="card-header flex gap-sm justify-between items-center">
@@ -46,17 +46,17 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 					case models.INFO:
 						<i class="bi bi-info-circle"></i>
 					case models.ATTENTION:
-						<i class="bi bi-exclamation-triangle text-warning"></i>
+						<i class="bi bi-exclamation-triangle"></i>
 					case models.BROKEN:
-						<i class="bi bi-x-circle text-danger"></i>
+						<i class="bi bi-x-circle"></i>
 				}
-				<span class="note-date text-sm text-muted">
+				<span class="note-date">
 					{ note.CreatedAt.Format("2006-01-02 15:04") }
 				</span>
 			</span>
 			<span class="flex gap">
 				<button
-					class="icon small secondary"
+					class="icon secondary small"
 					hx-get={ fmt.Sprintf(
 							"%s/htmx/notes/edit?id=%d&link_to_tables=%s&reload=true",
 							env.ServerPathPrefix, note.ID, note.Linked,
@@ -85,46 +85,41 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 			</span>
 		</div>
 		<div class="card-body">
-			<p
-				class="note-content"
-				style="white-space: pre-wrap; word-wrap: break-word;"
-			>
-				{ note.Content }
-			</p>
-			if note.Linked != "" {
-				<div class="linked-info mt-sm">
-					<small class="text-muted">
-						<strong>Verknüpft mit:</strong>
-						if strings.HasPrefix(note.Linked, "tool_") {
-							{{ toolIDStr := strings.TrimPrefix(note.Linked, "tool_") }}
-							{{ toolID, _ := strconv.ParseInt(toolIDStr, 10, 64) }}
-							for _, tool := range tools {
-								if tool.ID == toolID {
-									<a
-										href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
-										class="tool-link"
-									>
-										{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
-										if tool.Press != nil {
-											({ fmt.Sprintf("Presse %d", *tool.Press) })
-										}
-									</a>
-								}
-							}
-						} else if strings.HasPrefix(note.Linked, "press_") {
-							{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
-							<a
-								href={ fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr) }
-								class="press-link"
-							>
-								{ fmt.Sprintf("Presse %s", pressIDStr) }
-							</a>
-						} else {
-							<span>{ note.Linked }</span>
-						}
-					</small>
-				</div>
-			}
+			{ note.Content }
 		</div>
+		if note.Linked != "" {
+			<div class="card-footer">
+				<small class="text-muted">
+					Verknüpft mit:
+					if strings.HasPrefix(note.Linked, "tool_") {
+						{{ toolIDStr := strings.TrimPrefix(note.Linked, "tool_") }}
+						{{ toolID, _ := strconv.ParseInt(toolIDStr, 10, 64) }}
+						for _, tool := range tools {
+							if tool.ID == toolID {
+								<a
+									href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
+									class="tool-link"
+								>
+									{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
+									if tool.Press != nil {
+										({ fmt.Sprintf("Presse %d", *tool.Press) })
+									}
+								</a>
+							}
+						}
+					} else if strings.HasPrefix(note.Linked, "press_") {
+						{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
+						<a
+							href={ fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr) }
+							class="press-link"
+						>
+							{ fmt.Sprintf("Presse %s", pressIDStr) }
+						</a>
+					} else {
+						<span>{ note.Linked }</span>
+					}
+				</small>
+			</div>
+		}
 	</div>
 }
