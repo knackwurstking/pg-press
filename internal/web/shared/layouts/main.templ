@@ -55,7 +55,7 @@ templ Main(options MainOptions) {
 			/>
 			<title>{ options.PageTitle }</title>
 			<!-- HTMX for dynamic content -->
-			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.6.min.js") }></script>
+			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
 			<script>
 				const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant

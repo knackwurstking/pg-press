@@ -104,7 +104,7 @@ func TestStaticCacheMiddleware(t *testing.T) {
 				// Check ETag header
 				etag := rec.Header().Get("ETag")
 				assert.NotEmpty(t, etag, "ETag header should be set")
-				assert.True(t, strings.HasPrefix(etag, `"pg-vis-`), "ETag should have correct format")
+				assert.True(t, strings.HasPrefix(etag, `"pg-press-`), "ETag should have correct format")
 
 				// Check Vary header
 				vary := rec.Header().Get("Vary")
@@ -232,8 +232,8 @@ func TestGenerateETag(t *testing.T) {
 
 			assert.NotEmpty(t, etag1)
 			assert.NotEmpty(t, etag2)
-			assert.True(t, strings.HasPrefix(etag1, `"pg-vis-`))
-			assert.True(t, strings.HasPrefix(etag2, `"pg-vis-`))
+			assert.True(t, strings.HasPrefix(etag1, `"pg-press-`))
+			assert.True(t, strings.HasPrefix(etag2, `"pg-press-`))
 
 			if tt.expected {
 				assert.Equal(t, etag1, etag2)

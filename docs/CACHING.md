@@ -1,6 +1,6 @@
 # Asset Caching Implementation
 
-This document describes the asset caching strategy implemented in pg-vis to improve performance by leveraging browser caching for static assets.
+This document describes the asset caching strategy implemented in pg-press to improve performance by leveraging browser caching for static assets.
 
 ## Overview
 
@@ -84,19 +84,19 @@ ASSET_VERSION=v1.2.3 GIT_COMMIT=abc123ef make run
 ## How It Works
 
 1. **Request Processing**:
-    - Middleware checks if the requested file should be cached
-    - Sets appropriate cache headers based on file extension
-    - Adds ETag and Last-Modified headers for validation
+   - Middleware checks if the requested file should be cached
+   - Sets appropriate cache headers based on file extension
+   - Adds ETag and Last-Modified headers for validation
 
 2. **Asset URL Generation**:
-    - Template functions generate URLs with version parameters
-    - Version changes trigger cache invalidation
-    - Browsers fetch new assets when version changes
+   - Template functions generate URLs with version parameters
+   - Version changes trigger cache invalidation
+   - Browsers fetch new assets when version changes
 
 3. **Browser Behavior**:
-    - First visit: Downloads all assets, caches with long expiration
-    - Subsequent visits: Serves from cache (no network requests)
-    - Version change: Downloads only changed assets
+   - First visit: Downloads all assets, caches with long expiration
+   - Subsequent visits: Serves from cache (no network requests)
+   - Version change: Downloads only changed assets
 
 ## Benefits
 

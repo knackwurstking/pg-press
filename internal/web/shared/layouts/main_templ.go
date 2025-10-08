@@ -163,7 +163,7 @@ func Main(options MainOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.6.min.js"))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js"))
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/layouts/main.templ`, Line: 58, Col: 81}
 		}

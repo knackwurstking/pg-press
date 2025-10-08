@@ -114,7 +114,7 @@ func generateETag(path string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(path))
 	hash := fmt.Sprintf("%x", hasher.Sum(nil))
-	return fmt.Sprintf(`"pg-vis-%s"`, hash[:8])
+	return fmt.Sprintf(`"pg-press-%s"`, hash[:8])
 }
 
 // assetVersion generates a version string for assets

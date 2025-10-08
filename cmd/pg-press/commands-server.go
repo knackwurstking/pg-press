@@ -68,8 +68,7 @@ func serverCommand() cli.Command {
 				web.Serve(e, db)
 
 				log().Info("Starting HTTP server on %s", *addr)
-				if err := e.Start(*addr); err != nil &&
-					err != http.ErrServerClosed {
+				if err := e.Start(*addr); err != nil {
 					log().Error("Server startup failed on %s: %v", *addr, err)
 					log().Error("Common causes: port already in use, permission denied, invalid address format")
 					os.Exit(exitCodeServerStart)
