@@ -23,10 +23,7 @@ func serverCommand() cli.Command {
 		Name:  "server",
 		Usage: cli.Usage("Start the HTTP server for the pgpress web application."),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := cli.String(cmd, "db",
-				cli.WithShort("d"),
-				cli.Usage("Custom database file path (defaults to standard location)"),
-				cli.Optional)
+			customDBPath := createDBPathOption(cmd, "Custom database file path (defaults to standard location)")
 
 			addr := cli.String(cmd, "addr",
 				cli.WithShort("a"),

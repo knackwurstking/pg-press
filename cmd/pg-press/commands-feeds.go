@@ -29,11 +29,7 @@ func listFeedsCommand() cli.Command {
 		Name:  "list",
 		Usage: cli.Usage("List all feeds in the database"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := cli.String(cmd, "db",
-				cli.WithShort("d"),
-				cli.Usage("Custom database path"),
-				cli.Optional,
-			)
+			customDBPath := createDBPathOption(cmd, "Custom database path")
 
 			limit := cli.Int(cmd, "limit",
 				cli.WithShort("l"),
@@ -58,61 +54,61 @@ func listFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(*customDBPath)
-				if err != nil {
-					return err
-				}
+				return withDBOperation(customDBPath, func(db *database.DB) error {
+					var feeds []*models.Feed
 
-				var feeds []*models.Feed
+					var err error
+					// Get feeds based on parameters
+					if *limit > 0 {
+						feeds, err = db.Feeds.ListRange(*offset, *limit)
+						if err != nil {
+							return err
+						}
+					} else {
+						feeds, err = db.Feeds.List()
+						if err != nil {
+							return err
+						}
+					}
 
-				// Get feeds based on parameters
-				if *limit > 0 {
-					feeds, err = db.Feeds.ListRange(*offset, *limit)
-				} else {
-					feeds, err = db.Feeds.List()
-				}
+					// Filter by date if specified
+					if *since != "" || *before != "" {
+						feeds = filterFeedsByDate(feeds, *since, *before)
+					}
 
-				if err != nil {
-					return err
-				}
+					if len(feeds) == 0 {
+						fmt.Fprintln(os.Stderr, "No feeds found")
+						return nil
+					}
 
-				// Filter by date if specified
-				if *since != "" || *before != "" {
-					feeds = filterFeedsByDate(feeds, *since, *before)
-				}
+					// Print header
+					fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "ID", "Time", "Age", "Title", "Content")
+					fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "------", "-------------------", "--------", "------------------------------", "-------")
 
-				if len(feeds) == 0 {
-					fmt.Fprintln(os.Stderr, "No feeds found")
+					// Print feeds line by line
+					for _, feed := range feeds {
+						age := formatAge(feed.Age())
+						title := feed.Title
+						if len(title) > 30 {
+							title = title[:27] + "..."
+						}
+						content := feed.Content
+						if len(content) > 50 {
+							content = content[:47] + "..."
+						}
+						fmt.Printf("%-6d %-19s %-8s %-30s %s\n",
+							feed.ID,
+							feed.GetCreatedTime().Format("2006-01-02 15:04:05"),
+							age,
+							title,
+							content,
+						)
+					}
+
+					fmt.Printf("\nTotal: %d feed(s)\n", len(feeds))
+
 					return nil
-				}
-
-				// Print header
-				fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "ID", "Time", "Age", "Title", "Content")
-				fmt.Printf("%-6s %-19s %-8s %-30s %s\n", "------", "-------------------", "--------", "------------------------------", "-------")
-
-				// Print feeds line by line
-				for _, feed := range feeds {
-					age := formatAge(feed.Age())
-					title := feed.Title
-					if len(title) > 30 {
-						title = title[:27] + "..."
-					}
-					content := feed.Content
-					if len(content) > 50 {
-						content = content[:47] + "..."
-					}
-					fmt.Printf("%-6d %-19s %-8s %-30s %s\n",
-						feed.ID,
-						feed.GetCreatedTime().Format("2006-01-02 15:04:05"),
-						age,
-						title,
-						content,
-					)
-				}
-
-				fmt.Printf("\nTotal: %d feed(s)\n", len(feeds))
-
-				return nil
+				})
 			}
 		}),
 	}
@@ -132,11 +128,7 @@ func removeFeedsCommand() cli.Command {
 		Name:  "remove",
 		Usage: cli.Usage("Remove feeds from the database"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := cli.String(cmd, "db",
-				cli.WithShort("d"),
-				cli.Usage("Custom database path"),
-				cli.Optional,
-			)
+			customDBPath := createDBPathOption(cmd, "Custom database path")
 
 			olderThan := cli.String(cmd, "older-than",
 				cli.Usage("Remove feeds older than duration (e.g., 24h, 7d, 30d)"),
@@ -154,32 +146,29 @@ func removeFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(*customDBPath)
-				if err != nil {
-					return err
-				}
-
-				// Remove by IDs
-				if *idsStr != "" {
-					ids := strings.Split(*idsStr, ",")
-					// Trim whitespace from each ID
-					for i, id := range ids {
-						ids[i] = strings.TrimSpace(id)
+				return withDBOperation(customDBPath, func(db *database.DB) error {
+					// Remove by IDs
+					if *idsStr != "" {
+						ids := strings.Split(*idsStr, ",")
+						// Trim whitespace from each ID
+						for i, id := range ids {
+							ids[i] = strings.TrimSpace(id)
+						}
+						return removeFeedsByIDs(db, ids)
 					}
-					return removeFeedsByIDs(db, ids)
-				}
 
-				// Remove by duration
-				if *olderThan != "" {
-					return removeFeedsByDuration(db, *olderThan)
-				}
+					// Remove by duration
+					if *olderThan != "" {
+						return removeFeedsByDuration(db, *olderThan)
+					}
 
-				// Remove by date
-				if *before != "" {
-					return removeFeedsByDate(db, *before)
-				}
+					// Remove by date
+					if *before != "" {
+						return removeFeedsByDate(db, *before)
+					}
 
-				return fmt.Errorf("must specify either feed IDs, --older-than, or --before")
+					return fmt.Errorf("must specify either feed IDs, --older-than, or --before")
+				})
 			}
 		}),
 	}
