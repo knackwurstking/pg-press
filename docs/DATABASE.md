@@ -452,8 +452,8 @@ CREATE INDEX idx_press_cycles_tool_date ON press_cycles(tool_id, date);
 CREATE INDEX idx_press_cycles_press ON press_cycles(press_number);
 CREATE INDEX idx_notes_linked ON notes(linked);
 CREATE INDEX idx_notes_level ON notes(level);
-CREATE INDEX idx_feeds_time ON feeds(time);
-CREATE INDEX idx_feeds_data_type ON feeds(data_type);
+CREATE INDEX idx_feeds_created_at ON feeds(created_at);
+CREATE INDEX idx_feeds_user_id ON feeds(user_id);
 CREATE INDEX idx_tools_press ON tools(press);
 CREATE INDEX idx_tools_code ON tools(code);
 ```

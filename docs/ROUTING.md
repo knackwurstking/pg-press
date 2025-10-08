@@ -167,6 +167,30 @@ GET /profile
 
 ---
 
+#### Help System
+
+```http
+GET /help/markdown
+```
+
+**Description**: Interactive markdown help and reference page.
+
+**Authentication**: Required
+
+**Response**: HTML page with:
+
+- Complete markdown syntax reference
+- Live examples and demonstrations
+- Editor integration and usage guide
+- Feature documentation
+
+**Status Codes**:
+
+- `200 OK`: Help page rendered successfully
+- `401 Unauthorized`: Not authenticated
+
+---
+
 ### Content Management
 
 #### Editor Page
@@ -299,6 +323,54 @@ GET /tools/tool/123
 
 ---
 
+#### Umbau (Tool Change) Management
+
+```http
+GET /tools/press/:press/umbau
+```
+
+**Description**: Tool change management page for a specific press.
+
+**Authentication**: Required
+
+**Parameters**:
+
+- `press` (integer): Press number (0-5)
+
+**Response**: HTML page with tool change interface
+
+**Status Codes**:
+
+- `200 OK`: Umbau page rendered successfully
+- `401 Unauthorized`: Not authenticated
+- `404 Not Found`: Invalid press number
+
+```http
+POST /tools/press/:press/umbau
+```
+
+**Description**: Process tool change operations for a specific press.
+
+**Authentication**: Required
+
+**Parameters**:
+
+- `press` (integer): Press number (0-5)
+
+**Request Body**: Form data with tool change details
+
+**Response**: Redirect or updated page content
+
+**Status Codes**:
+
+- `200 OK`: Tool change processed successfully
+- `302 Found`: Redirect after successful operation
+- `400 Bad Request`: Invalid form data
+- `401 Unauthorized`: Not authenticated
+- `404 Not Found`: Invalid press number
+
+---
+
 ### Trouble Reports
 
 #### Trouble Reports List
@@ -383,6 +455,34 @@ GET /trouble-reports/attachment
 ```http
 GET /trouble-reports/attachment?attachment_id=789
 ```
+
+---
+
+### Notes System
+
+#### Notes Management Page
+
+```http
+GET /notes
+```
+
+**Description**: Notes and documentation management page.
+
+**Authentication**: Required
+
+**Response**: HTML page with:
+
+- Notes list with priority levels
+- Search and filter controls
+- Note creation interface
+- Entity linking system
+
+**Status Codes**:
+
+- `200 OK`: Notes page rendered successfully
+- `401 Unauthorized`: Not authenticated
+
+---
 
 ## HTMX Routes
 

@@ -192,21 +192,10 @@ See [docs/DATABASE.md](docs/DATABASE.md) for detailed schema information.
 
 - [🌟 Features Overview](docs/FEATURES.md) - Comprehensive feature documentation
 - [🗄️ Database Schema](docs/DATABASE.md) - Complete database structure
-- [🚀 Caching Strategy](docs/CACHING.md) - Asset optimization details
-- [🛣️ HTMX Endpoints](docs/API.md) - HTMX architecture and endpoints
-- [🛤️ Routing Table](docs/ROUTING.md) - All available routes
-- [📝 Notes System](docs/NOTES_SYSTEM.md) - Documentation management
-- [📝 Editor System](docs/EDITOR_SYSTEM.md) - Markdown editor implementation
-- [❓ Help System](docs/HELP_SYSTEM.md) - Interactive markdown help and user documentation
-- [📝 Shared Markdown](docs/SHARED_MARKDOWN_SYSTEM.md) - Shared markdown rendering system
-- [📝 Markdown Implementation](docs/MARKDOWN_IMPLEMENTATION.md) - Detailed markdown feature documentation
-- [🚀 Markdown Enhancements](docs/MARKDOWN_ENHANCEMENTS.md) - Recent markdown improvements and features
-- [🧪 Path Prefix Testing](docs/PATH_PREFIX_TESTING.md) - Server path prefix testing and deployment guide
-- [🔄 Migration Guide](docs/MIGRATION_GUIDE.md) - Database migration procedures
-- [📋 Migration Completion](docs/MIGRATION_COMPLETION.md) - Migration summary and status
-- [🧹 Scripts Cleanup](docs/SCRIPTS_CLEANUP.md) - Scripts directory reorganization summary
+- [⚡ Caching Strategy](docs/CACHING.md) - Asset optimization details
+- [🌐 API Documentation](docs/API.md) - HTMX architecture and endpoints
+- [🛤️ Routing Documentation](docs/ROUTING.md) - All available routes
 - [📚 Documentation Index](docs/README.md) - Complete documentation overview and navigation
-- [📋 Documentation Organization](docs/DOCUMENTATION_ORGANIZATION_SUMMARY.md) - Validation and organization summary
 
 ## Development
 
