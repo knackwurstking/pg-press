@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 // Attachments provides database operations for managing attachments with lazy loading.
 type Attachments struct {
-	db  *sql.DB
-	log *logger.Logger
+	*BaseService
 }
 
-// NewAttachment creates a new Service instance and initializes the database table.
+// NewAttachments creates a new Service instance and initializes the database table.
 func NewAttachments(db *sql.DB) *Attachments {
+	base := NewBaseService(db, "Attachments")
+
 	query := `
 		CREATE TABLE IF NOT EXISTS attachments (
 			id INTEGER NOT NULL,
@@ -28,69 +27,64 @@ func NewAttachments(db *sql.DB) *Attachments {
 		);
 	`
 
-	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create attachments table: %v", err))
+	if err := base.CreateTable(query, "attachments"); err != nil {
+		panic(err)
 	}
 
 	return &Attachments{
-		db:  db,
-		log: logger.GetComponentLogger("Service: Attachments"),
+		BaseService: base,
 	}
 }
 
 // List retrieves all attachments ordered by ID ascending.
 func (a *Attachments) List() ([]*models.Attachment, error) {
-	a.log.Debug("Listing all attachments")
+	a.LogOperation("Listing attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
 	rows, err := a.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select attachments: %v", err)
+		return nil, a.HandleSelectError(err, "attachments")
 	}
 	defer rows.Close()
 
-	var attachments []*models.Attachment
-
-	for rows.Next() {
-		attachment, err := a.scan(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan attachments: %v", err)
-		}
-		attachments = append(attachments, attachment)
+	attachments, err := ScanAttachmentsFromRows(rows)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select attachments: %v", err)
-	}
-
+	a.LogOperation("Listed attachments", fmt.Sprintf("count: %d", len(attachments)))
 	return attachments, nil
 }
 
 // Get retrieves a specific attachment by ID.
 func (a *Attachments) Get(id int64) (*models.Attachment, error) {
-	a.log.Debug("Getting attachment, id: %d", id)
+	if err := ValidateID(id, "attachment"); err != nil {
+		return nil, err
+	}
+
+	a.LogOperation("Getting attachment", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
 	row := a.db.QueryRow(query, id)
-	attachment, err := a.scan(row)
+
+	attachment, err := ScanSingleRow(row, ScanAttachment, "attachments")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("attachment with ID %d not found", id))
 		}
-
-		return nil, fmt.Errorf("select attachments: %v", err)
+		return nil, err
 	}
 
 	return attachment, nil
 }
 
 // GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (s *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
+func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
 
-	s.log.Debug("Getting attachments by IDs: %v", ids)
+	a.LogOperation("Getting attachments by IDs", fmt.Sprintf("count: %d", len(ids)))
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -101,33 +95,22 @@ func (s *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	}
 
 	query := fmt.Sprintf(
-		`
-			SELECT id, mime_type, data FROM attachments
-			WHERE id IN (%s)
-			ORDER BY id ASC
-		`,
+		`SELECT id, mime_type, data FROM attachments
+		WHERE id IN (%s)
+		ORDER BY id ASC`,
 		strings.Join(placeholders, ","),
 	)
 
-	rows, err := s.db.Query(query, args...)
+	rows, err := a.db.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("select attachments: %v", err)
+		return nil, a.HandleSelectError(err, "attachments")
 	}
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachmentMap := make(map[int64]*models.Attachment)
-
-	for rows.Next() {
-		attachment, err := s.scan(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan attachments: %v", err)
-		}
-		attachmentMap[attachment.GetID()] = attachment
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("select attachments: %v", err)
+	attachmentMap, err := ScanAttachmentsIntoMap(rows)
+	if err != nil {
+		return nil, err
 	}
 
 	// Return attachments in the order of the requested IDs
@@ -138,102 +121,93 @@ func (s *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 		}
 	}
 
+	a.LogOperation("Found attachments by IDs", fmt.Sprintf("found: %d", len(attachments)))
 	return attachments, nil
 }
 
 // Add creates a new attachment and returns its generated ID.
 func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
-	a.log.Debug("Adding attachment: %s", attachment.String())
-
-	if attachment == nil {
-		return 0, utils.NewValidationError("attachment cannot be nil")
+	if err := ValidateAttachment(attachment); err != nil {
+		return 0, err
 	}
 
+	// Call the model's validate method for additional checks
 	if err := attachment.Validate(); err != nil {
 		return 0, err
 	}
 
+	a.LogOperation("Adding attachment", fmt.Sprintf("mime_type: %s, size: %d bytes", attachment.MimeType, len(attachment.Data)))
+
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, fmt.Errorf("insert attachments: %v", err)
+		return 0, a.HandleInsertError(err, "attachments")
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("insert attachments: %v", err)
+		return 0, a.HandleInsertError(err, "attachments")
 	}
 
+	a.LogOperation("Added attachment", fmt.Sprintf("id: %d", id))
 	return id, nil
 }
 
 // Update modifies an existing attachment.
 func (a *Attachments) Update(attachment *models.Attachment) error {
-	id := attachment.GetID()
-	a.log.Debug("Updating attachment, id: %d", id)
-
-	if attachment == nil {
-		return utils.NewValidationError("attachment: attachment cannot be nil")
+	if err := ValidateAttachment(attachment); err != nil {
+		return err
 	}
 
+	// Call the model's validate method for additional checks
 	if err := attachment.Validate(); err != nil {
 		return err
 	}
 
+	// Convert string ID to int64
+	var id int64
+	if _, err := fmt.Sscanf(attachment.ID, "%d", &id); err != nil {
+		return utils.NewValidationError("invalid attachment ID format")
+	}
+
+	if err := ValidateID(id, "attachment"); err != nil {
+		return err
+	}
+
+	a.LogOperation("Updating attachment", fmt.Sprintf("id: %d", id))
+
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
 	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return fmt.Errorf("update attachments: %v", err)
+		return a.HandleUpdateError(err, "attachments")
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("update attachments: %v", err)
+	if err := a.CheckRowsAffected(result, "attachment", id); err != nil {
+		return err
 	}
 
-	if rowsAffected == 0 {
-		return utils.NewNotFoundError(fmt.Sprintf("id: %d", id))
-	}
-
+	a.LogOperation("Updated attachment", fmt.Sprintf("id: %d", id))
 	return nil
 }
 
 // Delete deletes an attachment by ID.
 func (a *Attachments) Delete(id int64) error {
-	a.log.Debug("Removing attachment, id: %d", id)
+	if err := ValidateID(id, "attachment"); err != nil {
+		return err
+	}
+
+	a.LogOperation("Deleting attachment", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("delete attachments: %v", err)
+		return a.HandleDeleteError(err, "attachments")
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("delete attachments: %v", err)
+	if err := a.CheckRowsAffected(result, "attachment", id); err != nil {
+		return err
 	}
 
-	if rowsAffected == 0 {
-		return utils.NewNotFoundError(fmt.Sprintf("id: %d", id))
-	}
-
+	a.LogOperation("Deleted attachment", id)
 	return nil
-}
-
-func (s *Attachments) scan(scanner interfaces.Scannable) (*models.Attachment, error) {
-	attachment := &models.Attachment{}
-	var id int64
-
-	if err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data); err != nil {
-		// The `Get` method needs the original sql.ErrNoRows error
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan row: %v", err)
-	}
-
-	// Set the ID using string conversion to maintain compatibility
-	attachment.ID = fmt.Sprintf("%d", id)
-
-	return attachment, nil
 }

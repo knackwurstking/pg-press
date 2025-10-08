@@ -5,36 +5,34 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type TroubleReports struct {
-	db            *sql.DB
+	*BaseService
 	attachments   *Attachments
 	modifications *Modifications
-	log           *logger.Logger
 }
 
 func NewTroubleReports(db *sql.DB, a *Attachments, m *Modifications) *TroubleReports {
-	troubleReport := &TroubleReports{
-		db:            db,
+	base := NewBaseService(db, "Trouble Reports")
+
+	troubleReports := &TroubleReports{
+		BaseService:   base,
 		attachments:   a,
 		modifications: m,
-		log:           logger.GetComponentLogger("Service: Trouble Reports"),
 	}
 
-	if err := troubleReport.createTable(db); err != nil {
+	if err := troubleReports.createTable(); err != nil {
 		panic(err)
 	}
 
-	return troubleReport
+	return troubleReports
 }
 
-func (s *TroubleReports) createTable(db *sql.DB) error {
-	const createQuery string = `
+func (s *TroubleReports) createTable() error {
+	query := `
 		CREATE TABLE IF NOT EXISTS trouble_reports (
 			id INTEGER NOT NULL,
 			title TEXT NOT NULL,
@@ -44,22 +42,19 @@ func (s *TroubleReports) createTable(db *sql.DB) error {
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
-	if _, err := db.Exec(createQuery); err != nil {
-		return fmt.Errorf("failed to create trouble_reports table: %v", err)
+
+	if err := s.CreateTable(query, "trouble_reports"); err != nil {
+		return err
 	}
 
 	// Run migration to add use_markdown column if it doesn't exist
-	if err := s.migrateUseMarkdownColumn(db); err != nil {
-		return fmt.Errorf("failed to migrate use_markdown column: %v", err)
-	}
-
-	return nil
+	return s.migrateUseMarkdownColumn()
 }
 
-func (s *TroubleReports) migrateUseMarkdownColumn(db *sql.DB) error {
+func (s *TroubleReports) migrateUseMarkdownColumn() error {
 	// Check if use_markdown column exists
 	const checkColumnQuery = `PRAGMA table_info(trouble_reports)`
-	rows, err := db.Query(checkColumnQuery)
+	rows, err := s.db.Query(checkColumnQuery)
 	if err != nil {
 		return fmt.Errorf("failed to check table schema: %v", err)
 	}
@@ -88,12 +83,12 @@ func (s *TroubleReports) migrateUseMarkdownColumn(db *sql.DB) error {
 
 	// Add use_markdown column if it doesn't exist
 	if !hasUseMarkdownColumn {
-		s.log.Info("Adding use_markdown column to existing trouble_reports table")
+		s.LogOperation("Adding use_markdown column to existing trouble_reports table")
 		const addColumnQuery = `ALTER TABLE trouble_reports ADD COLUMN use_markdown BOOLEAN DEFAULT 0`
-		if _, err := db.Exec(addColumnQuery); err != nil {
+		if _, err := s.db.Exec(addColumnQuery); err != nil {
 			return fmt.Errorf("failed to add use_markdown column: %v", err)
 		}
-		s.log.Info("Successfully added use_markdown column")
+		s.LogOperation("Successfully added use_markdown column")
 	}
 
 	return nil
@@ -101,73 +96,65 @@ func (s *TroubleReports) migrateUseMarkdownColumn(db *sql.DB) error {
 
 // List retrieves all trouble reports ordered by ID descending.
 func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
-	s.log.Debug("Starting trouble reports list query")
+	s.LogOperation("Listing trouble reports")
 
-	const listQuery string = `SELECT * FROM trouble_reports ORDER BY id DESC`
+	const listQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := s.db.Query(listQuery)
 	if err != nil {
-		s.log.Error("Failed to execute trouble reports list query: %v", err)
-		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
+		return nil, s.HandleSelectError(err, "trouble_reports")
 	}
 	defer rows.Close()
 
-	var reports []*models.TroubleReport
-	reportCount := 0
-
-	for rows.Next() {
-		report, err := s.scanTroubleReport(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan error: trouble_reports: %v", err)
-		}
-		reports = append(reports, report)
-		reportCount++
+	reports, err := ScanTroubleReportsFromRows(rows)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := rows.Err(); err != nil {
-		s.log.Error("Error iterating over %d trouble report rows: %v", reportCount, err)
-		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
-	}
-
-	s.log.Info("Listed %d trouble reports", len(reports))
+	s.LogOperation("Listed trouble reports", fmt.Sprintf("count: %d", len(reports)))
 	return reports, nil
 }
 
 // Get retrieves a specific trouble report by ID.
 func (s *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
-	s.log.Debug("Getting trouble report by ID: %d", id)
+	if err := ValidateID(id, "trouble_report"); err != nil {
+		return nil, err
+	}
+
+	s.LogOperation("Getting trouble report", id)
 
 	const getQuery = `SELECT * FROM trouble_reports WHERE id = ?`
 	row := s.db.QueryRow(getQuery, id)
 
-	report, err := s.scanTroubleReport(row)
-
+	report, err := ScanSingleRow(row, ScanTroubleReport, "trouble_reports")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("trouble report with ID %d", id))
 		}
-
-		return nil, fmt.Errorf("select error: trouble_reports: %v", err)
+		return nil, err
 	}
 
-	s.log.Debug("Retrieved trouble report %d (title='%s')", id, report.Title)
+	s.LogOperation("Retrieved trouble report", fmt.Sprintf("id: %d, title: %s", id, report.Title))
 	return report, nil
 }
 
 // Add creates a new trouble report and generates a corresponding activity feed entry.
 func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
-	// Validate
-	if u == nil {
-		return 0, utils.NewValidationError("user: user cannot be nil")
+	if err := ValidateTroubleReport(tr); err != nil {
+		return 0, err
 	}
 
+	if err := ValidateNotNil(u, "user"); err != nil {
+		return 0, err
+	}
+
+	// Call the model's validate method for additional checks
 	if err := tr.Validate(); err != nil {
 		return 0, err
 	}
 
 	userInfo := createUserInfo(u)
-
-	s.log.Info("Adding trouble report by %s: title='%s', attachments=%d",
-		userInfo, tr.Title, len(tr.LinkedAttachments))
+	s.LogOperationWithUser("Adding trouble report", userInfo,
+		fmt.Sprintf("title: %s, attachments: %d", tr.Title, len(tr.LinkedAttachments)))
 
 	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
@@ -176,21 +163,16 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 	}
 
 	// Insert trouble report
-	const addQuery = `INSERT INTO trouble_reports
-		(title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`
-
-	result, err := s.db.Exec(
-		addQuery, tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown,
-	)
+	const addQuery = `INSERT INTO trouble_reports (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`
+	result, err := s.db.Exec(addQuery, tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown)
 	if err != nil {
-		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
+		return 0, s.HandleInsertError(err, "trouble_reports")
 	}
 
 	// Get ID of inserted trouble report
 	id, err := result.LastInsertId()
 	if err != nil {
-		s.log.Error("Failed to get last insert ID for trouble report by %s: %v", userInfo, err)
-		return 0, fmt.Errorf("insert error: trouble_reports: %v", err)
+		return 0, s.HandleInsertError(err, "trouble_reports")
 	}
 	tr.ID = id
 
@@ -206,42 +188,47 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 		// Don't fail the entire operation for modification tracking
 	}
 
-	s.log.Info("Successfully added trouble report %d by %s", id, userInfo)
-
+	s.LogOperation("Added trouble report", fmt.Sprintf("id: %d", id))
 	return id, nil
 }
 
 // Update modifies an existing trouble report and generates an activity feed entry.
 func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error {
-	// Validate
-	if u == nil {
-		return utils.NewValidationError("user: user cannot be nil")
+	if err := ValidateTroubleReport(tr); err != nil {
+		return err
 	}
 
+	if err := ValidateID(tr.ID, "trouble_report"); err != nil {
+		return err
+	}
+
+	if err := ValidateNotNil(u, "user"); err != nil {
+		return err
+	}
+
+	// Call the model's validate method for additional checks
 	if err := tr.Validate(); err != nil {
 		return err
 	}
 
 	userInfo := createUserInfo(u)
+	s.LogOperationWithUser("Updating trouble report", userInfo,
+		fmt.Sprintf("id: %d, title: %s, attachments: %d", tr.ID, tr.Title, len(tr.LinkedAttachments)))
 
-	s.log.Info("Updating trouble report %d by %s: title='%s', attachments=%d",
-		tr.ID, userInfo, tr.Title, len(tr.LinkedAttachments))
-
-	// Unmarshal linked attachments
+	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
 		return fmt.Errorf("failed to marshal linked attachments: %v", err)
 	}
 
-	const updateQuery string = `UPDATE trouble_reports
-		SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`
-	_, err = s.db.Exec(
-		updateQuery,
-		tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown, // SET
-		tr.ID, // WHERE
-	)
+	const updateQuery = `UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`
+	result, err := s.db.Exec(updateQuery, tr.Title, tr.Content, string(linkedAttachments), tr.UseMarkdown, tr.ID)
 	if err != nil {
-		return fmt.Errorf("update error: trouble_reports: %v", err)
+		return s.HandleUpdateError(err, "trouble_reports")
+	}
+
+	if err := s.CheckRowsAffected(result, "trouble_report", tr.ID); err != nil {
+		return err
 	}
 
 	// Save modification
@@ -252,70 +239,61 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 		UseMarkdown:       tr.UseMarkdown,
 	}
 	if err := s.modifications.AddTroubleReportMod(u.TelegramID, tr.ID, modData); err != nil {
-		s.log.Error(
-			"Failed to save modification for trouble report %d: %v",
-			tr.ID, err,
-		)
+		s.log.Error("Failed to save modification for trouble report %d: %v", tr.ID, err)
 		// Don't fail the entire operation for modification tracking
 	}
 
-	s.log.Info("Successfully updated trouble report %d by %s",
-		tr.ID, userInfo)
-
+	s.LogOperation("Updated trouble report", fmt.Sprintf("id: %d", tr.ID))
 	return nil
 }
 
 // Delete deletes a trouble report by ID and generates an activity feed entry.
 func (s *TroubleReports) Delete(id int64, user *models.User) error {
-	if user == nil {
-		return utils.NewValidationError("user: user cannot be nil")
+	if err := ValidateID(id, "trouble_report"); err != nil {
+		return err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
 	}
 
 	userInfo := createUserInfo(user)
 
-	s.log.Info("Removing trouble report %d by %s", id, userInfo)
-
-	// Get the report before deleting for the feed entry and logging
+	// Get the report before deleting for logging and cleanup
 	report, err := s.Get(id)
 	if err != nil {
 		return err
 	}
-	s.log.Debug("Retrieved trouble report %d (title='%s') for deletion", id, report.Title)
+
+	s.LogOperationWithUser("Deleting trouble report", userInfo,
+		fmt.Sprintf("id: %d, title: %s", id, report.Title))
 
 	const deleteQuery = `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := s.db.Exec(deleteQuery, id)
 	if err != nil {
-		return fmt.Errorf("delete error: trouble_reports: %v", err)
+		return s.HandleDeleteError(err, "trouble_reports")
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("delete error: trouble_reports: %v", err)
+	if err := s.CheckRowsAffected(result, "trouble_report", id); err != nil {
+		return err
 	}
 
-	if rowsAffected == 0 {
-		return utils.NewNotFoundError(fmt.Sprintf("no trouble report found with ID %d", id))
-	}
-
-	// Delete modification
+	// Delete modifications
 	if err := s.modifications.DeleteAll(ModificationTypeTroubleReport, report.ID); err != nil {
-		s.log.Error("Failed to delete all modifications for entity type \"%s\" and entity ID %d",
-			ModificationTypeTroubleReport, report.ID)
+		s.log.Error("Failed to delete modifications for trouble report %d: %v", report.ID, err)
 	}
 
-	s.log.Info(
-		"Successfully deleted trouble report %d (title='%s') by %s",
-		id, report.Title, userInfo,
-	)
-
+	s.LogOperation("Deleted trouble report", fmt.Sprintf("id: %d", id))
 	return nil
 }
 
 // GetWithAttachments retrieves a trouble report and loads its attachments.
-func (s *TroubleReports) GetWithAttachments(
-	id int64,
-) (*models.TroubleReportWithAttachments, error) {
-	s.log.Debug("Getting trouble report with attachments, id: %d", id)
+func (s *TroubleReports) GetWithAttachments(id int64) (*models.TroubleReportWithAttachments, error) {
+	if err := ValidateID(id, "trouble_report"); err != nil {
+		return nil, err
+	}
+
+	s.LogOperation("Getting trouble report with attachments", id)
 
 	// Get the trouble report
 	tr, err := s.Get(id)
@@ -329,8 +307,8 @@ func (s *TroubleReports) GetWithAttachments(
 		return nil, err
 	}
 
-	s.log.Debug("Retrieved trouble report %d (title='%s') with %d attachments",
-		id, tr.Title, len(attachments))
+	s.LogOperation("Retrieved trouble report with attachments",
+		fmt.Sprintf("id: %d, attachments: %d", id, len(attachments)))
 
 	return &models.TroubleReportWithAttachments{
 		TroubleReport:     tr,
@@ -340,7 +318,7 @@ func (s *TroubleReports) GetWithAttachments(
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
 func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
-	s.log.Debug("Starting trouble reports with attachments list query")
+	s.LogOperation("Listing trouble reports with attachments")
 
 	// Get all trouble reports
 	reports, err := s.List()
@@ -365,50 +343,41 @@ func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttac
 		})
 	}
 
-	s.log.Info(
-		"Listed %d trouble reports with %d total attachments",
-		len(result), totalAttachments,
-	)
+	s.LogOperation("Listed trouble reports with attachments",
+		fmt.Sprintf("reports: %d, total_attachments: %d", len(result), totalAttachments))
 
 	return result, nil
 }
 
 // AddWithAttachments creates a new trouble report and its attachments.
-func (s *TroubleReports) AddWithAttachments(
-	troubleReport *models.TroubleReport, user *models.User, attachments ...*models.Attachment,
-) error {
-	if user == nil {
-		return utils.NewValidationError("user: user cannot be nil")
+func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport, user *models.User, attachments ...*models.Attachment) error {
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
 	}
 
 	userInfo := createUserInfo(user)
-
-	s.log.Info("Adding trouble report with %d attachments by %s: title='%s'",
-		len(attachments), userInfo, troubleReport.Title)
+	s.LogOperationWithUser("Adding trouble report with attachments", userInfo,
+		fmt.Sprintf("title: %s, attachments: %d", troubleReport.Title, len(attachments)))
 
 	// First, add the attachments and collect their IDs
 	var attachmentIDs []int64
 	for i, attachment := range attachments {
 		if attachment == nil {
-			s.log.Debug("Skipping nil attachment %d for %s", i, userInfo)
+			s.LogOperation("Skipping nil attachment", fmt.Sprintf("index: %d", i))
 			continue
 		}
 
-		s.log.Debug("Adding attachment %d/%d (size: %d bytes) for %s",
-			i+1, len(attachments), len(attachment.Data), userInfo)
+		s.LogOperation("Adding attachment", fmt.Sprintf("index: %d, size: %d bytes", i+1, len(attachment.Data)))
 
 		id, err := s.attachments.Add(attachment)
 		if err != nil {
 			// Cleanup already added attachments on failure
-			s.log.Error("Failed to add attachment %d for %s, cleaning up %d existing: %v",
-				i+1, userInfo, len(attachmentIDs), err)
-
+			s.log.Error("Failed to add attachment %d, cleaning up %d existing: %v", i+1, len(attachmentIDs), err)
 			for _, addedID := range attachmentIDs {
 				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
 					s.log.Error("Failed to cleanup attachment %d: %v", addedID, cleanupErr)
 				}
 			}
-
 			return err
 		}
 
@@ -420,10 +389,7 @@ func (s *TroubleReports) AddWithAttachments(
 
 	// Add the trouble report
 	if _, err := s.Add(troubleReport, user); err != nil {
-		s.log.Error(
-			"Failed to add trouble report for %s, cleaning up %d attachments: %v",
-			userInfo, len(attachmentIDs), err,
-		)
+		s.log.Error("Failed to add trouble report, cleaning up %d attachments: %v", len(attachmentIDs), err)
 
 		// Cleanup attachments on failure
 		for _, id := range attachmentIDs {
@@ -431,55 +397,47 @@ func (s *TroubleReports) AddWithAttachments(
 				s.log.Error("Failed to cleanup attachment %d: %v", id, cleanupErr)
 			}
 		}
-
 		return err
 	}
 
+	s.LogOperation("Added trouble report with attachments",
+		fmt.Sprintf("attachments_added: %d", len(attachmentIDs)))
 	return nil
 }
 
 // UpdateWithAttachments updates a trouble report and manages its attachments.
-func (s *TroubleReports) UpdateWithAttachments(
-	id int64,
-	tr *models.TroubleReport,
-	user *models.User,
-	newAttachments ...*models.Attachment,
-) error {
-	if user == nil {
-		return utils.NewValidationError("user: user cannot be nil")
+func (s *TroubleReports) UpdateWithAttachments(id int64, tr *models.TroubleReport, user *models.User, newAttachments ...*models.Attachment) error {
+	if err := ValidateID(id, "trouble_report"); err != nil {
+		return err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
 	}
 
 	userInfo := createUserInfo(user)
-
-	s.log.Info(
-		"Updating trouble report %d with %d new attachments by %s: title='%s'",
-		id, len(newAttachments), userInfo, tr.Title,
-	)
+	s.LogOperationWithUser("Updating trouble report with attachments", userInfo,
+		fmt.Sprintf("id: %d, title: %s, new_attachments: %d", id, tr.Title, len(newAttachments)))
 
 	// Add new attachments
 	var newAttachmentIDs []int64
 	for i, attachment := range newAttachments {
 		if attachment == nil {
-			s.log.Debug("Skipping nil attachment %d for update %d by %s", i, id, userInfo)
+			s.LogOperation("Skipping nil attachment", fmt.Sprintf("index: %d", i))
 			continue
 		}
 
-		s.log.Debug("Adding new attachment %d/%d (size: %d bytes) for update %d by %s",
-			i+1, len(newAttachments), len(attachment.Data), id, userInfo)
+		s.LogOperation("Adding new attachment", fmt.Sprintf("index: %d, size: %d bytes", i+1, len(attachment.Data)))
 
 		attachmentID, err := s.attachments.Add(attachment)
-
 		if err != nil {
 			// Cleanup already added attachments on failure
-			s.log.Error("Failed to add new attachment %d for update %d by %s, cleaning up %d existing: %v",
-				i+1, id, userInfo, len(newAttachmentIDs), err)
-
+			s.log.Error("Failed to add new attachment %d, cleaning up %d existing: %v", i+1, len(newAttachmentIDs), err)
 			for _, addedID := range newAttachmentIDs {
 				if cleanupErr := s.attachments.Delete(addedID); cleanupErr != nil {
 					s.log.Error("Failed to cleanup new attachment %d: %v", addedID, cleanupErr)
 				}
 			}
-
 			return err
 		}
 
@@ -492,13 +450,13 @@ func (s *TroubleReports) UpdateWithAttachments(
 	tr.LinkedAttachments = allAttachmentIDs
 	tr.ID = id
 
-	s.log.Debug("Combined attachments for update %d: %d existing + %d new = %d total",
-		id, originalAttachmentCount, len(newAttachmentIDs), len(allAttachmentIDs))
+	s.LogOperation("Combined attachments for update",
+		fmt.Sprintf("id: %d, existing: %d, new: %d, total: %d",
+			id, originalAttachmentCount, len(newAttachmentIDs), len(allAttachmentIDs)))
 
 	// Update the trouble report
 	if err := s.Update(tr, user); err != nil {
-		s.log.Error("Failed to update trouble report %d by %s, cleaning up %d new attachments: %v",
-			id, userInfo, len(newAttachmentIDs), err)
+		s.log.Error("Failed to update trouble report %d, cleaning up %d new attachments: %v", id, len(newAttachmentIDs), err)
 
 		// Cleanup new attachments on failure
 		for _, attachmentID := range newAttachmentIDs {
@@ -506,27 +464,26 @@ func (s *TroubleReports) UpdateWithAttachments(
 				s.log.Error("Failed to cleanup new attachment %d: %v", attachmentID, cleanupErr)
 			}
 		}
-
 		return err
 	}
 
-	s.log.Info(
-		"Successfully updated trouble report %d with %d new attachments by %s",
-		id, len(newAttachmentIDs), userInfo,
-	)
-
+	s.LogOperation("Updated trouble report with attachments",
+		fmt.Sprintf("id: %d, new_attachments_added: %d", id, len(newAttachmentIDs)))
 	return nil
 }
 
 // RemoveWithAttachments removes a trouble report and its attachments.
 func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*models.TroubleReport, error) {
-	if user == nil {
-		return nil, utils.NewValidationError("user: user cannot be nil")
+	if err := ValidateID(id, "trouble_report"); err != nil {
+		return nil, err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return nil, err
 	}
 
 	userInfo := createUserInfo(user)
-
-	s.log.Info("Removing trouble report %d with attachments by %s", id, userInfo)
+	s.LogOperationWithUser("Removing trouble report with attachments", userInfo, fmt.Sprintf("id: %d", id))
 
 	// Get the trouble report to find its attachments
 	tr, err := s.Get(id)
@@ -534,10 +491,8 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 		return tr, err
 	}
 
-	s.log.Debug(
-		"Retrieved trouble report %d (title='%s') with %d attachments for removal by %s",
-		id, tr.Title, len(tr.LinkedAttachments), userInfo,
-	)
+	s.LogOperation("Retrieved trouble report for removal",
+		fmt.Sprintf("id: %d, title: %s, attachments: %d", id, tr.Title, len(tr.LinkedAttachments)))
 
 	// Remove the trouble report first
 	if err := s.Delete(id, user); err != nil {
@@ -549,11 +504,7 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 	failedAttachmentDeletes := 0
 	for _, attachmentID := range tr.LinkedAttachments {
 		if err := s.attachments.Delete(attachmentID); err != nil {
-			s.log.Warn(
-				"Failed to remove attachment %d for trouble report %d by %s: %v",
-				attachmentID, id, userInfo, err,
-			)
-
+			s.log.Warn("Failed to remove attachment %d for trouble report %d: %v", attachmentID, id, err)
 			failedAttachmentDeletes++
 		} else {
 			successfulAttachmentDeletes++
@@ -561,50 +512,33 @@ func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*mo
 	}
 
 	if failedAttachmentDeletes > 0 {
-		s.log.Warn(
-			"Failed to remove %d/%d attachments for trouble report %d",
-			failedAttachmentDeletes, len(tr.LinkedAttachments), id,
-		)
+		s.log.Warn("Failed to remove %d/%d attachments for trouble report %d",
+			failedAttachmentDeletes, len(tr.LinkedAttachments), id)
 	}
+
+	s.LogOperation("Removed trouble report with attachments",
+		fmt.Sprintf("id: %d, attachments_removed: %d, attachments_failed: %d",
+			id, successfulAttachmentDeletes, failedAttachmentDeletes))
 
 	return tr, nil
 }
 
 // LoadAttachments loads attachments for a trouble report.
 func (s *TroubleReports) LoadAttachments(tr *models.TroubleReport) ([]*models.Attachment, error) {
-	s.log.Debug(
-		"Loading %d attachments for trouble report %d (title='%s')",
-		len(tr.LinkedAttachments), tr.ID, tr.Title,
-	)
+	if err := ValidateTroubleReport(tr); err != nil {
+		return nil, err
+	}
+
+	s.LogOperation("Loading attachments for trouble report",
+		fmt.Sprintf("id: %d, attachment_count: %d", tr.ID, len(tr.LinkedAttachments)))
 
 	attachments, err := s.attachments.GetByIDs(tr.LinkedAttachments)
 	if err != nil {
 		return nil, err
 	}
 
-	s.log.Debug("Successfully loaded %d/%d attachments for trouble report %d",
-		len(attachments), len(tr.LinkedAttachments), tr.ID)
+	s.LogOperation("Loaded attachments for trouble report",
+		fmt.Sprintf("id: %d, loaded: %d/%d", tr.ID, len(attachments), len(tr.LinkedAttachments)))
 
 	return attachments, nil
-}
-
-func (s *TroubleReports) scanTroubleReport(scanner interfaces.Scannable) (*models.TroubleReport, error) {
-	report := &models.TroubleReport{}
-	var linkedAttachments string
-
-	if err := scanner.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &report.UseMarkdown); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-
-		return nil, fmt.Errorf("failed to scan row: %v", err)
-	}
-
-	// Try to unmarshal as new format (array of int64 IDs) first
-	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		s.log.Error("Failed to unmarshal linked attachments for report %d: %v", report.ID, err)
-		return nil, fmt.Errorf("failed to unmarshal linked attachments: %v", err)
-	}
-
-	return report, nil
 }

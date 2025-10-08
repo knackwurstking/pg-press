@@ -2,22 +2,20 @@ package services
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type ToolRegenerations struct {
-	db    *sql.DB
+	*BaseService
 	tools *Tools
-	log   *logger.Logger
 }
 
 func NewToolRegenerations(db *sql.DB, tools *Tools) *ToolRegenerations {
+	base := NewBaseService(db, "Tool Regenerations")
+
 	query := `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,32 +31,28 @@ func NewToolRegenerations(db *sql.DB, tools *Tools) *ToolRegenerations {
 		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_cycle_id ON tool_regenerations(cycle_id);
 	`
 
-	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create tool_regenerations table: %v", err))
+	if err := base.CreateTable(query, "tool_regenerations"); err != nil {
+		panic(err)
 	}
 
 	return &ToolRegenerations{
-		db:    db,
-		tools: tools,
-		log:   logger.GetComponentLogger("Service: Tool Regenerations"),
+		BaseService: base,
+		tools:       tools,
 	}
 }
 
-// Create records a new tool regeneration event
+// Add records a new tool regeneration event
 func (r *ToolRegenerations) Add(regeneration *models.Regeneration, user *models.User) (*models.Regeneration, error) {
-	r.log.Info("Creating tool regeneration: tool_id=%d, cycle_id=%d, reason=%s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
-
-	if user == nil {
-		return nil, utils.NewValidationError("user: user is required")
+	if err := ValidateToolRegeneration(regeneration); err != nil {
+		return nil, err
 	}
 
-	if regeneration.ToolID <= 0 {
-		return nil, utils.NewValidationError("tool_id: tool_id is required")
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return nil, err
 	}
 
-	if regeneration.CycleID <= 0 {
-		return nil, utils.NewValidationError("cycle_id: cycle_id is required")
-	}
+	r.LogOperationWithUser("Adding tool regeneration", createUserInfo(user),
+		fmt.Sprintf("tool: %d, cycle: %d, reason: %s", regeneration.ToolID, regeneration.CycleID, regeneration.Reason))
 
 	query := `
 		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
@@ -66,32 +60,40 @@ func (r *ToolRegenerations) Add(regeneration *models.Regeneration, user *models.
 		RETURNING id, tool_id, cycle_id, reason, performed_by
 	`
 
-	regeneration, err := r.scanToolRegeneration(
-		r.db.QueryRow(query,
-			regeneration.ToolID,
-			regeneration.CycleID,
-			regeneration.Reason,
-			user.TelegramID,
-		),
+	row := r.db.QueryRow(query,
+		regeneration.ToolID,
+		regeneration.CycleID,
+		regeneration.Reason,
+		user.TelegramID,
 	)
+
+	result, err := ScanSingleRow(row, ScanToolRegeneration, "tool_regenerations")
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError(fmt.Sprintf("tool regeneration: %d", regeneration.ID))
+			return nil, utils.NewNotFoundError("failed to create tool regeneration")
 		}
-
-		return nil, fmt.Errorf("insert error: tool_regenerations: %v", err)
+		return nil, err
 	}
 
-	return regeneration, nil
+	r.LogOperation("Added tool regeneration", fmt.Sprintf("id: %d", result.ID))
+	return result, nil
 }
 
 // Update updates an existing regeneration record
 func (r *ToolRegenerations) Update(regeneration *models.Regeneration, user *models.User) error {
-	r.log.Info("Updating tool regeneration: id=%d", regeneration.ID)
-
-	if user == nil {
-		return utils.NewValidationError("user: user is required")
+	if err := ValidateToolRegeneration(regeneration); err != nil {
+		return err
 	}
+
+	if err := ValidateID(regeneration.ID, "regeneration"); err != nil {
+		return err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	r.LogOperationWithUser("Updating tool regeneration", createUserInfo(user), fmt.Sprintf("id: %d", regeneration.ID))
 
 	query := `
 		UPDATE tool_regenerations
@@ -99,110 +101,152 @@ func (r *ToolRegenerations) Update(regeneration *models.Regeneration, user *mode
 		WHERE id = ?
 	`
 
-	_, err := r.db.Exec(query,
+	result, err := r.db.Exec(query,
 		regeneration.CycleID,
 		regeneration.Reason,
 		user.TelegramID,
 		regeneration.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("update error: tool_regenerations: %v", err)
+		return r.HandleUpdateError(err, "tool_regenerations")
 	}
 
+	if err := r.CheckRowsAffected(result, "tool_regeneration", regeneration.ID); err != nil {
+		return err
+	}
+
+	r.LogOperation("Updated tool regeneration", fmt.Sprintf("id: %d", regeneration.ID))
 	return nil
 }
 
 // Delete removes a regeneration record (should be used carefully)
 func (r *ToolRegenerations) Delete(id int64) error {
-	r.log.Info("Deleting regeneration record: id=%d", id)
-
-	query := `DELETE FROM tool_regenerations WHERE id = ?`
-	_, err := r.db.Exec(query, id)
-	if err != nil {
-		return fmt.Errorf("delete error: tool_regenerations: %v", err)
+	if err := ValidateID(id, "regeneration"); err != nil {
+		return err
 	}
 
+	r.LogOperation("Deleting tool regeneration", id)
+
+	query := `DELETE FROM tool_regenerations WHERE id = ?`
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return r.HandleDeleteError(err, "tool_regenerations")
+	}
+
+	if err := r.CheckRowsAffected(result, "tool_regeneration", id); err != nil {
+		return err
+	}
+
+	r.LogOperation("Deleted tool regeneration", id)
 	return nil
 }
 
+// AddToolRegeneration starts the tool regeneration process
 func (r *ToolRegenerations) AddToolRegeneration(cycleID, toolID int64, reason string, user *models.User) (*models.Regeneration, error) {
-	r.log.Info("Starting tool regeneration: tool_id=%d", toolID)
+	if err := ValidateID(cycleID, "cycle"); err != nil {
+		return nil, err
+	}
+
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return nil, err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return nil, err
+	}
+
+	r.LogOperationWithUser("Starting tool regeneration", createUserInfo(user), fmt.Sprintf("tool: %d", toolID))
 
 	// Update the tool's regeneration status
-	r.log.Debug("Updating tool regeneration status to regenerating: tool_id=%d", toolID)
+	r.LogOperation("Setting tool to regenerating status", fmt.Sprintf("tool: %d", toolID))
 	if err := r.tools.UpdateRegenerating(toolID, true, user); err != nil {
 		return nil, fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
-	// After this, create a new regeneration record
-	r.log.Debug("Creating new regeneration record: tool_id=%d", toolID)
+	// Create a new regeneration record
+	r.LogOperation("Creating regeneration record", fmt.Sprintf("tool: %d", toolID))
 	regeneration, err := r.Add(
 		models.NewRegeneration(toolID, cycleID, reason, &user.TelegramID),
 		user,
 	)
 	if err != nil {
-		// Undo the tool's regeneration status
-		r.log.Error("Failed to create new regeneration record: tool_id=%d", toolID)
-		r.log.Debug("Undoing tool regeneration status: tool_id=%d", toolID)
-		return nil, r.tools.UpdateRegenerating(toolID, false, user)
+		// Undo the tool's regeneration status on failure
+		r.log.Error("Failed to create regeneration record, undoing status change for tool: %d", toolID)
+		if undoErr := r.tools.UpdateRegenerating(toolID, false, user); undoErr != nil {
+			r.log.Error("Failed to undo tool regeneration status: %v", undoErr)
+		}
+		return nil, err
 	}
 
+	r.LogOperation("Started tool regeneration successfully", fmt.Sprintf("tool: %d, regen_id: %d", toolID, regeneration.ID))
 	return regeneration, nil
 }
 
-// Stop stops the tool regeneration process for the given tool ID
+// StopToolRegeneration stops the tool regeneration process for the given tool ID
 func (r *ToolRegenerations) StopToolRegeneration(toolID int64, user *models.User) error {
-	r.log.Info("Stopping tool regeneration: tool_id=%d", toolID)
-
-	if toolID <= 0 {
-		return errors.New("invalid tool ID")
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return err
 	}
 
-	// Just set the tool's regeneration status to false
-	r.log.Debug("Undoing tool regeneration status: tool_id=%d", toolID)
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	r.LogOperationWithUser("Stopping tool regeneration", createUserInfo(user), fmt.Sprintf("tool: %d", toolID))
+
+	// Set the tool's regeneration status to false
 	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
 		return fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
-	r.log.Info("Tool regeneration stopped: tool_id=%d", toolID)
+	r.LogOperation("Stopped tool regeneration", fmt.Sprintf("tool: %d", toolID))
 	return nil
 }
 
 // AbortToolRegeneration aborts the tool regeneration process and removes the regeneration record
 func (r *ToolRegenerations) AbortToolRegeneration(toolID int64, user *models.User) error {
-	r.log.Info("Aborting tool regeneration: tool_id=%d", toolID)
-
-	if toolID <= 0 {
-		return errors.New("invalid tool ID")
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return err
 	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	r.LogOperationWithUser("Aborting tool regeneration", createUserInfo(user), fmt.Sprintf("tool: %d", toolID))
 
 	// First, get the last regeneration record to delete it
 	lastRegen, err := r.GetLastRegeneration(toolID)
 	if err != nil {
-		r.log.Warn("No regeneration record found to abort for tool_id=%d: %v", toolID, err)
-		// Continue with status update even if no record found
+		if !utils.IsNotFoundError(err) {
+			return fmt.Errorf("failed to get last regeneration record: %v", err)
+		}
+		r.LogOperation("No regeneration record found to abort", fmt.Sprintf("tool: %d", toolID))
 	} else {
 		// Delete the regeneration record
-		r.log.Debug("Deleting regeneration record: id=%d", lastRegen.ID)
+		r.LogOperation("Deleting regeneration record", fmt.Sprintf("id: %d", lastRegen.ID))
 		if err := r.Delete(lastRegen.ID); err != nil {
-			r.log.Error("Failed to delete regeneration record: id=%d, error=%v", lastRegen.ID, err)
 			return fmt.Errorf("failed to delete regeneration record: %v", err)
 		}
 	}
 
 	// Set the tool's regeneration status to false
-	r.log.Debug("Undoing tool regeneration status: tool_id=%d", toolID)
+	r.LogOperation("Setting tool to non-regenerating status", fmt.Sprintf("tool: %d", toolID))
 	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
 		return fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
-	r.log.Info("Tool regeneration aborted: tool_id=%d", toolID)
+	r.LogOperation("Aborted tool regeneration", fmt.Sprintf("tool: %d", toolID))
 	return nil
 }
 
 // GetLastRegeneration gets the most recent regeneration for a tool
 func (r *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.Regeneration, error) {
-	r.log.Info("Getting last regeneration for tool: tool_id=%d", toolID)
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return nil, err
+	}
+
+	r.LogOperation("Getting last regeneration for tool", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -212,21 +256,26 @@ func (r *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.Regenerat
 		LIMIT 1
 	`
 
-	regen, err := r.scanToolRegeneration(r.db.QueryRow(query, toolID))
+	row := r.db.QueryRow(query, toolID)
+	regen, err := ScanSingleRow(row, ScanToolRegeneration, "tool_regenerations")
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError(fmt.Sprintf("tool_id=%d", toolID))
+			return nil, utils.NewNotFoundError(fmt.Sprintf("tool regeneration for tool_id: %d", toolID))
 		}
-
-		return nil, fmt.Errorf("select error: tool_regenerations: %v", err)
+		return nil, err
 	}
 
+	r.LogOperation("Found last regeneration", fmt.Sprintf("tool: %d, regen_id: %d", toolID, regen.ID))
 	return regen, nil
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
 func (r *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, error) {
-	r.log.Info("Getting regeneration history for tool: tool_id=%d", toolID)
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return nil, err
+	}
+
+	r.LogOperation("Getting regeneration history for tool", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -234,46 +283,18 @@ func (r *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*models.Rege
 		WHERE tool_id = ?
 		ORDER BY id DESC
 	`
+
 	rows, err := r.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("select error: tool_regenerations: %v", err)
+		return nil, r.HandleSelectError(err, "tool_regenerations")
 	}
 	defer rows.Close()
 
-	var regenerations []*models.Regeneration
-	for rows.Next() {
-		regen, err := r.scanToolRegeneration(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan error: tool_regenerations: %v", err)
-		}
-
-		regenerations = append(regenerations, regen)
-	}
-
-	return regenerations, nil
-}
-
-func (r *ToolRegenerations) scanToolRegeneration(scanner interfaces.Scannable) (*models.Regeneration, error) {
-	regen := &models.Regeneration{}
-	var performedBy sql.NullInt64
-
-	err := scanner.Scan(
-		&regen.ID,
-		&regen.ToolID,
-		&regen.CycleID,
-		&regen.Reason,
-		&performedBy,
-	)
+	regenerations, err := ScanToolRegenerationsFromRows(rows)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
 		return nil, err
 	}
 
-	if performedBy.Valid {
-		regen.PerformedBy = &performedBy.Int64
-	}
-
-	return regen, nil
+	r.LogOperation("Found regeneration history", fmt.Sprintf("tool: %d, count: %d", toolID, len(regenerations)))
+	return regenerations, nil
 }

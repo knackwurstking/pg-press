@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 type PressCycles struct {
-	db  *sql.DB
-	log *logger.Logger
+	*BaseService
 }
 
 func NewPressCycles(db *sql.DB) *PressCycles {
-	// Create new table with tool_id and tool_position instead of slot fields
+	base := NewBaseService(db, "Press Cycles")
+
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,62 +33,58 @@ func NewPressCycles(db *sql.DB) *PressCycles {
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 	`
 
-	if _, err := db.Exec(query); err != nil {
-		panic(fmt.Errorf("failed to create press_cycles table: %v", err))
+	if err := base.CreateTable(query, "press_cycles"); err != nil {
+		panic(err)
 	}
 
 	return &PressCycles{
-		db:  db,
-		log: logger.GetComponentLogger("Service: Press Cycles"),
+		BaseService: base,
 	}
 }
 
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
-	s.log.Info(
-		"Getting partial cycles for press %d, tool %d, position %s",
-		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition,
-	)
+	if err := ValidatePressCycle(cycle); err != nil {
+		s.log.Error("Invalid cycle for partial calculation: %v", err)
+		return cycle.TotalCycles
+	}
 
-	// Get the total_cycles from the previous entry on the same press and tool position
-	// Total cycles must be less than current cycle total_cycles
+	s.LogOperation("Calculating partial cycles",
+		fmt.Sprintf("press: %d, tool: %d, position: %s, total: %d",
+			cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles))
+
 	query := `
-		SELECT
-			total_cycles
-		FROM
-			press_cycles
-		WHERE
-			press_number = ?
-			AND tool_id > 0
-			AND tool_position = ?
-			AND total_cycles < ?
-		ORDER BY
-			total_cycles DESC
+		SELECT total_cycles
+		FROM press_cycles
+		WHERE press_number = ? AND tool_id > 0 AND tool_position = ? AND total_cycles < ?
+		ORDER BY total_cycles DESC
 		LIMIT 1
 	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(
-		query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles,
-	).Scan(&previousTotalCycles)
+	err := s.db.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			s.log.Error(
-				"Failed to get previous total cycles for press %d, tool %d, position %s: %v",
-				cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, err,
-			)
+			s.log.Error("Failed to get previous total cycles: %v", err)
 		}
+		s.LogOperation("No previous cycles found, using total cycles", fmt.Sprintf("total: %d", cycle.TotalCycles))
 		return cycle.TotalCycles
 	}
 
 	partialCycles := cycle.TotalCycles - previousTotalCycles
+	s.LogOperation("Calculated partial cycles", fmt.Sprintf("partial: %d (total: %d - previous: %d)",
+		partialCycles, cycle.TotalCycles, previousTotalCycles))
 
 	return partialCycles
 }
 
 // Get retrieves a specific press cycle by its ID.
 func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
-	p.log.Debug("Getting press cycle by id: %d", id)
+	if err := ValidateID(id, "press_cycle"); err != nil {
+		return nil, err
+	}
+
+	p.LogOperation("Getting press cycle", id)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -99,21 +93,21 @@ func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
 	`
 
 	row := p.db.QueryRow(query, id)
-	cycle, err := p.scanPressCycle(row)
+	cycle, err := ScanSingleRow(row, ScanPressCycle, "press_cycles")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
 		}
-		return nil, fmt.Errorf("select error: press_cycles: %v", err)
+		return nil, err
 	}
-	cycle.PartialCycles = p.GetPartialCycles(cycle)
 
+	cycle.PartialCycles = p.GetPartialCycles(cycle)
 	return cycle, nil
 }
 
-// List retrieves all press cycles from the database, ordered by ID descending.
+// List retrieves all press cycles from the database, ordered by total cycles descending.
 func (p *PressCycles) List() ([]*models.Cycle, error) {
-	p.log.Debug("Listing all press cycles")
+	p.LogOperation("Listing press cycles")
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -123,23 +117,36 @@ func (p *PressCycles) List() ([]*models.Cycle, error) {
 
 	rows, err := p.db.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("select error: press_cycles: %v", err)
+		return nil, p.HandleSelectError(err, "press_cycles")
 	}
 	defer rows.Close()
 
-	return p.scanPressCyclesRows(rows)
+	cycles, err := p.scanPressCyclesRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	p.LogOperation("Listed press cycles", fmt.Sprintf("count: %d", len(cycles)))
+	return cycles, nil
 }
 
 // Add creates a new press cycle entry in the database.
 func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
-	p.log.Info(
-		"Adding new cycle: tool_id=%d, tool_position=%s, press_number=%d, total_cycles=%d",
-		cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
-	)
+	if err := ValidatePressCycle(cycle); err != nil {
+		return 0, err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return 0, err
+	}
 
 	if cycle.Date.IsZero() {
 		cycle.Date = time.Now()
 	}
+
+	p.LogOperationWithUser("Adding press cycle", createUserInfo(user),
+		fmt.Sprintf("tool: %d, position: %s, press: %d, cycles: %d",
+			cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles))
 
 	query := `
 		INSERT INTO press_cycles (press_number, tool_id, tool_position, total_cycles, date, performed_by)
@@ -155,25 +162,38 @@ func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error)
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("insert error: press_cycles: %v", err)
+		return 0, p.HandleInsertError(err, "press_cycles")
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("insert error: press_cycles: %v", err)
+		return 0, p.HandleInsertError(err, "press_cycles")
 	}
-	cycle.ID = id
 
+	cycle.ID = id
+	p.LogOperation("Added press cycle", fmt.Sprintf("id: %d", id))
 	return id, nil
 }
 
 // Update modifies an existing press cycle entry.
 func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
-	p.log.Info("Updating press cycle: id=%d", cycle.ID)
+	if err := ValidatePressCycle(cycle); err != nil {
+		return err
+	}
+
+	if err := ValidateID(cycle.ID, "press_cycle"); err != nil {
+		return err
+	}
+
+	if err := ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
 
 	if cycle.Date.IsZero() {
 		cycle.Date = time.Now()
 	}
+
+	p.LogOperationWithUser("Updating press cycle", createUserInfo(user), fmt.Sprintf("id: %d", cycle.ID))
 
 	query := `
 		UPDATE press_cycles
@@ -191,50 +211,46 @@ func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 		cycle.ID,
 	)
 	if err != nil {
-		return fmt.Errorf("update error: press_cycles: %v", err)
+		return p.HandleUpdateError(err, "press_cycles")
 	}
 
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("update error: press_cycles: %v", err)
+	if err := p.CheckRowsAffected(result, "press_cycle", cycle.ID); err != nil {
+		return err
 	}
 
-	if rows == 0 {
-		return utils.NewNotFoundError(fmt.Sprintf("Pressenzyklus mit ID %d nicht gefunden", cycle.ID))
-	}
-
+	p.LogOperation("Updated press cycle", fmt.Sprintf("id: %d", cycle.ID))
 	return nil
 }
 
 // Delete removes a press cycle from the database.
 func (p *PressCycles) Delete(id int64) error {
-	p.log.Info("Deleting press cycle: id=%d", id)
+	if err := ValidateID(id, "press_cycle"); err != nil {
+		return err
+	}
 
-	// No need to get cycle data for simplified feed system
+	p.LogOperation("Deleting press cycle", id)
 
-	query := `
-		DELETE FROM press_cycles WHERE id = ?
-	`
-
+	query := `DELETE FROM press_cycles WHERE id = ?`
 	result, err := p.db.Exec(query, id)
 	if err != nil {
-		return fmt.Errorf("delete error: press_cycles: %v", err)
+		return p.HandleDeleteError(err, "press_cycles")
 	}
 
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("delete error: press_cycles: %v", err)
-	}
-	if rows == 0 {
-		return utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
+	if err := p.CheckRowsAffected(result, "press_cycle", id); err != nil {
+		return err
 	}
 
+	p.LogOperation("Deleted press cycle", id)
 	return nil
 }
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
 func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
-	s.log.Info("Getting press cycles for tool: tool_id=%d", toolID)
+	if err := ValidateID(toolID, "tool"); err != nil {
+		return nil, err
+	}
+
+	s.LogOperation("Getting press cycles for tool", toolID)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -245,39 +261,42 @@ func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, erro
 
 	rows, err := s.db.Query(query, toolID)
 	if err != nil {
-		return nil, fmt.Errorf("select error: press_cycles: %v", err)
+		return nil, s.HandleSelectError(err, "press_cycles")
 	}
 	defer rows.Close()
 
-	s.log.Debug("Query executed successfully")
-
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, fmt.Errorf("scan error: press_cycles: %v", err)
+		return nil, err
 	}
 
-	s.log.Debug("Rows scanned successfully")
-
+	s.LogOperation("Found press cycles for tool", fmt.Sprintf("tool: %d, count: %d", toolID, len(cycles)))
 	return cycles, nil
 }
 
-// GetPressCycles gets all press cycles (current and historical) for a specific press
+// GetPressCycles gets all press cycles for a specific press with optional pagination
 func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
-	s.log.Debug("Getting press cycles: press_number=%d, limit=%v, offset=%v", pressNumber, limit, offset)
-
-	if !models.IsValidPressNumber(&pressNumber) {
-		return nil, utils.NewValidationError("press_number: invalid press number")
+	if err := ValidatePressNumber(pressNumber); err != nil {
+		return nil, err
 	}
 
-	var queryLimit, queryOffset sql.NullInt64
-	if limit != nil {
-		queryLimit.Int64 = int64(*limit)
-		queryLimit.Valid = true
+	// Validate pagination if provided
+	if limit != nil || offset != nil {
+		limitVal := 0
+		offsetVal := 0
+		if limit != nil {
+			limitVal = *limit
+		}
+		if offset != nil {
+			offsetVal = *offset
+		}
+		if err := ValidatePagination(limitVal, offsetVal); err != nil {
+			return nil, err
+		}
 	}
-	if offset != nil {
-		queryOffset.Int64 = int64(*offset)
-		queryOffset.Valid = true
-	}
+
+	s.LogOperation("Getting press cycles for press",
+		fmt.Sprintf("press: %d, limit: %v, offset: %v", pressNumber, limit, offset))
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -285,89 +304,50 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 		WHERE press_number = ?
 		ORDER BY total_cycles DESC
 	`
-	if queryLimit.Valid {
-		query += " LIMIT ?"
-	}
-	if queryOffset.Valid {
-		if queryLimit.Valid {
-			query += " OFFSET ?"
-		} else {
-			query += " LIMIT 0 OFFSET ?"
-		}
-	}
 
-	var args []any
+	var args []interface{}
 	args = append(args, pressNumber)
-	if queryLimit.Valid {
-		args = append(args, queryLimit.Int64)
+
+	if limit != nil {
+		query += " LIMIT ?"
+		args = append(args, *limit)
 	}
-	if queryOffset.Valid {
-		args = append(args, queryOffset.Int64)
+	if offset != nil {
+		if limit == nil {
+			query += " LIMIT -1"
+		}
+		query += " OFFSET ?"
+		args = append(args, *offset)
 	}
 
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("select error: press_cycles: %v", err)
+		return nil, s.HandleSelectError(err, "press_cycles")
 	}
 	defer rows.Close()
 
 	cycles, err := s.scanPressCyclesRows(rows)
 	if err != nil {
-		return nil, fmt.Errorf("scan error: press_cycles: %v", err)
+		return nil, err
 	}
 
+	s.LogOperation("Found press cycles for press",
+		fmt.Sprintf("press: %d, count: %d", pressNumber, len(cycles)))
 	return cycles, nil
 }
 
-// scanPressCyclesRows scans multiple press cycles from sql.Rows (without partial_cycles)
+// scanPressCyclesRows scans multiple press cycles from sql.Rows and calculates partial cycles
 func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
-	// Scanning cycles
-	cycles := make([]*models.Cycle, 0)
-	for rows.Next() {
-		p.log.Debug("Scanning press cycle %d", len(cycles))
-
-		cycle, err := p.scanPressCycle(rows)
-		if err != nil {
-			return nil, fmt.Errorf("scan error: press_cycles: %v", err)
-		}
-		cycles = append(cycles, cycle)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration error: press_cycles: %v", err)
+	cycles, err := ScanPressCyclesFromRows(rows)
+	if err != nil {
+		return nil, err
 	}
 
-	// Get partial cycles for each cycle
+	// Calculate partial cycles for each cycle
 	for _, cycle := range cycles {
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 	}
 
-	p.log.Debug("Got %d press cycles", len(cycles))
+	p.LogOperation("Scanned and calculated partial cycles", fmt.Sprintf("count: %d", len(cycles)))
 	return cycles, nil
-}
-
-func (p *PressCycles) scanPressCycle(scanner interfaces.Scannable) (*models.Cycle, error) {
-	cycle := &models.Cycle{}
-	var performedBy sql.NullInt64
-
-	err := scanner.Scan(
-		&cycle.ID,
-		&cycle.PressNumber,
-		&cycle.ToolID,
-		&cycle.ToolPosition,
-		&cycle.TotalCycles,
-		&cycle.Date,
-		&performedBy,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, err
-	}
-
-	if performedBy.Valid {
-		cycle.PerformedBy = performedBy.Int64
-	}
-
-	return cycle, nil
 }
