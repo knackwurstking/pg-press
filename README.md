@@ -92,25 +92,21 @@ PG Press is a manufacturing management system that provides real-time tracking a
    make build
    ```
 
-3. **Initialize the database**
+3. **Create your first user**
 
    ```bash
-   ./bin/pg-press init
+   ./bin/pg-press user add 123456789 "Your Name" "your-api-key-here"
    ```
 
-4. **Create your first user**
+   Note: Replace `123456789` with your Telegram ID, `"Your Name"` with your actual name, and `"your-api-key-here"` with a secure API key.
 
-   ```bash
-   ./bin/pg-press user add --name "Your Name"
-   ```
-
-5. **Start the server**
+4. **Start the server**
 
    ```bash
    make run
    ```
 
-6. **Access the application**
+5. **Access the application**
    Open your browser to `http://localhost:8080`
 
 ### Development Setup
@@ -133,7 +129,6 @@ This will start the server with automatic rebuilding on file changes.
 | `SERVER_PATH_PREFIX` | URL path prefix           | `/`            | `/pg-press`      |
 | `DATABASE_PATH`      | SQLite database file      | `pg-press.db`  | `/data/app.db`   |
 | `ASSET_VERSION`      | Asset versioning override | auto-generated | `v1.2.3`         |
-| `GIT_COMMIT`         | Git commit for versioning | auto-detected  | `abc123ef`       |
 
 ### Production Deployment
 
