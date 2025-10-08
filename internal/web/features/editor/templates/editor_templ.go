@@ -136,14 +136,14 @@ func EditorPage(options *EditorOptions) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> <span class=\"text-medium\">Markdown-Formatierung verwenden</span> <small class=\"muted text-sm italic ml-auto\">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small></label></div></div><!-- Markdown Tools --><div id=\"markdown-tools\" class=\"border p my transition-all\" style=\"display: none; border-radius: var(--ui-radius);\"><div class=\"mb text-sm text-semibold\"><span>Markdown-Werkzeuge</span></div><div class=\"flex gap-sm flex-wrap\"><button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('**', '**')\" title=\"Fett\"><i class=\"bi bi-type-bold\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('*', '*')\" title=\"Kursiv\"><i class=\"bi bi-type-italic\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('# ', '')\" title=\"Überschrift\"><i class=\"bi bi-type-h1\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('> ', '')\" title=\"Zitat\"><i class=\"bi bi-quote\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('`', '`')\" title=\"Code\"><i class=\"bi bi-code\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('- ', '')\" title=\"Liste\"><i class=\"bi bi-list-ul\"></i></button></div></div><!-- Content Textarea --><div class=\"flex flex-col gap-sm\"><label for=\"content\" class=\"text-sm text-medium\">Inhalt</label><div class=\"flex flex-col gap\"><textarea name=\"content\" id=\"content\" class=\"w-full resize-y\" placeholder=\"Inhalt eingeben...\" required rows=\"15\" style=\"font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; min-height: 400px;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> <span class=\"text-medium\">Markdown-Formatierung verwenden</span> <small class=\"muted text-sm italic ml-auto\">(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)</small></label></div></div><!-- Markdown Tools --><div id=\"markdown-tools\" class=\"border p my transition-all\" style=\"display: none; border-radius: var(--ui-radius);\"><div class=\"mb text-sm text-semibold\"><span>Markdown-Werkzeuge</span></div><div class=\"flex gap-sm flex-wrap\"><button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('**', '**')\" title=\"Fett\"><i class=\"bi bi-type-bold\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('*', '*')\" title=\"Kursiv\"><i class=\"bi bi-type-italic\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('__', '__')\" title=\"Unterstrichen\"><i class=\"bi bi-type-underline\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('# ', '')\" title=\"Überschrift\"><i class=\"bi bi-type-h1\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('> ', '')\" title=\"Zitat\"><i class=\"bi bi-quote\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('`', '`')\" title=\"Code\"><i class=\"bi bi-code\"></i></button> <button type=\"button\" class=\"icon secondary small\" onclick=\"insertMarkdown('- ', '')\" title=\"Liste\"><i class=\"bi bi-list-ul\"></i></button></div></div><!-- Content Textarea --><div class=\"flex flex-col gap-sm\"><label for=\"content\" class=\"text-sm text-medium\">Inhalt</label><div class=\"flex flex-col gap\"><textarea name=\"content\" id=\"content\" class=\"w-full resize-y\" placeholder=\"Inhalt eingeben...\" required rows=\"15\" style=\"font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; min-height: 400px;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(options.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 114, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 117, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -166,7 +166,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(len(options.Attachments))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 153, Col: 55}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 156, Col: 55}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -184,7 +184,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 						var templ_7745c5c3_Var10 string
 						templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attachment.GetID()))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 159, Col: 59}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 162, Col: 59}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 						if templ_7745c5c3_Err != nil {
@@ -197,7 +197,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 						var templ_7745c5c3_Var11 string
 						templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(attachmentIndex + 1)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 163, Col: 65}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 166, Col: 65}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 						if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 						var templ_7745c5c3_Var12 string
 						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 164, Col: 68}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 167, Col: 68}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 						if templ_7745c5c3_Err != nil {
@@ -277,7 +277,7 @@ func EditorPage(options *EditorOptions) templ.Component {
 				var templ_7745c5c3_Var15 templ.SafeURL
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 242, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 245, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -375,7 +375,7 @@ func navContent(options *EditorOptions) templ.Component {
 			var templ_7745c5c3_Var17 templ.SafeURL
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 271, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/editor/templates/editor.templ`, Line: 274, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
