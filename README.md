@@ -68,6 +68,7 @@ PG Press is a manufacturing management system that provides real-time tracking a
 - **PDF Generation**: gofpdf for report exports
 - **Authentication**: Cookie-based sessions with API key support
 - **Real-time**: WebSocket for live updates
+- **Architecture**: Server-rendered HTML with HTMX for dynamic updates (no REST API)
 
 ## Quick Start
 
@@ -152,36 +153,28 @@ This will start the server with automatic rebuilding on file changes.
 
 ## API Documentation
 
-### Authentication
+### Web Interface
 
-All API endpoints require authentication via cookie session or API key header:
+PG Press uses an HTMX-based web interface that provides dynamic interactions without traditional REST APIs:
 
-```bash
-curl -H "X-API-Key: your-api-key" https://your-domain/api/endpoint
-```
+#### Main Pages
 
-### Core Endpoints
+- `/` - Dashboard with system overview
+- `/tools` - Tools management and press overview
+- `/tools/tool/{id}` - Individual tool details
+- `/tools/press/{number}` - Press-specific view
+- `/trouble-reports` - Trouble reports management
+- `/notes` - Notes and documentation system
+- `/profile` - User profile and session management
 
-#### Tools Management
+#### Dynamic Features
 
-- `GET /api/tools` - List all tools
-- `POST /api/tools` - Create new tool
-- `PUT /api/tools/{id}` - Update tool
-- `DELETE /api/tools/{id}` - Delete tool
+- **Real-time Updates**: WebSocket-powered live data updates
+- **Partial Page Updates**: HTMX endpoints for seamless interactions
+- **Form Handling**: Server-rendered forms with validation
+- **File Uploads**: Drag-and-drop attachment support
 
-#### Press Cycles
-
-- `GET /api/cycles?tool_id={id}` - Get cycles for tool
-- `POST /api/cycles` - Record new cycle
-- `PUT /api/cycles/{id}` - Update cycle
-
-#### Trouble Reports
-
-- `GET /api/trouble-reports` - List reports
-- `POST /api/trouble-reports` - Create report
-- `GET /api/trouble-reports/{id}/pdf` - Export PDF
-
-For complete API documentation, see [docs/API.md](docs/API.md).
+For complete endpoint documentation, see [docs/API.md](docs/API.md).
 
 ## Database Schema
 
@@ -197,10 +190,14 @@ See [docs/DATABASE.md](docs/DATABASE.md) for detailed schema information.
 
 ## Documentation
 
+- [🌟 Features Overview](docs/FEATURES.md) - Comprehensive feature documentation
 - [🗄️ Database Schema](docs/DATABASE.md) - Complete database structure
 - [🚀 Caching Strategy](docs/CACHING.md) - Asset optimization details
-- [🛣️ Routing Table](docs/ROUTING.md) - All available endpoints
+- [🛣️ HTMX Endpoints](docs/API.md) - HTMX architecture and endpoints
+- [🛤️ Routing Table](docs/ROUTING.md) - All available routes
 - [📝 Notes System](docs/NOTES_SYSTEM.md) - Documentation management
+- [📝 Editor System](EDITOR_FEATURE_IMPLEMENTATION.md) - Markdown editor implementation
+- [📝 Shared Markdown](SHARED_MARKDOWN_SYSTEM.md) - Shared markdown rendering system
 
 ## Development
 

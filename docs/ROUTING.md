@@ -1,15 +1,24 @@
-# API Routing Documentation
+# HTMX Routing Documentation
 
-This document provides comprehensive documentation for all API endpoints and routes in the PG Press application, including request/response formats, authentication requirements, and usage examples.
+This document provides comprehensive documentation for all routes in the PG Press application, which uses an HTMX-based architecture for dynamic web interactions without traditional REST APIs.
 
 ## Overview
 
-PG Press uses a hybrid routing approach combining:
+PG Press uses an HTMX-first routing approach combining:
 
-- **Page Routes**: Traditional HTTP routes serving HTML pages
-- **HTMX Routes**: Dynamic content endpoints for interactive UI updates
-- **WebSocket Routes**: Real-time communication endpoints
-- **Asset Routes**: Static file serving with caching
+- **Page Routes**: Server-rendered HTML pages for main application views
+- **HTMX Routes**: Dynamic HTML fragment endpoints for interactive UI updates (prefixed with `/htmx/`)
+- **WebSocket Routes**: Real-time communication endpoints for live updates
+- **Asset Routes**: Static file serving with aggressive caching
+- **Editor Routes**: Full-page content editing with markdown support
+
+**Key Architecture Notes:**
+
+- No traditional REST API endpoints (no `/api/` routes)
+- All dynamic interactions use HTMX for partial page updates
+- Responses are HTML fragments, not JSON
+- Forms submit via HTMX with server-side validation
+- Real-time updates via WebSocket connections
 
 All routes support the `SERVER_PATH_PREFIX` environment variable for deployment under a subpath.
 
@@ -157,6 +166,41 @@ GET /profile
 - `401 Unauthorized`: Not authenticated
 
 ---
+
+### Content Management
+
+#### Editor Page
+
+**Full-page content editor with markdown support:**
+
+```
+GET /editor?type={content_type}&id={id}&return_url={url}
+```
+
+**Query Parameters:**
+
+- `type` (required): Content type (currently supports: `troublereport`)
+- `id` (optional): ID of existing item to edit (omit for new items)
+- `return_url` (optional): URL to redirect to after successful save
+
+**Features:**
+
+- Live markdown preview with split-screen view
+- Markdown toolbar with formatting tools
+- File attachment support (drag & drop)
+- Responsive design for mobile and desktop
+- Auto-save functionality
+
+**Save Content:**
+
+```
+POST /editor/save
+Content-Type: multipart/form-data
+
+type=troublereport&title=...&content=...&use_markdown=1&attachments=...
+```
+
+**Response:** Redirects to `return_url` on success, stays on editor with validation errors.
 
 ### Tools & Press Management
 
@@ -1180,7 +1224,168 @@ All assets include version parameters:
 /js/app.min.js?v=1701425400
 ```
 
+## Shared Markdown System
+
+### Architecture
+
+PG Press includes a centralized markdown rendering system located in `internal/web/shared/components/markdown.templ` that provides:
+
+#### Components
+
+1. **`MarkdownScript()`** - JavaScript functions for markdown processing
+2. **`MarkdownStyles()`** - CSS styles for rendered markdown content
+3. **`MarkdownContent(content, useMarkdown)`** - Conditional content rendering
+
+#### Supported Markdown Features
+
+- **Headers**: `#`, `##`, `###`
+- **Text Formatting**: `**bold**`, `*italic*`, `` `code` ``
+- **Lists**: Unordered (`-`) and ordered (`1.`)
+- **Blockquotes**: `> quote text`
+- **Paragraphs**: Double newlines create new paragraphs
+- **Line Breaks**: Single newlines become `<br>` tags
+
+#### Usage Pattern
+
+```go
+// In any template
+@components.MarkdownScript()  // Include JavaScript functions
+@components.MarkdownStyles() // Include CSS styles
+
+// Render content conditionally
+@components.MarkdownContent(item.Content, item.UseMarkdown)
+```
+
+#### Auto-Processing
+
+The system automatically processes markdown content on:
+
+- DOM content loaded
+- HTMX afterSwap events
+- Manual JavaScript triggers
+
+No manual initialization required.
+
+### Integration Points
+
+**Current Implementations:**
+
+- **Editor Feature**: Live preview functionality
+- **Trouble Reports**: Content display with markdown support
+- **Notes System**: Future integration planned
+
+## Editor System
+
+### Overview
+
+The Editor System provides a comprehensive, full-page editing experience with markdown support that replaces the previous dialog-based editing approach. It's designed to be type-agnostic and easily extensible for different content types.
+
+### Architecture
+
+**Location:** `internal/web/features/editor/`
+
+**Components:**
+
+- `handlers.go` - HTTP handlers for editor routes
+- `routes.go` - Route registration
+- `templates/editor.templ` - Main editor template
+
+### Features
+
+- **Full-page editing** with proper space for content creation
+- **Live markdown preview** with real-time split-screen rendering
+- **Markdown toolbar** with formatting tools (bold, italic, headers, lists, etc.)
+- **File attachments** with drag & drop support
+- **Responsive design** for mobile and desktop
+- **Type-agnostic architecture** for easy extension
+
+### Routes
+
+#### Editor Page
+
+```
+GET /editor?type={content_type}&id={id}&return_url={url}
+```
+
+**Parameters:**
+
+- `type` (required): Content type (`troublereport`)
+- `id` (optional): ID of existing item to edit
+- `return_url` (optional): Redirect URL after save
+
+#### Save Content
+
+```
+POST /editor/save
+Content-Type: multipart/form-data
+```
+
+**Form Fields:**
+
+- `type` - Content type
+- `title` - Content title
+- `content` - Main content body
+- `use_markdown` - Boolean flag for markdown rendering
+- `attachments` - File uploads (multiple)
+
+### Supported Content Types
+
+#### Trouble Reports (`troublereport`)
+
+- **Fields**: Title, Content, UseMarkdown flag
+- **Attachments**: Images up to 10MB each
+- **Database**: Full CRUD with attachment management
+- **Integration**: Feed entries for create/update operations
+
+### File Attachments
+
+**Supported Formats:**
+
+- Images: JPEG, PNG, GIF, WebP, SVG
+- **Size Limit**: 10MB per file
+- **Upload Methods**: Click to browse, drag & drop
+- **Preview**: File name and size display
+- **Management**: Remove files before saving
+
+### Integration with Shared Markdown System
+
+The editor integrates with the shared markdown system components:
+
+- Uses `MarkdownScript()` for live preview functionality
+- Applies `MarkdownStyles()` for consistent rendering
+- Leverages `window.updateMarkdownPreview()` for real-time updates
+
+### Extending for New Content Types
+
+To add support for new content types:
+
+1. **Add loading logic** in `loadExistingContent()`
+2. **Add saving logic** in `saveContent()`
+3. **Update template** `getTypeName()` function
+4. **Configure attachments** in `supportsAttachments()`
+5. **Set redirect URL** in `PostSaveContent()`
+
+### Migration from Dialog System
+
+The editor replaced the previous trouble reports dialog system:
+
+**Removed:**
+
+- `dialog-edit-trouble-report.templ`
+- Dialog-specific handler methods
+- HTMX dialog routes
+
+**Updated:**
+
+- Create/Edit buttons now link to editor
+- Improved user experience with full-page editing
+- Better mobile support and accessibility
+
 ## Development and Testing
+
+</thinking>
+
+I need to read the current file first to understand where to add the Editor System section.
 
 ### Development Server
 

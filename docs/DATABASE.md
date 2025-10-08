@@ -160,9 +160,10 @@ CREATE TABLE press_cycles (
     id           INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
     tool_id      INTEGER NOT NULL,
+    tool_position TEXT NOT NULL,
     date         DATETIME NOT NULL,
     total_cycles INTEGER NOT NULL DEFAULT 0,
-    performed_by INTEGER,
+    performed_by INTEGER NOT NULL,
     FOREIGN KEY(tool_id) REFERENCES tools(id),
     FOREIGN KEY(performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL
 );
@@ -173,21 +174,24 @@ CREATE TABLE press_cycles (
 - `id`: Auto-incrementing primary key
 - `press_number`: Press identifier (0-5)
 - `tool_id`: Foreign key to associated tool
+- `tool_position`: Position of tool during cycle (top/bottom)
 - `date`: Timestamp when cycles were recorded
 - `total_cycles`: Total cycle count for this record
-- `performed_by`: User who recorded the cycles (optional)
+- `performed_by`: User who recorded the cycles (required)
 
 **Constraints:**
 
 - `press_number` must be between 0 and 5
 - `tool_id` must reference existing tool
-- `performed_by` set to NULL if user is deleted
+- `tool_position` must be specified
+- `performed_by` must reference existing user, set to NULL if user is deleted
 
 **Indexes Recommended:**
 
 ```sql
-CREATE INDEX idx_press_cycles_tool_date ON press_cycles(tool_id, date);
-CREATE INDEX idx_press_cycles_press ON press_cycles(press_number);
+CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
+CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_position ON press_cycles(tool_position);
+CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 ```
 
 ### trouble_reports
@@ -200,7 +204,7 @@ CREATE TABLE trouble_reports (
     title              TEXT NOT NULL,
     content            TEXT NOT NULL,
     linked_attachments TEXT NOT NULL DEFAULT '',
-    mods               BLOB NOT NULL DEFAULT '{}'
+    use_markdown       BOOLEAN DEFAULT 0
 );
 ```
 
@@ -208,9 +212,9 @@ CREATE TABLE trouble_reports (
 
 - `id`: Auto-incrementing primary key
 - `title`: Report title/summary
-- `content`: Detailed report content (supports Markdown)
+- `content`: Detailed report content
 - `linked_attachments`: JSON array of attachment IDs
-- `mods`: JSON BLOB containing modification history
+- `use_markdown`: Boolean flag indicating if content should be rendered as markdown
 
 **Relationships:**
 
@@ -222,17 +226,6 @@ CREATE TABLE trouble_reports (
 ```json
 // linked_attachments format
 ["123", "456", "789"]
-
-// mods format
-{
-  "history": [
-    {
-      "timestamp": "2023-01-01T10:00:00Z",
-      "user": "user_name",
-      "changes": {...}
-    }
-  ]
-}
 ```
 
 ### attachments
@@ -325,12 +318,10 @@ CREATE TABLE metal_sheets (
     marke_height INTEGER NOT NULL,
     stf          REAL NOT NULL,
     stf_max      REAL NOT NULL,
-    tool_id      INTEGER,
-    notes        BLOB NOT NULL DEFAULT '[]',
-    mods         BLOB NOT NULL DEFAULT '{}',
-    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    identifier   TEXT NOT NULL,
+    tool_id      INTEGER NOT NULL,
     updated_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE SET NULL
+    FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
 );
 ```
 
@@ -342,16 +333,50 @@ CREATE TABLE metal_sheets (
 - `marke_height`: Mark height specification
 - `stf`: STF measurement value
 - `stf_max`: Maximum STF value
-- `tool_id`: Optional assignment to specific tool
-- `notes`: JSON array of linked note IDs
-- `mods`: JSON modification history
-- `created_at`: Creation timestamp
+- `identifier`: Unique identifier for the metal sheet
+- `tool_id`: Required assignment to specific tool
 - `updated_at`: Last modification timestamp
 
 **Relationships:**
 
-- Optional foreign key to `tools.id`
-- Linked notes via JSON array in `notes` field
+- Required foreign key to `tools.id` with CASCADE delete
+
+### modifications
+
+Tracks modification history for various entities in the system.
+
+```sql
+CREATE TABLE modifications (
+    id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id   INTEGER NOT NULL,
+    data        BLOB NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(telegram_id) ON DELETE SET NULL
+);
+```
+
+**Fields:**
+
+- `id`: Auto-incrementing primary key
+- `user_id`: User who made the modification
+- `entity_type`: Type of entity modified (e.g., 'trouble_report')
+- `entity_id`: ID of the modified entity
+- `data`: JSON BLOB containing modification details
+- `created_at`: When the modification was recorded
+
+**Relationships:**
+
+- `user_id` references `users.telegram_id`
+
+**Indexes:**
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_modifications_entity ON modifications(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_modifications_user ON modifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_modifications_created_at ON modifications(created_at);
+```
 
 ### tool_regenerations
 
@@ -390,39 +415,31 @@ Activity feed system for audit trails and notifications.
 
 ```sql
 CREATE TABLE feeds (
-    id        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    time      INTEGER NOT NULL,
-    data_type TEXT NOT NULL,
-    data      BLOB NOT NULL
+    id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title      TEXT NOT NULL,
+    content    TEXT NOT NULL,
+    user_id    INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
 );
 ```
 
 **Fields:**
 
 - `id`: Auto-incrementing primary key
-- `time`: Unix timestamp of the event
-- `data_type`: Event type classifier
-- `data`: JSON BLOB containing event details
+- `title`: Feed entry title
+- `content`: Feed entry content/description
+- `user_id`: ID of user who triggered the feed entry
+- `created_at`: Unix timestamp when the feed entry was created
 
-**Event Types:**
+**Relationships:**
 
-- `tool_created`: New tool added
-- `tool_updated`: Tool modified
-- `cycles_recorded`: New cycle data
-- `trouble_report_created`: New issue reported
-- `note_created`: New note added
-- `regeneration_started`: Tool regeneration initiated
+- `user_id` references `users.telegram_id`
 
-**Data Format:**
+**Indexes:**
 
-```json
-{
-  "user": "user_name",
-  "entity_type": "tool",
-  "entity_id": 123,
-  "action": "created",
-  "details": {...}
-}
+```sql
+CREATE INDEX IF NOT EXISTS idx_feeds_created_at ON feeds(created_at);
+CREATE INDEX IF NOT EXISTS idx_feeds_user_id ON feeds(user_id);
 ```
 
 ## Indexes and Performance

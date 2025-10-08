@@ -1,963 +1,570 @@
-# REST API Documentation
-
-This document provides comprehensive documentation for the PG Press REST API, designed for programmatic access to the manufacturing management system.
+# HTMX API Documentation
 
 ## Overview
 
-The PG Press REST API provides programmatic access to all core functionality:
+PG Press is built on an HTMX-based architecture that provides dynamic, server-rendered web interactions without traditional REST APIs. Instead of JSON APIs, the application uses HTMX endpoints that return HTML fragments for seamless page updates.
 
-- Tool and press management
-- Cycle tracking and reporting
-- Trouble report creation and management
-- Notes and documentation system
-- User management and authentication
-- File attachment handling
+## Architecture
 
-### API Characteristics
+### Technology Stack
 
-- **Protocol**: HTTP/HTTPS
-- **Data Format**: JSON
-- **Authentication**: API Key or Session Cookie
-- **Rate Limiting**: 1000 requests/hour per API key
-- **Versioning**: v1 (current)
+- **Backend**: Go with Echo web framework
+- **Frontend**: HTMX for dynamic interactions + vanilla JavaScript
+- **Templates**: Templ for type-safe HTML generation
+- **Real-time**: WebSocket for live updates
+- **Authentication**: Cookie-based sessions with API key support
 
-### Base URL
+### Request/Response Pattern
 
-```
-Production: https://your-domain.com/api/v1
-Development: http://localhost:8080/api/v1
-```
+Unlike REST APIs, HTMX endpoints:
+
+- Accept form data or URL parameters
+- Return HTML fragments (not JSON)
+- Update specific page sections dynamically
+- Support standard HTTP methods (GET, POST, PUT, DELETE)
 
 ## Authentication
 
-### API Key Authentication
+### Session-Based Authentication
 
-Primary method for programmatic access:
+All routes (except `/login`) require user authentication via session cookies.
 
-```http
-GET /api/v1/tools
-Authorization: Bearer your-api-key-here
+**Login Process:**
+
+```
+POST /login
+Content-Type: application/x-www-form-urlencoded
+
+api-key=your-api-key-here
 ```
 
-### Session Cookie Authentication
+**Response:** Redirects to profile page on success, stays on login page with error on failure.
 
-For web application integration:
+**Logout:**
 
-```http
-GET /api/v1/tools
-Cookie: session=your-session-cookie
+```
+GET /logout
 ```
 
-### Getting an API Key
+**Response:** Redirects to login page and clears session.
 
-API keys are generated through the web interface or CLI:
+## Page Routes
+
+### Authentication & User Management
+
+#### Login Page
+
+```
+GET /login
+```
+
+Renders the login form. Accepts `api-key` form parameter for authentication.
+
+#### Logout
+
+```
+GET /logout
+```
+
+Clears user session and redirects to login page.
+
+### Main Application Pages
+
+#### Home Dashboard
+
+```
+GET /
+GET /home
+```
+
+Main dashboard showing system overview and recent activity.
+
+#### User Profile
+
+```
+GET /profile
+```
+
+User profile page with session management and user information.
+
+#### Activity Feed
+
+```
+GET /feed
+```
+
+Chronological activity feed showing system events and user actions.
+
+### Tools & Press Management
+
+#### Tools Overview
+
+```
+GET /tools
+```
+
+Main tools management page with press sections and tool listings.
+
+#### Individual Tool Page
+
+```
+GET /tools/tool/{id}
+```
+
+Detailed view for a specific tool with cycles, notes, and management options.
+
+#### Press-Specific View
+
+```
+GET /tools/press/{press_number}
+```
+
+View all tools and activity for a specific press (0-5).
+
+### Trouble Reports
+
+#### Trouble Reports List
+
+```
+GET /trouble-reports
+```
+
+List all trouble reports with search and filtering capabilities.
+
+#### PDF Export
+
+```
+GET /trouble-reports/share-pdf?id={report_id}
+```
+
+Generate and download PDF version of trouble report.
+
+#### Attachment Download
+
+```
+GET /trouble-reports/attachment?id={attachment_id}
+```
+
+Download file attachment from trouble report.
+
+#### Modifications History
+
+```
+GET /trouble-reports/modifications/{id}
+```
+
+View modification history for a specific trouble report.
+
+### Content Editor
+
+#### Editor Page
+
+```
+GET /editor?type={content_type}&id={id}&return_url={url}
+```
+
+**Parameters:**
+
+- `type` (required): Content type (`troublereport`)
+- `id` (optional): ID of existing item to edit
+- `return_url` (optional): URL to redirect after save
+
+**Save Content:**
+
+```
+POST /editor/save
+Content-Type: multipart/form-data
+
+type=troublereport&content=...&title=...&attachments=...
+```
+
+### Notes Management
+
+#### Notes Page
+
+```
+GET /notes
+```
+
+Comprehensive notes management with filtering and search.
+
+### Metal Sheets
+
+#### Metal Sheets Management
+
+```
+GET /metal-sheets
+```
+
+Metal sheet inventory and tool assignment management.
+
+## HTMX Endpoints
+
+HTMX endpoints return HTML fragments for dynamic page updates.
+
+### Feed Management
+
+#### Feed List
+
+```
+GET /htmx/feed/list?limit={limit}&offset={offset}
+```
+
+Returns HTML fragment with feed entries for infinite scroll or pagination.
+
+### Navigation
+
+#### Feed Counter WebSocket
+
+```
+WebSocket: /ws/feed-counter
+```
+
+Real-time feed counter updates.
+
+**Message Format:**
+
+```json
+{
+  "type": "counter_update",
+  "count": 5,
+  "timestamp": 1699123456789
+}
+```
+
+### Profile Management
+
+#### Get User Cookies
+
+```
+GET /htmx/profile/cookies
+```
+
+Returns HTML table of user's active sessions.
+
+#### Delete User Cookie
+
+```
+DELETE /htmx/profile/cookies?value={cookie_value}
+```
+
+Deletes a specific user session.
+
+### Tools Management
+
+#### Tools List by Press
+
+```
+GET /htmx/tools/section/tools?press={press_number}
+```
+
+Returns HTML fragment with tools for specified press.
+
+#### Press Section
+
+```
+GET /htmx/tools/section/press?press={press_number}
+```
+
+Returns HTML fragment for press section with tools and controls.
+
+#### Tool Edit Dialog
+
+```
+GET /htmx/tools/edit?id={id}
+POST /htmx/tools/edit
+PUT /htmx/tools/edit?id={id}
+```
+
+CRUD operations for tools, returns HTML dialogs and updated content.
+
+#### Delete Tool
+
+```
+DELETE /htmx/tools/delete?id={id}
+```
+
+Deletes tool and returns updated tools section.
+
+### Press Cycles Management
+
+#### Cycles Section
+
+```
+GET /htmx/tools/tool/{id}/cycles
+```
+
+Returns HTML fragment with cycle data for specific tool.
+
+#### Total Cycles Calculator
+
+```
+GET /htmx/tools/tool/{id}/total-cycles-calc?press={press}&total={total}
+```
+
+Returns HTML fragment with cycle calculation validation.
+
+#### Cycle CRUD Operations
+
+```
+GET /htmx/tools/tool/{id}/cycle/edit?cycle_id={id}
+POST /htmx/tools/tool/{id}/cycle/edit
+PUT /htmx/tools/tool/{id}/cycle/edit?cycle_id={id}
+DELETE /htmx/tools/tool/{id}/cycle/delete?cycle_id={id}
+```
+
+Full CRUD operations for press cycles.
+
+### Trouble Reports Management
+
+#### Reports Data
+
+```
+GET /htmx/trouble-reports/data?search={query}&limit={limit}&offset={offset}
+```
+
+Returns HTML fragment with filtered/paginated trouble reports.
+
+#### Delete Trouble Report
+
+```
+DELETE /htmx/trouble-reports/data?id={id}
+```
+
+Deletes trouble report and returns updated list.
+
+#### Attachments Preview
+
+```
+GET /htmx/trouble-reports/attachments-preview?id={id}
+```
+
+Returns HTML preview of report attachments.
+
+#### Restore Modification
+
+```
+POST /htmx/trouble-reports/rollback
+Content-Type: application/x-www-form-urlencoded
+
+id={report_id}&mod_index={index}
+```
+
+Restores trouble report to previous version.
+
+### Notes Management
+
+#### Note CRUD Operations
+
+```
+GET /htmx/notes/edit?id={id}&link_to_tables={entity}
+POST /htmx/notes/edit?link_to_tables={entity}
+PUT /htmx/notes/edit?id={id}&link_to_tables={entity}
+DELETE /htmx/notes/delete?id={id}
+```
+
+**Link Formats:**
+
+- `tool_{id}` - Links to specific tool
+- `press_{number}` - Links to specific press
+- `{type}_{id}` - Links to any entity type
+
+#### Notes by Tool
+
+```
+GET /htmx/tools/notes?tool_id={id}
+```
+
+Returns HTML fragment with notes for specific tool.
+
+## WebSocket Endpoints
+
+### Feed Counter Updates
+
+**Endpoint:** `/ws/feed-counter`
+
+**Connection:** Standard WebSocket connection
+
+**Message Types:**
+
+**Counter Update:**
+
+```json
+{
+  "type": "counter_update",
+  "count": 12,
+  "timestamp": 1699123456789
+}
+```
+
+**Error Message:**
+
+```json
+{
+  "type": "error",
+  "message": "Connection error description"
+}
+```
+
+## Error Handling
+
+### Standard Error Responses
+
+HTMX endpoints return appropriate HTTP status codes with HTML error content:
+
+#### 400 Bad Request
+
+```html
+<div class="error">Invalid request parameters</div>
+```
+
+#### 401 Unauthorized
+
+```html
+<div class="error">Authentication required</div>
+```
+
+#### 404 Not Found
+
+```html
+<div class="error">Resource not found</div>
+```
+
+#### 500 Internal Server Error
+
+```html
+<div class="error">Internal server error</div>
+```
+
+## Request Patterns
+
+### Form Submissions
+
+Most HTMX endpoints expect form data:
+
+```html
+<form hx-post="/htmx/tools/edit" hx-target="#tools-section">
+  <input name="position" value="top" />
+  <input name="code" value="T001" />
+  <input name="type" value="punch" />
+  <button type="submit">Save</button>
+</form>
+```
+
+### HTMX Triggers
+
+Common HTMX response headers for page updates:
+
+```http
+HX-Trigger: toolCreated, pageLoaded
+HX-Trigger: toolUpdated, pageLoaded
+HX-Trigger: toolDeleted, pageLoaded
+```
+
+### File Uploads
+
+File uploads use multipart forms:
+
+```html
+<form hx-post="/editor/save" hx-encoding="multipart/form-data" hx-target="body">
+  <input type="file" name="attachments" multiple />
+  <textarea name="content"></textarea>
+  <button type="submit">Save</button>
+</form>
+```
+
+## Security
+
+### Authentication Requirements
+
+- All non-login routes require valid session
+- Session established via API key authentication
+- Session cookies are HTTP-only and secure
+
+### Input Validation
+
+- All form inputs are validated server-side
+- File uploads restricted by type and size
+- SQL injection protection through parameterized queries
+
+### CSRF Protection
+
+- Form-based endpoints include CSRF protection
+- Session-based validation for all state-changing operations
+
+## Performance Considerations
+
+### Caching Strategy
+
+- Static assets cached for 1 year (CSS, JS, fonts)
+- Images cached for 30 days
+- HTML responses not cached for dynamic content
+
+### HTMX Optimizations
+
+- Partial page updates reduce bandwidth
+- Client-side state management minimal
+- Server-side rendering for all dynamic content
+
+## Development and Testing
+
+### Local Development
 
 ```bash
-# CLI method
-./pg-press user add-key --name "My API Client"
-
-# Returns: api_key_abc123def456
+make dev  # Starts server with hot reloading
 ```
 
-## Common Patterns
+**Default URL:** `http://localhost:8080`
 
-### Request Headers
+### Testing HTMX Endpoints
 
-```http
-Content-Type: application/json
-Authorization: Bearer your-api-key
-Accept: application/json
+Use curl with appropriate headers:
+
+```bash
+# Test HTMX endpoint
+curl -H "HX-Request: true" \
+     -H "Cookie: session=your-session-cookie" \
+     http://localhost:8080/htmx/tools/section/tools?press=1
+
+# Test form submission
+curl -X POST \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -H "Cookie: session=your-session-cookie" \
+     -d "position=top&code=T001&type=punch" \
+     http://localhost:8080/htmx/tools/edit
 ```
 
-### Response Format
+## Migration from Traditional APIs
 
-All responses follow a consistent structure:
+If integrating with external systems that expect JSON APIs:
 
-**Success Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 123,
-    "name": "Tool ABC"
-  },
-  "meta": {
-    "timestamp": "2023-12-01T10:30:00Z",
-    "version": "v1"
-  }
-}
-```
-
-**Error Response:**
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Tool code is required",
-    "details": {
-      "field": "code",
-      "value": null
-    }
-  },
-  "meta": {
-    "timestamp": "2023-12-01T10:30:00Z",
-    "request_id": "req_abc123"
-  }
-}
-```
-
-### Pagination
-
-List endpoints support pagination:
-
-```http
-GET /api/v1/tools?page=2&limit=50&sort=code&order=asc
-```
-
-**Pagination Response:**
-
-```json
-{
-  "success": true,
-  "data": [...],
-  "pagination": {
-    "page": 2,
-    "limit": 50,
-    "total": 150,
-    "pages": 3,
-    "has_next": true,
-    "has_prev": true
-  }
-}
-```
-
-## Tools API
-
-### List Tools
-
-```http
-GET /api/v1/tools
-```
-
-**Query Parameters:**
-
-- `page` (integer): Page number (default: 1)
-- `limit` (integer): Items per page (default: 20, max: 100)
-- `press` (integer): Filter by press number (0-5)
-- `position` (string): Filter by position (top, bottom)
-- `type` (string): Filter by tool type
-- `search` (string): Search in code and type
-- `sort` (string): Sort field (code, type, press, created_at)
-- `order` (string): Sort order (asc, desc)
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 123,
-      "position": "top",
-      "type": "cutting",
-      "code": "ABC-123",
-      "press": 5,
-      "regenerating": false,
-      "format": {
-        "height": 100,
-        "width": 200,
-        "material": "steel"
-      },
-      "total_cycles": 15420,
-      "created_at": "2023-11-01T09:00:00Z",
-      "updated_at": "2023-12-01T10:30:00Z"
-    }
-  ],
-  "pagination": {...}
-}
-```
-
-### Get Tool
-
-```http
-GET /api/v1/tools/{id}
-```
-
-**Path Parameters:**
-
-- `id` (integer): Tool ID
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 123,
-    "position": "top",
-    "type": "cutting",
-    "code": "ABC-123",
-    "press": 5,
-    "regenerating": false,
-    "format": {
-      "height": 100,
-      "width": 200,
-      "material": "steel"
-    },
-    "cycles": {
-      "total": 15420,
-      "recent": [
-        {
-          "id": 456,
-          "date": "2023-12-01T08:00:00Z",
-          "cycles": 150,
-          "press_number": 5,
-          "performed_by": {
-            "id": 789,
-            "name": "John Doe"
-          }
-        }
-      ]
-    },
-    "notes": [
-      {
-        "id": 321,
-        "level": 1,
-        "content": "Requires calibration",
-        "created_at": "2023-11-30T15:00:00Z"
-      }
-    ],
-    "created_at": "2023-11-01T09:00:00Z",
-    "updated_at": "2023-12-01T10:30:00Z"
-  }
-}
-```
-
-### Create Tool
-
-```http
-POST /api/v1/tools
-```
-
-**Request Body:**
-
-```json
-{
-  "position": "top",
-  "type": "cutting",
-  "code": "ABC-124",
-  "press": 3,
-  "format": {
-    "height": 100,
-    "width": 200,
-    "material": "steel",
-    "specifications": {
-      "tolerance": "±0.1mm",
-      "surface_finish": "Ra 0.8"
-    }
-  }
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 124,
-    "position": "top",
-    "type": "cutting",
-    "code": "ABC-124",
-    "press": 3,
-    "regenerating": false,
-    "format": {...},
-    "created_at": "2023-12-01T10:30:00Z",
-    "updated_at": "2023-12-01T10:30:00Z"
-  }
-}
-```
-
-### Update Tool
-
-```http
-PUT /api/v1/tools/{id}
-```
-
-**Path Parameters:**
-
-- `id` (integer): Tool ID
-
-**Request Body:** Same as create (partial updates supported)
-
-### Delete Tool
-
-```http
-DELETE /api/v1/tools/{id}
-```
-
-**Path Parameters:**
-
-- `id` (integer): Tool ID
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "message": "Tool deleted successfully",
-    "deleted_id": 123
-  }
-}
-```
-
-## Press Cycles API
-
-### List Cycles
-
-```http
-GET /api/v1/cycles
-```
-
-**Query Parameters:**
-
-- `tool_id` (integer): Filter by tool ID
-- `press_number` (integer): Filter by press number (0-5)
-- `date_from` (date): Start date filter (YYYY-MM-DD)
-- `date_to` (date): End date filter (YYYY-MM-DD)
-- `performed_by` (integer): Filter by user ID
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 456,
-      "tool_id": 123,
-      "press_number": 5,
-      "date": "2023-12-01T08:00:00Z",
-      "total_cycles": 150,
-      "performed_by": {
-        "id": 789,
-        "name": "John Doe"
-      },
-      "tool": {
-        "id": 123,
-        "code": "ABC-123",
-        "type": "cutting"
-      }
-    }
-  ]
-}
-```
-
-### Create Cycle Record
-
-```http
-POST /api/v1/cycles
-```
-
-**Request Body:**
-
-```json
-{
-  "tool_id": 123,
-  "press_number": 5,
-  "total_cycles": 150,
-  "date": "2023-12-01T08:00:00Z",
-  "notes": "Regular maintenance cycle"
-}
-```
-
-### Get Cycle Statistics
-
-```http
-GET /api/v1/cycles/stats
-```
-
-**Query Parameters:**
-
-- `tool_id` (integer, optional): Tool-specific stats
-- `press_number` (integer, optional): Press-specific stats
-- `period` (string): Time period (day, week, month, year)
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "total_cycles": 150000,
-    "average_per_day": 500,
-    "by_press": {
-      "0": 25000,
-      "1": 30000,
-      "2": 20000,
-      "3": 35000,
-      "4": 25000,
-      "5": 15000
-    },
-    "by_period": [
-      {
-        "date": "2023-12-01",
-        "cycles": 500
-      }
-    ]
-  }
-}
-```
-
-## Trouble Reports API
-
-### List Reports
-
-```http
-GET /api/v1/trouble-reports
-```
-
-**Query Parameters:**
-
-- `status` (string): Filter by status (open, in_progress, resolved)
-- `priority` (string): Filter by priority (low, medium, high, critical)
-- `search` (string): Search in title and content
-- `created_from` (date): Filter reports created after date
-- `created_to` (date): Filter reports created before date
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 789,
-      "title": "Press 3 Hydraulic Issue",
-      "content": "Hydraulic system showing pressure drops...",
-      "status": "open",
-      "priority": "high",
-      "attachments": [
-        {
-          "id": 101,
-          "filename": "hydraulic_reading.jpg",
-          "mime_type": "image/jpeg",
-          "size": 245760,
-          "url": "/api/v1/attachments/101"
-        }
-      ],
-      "created_at": "2023-12-01T09:00:00Z",
-      "updated_at": "2023-12-01T10:30:00Z"
-    }
-  ]
-}
-```
-
-### Create Report
-
-```http
-POST /api/v1/trouble-reports
-Content-Type: multipart/form-data
-```
-
-**Form Fields:**
-
-- `title` (string): Report title
-- `content` (string): Detailed description
-- `priority` (string): Priority level (low, medium, high, critical)
-- `attachments[]` (file): Multiple file uploads supported
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 790,
-    "title": "Press 3 Hydraulic Issue",
-    "content": "Hydraulic system showing pressure drops...",
-    "status": "open",
-    "priority": "high",
-    "attachments": [...],
-    "created_at": "2023-12-01T10:30:00Z"
-  }
-}
-```
-
-### Export Report PDF
-
-```http
-GET /api/v1/trouble-reports/{id}/pdf
-```
-
-**Path Parameters:**
-
-- `id` (integer): Report ID
-
-**Response:** PDF file download with appropriate headers
-
-### Update Report
-
-```http
-PUT /api/v1/trouble-reports/{id}
-```
-
-**Request Body:**
-
-```json
-{
-  "title": "Updated title",
-  "content": "Updated content",
-  "status": "in_progress",
-  "priority": "medium"
-}
-```
-
-## Notes API
-
-### List Notes
-
-```http
-GET /api/v1/notes
-```
-
-**Query Parameters:**
-
-- `linked` (string): Filter by linked entity (e.g., "tool_123", "press_5")
-- `level` (integer): Filter by priority level (0=INFO, 1=ATTENTION, 2=BROKEN)
-- `search` (string): Search in note content
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 321,
-      "level": 1,
-      "content": "Tool requires calibration every 100 cycles",
-      "linked": "tool_123",
-      "linked_entity": {
-        "type": "tool",
-        "id": 123,
-        "code": "ABC-123"
-      },
-      "created_at": "2023-11-30T15:00:00Z"
-    }
-  ]
-}
-```
-
-### Create Note
-
-```http
-POST /api/v1/notes
-```
-
-**Request Body:**
-
-```json
-{
-  "level": 1,
-  "content": "Important maintenance note",
-  "linked": "tool_123"
-}
-```
-
-### Update Note
-
-```http
-PUT /api/v1/notes/{id}
-```
-
-### Delete Note
-
-```http
-DELETE /api/v1/notes/{id}
-```
-
-## Users API
-
-### List Users
-
-```http
-GET /api/v1/users
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "telegram_id": 123456789,
-      "user_name": "John Doe",
-      "last_feed": "feed_456",
-      "created_at": "2023-10-01T09:00:00Z",
-      "last_login": "2023-12-01T08:30:00Z"
-    }
-  ]
-}
-```
-
-### Get Current User
-
-```http
-GET /api/v1/users/me
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "telegram_id": 123456789,
-    "user_name": "John Doe",
-    "api_key": "api_key_abc123def456",
-    "permissions": ["read", "write", "admin"],
-    "last_feed": "feed_456",
-    "active_sessions": 3,
-    "last_login": "2023-12-01T08:30:00Z"
-  }
-}
-```
-
-### Update User Profile
-
-```http
-PUT /api/v1/users/me
-```
-
-**Request Body:**
-
-```json
-{
-  "user_name": "Updated Name"
-}
-```
-
-## Activity Feed API
-
-### Get Feed
-
-```http
-GET /api/v1/feed
-```
-
-**Query Parameters:**
-
-- `limit` (integer): Items per page (max: 100)
-- `since` (string): Get entries after this feed ID
-- `type` (string): Filter by event type
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "feed_789",
-      "time": "2023-12-01T10:30:00Z",
-      "type": "tool_created",
-      "data": {
-        "user": "John Doe",
-        "entity_type": "tool",
-        "entity_id": 123,
-        "action": "created",
-        "details": {
-          "tool_code": "ABC-123",
-          "press": 5
-        }
-      }
-    }
-  ],
-  "meta": {
-    "latest_id": "feed_789",
-    "has_more": false
-  }
-}
-```
-
-### Mark Feed as Read
-
-```http
-POST /api/v1/feed/mark-read
-```
-
-**Request Body:**
-
-```json
-{
-  "feed_id": "feed_789"
-}
-```
-
-## Attachments API
-
-### Upload Attachment
-
-```http
-POST /api/v1/attachments
-Content-Type: multipart/form-data
-```
-
-**Form Fields:**
-
-- `file` (file): File to upload
-- `description` (string, optional): File description
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": 101,
-    "filename": "hydraulic_reading.jpg",
-    "mime_type": "image/jpeg",
-    "size": 245760,
-    "url": "/api/v1/attachments/101",
-    "created_at": "2023-12-01T10:30:00Z"
-  }
-}
-```
-
-### Download Attachment
-
-```http
-GET /api/v1/attachments/{id}
-```
-
-**Path Parameters:**
-
-- `id` (integer): Attachment ID
-
-**Response:** File download with appropriate headers
-
-### Delete Attachment
-
-```http
-DELETE /api/v1/attachments/{id}
-```
-
-## Error Codes
-
-### HTTP Status Codes
-
-- `200 OK`: Successful request
-- `201 Created`: Resource created successfully
-- `204 No Content`: Successful request with no response body
-- `400 Bad Request`: Invalid request data
-- `401 Unauthorized`: Authentication required or invalid
-- `403 Forbidden`: Insufficient permissions
-- `404 Not Found`: Resource not found
-- `409 Conflict`: Resource conflict (e.g., duplicate code)
-- `422 Unprocessable Entity`: Validation errors
-- `429 Too Many Requests`: Rate limit exceeded
-- `500 Internal Server Error`: Server error
-
-### Application Error Codes
-
-| Code                  | Description                | HTTP Status |
-| --------------------- | -------------------------- | ----------- |
-| `AUTH_REQUIRED`       | Authentication required    | 401         |
-| `INVALID_API_KEY`     | API key invalid or expired | 401         |
-| `FORBIDDEN`           | Insufficient permissions   | 403         |
-| `NOT_FOUND`           | Resource not found         | 404         |
-| `VALIDATION_ERROR`    | Request validation failed  | 422         |
-| `DUPLICATE_CODE`      | Tool code already exists   | 409         |
-| `INVALID_PRESS`       | Press number must be 0-5   | 422         |
-| `FILE_TOO_LARGE`      | File exceeds size limit    | 413         |
-| `INVALID_FILE_TYPE`   | Unsupported file type      | 422         |
-| `RATE_LIMIT_EXCEEDED` | Too many requests          | 429         |
-
-## Rate Limiting
-
-### Limits
-
-- **Free tier**: 1,000 requests/hour
-- **Premium tier**: 10,000 requests/hour
-- **Enterprise**: Custom limits
-
-### Headers
-
-Rate limit information is included in response headers:
-
-```http
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 995
-X-RateLimit-Reset: 1701435600
-X-RateLimit-Window: 3600
-```
-
-### Rate Limit Exceeded
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Rate limit exceeded. Try again in 45 minutes.",
-    "retry_after": 2700
-  }
-}
-```
-
-## SDKs and Client Libraries
-
-### Official SDKs
-
-- **Go**: `github.com/your-org/pg-press-go`
-- **Python**: `pip install pg-press-client`
-- **JavaScript/Node.js**: `npm install pg-press-client`
-
-### Usage Examples
-
-**Go:**
-
-```go
-import "github.com/your-org/pg-press-go"
-
-client := pgpress.NewClient("your-api-key")
-tools, err := client.Tools.List(context.Background(), &pgpress.ToolsListOptions{
-    Press: 5,
-    Limit: 50,
-})
-```
-
-**Python:**
-
-```python
-from pg_press import Client
-
-client = Client(api_key="your-api-key")
-tools = client.tools.list(press=5, limit=50)
-```
-
-**JavaScript:**
-
-```javascript
-import PGPress from "pg-press-client";
-
-const client = new PGPress({ apiKey: "your-api-key" });
-const tools = await client.tools.list({ press: 5, limit: 50 });
-```
-
-## Webhooks
-
-### Configuration
-
-Configure webhooks to receive real-time notifications:
-
-```http
-POST /api/v1/webhooks
-```
-
-**Request Body:**
-
-```json
-{
-  "url": "https://your-app.com/webhooks/pg-press",
-  "events": ["tool.created", "cycle.recorded", "report.created"],
-  "secret": "your-webhook-secret"
-}
-```
-
-### Event Types
-
-- `tool.created` - New tool added
-- `tool.updated` - Tool modified
-- `tool.deleted` - Tool removed
-- `cycle.recorded` - New cycle data
-- `report.created` - New trouble report
-- `report.updated` - Report modified
-- `note.created` - New note added
-
-### Payload Format
-
-```json
-{
-  "event": "tool.created",
-  "timestamp": "2023-12-01T10:30:00Z",
-  "data": {
-    "tool": {
-      "id": 123,
-      "code": "ABC-123",
-      "press": 5
-    },
-    "user": {
-      "id": 789,
-      "name": "John Doe"
-    }
-  },
-  "signature": "sha256=abc123def456..."
-}
-```
+1. **Consider adding API endpoints** alongside HTMX endpoints
+2. **Reuse business logic** from existing handlers
+3. **Maintain authentication** system compatibility
+4. **Use content negotiation** to serve JSON vs HTML based on Accept header
 
 ## Best Practices
 
-### Authentication
+### HTMX Development
 
-- Store API keys securely
-- Rotate keys regularly
-- Use HTTPS in production
-- Implement proper error handling
-
-### Performance
-
-- Use pagination for large datasets
-- Cache responses when appropriate
-- Implement exponential backoff for retries
-- Monitor rate limits
+1. **Target specific elements** for updates rather than full page reloads
+2. **Use appropriate HTTP methods** (GET for reads, POST for creates, etc.)
+3. **Include CSRF tokens** in forms
+4. **Handle loading states** with HTMX indicators
+5. **Validate inputs** both client and server-side
 
 ### Error Handling
 
-- Check HTTP status codes
-- Parse error response details
-- Implement retry logic for transient errors
-- Log errors for debugging
+1. **Return appropriate HTTP status codes**
+2. **Provide user-friendly error messages**
+3. **Log errors** for debugging
+4. **Handle network failures** gracefully
 
-### Data Validation
+### Performance
 
-- Validate input data before sending
-- Handle validation errors gracefully
-- Use appropriate data types
-- Follow naming conventions
+1. **Minimize HTML fragment size** for HTMX responses
+2. **Cache static assets** aggressively
+3. **Use WebSockets** for real-time updates
+4. **Optimize database queries** for frequently accessed data
 
-## Changelog
-
-### v1.0.0 (Current)
-
-- Initial API release
-- Full CRUD operations for all resources
-- Authentication and rate limiting
-- File upload support
-- Webhook notifications
-
-### Future Versions
-
-- GraphQL endpoint
-- Bulk operations
-- Advanced filtering and search
-- Real-time subscriptions
-- Enhanced analytics endpoints
-
-## Support
-
-For API support and questions:
-
-- Documentation: https://docs.pg-press.com/api
-- GitHub Issues: https://github.com/your-org/pg-press/issues
-- Email: api-support@your-domain.com
-
-## Terms of Service
-
-By using the PG Press API, you agree to our Terms of Service and Privacy Policy. Please review these documents before integrating with our API.
+This documentation reflects the actual HTMX-based architecture of PG Press and should be used as the primary reference for understanding the application's API patterns and endpoints.
