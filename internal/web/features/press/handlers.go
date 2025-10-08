@@ -214,33 +214,10 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 
 	h.LogInfo("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
 
-	// Get cycles for this press
-	cycles, err := h.DB.PressCycles.GetPressCycles(press, nil, nil)
+	// Get cycle summary data using service
+	cycles, toolsMap, usersMap, err := h.DB.PressCycles.GetCycleSummaryData(press, h.DB.Tools, h.DB.Users)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get cycles from database")
-	}
-
-	// Get tools for this press to create toolsMap
-	tools, err := h.DB.Tools.ListWithNotes()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get tools from database")
-	}
-
-	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
-		toolsMap[tool.ID] = tool
-	}
-
-	// Get users map for performed_by names
-	users, err := h.DB.Users.List()
-	if err != nil {
-		return h.HandleError(c, err, "failed to get users from database")
-	}
-
-	usersMap := make(map[int64]*models.User)
-	for _, u := range users {
-		usersMap[u.TelegramID] = u
+		return h.HandleError(c, err, "failed to get cycle summary data")
 	}
 
 	// Generate PDF
