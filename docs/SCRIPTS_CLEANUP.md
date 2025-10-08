@@ -64,7 +64,7 @@ The following outdated scripts have been removed as they are no longer needed:
 - **Changes**: Removed references to deleted migration scripts
 - **Status**: Remains as the primary notes system migration
 
-#### `MIGRATION-README.md` (COMPLETELY REWRITTEN)
+#### `docs/MIGRATION_GUIDE.md` (MOVED from scripts/MIGRATION-README.md)
 
 - **Changes**:
   - Removed documentation for deleted scripts
@@ -79,10 +79,11 @@ The following outdated scripts have been removed as they are no longer needed:
 scripts/
 ├── backups/                                    # Auto-created backup directory
 ├── .gitignore                                  # Git ignore rules for backups
-├── MIGRATION-README.md                         # Complete migration documentation
 ├── migrate-notes-system-refactor.sh           # Notes system migration
 └── migrate-trouble-reports-markdown.sh        # NEW: Markdown support migration
 ```
+
+**Note**: Migration documentation moved to `docs/MIGRATION_GUIDE.md`
 
 ## Migration Script Features
 
@@ -265,7 +266,7 @@ sqlite3 pg-press.db "SELECT COUNT(*) FROM trouble_reports WHERE use_markdown IS 
 
 1. **Follow Naming Convention**: `migrate-feature-description.sh`
 2. **Include Standard Features**: Backup, validation, dry-run, help
-3. **Update Documentation**: Add to MIGRATION-README.md
+3. **Update Documentation**: Add to docs/MIGRATION_GUIDE.md
 4. **Test Thoroughly**: Verify on copy of production data
 5. **Make Executable**: `chmod +x script-name.sh`
 

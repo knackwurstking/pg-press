@@ -29,22 +29,22 @@ The migration script cleanup and trouble reports markdown feature migration has 
    - **Features**: Backup, validation, dry-run, help documentation
    - **Size**: 321 lines of robust migration logic
 
-2. **`MARKDOWN_FEATURES_IMPLEMENTATION.md`**
+2. **`docs/MARKDOWN_IMPLEMENTATION.md`**
    - **Purpose**: Comprehensive documentation of markdown feature
    - **Content**: Technical implementation details, usage instructions, security features
    - **Size**: 436 lines of detailed documentation
 
-3. **`SCRIPTS_MIGRATION_SUMMARY.md`**
+3. **`docs/SCRIPTS_CLEANUP.md`**
    - **Purpose**: Summary of scripts directory changes
    - **Content**: Detailed explanation of cleanup and new migration
    - **Size**: 292 lines of migration documentation
 
-4. **`MIGRATION_SCRIPT_COMPLETION_SUMMARY.md`** (this file)
+4. **`docs/MIGRATION_COMPLETION.md`** (this file)
    - **Purpose**: Final completion summary and usage guide
 
 ### ✅ Files Updated
 
-1. **`scripts/MIGRATION-README.md`** (Complete Rewrite)
+1. **`docs/MIGRATION_GUIDE.md`** (Moved from scripts/MIGRATION-README.md)
    - **Changed**: Removed outdated script documentation
    - **Added**: Comprehensive markdown migration documentation
    - **Improved**: General migration guidelines and procedures

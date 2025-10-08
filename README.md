@@ -196,8 +196,14 @@ See [docs/DATABASE.md](docs/DATABASE.md) for detailed schema information.
 - [🛣️ HTMX Endpoints](docs/API.md) - HTMX architecture and endpoints
 - [🛤️ Routing Table](docs/ROUTING.md) - All available routes
 - [📝 Notes System](docs/NOTES_SYSTEM.md) - Documentation management
-- [📝 Editor System](EDITOR_FEATURE_IMPLEMENTATION.md) - Markdown editor implementation
-- [📝 Shared Markdown](SHARED_MARKDOWN_SYSTEM.md) - Shared markdown rendering system
+- [📝 Editor System](docs/EDITOR_SYSTEM.md) - Markdown editor implementation
+- [📝 Shared Markdown](docs/SHARED_MARKDOWN_SYSTEM.md) - Shared markdown rendering system
+- [📝 Markdown Implementation](docs/MARKDOWN_IMPLEMENTATION.md) - Detailed markdown feature documentation
+- [🔄 Migration Guide](docs/MIGRATION_GUIDE.md) - Database migration procedures
+- [📋 Migration Completion](docs/MIGRATION_COMPLETION.md) - Migration summary and status
+- [🧹 Scripts Cleanup](docs/SCRIPTS_CLEANUP.md) - Scripts directory reorganization summary
+- [📚 Documentation Index](docs/README.md) - Complete documentation overview and navigation
+- [📋 Documentation Organization](docs/DOCUMENTATION_ORGANIZATION_SUMMARY.md) - Validation and organization summary
 
 ## Development
 
