@@ -5,6 +5,8 @@ import (
 	"embed"
 	"os"
 
+	"github.com/knackwurstking/pgpress/internal/web/features/help"
+
 	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/auth"
 	"github.com/knackwurstking/pgpress/internal/web/features/editor"
@@ -41,6 +43,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 	auth.NewRoutes(db).RegisterRoutes(e)
 	editor.NewRoutes(db).RegisterRoutes(e)
 	feed.NewRoutes(db).RegisterRoutes(e)
+	help.NewRoutes(db).RegisterRoutes(e)
 	home.NewRoutes(db).RegisterRoutes(e)
 	profile.NewRoutes(db).RegisterRoutes(e)
 	tools.NewRoutes(db).RegisterRoutes(e)

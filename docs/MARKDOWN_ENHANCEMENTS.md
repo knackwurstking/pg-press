@@ -84,6 +84,13 @@ Changed the replacement pattern from `<br>` to `\n` (newline) to ensure proper l
 - Function: `insertMarkdown('__', '__')`
 - Position: Between italic and heading buttons
 
+**Help Integration:**
+
+- Added help links in markdown checkbox section and toolbar
+- Links use `env.ServerPathPrefix` for proper URL construction
+- Help opens in new tabs to preserve editor content
+- All links automatically handle server path prefix configuration
+
 ## Technical Implementation
 
 ### Regex Processing Order
@@ -131,9 +138,12 @@ The underline feature uses standard HTML `<u>` tags with CSS `text-decoration: u
 ## Files Modified
 
 1. `internal/web/shared/components/markdown.templ` - Core markdown rendering logic
-2. `internal/web/features/editor/templates/editor.templ` - Editor toolbar
-3. `internal/web/shared/components/markdown_templ.go` - Auto-generated (via `templ generate`)
-4. `internal/web/features/editor/templates/editor_templ.go` - Auto-generated (via `templ generate`)
+2. `internal/web/features/editor/templates/editor.templ` - Editor toolbar with help links
+3. `internal/web/features/help/` - Complete new help feature module
+4. `internal/web/router.go` - Added help routes registration
+5. `internal/web/shared/components/markdown_templ.go` - Auto-generated (via `templ generate`)
+6. `internal/web/features/editor/templates/editor_templ.go` - Auto-generated (via `templ generate`)
+7. `internal/web/features/help/templates/markdown_templ.go` - Auto-generated (via `templ generate`)
 
 ## How to Use
 
@@ -142,6 +152,8 @@ The underline feature uses standard HTML `<u>` tags with CSS `text-decoration: u
 1. **Underline text**: Wrap text with double underscores: `__your text__`
 2. **Blockquotes**: Use `> ` at the start of lines - newlines are now properly preserved
 3. **Editor toolbar**: Click the underline button (U icon) to format selected text
+4. **Get help**: Click the help icons (ⓘ or ❓) in the editor to access comprehensive markdown documentation
+5. **Access help directly**: Visit `{SERVER_PATH_PREFIX}/help/markdown` where prefix is your configured path
 
 ### For Developers
 
@@ -157,3 +169,21 @@ Potential future improvements could include:
 - Better code block handling with syntax highlighting
 - Table support
 - Link rendering improvements
+
+## Server Path Prefix Support
+
+All help system components fully support the `SERVER_PATH_PREFIX` environment variable:
+
+**Implementation:**
+
+- Help page accessible at `{prefix}/help/markdown` where prefix is configurable
+- Editor help links use `env.ServerPathPrefix` for proper URL construction
+- Navigation links automatically handle prefix for seamless experience
+- Zero additional configuration required
+
+**Benefits:**
+
+- Works with reverse proxies and custom deployment paths
+- Maintains consistent user experience regardless of URL structure
+- Automatic prefix handling requires no manual URL updates
+- Compatible with existing server path prefix configuration

@@ -38,6 +38,10 @@ Detailed documentation of the notes management system, including the generic lin
 
 Complete documentation of the reusable editor feature that provides markdown editing capabilities across the application. Covers architecture, usage patterns, and content type support.
 
+### [❓ Help System](HELP_SYSTEM.md)
+
+Comprehensive documentation of the interactive markdown help system, including the help page implementation, editor integration, enhanced markdown features (underline support and blockquote fixes), and server path prefix handling.
+
 ## 📝 Markdown & Content Management
 
 ### [📋 Markdown Implementation](MARKDOWN_IMPLEMENTATION.md)
@@ -47,6 +51,18 @@ Comprehensive guide to the markdown features in trouble reports, including datab
 ### [🔄 Shared Markdown System](SHARED_MARKDOWN_SYSTEM.md)
 
 Technical documentation of the shared markdown rendering system, covering components architecture, JavaScript functions, CSS styling, and usage patterns across features.
+
+### [🚀 Markdown Enhancements](MARKDOWN_ENHANCEMENTS.md)
+
+Detailed documentation of recent markdown improvements including underline support (`__text__`), blockquote newline fixes, editor toolbar enhancements, and comprehensive user help integration.
+
+### [📖 Markdown Usage Guide](MARKDOWN_USAGE_GUIDE.md)
+
+Comprehensive user guide covering all markdown features supported in pg-press, including syntax examples, best practices, common use cases, and integration with the application's markdown system.
+
+### [🧪 Path Prefix Testing](PATH_PREFIX_TESTING.md)
+
+Quick testing guide for verifying server path prefix functionality across the help system and editor integration, including deployment scenarios and troubleshooting.
 
 ## 🔧 Development & Administration
 
@@ -58,9 +74,21 @@ Complete database migration procedures including available scripts, usage instru
 
 Detailed summary of completed migration tasks, including the trouble reports markdown feature implementation and migration script cleanup activities.
 
+### [📚 Help System Documentation Migration](HELP_SYSTEM_DOCS_MIGRATION.md)
+
+Summary of the comprehensive help system documentation reorganization and migration into the centralized docs directory structure, including file moves, link updates, and validation procedures.
+
+### [🎉 Help System Implementation Complete](HELP_SYSTEM_COMPLETION_SUMMARY.md)
+
+Comprehensive project completion summary documenting the full interactive markdown help system implementation, including technical achievements, testing validation, documentation ecosystem, and production readiness assessment.
+
 ### [🧹 Scripts Cleanup](SCRIPTS_CLEANUP.md)
 
 Documentation of the scripts directory reorganization, including removed outdated scripts, new migration implementations, and improved maintenance procedures.
+
+### [🎨 Template Customization Guide](TEMPLATE_CUSTOMIZATION_GUIDE.md)
+
+Comprehensive guide for customizing and extending templates using the integrated ui.min.css utility framework, including color systems, layout utilities, component patterns, and best practices demonstrated through the help system implementation.
 
 ## 📖 Documentation Categories
 
@@ -80,15 +108,20 @@ Focus on operational aspects:
 1. [Migration Guide](MIGRATION_GUIDE.md) - Database maintenance procedures
 2. [Caching Strategy](CACHING.md) - Performance optimization
 3. [Migration Completion](MIGRATION_COMPLETION.md) - Current system state
+4. [Help System Documentation Migration](HELP_SYSTEM_DOCS_MIGRATION.md) - Documentation organization procedures
+5. [Help System Implementation Complete](HELP_SYSTEM_COMPLETION_SUMMARY.md) - Project completion assessment
 
 ### For Feature Development
 
 Reference these for implementing new features:
 
 1. [Editor System](EDITOR_SYSTEM.md) - Reusable editing patterns
-2. [Shared Markdown System](SHARED_MARKDOWN_SYSTEM.md) - Content rendering
-3. [Notes System](NOTES_SYSTEM.md) - Generic linking patterns
-4. [Markdown Implementation](MARKDOWN_IMPLEMENTATION.md) - Rich text features
+2. [Help System](HELP_SYSTEM.md) - Interactive documentation and user guidance
+3. [Shared Markdown System](SHARED_MARKDOWN_SYSTEM.md) - Content rendering
+4. [Notes System](NOTES_SYSTEM.md) - Generic linking patterns
+5. [Markdown Implementation](MARKDOWN_IMPLEMENTATION.md) - Rich text features
+6. [Markdown Enhancements](MARKDOWN_ENHANCEMENTS.md) - Latest markdown improvements
+7. [Template Customization Guide](TEMPLATE_CUSTOMIZATION_GUIDE.md) - UI framework and styling patterns
 
 ### For Maintenance & Cleanup
 
@@ -96,6 +129,8 @@ Historical and cleanup documentation:
 
 1. [Scripts Cleanup](SCRIPTS_CLEANUP.md) - Scripts directory reorganization
 2. [Migration Completion](MIGRATION_COMPLETION.md) - Completed migration tasks
+3. [Help System Documentation Migration](HELP_SYSTEM_DOCS_MIGRATION.md) - Documentation reorganization summary
+4. [Help System Implementation Complete](HELP_SYSTEM_COMPLETION_SUMMARY.md) - Complete project implementation summary
 
 ## 🎯 Quick Reference
 
@@ -125,6 +160,15 @@ Historical and cleanup documentation:
 - Use [Shared Markdown System](SHARED_MARKDOWN_SYSTEM.md) for consistent rendering
 - Reference [Markdown Implementation](MARKDOWN_IMPLEMENTATION.md) for advanced features
 - Check [Editor System](EDITOR_SYSTEM.md) for editing workflows
+- Review [Help System](HELP_SYSTEM.md) for user documentation patterns
+- See [Markdown Enhancements](MARKDOWN_ENHANCEMENTS.md) for latest features
+- Use [Markdown Usage Guide](MARKDOWN_USAGE_GUIDE.md) for complete syntax reference
+- Follow [Template Customization Guide](TEMPLATE_CUSTOMIZATION_GUIDE.md) for UI development
+
+**Testing and deployment:**
+
+- Use [Path Prefix Testing](PATH_PREFIX_TESTING.md) for server configuration verification
+- Check deployment flexibility and URL handling across different environments
 
 ## 📋 Documentation Standards
 

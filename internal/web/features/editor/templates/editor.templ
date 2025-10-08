@@ -66,16 +66,25 @@ templ EditorPage(options *EditorOptions) {
 										checked
 									}
 								/>
-								<span class="text-medium">Markdown-Formatierung verwenden</span>
-								<small class="muted text-sm italic ml-auto">
-									(unterstützt **fett**, *kursiv*, # Überschriften, > Zitate, automatische Zeilenumbrüche, etc.)
-								</small>
+								<span class="text-medium w-full">Markdown-Formatierung verwenden</span>
+								<div class="ml-auto flex justify-end items-center gap-xs">
+									<a
+										role="button"
+										href={ templ.URL(env.ServerPathPrefix + "/help/markdown") }
+										target="_blank"
+										class="text-xs primary ghost"
+										style="text-wrap: nowrap;"
+										title="Vollständige Markdown Hilfe"
+									>
+										<i class="bi bi-info-circle"></i>
+									</a>
+								</div>
 							</label>
 						</div>
 					</div>
 					<!-- Markdown Tools -->
 					<div id="markdown-tools" class="border p my transition-all" style="display: none; border-radius: var(--ui-radius);">
-						<div class="mb text-sm text-semibold">
+						<div class="mb text-sm text-semibold flex items-center">
 							<span>Markdown-Werkzeuge</span>
 						</div>
 						<div class="flex gap-sm flex-wrap">
