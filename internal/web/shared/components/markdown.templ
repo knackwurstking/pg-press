@@ -1,97 +1,13 @@
 package components
 
-templ MarkdownScript() {
-	<script>
-		// Core markdown rendering function
-		function renderMarkdownToHTML(content) {
-			if (!content || content.trim() === '') {
-				return '';
-			}
-
-			// First, process inline formatting and structural elements
-			var processed = content
-				.replace(/### (.*$)/gm, '<h3>$1</h3>')
-				.replace(/## (.*$)/gm, '<h2>$1</h2>')
-				.replace(/# (.*$)/gm, '<h1>$1</h1>')
-				.replace(/__(.*?)__/g, '<u>$1</u>')
-				.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-				.replace(/\*(.*?)\*/g, '<em>$1</em>')
-				.replace(/`(.*?)`/g, '<code>$1</code>')
-				.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
-				.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
-				.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
-				.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
-				.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-				.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
-				.replace(/class="[uo]l-item"/g, '')
-				.replace(/<bq-line>/g, '')
-				.replace(/<\/bq-line>/g, '\n');
-
-			// Split content by double newlines to create paragraphs
-			var paragraphs = processed.split(/\n\s*\n/);
-
-			return paragraphs.map(function(paragraph) {
-				paragraph = paragraph.trim();
-				if (!paragraph) return '';
-
-				// Skip if it's already an HTML block element
-				if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
-					return paragraph;
-				}
-
-				// Convert single newlines to line breaks within paragraphs
-				var withLineBreaks = paragraph.replace(/\n/g, '<br>');
-
-				// Wrap in paragraph tags if it's not already a block element
-				return '<p>' + withLineBreaks + '</p>';
-			}).join('\n\n');
-		}
-
-		// Process markdown content in DOM elements
-		function processMarkdownContent() {
-			var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
-			containers.forEach(function(container) {
-				var content = container.getAttribute('data-markdown-content');
-				if (content) {
-					var html = renderMarkdownToHTML(content);
-					if (html) {
-						container.innerHTML = html;
-					} else {
-						container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
-					}
-				}
-			});
-		}
-
-		// Update live preview for editors - exposed globally for cross-template access
-		window.updateMarkdownPreview = function(textareaId, previewId) {
-			var textarea = document.getElementById(textareaId);
-			var previewContent = document.getElementById(previewId);
-
-			if (!textarea || !previewContent) return;
-
-			var html = '';
-			if (textarea.value) {
-				html = renderMarkdownToHTML(textarea.value);
-			}
-
-			previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
-		};
-
-		// Auto-process markdown content when DOM is ready
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', function() {
-				setTimeout(processMarkdownContent, 10);
-			});
-		} else {
-			setTimeout(processMarkdownContent, 10);
-		}
-
-		// Listen for HTMX afterSwap events to re-process markdown
-		document.addEventListener('htmx:afterSwap', function(event) {
-			setTimeout(processMarkdownContent, 50);
-		});
-	</script>
+templ MarkdownContent(content string, useMarkdown bool) {
+	if useMarkdown {
+		<div class="markdown-content" data-markdown-content={ content }>
+			@Spinner()
+		</div>
+	} else {
+		<pre>{ content }</pre>
+	}
 }
 
 templ MarkdownStyles() {
@@ -173,12 +89,94 @@ templ MarkdownStyles() {
 	</style>
 }
 
-templ MarkdownContent(content string, useMarkdown bool) {
-	if useMarkdown {
-		<div class="markdown-content" data-markdown-content={ content }>
-			@Spinner()
-		</div>
-	} else {
-		<pre>{ content }</pre>
+script MarkdownScript() {
+	// Core markdown rendering function
+	function renderMarkdownToHTML(content) {
+		if (!content || content.trim() === '') {
+			return '';
+		}
+
+		// First, process inline formatting and structural elements
+		var processed = content
+			.replace(/### (.*$)/gm, '<h3>$1</h3>')
+			.replace(/## (.*$)/gm, '<h2>$1</h2>')
+			.replace(/# (.*$)/gm, '<h1>$1</h1>')
+			.replace(/__(.*?)__/g, '<u>$1</u>')
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*(.*?)\*/g, '<em>$1</em>')
+			.replace(/`(.*?)`/g, '<code>$1</code>')
+			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
+			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
+			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
+			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/<bq-line>/g, '')
+			.replace(/<\/bq-line>/g, '\n');
+
+		// Split content by double newlines to create paragraphs
+		var paragraphs = processed.split(/\n\s*\n/);
+
+		return paragraphs.map(function(paragraph) {
+			paragraph = paragraph.trim();
+			if (!paragraph) return '';
+
+			// Skip if it's already an HTML block element
+			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
+				return paragraph;
+			}
+
+			// Convert single newlines to line breaks within paragraphs
+			var withLineBreaks = paragraph.replace(/\n/g, '<br>');
+
+			// Wrap in paragraph tags if it's not already a block element
+			return '<p>' + withLineBreaks + '</p>';
+		}).join('\n\n');
 	}
+
+	// Process markdown content in DOM elements
+	function processMarkdownContent() {
+		var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
+		containers.forEach(function(container) {
+			var content = container.getAttribute('data-markdown-content');
+			if (content) {
+				var html = renderMarkdownToHTML(content);
+				if (html) {
+					container.innerHTML = html;
+				} else {
+					container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+				}
+			}
+		});
+	}
+
+	// Update live preview for editors - exposed globally for cross-template access
+	window.updateMarkdownPreview = function(textareaId, previewId) {
+		var textarea = document.getElementById(textareaId);
+		var previewContent = document.getElementById(previewId);
+
+		if (!textarea || !previewContent) return;
+
+		var html = '';
+		if (textarea.value) {
+			html = renderMarkdownToHTML(textarea.value);
+		}
+
+		previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
+	};
+
+	// Auto-process markdown content when DOM is ready
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(processMarkdownContent, 10);
+		});
+	} else {
+		setTimeout(processMarkdownContent, 10);
+	}
+
+	// Listen for HTMX afterSwap events to re-process markdown
+	document.addEventListener('htmx:afterSwap', function(event) {
+		setTimeout(processMarkdownContent, 50);
+	});
 }

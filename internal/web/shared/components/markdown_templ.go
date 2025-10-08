@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func MarkdownScript() templ.Component {
+func MarkdownContent(content string, useMarkdown bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,9 +29,50 @@ func MarkdownScript() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<script>\n\t\t// Core markdown rendering function\n\t\tfunction renderMarkdownToHTML(content) {\n\t\t\tif (!content || content.trim() === '') {\n\t\t\t\treturn '';\n\t\t\t}\n\n\t\t\t// First, process inline formatting and structural elements\n\t\t\tvar processed = content\n\t\t\t\t.replace(/### (.*$)/gm, '<h3>$1</h3>')\n\t\t\t\t.replace(/## (.*$)/gm, '<h2>$1</h2>')\n\t\t\t\t.replace(/# (.*$)/gm, '<h1>$1</h1>')\n\t\t\t\t.replace(/__(.*?)__/g, '<u>$1</u>')\n\t\t\t\t.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n\t\t\t\t.replace(/\\*(.*?)\\*/g, '<em>$1</em>')\n\t\t\t\t.replace(/`(.*?)`/g, '<code>$1</code>')\n\t\t\t\t.replace(/^- (.*$)/gm, '<li class=\"ul-item\">$1</li>')\n\t\t\t\t.replace(/^\\d+\\. (.*$)/gm, '<li class=\"ol-item\">$1</li>')\n\t\t\t\t.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')\n\t\t\t\t.replace(/(<li class=\"ul-item\">[\\s\\S]*?<\\/li>(?:\\s*<li class=\"ul-item\">[\\s\\S]*?<\\/li>)*)/gm, '<ul>$1</ul>')\n\t\t\t\t.replace(/(<li class=\"ol-item\">[\\s\\S]*?<\\/li>(?:\\s*<li class=\"ol-item\">[\\s\\S]*?<\\/li>)*)/gm, '<ol>$1</ol>')\n\t\t\t\t.replace(/(<bq-line>[\\s\\S]*?<\\/bq-line>(?:\\s*<bq-line>[\\s\\S]*?<\\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')\n\t\t\t\t.replace(/class=\"[uo]l-item\"/g, '')\n\t\t\t\t.replace(/<bq-line>/g, '')\n\t\t\t\t.replace(/<\\/bq-line>/g, '\\n');\n\n\t\t\t// Split content by double newlines to create paragraphs\n\t\t\tvar paragraphs = processed.split(/\\n\\s*\\n/);\n\n\t\t\treturn paragraphs.map(function(paragraph) {\n\t\t\t\tparagraph = paragraph.trim();\n\t\t\t\tif (!paragraph) return '';\n\n\t\t\t\t// Skip if it's already an HTML block element\n\t\t\t\tif (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {\n\t\t\t\t\treturn paragraph;\n\t\t\t\t}\n\n\t\t\t\t// Convert single newlines to line breaks within paragraphs\n\t\t\t\tvar withLineBreaks = paragraph.replace(/\\n/g, '<br>');\n\n\t\t\t\t// Wrap in paragraph tags if it's not already a block element\n\t\t\t\treturn '<p>' + withLineBreaks + '</p>';\n\t\t\t}).join('\\n\\n');\n\t\t}\n\n\t\t// Process markdown content in DOM elements\n\t\tfunction processMarkdownContent() {\n\t\t\tvar containers = document.querySelectorAll('.markdown-content[data-markdown-content]');\n\t\t\tcontainers.forEach(function(container) {\n\t\t\t\tvar content = container.getAttribute('data-markdown-content');\n\t\t\t\tif (content) {\n\t\t\t\t\tvar html = renderMarkdownToHTML(content);\n\t\t\t\t\tif (html) {\n\t\t\t\t\t\tcontainer.innerHTML = html;\n\t\t\t\t\t} else {\n\t\t\t\t\t\tcontainer.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t});\n\t\t}\n\n\t\t// Update live preview for editors - exposed globally for cross-template access\n\t\twindow.updateMarkdownPreview = function(textareaId, previewId) {\n\t\t\tvar textarea = document.getElementById(textareaId);\n\t\t\tvar previewContent = document.getElementById(previewId);\n\n\t\t\tif (!textarea || !previewContent) return;\n\n\t\t\tvar html = '';\n\t\t\tif (textarea.value) {\n\t\t\t\thtml = renderMarkdownToHTML(textarea.value);\n\t\t\t}\n\n\t\t\tpreviewContent.innerHTML = '<div class=\"markdown-content\">' + html + '</div>';\n\t\t};\n\n\t\t// Auto-process markdown content when DOM is ready\n\t\tif (document.readyState === 'loading') {\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tsetTimeout(processMarkdownContent, 10);\n\t\t\t});\n\t\t} else {\n\t\t\tsetTimeout(processMarkdownContent, 10);\n\t\t}\n\n\t\t// Listen for HTMX afterSwap events to re-process markdown\n\t\tdocument.addEventListener('htmx:afterSwap', function(event) {\n\t\t\tsetTimeout(processMarkdownContent, 50);\n\t\t});\n\t</script>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if useMarkdown {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"markdown-content\" data-markdown-content=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(content)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/markdown.templ`, Line: 5, Col: 63}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<pre>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(content)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/markdown.templ`, Line: 9, Col: 16}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</pre>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})
@@ -53,12 +94,12 @@ func MarkdownStyles() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<style>\n\t\t/* Shared Markdown Content Styles */\n\t\t.markdown-content {\n\t\t\tline-height: 1.6;\n\t\t\tcolor: var(--ui-text);\n\t\t}\n\n\t\t.markdown-content h1,\n\t\t.markdown-content h2,\n\t\t.markdown-content h3,\n\t\t.markdown-content h4,\n\t\t.markdown-content h5,\n\t\t.markdown-content h6 {\n\t\t\tmargin: 0.8em 0 0.4em 0;\n\t\t\tfont-weight: bold;\n\t\t\tline-height: 1.3;\n\t\t}\n\n\t\t.markdown-content h1 { font-size: 1.4em; }\n\t\t.markdown-content h2 { font-size: 1.2em; }\n\t\t.markdown-content h3 { font-size: 1.1em; }\n\n\t\t.markdown-content p {\n\t\t\tmargin: 0.5em 0 1em 0;\n\t\t}\n\n\t\t.markdown-content ul,\n\t\t.markdown-content ol {\n\t\t\tmargin: 0.5em 0;\n\t\t\tpadding-left: 1.5em;\n\t\t\tlist-style: inherit;\n\t\t}\n\n\t\t.markdown-content ul {\n\t\t\tlist-style-type: disc;\n\t\t}\n\n\t\t.markdown-content ol {\n\t\t\tlist-style-type: decimal;\n\t\t}\n\n\t\t.markdown-content li {\n\t\t\tmargin: 0.25em 0;\n\t\t\tdisplay: list-item;\n\t\t}\n\n\t\t.markdown-content code {\n\t\t\tfont-size: 0.85em;\n\t\t\tpadding: 0.125em 0.25em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\n\t\t.markdown-content pre {\n\t\t\tmargin: 1em 0;\n\t\t\tpadding: 1em;\n\t\t\tborder-radius: 4px;\n\t\t\toverflow-x: auto;\n\t\t}\n\n\t\t.markdown-content strong {\n\t\t\tfont-weight: 600;\n\t\t}\n\n\t\t.markdown-content em {\n\t\t\tfont-style: italic;\n\t\t}\n\n\t\t.markdown-content u {\n\t\t\ttext-decoration: underline;\n\t\t}\n\n\t\t.markdown-content blockquote {\n\t\t\tmargin: 1em 0;\n\t\t\tpadding: 0.5em 1em;\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<style>\n\t\t/* Shared Markdown Content Styles */\n\t\t.markdown-content {\n\t\t\tline-height: 1.6;\n\t\t\tcolor: var(--ui-text);\n\t\t}\n\n\t\t.markdown-content h1,\n\t\t.markdown-content h2,\n\t\t.markdown-content h3,\n\t\t.markdown-content h4,\n\t\t.markdown-content h5,\n\t\t.markdown-content h6 {\n\t\t\tmargin: 0.8em 0 0.4em 0;\n\t\t\tfont-weight: bold;\n\t\t\tline-height: 1.3;\n\t\t}\n\n\t\t.markdown-content h1 { font-size: 1.4em; }\n\t\t.markdown-content h2 { font-size: 1.2em; }\n\t\t.markdown-content h3 { font-size: 1.1em; }\n\n\t\t.markdown-content p {\n\t\t\tmargin: 0.5em 0 1em 0;\n\t\t}\n\n\t\t.markdown-content ul,\n\t\t.markdown-content ol {\n\t\t\tmargin: 0.5em 0;\n\t\t\tpadding-left: 1.5em;\n\t\t\tlist-style: inherit;\n\t\t}\n\n\t\t.markdown-content ul {\n\t\t\tlist-style-type: disc;\n\t\t}\n\n\t\t.markdown-content ol {\n\t\t\tlist-style-type: decimal;\n\t\t}\n\n\t\t.markdown-content li {\n\t\t\tmargin: 0.25em 0;\n\t\t\tdisplay: list-item;\n\t\t}\n\n\t\t.markdown-content code {\n\t\t\tfont-size: 0.85em;\n\t\t\tpadding: 0.125em 0.25em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\n\t\t.markdown-content pre {\n\t\t\tmargin: 1em 0;\n\t\t\tpadding: 1em;\n\t\t\tborder-radius: 4px;\n\t\t\toverflow-x: auto;\n\t\t}\n\n\t\t.markdown-content strong {\n\t\t\tfont-weight: 600;\n\t\t}\n\n\t\t.markdown-content em {\n\t\t\tfont-style: italic;\n\t\t}\n\n\t\t.markdown-content u {\n\t\t\ttext-decoration: underline;\n\t\t}\n\n\t\t.markdown-content blockquote {\n\t\t\tmargin: 1em 0;\n\t\t\tpadding: 0.5em 1em;\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,74 +107,102 @@ func MarkdownStyles() templ.Component {
 	})
 }
 
-func MarkdownContent(content string, useMarkdown bool) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
+func MarkdownScript() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_MarkdownScript_abec`,
+		Function: `function __templ_MarkdownScript_abec(){// Core markdown rendering function
+	function renderMarkdownToHTML(content) {
+		if (!content || content.trim() === '') {
+			return '';
 		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+
+		// First, process inline formatting and structural elements
+		var processed = content
+			.replace(/### (.*$)/gm, '<h3>$1</h3>')
+			.replace(/## (.*$)/gm, '<h2>$1</h2>')
+			.replace(/# (.*$)/gm, '<h1>$1</h1>')
+			.replace(/__(.*?)__/g, '<u>$1</u>')
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*(.*?)\*/g, '<em>$1</em>')
+			.replace(/` + "`" + `(.*?)` + "`" + `/g, '<code>$1</code>')
+			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
+			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
+			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
+			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/<bq-line>/g, '')
+			.replace(/<\/bq-line>/g, '\n');
+
+		// Split content by double newlines to create paragraphs
+		var paragraphs = processed.split(/\n\s*\n/);
+
+		return paragraphs.map(function(paragraph) {
+			paragraph = paragraph.trim();
+			if (!paragraph) return '';
+
+			// Skip if it's already an HTML block element
+			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
+				return paragraph;
+			}
+
+			// Convert single newlines to line breaks within paragraphs
+			var withLineBreaks = paragraph.replace(/\n/g, '<br>');
+
+			// Wrap in paragraph tags if it's not already a block element
+			return '<p>' + withLineBreaks + '</p>';
+		}).join('\n\n');
+	}
+
+	// Process markdown content in DOM elements
+	function processMarkdownContent() {
+		var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
+		containers.forEach(function(container) {
+			var content = container.getAttribute('data-markdown-content');
+			if (content) {
+				var html = renderMarkdownToHTML(content);
+				if (html) {
+					container.innerHTML = html;
+				} else {
+					container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
 				}
-			}()
+			}
+		});
+	}
+
+	// Update live preview for editors - exposed globally for cross-template access
+	window.updateMarkdownPreview = function(textareaId, previewId) {
+		var textarea = document.getElementById(textareaId);
+		var previewContent = document.getElementById(previewId);
+
+		if (!textarea || !previewContent) return;
+
+		var html = '';
+		if (textarea.value) {
+			html = renderMarkdownToHTML(textarea.value);
 		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var3 == nil {
-			templ_7745c5c3_Var3 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		if useMarkdown {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"markdown-content\" data-markdown-content=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/markdown.templ`, Line: 178, Col: 63}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = Spinner().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<pre>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/markdown.templ`, Line: 182, Col: 16}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</pre>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		return nil
-	})
+
+		previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
+	};
+
+	// Auto-process markdown content when DOM is ready
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(processMarkdownContent, 10);
+		});
+	} else {
+		setTimeout(processMarkdownContent, 10);
+	}
+
+	// Listen for HTMX afterSwap events to re-process markdown
+	document.addEventListener('htmx:afterSwap', function(event) {
+		setTimeout(processMarkdownContent, 50);
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_MarkdownScript_abec`),
+		CallInline: templ.SafeScriptInline(`__templ_MarkdownScript_abec`),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate
