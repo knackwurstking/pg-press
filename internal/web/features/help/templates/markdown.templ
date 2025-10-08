@@ -8,237 +8,26 @@ templ MarkdownHelpPage() {
 	@layouts.Main(layouts.MainOptions{
 		PageTitle:      "Markdown Hilfe",
 		AppBarTitle:    "Markdown Hilfe",
-		AdditionalHead: helpStyles(),
+		AdditionalHead: additionalHead(),
 		NavContent:     helpNavContent(),
 	}) {
 		<main class="container py-lg">
 			<div class="max-w-4xl mx-auto">
-				<header class="mb-xl">
-					<h1 class="text-2xl text-bold mb-sm flex items-center gap">
-						<i class="bi bi-markdown mr-sm ghost primary"></i>
+				<header>
+					<h1 class="text-2xl text-bold flex items-center gap">
+						<i class="bi bi-markdown ghost primary"></i>
 						Markdown Hilfe
 					</h1>
-					<p class="text-lg muted">
+					<p class="text-lg muted border">
 						Eine vollständige Übersicht aller unterstützten Markdown-Funktionen mit Beispielen und Live-Vorschau.
 					</p>
 				</header>
-				<div class="space-y-lg">
-					<!-- Quick Reference Card -->
-					<section class="card elevated p-lg">
-						<h2 class="text-xl text-bold mb-md flex items-center ghost primary gap">
-							<i class="bi bi-lightning mr-sm"></i>
-							Schnellreferenz
-						</h2>
-						<div class="grid gap-sm">
-							<div class="flex items-center justify-between p-sm border rounded gap">
-								<code class="contrast px-sm py-xs rounded text-sm">**Fett**</code>
-								<span class="flex gap justify-between items-center w-50">
-									→
-									<strong>Fett</strong>
-								</span>
-							</div>
-							<div class="flex items-center justify-between p-sm border rounded">
-								<code class="contrast px-sm py-xs rounded text-sm">*Kursiv*</code>
-								<span class="flex gap justify-between items-center w-50">
-									→
-									<em>Kursiv</em>
-								</span>
-							</div>
-							<div class="flex items-center justify-between p-sm border rounded">
-								<code class="contrast px-sm py-xs rounded text-sm">__Unterstrichen__</code>
-								<span class="flex gap justify-between items-center w-50">
-									→
-									<u>Unterstrichen</u>
-								</span>
-							</div>
-							<div class="flex items-center justify-between p-sm border rounded">
-								<code class="contrast px-sm py-xs rounded text-sm">`Code`</code>
-								<span class="flex gap justify-between items-center w-50">
-									→
-									<code class="muted px-xs rounded">Code</code>
-								</span>
-							</div>
-							<div class="flex items-center justify-between p-sm border rounded">
-								<code class="contrast px-sm py-xs rounded text-sm"># Überschrift 1</code>
-								<span class=" flex gap justify-between items-center w-50">
-									→
-									<strong class="text-xl">Überschrift 1</strong>
-								</span>
-							</div>
-						</div>
-					</section>
-					<!-- Interactive Demo -->
-					<section class="card elevated p-lg">
-						<h2 class="text-xl text-bold mb-md flex items-center ghost success gap">
-							<i class="bi bi-play-circle mr-sm"></i>
-							Interaktive Vorschau
-						</h2>
-						<p class="muted mb-md">
-							Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:
-						</p>
-						<div class="demo-grid gap-lg">
-							<div>
-								<label for="demo-textarea" class="text-sm text-medium mb-sm block">Markdown eingeben:</label>
-								<textarea
-									id="demo-textarea"
-									class="w-full border rounded p-sm text-sm resize-y"
-									rows="8"
-									placeholder="Hier können Sie Markdown ausprobieren..."
-								></textarea>
-								<script>
-									document.querySelector("textarea#demo-textarea").value =
-`# Willkommen bei Markdown!
-
-Dies ist ein **Beispieltext** mit verschiedenen Formatierungen:
-
-- *Kursiver Text*
-- **Fetter Text**
-- __Unterstrichener Text__
-- \`Inline-Code\`
-
-> Ein Blockzitat für wichtige Informationen.
-
-Und natürlich mehr Beispiele für die Vorschau!`;
-								</script>
-							</div>
-							<div>
-								<label class="text-sm text-medium mb-sm block">Vorschau:</label>
-								<div id="demo-preview" class="border rounded p-sm overflow-y-auto markdown-content" style="min-height: 200px; max-height: 300px;">
-									<!-- Live preview will be rendered here -->
-								</div>
-							</div>
-						</div>
-					</section>
-					<!-- Text Formatting -->
-					<div class="card outline p-lg">
-						<h2 class="text-xl text-bold mb-md flex items-center ghost info gap">
-							<i class="bi bi-type mr-sm"></i>
-							Textformatierung
-						</h2>
-						<div class="space-y-md">
-							<div class="pb-md border-bottom">
-								<h3 class="text-lg text-medium mb-sm">Fetter Text</h3>
-								<div class="example-grid gap-md mb-sm">
-									<div class="muted outline rounded p-sm">
-										<code class="text-sm">**Dies ist fetter Text**</code>
-									</div>
-									<div class="border rounded p-sm markdown-content">
-										<p><strong>Dies ist fetter Text</strong></p>
-									</div>
-								</div>
-								<p class="text-sm muted">
-									Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.
-								</p>
-							</div>
-							<div class="pb-md border-bottom">
-								<h3 class="text-lg text-medium mb-sm">Kursiver Text</h3>
-								<div class="example-grid gap-md mb-sm">
-									<div class="muted outline rounded p-sm">
-										<code class="text-sm">*Dies ist kursiver Text*</code>
-									</div>
-									<div class="border rounded p-sm markdown-content">
-										<p><em>Dies ist kursiver Text</em></p>
-									</div>
-								</div>
-								<p class="text-sm muted">
-									Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.
-								</p>
-							</div>
-							<div class="pb-md border-bottom">
-								<h3 class="text-lg text-medium mb-sm">Unterstrichener Text</h3>
-								<div class="example-grid gap-md mb-sm">
-									<div class="muted outline rounded p-sm">
-										<code class="text-sm">__Dies ist unterstrichener Text__</code>
-									</div>
-									<div class="border rounded p-sm markdown-content">
-										<p><u>Dies ist unterstrichener Text</u></p>
-									</div>
-								</div>
-								<p class="text-sm muted">
-									Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.
-								</p>
-							</div>
-							<div class="pb-md border-bottom">
-								<h3 class="text-lg text-medium mb-sm">Inline-Code</h3>
-								<div class="example-grid gap-md mb-sm">
-									<div class="muted outline rounded p-sm">
-										<code class="text-sm">Dies ist Code: `print("Hallo")`</code>
-									</div>
-									<div class="border rounded p-sm markdown-content">
-										<p>Dies ist Code: <code>print("Hallo")</code></p>
-									</div>
-								</div>
-								<p class="text-sm muted">
-									Verwenden Sie Backticks (`) um Inline-Code zu markieren.
-								</p>
-							</div>
-							<div>
-								<h3 class="text-lg text-medium mb-sm">Listen</h3>
-								<div class="example-grid gap-md mb-sm">
-									<div class="muted outline rounded p-sm">
-										<code class="text-sm">- Erstes Element<br/>- Zweites Element<br/>- Drittes Element</code>
-									</div>
-									<div class="border rounded p-sm markdown-content">
-										<ul>
-											<li>Erstes Element</li>
-											<li>Zweites Element</li>
-											<li>Drittes Element</li>
-										</ul>
-									</div>
-								</div>
-								<p class="text-sm muted">
-									Verwenden Sie Bindestriche (-) für ungeordnete Listen.
-								</p>
-							</div>
-						</div>
-					</div>
-					<!-- Blockquotes -->
-					<div class="card outline p-lg">
-						<h2 class="text-xl text-bold mb-md flex items-center ghost secondary gap">
-							<i class="bi bi-quote mr-sm"></i>
-							Zitate
-						</h2>
-						<div class="example-grid gap-md mb-md">
-							<div class="muted outline rounded p-sm">
-								<code class="text-sm">> Dies ist ein wichtiges Zitat<br/>> mit mehreren Zeilen</code>
-							</div>
-							<div class="border rounded p-sm markdown-content">
-								<blockquote>
-									<p>Dies ist ein wichtiges Zitat<br/>mit mehreren Zeilen</p>
-								</blockquote>
-							</div>
-						</div>
-						<p class="text-sm muted mb-md">
-							Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.
-						</p>
-					</div>
-					<!-- Tips -->
-					<div class="card success outline p-lg">
-						<h2 class="text-xl text-bold mb-md flex items-center ghost success gap">
-							<i class="bi bi-lightbulb mr-sm"></i>
-							Tipps & Häufige Fehler
-						</h2>
-						<div class="space-y-md">
-							<div class="flex items-start gap-sm">
-								<i class="bi bi-check-circle-fill success text-lg mt-xs"></i>
-								<div>
-									<strong class="text-medium">Leerzeichen beachten:</strong>
-									<span class="text-sm muted block">
-										Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.
-									</span>
-								</div>
-							</div>
-							<div class="flex items-start gap-sm">
-								<i class="bi bi-check-circle-fill success text-lg mt-xs"></i>
-								<div>
-									<strong class="text-medium">Zeilen trennen:</strong>
-									<span class="text-sm muted block">
-										Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
+				<div class="my-lg flex flex-col gap-lg">
+					@quickReferenceCardSection()
+					@interactiveDemoSection()
+					@textFormattingShowcase()
+					@blockquoteShowcase()
+					@tips()
 				</div>
 			</div>
 		</main>
@@ -255,7 +44,7 @@ templ helpNavContent() {
 	</div>
 }
 
-templ helpStyles() {
+templ additionalHead() {
 	@components.MarkdownStyles()
 	<style>
 		/* Demo grid layout */
@@ -282,20 +71,6 @@ templ helpStyles() {
 				grid-template-columns: 1fr;
 			}
 		}
-
-		/* Space utilities */
-		.space-y-lg > * + * {
-			margin-top: 2rem;
-		}
-
-		.space-y-md > * + * {
-			margin-top: 1rem;
-		}
-
-		/* Border utilities */
-		.border-bottom {
-			border-bottom: 1px solid var(--ui-border-subtle);
-		}
 	</style>
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
@@ -316,4 +91,233 @@ templ helpStyles() {
 			}
 		});
 	</script>
+}
+
+templ quickReferenceCardSection() {
+	<section class="card p-lg">
+		<h2 class="text-xl text-bold flex items-center ghost primary gap">
+			<i class="bi bi-lightning"></i>
+			Schnellreferenz
+		</h2>
+		<div class="grid gap-sm">
+			<div class="flex items-center justify-between p-sm border rounded gap">
+				<code class="contrast px-sm py-xs rounded text-sm">**Fett**</code>
+				<span class="flex gap justify-between items-center w-50">
+					→
+					<strong>Fett</strong>
+				</span>
+			</div>
+			<div class="flex items-center justify-between p-sm border rounded">
+				<code class="contrast px-sm py-xs rounded text-sm">*Kursiv*</code>
+				<span class="flex gap justify-between items-center w-50">
+					→
+					<em>Kursiv</em>
+				</span>
+			</div>
+			<div class="flex items-center justify-between p-sm border rounded">
+				<code class="contrast px-sm py-xs rounded text-sm">__Unterstrichen__</code>
+				<span class="flex gap justify-between items-center w-50">
+					→
+					<u>Unterstrichen</u>
+				</span>
+			</div>
+			<div class="flex items-center justify-between p-sm border rounded">
+				<code class="contrast px-sm py-xs rounded text-sm">`Code`</code>
+				<span class="flex gap justify-between items-center w-50">
+					→
+					<code class="muted px-xs rounded">Code</code>
+				</span>
+			</div>
+			<div class="flex items-center justify-between p-sm border rounded">
+				<code class="contrast px-sm py-xs rounded text-sm"># Überschrift 1</code>
+				<span class=" flex gap justify-between items-center w-50">
+					→
+					<strong class="text-xl">Überschrift 1</strong>
+				</span>
+			</div>
+		</div>
+	</section>
+}
+
+templ interactiveDemoSection() {
+	<section class="card p-lg">
+		<h2 class="text-xl text-bold flex items-center ghost success gap">
+			<i class="bi bi-play-circle"></i>
+			Interaktive Vorschau
+		</h2>
+		<p class="muted border">
+			Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:
+		</p>
+		<div class="demo-grid gap-lg">
+			<div class="flex flex-col">
+				<label for="demo-textarea" class="text-sm text-medium">Markdown eingeben:</label>
+				<textarea
+					id="demo-textarea"
+					class="w-full h-full border rounded p-sm text-sm resize-y"
+					placeholder="Hier können Sie Markdown ausprobieren..."
+				></textarea>
+				<script>
+					document.querySelector("textarea#demo-textarea").value =
+`# Willkommen bei Markdown!
+
+Dies ist ein **Beispieltext** mit verschiedenen Formatierungen:
+
+- *Kursiver Text*
+- **Fetter Text**
+- __Unterstrichener Text__
+- \`Inline-Code\`
+
+> Ein Blockzitat für wichtige Informationen.
+
+Und natürlich mehr Beispiele für die Vorschau!`;
+								</script>
+			</div>
+			<div>
+				<label class="text-sm text-medium block">Vorschau:</label>
+				<div id="demo-preview" class="border rounded p-sm overflow-y-auto markdown-content" style="min-height: 200px; max-height: 300px;">
+					<!-- Live preview will be rendered here -->
+				</div>
+			</div>
+		</div>
+	</section>
+}
+
+templ textFormattingShowcase() {
+	<section class="card p-lg flex flex-col gap">
+		<h2 class="text-xl text-bold flex items-center ghost info gap">
+			<i class="bi bi-type"></i>
+			Textformatierung
+		</h2>
+		<div class="py-lg flex flex-col gap">
+			<div class="flex flex-col gap">
+				<h3 class="text-lg text-medium">Fetter Text</h3>
+				<div class="example-grid gap">
+					<div class="muted outline rounded p-sm">
+						<code class="text-sm">**Dies ist fetter Text**</code>
+					</div>
+					<div class="border rounded p-sm markdown-content">
+						<p><strong>Dies ist fetter Text</strong></p>
+					</div>
+				</div>
+				<p class="text-sm muted border">
+					Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.
+				</p>
+			</div>
+			<hr/>
+			<div class="flex flex-col gap">
+				<h3 class="text-lg text-medium">Kursiver Text</h3>
+				<div class="example-grid gap">
+					<div class="muted outline rounded p-sm">
+						<code class="text-sm">*Dies ist kursiver Text*</code>
+					</div>
+					<div class="border rounded p-sm markdown-content">
+						<p><em>Dies ist kursiver Text</em></p>
+					</div>
+				</div>
+				<p class="text-sm muted border">
+					Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.
+				</p>
+			</div>
+			<hr/>
+			<div class="flex flex-col gap">
+				<h3 class="text-lg text-medium">Unterstrichener Text</h3>
+				<div class="example-grid gap">
+					<div class="muted outline rounded p-sm">
+						<code class="text-sm">__Dies ist unterstrichener Text__</code>
+					</div>
+					<div class="border rounded p-sm markdown-content">
+						<p><u>Dies ist unterstrichener Text</u></p>
+					</div>
+				</div>
+				<p class="text-sm muted border">
+					Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.
+				</p>
+			</div>
+			<hr/>
+			<div class="flex flex-col gap">
+				<h3 class="text-lg text-medium">Inline-Code</h3>
+				<div class="example-grid gap">
+					<div class="muted outline rounded p-sm">
+						<code class="text-sm">Dies ist Code: `print("Hallo")`</code>
+					</div>
+					<div class="border rounded p-sm markdown-content">
+						<p>Dies ist Code: <code>print("Hallo")</code></p>
+					</div>
+				</div>
+				<p class="text-sm muted border">
+					Verwenden Sie Backticks (`) um Inline-Code zu markieren.
+				</p>
+			</div>
+			<hr/>
+			<div class="flex flex-col gap">
+				<h3 class="text-lg text-medium">Listen</h3>
+				<div class="example-grid gap">
+					<div class="muted outline rounded p-sm">
+						<code class="text-sm">- Erstes Element<br/>- Zweites Element<br/>- Drittes Element</code>
+					</div>
+					<div class="border rounded p-sm markdown-content">
+						<ul>
+							<li>Erstes Element</li>
+							<li>Zweites Element</li>
+							<li>Drittes Element</li>
+						</ul>
+					</div>
+				</div>
+				<p class="text-sm muted border">
+					Verwenden Sie Bindestriche (-) für ungeordnete Listen.
+				</p>
+			</div>
+		</div>
+	</section>
+}
+
+templ blockquoteShowcase() {
+	<section class="card p-lg flex flex-col gap">
+		<h2 class="text-xl text-bold flex items-center ghost secondary gap">
+			<i class="bi bi-quote mr"></i>
+			Zitate
+		</h2>
+		<div class="example-grid gap">
+			<div class="muted outline rounded p-sm">
+				<code class="text-sm">> Dies ist ein wichtiges Zitat<br/>> mit mehreren Zeilen</code>
+			</div>
+			<div class="border rounded p-sm markdown-content">
+				<blockquote>
+					<p>Dies ist ein wichtiges Zitat<br/>mit mehreren Zeilen</p>
+				</blockquote>
+			</div>
+		</div>
+		<p class="text-sm muted border">
+			Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.
+		</p>
+	</section>
+}
+
+templ tips() {
+	<section class="card success outline p-lg">
+		<h2 class="text-xl text-bold mb flex items-center ghost success gap">
+			<i class="bi bi-lightbulb"></i>
+			Tipps & Häufige Fehler
+		</h2>
+		<div class="my-lg">
+			<div class="flex items-start gap pb">
+				<i class="bi bi-check-circle-fill success ghost text-lg mt"></i>
+				<div>
+					<strong class="text-medium">Leerzeichen beachten:</strong>
+					<span class="text-sm muted block">
+						Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.
+					</span>
+				</div>
+			</div>
+			<div class="flex items-start gap">
+				<i class="bi bi-check-circle-fill success ghost text-lg mt"></i>
+				<div>
+					<strong class="text-medium">Zeilen trennen:</strong>
+					<span class="text-sm muted block">
+						Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.
+					</span>
+				</div>
+			</div>
+		</div>
+	</section>
 }

@@ -45,7 +45,31 @@ func MarkdownHelpPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container py-lg\"><div class=\"max-w-4xl mx-auto\"><header class=\"mb-xl\"><h1 class=\"text-2xl text-bold mb-sm flex items-center gap\"><i class=\"bi bi-markdown mr-sm ghost primary\"></i> Markdown Hilfe</h1><p class=\"text-lg muted\">Eine vollständige Übersicht aller unterstützten Markdown-Funktionen mit Beispielen und Live-Vorschau.</p></header><div class=\"space-y-lg\"><!-- Quick Reference Card --><section class=\"card elevated p-lg\"><h2 class=\"text-xl text-bold mb-md flex items-center ghost primary gap\"><i class=\"bi bi-lightning mr-sm\"></i> Schnellreferenz</h2><div class=\"grid gap-sm\"><div class=\"flex items-center justify-between p-sm border rounded gap\"><code class=\"contrast px-sm py-xs rounded text-sm\">**Fett**</code> <span class=\"flex gap justify-between items-center w-50\">→ <strong>Fett</strong></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">*Kursiv*</code> <span class=\"flex gap justify-between items-center w-50\">→ <em>Kursiv</em></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">__Unterstrichen__</code> <span class=\"flex gap justify-between items-center w-50\">→ <u>Unterstrichen</u></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">`Code`</code> <span class=\"flex gap justify-between items-center w-50\">→ <code class=\"muted px-xs rounded\">Code</code></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\"># Überschrift 1</code> <span class=\" flex gap justify-between items-center w-50\">→ <strong class=\"text-xl\">Überschrift 1</strong></span></div></div></section><!-- Interactive Demo --><section class=\"card elevated p-lg\"><h2 class=\"text-xl text-bold mb-md flex items-center ghost success gap\"><i class=\"bi bi-play-circle mr-sm\"></i> Interaktive Vorschau</h2><p class=\"muted mb-md\">Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:</p><div class=\"demo-grid gap-lg\"><div><label for=\"demo-textarea\" class=\"text-sm text-medium mb-sm block\">Markdown eingeben:</label> <textarea id=\"demo-textarea\" class=\"w-full border rounded p-sm text-sm resize-y\" rows=\"8\" placeholder=\"Hier können Sie Markdown ausprobieren...\"></textarea><script>\n\t\t\t\t\t\t\t\t\tdocument.querySelector(\"textarea#demo-textarea\").value =\n`# Willkommen bei Markdown!\n\nDies ist ein **Beispieltext** mit verschiedenen Formatierungen:\n\n- *Kursiver Text*\n- **Fetter Text**\n- __Unterstrichener Text__\n- \\`Inline-Code\\`\n\n> Ein Blockzitat für wichtige Informationen.\n\nUnd natürlich mehr Beispiele für die Vorschau!`;\n\t\t\t\t\t\t\t\t</script></div><div><label class=\"text-sm text-medium mb-sm block\">Vorschau:</label><div id=\"demo-preview\" class=\"border rounded p-sm overflow-y-auto markdown-content\" style=\"min-height: 200px; max-height: 300px;\"><!-- Live preview will be rendered here --></div></div></div></section><!-- Text Formatting --><div class=\"card outline p-lg\"><h2 class=\"text-xl text-bold mb-md flex items-center ghost info gap\"><i class=\"bi bi-type mr-sm\"></i> Textformatierung</h2><div class=\"space-y-md\"><div class=\"pb-md border-bottom\"><h3 class=\"text-lg text-medium mb-sm\">Fetter Text</h3><div class=\"example-grid gap-md mb-sm\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">**Dies ist fetter Text**</code></div><div class=\"border rounded p-sm markdown-content\"><p><strong>Dies ist fetter Text</strong></p></div></div><p class=\"text-sm muted\">Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.</p></div><div class=\"pb-md border-bottom\"><h3 class=\"text-lg text-medium mb-sm\">Kursiver Text</h3><div class=\"example-grid gap-md mb-sm\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">*Dies ist kursiver Text*</code></div><div class=\"border rounded p-sm markdown-content\"><p><em>Dies ist kursiver Text</em></p></div></div><p class=\"text-sm muted\">Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.</p></div><div class=\"pb-md border-bottom\"><h3 class=\"text-lg text-medium mb-sm\">Unterstrichener Text</h3><div class=\"example-grid gap-md mb-sm\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">__Dies ist unterstrichener Text__</code></div><div class=\"border rounded p-sm markdown-content\"><p><u>Dies ist unterstrichener Text</u></p></div></div><p class=\"text-sm muted\">Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.</p></div><div class=\"pb-md border-bottom\"><h3 class=\"text-lg text-medium mb-sm\">Inline-Code</h3><div class=\"example-grid gap-md mb-sm\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">Dies ist Code: `print(\"Hallo\")`</code></div><div class=\"border rounded p-sm markdown-content\"><p>Dies ist Code: <code>print(\"Hallo\")</code></p></div></div><p class=\"text-sm muted\">Verwenden Sie Backticks (`) um Inline-Code zu markieren.</p></div><div><h3 class=\"text-lg text-medium mb-sm\">Listen</h3><div class=\"example-grid gap-md mb-sm\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">- Erstes Element<br>- Zweites Element<br>- Drittes Element</code></div><div class=\"border rounded p-sm markdown-content\"><ul><li>Erstes Element</li><li>Zweites Element</li><li>Drittes Element</li></ul></div></div><p class=\"text-sm muted\">Verwenden Sie Bindestriche (-) für ungeordnete Listen.</p></div></div></div><!-- Blockquotes --><div class=\"card outline p-lg\"><h2 class=\"text-xl text-bold mb-md flex items-center ghost secondary gap\"><i class=\"bi bi-quote mr-sm\"></i> Zitate</h2><div class=\"example-grid gap-md mb-md\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">> Dies ist ein wichtiges Zitat<br>> mit mehreren Zeilen</code></div><div class=\"border rounded p-sm markdown-content\"><blockquote><p>Dies ist ein wichtiges Zitat<br>mit mehreren Zeilen</p></blockquote></div></div><p class=\"text-sm muted mb-md\">Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.</p></div><!-- Tips --><div class=\"card success outline p-lg\"><h2 class=\"text-xl text-bold mb-md flex items-center ghost success gap\"><i class=\"bi bi-lightbulb mr-sm\"></i> Tipps & Häufige Fehler</h2><div class=\"space-y-md\"><div class=\"flex items-start gap-sm\"><i class=\"bi bi-check-circle-fill success text-lg mt-xs\"></i><div><strong class=\"text-medium\">Leerzeichen beachten:</strong> <span class=\"text-sm muted block\">Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.</span></div></div><div class=\"flex items-start gap-sm\"><i class=\"bi bi-check-circle-fill success text-lg mt-xs\"></i><div><strong class=\"text-medium\">Zeilen trennen:</strong> <span class=\"text-sm muted block\">Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.</span></div></div></div></div></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container py-lg\"><div class=\"max-w-4xl mx-auto\"><header><h1 class=\"text-2xl text-bold flex items-center gap\"><i class=\"bi bi-markdown ghost primary\"></i> Markdown Hilfe</h1><p class=\"text-lg muted border\">Eine vollständige Übersicht aller unterstützten Markdown-Funktionen mit Beispielen und Live-Vorschau.</p></header><div class=\"my-lg flex flex-col gap-lg\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = quickReferenceCardSection().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = interactiveDemoSection().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = textFormattingShowcase().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = blockquoteShowcase().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = tips().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -58,7 +82,7 @@ func MarkdownHelpPage() templ.Component {
 		templ_7745c5c3_Err = layouts.Main(layouts.MainOptions{
 			PageTitle:      "Markdown Hilfe",
 			AppBarTitle:    "Markdown Hilfe",
-			AdditionalHead: helpStyles(),
+			AdditionalHead: additionalHead(),
 			NavContent:     helpNavContent(),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -89,20 +113,20 @@ func helpNavContent() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"flex items-center gap-sm\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"flex items-center gap-sm\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(env.ServerPathPrefix + "/"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/help/templates/markdown.templ`, Line: 251, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/help/templates/markdown.templ`, Line: 40, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex items-center gap-xs muted hover:contrast transition-colors\"><i class=\"bi bi-house\"></i> <span class=\"hidden sm:inline\">Startseite</span></a></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"flex items-center gap-xs muted hover:contrast transition-colors\"><i class=\"bi bi-house\"></i> <span class=\"hidden sm:inline\">Startseite</span></a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -110,7 +134,7 @@ func helpNavContent() templ.Component {
 	})
 }
 
-func helpStyles() templ.Component {
+func additionalHead() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -135,7 +159,152 @@ func helpStyles() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<style>\n\t\t/* Demo grid layout */\n\t\t.demo-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.demo-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\n\t\t/* Example grid layout */\n\t\t.example-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\talign-items: start;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.example-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\n\t\t/* Space utilities */\n\t\t.space-y-lg > * + * {\n\t\t\tmargin-top: 2rem;\n\t\t}\n\n\t\t.space-y-md > * + * {\n\t\t\tmargin-top: 1rem;\n\t\t}\n\n\t\t/* Border utilities */\n\t\t.border-bottom {\n\t\t\tborder-bottom: 1px solid var(--ui-border-subtle);\n\t\t}\n\t</style><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tvar textarea = document.getElementById('demo-textarea');\n\n\t\t\tfunction updatePreview() {\n\t\t\t\tif (window.updateMarkdownPreview) {\n\t\t\t\t\twindow.updateMarkdownPreview('demo-textarea', 'demo-preview');\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (textarea) {\n\t\t\t\t// Update preview on input\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\n\t\t\t\t// Initial preview\n\t\t\t\tsetTimeout(updatePreview, 100);\n\t\t\t}\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<style>\n\t\t/* Demo grid layout */\n\t\t.demo-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.demo-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\n\t\t/* Example grid layout */\n\t\t.example-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\talign-items: start;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.example-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\t</style><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tvar textarea = document.getElementById('demo-textarea');\n\n\t\t\tfunction updatePreview() {\n\t\t\t\tif (window.updateMarkdownPreview) {\n\t\t\t\t\twindow.updateMarkdownPreview('demo-textarea', 'demo-preview');\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (textarea) {\n\t\t\t\t// Update preview on input\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\n\t\t\t\t// Initial preview\n\t\t\t\tsetTimeout(updatePreview, 100);\n\t\t\t}\n\t\t});\n\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func quickReferenceCardSection() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<section class=\"card p-lg\"><h2 class=\"text-xl text-bold flex items-center ghost primary gap\"><i class=\"bi bi-lightning\"></i> Schnellreferenz</h2><div class=\"grid gap-sm\"><div class=\"flex items-center justify-between p-sm border rounded gap\"><code class=\"contrast px-sm py-xs rounded text-sm\">**Fett**</code> <span class=\"flex gap justify-between items-center w-50\">→ <strong>Fett</strong></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">*Kursiv*</code> <span class=\"flex gap justify-between items-center w-50\">→ <em>Kursiv</em></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">__Unterstrichen__</code> <span class=\"flex gap justify-between items-center w-50\">→ <u>Unterstrichen</u></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\">`Code`</code> <span class=\"flex gap justify-between items-center w-50\">→ <code class=\"muted px-xs rounded\">Code</code></span></div><div class=\"flex items-center justify-between p-sm border rounded\"><code class=\"contrast px-sm py-xs rounded text-sm\"># Überschrift 1</code> <span class=\" flex gap justify-between items-center w-50\">→ <strong class=\"text-xl\">Überschrift 1</strong></span></div></div></section>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func interactiveDemoSection() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<section class=\"card p-lg\"><h2 class=\"text-xl text-bold flex items-center ghost success gap\"><i class=\"bi bi-play-circle\"></i> Interaktive Vorschau</h2><p class=\"muted border\">Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:</p><div class=\"demo-grid gap-lg\"><div class=\"flex flex-col\"><label for=\"demo-textarea\" class=\"text-sm text-medium\">Markdown eingeben:</label> <textarea id=\"demo-textarea\" class=\"w-full h-full border rounded p-sm text-sm resize-y\" placeholder=\"Hier können Sie Markdown ausprobieren...\"></textarea><script>\n\t\t\t\t\tdocument.querySelector(\"textarea#demo-textarea\").value =\n`# Willkommen bei Markdown!\n\nDies ist ein **Beispieltext** mit verschiedenen Formatierungen:\n\n- *Kursiver Text*\n- **Fetter Text**\n- __Unterstrichener Text__\n- \\`Inline-Code\\`\n\n> Ein Blockzitat für wichtige Informationen.\n\nUnd natürlich mehr Beispiele für die Vorschau!`;\n\t\t\t\t\t\t\t\t</script></div><div><label class=\"text-sm text-medium block\">Vorschau:</label><div id=\"demo-preview\" class=\"border rounded p-sm overflow-y-auto markdown-content\" style=\"min-height: 200px; max-height: 300px;\"><!-- Live preview will be rendered here --></div></div></div></section>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func textFormattingShowcase() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<section class=\"card p-lg flex flex-col gap\"><h2 class=\"text-xl text-bold flex items-center ghost info gap\"><i class=\"bi bi-type\"></i> Textformatierung</h2><div class=\"py-lg flex flex-col gap\"><div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Fetter Text</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">**Dies ist fetter Text**</code></div><div class=\"border rounded p-sm markdown-content\"><p><strong>Dies ist fetter Text</strong></p></div></div><p class=\"text-sm muted border\">Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.</p></div><hr><div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Kursiver Text</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">*Dies ist kursiver Text*</code></div><div class=\"border rounded p-sm markdown-content\"><p><em>Dies ist kursiver Text</em></p></div></div><p class=\"text-sm muted border\">Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.</p></div><hr><div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Unterstrichener Text</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">__Dies ist unterstrichener Text__</code></div><div class=\"border rounded p-sm markdown-content\"><p><u>Dies ist unterstrichener Text</u></p></div></div><p class=\"text-sm muted border\">Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.</p></div><hr><div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Inline-Code</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">Dies ist Code: `print(\"Hallo\")`</code></div><div class=\"border rounded p-sm markdown-content\"><p>Dies ist Code: <code>print(\"Hallo\")</code></p></div></div><p class=\"text-sm muted border\">Verwenden Sie Backticks (`) um Inline-Code zu markieren.</p></div><hr><div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Listen</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">- Erstes Element<br>- Zweites Element<br>- Drittes Element</code></div><div class=\"border rounded p-sm markdown-content\"><ul><li>Erstes Element</li><li>Zweites Element</li><li>Drittes Element</li></ul></div></div><p class=\"text-sm muted border\">Verwenden Sie Bindestriche (-) für ungeordnete Listen.</p></div></div></section>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func blockquoteShowcase() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<section class=\"card p-lg flex flex-col gap\"><h2 class=\"text-xl text-bold flex items-center ghost secondary gap\"><i class=\"bi bi-quote mr\"></i> Zitate</h2><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">> Dies ist ein wichtiges Zitat<br>> mit mehreren Zeilen</code></div><div class=\"border rounded p-sm markdown-content\"><blockquote><p>Dies ist ein wichtiges Zitat<br>mit mehreren Zeilen</p></blockquote></div></div><p class=\"text-sm muted border\">Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.</p></section>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func tips() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<section class=\"card success outline p-lg\"><h2 class=\"text-xl text-bold mb flex items-center ghost success gap\"><i class=\"bi bi-lightbulb\"></i> Tipps & Häufige Fehler</h2><div class=\"my-lg\"><div class=\"flex items-start gap pb\"><i class=\"bi bi-check-circle-fill success ghost text-lg mt\"></i><div><strong class=\"text-medium\">Leerzeichen beachten:</strong> <span class=\"text-sm muted block\">Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.</span></div></div><div class=\"flex items-start gap\"><i class=\"bi bi-check-circle-fill success ghost text-lg mt\"></i><div><strong class=\"text-medium\">Zeilen trennen:</strong> <span class=\"text-sm muted block\">Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.</span></div></div></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
