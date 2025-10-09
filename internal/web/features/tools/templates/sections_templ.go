@@ -534,14 +534,14 @@ func AdminOverlappingTools(overlappingTools []*services.OverlappingTool) templ.C
 				return templ_7745c5c3_Err
 			}
 			for _, tool := range overlappingTools {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div class=\"card error outline p\"><div class=\"flex justify-between items-start mb\"><div><h6 class=\"m-0\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div class=\"card error outline p\"><div class=\"mb\"><h6 class=\"m-0\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(tool.ToolCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 355, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 354, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {
@@ -561,7 +561,7 @@ func AdminOverlappingTools(overlappingTools []*services.OverlappingTool) templ.C
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</pre></small></div><span class=\"badge error\">Überschneidung</span></div><div class=\"overlapping-instances\"><h6>Betroffene Pressen:</h6><div class=\"grid\" style=\"grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ui-spacing);\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</pre></small></div><div class=\"overlapping-instances\"><h6>Betroffene Pressen:</h6><div class=\"grid\" style=\"grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ui-spacing);\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -573,7 +573,7 @@ func AdminOverlappingTools(overlappingTools []*services.OverlappingTool) templ.C
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", instance.PressNumber))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 376, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/sections.templ`, Line: 373, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {

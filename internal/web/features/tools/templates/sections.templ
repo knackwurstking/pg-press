@@ -350,22 +350,19 @@ templ AdminOverlappingTools(overlappingTools []*services.OverlappingTool) {
 			<div class="flex flex-col gap">
 				for _, tool := range overlappingTools {
 					<div class="card error outline p">
-						<div class="flex justify-between items-start mb">
-							<div>
-								<h6 class="m-0">{ tool.ToolCode }</h6>
-								<small>
-									<pre>
-										@templ.Raw(fmt.Sprintf(
-											"Tool ID:  %s\n"+
-												"Zeitraum: %s - %s",
-											fmt.Sprintf("%d", tool.ToolID),
-											tool.StartDate.Format("02.01.2006"),
-											tool.EndDate.Format("02.01.2006"),
-										))
-									</pre>
-								</small>
-							</div>
-							<span class="badge error">Überschneidung</span>
+						<div class="mb">
+							<h6 class="m-0">{ tool.ToolCode }</h6>
+							<small>
+								<pre>
+									@templ.Raw(fmt.Sprintf(
+										"Tool ID:  %s\n"+
+											"Zeitraum: %s - %s",
+										fmt.Sprintf("%d", tool.ToolID),
+										tool.StartDate.Format("02.01.2006"),
+										tool.EndDate.Format("02.01.2006"),
+									))
+								</pre>
+							</small>
 						</div>
 						<div class="overlapping-instances">
 							<h6>Betroffene Pressen:</h6>
