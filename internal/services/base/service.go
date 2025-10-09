@@ -3,7 +3,6 @@ package base
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -89,36 +88,6 @@ func (b *BaseService) CheckRowsAffected(result sql.Result, entityName string, id
 		return utils.NewNotFoundError(fmt.Sprintf("%s with ID %v not found", entityName, id))
 	}
 	return nil
-}
-
-// LogSlowQuery logs queries that take longer than the threshold
-func (b *BaseService) LogSlowQuery(start time.Time, operation string, threshold time.Duration, additionalInfo ...interface{}) {
-	elapsed := time.Since(start)
-	if elapsed > threshold {
-		if len(additionalInfo) > 0 {
-			b.Log.Warn("Slow %s query took %v - %v", operation, elapsed, additionalInfo[0])
-		} else {
-			b.Log.Warn("Slow %s query took %v", operation, elapsed)
-		}
-	}
-}
-
-// LogOperation logs operations at debug level with consistent formatting
-func (b *BaseService) LogOperation(operation string, details ...interface{}) {
-	if len(details) > 0 {
-		b.Log.Debug("%s: %v", operation, details[0])
-	} else {
-		b.Log.Debug("%s", operation)
-	}
-}
-
-// LogOperationWithUser logs operations that involve a user
-func (b *BaseService) LogOperationWithUser(operation string, userInfo string, details ...any) {
-	if len(details) > 0 {
-		b.Log.Info("%s by %s: %v", operation, userInfo, details[0])
-	} else {
-		b.Log.Info("%s by %s", operation, userInfo)
-	}
 }
 
 // ExecuteInTransaction executes a function within a database transaction

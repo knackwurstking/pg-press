@@ -2,7 +2,6 @@ package cookies
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/services/base"
 	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
@@ -38,7 +37,7 @@ func NewService(db *sql.DB) *Service {
 }
 
 func (c *Service) List() ([]*models.Cookie, error) {
-	c.LogOperation("Listing cookies")
+	c.Log.Debug("Listing cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.DB.Query(query)
@@ -52,7 +51,7 @@ func (c *Service) List() ([]*models.Cookie, error) {
 		return nil, err
 	}
 
-	c.LogOperation("Listed cookies", fmt.Sprintf("count: %d", len(cookies)))
+	c.Log.Debug("Listed cookies: count: %d", len(cookies))
 	return cookies, nil
 }
 
@@ -61,7 +60,7 @@ func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 		return nil, err
 	}
 
-	c.LogOperation("Listing cookies by API key")
+	c.Log.Debug("Listing cookies by API key")
 
 	query := `SELECT * FROM cookies WHERE api_key = ? ORDER BY last_login DESC`
 	rows, err := c.DB.Query(query, apiKey)
@@ -75,7 +74,6 @@ func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 		return nil, err
 	}
 
-	c.LogOperation("Found cookies for API key", fmt.Sprintf("count: %d", len(cookies)))
 	return cookies, nil
 }
 
@@ -84,7 +82,7 @@ func (c *Service) Get(value string) (*models.Cookie, error) {
 		return nil, err
 	}
 
-	c.LogOperation("Getting cookie by value")
+	c.Log.Debug("Getting cookie by value")
 
 	query := `SELECT * FROM cookies WHERE value = ?`
 	row := c.DB.QueryRow(query, value)
@@ -105,7 +103,7 @@ func (c *Service) Add(cookie *models.Cookie) error {
 		return err
 	}
 
-	c.LogOperation("Adding cookie")
+	c.Log.Debug("Adding cookie")
 
 	// Check if cookie already exists
 	exists, err := c.CheckExistence(`SELECT COUNT(*) FROM cookies WHERE value = ?`, cookie.Value)
@@ -123,7 +121,7 @@ func (c *Service) Add(cookie *models.Cookie) error {
 		return c.HandleInsertError(err, "cookies")
 	}
 
-	c.LogOperation("Successfully added cookie")
+	c.Log.Debug("Successfully added cookie")
 	return nil
 }
 
@@ -136,7 +134,7 @@ func (c *Service) Update(value string, cookie *models.Cookie) error {
 		return err
 	}
 
-	c.LogOperation("Updating cookie")
+	c.Log.Debug("Updating cookie")
 
 	query := `UPDATE cookies SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
 	result, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
@@ -148,7 +146,7 @@ func (c *Service) Update(value string, cookie *models.Cookie) error {
 		return err
 	}
 
-	c.LogOperation("Successfully updated cookie")
+	c.Log.Debug("Successfully updated cookie")
 	return nil
 }
 
@@ -157,7 +155,7 @@ func (c *Service) Remove(value string) error {
 		return err
 	}
 
-	c.LogOperation("Removing cookie")
+	c.Log.Debug("Removing cookie")
 
 	query := `DELETE FROM cookies WHERE value = ?`
 	result, err := c.DB.Exec(query, value)
@@ -169,7 +167,7 @@ func (c *Service) Remove(value string) error {
 		return err
 	}
 
-	c.LogOperation("Successfully removed cookie")
+	c.Log.Debug("Successfully removed cookie")
 	return nil
 }
 
@@ -191,7 +189,7 @@ func (c *Service) RemoveApiKey(apiKey string) error {
 		return err
 	}
 
-	c.LogOperation("Successfully removed cookies for API key", fmt.Sprintf("count: %d", rowsAffected))
+	c.Log.Debug("Successfully removed cookies for API key: count: %d", rowsAffected)
 	return nil
 }
 
@@ -213,6 +211,6 @@ func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
 		return 0, err
 	}
 
-	c.LogOperation("Removed expired cookies", fmt.Sprintf("count: %d", rowsAffected))
+	c.Log.Debug("Removed expired cookies: count: %d", rowsAffected)
 	return rowsAffected, nil
 }

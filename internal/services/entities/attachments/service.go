@@ -38,7 +38,7 @@ func NewService(db *sql.DB) *Service {
 }
 
 func (a *Service) List() ([]*models.Attachment, error) {
-	a.LogOperation("Listing attachments")
+	a.Log.Debug("Listing attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
 	rows, err := a.DB.Query(query)
@@ -52,7 +52,7 @@ func (a *Service) List() ([]*models.Attachment, error) {
 		return nil, err
 	}
 
-	a.LogOperation("Listed attachments", fmt.Sprintf("count: %d", len(attachments)))
+	a.Log.Debug("Listed attachments: count: %d", len(attachments))
 	return attachments, nil
 }
 
@@ -61,7 +61,7 @@ func (a *Service) Get(id int64) (*models.Attachment, error) {
 		return nil, err
 	}
 
-	a.LogOperation("Getting attachment", id)
+	a.Log.Debug("Getting attachment: %d", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
 	row := a.DB.QueryRow(query, id)
@@ -82,7 +82,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 		return []*models.Attachment{}, nil
 	}
 
-	a.LogOperation("Getting attachments by IDs", fmt.Sprintf("count: %d", len(ids)))
+	a.Log.Debug("Getting attachments by IDs: count: %d", len(ids))
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -119,7 +119,7 @@ func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 		}
 	}
 
-	a.LogOperation("Found attachments by IDs", fmt.Sprintf("found: %d", len(attachments)))
+	a.Log.Debug("Found attachments by IDs: found: %d", len(attachments))
 	return attachments, nil
 }
 
@@ -133,7 +133,8 @@ func (a *Service) Add(attachment *models.Attachment) (int64, error) {
 		return 0, err
 	}
 
-	a.LogOperation("Adding attachment", fmt.Sprintf("mime_type: %s, size: %d bytes", attachment.MimeType, len(attachment.Data)))
+	a.Log.Debug("Adding attachment: mime_type: %s, size: %d bytes",
+		attachment.MimeType, len(attachment.Data))
 
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
@@ -146,7 +147,7 @@ func (a *Service) Add(attachment *models.Attachment) (int64, error) {
 		return 0, a.HandleInsertError(err, "attachments")
 	}
 
-	a.LogOperation("Added attachment", fmt.Sprintf("id: %d", id))
+	a.Log.Debug("Added attachment: id: %d", id)
 	return id, nil
 }
 
@@ -170,7 +171,7 @@ func (a *Service) Update(attachment *models.Attachment) error {
 		return err
 	}
 
-	a.LogOperation("Updating attachment", fmt.Sprintf("id: %d", id))
+	a.Log.Debug("Updating attachment: id: %d", id)
 
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
@@ -182,7 +183,7 @@ func (a *Service) Update(attachment *models.Attachment) error {
 		return err
 	}
 
-	a.LogOperation("Updated attachment", fmt.Sprintf("id: %d", id))
+	a.Log.Debug("Updated attachment: id: %d", id)
 	return nil
 }
 
@@ -191,7 +192,7 @@ func (a *Service) Delete(id int64) error {
 		return err
 	}
 
-	a.LogOperation("Deleting attachment", id)
+	a.Log.Debug("Deleting attachment: %d", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
 	result, err := a.DB.Exec(query, id)
@@ -203,6 +204,6 @@ func (a *Service) Delete(id int64) error {
 		return err
 	}
 
-	a.LogOperation("Deleted attachment", id)
+	a.Log.Debug("Deleted attachment: %d", id)
 	return nil
 }
