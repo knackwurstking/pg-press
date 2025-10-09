@@ -137,12 +137,13 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 
 	// Create final cycle entries for current tools (being removed) with the total cycles
 	for _, tool := range currentTools {
-		cycle := &models.Cycle{
-			PressNumber:  pn,
-			ToolID:       tool.ID,
-			ToolPosition: tool.Position,
-			TotalCycles:  totalCycles,
-		}
+		cycle := models.NewCycle(
+			pn,
+			tool.ID,
+			tool.Position,
+			totalCycles,
+			user.TelegramID,
+		)
 
 		_, err := h.DB.PressCycles.Add(cycle, user)
 		if err != nil {
