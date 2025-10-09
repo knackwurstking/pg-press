@@ -37,27 +37,6 @@ func ValidateNote(note *models.Note) error {
 	return nil
 }
 
-// ValidateFeed performs comprehensive feed validation
-func ValidateFeed(feed *models.Feed) error {
-	if err := ValidateNotNil(feed, "feed"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(feed.Title, "title"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(feed.Content, "content"); err != nil {
-		return err
-	}
-
-	if err := ValidatePositive(feed.UserID, "user_id"); err != nil {
-		return err
-	}
-
-	return ValidatePositive(feed.CreatedAt, "created_at")
-}
-
 // ValidateTool performs comprehensive tool validation
 func ValidateTool(tool *models.Tool) error {
 	if err := ValidateNotNil(tool, "tool"); err != nil {
@@ -263,8 +242,6 @@ func ValidateTroubleReport(report *models.TroubleReport) error {
 
 	return nil
 }
-
-
 
 // ValidateExistence checks if a value exists in allowed options
 func ValidateExistence(value string, allowedValues []string, fieldName string) error {

@@ -22,8 +22,6 @@ func ScanUser(scanner interfaces.Scannable) (*models.User, error) {
 	return user, nil
 }
 
-
-
 // ScanNote scans a database row into a Note model
 func ScanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
@@ -65,8 +63,6 @@ func ScanUsersFromRows(rows *sql.Rows) ([]*models.User, error) {
 	return ScanRows(rows, ScanUser)
 }
 
-
-
 // ScanNotesFromRows scans multiple note rows
 func ScanNotesFromRows(rows *sql.Rows) ([]*models.Note, error) {
 	return ScanRows(rows, ScanNote)
@@ -89,24 +85,6 @@ func ScanUsersIntoMap(rows *sql.Rows) (map[int64]*models.User, error) {
 	return ScanIntoMap(rows, ScanUser, func(user *models.User) int64 {
 		return user.TelegramID
 	})
-}
-
-// ScanFeed scans a database row into a Feed model
-func ScanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
-	feed := &models.Feed{}
-	err := scanner.Scan(&feed.ID, &feed.Title, &feed.Content, &feed.UserID, &feed.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan feed: %v", err)
-	}
-	return feed, nil
-}
-
-// ScanFeedsFromRows scans multiple feed rows
-func ScanFeedsFromRows(rows *sql.Rows) ([]*models.Feed, error) {
-	return ScanRows(rows, ScanFeed)
 }
 
 // ScanFeedsIntoMap scans feeds into a map by ID
