@@ -656,3 +656,167 @@ func (s *PressCycles) getPositionOrder(position models.Position) int {
 		return 999
 	}
 }
+
+// OverlappingTool represents a tool that appears on multiple presses simultaneously
+type OverlappingTool struct {
+	ToolID    int64                      `json:"tool_id"`
+	ToolCode  string                     `json:"tool_code"`
+	Overlaps  []*OverlappingToolInstance `json:"overlaps"`
+	StartDate time.Time                  `json:"start_date"`
+	EndDate   time.Time                  `json:"end_date"`
+}
+
+// OverlappingToolInstance represents one instance of a tool on a specific press
+type OverlappingToolInstance struct {
+	PressNumber models.PressNumber `json:"press_number"`
+	Position    models.Position    `json:"position"`
+	StartDate   time.Time          `json:"start_date"`
+	EndDate     time.Time          `json:"end_date"`
+}
+
+// GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
+func (s *PressCycles) GetOverlappingTools(toolsService *Tools, usersService *Users) ([]*OverlappingTool, error) {
+	if err := ValidateNotNil(toolsService, "tools service"); err != nil {
+		return nil, err
+	}
+	if err := ValidateNotNil(usersService, "users service"); err != nil {
+		return nil, err
+	}
+
+	s.LogOperation("Detecting overlapping tools across all presses")
+
+	// Valid press numbers
+	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
+
+	// Get all tool summaries for all presses
+	allToolSummaries := make(map[models.PressNumber][]*ToolSummary)
+
+	for _, press := range validPresses {
+		cycles, toolsMap, _, err := s.GetCycleSummaryData(press, toolsService, usersService)
+		if err != nil {
+			s.LogOperation("Failed to get cycle summary data for press", fmt.Sprintf("press: %d, error: %v", press, err))
+			continue // Skip this press and continue with others
+		}
+
+		summaries, err := s.GetToolSummaries(cycles, toolsMap)
+		if err != nil {
+			s.LogOperation("Failed to get tool summaries for press", fmt.Sprintf("press: %d, error: %v", press, err))
+			continue // Skip this press and continue with others
+		}
+
+		allToolSummaries[press] = summaries
+	}
+
+	// Group summaries by tool ID
+	toolGroups := make(map[int64]map[models.PressNumber][]*ToolSummary)
+	for press, summaries := range allToolSummaries {
+		for _, summary := range summaries {
+			if toolGroups[summary.ToolID] == nil {
+				toolGroups[summary.ToolID] = make(map[models.PressNumber][]*ToolSummary)
+			}
+			toolGroups[summary.ToolID][press] = append(toolGroups[summary.ToolID][press], summary)
+		}
+	}
+
+	var overlappingTools []*OverlappingTool
+
+	// Check each tool for overlaps across presses
+	for toolID, pressSummaries := range toolGroups {
+		// Only check tools that appear on multiple presses
+		if len(pressSummaries) < 2 {
+			continue
+		}
+
+		// Get all press combinations
+		presses := make([]models.PressNumber, 0, len(pressSummaries))
+		for press := range pressSummaries {
+			presses = append(presses, press)
+		}
+
+		// Check for overlaps between all press pairs
+		var overlaps []*OverlappingToolInstance
+		overallStartDate := time.Time{}
+		overallEndDate := time.Time{}
+		toolCode := fmt.Sprintf("Tool ID %d", toolID)
+
+		for i, press1 := range presses {
+			for _, summary1 := range pressSummaries[press1] {
+				// Update tool code if we have it
+				if summary1.ToolCode != "" && summary1.ToolCode != fmt.Sprintf("Tool ID %d", toolID) {
+					toolCode = summary1.ToolCode
+				}
+
+				// Track overall date range
+				if overallStartDate.IsZero() || summary1.StartDate.Before(overallStartDate) {
+					overallStartDate = summary1.StartDate
+				}
+				if overallEndDate.IsZero() || summary1.EndDate.After(overallEndDate) {
+					overallEndDate = summary1.EndDate
+				}
+
+				for j := i + 1; j < len(presses); j++ {
+					press2 := presses[j]
+					for _, summary2 := range pressSummaries[press2] {
+						// Check if time periods overlap
+						if s.timePeriodsOverlap(summary1.StartDate, summary1.EndDate, summary2.StartDate, summary2.EndDate) {
+							// Add both instances if not already added
+							instance1 := &OverlappingToolInstance{
+								PressNumber: press1,
+								Position:    summary1.Position,
+								StartDate:   summary1.StartDate,
+								EndDate:     summary1.EndDate,
+							}
+							instance2 := &OverlappingToolInstance{
+								PressNumber: press2,
+								Position:    summary2.Position,
+								StartDate:   summary2.StartDate,
+								EndDate:     summary2.EndDate,
+							}
+
+							// Check if we already have these instances
+							if !s.containsInstance(overlaps, instance1) {
+								overlaps = append(overlaps, instance1)
+							}
+							if !s.containsInstance(overlaps, instance2) {
+								overlaps = append(overlaps, instance2)
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// If we found overlaps, create the overlapping tool entry
+		if len(overlaps) > 0 {
+			overlappingTool := &OverlappingTool{
+				ToolID:    toolID,
+				ToolCode:  toolCode,
+				Overlaps:  overlaps,
+				StartDate: overallStartDate,
+				EndDate:   overallEndDate,
+			}
+			overlappingTools = append(overlappingTools, overlappingTool)
+		}
+	}
+
+	s.LogOperation("Overlapping tools detection completed", fmt.Sprintf("found: %d overlapping tools", len(overlappingTools)))
+	return overlappingTools, nil
+}
+
+// timePeriodsOverlap checks if two time periods overlap
+func (s *PressCycles) timePeriodsOverlap(start1, end1, start2, end2 time.Time) bool {
+	return start1.Before(end2) && start2.Before(end1)
+}
+
+// containsInstance checks if an instance is already in the slice
+func (s *PressCycles) containsInstance(instances []*OverlappingToolInstance, target *OverlappingToolInstance) bool {
+	for _, instance := range instances {
+		if instance.PressNumber == target.PressNumber &&
+			instance.Position == target.Position &&
+			instance.StartDate.Equal(target.StartDate) &&
+			instance.EndDate.Equal(target.EndDate) {
+			return true
+		}
+	}
+	return false
+}

@@ -253,6 +253,32 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	return nil
 }
 
+func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
+	h.LogDebug("Getting overlapping tools for admin section")
+
+	// Get user from context for audit trail
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	h.LogInfo("User %s requested overlapping tools analysis", user.Name)
+
+	// Get overlapping tools from service
+	overlappingTools, err := h.DB.PressCycles.GetOverlappingTools(h.DB.Tools, h.DB.Users)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get overlapping tools")
+	}
+
+	// Render the admin overlapping tools section
+	adminSection := templates.AdminOverlappingTools(overlappingTools)
+	if err := adminSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.RenderInternalError(c, "failed to render admin overlapping tools section: "+err.Error())
+	}
+
+	return nil
+}
+
 func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, error) {
 	// Parse position with validation
 	var position models.Position

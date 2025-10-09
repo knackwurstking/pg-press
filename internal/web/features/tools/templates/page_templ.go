@@ -47,20 +47,20 @@ func Page() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"flex flex-col gap\"><details id=\"section-press\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"container fluid\"><div class=\"flex flex-col gap\"><details id=\"section-admin-overlapping-tools\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/press")
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 21, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 21, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-gear-fill mr\"></i> Eingebaute Werkzeuge</h4></summary>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> Admin: Werkzeug-Überschneidungen</h4></summary>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,12 +68,12 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</details> <details id=\"section-tools-list\" hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</details> <details id=\"section-press\" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/tools")
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/press")
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 36, Col: 64}
 			}
@@ -81,7 +81,7 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h4></summary>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-gear-fill mr\"></i> Eingebaute Werkzeuge</h4></summary>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -89,7 +89,28 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</details></div><script>\n\t\t\t\t// Auto-open tools section if query parameters are present.\n\t\t\t\t// Currently only the tools section will set these parameters.\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\tvar params = new URLSearchParams(window.location.search);\n\t\t\t\t\tif (params.toString()) {\n\t\t\t\t\t\tvar toolsSection = document.getElementById('section-tools-list');\n\t\t\t\t\t\tif (toolsSection) {\n\t\t\t\t\t\t\ttoolsSection.open = true;\n\t\t\t\t\t\t\t// Trigger the HTMX load\n\t\t\t\t\t\t\thtmx.trigger(toolsSection, 'toggle');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</details> <details id=\"section-tools-list\" hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/tools")
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 51, Col: 64}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h4></summary>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</details></div><script>\n\t\t\t\t// Auto-open tools section if query parameters are present.\n\t\t\t\t// Currently only the tools section will set these parameters.\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\tvar params = new URLSearchParams(window.location.search);\n\t\t\t\t\tif (params.toString()) {\n\t\t\t\t\t\tvar toolsSection = document.getElementById('section-tools-list');\n\t\t\t\t\t\tif (toolsSection) {\n\t\t\t\t\t\t\ttoolsSection.open = true;\n\t\t\t\t\t\t\t// Trigger the HTMX load\n\t\t\t\t\t\t\thtmx.trigger(toolsSection, 'toggle');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t</script></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,12 +146,12 @@ func navContent() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex flex-row gap justify-end items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex flex-row gap justify-end items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -146,7 +167,7 @@ func navContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

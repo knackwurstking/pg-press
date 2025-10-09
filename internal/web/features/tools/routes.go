@@ -45,6 +45,10 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.HTMXGetSectionPress),
 			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/section/tools",
 				r.handler.HTMXGetSectionTools),
+
+			// Admin section handlers
+			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/admin/overlapping-tools",
+				r.handler.HTMXGetAdminOverlappingTools),
 		},
 	)
 }
