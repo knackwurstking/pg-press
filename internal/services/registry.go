@@ -30,7 +30,7 @@ func NewRegistry(db *sql.DB) *Registry {
 	}
 }
 
-// GetDB returns the underlying sql.DB connection
+// GetSQL returns the underlying sql.DB connection
 func (db *Registry) GetSQL() *sql.DB {
 	return db.db
 }
