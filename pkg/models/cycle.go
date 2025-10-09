@@ -14,6 +14,7 @@ type Cycle struct {
 	PartialCycles int64       `json:"partial_cycles"`
 	PerformedBy   int64       `json:"performed_by"`
 
+	// TODO: Do we really need this?
 	tool *Tool
 }
 
@@ -40,10 +41,12 @@ func NewPressCycleWithID(id int64, press PressNumber, toolID int64, toolPosition
 	}
 }
 
+// TODO: Do we really need this?
 func (c *Cycle) SetTool(tool *Tool) {
 	c.tool = tool
 }
 
+// TODO: Do we really need this?
 func (c *Cycle) GetTool() *Tool {
 	return c.tool
 }
