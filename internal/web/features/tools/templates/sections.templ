@@ -2,13 +2,13 @@ package templates
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"slices"
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
@@ -315,12 +315,13 @@ templ AdminOverlappingTools(overlappingTools []*services.OverlappingTool) {
 	<span
 		hx-get={ env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools" }
 		hx-trigger="pageLoaded from:body"
+		hx-target="#section-admin-overlapping-tools"
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary class="mb">
 		<h4>
 			<i class="bi bi-exclamation-triangle mr"></i>
-			Admin: Werkzeug-Überschneidungen
+			Admin Tools: Werkzeug-Überschneidungen
 		</h4>
 	</summary>
 	<div class="admin-overlapping-tools">
@@ -341,7 +342,7 @@ templ AdminOverlappingTools(overlappingTools []*services.OverlappingTool) {
 					<div>
 						<h5 class="m-0">Überschneidungen erkannt!</h5>
 						<p class="muted border m-0">
-							{ fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig auf mehreren Pressen verwendet werden.", len(overlappingTools)) }
+							{ fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)) }
 						</p>
 					</div>
 				</div>

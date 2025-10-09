@@ -213,7 +213,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 		</td>
 		// Cycle Position
 		<td>
-			<span class="text-xs">{ cycle.ToolPosition }</span>
+			<span class="text-xs">{ cycle.ToolPosition.GermanString() }</span>
 		</td>
 		// Total Cycles
 		<td>

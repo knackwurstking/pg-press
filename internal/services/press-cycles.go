@@ -788,6 +788,29 @@ func (s *PressCycles) GetOverlappingTools(toolsService *Tools, usersService *Use
 
 		// If we found overlaps, create the overlapping tool entry
 		if len(overlaps) > 0 {
+			// Collect unique positions and append to toolCode
+			positions := make(map[string]bool)
+			var positionList []string
+			for _, instance := range overlaps {
+				pos := instance.Position.GermanString()
+				if !positions[pos] {
+					positions[pos] = true
+					positionList = append(positionList, pos)
+				}
+			}
+
+			// Append positions to toolCode
+			if len(positionList) > 0 {
+				positionsStr := ""
+				for i, pos := range positionList {
+					if i > 0 {
+						positionsStr += ", "
+					}
+					positionsStr += pos
+				}
+				toolCode = fmt.Sprintf("%s (%s)", toolCode, positionsStr)
+			}
+
 			overlappingTool := &OverlappingTool{
 				ToolID:    toolID,
 				ToolCode:  toolCode,

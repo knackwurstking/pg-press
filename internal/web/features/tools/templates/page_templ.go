@@ -60,7 +60,7 @@ func Page() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> Admin: Werkzeug-Überschneidungen</h4></summary>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-trigger=\"toggle[event.target.open]\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" hx-on:toggle=\"if (!event.target.open) event.target.innerHTML = event.target.querySelector('summary').outerHTML\"><summary class=\"mb\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> Admin Tools: Werkzeug-Überschneidungen</h4></summary>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
