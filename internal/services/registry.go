@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/services/entities/attachments"
 	"github.com/knackwurstking/pgpress/internal/services/entities/cookies"
 	"github.com/knackwurstking/pgpress/internal/services/entities/feeds"
+	"github.com/knackwurstking/pgpress/internal/services/entities/users"
 )
 
 type Registry struct {
@@ -14,6 +15,7 @@ type Registry struct {
 	Attachments *attachments.Service
 	Cookies     *cookies.Service
 	Feeds       *feeds.Service
+	Users       *users.Service
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -24,6 +26,7 @@ func NewRegistry(db *sql.DB) *Registry {
 		Attachments: attachments.NewService(db),
 		Cookies:     cookies.NewService(db),
 		Feeds:       feeds.NewService(db),
+		Users:       users.NewService(db),
 	}
 }
 

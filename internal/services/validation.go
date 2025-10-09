@@ -7,19 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// ValidateUser performs comprehensive user validation
-func ValidateUser(user *models.User) error {
-	if err := ValidateNotNil(user, "user"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(user.Name, "user_name"); err != nil {
-		return err
-	}
-
-	return ValidateAPIKey(user.ApiKey)
-}
-
 // ValidateNote performs comprehensive note validation
 func ValidateNote(note *models.Note) error {
 	if err := ValidateNotNil(note, "note"); err != nil {

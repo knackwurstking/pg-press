@@ -9,19 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// ScanUser scans a database row into a User model
-func ScanUser(scanner interfaces.Scannable) (*models.User, error) {
-	user := &models.User{}
-	err := scanner.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan user: %v", err)
-	}
-	return user, nil
-}
-
 // ScanNote scans a database row into a Note model
 func ScanNote(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
@@ -56,11 +43,6 @@ func ScanNoteWithNullable(scanner interfaces.Scannable) (*models.Note, error) {
 	}
 
 	return note, nil
-}
-
-// ScanUsersFromRows scans multiple user rows
-func ScanUsersFromRows(rows *sql.Rows) ([]*models.User, error) {
-	return ScanRows(rows, ScanUser)
 }
 
 // ScanNotesFromRows scans multiple note rows
