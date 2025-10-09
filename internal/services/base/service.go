@@ -1,4 +1,4 @@
-package services
+package base
 
 import (
 	"database/sql"
@@ -12,21 +12,21 @@ import (
 
 // BaseService provides common database operations and utilities for all services
 type BaseService struct {
-	db  *sql.DB
-	log *logger.Logger
+	DB  *sql.DB
+	Log *logger.Logger
 }
 
 // NewBaseService creates a new base service with database connection and logger
 func NewBaseService(db *sql.DB, componentName string) *BaseService {
 	return &BaseService{
-		db:  db,
-		log: logger.GetComponentLogger(fmt.Sprintf("Service: %s", componentName)),
+		DB:  db,
+		Log: logger.GetComponentLogger(fmt.Sprintf("Service: %s", componentName)),
 	}
 }
 
 // CreateTable executes a table creation query with error handling
 func (b *BaseService) CreateTable(query string, tableName string) error {
-	if _, err := b.db.Exec(query); err != nil {
+	if _, err := b.DB.Exec(query); err != nil {
 		return fmt.Errorf("failed to create %s table: %v", tableName, err)
 	}
 	return nil
@@ -63,7 +63,7 @@ func (b *BaseService) HandleDeleteError(err error, entityName string) error {
 // CheckExistence checks if a record exists with the given query and parameters
 func (b *BaseService) CheckExistence(query string, args ...interface{}) (bool, error) {
 	var count int
-	err := b.db.QueryRow(query, args...).Scan(&count)
+	err := b.DB.QueryRow(query, args...).Scan(&count)
 	if err != nil {
 		return false, err
 	}
@@ -96,9 +96,9 @@ func (b *BaseService) LogSlowQuery(start time.Time, operation string, threshold 
 	elapsed := time.Since(start)
 	if elapsed > threshold {
 		if len(additionalInfo) > 0 {
-			b.log.Warn("Slow %s query took %v - %v", operation, elapsed, additionalInfo[0])
+			b.Log.Warn("Slow %s query took %v - %v", operation, elapsed, additionalInfo[0])
 		} else {
-			b.log.Warn("Slow %s query took %v", operation, elapsed)
+			b.Log.Warn("Slow %s query took %v", operation, elapsed)
 		}
 	}
 }
@@ -106,24 +106,24 @@ func (b *BaseService) LogSlowQuery(start time.Time, operation string, threshold 
 // LogOperation logs operations at debug level with consistent formatting
 func (b *BaseService) LogOperation(operation string, details ...interface{}) {
 	if len(details) > 0 {
-		b.log.Debug("%s: %v", operation, details[0])
+		b.Log.Debug("%s: %v", operation, details[0])
 	} else {
-		b.log.Debug("%s", operation)
+		b.Log.Debug("%s", operation)
 	}
 }
 
 // LogOperationWithUser logs operations that involve a user
-func (b *BaseService) LogOperationWithUser(operation string, userInfo string, details ...interface{}) {
+func (b *BaseService) LogOperationWithUser(operation string, userInfo string, details ...any) {
 	if len(details) > 0 {
-		b.log.Info("%s by %s: %v", operation, userInfo, details[0])
+		b.Log.Info("%s by %s: %v", operation, userInfo, details[0])
 	} else {
-		b.log.Info("%s by %s", operation, userInfo)
+		b.Log.Info("%s by %s", operation, userInfo)
 	}
 }
 
 // ExecuteInTransaction executes a function within a database transaction
 func (b *BaseService) ExecuteInTransaction(fn func(tx *sql.Tx) error) error {
-	tx, err := b.db.Begin()
+	tx, err := b.DB.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %v", err)
 	}

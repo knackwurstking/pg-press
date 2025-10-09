@@ -22,18 +22,7 @@ func ScanUser(scanner interfaces.Scannable) (*models.User, error) {
 	return user, nil
 }
 
-// ScanCookie scans a database row into a Cookie model
-func ScanCookie(scanner interfaces.Scannable) (*models.Cookie, error) {
-	cookie := &models.Cookie{}
-	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan cookie: %v", err)
-	}
-	return cookie, nil
-}
+
 
 // ScanNote scans a database row into a Note model
 func ScanNote(scanner interfaces.Scannable) (*models.Note, error) {
@@ -71,34 +60,12 @@ func ScanNoteWithNullable(scanner interfaces.Scannable) (*models.Note, error) {
 	return note, nil
 }
 
-// ScanRows provides a generic way to scan multiple rows
-func ScanRows[T any](rows *sql.Rows, scanFunc func(interfaces.Scannable) (*T, error)) ([]*T, error) {
-	var results []*T
-
-	for rows.Next() {
-		item, err := scanFunc(rows)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
-		}
-		results = append(results, item)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
-	}
-
-	return results, nil
-}
-
 // ScanUsersFromRows scans multiple user rows
 func ScanUsersFromRows(rows *sql.Rows) ([]*models.User, error) {
 	return ScanRows(rows, ScanUser)
 }
 
-// ScanCookiesFromRows scans multiple cookie rows
-func ScanCookiesFromRows(rows *sql.Rows) ([]*models.Cookie, error) {
-	return ScanRows(rows, ScanCookie)
-}
+
 
 // ScanNotesFromRows scans multiple note rows
 func ScanNotesFromRows(rows *sql.Rows) ([]*models.Note, error) {
@@ -108,26 +75,6 @@ func ScanNotesFromRows(rows *sql.Rows) ([]*models.Note, error) {
 // ScanNotesFromRowsWithNullable scans multiple note rows with nullable fields
 func ScanNotesFromRowsWithNullable(rows *sql.Rows) ([]*models.Note, error) {
 	return ScanRows(rows, ScanNoteWithNullable)
-}
-
-// ScanIntoMap scans rows into a map by ID for efficient lookup
-func ScanIntoMap[T any, K comparable](rows *sql.Rows, scanFunc func(interfaces.Scannable) (*T, error), keyFunc func(*T) K) (map[K]*T, error) {
-	resultMap := make(map[K]*T)
-
-	for rows.Next() {
-		item, err := scanFunc(rows)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
-		}
-		key := keyFunc(item)
-		resultMap[key] = item
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
-	}
-
-	return resultMap, nil
 }
 
 // ScanNotesIntoMap scans notes into a map by ID
@@ -144,41 +91,6 @@ func ScanUsersIntoMap(rows *sql.Rows) (map[int64]*models.User, error) {
 	})
 }
 
-// HandleScanError provides consistent error handling for scan operations
-func HandleScanError(err error, entityName string) error {
-	if err == sql.ErrNoRows {
-		return err
-	}
-	return fmt.Errorf("scan error: %s: %v", entityName, err)
-}
-
-// ScanSingleRow is a helper for scanning a single row with error handling
-func ScanSingleRow[T any](row *sql.Row, scanFunc func(interfaces.Scannable) (*T, error), entityName string) (*T, error) {
-	result, err := scanFunc(row)
-	if err != nil {
-		return nil, HandleScanError(err, entityName)
-	}
-	return result, nil
-}
-
-// ScanAttachment scans a database row into an Attachment model
-func ScanAttachment(scanner interfaces.Scannable) (*models.Attachment, error) {
-	attachment := &models.Attachment{}
-	var id int64
-
-	err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan attachment: %v", err)
-	}
-
-	// Set the ID using string conversion to maintain compatibility
-	attachment.ID = fmt.Sprintf("%d", id)
-	return attachment, nil
-}
-
 // ScanFeed scans a database row into a Feed model
 func ScanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
 	feed := &models.Feed{}
@@ -192,24 +104,9 @@ func ScanFeed(scanner interfaces.Scannable) (*models.Feed, error) {
 	return feed, nil
 }
 
-// ScanAttachmentsFromRows scans multiple attachment rows
-func ScanAttachmentsFromRows(rows *sql.Rows) ([]*models.Attachment, error) {
-	return ScanRows(rows, ScanAttachment)
-}
-
 // ScanFeedsFromRows scans multiple feed rows
 func ScanFeedsFromRows(rows *sql.Rows) ([]*models.Feed, error) {
 	return ScanRows(rows, ScanFeed)
-}
-
-// ScanAttachmentsIntoMap scans attachments into a map by ID
-func ScanAttachmentsIntoMap(rows *sql.Rows) (map[int64]*models.Attachment, error) {
-	return ScanIntoMap(rows, ScanAttachment, func(attachment *models.Attachment) int64 {
-		// Convert string ID back to int64 for map key
-		id := int64(0)
-		fmt.Sscanf(attachment.ID, "%d", &id)
-		return id
-	})
 }
 
 // ScanFeedsIntoMap scans feeds into a map by ID

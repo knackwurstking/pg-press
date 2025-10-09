@@ -1,22 +1,23 @@
-package services
+package attachments
 
 import (
 	"database/sql"
 	"fmt"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/internal/services/base"
+	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
+	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// Attachments provides database operations for managing attachments with lazy loading.
-type Attachments struct {
-	*BaseService
+type Service struct {
+	*base.BaseService
 }
 
-// NewAttachments creates a new Service instance and initializes the database table.
-func NewAttachments(db *sql.DB) *Attachments {
-	base := NewBaseService(db, "Attachments")
+func NewService(db *sql.DB) *Service {
+	base := base.NewBaseService(db, "Attachments")
 
 	query := `
 		CREATE TABLE IF NOT EXISTS attachments (
@@ -31,23 +32,22 @@ func NewAttachments(db *sql.DB) *Attachments {
 		panic(err)
 	}
 
-	return &Attachments{
+	return &Service{
 		BaseService: base,
 	}
 }
 
-// List retrieves all attachments ordered by ID ascending.
-func (a *Attachments) List() ([]*models.Attachment, error) {
+func (a *Service) List() ([]*models.Attachment, error) {
 	a.LogOperation("Listing attachments")
 
 	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
-	rows, err := a.db.Query(query)
+	rows, err := a.DB.Query(query)
 	if err != nil {
 		return nil, a.HandleSelectError(err, "attachments")
 	}
 	defer rows.Close()
 
-	attachments, err := ScanAttachmentsFromRows(rows)
+	attachments, err := scanAttachmentsFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -56,18 +56,17 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 	return attachments, nil
 }
 
-// Get retrieves a specific attachment by ID.
-func (a *Attachments) Get(id int64) (*models.Attachment, error) {
-	if err := ValidateID(id, "attachment"); err != nil {
+func (a *Service) Get(id int64) (*models.Attachment, error) {
+	if err := validation.ValidateID(id, "attachment"); err != nil {
 		return nil, err
 	}
 
 	a.LogOperation("Getting attachment", id)
 
 	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
-	row := a.db.QueryRow(query, id)
+	row := a.DB.QueryRow(query, id)
 
-	attachment, err := ScanSingleRow(row, ScanAttachment, "attachments")
+	attachment, err := scanner.ScanSingleRow(row, scanAttachment, "attachments")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("attachment with ID %d not found", id))
@@ -78,8 +77,7 @@ func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	return attachment, nil
 }
 
-// GetByIDs retrieves multiple attachments by their IDs in the order specified.
-func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
+func (a *Service) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -101,14 +99,14 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 		strings.Join(placeholders, ","),
 	)
 
-	rows, err := a.db.Query(query, args...)
+	rows, err := a.DB.Query(query, args...)
 	if err != nil {
 		return nil, a.HandleSelectError(err, "attachments")
 	}
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachmentMap, err := ScanAttachmentsIntoMap(rows)
+	attachmentMap, err := scanAttachmentsIntoMap(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +123,8 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	return attachments, nil
 }
 
-// Add creates a new attachment and returns its generated ID.
-func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
-	if err := ValidateAttachment(attachment); err != nil {
+func (a *Service) Add(attachment *models.Attachment) (int64, error) {
+	if err := validateAttachment(attachment); err != nil {
 		return 0, err
 	}
 
@@ -139,7 +136,7 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 	a.LogOperation("Adding attachment", fmt.Sprintf("mime_type: %s, size: %d bytes", attachment.MimeType, len(attachment.Data)))
 
 	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
-	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data)
+	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
 		return 0, a.HandleInsertError(err, "attachments")
 	}
@@ -153,9 +150,8 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 	return id, nil
 }
 
-// Update modifies an existing attachment.
-func (a *Attachments) Update(attachment *models.Attachment) error {
-	if err := ValidateAttachment(attachment); err != nil {
+func (a *Service) Update(attachment *models.Attachment) error {
+	if err := validateAttachment(attachment); err != nil {
 		return err
 	}
 
@@ -170,14 +166,14 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 		return utils.NewValidationError("invalid attachment ID format")
 	}
 
-	if err := ValidateID(id, "attachment"); err != nil {
+	if err := validation.ValidateID(id, "attachment"); err != nil {
 		return err
 	}
 
 	a.LogOperation("Updating attachment", fmt.Sprintf("id: %d", id))
 
 	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
-	result, err := a.db.Exec(query, attachment.MimeType, attachment.Data, id)
+	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
 		return a.HandleUpdateError(err, "attachments")
 	}
@@ -190,16 +186,15 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 	return nil
 }
 
-// Delete deletes an attachment by ID.
-func (a *Attachments) Delete(id int64) error {
-	if err := ValidateID(id, "attachment"); err != nil {
+func (a *Service) Delete(id int64) error {
+	if err := validation.ValidateID(id, "attachment"); err != nil {
 		return err
 	}
 
 	a.LogOperation("Deleting attachment", id)
 
 	query := `DELETE FROM attachments WHERE id = ?`
-	result, err := a.db.Exec(query, id)
+	result, err := a.DB.Exec(query, id)
 	if err != nil {
 		return a.HandleDeleteError(err, "attachments")
 	}

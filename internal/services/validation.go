@@ -3,52 +3,9 @@ package services
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/pkg/constants"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
-
-// ValidateNotNil checks if an entity is nil and returns a validation error if so
-func ValidateNotNil(entity interface{}, entityName string) error {
-	if entity == nil {
-		return utils.NewValidationError(fmt.Sprintf("%s cannot be nil", entityName))
-	}
-	return nil
-}
-
-// ValidateNotEmpty checks if a string value is empty and returns a validation error if so
-func ValidateNotEmpty(value, fieldName string) error {
-	if value == "" {
-		return utils.NewValidationError(fmt.Sprintf("%s cannot be empty", fieldName))
-	}
-	return nil
-}
-
-// ValidatePositive checks if a numeric value is positive and returns a validation error if not
-func ValidatePositive(value int64, fieldName string) error {
-	if value <= 0 {
-		return utils.NewValidationError(fmt.Sprintf("%s must be positive", fieldName))
-	}
-	return nil
-}
-
-// ValidateMinLength checks if a string meets minimum length requirements
-func ValidateMinLength(value, fieldName string, minLength int) error {
-	if len(value) < minLength {
-		return utils.NewValidationError(
-			fmt.Sprintf("%s must be at least %d characters", fieldName, minLength),
-		)
-	}
-	return nil
-}
-
-// ValidateAPIKey performs comprehensive API key validation
-func ValidateAPIKey(apiKey string) error {
-	if err := ValidateNotEmpty(apiKey, "api_key"); err != nil {
-		return err
-	}
-	return ValidateMinLength(apiKey, "api_key", constants.MinAPIKeyLength)
-}
 
 // ValidateUser performs comprehensive user validation
 func ValidateUser(user *models.User) error {
@@ -63,23 +20,6 @@ func ValidateUser(user *models.User) error {
 	return ValidateAPIKey(user.ApiKey)
 }
 
-// ValidateCookie performs comprehensive cookie validation
-func ValidateCookie(cookie *models.Cookie) error {
-	if err := ValidateNotNil(cookie, "cookie"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(cookie.Value, "value"); err != nil {
-		return err
-	}
-
-	if err := ValidateAPIKey(cookie.ApiKey); err != nil {
-		return err
-	}
-
-	return ValidatePositive(cookie.LastLogin, "last_login")
-}
-
 // ValidateNote performs comprehensive note validation
 func ValidateNote(note *models.Note) error {
 	if err := ValidateNotNil(note, "note"); err != nil {
@@ -92,23 +32,6 @@ func ValidateNote(note *models.Note) error {
 
 	if note.Level < 0 {
 		return utils.NewValidationError("level must be non-negative")
-	}
-
-	return nil
-}
-
-// ValidateAttachment performs comprehensive attachment validation
-func ValidateAttachment(attachment *models.Attachment) error {
-	if err := ValidateNotNil(attachment, "attachment"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(attachment.MimeType, "mime_type"); err != nil {
-		return err
-	}
-
-	if len(attachment.Data) == 0 {
-		return utils.NewValidationError("data cannot be empty")
 	}
 
 	return nil
@@ -341,15 +264,7 @@ func ValidateTroubleReport(report *models.TroubleReport) error {
 	return nil
 }
 
-// ValidateID checks if an ID is valid (positive)
-func ValidateID(id int64, entityName string) error {
-	return ValidatePositive(id, fmt.Sprintf("%s_id", entityName))
-}
 
-// ValidateTimestamp checks if a timestamp is valid (positive)
-func ValidateTimestamp(timestamp int64, fieldName string) error {
-	return ValidatePositive(timestamp, fieldName)
-}
 
 // ValidateExistence checks if a value exists in allowed options
 func ValidateExistence(value string, allowedValues []string, fieldName string) error {
