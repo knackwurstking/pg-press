@@ -68,8 +68,9 @@ func (b *BaseHandler) RenderNotFound(c echo.Context, message string) error {
 
 // HandleError processes errors and returns appropriate HTTP responses
 func (b *BaseHandler) HandleError(c echo.Context, err error, context string) error {
+	message := fmt.Sprintf("%s: %v", context, err)
 	if b.Logger != nil {
-		b.Logger.Error("%s: %v", context, err)
+		b.Logger.Error(message)
 	}
 
 	statusCode := utils.GetHTTPStatusCode(err)
@@ -77,7 +78,7 @@ func (b *BaseHandler) HandleError(c echo.Context, err error, context string) err
 		statusCode = http.StatusInternalServerError
 	}
 
-	return b.RenderError(c, statusCode, err.Error())
+	return b.RenderError(c, statusCode, message)
 }
 
 // RedirectTo redirects the user to a specific path

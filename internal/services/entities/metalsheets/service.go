@@ -233,10 +233,6 @@ func (s *Service) GetAvailable() ([]*models.MetalSheet, error) {
 }
 
 func (s *Service) Add(sheet *models.MetalSheet) (int64, error) {
-	if err := validateMetalSheet(sheet); err != nil {
-		return 0, err
-	}
-
 	s.Log.Debug("Adding metal sheet: tool_id: %d, identifier: %s",
 		sheet.ToolID, sheet.Identifier)
 
@@ -272,10 +268,6 @@ func (s *Service) Add(sheet *models.MetalSheet) (int64, error) {
 }
 
 func (s *Service) Update(sheet *models.MetalSheet) error {
-	if err := validateMetalSheet(sheet); err != nil {
-		return err
-	}
-
 	if err := validation.ValidateID(sheet.ID, "metal_sheet"); err != nil {
 		return err
 	}
