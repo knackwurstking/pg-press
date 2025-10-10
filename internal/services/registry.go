@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/services/entities/metalsheets"
 	"github.com/knackwurstking/pgpress/internal/services/entities/modifications"
 	"github.com/knackwurstking/pgpress/internal/services/entities/notes"
+	"github.com/knackwurstking/pgpress/internal/services/entities/presscycles"
 	"github.com/knackwurstking/pgpress/internal/services/entities/users"
 )
 
@@ -22,6 +23,7 @@ type Registry struct {
 	Modifications *modifications.Service
 	MetalSheets   *metalsheets.Service
 	Notes         *notes.Service
+	PressCycles   *presscycles.Service
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -37,6 +39,7 @@ func NewRegistry(db *sql.DB) *Registry {
 		Users:         users.NewService(db),
 		Modifications: modifications.NewService(db),
 		MetalSheets:   metalsheets.NewService(db, notesService),
+		PressCycles:   presscycles.NewService(db),
 
 		Notes: notesService,
 	}

@@ -1,20 +1,29 @@
-package services
+package presscycles
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/services/base"
+	"github.com/knackwurstking/pgpress/internal/services/entities/users"
+	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
+	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type PressCycles struct {
-	*BaseService
+type Service struct {
+	*base.BaseService
 }
 
-func NewPressCycles(db *sql.DB) *PressCycles {
-	base := NewBaseService(db, "Press Cycles")
+// ToolsService defines the interface for tools service methods used by PressCycles
+type ToolsService interface {
+	ListWithNotes() ([]*models.ToolWithNotes, error)
+}
+
+func NewService(db *sql.DB) *Service {
+	baseService := base.NewBaseService(db, "Press Cycles")
 
 	query := `
 		CREATE TABLE IF NOT EXISTS press_cycles (
@@ -33,25 +42,24 @@ func NewPressCycles(db *sql.DB) *PressCycles {
 		CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 	`
 
-	if err := base.CreateTable(query, "press_cycles"); err != nil {
+	if err := baseService.CreateTable(query, "press_cycles"); err != nil {
 		panic(err)
 	}
 
-	return &PressCycles{
-		BaseService: base,
+	return &Service{
+		BaseService: baseService,
 	}
 }
 
 // GetPartialCycles calculates the partial cycles for a given cycle
-func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
+func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := ValidatePressCycle(cycle); err != nil {
-		s.log.Error("Invalid cycle for partial calculation: %v", err)
+		s.Log.Error("Invalid cycle for partial calculation: %v", err)
 		return cycle.TotalCycles
 	}
 
-	s.LogOperation("Calculating partial cycles",
-		fmt.Sprintf("press: %d, tool: %d, position: %s, total: %d",
-			cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles))
+	s.Log.Info("Calculating partial cycles: press: %d, tool: %d, position: %s, total: %d",
+		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles)
 
 	query := `
 		SELECT total_cycles
@@ -62,29 +70,29 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	`
 
 	var previousTotalCycles int64
-	err := s.db.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles).Scan(&previousTotalCycles)
+	err := s.DB.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles).Scan(&previousTotalCycles)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			s.log.Error("Failed to get previous total cycles: %v", err)
+			s.Log.Error("Failed to get previous total cycles: %v", err)
 		}
-		s.LogOperation("No previous cycles found, using total cycles", fmt.Sprintf("total: %d", cycle.TotalCycles))
+		s.Log.Info("No previous cycles found, using total cycles: %d", cycle.TotalCycles)
 		return cycle.TotalCycles
 	}
 
 	partialCycles := cycle.TotalCycles - previousTotalCycles
-	s.LogOperation("Calculated partial cycles", fmt.Sprintf("partial: %d (total: %d - previous: %d)",
-		partialCycles, cycle.TotalCycles, previousTotalCycles))
+	s.Log.Info("Calculated partial cycles: %d (total: %d - previous: %d)",
+		partialCycles, cycle.TotalCycles, previousTotalCycles)
 
 	return partialCycles
 }
 
 // Get retrieves a specific press cycle by its ID.
-func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
-	if err := ValidateID(id, "press_cycle"); err != nil {
+func (p *Service) Get(id int64) (*models.Cycle, error) {
+	if err := validation.ValidateID(id, "press_cycle"); err != nil {
 		return nil, err
 	}
 
-	p.LogOperation("Getting press cycle", id)
+	p.Log.Info("Getting press cycle: %d", id)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -92,8 +100,8 @@ func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
 		WHERE id = ?
 	`
 
-	row := p.db.QueryRow(query, id)
-	cycle, err := ScanSingleRow(row, ScanPressCycle, "press_cycles")
+	row := p.DB.QueryRow(query, id)
+	cycle, err := scanner.ScanSingleRow(row, ScanPressCycle, "press_cycles")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
@@ -106,8 +114,8 @@ func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
 }
 
 // List retrieves all press cycles from the database, ordered by total cycles descending.
-func (p *PressCycles) List() ([]*models.Cycle, error) {
-	p.LogOperation("Listing press cycles")
+func (p *Service) List() ([]*models.Cycle, error) {
+	p.Log.Info("Listing press cycles")
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -115,7 +123,7 @@ func (p *PressCycles) List() ([]*models.Cycle, error) {
 		ORDER BY total_cycles DESC
 	`
 
-	rows, err := p.db.Query(query)
+	rows, err := p.DB.Query(query)
 	if err != nil {
 		return nil, p.HandleSelectError(err, "press_cycles")
 	}
@@ -126,17 +134,17 @@ func (p *PressCycles) List() ([]*models.Cycle, error) {
 		return nil, err
 	}
 
-	p.LogOperation("Listed press cycles", fmt.Sprintf("count: %d", len(cycles)))
+	p.Log.Info("Listed press cycles: count: %d", len(cycles))
 	return cycles, nil
 }
 
 // Add creates a new press cycle entry in the database.
-func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
+func (p *Service) Add(cycle *models.Cycle, user *models.User) (int64, error) {
 	if err := ValidatePressCycle(cycle); err != nil {
 		return 0, err
 	}
 
-	if err := ValidateNotNil(user, "user"); err != nil {
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return 0, err
 	}
 
@@ -144,16 +152,15 @@ func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error)
 		cycle.Date = time.Now()
 	}
 
-	p.LogOperationWithUser("Adding press cycle", createUserInfo(user),
-		fmt.Sprintf("tool: %d, position: %s, press: %d, cycles: %d",
-			cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles))
+	p.Log.Info("Adding press cycle by %s (%d): tool: %d, position: %s, press: %d, cycles: %d",
+		user.Name, user.TelegramID, cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles)
 
 	query := `
 		INSERT INTO press_cycles (press_number, tool_id, tool_position, total_cycles, date, performed_by)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := p.db.Exec(query,
+	result, err := p.DB.Exec(query,
 		cycle.PressNumber,
 		cycle.ToolID,
 		cycle.ToolPosition,
@@ -171,21 +178,21 @@ func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error)
 	}
 
 	cycle.ID = id
-	p.LogOperation("Added press cycle", fmt.Sprintf("id: %d", id))
+	p.Log.Info("Added press cycle: id: %d", id)
 	return id, nil
 }
 
 // Update modifies an existing press cycle entry.
-func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
+func (p *Service) Update(cycle *models.Cycle, user *models.User) error {
 	if err := ValidatePressCycle(cycle); err != nil {
 		return err
 	}
 
-	if err := ValidateID(cycle.ID, "press_cycle"); err != nil {
+	if err := validation.ValidateID(cycle.ID, "press_cycle"); err != nil {
 		return err
 	}
 
-	if err := ValidateNotNil(user, "user"); err != nil {
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return err
 	}
 
@@ -193,7 +200,7 @@ func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 		cycle.Date = time.Now()
 	}
 
-	p.LogOperationWithUser("Updating press cycle", createUserInfo(user), fmt.Sprintf("id: %d", cycle.ID))
+	p.Log.Info("Updating press cycle by %s (%d): id: %d", user.Name, user.TelegramID, cycle.ID)
 
 	query := `
 		UPDATE press_cycles
@@ -201,7 +208,7 @@ func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 		WHERE id = ?
 	`
 
-	result, err := p.db.Exec(query,
+	result, err := p.DB.Exec(query,
 		cycle.TotalCycles,
 		cycle.ToolID,
 		cycle.ToolPosition,
@@ -218,20 +225,20 @@ func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 		return err
 	}
 
-	p.LogOperation("Updated press cycle", fmt.Sprintf("id: %d", cycle.ID))
+	p.Log.Info("Updated press cycle: id: %d", cycle.ID)
 	return nil
 }
 
 // Delete removes a press cycle from the database.
-func (p *PressCycles) Delete(id int64) error {
-	if err := ValidateID(id, "press_cycle"); err != nil {
+func (p *Service) Delete(id int64) error {
+	if err := validation.ValidateID(id, "press_cycle"); err != nil {
 		return err
 	}
 
-	p.LogOperation("Deleting press cycle", id)
+	p.Log.Info("Deleting press cycle: %d", id)
 
 	query := `DELETE FROM press_cycles WHERE id = ?`
-	result, err := p.db.Exec(query, id)
+	result, err := p.DB.Exec(query, id)
 	if err != nil {
 		return p.HandleDeleteError(err, "press_cycles")
 	}
@@ -240,17 +247,17 @@ func (p *PressCycles) Delete(id int64) error {
 		return err
 	}
 
-	p.LogOperation("Deleted press cycle", id)
+	p.Log.Info("Deleted press cycle: %d", id)
 	return nil
 }
 
 // GetPressCyclesForTool gets all press cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
-	if err := ValidateID(toolID, "tool"); err != nil {
+func (s *Service) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
+	if err := validation.ValidateID(toolID, "tool"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Getting press cycles for tool", toolID)
+	s.Log.Info("Getting press cycles for tool: %d", toolID)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -259,7 +266,7 @@ func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, erro
 		ORDER BY date DESC
 	`
 
-	rows, err := s.db.Query(query, toolID)
+	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "press_cycles")
 	}
@@ -270,33 +277,18 @@ func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, erro
 		return nil, err
 	}
 
-	s.LogOperation("Found press cycles for tool", fmt.Sprintf("tool: %d, count: %d", toolID, len(cycles)))
+	s.Log.Info("Found press cycles for tool: %d, count: %d", toolID, len(cycles))
 	return cycles, nil
 }
 
 // GetPressCycles gets all press cycles for a specific press with optional pagination
-func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
+func (s *Service) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
 	if err := ValidatePressNumber(pressNumber); err != nil {
 		return nil, err
 	}
 
-	// Validate pagination if provided
-	if limit != nil || offset != nil {
-		limitVal := 0
-		offsetVal := 0
-		if limit != nil {
-			limitVal = *limit
-		}
-		if offset != nil {
-			offsetVal = *offset
-		}
-		if err := ValidatePagination(limitVal, offsetVal); err != nil {
-			return nil, err
-		}
-	}
-
-	s.LogOperation("Getting press cycles for press",
-		fmt.Sprintf("press: %d, limit: %v, offset: %v", pressNumber, limit, offset))
+	s.Log.Info("Getting press cycles for press: %d, limit: %v, offset: %v",
+		pressNumber, limit, offset)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -305,22 +297,22 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 		ORDER BY total_cycles DESC
 	`
 
-	var args []interface{}
-	args = append(args, pressNumber)
+	var queryArgs []any
+	queryArgs = append(queryArgs, pressNumber)
 
 	if limit != nil {
 		query += " LIMIT ?"
-		args = append(args, *limit)
+		queryArgs = append(queryArgs, *limit)
 	}
 	if offset != nil {
 		if limit == nil {
 			query += " LIMIT -1"
 		}
 		query += " OFFSET ?"
-		args = append(args, *offset)
+		queryArgs = append(queryArgs, *offset)
 	}
 
-	rows, err := s.db.Query(query, args...)
+	rows, err := s.DB.Query(query, queryArgs...)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "press_cycles")
 	}
@@ -331,13 +323,12 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 		return nil, err
 	}
 
-	s.LogOperation("Found press cycles for press",
-		fmt.Sprintf("press: %d, count: %d", pressNumber, len(cycles)))
+	s.Log.Info("Found press cycles for press: %d, count: %d", pressNumber, len(cycles))
 	return cycles, nil
 }
 
 // scanPressCyclesRows scans multiple press cycles from sql.Rows and calculates partial cycles
-func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
+func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
 	cycles, err := ScanPressCyclesFromRows(rows)
 	if err != nil {
 		return nil, err
@@ -348,7 +339,7 @@ func (p *PressCycles) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, erro
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 	}
 
-	p.LogOperation("Scanned and calculated partial cycles", fmt.Sprintf("count: %d", len(cycles)))
+	p.Log.Info("Scanned and calculated partial cycles: count: %d", len(cycles))
 	return cycles, nil
 }
 
@@ -377,20 +368,20 @@ type ToolSummary struct {
 //	    return err
 //	}
 //	// Use cycles, toolsMap, and usersMap for PDF generation, reports, etc.
-func (s *PressCycles) GetCycleSummaryData(pressNumber models.PressNumber, toolsService *Tools, usersService *Users) ([]*models.Cycle, map[int64]*models.Tool, map[int64]*models.User, error) {
+func (s *Service) GetCycleSummaryData(pressNumber models.PressNumber, toolsService ToolsService, usersService *users.Service) ([]*models.Cycle, map[int64]*models.Tool, map[int64]*models.User, error) {
 	if err := ValidatePressNumber(pressNumber); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := ValidateNotNil(toolsService, "tools service"); err != nil {
+	if err := validation.ValidateNotNil(toolsService, "tools service"); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := ValidateNotNil(usersService, "users service"); err != nil {
+	if err := validation.ValidateNotNil(usersService, "users service"); err != nil {
 		return nil, nil, nil, err
 	}
 
-	s.LogOperation("Getting cycle summary data for press", pressNumber)
+	s.Log.Info("Getting cycle summary data for press: %d", pressNumber)
 
 	// Get cycles for this press
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
@@ -421,9 +412,8 @@ func (s *PressCycles) GetCycleSummaryData(pressNumber models.PressNumber, toolsS
 		usersMap[u.TelegramID] = u
 	}
 
-	s.LogOperation("Retrieved cycle summary data for press",
-		fmt.Sprintf("press: %d, cycles: %d, tools: %d, users: %d",
-			pressNumber, len(cycles), len(toolsMap), len(usersMap)))
+	s.Log.Info("Retrieved cycle summary data for press: %d, cycles: %d, tools: %d, users: %d",
+		pressNumber, len(cycles), len(toolsMap), len(usersMap))
 
 	return cycles, toolsMap, usersMap, nil
 }
@@ -435,9 +425,9 @@ func (s *PressCycles) GetCycleSummaryData(pressNumber models.PressNumber, toolsS
 //
 //	totalCycles, totalPartial, activeTools, entries := pressCyclesService.GetCycleSummaryStats(cycles)
 //	fmt.Printf("Total cycles: %d, Active tools: %d, Entries: %d", totalCycles, activeTools, entries)
-func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64, int64, int64) {
+func (s *Service) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64, int64, int64) {
 	if cycles == nil {
-		s.log.Error("Cannot calculate stats from nil cycles data")
+		s.Log.Error("Cannot calculate stats from nil cycles data")
 		return 0, 0, 0, 0
 	}
 
@@ -456,9 +446,8 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64
 	activeToolsCount := int64(len(activeTools))
 	entriesCount := int64(len(cycles))
 
-	s.LogOperation("Calculated cycle summary stats",
-		fmt.Sprintf("total_cycles: %d, active_tools: %d, entries: %d",
-			totalCycles, activeToolsCount, entriesCount))
+	s.Log.Info("Calculated cycle summary stats: total_cycles: %d, active_tools: %d, entries: %d",
+		totalCycles, activeToolsCount, entriesCount)
 
 	return totalCycles, totalPartialCycles, activeToolsCount, entriesCount
 }
@@ -480,12 +469,12 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64
 //	    return err
 //	}
 //	// Use summaries for detailed tool usage reports
-func (s *PressCycles) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*models.Tool) ([]*ToolSummary, error) {
+func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*models.Tool) ([]*ToolSummary, error) {
 	if cycles == nil {
 		return nil, fmt.Errorf("cannot create tool summaries from nil cycles data")
 	}
 
-	s.LogOperation("Creating tool summaries from cycles data")
+	s.Log.Info("Creating tool summaries from cycles data")
 
 	var toolSummaries []*ToolSummary
 
@@ -521,14 +510,13 @@ func (s *PressCycles) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int6
 	// Sort by cycle count and position
 	s.sortToolSummariesByCycles(consolidatedSummaries)
 
-	s.LogOperation("Created tool summaries",
-		fmt.Sprintf("original: %d, consolidated: %d", len(toolSummaries), len(consolidatedSummaries)))
+	s.Log.Info("Created tool summaries: original: %d, consolidated: %d", len(toolSummaries), len(consolidatedSummaries))
 
 	return consolidatedSummaries, nil
 }
 
 // sortToolSummariesChronologically sorts tool summaries by date and position
-func (s *PressCycles) sortToolSummariesChronologically(summaries []*ToolSummary) {
+func (s *Service) sortToolSummariesChronologically(summaries []*ToolSummary) {
 	for i := 0; i < len(summaries)-1; i++ {
 		for j := i + 1; j < len(summaries); j++ {
 			if summaries[i].StartDate.After(summaries[j].StartDate) ||
@@ -541,7 +529,7 @@ func (s *PressCycles) sortToolSummariesChronologically(summaries []*ToolSummary)
 }
 
 // consolidateToolSummaries consolidates consecutive entries for the same tool in the same position
-func (s *PressCycles) consolidateToolSummaries(summaries []*ToolSummary) []*ToolSummary {
+func (s *Service) consolidateToolSummaries(summaries []*ToolSummary) []*ToolSummary {
 	var consolidatedSummaries []*ToolSummary
 	lastToolByPosition := make(map[models.Position]int64)
 	positionIndexMap := make(map[models.Position]int)
@@ -595,7 +583,7 @@ func (s *PressCycles) consolidateToolSummaries(summaries []*ToolSummary) []*Tool
 }
 
 // fixToolSummaryStartDates fixes start dates based on tool changes per position
-func (s *PressCycles) fixToolSummaryStartDates(summaries []*ToolSummary) {
+func (s *Service) fixToolSummaryStartDates(summaries []*ToolSummary) {
 	positionEntries := make(map[models.Position][]*ToolSummary)
 	for _, summary := range summaries {
 		positionEntries[summary.Position] = append(positionEntries[summary.Position], summary)
@@ -627,7 +615,7 @@ func (s *PressCycles) fixToolSummaryStartDates(summaries []*ToolSummary) {
 }
 
 // sortToolSummariesByCycles sorts tool summaries by cycle count and then by position
-func (s *PressCycles) sortToolSummariesByCycles(summaries []*ToolSummary) {
+func (s *Service) sortToolSummariesByCycles(summaries []*ToolSummary) {
 	for i := 0; i < len(summaries)-1; i++ {
 		for j := i + 1; j < len(summaries); j++ {
 			// Primary sort: by cycle count
@@ -644,7 +632,7 @@ func (s *PressCycles) sortToolSummariesByCycles(summaries []*ToolSummary) {
 }
 
 // getPositionOrder returns the sort order for a position
-func (s *PressCycles) getPositionOrder(position models.Position) int {
+func (s *Service) getPositionOrder(position models.Position) int {
 	switch position {
 	case models.PositionTop:
 		return 1
@@ -675,15 +663,15 @@ type OverlappingToolInstance struct {
 }
 
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
-func (s *PressCycles) GetOverlappingTools(toolsService *Tools, usersService *Users) ([]*OverlappingTool, error) {
-	if err := ValidateNotNil(toolsService, "tools service"); err != nil {
+func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *users.Service) ([]*OverlappingTool, error) {
+	if err := validation.ValidateNotNil(toolsService, "tools service"); err != nil {
 		return nil, err
 	}
-	if err := ValidateNotNil(usersService, "users service"); err != nil {
+	if err := validation.ValidateNotNil(usersService, "users service"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Detecting overlapping tools across all presses")
+	s.Log.Info("Detecting overlapping tools across all presses")
 
 	// Valid press numbers
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
@@ -694,13 +682,13 @@ func (s *PressCycles) GetOverlappingTools(toolsService *Tools, usersService *Use
 	for _, press := range validPresses {
 		cycles, toolsMap, _, err := s.GetCycleSummaryData(press, toolsService, usersService)
 		if err != nil {
-			s.LogOperation("Failed to get cycle summary data for press", fmt.Sprintf("press: %d, error: %v", press, err))
+			s.Log.Error("Failed to get cycle summary data for press: %d, error: %v", press, err)
 			continue // Skip this press and continue with others
 		}
 
 		summaries, err := s.GetToolSummaries(cycles, toolsMap)
 		if err != nil {
-			s.LogOperation("Failed to get tool summaries for press", fmt.Sprintf("press: %d, error: %v", press, err))
+			s.Log.Error("Failed to get tool summaries for press: %d, error: %v", press, err)
 			continue // Skip this press and continue with others
 		}
 
@@ -822,17 +810,17 @@ func (s *PressCycles) GetOverlappingTools(toolsService *Tools, usersService *Use
 		}
 	}
 
-	s.LogOperation("Overlapping tools detection completed", fmt.Sprintf("found: %d overlapping tools", len(overlappingTools)))
+	s.Log.Info("Overlapping tools detection completed: found: %d overlapping tools", len(overlappingTools))
 	return overlappingTools, nil
 }
 
 // timePeriodsOverlap checks if two time periods overlap
-func (s *PressCycles) timePeriodsOverlap(start1, end1, start2, end2 time.Time) bool {
+func (s *Service) timePeriodsOverlap(start1, end1, start2, end2 time.Time) bool {
 	return start1.Before(end2) && start2.Before(end1)
 }
 
 // containsInstance checks if an instance is already in the slice
-func (s *PressCycles) containsInstance(instances []*OverlappingToolInstance, target *OverlappingToolInstance) bool {
+func (s *Service) containsInstance(instances []*OverlappingToolInstance, target *OverlappingToolInstance) bool {
 	for _, instance := range instances {
 		if instance.PressNumber == target.PressNumber &&
 			instance.Position == target.Position &&
