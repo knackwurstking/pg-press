@@ -82,6 +82,8 @@ func main() {
 				},
 			},
 
+			toolsCommand(),
+
 			serverCommand(),
 
 			cli.CompletionCommand(),

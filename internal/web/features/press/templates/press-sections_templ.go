@@ -558,7 +558,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-			"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+			"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d&tool_change_mode=true",
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {

@@ -17,6 +17,10 @@ type DialogEditCycleProps struct {
 	InputTotalCycles int64
 	InputPressNumber *models.PressNumber
 	OriginalDate     *time.Time
+
+	// Tool change mode
+	AllowToolChange bool
+	AvailableTools  []*models.Tool
 }
 
 templ DialogEditCycle(props *DialogEditCycleProps) {
@@ -47,8 +51,42 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 		Behavior:              "custom",
 		CustomWindowEventName: "visibilitychange",
 	}) {
-		<!-- Display active tool information -->
-		if props.Tool != nil {
+		<!-- Tool selection or display -->
+		if props.AllowToolChange && len(props.AvailableTools) > 0 {
+			<section class="tool-selection flex flex-col gap-sm">
+				<label for="tool_id">Werkzeug auswählen</label>
+				<select id="tool_id" name="tool_id" required>
+					<option value="" disabled selected?={ props.Tool == nil }>
+						Werkzeug auswählen
+					</option>
+					for _, tool := range props.AvailableTools {
+						<option
+							value={ fmt.Sprintf("%d", tool.ID) }
+							selected?={ props.Tool != nil && props.Tool.ID == tool.ID }
+						>
+							{{
+							pressInfo := "Keine Presse"
+							if tool.Press != nil {
+								pressInfo = fmt.Sprintf("Presse %d", *tool.Press)
+							}
+							regenInfo := ""
+							if tool.Regenerating {
+								regenInfo = " [REGEN]"
+							}
+							}}
+							{ fmt.Sprintf("%s %s %s - %s (%s)%s",
+							                        tool.Format.String(), tool.Code, tool.Type,
+							                        tool.Position.GermanString(), pressInfo, regenInfo) }
+						</option>
+					}
+				</select>
+			</section>
+			<!-- Hidden field to track original tool ID for tool changes -->
+			if props.CycleID > 0 && props.Tool != nil {
+				<input type="hidden" name="original_tool_id" value={ fmt.Sprintf("%d", props.Tool.ID) }/>
+			}
+		} else if props.Tool != nil {
+			<!-- Display active tool information -->
 			<section class="tool-info flex flex-col gap-sm">
 				<label>Aktives Werkzeug</label>
 				<div class="flex flex-col gap-xs">

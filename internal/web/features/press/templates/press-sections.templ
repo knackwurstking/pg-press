@@ -232,7 +232,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 				<button
 					class="icon small ghost"
 					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d&tool_change_mode=true",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 					) }
 					hx-trigger="click"

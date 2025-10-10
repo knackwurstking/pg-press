@@ -2,6 +2,7 @@ package tool
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -22,6 +23,7 @@ type EditToolCycleDialogFormData struct {
 	PressNumber  *models.PressNumber
 	Date         time.Time // OriginalDate form field name "original_date"
 	Regenerating bool
+	ToolID       *int64 // ToolID form field name "tool_id" (for tool change mode)
 }
 
 type Handler struct {
@@ -295,6 +297,9 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 	props := &templates.DialogEditCycleProps{}
 
+	// Check if we're in tool change mode
+	toolChangeMode := c.QueryParam("tool_change_mode") == "true"
+
 	if c.QueryParam("id") != "" {
 		cycleID, err := h.ParseInt64Query(c, "id")
 		if err != nil {
@@ -313,6 +318,61 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 
 		if props.Tool, err = h.DB.Tools.Get(cycle.ToolID); err != nil {
 			return h.HandleError(c, err, "failed to load tool data")
+		}
+
+		// If in tool change mode, load all available tools for this press
+		if toolChangeMode {
+			props.AllowToolChange = true
+
+			// Get all tools
+			allTools, err := h.DB.Tools.ListWithNotes()
+			if err != nil {
+				return h.HandleError(c, err, "failed to load available tools")
+			}
+
+			// Include all tools in the database for selection
+			for _, toolWithNotes := range allTools {
+				tool := toolWithNotes.Tool
+				props.AvailableTools = append(props.AvailableTools, tool)
+			}
+
+			// Sort tools for better user experience
+			// Order: Press number (assigned first, then unassigned), then position, then format/code
+			sort.Slice(props.AvailableTools, func(i, j int) bool {
+				a, b := props.AvailableTools[i], props.AvailableTools[j]
+
+				// Primary sort: tools with press assignment come first
+				aHasPress := a.Press != nil
+				bHasPress := b.Press != nil
+				if aHasPress != bHasPress {
+					return aHasPress // true comes before false
+				}
+
+				// Secondary sort: by press number (if both have press)
+				if aHasPress && bHasPress {
+					if *a.Press != *b.Press {
+						return *a.Press < *b.Press
+					}
+				}
+
+				// Tertiary sort: by position (top, top cassette, bottom)
+				if a.Position != b.Position {
+					return a.Position < b.Position
+				}
+
+				// Quaternary sort: by format (width x height)
+				if a.Format != b.Format {
+					if a.Format.Width != b.Format.Width {
+						return a.Format.Width < b.Format.Width
+					}
+					if a.Format.Height != b.Format.Height {
+						return a.Format.Height < b.Format.Height
+					}
+				}
+
+				// Final sort: by code
+				return a.Code < b.Code
+			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
 		toolID, err := h.ParseInt64Query(c, "tool_id")
@@ -411,9 +471,11 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	if err != nil {
 		return h.HandleError(c, err, "failed to get cycle")
 	}
-	tool, err := h.DB.Tools.Get(cycle.ToolID)
+
+	// Get original tool
+	originalTool, err := h.DB.Tools.Get(cycle.ToolID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool")
+		return h.HandleError(c, err, "failed to get original tool")
 	}
 
 	form, err := h.getCycleFormData(c)
@@ -423,6 +485,20 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 
 	if !models.IsValidPressNumber(form.PressNumber) {
 		return h.RenderBadRequest(c, "press_number must be a valid integer")
+	}
+
+	// Determine which tool to use for the cycle
+	var tool *models.Tool
+	if form.ToolID != nil {
+		// Tool change requested - get the new tool
+		newTool, err := h.DB.Tools.Get(*form.ToolID)
+		if err != nil {
+			return h.HandleError(c, err, "failed to get new tool")
+		}
+		tool = newTool
+	} else {
+		// No tool change - use original tool
+		tool = originalTool
 	}
 
 	// Update the cycle
@@ -454,9 +530,21 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	}
 
 	// Create feed entry
-	title := fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
-	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	var title string
+	var content string
+
+	if form.ToolID != nil {
+		// Tool change occurred
+		title = "Zyklus aktualisiert mit Werkzeugwechsel"
+		content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	} else {
+		// Regular cycle update
+		title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
+		content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	}
+
 	if form.Regenerating {
 		content += "\nRegenerierung abgeschlossen"
 	}
@@ -550,6 +638,15 @@ func (h *Handler) getCycleFormData(c echo.Context) (*EditToolCycleDialogFormData
 	}
 
 	form.Regenerating = c.FormValue("regenerating") != ""
+
+	// Parse tool_id if present (for tool change mode)
+	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
+		toolID, err := strconv.ParseInt(toolIDString, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid tool_id: %v", err)
+		}
+		form.ToolID = &toolID
+	}
 
 	return form, nil
 }

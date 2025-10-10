@@ -86,13 +86,12 @@ templ DialogEditMetalSheetContentPositionTop(props *DialogEditMetalSheetProps) {
 			name="identifier"
 			required
 		>
+			if props.MetalSheet == nil {
+				<option value="" disabled selected>Pressen Typ</option>
+			}
 			<option
 				value="SACMI"
 				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SACMI" {
-					selected
-				}
-				else
-				if props.MetalSheet == nil {
 					selected
 				}
 			>SACMI</option>
