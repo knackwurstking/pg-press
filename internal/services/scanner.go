@@ -92,24 +92,6 @@ func ScanMetalSheetsIntoMap(rows *sql.Rows) (map[int64]*models.MetalSheet, error
 	})
 }
 
-// ScanModification scans a database row into a Modification model
-func ScanModification(scanner interfaces.Scannable) (*models.Modification[any], error) {
-	mod := &models.Modification[any]{}
-	err := scanner.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan modification: %v", err)
-	}
-	return mod, nil
-}
-
-// ScanModificationsFromRows scans multiple modification rows
-func ScanModificationsFromRows(rows *sql.Rows) ([]*models.Modification[any], error) {
-	return ScanRows(rows, ScanModification)
-}
-
 // ScanModificationsIntoMap scans modifications into a map by ID
 func ScanModificationsIntoMap(rows *sql.Rows) (map[int64]*models.Modification[any], error) {
 	return ScanIntoMap(rows, ScanModification, func(mod *models.Modification[any]) int64 {

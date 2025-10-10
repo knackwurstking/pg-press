@@ -1,4 +1,4 @@
-package services
+package modifications
 
 import (
 	"database/sql"
@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/internal/services/base"
+	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
+	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -29,14 +32,14 @@ type ModificationWithUser struct {
 	User         models.User              `json:"user"`
 }
 
-// Modifications handles database operations for modifications
-type Modifications struct {
-	*BaseService
+// Service handles database operations for modifications
+type Service struct {
+	*base.BaseService
 }
 
-// NewModifications creates a new ModificationService instance
-func NewModifications(db *sql.DB) *Modifications {
-	base := NewBaseService(db, "Modifications")
+// NewService creates a new ModificationService instance
+func NewService(db *sql.DB) *Service {
+	base := base.NewBaseService(db, "Modifications")
 
 	query := `
 		CREATE TABLE IF NOT EXISTS modifications (
@@ -58,24 +61,24 @@ func NewModifications(db *sql.DB) *Modifications {
 		panic(err)
 	}
 
-	return &Modifications{
+	return &Service{
 		BaseService: base,
 	}
 }
 
 // Add creates a new modification record
-func (s *Modifications) Add(
+func (s *Service) Add(
 	userID int64, entityType ModificationType, entityID int64, data any,
 ) (*models.Modification[any], error) {
-	if err := ValidateID(userID, "user"); err != nil {
+	if err := validation.ValidateID(userID, "user"); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +86,7 @@ func (s *Modifications) Add(
 		return nil, utils.NewValidationError("modification data cannot be nil")
 	}
 
-	s.LogOperation("Adding modification", fmt.Sprintf("user_id: %d, entity_type: %s, entity_id: %d", userID, entityType, entityID))
+	s.Log.Debug("Adding modification: user_id: %d, entity_type: %s, entity_id: %d", userID, entityType, entityID)
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -96,7 +99,8 @@ func (s *Modifications) Add(
 	`
 
 	now := time.Now()
-	result, err := s.db.Exec(query, userID, string(entityType), entityID, jsonData, now)
+	result, err := s.DB.Exec(query,
+		userID, string(entityType), entityID, jsonData, now)
 	if err != nil {
 		return nil, s.HandleInsertError(err, "modifications")
 	}
@@ -113,17 +117,17 @@ func (s *Modifications) Add(
 		CreatedAt: now,
 	}
 
-	s.LogOperation("Added modification", fmt.Sprintf("id: %d", id))
+	s.Log.Debug("Added modification: id: %d", id)
 	return mod, nil
 }
 
 // Get retrieves a specific modification by ID
-func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
-	if err := ValidateID(id, "modification"); err != nil {
+func (s *Service) Get(id int64) (*models.Modification[any], error) {
+	if err := validation.ValidateID(id, "modification"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Getting modification", id)
+	s.Log.Debug("Getting modification: %v", id)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -131,9 +135,9 @@ func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
 		WHERE id = ?
 	`
 
-	row := s.db.QueryRow(query, id)
+	row := s.DB.QueryRow(query, id)
 
-	mod, err := ScanSingleRow(row, ScanModification, "modifications")
+	mod, err := scanner.ScanSingleRow(row, modificationScanner, "modifications")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
@@ -145,24 +149,18 @@ func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
 }
 
 // List retrieves all modifications for a specific entity
-func (s *Modifications) List(
+func (s *Service) List(
 	entityType ModificationType, entityID int64, limit, offset int,
 ) ([]*models.Modification[any], error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
-	if limit > 0 { // Only validate pagination if limit is specified
-		if err := ValidatePagination(limit, offset); err != nil {
-			return nil, err
-		}
-	}
-
-	s.LogOperation("Listing modifications", fmt.Sprintf("entity_type: %s, entity_id: %d, limit: %d, offset: %d", entityType, entityID, limit, offset))
+	s.Log.Debug("Listing modifications: entity_type: %s, entity_id: %d, limit: %d, offset: %d", entityType, entityID, limit, offset)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -172,39 +170,40 @@ func (s *Modifications) List(
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := s.db.Query(query, string(entityType), entityID, limit, offset)
+	rows, err := s.DB.Query(query, string(entityType), entityID, limit, offset)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "modifications")
 	}
 	defer rows.Close()
 
-	modifications, err := ScanModificationsFromRows(rows)
+	modifications, err := scanModificationsFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Listed modifications", fmt.Sprintf("count: %d", len(modifications)))
+	s.Log.Debug("Listed modifications: count: %d", len(modifications))
 	return modifications, nil
 }
 
 // ListAll retrieves all modifications for a specific entity without pagination
-func (s *Modifications) ListAll(
+func (s *Service) ListAll(
 	entityType ModificationType, entityID int64,
 ) ([]*models.Modification[any], error) {
 	return s.List(entityType, entityID, -1, 0)
 }
 
 // Count returns the total number of modifications for a specific entity
-func (s *Modifications) Count(entityType ModificationType, entityID int64) (int64, error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+func (s *Service) Count(entityType ModificationType, entityID int64) (int64, error) {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return 0, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return 0, err
 	}
 
-	s.LogOperation("Counting modifications", fmt.Sprintf("entity_type: %s, entity_id: %d", entityType, entityID))
+	s.Log.Debug("Counting modifications: entity_type: %s, entity_id: %d",
+		entityType, entityID)
 
 	query := `
 		SELECT COUNT(*)
@@ -213,28 +212,28 @@ func (s *Modifications) Count(entityType ModificationType, entityID int64) (int6
 	`
 
 	var count int64
-	err := s.db.QueryRow(query, string(entityType), entityID).Scan(&count)
+	err := s.DB.QueryRow(query, string(entityType), entityID).Scan(&count)
 	if err != nil {
 		return 0, s.HandleSelectError(err, "modifications")
 	}
 
-	s.LogOperation("Counted modifications", fmt.Sprintf("count: %d", count))
+	s.Log.Debug("Counted modifications: count: %d", count)
 	return count, nil
 }
 
 // GetLatest retrieves the most recent modification for a specific entity
-func (s *Modifications) GetLatest(
+func (s *Service) GetLatest(
 	entityType ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Getting latest modification", fmt.Sprintf("entity_type: %s, entity_id: %d", entityType, entityID))
+	s.Log.Debug("Getting latest modification: entity_type: %s, entity_id: %d", entityType, entityID)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -244,9 +243,9 @@ func (s *Modifications) GetLatest(
 		LIMIT 1
 	`
 
-	row := s.db.QueryRow(query, string(entityType), entityID)
+	row := s.DB.QueryRow(query, string(entityType), entityID)
 
-	mod, err := ScanSingleRow(row, ScanModification, "modifications")
+	mod, err := scanner.ScanSingleRow(row, modificationScanner, "modifications")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
@@ -258,18 +257,18 @@ func (s *Modifications) GetLatest(
 }
 
 // GetOldest retrieves the oldest modification for a specific entity
-func (s *Modifications) GetOldest(
+func (s *Service) GetOldest(
 	entityType ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Getting oldest modification", fmt.Sprintf("entity_type: %s, entity_id: %d", entityType, entityID))
+	s.Log.Debug("Getting oldest modification: entity_type: %s, entity_id: %d", entityType, entityID)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -279,9 +278,10 @@ func (s *Modifications) GetOldest(
 		LIMIT 1
 	`
 
-	row := s.db.QueryRow(query, string(entityType), entityID)
+	row := s.DB.QueryRow(query, string(entityType), entityID)
 
-	mod, err := ScanSingleRow(row, ScanModification, "modifications")
+	mod, err := scanner.ScanSingleRow(
+		row, modificationScanner, "modifications")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError("modification")
@@ -293,15 +293,15 @@ func (s *Modifications) GetOldest(
 }
 
 // Delete removes a specific modification by ID
-func (s *Modifications) Delete(id int64) error {
-	if err := ValidateID(id, "modification"); err != nil {
+func (s *Service) Delete(id int64) error {
+	if err := validation.ValidateID(id, "modification"); err != nil {
 		return err
 	}
 
-	s.LogOperation("Deleting modification", id)
+	s.Log.Debug("Deleting modification: %v", id)
 
 	query := `DELETE FROM modifications WHERE id = ?`
-	result, err := s.db.Exec(query, id)
+	result, err := s.DB.Exec(query, id)
 	if err != nil {
 		return s.HandleDeleteError(err, "modifications")
 	}
@@ -310,24 +310,24 @@ func (s *Modifications) Delete(id int64) error {
 		return err
 	}
 
-	s.LogOperation("Deleted modification", id)
+	s.Log.Debug("Deleted modification: %v", id)
 	return nil
 }
 
 // DeleteAll removes all modifications for a specific entity
-func (s *Modifications) DeleteAll(entityType ModificationType, entityID int64) error {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+func (s *Service) DeleteAll(entityType ModificationType, entityID int64) error {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return err
 	}
 
-	s.log.Info("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.Log.Info("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `DELETE FROM modifications WHERE entity_type = ? AND entity_id = ?`
-	result, err := s.db.Exec(query, string(entityType), entityID)
+	result, err := s.DB.Exec(query, string(entityType), entityID)
 	if err != nil {
 		return s.HandleDeleteError(err, "modifications")
 	}
@@ -337,23 +337,17 @@ func (s *Modifications) DeleteAll(entityType ModificationType, entityID int64) e
 		return err
 	}
 
-	s.log.Info("Successfully deleted %d modifications", rowsAffected)
+	s.Log.Info("Successfully deleted %d modifications", rowsAffected)
 	return nil
 }
 
 // GetByUser retrieves all modifications made by a specific user
-func (s *Modifications) GetByUser(
-	userID int64, limit, offset int,
-) ([]*models.Modification[any], error) {
-	if err := ValidateID(userID, "user"); err != nil {
+func (s *Service) GetByUser(userID int64, limit, offset int) ([]*models.Modification[any], error) {
+	if err := validation.ValidateID(userID, "user"); err != nil {
 		return nil, err
 	}
 
-	if err := ValidatePagination(limit, offset); err != nil {
-		return nil, err
-	}
-
-	s.LogOperation("Getting modifications by user", fmt.Sprintf("user_id: %d, limit: %d, offset: %d", userID, limit, offset))
+	s.Log.Debug("Getting modifications by user: user_id: %d, limit: %d, offset: %d", userID, limit, offset)
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -363,30 +357,30 @@ func (s *Modifications) GetByUser(
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := s.db.Query(query, userID, limit, offset)
+	rows, err := s.DB.Query(query, userID, limit, offset)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "modifications")
 	}
 	defer rows.Close()
 
-	modifications, err := ScanModificationsFromRows(rows)
+	modifications, err := scanModificationsFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Found modifications by user", fmt.Sprintf("count: %d", len(modifications)))
+	s.Log.Debug("Found modifications by user: count: %d", len(modifications))
 	return modifications, nil
 }
 
 // GetByDateRange retrieves modifications within a specific date range
-func (s *Modifications) GetByDateRange(
+func (s *Service) GetByDateRange(
 	entityType ModificationType, entityID int64, from, to time.Time,
 ) ([]*models.Modification[any], error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
@@ -394,9 +388,8 @@ func (s *Modifications) GetByDateRange(
 		return nil, utils.NewValidationError("from date must be before to date")
 	}
 
-	s.LogOperation("Getting modifications by date range",
-		fmt.Sprintf("entity_type: %s, entity_id: %d, from: %s, to: %s",
-			entityType, entityID, from.Format(time.RFC3339), to.Format(time.RFC3339)))
+	s.Log.Debug("Getting modifications by date range: entity_type: %s, entity_id: %d, from: %s, to: %s",
+		entityType, entityID, from.Format(time.RFC3339), to.Format(time.RFC3339))
 
 	query := `
 		SELECT id, user_id, data, created_at
@@ -405,60 +398,60 @@ func (s *Modifications) GetByDateRange(
 		ORDER BY created_at DESC
 	`
 
-	rows, err := s.db.Query(query, string(entityType), entityID, from, to)
+	rows, err := s.DB.Query(query, string(entityType), entityID, from, to)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "modifications")
 	}
 	defer rows.Close()
 
-	modifications, err := ScanModificationsFromRows(rows)
+	modifications, err := scanModificationsFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Found modifications by date range", fmt.Sprintf("count: %d", len(modifications)))
+	s.Log.Debug("Found modifications by date range: count: %d", len(modifications))
 	return modifications, nil
 }
 
 // Helper methods for specific entity types
 
 // AddTroubleReportMod adds a modification for a trouble report
-func (s *Modifications) AddTroubleReportMod(userID, reportID int64, data any) error {
+func (s *Service) AddTroubleReportMod(userID, reportID int64, data any) error {
 	_, err := s.Add(userID, ModificationTypeTroubleReport, reportID, data)
 	return err
 }
 
 // AddMetalSheetMod adds a modification for a metal sheet
-func (s *Modifications) AddMetalSheetMod(userID, sheetID int64, data any) error {
+func (s *Service) AddMetalSheetMod(userID, sheetID int64, data any) error {
 	_, err := s.Add(userID, ModificationTypeMetalSheet, sheetID, data)
 	return err
 }
 
 // AddToolMod adds a modification for a tool
-func (s *Modifications) AddToolMod(userID, toolID int64, data any) error {
+func (s *Service) AddToolMod(userID, toolID int64, data any) error {
 	_, err := s.Add(userID, ModificationTypeTool, toolID, data)
 	return err
 }
 
 // AddPressCycleMod adds a modification for a press cycle
-func (s *Modifications) AddPressCycleMod(userID, cycleID int64, data any) error {
+func (s *Service) AddPressCycleMod(userID, cycleID int64, data any) error {
 	_, err := s.Add(userID, ModificationTypePressCycle, cycleID, data)
 	return err
 }
 
 // AddUserMod adds a modification for a user
-func (s *Modifications) AddUserMod(userID, targetUserID int64, data any) error {
+func (s *Service) AddUserMod(userID, targetUserID int64, data any) error {
 	_, err := s.Add(userID, ModificationTypeUser, targetUserID, data)
 	return err
 }
 
 // GetWithUser retrieves a modification with user information
-func (s *Modifications) GetWithUser(id int64) (*ModificationWithUser, error) {
-	if err := ValidateID(id, "modification"); err != nil {
+func (s *Service) GetWithUser(id int64) (*ModificationWithUser, error) {
+	if err := validation.ValidateID(id, "modification"); err != nil {
 		return nil, err
 	}
 
-	s.LogOperation("Getting modification with user", id)
+	s.Log.Debug("Getting modification with user: %v", id)
 
 	query := `
 		SELECT m.id, m.user_id, m.data, m.created_at, u.user_name
@@ -467,7 +460,7 @@ func (s *Modifications) GetWithUser(id int64) (*ModificationWithUser, error) {
 		WHERE m.id = ?
 	`
 
-	row := s.db.QueryRow(query, id)
+	row := s.DB.QueryRow(query, id)
 
 	modWithUser := &ModificationWithUser{}
 	err := row.Scan(
@@ -489,22 +482,18 @@ func (s *Modifications) GetWithUser(id int64) (*ModificationWithUser, error) {
 }
 
 // ListWithUser retrieves modifications with user information for a specific entity
-func (s *Modifications) ListWithUser(
+func (s *Service) ListWithUser(
 	entityType ModificationType, entityID int64, limit, offset int,
 ) ([]*ModificationWithUser, error) {
-	if err := ValidateModificationType(string(entityType)); err != nil {
+	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
 
-	if err := ValidateID(entityID, "entity"); err != nil {
+	if err := validation.ValidateID(entityID, "entity"); err != nil {
 		return nil, err
 	}
 
-	if err := ValidatePagination(limit, offset); err != nil {
-		return nil, err
-	}
-
-	s.LogOperation("Listing modifications with user", fmt.Sprintf("entity_type: %s, entity_id: %d", entityType, entityID))
+	s.Log.Debug("Listing modifications with user: entity_type: %s, entity_id: %d", entityType, entityID)
 
 	query := `
 		SELECT m.id, m.user_id, m.data, m.created_at, u.user_name
@@ -515,7 +504,7 @@ func (s *Modifications) ListWithUser(
 		LIMIT ? OFFSET ?
 	`
 
-	rows, err := s.db.Query(query, string(entityType), entityID, limit, offset)
+	rows, err := s.DB.Query(query, string(entityType), entityID, limit, offset)
 	if err != nil {
 		return nil, s.HandleSelectError(err, "modifications")
 	}
@@ -542,6 +531,6 @@ func (s *Modifications) ListWithUser(
 		return nil, s.HandleSelectError(err, "modifications")
 	}
 
-	s.LogOperation("Listed modifications with user", fmt.Sprintf("count: %d", len(modifications)))
+	s.Log.Debug("Listed modifications with user: count: %d", len(modifications))
 	return modifications, nil
 }

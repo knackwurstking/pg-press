@@ -67,10 +67,6 @@ func (f *Service) List() ([]*models.Feed, error) {
 }
 
 func (f *Service) ListRange(offset, limit int) ([]*models.Feed, error) {
-	if err := validatePagination(offset, limit); err != nil {
-		return nil, err
-	}
-
 	f.Log.Debug("Listing feeds with pagination: offset: %d, limit: %d", offset, limit)
 
 	query := `SELECT id, title, content, user_id, created_at FROM feeds
@@ -91,10 +87,6 @@ func (f *Service) ListRange(offset, limit int) ([]*models.Feed, error) {
 
 func (f *Service) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
 	if err := validation.ValidateID(userID, "user"); err != nil {
-		return nil, err
-	}
-
-	if err := validatePagination(offset, limit); err != nil {
 		return nil, err
 	}
 

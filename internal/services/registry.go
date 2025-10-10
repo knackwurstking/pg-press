@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/services/entities/cookies"
 	"github.com/knackwurstking/pgpress/internal/services/entities/feeds"
 	"github.com/knackwurstking/pgpress/internal/services/entities/metalsheets"
+	"github.com/knackwurstking/pgpress/internal/services/entities/modifications"
 	"github.com/knackwurstking/pgpress/internal/services/entities/notes"
 	"github.com/knackwurstking/pgpress/internal/services/entities/users"
 )
@@ -14,12 +15,13 @@ import (
 type Registry struct {
 	db *sql.DB
 
-	Attachments *attachments.Service
-	Cookies     *cookies.Service
-	Feeds       *feeds.Service
-	Users       *users.Service
-	MetalSheets *metalsheets.Service
-	Notes       *notes.Service
+	Attachments   *attachments.Service
+	Cookies       *cookies.Service
+	Feeds         *feeds.Service
+	Users         *users.Service
+	Modifications *modifications.Service
+	MetalSheets   *metalsheets.Service
+	Notes         *notes.Service
 }
 
 // New creates a new DB instance with all necessary table handlers initialized.
@@ -28,12 +30,15 @@ func NewRegistry(db *sql.DB) *Registry {
 	notesService := notes.NewService(db)
 
 	return &Registry{
-		db:          db,
-		Attachments: attachments.NewService(db),
-		Cookies:     cookies.NewService(db),
-		Feeds:       feeds.NewService(db),
-		Users:       users.NewService(db),
-		MetalSheets: metalsheets.NewService(db, notesService),
+		db:            db,
+		Attachments:   attachments.NewService(db),
+		Cookies:       cookies.NewService(db),
+		Feeds:         feeds.NewService(db),
+		Users:         users.NewService(db),
+		Modifications: modifications.NewService(db),
+		MetalSheets:   metalsheets.NewService(db, notesService),
+
+		Notes: notesService,
 	}
 }
 

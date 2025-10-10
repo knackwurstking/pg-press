@@ -48,31 +48,6 @@ func ValidateModification(mod *models.Modification[any]) error {
 	return nil
 }
 
-// ValidateModificationType validates modification type strings
-func ValidateModificationType(modType string) error {
-	if err := ValidateNotEmpty(modType, "modification_type"); err != nil {
-		return err
-	}
-
-	validTypes := []string{
-		"trouble_reports",
-		"metal_sheets",
-		"tools",
-		"press_cycles",
-		"users",
-		"notes",
-		"attachments",
-	}
-
-	for _, validType := range validTypes {
-		if modType == validType {
-			return nil
-		}
-	}
-
-	return utils.NewValidationError(fmt.Sprintf("invalid modification type: %s", modType))
-}
-
 // ValidatePagination validates pagination parameters
 func ValidatePagination(limit, offset int) error {
 	if limit < 0 {

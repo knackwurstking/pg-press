@@ -3,7 +3,6 @@ package feeds
 import (
 	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 func validateFeed(feed *models.Feed) error {
@@ -24,17 +23,4 @@ func validateFeed(feed *models.Feed) error {
 	}
 
 	return validation.ValidatePositiveInt64(feed.CreatedAt, "created_at")
-}
-
-func validatePagination(offset, limit int) error {
-	if offset < 0 {
-		return utils.NewValidationError("offset: must be non-negative")
-	}
-	if limit <= 0 {
-		return utils.NewValidationError("limit: must be positive")
-	}
-	if limit > 1000 {
-		return utils.NewValidationError("limit: must not exceed 1000")
-	}
-	return nil
 }
