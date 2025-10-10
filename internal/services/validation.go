@@ -7,23 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// ValidateNote performs comprehensive note validation
-func ValidateNote(note *models.Note) error {
-	if err := ValidateNotNil(note, "note"); err != nil {
-		return err
-	}
-
-	if err := ValidateNotEmpty(note.Content, "content"); err != nil {
-		return err
-	}
-
-	if note.Level < 0 {
-		return utils.NewValidationError("level must be non-negative")
-	}
-
-	return nil
-}
-
 // ValidateTool performs comprehensive tool validation
 func ValidateTool(tool *models.Tool) error {
 	if err := ValidateNotNil(tool, "tool"); err != nil {
@@ -44,44 +27,6 @@ func ValidateTool(tool *models.Tool) error {
 
 	// Format validation would be handled by the model's own validation
 	// since models.Format might not be a pointer type
-
-	return nil
-}
-
-// ValidateMetalSheet performs comprehensive metal sheet validation
-func ValidateMetalSheet(sheet *models.MetalSheet) error {
-	if err := ValidateNotNil(sheet, "metal_sheet"); err != nil {
-		return err
-	}
-
-	if sheet.TileHeight <= 0 {
-		return utils.NewValidationError("tile_height must be positive")
-	}
-
-	if sheet.Value <= 0 {
-		return utils.NewValidationError("value must be positive")
-	}
-
-	if sheet.MarkeHeight <= 0 {
-		return utils.NewValidationError("marke_height must be positive")
-	}
-
-	if sheet.STF <= 0 {
-		return utils.NewValidationError("stf must be positive")
-	}
-
-	if sheet.STFMax <= 0 {
-		return utils.NewValidationError("stf_max must be positive")
-	}
-
-	if err := ValidateID(sheet.ToolID, "tool"); err != nil {
-		return err
-	}
-
-	// Validate machine type identifier
-	if !sheet.Identifier.IsValid() {
-		return utils.NewValidationError("invalid machine type identifier")
-	}
 
 	return nil
 }

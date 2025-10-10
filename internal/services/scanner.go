@@ -9,19 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// ScanNote scans a database row into a Note model
-func ScanNote(scanner interfaces.Scannable) (*models.Note, error) {
-	note := &models.Note{}
-	err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt, &note.Linked)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan note: %v", err)
-	}
-	return note, nil
-}
-
 // ScanNoteWithNullable scans a database row into a Note model with nullable linked field
 func ScanNoteWithNullable(scanner interfaces.Scannable) (*models.Note, error) {
 	note := &models.Note{}
@@ -45,21 +32,9 @@ func ScanNoteWithNullable(scanner interfaces.Scannable) (*models.Note, error) {
 	return note, nil
 }
 
-// ScanNotesFromRows scans multiple note rows
-func ScanNotesFromRows(rows *sql.Rows) ([]*models.Note, error) {
-	return ScanRows(rows, ScanNote)
-}
-
 // ScanNotesFromRowsWithNullable scans multiple note rows with nullable fields
 func ScanNotesFromRowsWithNullable(rows *sql.Rows) ([]*models.Note, error) {
 	return ScanRows(rows, ScanNoteWithNullable)
-}
-
-// ScanNotesIntoMap scans notes into a map by ID
-func ScanNotesIntoMap(rows *sql.Rows) (map[int64]*models.Note, error) {
-	return ScanIntoMap(rows, ScanNote, func(note *models.Note) int64 {
-		return note.ID
-	})
 }
 
 // ScanUsersIntoMap scans users into a map by Telegram ID
@@ -108,33 +83,6 @@ func ScanToolsIntoMap(rows *sql.Rows) (map[int64]*models.Tool, error) {
 	return ScanIntoMap(rows, ScanTool, func(tool *models.Tool) int64 {
 		return tool.ID
 	})
-}
-
-// ScanMetalSheet scans a database row into a MetalSheet model
-func ScanMetalSheet(scanner interfaces.Scannable) (*models.MetalSheet, error) {
-	sheet := &models.MetalSheet{}
-	var identifierStr string
-	var toolID int64
-
-	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
-		&sheet.STF, &sheet.STFMax, &identifierStr, &toolID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
-	}
-
-	// Convert string identifier to MachineType
-	sheet.Identifier = models.MachineType(identifierStr)
-	sheet.ToolID = toolID
-
-	return sheet, nil
-}
-
-// ScanMetalSheetsFromRows scans multiple metal sheet rows
-func ScanMetalSheetsFromRows(rows *sql.Rows) ([]*models.MetalSheet, error) {
-	return ScanRows(rows, ScanMetalSheet)
 }
 
 // ScanMetalSheetsIntoMap scans metal sheets into a map by ID

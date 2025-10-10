@@ -1,20 +1,23 @@
-package services
+package notes
 
 import (
 	"database/sql"
 	"fmt"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/internal/services/base"
+	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
+	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-type Notes struct {
-	*BaseService
+type Service struct {
+	*base.BaseService
 }
 
-func NewNotes(db *sql.DB) *Notes {
-	base := NewBaseService(db, "Notes")
+func NewService(db *sql.DB) *Service {
+	base := base.NewBaseService(db, "Notes")
 
 	query := `
 		CREATE TABLE IF NOT EXISTS notes (
@@ -31,47 +34,47 @@ func NewNotes(db *sql.DB) *Notes {
 		panic(err)
 	}
 
-	return &Notes{
+	return &Service{
 		BaseService: base,
 	}
 }
 
-func (n *Notes) List() ([]*models.Note, error) {
-	n.LogOperation("Listing notes")
+func (n *Service) List() ([]*models.Note, error) {
+	n.Log.Debug("Listing notes")
 
 	query := `
 		SELECT id, level, content, created_at, COALESCE(linked, '') as linked FROM notes;
 	`
 
-	rows, err := n.db.Query(query)
+	rows, err := n.DB.Query(query)
 	if err != nil {
 		return nil, n.HandleSelectError(err, "notes")
 	}
 	defer rows.Close()
 
-	notes, err := ScanNotesFromRows(rows)
+	notes, err := scanNotesFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	n.LogOperation("Listed notes", fmt.Sprintf("count: %d", len(notes)))
+	n.Log.Debug("Listed notes: count: %d", len(notes))
 	return notes, nil
 }
 
-func (n *Notes) Get(id int64) (*models.Note, error) {
-	if err := ValidateID(id, "note"); err != nil {
+func (n *Service) Get(id int64) (*models.Note, error) {
+	if err := validation.ValidateID(id, "note"); err != nil {
 		return nil, err
 	}
 
-	n.LogOperation("Getting note", id)
+	n.Log.Debug("Getting note: %d", id)
 
 	query := `
 		SELECT id, level, content, created_at, COALESCE(linked, '') as linked FROM notes WHERE id = $1;
 	`
 
-	row := n.db.QueryRow(query, id)
+	row := n.DB.QueryRow(query, id)
 
-	note, err := ScanSingleRow(row, ScanNote, "notes")
+	note, err := scanner.ScanSingleRow(row, scanNote, "notes")
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
@@ -82,12 +85,12 @@ func (n *Notes) Get(id int64) (*models.Note, error) {
 	return note, nil
 }
 
-func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Service) GetByIDs(ids []int64) ([]*models.Note, error) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
 
-	n.LogOperation("Getting notes by IDs", fmt.Sprintf("count: %d", len(ids)))
+	n.Log.Debug("Getting notes by IDs: count: %d", len(ids))
 
 	// Build placeholders for the IN clause
 	placeholders := make([]string, len(ids))
@@ -102,14 +105,14 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 		strings.Join(placeholders, ","),
 	)
 
-	rows, err := n.db.Query(query, args...)
+	rows, err := n.DB.Query(query, args...)
 	if err != nil {
 		return nil, n.HandleSelectError(err, "notes")
 	}
 	defer rows.Close()
 
 	// Store notes in a map for efficient lookup
-	noteMap, err := ScanNotesIntoMap(rows)
+	noteMap, err := scanNotesIntoMap(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +125,12 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 		}
 	}
 
-	n.LogOperation("Found notes by IDs", fmt.Sprintf("found: %d", len(notes)))
+	n.Log.Debug("Found notes by IDs: count: %d", len(notes))
 	return notes, nil
 }
 
-func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
-	n.LogOperation("Getting notes for press", press)
+func (n *Service) GetByPress(press models.PressNumber) ([]*models.Note, error) {
+	n.Log.Debug("Getting notes for press: %d", press)
 
 	query := `
 		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
@@ -136,27 +139,27 @@ func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
 	`
 
 	pressLinked := fmt.Sprintf("press_%d", press)
-	rows, err := n.db.Query(query, pressLinked)
+	rows, err := n.DB.Query(query, pressLinked)
 	if err != nil {
 		return nil, n.HandleSelectError(err, "notes by press")
 	}
 	defer rows.Close()
 
-	notes, err := ScanNotesFromRows(rows)
+	notes, err := scanNotesFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	n.LogOperation("Found notes for press", fmt.Sprintf("press: %d, count: %d", press, len(notes)))
+	n.Log.Debug("Found notes for press: press: %d, count: %d", press, len(notes))
 	return notes, nil
 }
 
-func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
-	if err := ValidateID(toolID, "tool"); err != nil {
+func (n *Service) GetByTool(toolID int64) ([]*models.Note, error) {
+	if err := validation.ValidateID(toolID, "tool"); err != nil {
 		return nil, err
 	}
 
-	n.LogOperation("Getting notes for tool", toolID)
+	n.Log.Debug("Getting notes for tool: %d", toolID)
 
 	query := `
 		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
@@ -165,27 +168,27 @@ func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
 	`
 
 	toolLinked := fmt.Sprintf("tool_%d", toolID)
-	rows, err := n.db.Query(query, toolLinked)
+	rows, err := n.DB.Query(query, toolLinked)
 	if err != nil {
 		return nil, n.HandleSelectError(err, "notes by tool")
 	}
 	defer rows.Close()
 
-	notes, err := ScanNotesFromRows(rows)
+	notes, err := scanNotesFromRows(rows)
 	if err != nil {
 		return nil, err
 	}
 
-	n.LogOperation("Found notes for tool", fmt.Sprintf("tool: %d, count: %d", toolID, len(notes)))
+	n.Log.Debug("Found notes for tool: tool: %d, count: %d", toolID, len(notes))
 	return notes, nil
 }
 
-func (n *Notes) Add(note *models.Note) (int64, error) {
-	if err := ValidateNote(note); err != nil {
+func (n *Service) Add(note *models.Note) (int64, error) {
+	if err := validateNote(note); err != nil {
 		return 0, err
 	}
 
-	n.LogOperation("Adding note", fmt.Sprintf("level: %d", note.Level))
+	n.Log.Debug("Adding note: level: %d", note.Level)
 
 	query := `
 		INSERT INTO notes (level, content, linked) VALUES ($1, $2, $3);
@@ -194,7 +197,7 @@ func (n *Notes) Add(note *models.Note) (int64, error) {
 	// Convert empty string to NULL for database storage
 	linkedValue := n.PrepareNullableString(note.Linked)
 
-	result, err := n.db.Exec(query, note.Level, note.Content, linkedValue)
+	result, err := n.DB.Exec(query, note.Level, note.Content, linkedValue)
 	if err != nil {
 		return 0, n.HandleInsertError(err, "notes")
 	}
@@ -204,20 +207,20 @@ func (n *Notes) Add(note *models.Note) (int64, error) {
 		return 0, n.HandleInsertError(err, "notes")
 	}
 
-	n.LogOperation("Added note", fmt.Sprintf("id: %d", id))
+	n.Log.Debug("Added note: id: %d", id)
 	return id, nil
 }
 
-func (n *Notes) Update(note *models.Note) error {
-	if err := ValidateNote(note); err != nil {
+func (n *Service) Update(note *models.Note) error {
+	if err := validateNote(note); err != nil {
 		return err
 	}
 
-	if err := ValidateID(note.ID, "note"); err != nil {
+	if err := validation.ValidateID(note.ID, "note"); err != nil {
 		return err
 	}
 
-	n.LogOperation("Updating note", fmt.Sprintf("id: %d, level: %d", note.ID, note.Level))
+	n.Log.Debug("Updating note: id: %d, level: %d", note.ID, note.Level)
 
 	query := `
 		UPDATE notes SET level = $1, content = $2, linked = $3 WHERE id = $4;
@@ -226,7 +229,7 @@ func (n *Notes) Update(note *models.Note) error {
 	// Convert empty string to NULL for database storage
 	linkedValue := n.PrepareNullableString(note.Linked)
 
-	result, err := n.db.Exec(query, note.Level, note.Content, linkedValue, note.ID)
+	result, err := n.DB.Exec(query, note.Level, note.Content, linkedValue, note.ID)
 	if err != nil {
 		return n.HandleUpdateError(err, "notes")
 	}
@@ -235,26 +238,26 @@ func (n *Notes) Update(note *models.Note) error {
 		return err
 	}
 
-	n.LogOperation("Updated note", fmt.Sprintf("id: %d", note.ID))
+	n.Log.Debug("Updated note: id: %d", note.ID)
 	return nil
 }
 
-func (n *Notes) Delete(id int64, user *models.User) error {
-	if err := ValidateID(id, "note"); err != nil {
+func (n *Service) Delete(id int64, user *models.User) error {
+	if err := validation.ValidateID(id, "note"); err != nil {
 		return err
 	}
 
-	if err := ValidateNotNil(user, "user"); err != nil {
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return err
 	}
 
-	n.LogOperationWithUser("Deleting note", createUserInfo(user), fmt.Sprintf("id: %d", id))
+	n.Log.Info("Deleting note: id: %d: user: %s", id, user)
 
 	query := `
 		DELETE FROM notes WHERE id = $1;
 	`
 
-	result, err := n.db.Exec(query, id)
+	result, err := n.DB.Exec(query, id)
 	if err != nil {
 		return n.HandleDeleteError(err, "notes")
 	}
