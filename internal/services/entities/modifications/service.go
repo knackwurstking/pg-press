@@ -13,6 +13,8 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
+// TODO: Move types "ModificationType", constants and "ModificationWithUser" to models
+
 // ModificationType represents the type of entity being modified
 type ModificationType string
 
