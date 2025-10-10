@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/services/base"
-	"github.com/knackwurstking/pgpress/internal/services/entities/modifications"
 	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
 	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -28,7 +27,7 @@ type AttachmentsService interface {
 
 // ModificationsService defines the interface for modifications service methods
 type ModificationsService interface {
-	Add(userID int64, entityType modifications.ModificationType, entityID int64, data any) (*models.Modification[any], error)
+	Add(userID int64, entityType models.ModificationType, entityID int64, data any) (*models.Modification[any], error)
 }
 
 func NewService(db *sql.DB, a AttachmentsService, m ModificationsService) *Service {
@@ -197,7 +196,9 @@ func (s *Service) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
 		LinkedAttachments: tr.LinkedAttachments,
 		UseMarkdown:       tr.UseMarkdown,
 	}
-	if _, err := s.modifications.Add(u.TelegramID, modifications.ModificationTypeTroubleReport, id, modData); err != nil {
+	if _, err := s.modifications.Add(
+		u.TelegramID, models.ModificationTypeTroubleReport, id, modData,
+	); err != nil {
 		s.Log.Error("Failed to save initial modification for trouble report %d: %v", id, err)
 		// Don't fail the entire operation for modification tracking
 	}
@@ -252,7 +253,13 @@ func (s *Service) Update(tr *models.TroubleReport, u *models.User) error {
 		LinkedAttachments: tr.LinkedAttachments,
 		UseMarkdown:       tr.UseMarkdown,
 	}
-	if _, err := s.modifications.Add(u.TelegramID, modifications.ModificationTypeTroubleReport, tr.ID, modData); err != nil {
+	if _, err := s.modifications.Add(
+		u.TelegramID,
+		models.ModificationTypeTroubleReport,
+
+		tr.ID,
+		modData,
+	); err != nil {
 		s.Log.Error("Failed to save modification for trouble report %d: %v", tr.ID, err)
 		// Don't fail the entire operation for modification tracking
 	}
@@ -329,7 +336,7 @@ func (s *Service) GetWithAttachments(id int64) (*models.TroubleReportWithAttachm
 }
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
-func (s *Service) GetAllWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
+func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
 	s.Log.Info("Getting all trouble reports with attachments")
 
 	// Get all trouble reports

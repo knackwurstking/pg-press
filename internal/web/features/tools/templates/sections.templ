@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -311,7 +310,7 @@ templ sectionToolsFilter(tools []*models.ToolWithNotes) {
 	</div>
 }
 
-templ AdminOverlappingTools(overlappingTools []*services.OverlappingTool) {
+templ AdminOverlappingTools(overlappingTools []*models.OverlappingTool) {
 	<span
 		hx-get={ env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools" }
 		hx-trigger="pageLoaded from:body"

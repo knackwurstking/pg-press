@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
@@ -16,12 +16,12 @@ import (
 
 // BaseHandler provides common functionality for all handlers
 type BaseHandler struct {
-	DB     *database.DB
+	DB     *services.Registry
 	Logger *logger.Logger
 }
 
 // NewBaseHandler creates a new base handler with database and logger
-func NewBaseHandler(db *database.DB, logger *logger.Logger) *BaseHandler {
+func NewBaseHandler(db *services.Registry, logger *logger.Logger) *BaseHandler {
 	return &BaseHandler{
 		DB:     db,
 		Logger: logger,

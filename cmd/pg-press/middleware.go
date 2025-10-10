@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -133,7 +133,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 	}
 }
 
-func middlewareKeyAuth(db *database.DB) echo.MiddlewareFunc {
+func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: keyAuthSkipper,
 		KeyLookup: "header:" + echo.HeaderAuthorization +
@@ -160,7 +160,7 @@ func keyAuthSkipper(ctx echo.Context) bool {
 	return keyAuthFilesToSkipRegExp.MatchString(url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, error) {
+func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (bool, error) {
 	l := clog("Middleware: Auth Validator")
 	remoteIP := ctx.RealIP()
 
@@ -177,7 +177,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *database.DB) (bool, err
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *database.DB) (*models.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.User, error) {
 	l := clog("Middleware: Cookie Validation")
 
 	remoteIP := ctx.RealIP()

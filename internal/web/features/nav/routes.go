@@ -3,7 +3,7 @@ package nav
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 
@@ -14,7 +14,7 @@ type Routes struct {
 	handler *Handler
 }
 
-func NewRoutes(db *database.DB, ws *wshandlers.FeedHandler) *Routes {
+func NewRoutes(db *services.Registry, ws *wshandlers.FeedHandler) *Routes {
 	return &Routes{
 		handler: NewHandler(db, ws),
 	}

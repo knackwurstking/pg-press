@@ -645,25 +645,10 @@ func (s *Service) getPositionOrder(position models.Position) int {
 	}
 }
 
-// OverlappingTool represents a tool that appears on multiple presses simultaneously
-type OverlappingTool struct {
-	ToolID    int64                      `json:"tool_id"`
-	ToolCode  string                     `json:"tool_code"`
-	Overlaps  []*OverlappingToolInstance `json:"overlaps"`
-	StartDate time.Time                  `json:"start_date"`
-	EndDate   time.Time                  `json:"end_date"`
-}
-
-// OverlappingToolInstance represents one instance of a tool on a specific press
-type OverlappingToolInstance struct {
-	PressNumber models.PressNumber `json:"press_number"`
-	Position    models.Position    `json:"position"`
-	StartDate   time.Time          `json:"start_date"`
-	EndDate     time.Time          `json:"end_date"`
-}
-
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
-func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *users.Service) ([]*OverlappingTool, error) {
+func (s *Service) GetOverlappingTools(
+	toolsService ToolsService, usersService *users.Service,
+) ([]*models.OverlappingTool, error) {
 	if err := validation.ValidateNotNil(toolsService, "tools service"); err != nil {
 		return nil, err
 	}
@@ -706,7 +691,7 @@ func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *u
 		}
 	}
 
-	var overlappingTools []*OverlappingTool
+	var overlappingTools []*models.OverlappingTool
 
 	// Check each tool for overlaps across presses
 	for toolID, pressSummaries := range toolGroups {
@@ -722,7 +707,7 @@ func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *u
 		}
 
 		// Check for overlaps between all press pairs
-		var overlaps []*OverlappingToolInstance
+		var overlaps []*models.OverlappingToolInstance
 		overallStartDate := time.Time{}
 		overallEndDate := time.Time{}
 		toolCode := fmt.Sprintf("Tool ID %d", toolID)
@@ -748,13 +733,13 @@ func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *u
 						// Check if time periods overlap
 						if s.timePeriodsOverlap(summary1.StartDate, summary1.EndDate, summary2.StartDate, summary2.EndDate) {
 							// Add both instances if not already added
-							instance1 := &OverlappingToolInstance{
+							instance1 := &models.OverlappingToolInstance{
 								PressNumber: press1,
 								Position:    summary1.Position,
 								StartDate:   summary1.StartDate,
 								EndDate:     summary1.EndDate,
 							}
-							instance2 := &OverlappingToolInstance{
+							instance2 := &models.OverlappingToolInstance{
 								PressNumber: press2,
 								Position:    summary2.Position,
 								StartDate:   summary2.StartDate,
@@ -799,7 +784,7 @@ func (s *Service) GetOverlappingTools(toolsService ToolsService, usersService *u
 				toolCode = fmt.Sprintf("%s (%s)", toolCode, positionsStr)
 			}
 
-			overlappingTool := &OverlappingTool{
+			overlappingTool := &models.OverlappingTool{
 				ToolID:    toolID,
 				ToolCode:  toolCode,
 				Overlaps:  overlaps,
@@ -820,7 +805,9 @@ func (s *Service) timePeriodsOverlap(start1, end1, start2, end2 time.Time) bool 
 }
 
 // containsInstance checks if an instance is already in the slice
-func (s *Service) containsInstance(instances []*OverlappingToolInstance, target *OverlappingToolInstance) bool {
+func (s *Service) containsInstance(
+	instances []*models.OverlappingToolInstance, target *models.OverlappingToolInstance,
+) bool {
 	for _, instance := range instances {
 		if instance.PressNumber == target.PressNumber &&
 			instance.Position == target.Position &&

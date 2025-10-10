@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers/templates"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 
@@ -27,14 +27,14 @@ type FeedHandler struct {
 	register    chan *FeedConnection
 	unregister  chan *FeedConnection
 	broadcast   chan struct{}
-	db          *database.DB
+	db          *services.Registry
 	mu          sync.RWMutex
 
 	log *logger.Logger
 }
 
 // NewFeedHandler creates a new feed notification manager
-func NewFeedHandler(db *database.DB) *FeedHandler {
+func NewFeedHandler(db *services.Registry) *FeedHandler {
 	return &FeedHandler{
 		connections: make(map[*FeedConnection]bool),
 		register:    make(chan *FeedConnection),

@@ -1,7 +1,7 @@
 package nav
 
 import (
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/internal/web/wshandlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -16,7 +16,7 @@ type Handler struct {
 	wsFeedHandler *wshandlers.FeedHandler
 }
 
-func NewHandler(db *database.DB, ws *wshandlers.FeedHandler) *Handler {
+func NewHandler(db *services.Registry, ws *wshandlers.FeedHandler) *Handler {
 	return &Handler{
 		BaseHandler:   handlers.NewBaseHandler(db, logger.NewComponentLogger("Nav")),
 		wsFeedHandler: ws,

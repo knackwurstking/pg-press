@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/pdf"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/press/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -19,7 +19,7 @@ type Handler struct {
 	*handlers.BaseHandler
 }
 
-func NewHandler(db *database.DB) *Handler {
+func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
 		BaseHandler: handlers.NewBaseHandler(
 			db,

@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/troublereports/templates"
@@ -31,7 +30,7 @@ type Handler struct {
 	*handlers.BaseHandler
 }
 
-func NewHandler(db *database.DB) *Handler {
+func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
 		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Trouble Reports")),
 	}
@@ -117,7 +116,11 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 	h.LogDebug("Fetching modifications for trouble report %d", id)
 
 	modifications, err := h.DB.Modifications.ListWithUser(
-		services.ModificationTypeTroubleReport, id, 100, 0)
+		models.ModificationTypeTroubleReport,
+		id,
+		100,
+		0,
+	)
 	if err != nil {
 		return h.HandleError(c, err, "failed to retrieve modifications")
 	}
@@ -282,7 +285,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 
 	// Find the specific modification
 	modifications, err := h.DB.Modifications.ListAll(
-		services.ModificationTypeTroubleReport, id)
+		models.ModificationTypeTroubleReport, id)
 	if err != nil {
 		return h.HandleError(c, err, "failed to retrieve modifications")
 	}

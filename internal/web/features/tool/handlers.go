@@ -7,7 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/tool/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
@@ -28,7 +28,7 @@ type Handler struct {
 	*handlers.BaseHandler
 }
 
-func NewHandler(db *database.DB) *Handler {
+func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
 		BaseHandler: handlers.NewBaseHandler(
 			db,

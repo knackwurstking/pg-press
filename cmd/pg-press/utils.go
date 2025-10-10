@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -22,7 +22,7 @@ func clog(component string) *logger.Logger {
 	return logger.GetComponentLogger(component)
 }
 
-func openDB(customPath string) (*database.DB, error) {
+func openDB(customPath string) (*services.Registry, error) {
 	path := filepath.Join(configPath, databaseFile)
 	log().Debug("Database path: %s", path)
 
@@ -52,7 +52,7 @@ func openDB(customPath string) (*database.DB, error) {
 		return nil, err
 	}
 
-	return database.New(db), nil
+	return services.NewRegistry(db), nil
 }
 
 // createDBPathOption creates a standardized database path CLI option
@@ -68,7 +68,7 @@ func createDBPathOption(cmd *cli.Command, usage string) *string {
 }
 
 // withDBOperation is a helper that handles common database operations
-func withDBOperation(customDBPath *string, operation func(*database.DB) error) error {
+func withDBOperation(customDBPath *string, operation func(*services.Registry) error) error {
 	db, err := openDB(*customDBPath)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func withDBOperation(customDBPath *string, operation func(*database.DB) error) e
 }
 
 // createSimpleCommand creates a CLI command with standardized database access
-func createSimpleCommand(name, usage string, action func(*database.DB) error) cli.Command {
+func createSimpleCommand(name, usage string, action func(*services.Registry) error) cli.Command {
 	return cli.Command{
 		Name:  name,
 		Usage: cli.Usage(usage),

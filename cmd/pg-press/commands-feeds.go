@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 
@@ -54,7 +54,7 @@ func listFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					var feeds []*models.Feed
 
 					var err error
@@ -146,7 +146,7 @@ func removeFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					// Remove by IDs
 					if *idsStr != "" {
 						ids := strings.Split(*idsStr, ",")
@@ -232,7 +232,7 @@ func formatAge(duration time.Duration) string {
 // This function is no longer needed with the simplified feed structure
 // Content is now directly accessible as feed.Content
 
-func removeFeedsByIDs(db *database.DB, ids []string) error {
+func removeFeedsByIDs(db *services.Registry, ids []string) error {
 	var failed []string
 	var removed int
 
@@ -273,7 +273,7 @@ func removeFeedsByIDs(db *database.DB, ids []string) error {
 	return nil
 }
 
-func removeFeedsByDuration(db *database.DB, durationStr string) error {
+func removeFeedsByDuration(db *services.Registry, durationStr string) error {
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
 		// Try parsing as days if direct parsing fails
@@ -302,7 +302,7 @@ func removeFeedsByDuration(db *database.DB, durationStr string) error {
 	return nil
 }
 
-func removeFeedsByDate(db *database.DB, dateStr string) error {
+func removeFeedsByDate(db *services.Registry, dateStr string) error {
 	cutoffTime, err := parseDateTime(dateStr)
 	if err != nil {
 		return fmt.Errorf("invalid date format: %s (use format '2006-01-02' or '2006-01-02 15:04:05')", dateStr)

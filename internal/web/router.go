@@ -5,9 +5,9 @@ import (
 	"embed"
 	"os"
 
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/help"
 
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/web/features/auth"
 	"github.com/knackwurstking/pgpress/internal/web/features/editor"
 	"github.com/knackwurstking/pgpress/internal/web/features/feed"
@@ -33,7 +33,7 @@ var (
 	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
 )
 
-func Serve(e *echo.Echo, db *database.DB) {
+func Serve(e *echo.Echo, db *services.Registry) {
 	// Static File Server
 	e.StaticFS(serverPathPrefix+"/", echo.MustSubFS(assets, "assets"))
 
@@ -57,7 +57,7 @@ func Serve(e *echo.Echo, db *database.DB) {
 }
 
 // NOTE: If i have more then just this on handler i need to change the return type
-func startWsFeedHandler(db *database.DB) *wshandlers.FeedHandler {
+func startWsFeedHandler(db *services.Registry) *wshandlers.FeedHandler {
 	wsfh := wshandlers.NewFeedHandler(db)
 
 	// Start the feed notification manager in a goroutine

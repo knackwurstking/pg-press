@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/database"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/tools/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
@@ -33,7 +33,7 @@ type Handler struct {
 	userNameMaxLength int
 }
 
-func NewHandler(db *database.DB) *Handler {
+func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
 		BaseHandler: handlers.NewBaseHandler(db,
 			logger.NewComponentLogger("Tools")),

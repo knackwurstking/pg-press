@@ -13,27 +13,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// TODO: Move types "ModificationType", constants and "ModificationWithUser" to models
-
-// ModificationType represents the type of entity being modified
-type ModificationType string
-
-const (
-	ModificationTypeTroubleReport ModificationType = "trouble_reports"
-	ModificationTypeMetalSheet    ModificationType = "metal_sheets"
-	ModificationTypeTool          ModificationType = "tools"
-	ModificationTypePressCycle    ModificationType = "press_cycles"
-	ModificationTypeUser          ModificationType = "users"
-	ModificationTypeNote          ModificationType = "notes"
-	ModificationTypeAttachment    ModificationType = "attachments"
-)
-
-// ModificationWithUser represents a modification with user information
-type ModificationWithUser struct {
-	Modification models.Modification[any] `json:"modification"`
-	User         models.User              `json:"user"`
-}
-
 // Service handles database operations for modifications
 type Service struct {
 	*base.BaseService
@@ -70,7 +49,7 @@ func NewService(db *sql.DB) *Service {
 
 // Add creates a new modification record
 func (s *Service) Add(
-	userID int64, entityType ModificationType, entityID int64, data any,
+	userID int64, entityType models.ModificationType, entityID int64, data any,
 ) (*models.Modification[any], error) {
 	if err := validation.ValidateID(userID, "user"); err != nil {
 		return nil, err
@@ -152,7 +131,7 @@ func (s *Service) Get(id int64) (*models.Modification[any], error) {
 
 // List retrieves all modifications for a specific entity
 func (s *Service) List(
-	entityType ModificationType, entityID int64, limit, offset int,
+	entityType models.ModificationType, entityID int64, limit, offset int,
 ) ([]*models.Modification[any], error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
@@ -189,13 +168,13 @@ func (s *Service) List(
 
 // ListAll retrieves all modifications for a specific entity without pagination
 func (s *Service) ListAll(
-	entityType ModificationType, entityID int64,
+	entityType models.ModificationType, entityID int64,
 ) ([]*models.Modification[any], error) {
 	return s.List(entityType, entityID, -1, 0)
 }
 
 // Count returns the total number of modifications for a specific entity
-func (s *Service) Count(entityType ModificationType, entityID int64) (int64, error) {
+func (s *Service) Count(entityType models.ModificationType, entityID int64) (int64, error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return 0, err
 	}
@@ -225,7 +204,7 @@ func (s *Service) Count(entityType ModificationType, entityID int64) (int64, err
 
 // GetLatest retrieves the most recent modification for a specific entity
 func (s *Service) GetLatest(
-	entityType ModificationType, entityID int64,
+	entityType models.ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
@@ -260,7 +239,7 @@ func (s *Service) GetLatest(
 
 // GetOldest retrieves the oldest modification for a specific entity
 func (s *Service) GetOldest(
-	entityType ModificationType, entityID int64,
+	entityType models.ModificationType, entityID int64,
 ) (*models.Modification[any], error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
@@ -317,7 +296,7 @@ func (s *Service) Delete(id int64) error {
 }
 
 // DeleteAll removes all modifications for a specific entity
-func (s *Service) DeleteAll(entityType ModificationType, entityID int64) error {
+func (s *Service) DeleteAll(entityType models.ModificationType, entityID int64) error {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return err
 	}
@@ -376,7 +355,7 @@ func (s *Service) GetByUser(userID int64, limit, offset int) ([]*models.Modifica
 
 // GetByDateRange retrieves modifications within a specific date range
 func (s *Service) GetByDateRange(
-	entityType ModificationType, entityID int64, from, to time.Time,
+	entityType models.ModificationType, entityID int64, from, to time.Time,
 ) ([]*models.Modification[any], error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
@@ -419,36 +398,36 @@ func (s *Service) GetByDateRange(
 
 // AddTroubleReportMod adds a modification for a trouble report
 func (s *Service) AddTroubleReportMod(userID, reportID int64, data any) error {
-	_, err := s.Add(userID, ModificationTypeTroubleReport, reportID, data)
+	_, err := s.Add(userID, models.ModificationTypeTroubleReport, reportID, data)
 	return err
 }
 
 // AddMetalSheetMod adds a modification for a metal sheet
 func (s *Service) AddMetalSheetMod(userID, sheetID int64, data any) error {
-	_, err := s.Add(userID, ModificationTypeMetalSheet, sheetID, data)
+	_, err := s.Add(userID, models.ModificationTypeMetalSheet, sheetID, data)
 	return err
 }
 
 // AddToolMod adds a modification for a tool
 func (s *Service) AddToolMod(userID, toolID int64, data any) error {
-	_, err := s.Add(userID, ModificationTypeTool, toolID, data)
+	_, err := s.Add(userID, models.ModificationTypeTool, toolID, data)
 	return err
 }
 
 // AddPressCycleMod adds a modification for a press cycle
 func (s *Service) AddPressCycleMod(userID, cycleID int64, data any) error {
-	_, err := s.Add(userID, ModificationTypePressCycle, cycleID, data)
+	_, err := s.Add(userID, models.ModificationTypePressCycle, cycleID, data)
 	return err
 }
 
 // AddUserMod adds a modification for a user
 func (s *Service) AddUserMod(userID, targetUserID int64, data any) error {
-	_, err := s.Add(userID, ModificationTypeUser, targetUserID, data)
+	_, err := s.Add(userID, models.ModificationTypeUser, targetUserID, data)
 	return err
 }
 
 // GetWithUser retrieves a modification with user information
-func (s *Service) GetWithUser(id int64) (*ModificationWithUser, error) {
+func (s *Service) GetWithUser(id int64) (*models.ModificationWithUser, error) {
 	if err := validation.ValidateID(id, "modification"); err != nil {
 		return nil, err
 	}
@@ -464,7 +443,7 @@ func (s *Service) GetWithUser(id int64) (*ModificationWithUser, error) {
 
 	row := s.DB.QueryRow(query, id)
 
-	modWithUser := &ModificationWithUser{}
+	modWithUser := &models.ModificationWithUser{}
 	err := row.Scan(
 		&modWithUser.Modification.ID,
 		&modWithUser.Modification.UserID,
@@ -485,8 +464,8 @@ func (s *Service) GetWithUser(id int64) (*ModificationWithUser, error) {
 
 // ListWithUser retrieves modifications with user information for a specific entity
 func (s *Service) ListWithUser(
-	entityType ModificationType, entityID int64, limit, offset int,
-) ([]*ModificationWithUser, error) {
+	entityType models.ModificationType, entityID int64, limit, offset int,
+) ([]*models.ModificationWithUser, error) {
 	if err := validateModificationType(string(entityType)); err != nil {
 		return nil, err
 	}
@@ -512,9 +491,9 @@ func (s *Service) ListWithUser(
 	}
 	defer rows.Close()
 
-	var modifications []*ModificationWithUser
+	var modifications []*models.ModificationWithUser
 	for rows.Next() {
-		modWithUser := &ModificationWithUser{}
+		modWithUser := &models.ModificationWithUser{}
 		err := rows.Scan(
 			&modWithUser.Modification.ID,
 			&modWithUser.Modification.UserID,

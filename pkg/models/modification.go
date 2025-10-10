@@ -6,6 +6,19 @@ import (
 	"time"
 )
 
+// ModificationType represents the type of entity being modified
+type ModificationType string
+
+const (
+	ModificationTypeTroubleReport ModificationType = "trouble_reports"
+	ModificationTypeMetalSheet    ModificationType = "metal_sheets"
+	ModificationTypeTool          ModificationType = "tools"
+	ModificationTypePressCycle    ModificationType = "press_cycles"
+	ModificationTypeUser          ModificationType = "users"
+	ModificationTypeNote          ModificationType = "notes"
+	ModificationTypeAttachment    ModificationType = "attachments"
+)
+
 // Modification represents a modification in the database
 type Modification[T any] struct {
 	ID        int64     `json:"id"`
@@ -92,4 +105,10 @@ func (m *Modification[T]) Clone() *Modification[T] {
 		Data:      dataCopy,
 		CreatedAt: m.CreatedAt,
 	}
+}
+
+// ModificationWithUser represents a modification with user information
+type ModificationWithUser struct {
+	Modification Modification[any] `json:"modification"`
+	User         User              `json:"user"`
 }

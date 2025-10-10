@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/knackwurstking/pgpress/internal/database"
+	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 	"github.com/labstack/gommon/color"
@@ -13,7 +13,7 @@ import (
 )
 
 func listUserCommand() cli.Command {
-	return createSimpleCommand("list", "List all users", func(db *database.DB) error {
+	return createSimpleCommand("list", "List all users", func(db *services.Registry) error {
 		users, err := db.Users.List()
 		if err != nil {
 			return err
@@ -38,7 +38,7 @@ func showUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					user, err := db.Users.Get(*telegramID)
 					if err != nil {
 						handleNotFoundError(err)
@@ -84,7 +84,7 @@ func addUserCommand() cli.Command {
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					user := models.NewUser(*telegramID, *userName, *apiKey)
 					if _, err := db.Users.Add(user); utils.IsAlreadyExistsError(err) {
 						return fmt.Errorf("user already exists: %d (%s)", *telegramID, *userName)
@@ -105,7 +105,7 @@ func removeUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					return db.Users.Delete(*telegramID)
 				})
 			}
@@ -123,7 +123,7 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *database.DB) error {
+				return withDBOperation(customDBPath, func(db *services.Registry) error {
 					user, err := db.Users.Get(*telegramID)
 					if err != nil {
 						return err
