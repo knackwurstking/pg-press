@@ -25,7 +25,7 @@ run:
 dev:
 	which gow || \
 		( \
-		    echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`'A && \
+		    echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && \
     		exit 1 \
 		)
 	export LOG_LEVEL=DEBUG && \

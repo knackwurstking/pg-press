@@ -70,7 +70,7 @@ func (b *BaseHandler) RenderNotFound(c echo.Context, message string) error {
 func (b *BaseHandler) HandleError(c echo.Context, err error, context string) error {
 	message := fmt.Sprintf("%s: %v", context, err)
 	if b.Logger != nil {
-		b.Logger.Error(message)
+		b.Logger.Error("%s", message)
 	}
 
 	statusCode := utils.GetHTTPStatusCode(err)
