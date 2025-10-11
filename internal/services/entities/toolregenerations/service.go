@@ -61,7 +61,7 @@ func (r *Service) Add(regeneration *models.Regeneration, user *models.User) (*mo
 		return nil, err
 	}
 
-	r.Log.Info("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
+	r.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
 	query := `
@@ -85,7 +85,6 @@ func (r *Service) Add(regeneration *models.Regeneration, user *models.User) (*mo
 		return nil, err
 	}
 
-	r.Log.Info("Added tool regeneration: id: %d", result.ID)
 	return result, nil
 }
 
@@ -103,7 +102,7 @@ func (r *Service) Update(regeneration *models.Regeneration, user *models.User) e
 		return err
 	}
 
-	r.Log.Info("Updating tool regeneration by %s (%d): id: %d", user.Name, user.TelegramID, regeneration.ID)
+	r.Log.Debug("Updating tool regeneration by %s (%d): id: %d", user.Name, user.TelegramID, regeneration.ID)
 
 	query := `
 		UPDATE tool_regenerations
@@ -125,7 +124,6 @@ func (r *Service) Update(regeneration *models.Regeneration, user *models.User) e
 		return err
 	}
 
-	r.Log.Info("Updated tool regeneration: id: %d", regeneration.ID)
 	return nil
 }
 
@@ -135,7 +133,7 @@ func (r *Service) Delete(id int64) error {
 		return err
 	}
 
-	r.Log.Info("Deleting tool regeneration: %d", id)
+	r.Log.Debug("Deleting tool regeneration: %d", id)
 
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	result, err := r.DB.Exec(query, id)
@@ -147,7 +145,6 @@ func (r *Service) Delete(id int64) error {
 		return err
 	}
 
-	r.Log.Info("Deleted tool regeneration: %d", id)
 	return nil
 }
 
@@ -168,7 +165,7 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 	r.Log.Debug("Starting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
 
 	// Update the tool's regeneration status
-	r.Log.Info("Setting tool to regenerating status: tool: %d", toolID)
+	r.Log.Debug("Setting tool to regenerating status: tool: %d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, true, user); err != nil {
 		return nil, fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
@@ -224,7 +221,7 @@ func (r *Service) AbortToolRegeneration(toolID int64, user *models.User) error {
 		return err
 	}
 
-	r.Log.Info("Aborting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
+	r.Log.Debug("Aborting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
 
 	// First, get the last regeneration record to delete it
 	lastRegen, err := r.GetLastRegeneration(toolID)
@@ -232,22 +229,21 @@ func (r *Service) AbortToolRegeneration(toolID int64, user *models.User) error {
 		if !utils.IsNotFoundError(err) {
 			return fmt.Errorf("failed to get last regeneration record: %v", err)
 		}
-		r.Log.Info("No regeneration record found to abort: tool: %d", toolID)
+		r.Log.Debug("No regeneration record found to abort: tool: %d", toolID)
 	} else {
 		// Delete the regeneration record
-		r.Log.Info("Deleting regeneration record: id: %d", lastRegen.ID)
+		r.Log.Debug("Deleting regeneration record: id: %d", lastRegen.ID)
 		if err := r.Delete(lastRegen.ID); err != nil {
 			return fmt.Errorf("failed to delete regeneration record: %v", err)
 		}
 	}
 
 	// Set the tool's regeneration status to false
-	r.Log.Info("Setting tool to non-regenerating status: tool: %d", toolID)
+	r.Log.Debug("Setting tool to non-regenerating status: tool: %d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
 		return fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
-	r.Log.Info("Aborted tool regeneration: tool: %d", toolID)
 	return nil
 }
 
@@ -257,7 +253,7 @@ func (r *Service) GetLastRegeneration(toolID int64) (*models.Regeneration, error
 		return nil, err
 	}
 
-	r.Log.Info("Getting last regeneration for tool: %d", toolID)
+	r.Log.Debug("Getting last regeneration for tool: %d", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -276,7 +272,6 @@ func (r *Service) GetLastRegeneration(toolID int64) (*models.Regeneration, error
 		return nil, err
 	}
 
-	r.Log.Info("Found last regeneration: tool: %d, regen_id: %d", toolID, regen.ID)
 	return regen, nil
 }
 
@@ -286,7 +281,7 @@ func (r *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, 
 		return nil, err
 	}
 
-	r.Log.Info("Getting regeneration history for tool: %d", toolID)
+	r.Log.Debug("Getting regeneration history for tool: %d", toolID)
 
 	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
@@ -306,6 +301,5 @@ func (r *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, 
 		return nil, err
 	}
 
-	r.Log.Info("Found regeneration history: tool: %d, count: %d", toolID, len(regenerations))
 	return regenerations, nil
 }

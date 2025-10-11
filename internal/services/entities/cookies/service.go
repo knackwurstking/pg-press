@@ -121,7 +121,6 @@ func (c *Service) Add(cookie *models.Cookie) error {
 		return c.HandleInsertError(err, "cookies")
 	}
 
-	c.Log.Debug("Successfully added cookie")
 	return nil
 }
 
@@ -146,7 +145,6 @@ func (c *Service) Update(value string, cookie *models.Cookie) error {
 		return err
 	}
 
-	c.Log.Debug("Successfully updated cookie")
 	return nil
 }
 
@@ -167,7 +165,6 @@ func (c *Service) Remove(value string) error {
 		return err
 	}
 
-	c.Log.Debug("Successfully removed cookie")
 	return nil
 }
 
@@ -176,7 +173,7 @@ func (c *Service) RemoveApiKey(apiKey string) error {
 		return err
 	}
 
-	c.Log.Info("Removing cookies by API key")
+	c.Log.Debug("Removing cookies by API key")
 
 	query := `DELETE FROM cookies WHERE api_key = ?`
 	result, err := c.DB.Exec(query, apiKey)
@@ -198,7 +195,7 @@ func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
 		return 0, err
 	}
 
-	c.Log.Info("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
+	c.Log.Debug("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	query := `DELETE FROM cookies WHERE last_login < ?`
 	result, err := c.DB.Exec(query, beforeTimestamp)

@@ -64,7 +64,7 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 		return 0, err
 	}
 
-	t.Log.Info("Adding tool by %s: position: %s, type: %s, code: %s", user.String(), tool.Position, tool.Type, tool.Code)
+	t.Log.Debug("Adding tool by %s: position: %s, type: %s, code: %s", user.String(), tool.Position, tool.Type, tool.Code)
 
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
 		return 0, err
@@ -90,7 +90,6 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
 	}
 
-	t.Log.Info("Added tool: id: %d", id)
 	return id, nil
 }
 
@@ -103,7 +102,7 @@ func (t *Service) AddWithNotes(tool *models.Tool, user *models.User, notes ...*m
 		return nil, err
 	}
 
-	t.Log.Info("Adding tool with notes by %s: notes_count: %d", user.String(), len(notes))
+	t.Log.Debug("Adding tool with notes by %s: notes_count: %d", user.String(), len(notes))
 
 	var createdNotes []*models.Note
 	for _, note := range notes {
@@ -139,7 +138,7 @@ func (t *Service) Delete(id int64, user *models.User) error {
 		return err
 	}
 
-	t.Log.Info("Deleting tool by %s: id: %d", user.String(), id)
+	t.Log.Debug("Deleting tool by %s: id: %d", user.String(), id)
 
 	const deleteQuery = `DELETE FROM tools WHERE id = ?`
 	result, err := t.DB.Exec(deleteQuery, id)
@@ -155,7 +154,7 @@ func (t *Service) Get(id int64) (*models.Tool, error) {
 		return nil, err
 	}
 
-	t.Log.Info("Getting tool: %d", id)
+	t.Log.Debug("Getting tool: %d", id)
 
 	const query = `SELECT id, position, format, type, code, regenerating, press FROM tools WHERE id = ?`
 	row := t.DB.QueryRow(query, id)
@@ -172,7 +171,7 @@ func (t *Service) Get(id int64) (*models.Tool, error) {
 }
 
 func (t *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
-	t.Log.Info("Getting active tools for press: %d", pressNumber)
+	t.Log.Debug("Getting active tools for press: %d", pressNumber)
 
 	const query = `
 		SELECT id, position, format, type, code, regenerating, press
@@ -191,7 +190,6 @@ func (t *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*mode
 		return nil
 	}
 
-	t.Log.Info("Found active tools for press: %d, count: %d", pressNumber, len(tools))
 	return tools
 }
 
@@ -200,7 +198,7 @@ func (t *Service) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, e
 		return nil, fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 	}
 
-	t.Log.Info("Getting tools by press: %v", pressNumber)
+	t.Log.Debug("Getting tools by press: %v", pressNumber)
 
 	const query = `
 		SELECT id, position, format, type, code, regenerating, press
@@ -217,12 +215,11 @@ func (t *Service) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, e
 		return nil, err
 	}
 
-	t.Log.Info("Found tools by press: %v, count: %d", pressNumber, len(tools))
 	return tools, nil
 }
 
 func (t *Service) GetPressUtilization() ([]models.PressUtilization, error) {
-	t.Log.Info("Getting press utilization")
+	t.Log.Debug("Getting press utilization")
 
 	var utilization []models.PressUtilization
 
@@ -241,7 +238,6 @@ func (t *Service) GetPressUtilization() ([]models.PressUtilization, error) {
 		})
 	}
 
-	t.Log.Info("Calculated press utilization: presses_checked: %d", len(validPresses))
 	return utilization, nil
 }
 
@@ -250,7 +246,7 @@ func (t *Service) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 		return nil, err
 	}
 
-	t.Log.Info("Getting tool with notes: %d", id)
+	t.Log.Debug("Getting tool with notes: %d", id)
 
 	tool, err := t.Get(id)
 	if err != nil {
@@ -262,12 +258,11 @@ func (t *Service) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
 		return nil, fmt.Errorf("failed to load notes for tool")
 	}
 
-	t.Log.Info("Found tool with notes: id: %d, notes_count: %d", id, len(notes))
 	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
 }
 
 func (t *Service) List() ([]*models.Tool, error) {
-	t.Log.Info("Listing tools")
+	t.Log.Debug("Listing tools")
 
 	const query = `
 		SELECT
@@ -288,12 +283,11 @@ func (t *Service) List() ([]*models.Tool, error) {
 		return nil, err
 	}
 
-	t.Log.Info("Listed tools: count: %d", len(tools))
 	return tools, nil
 }
 
 func (t *Service) ListWithNotes() ([]*models.ToolWithNotes, error) {
-	t.Log.Info("Listing tools with notes")
+	t.Log.Debug("Listing tools with notes")
 
 	tools, err := t.List()
 	if err != nil {
@@ -309,7 +303,6 @@ func (t *Service) ListWithNotes() ([]*models.ToolWithNotes, error) {
 		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
 	}
 
-	t.Log.Info("Listed tools with notes: count: %d", len(result))
 	return result, nil
 }
 
@@ -326,7 +319,7 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 		return err
 	}
 
-	t.Log.Info("Updating tool by %s: id: %d", user.String(), tool.ID)
+	t.Log.Debug("Updating tool by %s: id: %d", user.String(), tool.ID)
 
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
 		return err
@@ -360,7 +353,6 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 		return err
 	}
 
-	t.Log.Info("Updated tool: id: %d", tool.ID)
 	return nil
 }
 
@@ -373,7 +365,7 @@ func (t *Service) UpdatePress(toolID int64, press *models.PressNumber, user *mod
 		return err
 	}
 
-	t.Log.Info("Updating tool press by %s: id: %d, press: %v", user.String(), toolID, press)
+	t.Log.Debug("Updating tool press by %s: id: %d, press: %v", user.String(), toolID, press)
 
 	tool, err := t.Get(toolID)
 	if err != nil {
@@ -381,7 +373,6 @@ func (t *Service) UpdatePress(toolID int64, press *models.PressNumber, user *mod
 	}
 
 	if equalPressNumbers(tool.Press, press) {
-		t.Log.Info("Tool press unchanged: id: %d", toolID)
 		return nil
 	}
 
@@ -399,7 +390,6 @@ func (t *Service) UpdatePress(toolID int64, press *models.PressNumber, user *mod
 		return err
 	}
 
-	t.Log.Info("Updated tool press: id: %d, press: %v", toolID, press)
 	return nil
 }
 
@@ -419,11 +409,10 @@ func (t *Service) UpdateRegenerating(toolID int64, regenerating bool, user *mode
 	}
 
 	if currentTool.Regenerating == regenerating {
-		t.Log.Info("Tool regeneration status unchanged by %s: id: %d, regenerating: %v", user.String(), toolID, regenerating)
 		return nil
 	}
 
-	t.Log.Info("Updating tool regenerating status by %s: id: %d, regenerating: %v", user.String(), toolID, regenerating)
+	t.Log.Debug("Updating tool regenerating status by %s: id: %d, regenerating: %v", user.String(), toolID, regenerating)
 
 	const query = `UPDATE tools SET regenerating = ? WHERE id = ?`
 	result, err := t.DB.Exec(query, regenerating, toolID)
@@ -435,7 +424,6 @@ func (t *Service) UpdateRegenerating(toolID int64, regenerating bool, user *mode
 		return err
 	}
 
-	t.Log.Info("Updated tool regenerating status: id: %d, regenerating: %v", toolID, regenerating)
 	return nil
 }
 

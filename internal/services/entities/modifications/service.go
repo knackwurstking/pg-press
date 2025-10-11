@@ -98,7 +98,6 @@ func (s *Service) Add(
 		CreatedAt: now,
 	}
 
-	s.Log.Debug("Added modification: id: %d", id)
 	return mod, nil
 }
 
@@ -162,7 +161,6 @@ func (s *Service) List(
 		return nil, err
 	}
 
-	s.Log.Debug("Listed modifications: count: %d", len(modifications))
 	return modifications, nil
 }
 
@@ -198,7 +196,6 @@ func (s *Service) Count(entityType models.ModificationType, entityID int64) (int
 		return 0, s.HandleSelectError(err, "modifications")
 	}
 
-	s.Log.Debug("Counted modifications: count: %d", count)
 	return count, nil
 }
 
@@ -291,7 +288,6 @@ func (s *Service) Delete(id int64) error {
 		return err
 	}
 
-	s.Log.Debug("Deleted modification: %v", id)
 	return nil
 }
 
@@ -305,7 +301,7 @@ func (s *Service) DeleteAll(entityType models.ModificationType, entityID int64) 
 		return err
 	}
 
-	s.Log.Info("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
+	s.Log.Debug("Deleting all modifications: entity_type=%s, entity_id=%d", entityType, entityID)
 
 	query := `DELETE FROM modifications WHERE entity_type = ? AND entity_id = ?`
 	result, err := s.DB.Exec(query, string(entityType), entityID)
@@ -313,12 +309,11 @@ func (s *Service) DeleteAll(entityType models.ModificationType, entityID int64) 
 		return s.HandleDeleteError(err, "modifications")
 	}
 
-	rowsAffected, err := s.GetRowsAffected(result, "delete all modifications")
+	_, err = s.GetRowsAffected(result, "delete all modifications")
 	if err != nil {
 		return err
 	}
 
-	s.Log.Info("Successfully deleted %d modifications", rowsAffected)
 	return nil
 }
 
@@ -349,7 +344,6 @@ func (s *Service) GetByUser(userID int64, limit, offset int) ([]*models.Modifica
 		return nil, err
 	}
 
-	s.Log.Debug("Found modifications by user: count: %d", len(modifications))
 	return modifications, nil
 }
 
@@ -390,7 +384,6 @@ func (s *Service) GetByDateRange(
 		return nil, err
 	}
 
-	s.Log.Debug("Found modifications by date range: count: %d", len(modifications))
 	return modifications, nil
 }
 
@@ -512,6 +505,5 @@ func (s *Service) ListWithUser(
 		return nil, s.HandleSelectError(err, "modifications")
 	}
 
-	s.Log.Debug("Listed modifications with user: count: %d", len(modifications))
 	return modifications, nil
 }

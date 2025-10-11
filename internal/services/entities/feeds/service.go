@@ -134,7 +134,6 @@ func (f *Service) Add(feedData *models.Feed) error {
 		f.broadcaster.Broadcast()
 	}
 
-	f.Log.Debug("Added feed: id: %d", id)
 	return nil
 }
 
@@ -173,7 +172,7 @@ func (f *Service) DeleteBefore(timestamp int64) (int64, error) {
 		return 0, err
 	}
 
-	f.Log.Info("Deleting feeds before timestamp %d", timestamp)
+	f.Log.Debug("Deleting feeds before timestamp %d", timestamp)
 
 	query := `DELETE FROM feeds WHERE created_at < ?`
 	result, err := f.DB.Exec(query, timestamp)
@@ -186,7 +185,7 @@ func (f *Service) DeleteBefore(timestamp int64) (int64, error) {
 		return 0, err
 	}
 
-	f.Log.Info("Deleted %d feeds before timestamp %d", rowsAffected, timestamp)
+	f.Log.Debug("Deleted %d feeds before timestamp %d", rowsAffected, timestamp)
 
 	return rowsAffected, nil
 }
@@ -229,6 +228,5 @@ func (f *Service) Delete(id int64) error {
 		return err
 	}
 
-	f.Log.Debug("Deleted feed: %d", id)
 	return nil
 }

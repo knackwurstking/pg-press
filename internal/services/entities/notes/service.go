@@ -251,7 +251,7 @@ func (n *Service) Delete(id int64, user *models.User) error {
 		return err
 	}
 
-	n.Log.Info("Deleting note: id: %d: user: %s", id, user)
+	n.Log.Debug("Deleting note: id: %d: user: %s", id, user)
 
 	query := `
 		DELETE FROM notes WHERE id = $1;

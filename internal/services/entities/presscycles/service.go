@@ -58,7 +58,7 @@ func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 		return cycle.TotalCycles
 	}
 
-	s.Log.Info("Calculating partial cycles: press: %d, tool: %d, position: %s, total: %d",
+	s.Log.Debug("Calculating partial cycles: press: %d, tool: %d, position: %s, total: %d",
 		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles)
 
 	query := `
@@ -75,12 +75,12 @@ func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 		if err != sql.ErrNoRows {
 			s.Log.Error("Failed to get previous total cycles: %v", err)
 		}
-		s.Log.Info("No previous cycles found, using total cycles: %d", cycle.TotalCycles)
+		s.Log.Debug("No previous cycles found, using total cycles: %d", cycle.TotalCycles)
 		return cycle.TotalCycles
 	}
 
 	partialCycles := cycle.TotalCycles - previousTotalCycles
-	s.Log.Info("Calculated partial cycles: %d (total: %d - previous: %d)",
+	s.Log.Debug("Calculated partial cycles: %d (total: %d - previous: %d)",
 		partialCycles, cycle.TotalCycles, previousTotalCycles)
 
 	return partialCycles
@@ -92,7 +92,7 @@ func (p *Service) Get(id int64) (*models.Cycle, error) {
 		return nil, err
 	}
 
-	p.Log.Info("Getting press cycle: %d", id)
+	p.Log.Debug("Getting press cycle: %d", id)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -115,7 +115,7 @@ func (p *Service) Get(id int64) (*models.Cycle, error) {
 
 // List retrieves all press cycles from the database, ordered by total cycles descending.
 func (p *Service) List() ([]*models.Cycle, error) {
-	p.Log.Info("Listing press cycles")
+	p.Log.Debug("Listing press cycles")
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -134,7 +134,6 @@ func (p *Service) List() ([]*models.Cycle, error) {
 		return nil, err
 	}
 
-	p.Log.Info("Listed press cycles: count: %d", len(cycles))
 	return cycles, nil
 }
 
@@ -152,7 +151,7 @@ func (p *Service) Add(cycle *models.Cycle, user *models.User) (int64, error) {
 		cycle.Date = time.Now()
 	}
 
-	p.Log.Info("Adding press cycle by %s (%d): tool: %d, position: %s, press: %d, cycles: %d",
+	p.Log.Debug("Adding press cycle by %s (%d): tool: %d, position: %s, press: %d, cycles: %d",
 		user.Name, user.TelegramID, cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles)
 
 	query := `
@@ -178,7 +177,6 @@ func (p *Service) Add(cycle *models.Cycle, user *models.User) (int64, error) {
 	}
 
 	cycle.ID = id
-	p.Log.Info("Added press cycle: id: %d", id)
 	return id, nil
 }
 
@@ -200,7 +198,7 @@ func (p *Service) Update(cycle *models.Cycle, user *models.User) error {
 		cycle.Date = time.Now()
 	}
 
-	p.Log.Info("Updating press cycle by %s (%d): id: %d", user.Name, user.TelegramID, cycle.ID)
+	p.Log.Debug("Updating press cycle by %s (%d): id: %d", user.Name, user.TelegramID, cycle.ID)
 
 	query := `
 		UPDATE press_cycles
@@ -225,7 +223,6 @@ func (p *Service) Update(cycle *models.Cycle, user *models.User) error {
 		return err
 	}
 
-	p.Log.Info("Updated press cycle: id: %d", cycle.ID)
 	return nil
 }
 
@@ -235,7 +232,7 @@ func (p *Service) Delete(id int64) error {
 		return err
 	}
 
-	p.Log.Info("Deleting press cycle: %d", id)
+	p.Log.Debug("Deleting press cycle: %d", id)
 
 	query := `DELETE FROM press_cycles WHERE id = ?`
 	result, err := p.DB.Exec(query, id)
@@ -247,7 +244,6 @@ func (p *Service) Delete(id int64) error {
 		return err
 	}
 
-	p.Log.Info("Deleted press cycle: %d", id)
 	return nil
 }
 
@@ -257,7 +253,7 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
 		return nil, err
 	}
 
-	s.Log.Info("Getting press cycles for tool: %d", toolID)
+	s.Log.Debug("Getting press cycles for tool: %d", toolID)
 
 	query := `
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -277,7 +273,6 @@ func (s *Service) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
 		return nil, err
 	}
 
-	s.Log.Info("Found press cycles for tool: %d, count: %d", toolID, len(cycles))
 	return cycles, nil
 }
 
@@ -287,7 +282,7 @@ func (s *Service) GetPressCycles(pressNumber models.PressNumber, limit *int, off
 		return nil, err
 	}
 
-	s.Log.Info("Getting press cycles for press: %d, limit: %v, offset: %v",
+	s.Log.Debug("Getting press cycles for press: %d, limit: %v, offset: %v",
 		pressNumber, limit, offset)
 
 	query := `
@@ -323,7 +318,6 @@ func (s *Service) GetPressCycles(pressNumber models.PressNumber, limit *int, off
 		return nil, err
 	}
 
-	s.Log.Info("Found press cycles for press: %d, count: %d", pressNumber, len(cycles))
 	return cycles, nil
 }
 
@@ -339,7 +333,6 @@ func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
 		cycle.PartialCycles = p.GetPartialCycles(cycle)
 	}
 
-	p.Log.Info("Scanned and calculated partial cycles: count: %d", len(cycles))
 	return cycles, nil
 }
 
@@ -381,7 +374,7 @@ func (s *Service) GetCycleSummaryData(pressNumber models.PressNumber, toolsServi
 		return nil, nil, nil, err
 	}
 
-	s.Log.Info("Getting cycle summary data for press: %d", pressNumber)
+	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
 
 	// Get cycles for this press
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
@@ -411,9 +404,6 @@ func (s *Service) GetCycleSummaryData(pressNumber models.PressNumber, toolsServi
 	for _, u := range users {
 		usersMap[u.TelegramID] = u
 	}
-
-	s.Log.Info("Retrieved cycle summary data for press: %d, cycles: %d, tools: %d, users: %d",
-		pressNumber, len(cycles), len(toolsMap), len(usersMap))
 
 	return cycles, toolsMap, usersMap, nil
 }
@@ -446,9 +436,6 @@ func (s *Service) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64, in
 	activeToolsCount := int64(len(activeTools))
 	entriesCount := int64(len(cycles))
 
-	s.Log.Info("Calculated cycle summary stats: total_cycles: %d, active_tools: %d, entries: %d",
-		totalCycles, activeToolsCount, entriesCount)
-
 	return totalCycles, totalPartialCycles, activeToolsCount, entriesCount
 }
 
@@ -474,7 +461,7 @@ func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*m
 		return nil, fmt.Errorf("cannot create tool summaries from nil cycles data")
 	}
 
-	s.Log.Info("Creating tool summaries from cycles data")
+	s.Log.Debug("Creating tool summaries from cycles data")
 
 	var toolSummaries []*ToolSummary
 
@@ -509,8 +496,6 @@ func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*m
 
 	// Sort by cycle count and position
 	s.sortToolSummariesByCycles(consolidatedSummaries)
-
-	s.Log.Info("Created tool summaries: original: %d, consolidated: %d", len(toolSummaries), len(consolidatedSummaries))
 
 	return consolidatedSummaries, nil
 }
@@ -656,7 +641,7 @@ func (s *Service) GetOverlappingTools(
 		return nil, err
 	}
 
-	s.Log.Info("Detecting overlapping tools across all presses")
+	s.Log.Debug("Detecting overlapping tools across all presses")
 
 	// Valid press numbers
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
@@ -795,7 +780,6 @@ func (s *Service) GetOverlappingTools(
 		}
 	}
 
-	s.Log.Info("Overlapping tools detection completed: found: %d overlapping tools", len(overlappingTools))
 	return overlappingTools, nil
 }
 

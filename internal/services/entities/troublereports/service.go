@@ -98,12 +98,12 @@ func (s *Service) migrateUseMarkdownColumn() error {
 
 	// Add use_markdown column if it doesn't exist
 	if !hasUseMarkdownColumn {
-		s.Log.Info("Adding use_markdown column to existing trouble_reports table")
+		s.Log.Debug("Adding use_markdown column to existing trouble_reports table")
 		const addColumnQuery = `ALTER TABLE trouble_reports ADD COLUMN use_markdown BOOLEAN DEFAULT 0`
 		if _, err := s.DB.Exec(addColumnQuery); err != nil {
 			return fmt.Errorf("failed to add use_markdown column: %v", err)
 		}
-		s.Log.Info("Successfully added use_markdown column")
+
 	}
 
 	return nil
@@ -111,7 +111,7 @@ func (s *Service) migrateUseMarkdownColumn() error {
 
 // List retrieves all trouble reports ordered by ID descending.
 func (s *Service) List() ([]*models.TroubleReport, error) {
-	s.Log.Info("Listing trouble reports")
+	s.Log.Debug("Listing trouble reports")
 
 	const listQuery = `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := s.DB.Query(listQuery)
@@ -125,7 +125,6 @@ func (s *Service) List() ([]*models.TroubleReport, error) {
 		return nil, err
 	}
 
-	s.Log.Info("Listed trouble reports: count: %d", len(reports))
 	return reports, nil
 }
 
@@ -135,7 +134,7 @@ func (s *Service) Get(id int64) (*models.TroubleReport, error) {
 		return nil, err
 	}
 
-	s.Log.Info("Getting trouble report: %d", id)
+	s.Log.Debug("Getting trouble report: %d", id)
 
 	const getQuery = `SELECT * FROM trouble_reports WHERE id = ?`
 	row := s.DB.QueryRow(getQuery, id)
@@ -148,7 +147,6 @@ func (s *Service) Get(id int64) (*models.TroubleReport, error) {
 		return nil, err
 	}
 
-	s.Log.Info("Retrieved trouble report: id: %d, title: %s", id, report.Title)
 	return report, nil
 }
 
@@ -167,7 +165,7 @@ func (s *Service) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
 		return 0, err
 	}
 
-	s.Log.Info("Adding trouble report by %s: title: %s, attachments: %d", u.String(), tr.Title, len(tr.LinkedAttachments))
+	s.Log.Debug("Adding trouble report by %s: title: %s, attachments: %d", u.String(), tr.Title, len(tr.LinkedAttachments))
 
 	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
@@ -203,7 +201,6 @@ func (s *Service) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
 		// Don't fail the entire operation for modification tracking
 	}
 
-	s.Log.Info("Added trouble report: id: %d", id)
 	return id, nil
 }
 
@@ -227,7 +224,7 @@ func (s *Service) Update(tr *models.TroubleReport, u *models.User) error {
 		return err
 	}
 
-	s.Log.Info("Updating trouble report by %s: id: %d, title: %s, attachments: %d", u.String(), tr.ID, tr.Title, len(tr.LinkedAttachments))
+	s.Log.Debug("Updating trouble report by %s: id: %d, title: %s, attachments: %d", u.String(), tr.ID, tr.Title, len(tr.LinkedAttachments))
 
 	// Marshal linked attachments
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
@@ -264,7 +261,6 @@ func (s *Service) Update(tr *models.TroubleReport, u *models.User) error {
 		// Don't fail the entire operation for modification tracking
 	}
 
-	s.Log.Info("Updated trouble report: id: %d", tr.ID)
 	return nil
 }
 
@@ -285,7 +281,7 @@ func (s *Service) Delete(id int64, user *models.User) error {
 		return err
 	}
 
-	s.Log.Info("Deleting trouble report by %s: id: %d, title: %s", user.String(), id, report.Title)
+	s.Log.Debug("Deleting trouble report by %s: id: %d, title: %s", user.String(), id, report.Title)
 
 	const deleteQuery = `DELETE FROM trouble_reports WHERE id = ?`
 	result, err := s.DB.Exec(deleteQuery, id)
@@ -303,7 +299,6 @@ func (s *Service) Delete(id int64, user *models.User) error {
 	//	s.Log.Error("Failed to delete modifications for trouble report %d: %v", report.ID, err)
 	// }
 
-	s.Log.Info("Deleted trouble report: id: %d", id)
 	return nil
 }
 
@@ -313,7 +308,7 @@ func (s *Service) GetWithAttachments(id int64) (*models.TroubleReportWithAttachm
 		return nil, err
 	}
 
-	s.Log.Info("Getting trouble report with attachments: %d", id)
+	s.Log.Debug("Getting trouble report with attachments: %d", id)
 
 	// Get the trouble report
 	tr, err := s.Get(id)
@@ -327,8 +322,6 @@ func (s *Service) GetWithAttachments(id int64) (*models.TroubleReportWithAttachm
 		return nil, fmt.Errorf("failed to load attachments: %v", err)
 	}
 
-	s.Log.Info("Retrieved trouble report with attachments: id: %d, attachments: %d", id, len(attachments))
-
 	return &models.TroubleReportWithAttachments{
 		TroubleReport:     tr,
 		LoadedAttachments: attachments,
@@ -337,7 +330,7 @@ func (s *Service) GetWithAttachments(id int64) (*models.TroubleReportWithAttachm
 
 // ListWithAttachments retrieves all trouble reports and loads their attachments.
 func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
-	s.Log.Info("Getting all trouble reports with attachments")
+	s.Log.Debug("Getting all trouble reports with attachments")
 
 	// Get all trouble reports
 	reports, err := s.List()
@@ -362,8 +355,6 @@ func (s *Service) ListWithAttachments() ([]*models.TroubleReportWithAttachments,
 		})
 	}
 
-	s.Log.Info("Listed trouble reports with attachments: reports: %d, total_attachments: %d", len(result), totalAttachments)
-
 	return result, nil
 }
 
@@ -374,17 +365,17 @@ func (s *Service) AddWithAttachments(troubleReport *models.TroubleReport, user *
 		return err
 	}
 
-	s.Log.Info("Adding trouble report with attachments by %s: title: %s, attachments: %d", user.String(), troubleReport.Title, len(attachments))
+	s.Log.Debug("Adding trouble report with attachments by %s: title: %s, attachments: %d", user.String(), troubleReport.Title, len(attachments))
 
 	// First, add the attachments and collect their IDs
 	var attachmentIDs []int64
 	for i, attachment := range attachments {
 		if attachment == nil {
-			s.Log.Info("Skipping nil attachment: index: %d", i+1)
+			s.Log.Debug("Skipping nil attachment: index: %d", i+1)
 			continue
 		}
 
-		s.Log.Info("Adding attachment: index: %d, size: %d bytes", i+1, len(attachment.Data))
+		s.Log.Debug("Adding attachment: index: %d, size: %d bytes", i+1, len(attachment.Data))
 
 		id, err := s.attachments.Add(attachment)
 		if err != nil {
@@ -421,7 +412,6 @@ func (s *Service) AddWithAttachments(troubleReport *models.TroubleReport, user *
 
 	troubleReport.ID = id
 
-	s.Log.Info("Added trouble report with attachments: id: %d, attachments: %d", troubleReport.ID, len(attachmentIDs))
 	return nil
 }
 
@@ -435,17 +425,17 @@ func (s *Service) UpdateWithAttachments(id int64, tr *models.TroubleReport, user
 		return err
 	}
 
-	s.Log.Info("Updating trouble report with attachments by %s: id: %d, title: %s, new_attachments: %d", user.String(), id, tr.Title, len(newAttachments))
+	s.Log.Debug("Updating trouble report with attachments by %s: id: %d, title: %s, new_attachments: %d", user.String(), id, tr.Title, len(newAttachments))
 
 	// Add new attachments
 	var newAttachmentIDs []int64
 	for i, attachment := range newAttachments {
 		if attachment == nil {
-			s.Log.Info("Skipping nil attachment: index: %d", i+1)
+			s.Log.Debug("Skipping nil attachment: index: %d", i+1)
 			continue
 		}
 
-		s.Log.Info("Adding new attachment: index: %d, size: %d bytes", i+1, len(attachment.Data))
+		s.Log.Debug("Adding new attachment: index: %d, size: %d bytes", i+1, len(attachment.Data))
 
 		attachmentID, err := s.attachments.Add(attachment)
 		if err != nil {
@@ -468,7 +458,7 @@ func (s *Service) UpdateWithAttachments(id int64, tr *models.TroubleReport, user
 	tr.LinkedAttachments = allAttachmentIDs
 	tr.ID = id
 
-	s.Log.Info("Combined attachments for update: id: %d, existing: %d, new: %d, total: %d",
+	s.Log.Debug("Combined attachments for update: id: %d, existing: %d, new: %d, total: %d",
 		id, originalAttachmentCount, len(newAttachmentIDs), len(allAttachmentIDs))
 
 	// Update the trouble report
@@ -484,7 +474,6 @@ func (s *Service) UpdateWithAttachments(id int64, tr *models.TroubleReport, user
 		return err
 	}
 
-	s.Log.Info("Updated trouble report with attachments: id: %d, new_attachments: %d", tr.ID, len(newAttachmentIDs))
 	return nil
 }
 
@@ -498,7 +487,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 		return nil, err
 	}
 
-	s.Log.Info("Removing trouble report with attachments by %s: id: %d", user.String(), id)
+	s.Log.Debug("Removing trouble report with attachments by %s: id: %d", user.String(), id)
 
 	// Get the trouble report to find its attachments
 	tr, err := s.Get(id)
@@ -506,7 +495,7 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 		return tr, err
 	}
 
-	s.Log.Info("Retrieved trouble report for removal: id: %d, title: %s, attachments: %d", id, tr.Title, len(tr.LinkedAttachments))
+	s.Log.Debug("Retrieved trouble report for removal: id: %d, title: %s, attachments: %d", id, tr.Title, len(tr.LinkedAttachments))
 
 	// Remove the trouble report first
 	if err := s.Delete(id, user); err != nil {
@@ -530,9 +519,6 @@ func (s *Service) RemoveWithAttachments(id int64, user *models.User) (*models.Tr
 			failedAttachmentDeletes, len(tr.LinkedAttachments), tr.ID)
 	}
 
-	s.Log.Info("Removed trouble report with attachments: id: %d, attachments_removed: %d, attachments_failed: %d",
-		tr.ID, successfulAttachmentDeletes, failedAttachmentDeletes)
-
 	return tr, nil
 }
 
@@ -542,7 +528,7 @@ func (s *Service) LoadAttachments(report *models.TroubleReport) ([]*models.Attac
 		return nil, err
 	}
 
-	s.Log.Info("Loading attachments for trouble report: id: %d, attachments: %d", report.ID, len(report.LinkedAttachments))
+	s.Log.Debug("Loading attachments for trouble report: id: %d, attachments: %d", report.ID, len(report.LinkedAttachments))
 
 	// Load attachments individually
 	var attachments []*models.Attachment
@@ -555,6 +541,5 @@ func (s *Service) LoadAttachments(report *models.TroubleReport) ([]*models.Attac
 		attachments = append(attachments, attachment)
 	}
 
-	s.Log.Info("Loaded attachments for trouble report: id: %d, loaded: %d", report.ID, len(attachments))
 	return attachments, nil
 }

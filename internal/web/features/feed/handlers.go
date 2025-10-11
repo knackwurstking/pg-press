@@ -66,7 +66,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	if len(feeds) > 0 {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
-		h.Log.Debug("Updating user %s last feed from %d to %d",
+		h.Log.Info("Updating user %s last feed from %d to %d",
 			user.Name, oldLastFeed, user.LastFeed)
 
 		if err := h.DB.Users.Update(user); err != nil {

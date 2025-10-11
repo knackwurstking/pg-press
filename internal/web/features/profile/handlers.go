@@ -110,9 +110,6 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 		return err
 	}
 
-	h.Log.Info("Successfully updated username for user %d from %s to %s",
-		user.TelegramID, user.Name, userName)
-
 	// Create feed entry
 	feedTitle := "Benutzername geändert"
 	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)

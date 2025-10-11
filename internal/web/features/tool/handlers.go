@@ -58,9 +58,6 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool")
 	}
 
-	h.Log.Debug("Successfully fetched tool %d: Type=%s, Code=%s",
-		id, tool.Type, tool.Code)
-
 	page := templates.Page(&templates.PageProps{
 		User:       user,
 		ToolString: tool.String(),

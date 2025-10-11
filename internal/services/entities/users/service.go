@@ -77,7 +77,7 @@ func (u *Service) Add(user *models.User) (int64, error) {
 		return 0, err
 	}
 
-	u.Log.Info("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
+	u.Log.Debug("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
 
 	// Check if user already exists
 	exists, err := u.CheckExistence(`SELECT COUNT(*) FROM users WHERE telegram_id = ?`, user.TelegramID)
@@ -100,7 +100,7 @@ func (u *Service) Add(user *models.User) (int64, error) {
 }
 
 func (u *Service) Delete(telegramID int64) error {
-	u.Log.Info("Removing user %d", telegramID)
+	u.Log.Debug("Removing user %d", telegramID)
 
 	// Get the user before deleting for validation
 	if _, err := u.Get(telegramID); utils.IsNotFoundError(err) {
@@ -124,7 +124,7 @@ func (u *Service) Update(user *models.User) error {
 	}
 
 	telegramID := user.TelegramID
-	u.Log.Info("Updating user %d: new_name=%s", telegramID, user.Name)
+	u.Log.Debug("Updating user %d: new_name=%s", telegramID, user.Name)
 
 	// Update the user
 	query := `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
