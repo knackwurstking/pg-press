@@ -549,6 +549,16 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool for deletion")
 	}
 
+	// Check if there are any regenerations associated with this cycle
+	hasRegenerations, err := h.DB.ToolRegenerations.HasRegenerationsForCycle(cycleID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to check for regenerations")
+	}
+
+	if hasRegenerations {
+		return h.RenderBadRequest(c, "Cannot delete cycle: it has associated regenerations. Please remove regenerations first.")
+	}
+
 	if err := h.DB.PressCycles.Delete(cycleID); err != nil {
 		return h.HandleError(c, err, "failed to delete press cycle")
 	}

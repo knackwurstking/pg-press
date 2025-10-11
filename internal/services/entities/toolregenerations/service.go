@@ -276,6 +276,24 @@ func (r *Service) GetLastRegeneration(toolID int64) (*models.Regeneration, error
 }
 
 // GetRegenerationHistory gets all regenerations for a tool
+// HasRegenerationsForCycle checks if a cycle has any regenerations associated with it
+func (r *Service) HasRegenerationsForCycle(cycleID int64) (bool, error) {
+	if err := validation.ValidateID(cycleID, "cycle"); err != nil {
+		return false, err
+	}
+
+	r.Log.Debug("Checking if cycle has regenerations: %d", cycleID)
+
+	query := `SELECT COUNT(*) FROM tool_regenerations WHERE cycle_id = ?`
+	var count int
+	err := r.DB.QueryRow(query, cycleID).Scan(&count)
+	if err != nil {
+		return false, r.HandleSelectError(err, "tool_regenerations")
+	}
+
+	return count > 0, nil
+}
+
 func (r *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, error) {
 	if err := validation.ValidateID(toolID, "tool"); err != nil {
 		return nil, err
