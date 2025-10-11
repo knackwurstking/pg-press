@@ -48,6 +48,7 @@ func (t *Service) createTable() error {
 			type TEXT NOT NULL,
 			code TEXT NOT NULL,
 			regenerating INTEGER NOT NULL DEFAULT 0,
+			is_dead INTEGER NOT NULL DEFAULT 0,
 			press INTEGER,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -76,11 +77,11 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	}
 
 	const insertQuery = `
-		INSERT INTO tools (position, format, type, code, regenerating, press)
-		VALUES (?, ?, ?, ?, ?, ?)
+		INSERT INTO tools (position, format, type, code, regenerating, is_dead, press)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := t.DB.Exec(insertQuery, tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.Press)
+	result, err := t.DB.Exec(insertQuery, tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.IsDead, tool.Press)
 	if err != nil {
 		return 0, t.HandleInsertError(err, "tools")
 	}
@@ -156,7 +157,7 @@ func (t *Service) Get(id int64) (*models.Tool, error) {
 
 	t.Log.Debug("Getting tool: %d", id)
 
-	const query = `SELECT id, position, format, type, code, regenerating, press FROM tools WHERE id = ?`
+	const query = `SELECT id, position, format, type, code, regenerating, is_dead, press FROM tools WHERE id = ?`
 	row := t.DB.QueryRow(query, id)
 
 	tool, err := scanner.ScanSingleRow(row, ScanTool, "tools")
@@ -174,8 +175,8 @@ func (t *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*mode
 	t.Log.Debug("Getting active tools for press: %d", pressNumber)
 
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press
-		FROM tools WHERE regenerating = 0 AND press = ?
+		SELECT id, position, format, type, code, regenerating, is_dead, press
+		FROM tools WHERE regenerating = 0 AND is_dead = 0 AND press = ?
 	`
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
@@ -201,8 +202,8 @@ func (t *Service) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, e
 	t.Log.Debug("Getting tools by press: %v", pressNumber)
 
 	const query = `
-		SELECT id, position, format, type, code, regenerating, press
-		FROM tools WHERE press = ? AND regenerating = 0
+		SELECT id, position, format, type, code, regenerating, is_dead, press
+		FROM tools WHERE press = ? AND regenerating = 0 AND is_dead = 0
 	`
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
@@ -266,9 +267,63 @@ func (t *Service) List() ([]*models.Tool, error) {
 
 	const query = `
 		SELECT
-			id, position, format, type, code, regenerating, press
+			id, position, format, type, code, regenerating, is_dead, press
 		FROM
 			tools
+		ORDER BY format ASC, code ASC
+	`
+
+	rows, err := t.DB.Query(query)
+	if err != nil {
+		return nil, t.HandleSelectError(err, "tools")
+	}
+	defer rows.Close()
+
+	tools, err := ScanToolsFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return tools, nil
+}
+
+func (t *Service) ListActiveTools() ([]*models.Tool, error) {
+	t.Log.Debug("Listing active tools")
+
+	const query = `
+		SELECT
+			id, position, format, type, code, regenerating, is_dead, press
+		FROM
+			tools
+		WHERE
+			is_dead = 0
+		ORDER BY format ASC, code ASC
+	`
+
+	rows, err := t.DB.Query(query)
+	if err != nil {
+		return nil, t.HandleSelectError(err, "tools")
+	}
+	defer rows.Close()
+
+	tools, err := ScanToolsFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return tools, nil
+}
+
+func (t *Service) ListDeadTools() ([]*models.Tool, error) {
+	t.Log.Debug("Listing dead tools")
+
+	const query = `
+		SELECT
+			id, position, format, type, code, regenerating, is_dead, press
+		FROM
+			tools
+		WHERE
+			is_dead = 1
 		ORDER BY format ASC, code ASC
 	`
 
@@ -332,7 +387,7 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 
 	const updateQuery = `
 		UPDATE tools
-		SET position = ?, format = ?, type = ?, code = ?, regenerating = ?, press = ?
+		SET position = ?, format = ?, type = ?, code = ?, regenerating = ?, is_dead = ?, press = ?
 		WHERE id = ?
 	`
 
@@ -342,6 +397,7 @@ func (t *Service) Update(tool *models.Tool, user *models.User) error {
 		tool.Type,
 		tool.Code,
 		tool.Regenerating,
+		tool.IsDead,
 		tool.Press,
 		tool.ID,
 	)
@@ -416,6 +472,56 @@ func (t *Service) UpdateRegenerating(toolID int64, regenerating bool, user *mode
 
 	const query = `UPDATE tools SET regenerating = ? WHERE id = ?`
 	result, err := t.DB.Exec(query, regenerating, toolID)
+	if err != nil {
+		return t.HandleUpdateError(err, "tools")
+	}
+
+	if err := t.CheckRowsAffected(result, "tool", toolID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *Service) MarkAsDead(toolID int64, user *models.User) error {
+	if err := validation.ValidateID(toolID, "tool"); err != nil {
+		return err
+	}
+
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	t.Log.Debug("Marking tool as dead by %s: id: %d", user.String(), toolID)
+
+	// Mark as dead and clear press assignment
+	const query = `UPDATE tools SET is_dead = 1, press = NULL WHERE id = ?`
+	result, err := t.DB.Exec(query, toolID)
+	if err != nil {
+		return t.HandleUpdateError(err, "tools")
+	}
+
+	if err := t.CheckRowsAffected(result, "tool", toolID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *Service) ReviveTool(toolID int64, user *models.User) error {
+	if err := validation.ValidateID(toolID, "tool"); err != nil {
+		return err
+	}
+
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	t.Log.Debug("Reviving dead tool by %s: id: %d", user.String(), toolID)
+
+	// Mark as alive (not dead)
+	const query = `UPDATE tools SET is_dead = 0 WHERE id = ?`
+	result, err := t.DB.Exec(query, toolID)
 	if err != nil {
 		return t.HandleUpdateError(err, "tools")
 	}

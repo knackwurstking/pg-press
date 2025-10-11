@@ -18,6 +18,7 @@ const (
 	StatusActive       = Status("active")
 	StatusAvailable    = Status("available")
 	StatusRegenerating = Status("regenerating")
+	StatusDead         = Status("dead")
 
 	ToolCycleWarning int64 = 800000  // Orange
 	ToolCycleError   int64 = 1000000 // Red
@@ -69,6 +70,7 @@ type Tool struct {
 	Type         string       `json:"type"` // Ex: FC, GTC, MASS
 	Code         string       `json:"code"` // Ex: G01, G02, ...
 	Regenerating bool         `json:"regenerating"`
+	IsDead       bool         `json:"is_dead"`
 	Press        *PressNumber `json:"press"` // Press number (0-5) when status is active
 }
 
@@ -84,6 +86,9 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 }
 
 func (t *Tool) Status() Status {
+	if t.IsDead {
+		return StatusDead
+	}
 	if t.Regenerating {
 		return StatusRegenerating
 	}

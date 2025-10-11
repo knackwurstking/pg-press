@@ -89,7 +89,7 @@ templ sectionActions(user *models.User, toolID int64) {
 		<button
 			class="destructive flex gap"
 			hx-delete={ fmt.Sprintf(
-				"%s/htmx/tools/delete?id=%d",
+				"%s/htmx/tools/mark-dead?id=%d",
 				env.ServerPathPrefix, toolID,
 			) }
 			hx-trigger="click"

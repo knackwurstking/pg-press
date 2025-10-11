@@ -188,7 +188,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.Log.Debug("User %s deleting tool %d", user.Name, toolID)
+	h.Log.Info("User %s deleting tool %d", user.Name, toolID)
 
 	// Get tool data before deletion for the feed
 	tool, err := h.DB.Tools.Get(toolID)
@@ -219,6 +219,56 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
+	// Get tool ID from query parameter
+	toolID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c,
+			"invalid or missing id parameter: "+err.Error())
+	}
+
+	// Get user from context for audit trail
+	user, err := h.GetUserFromContext(c)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get user from context")
+	}
+
+	h.Log.Info("User %s marking tool %d as dead", user.Name, toolID)
+
+	// Get tool data before marking as dead for the feed
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool for marking as dead")
+	}
+
+	// Check if tool is already dead
+	if tool.IsDead {
+		return h.RenderBadRequest(c, "tool is already marked as dead")
+	}
+
+	// Mark the tool as dead in database
+	if err := h.DB.Tools.MarkAsDead(toolID, user); err != nil {
+		return h.HandleError(c, err, "failed to mark tool as dead")
+	}
+
+	// Create feed entry
+	title := "Werkzeug als defekt markiert"
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.DB.Feeds.Add(feed); err != nil {
+		h.Log.Error("Failed to create feed for tool marking as dead: %v", err)
+	}
+
+	// Set redirect header to tools page
+	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
+	return c.NoContent(http.StatusOK)
+}
+
 func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 	h.Log.Debug("Rendering press section")
 
@@ -240,9 +290,17 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	h.Log.Debug("Rendering tools section")
 
 	// Get tools from database
-	tools, err := h.DB.Tools.ListWithNotes()
+	allTools, err := h.DB.Tools.ListWithNotes()
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tools from database")
+	}
+
+	// Filter out dead tools
+	var tools []*models.ToolWithNotes
+	for _, tool := range allTools {
+		if !tool.IsDead {
+			tools = append(tools, tool)
+		}
 	}
 
 	sectionTools := templates.SectionTools(tools)
