@@ -49,7 +49,17 @@ templ Page(props *PageProps) {
 					{{ attentionCount := 0 }}
 					{{ infoCount := 0 }}
 					{{
+						outer:
 						for _, note := range props.Notes {
+							l := note.GetLinked()
+							if l.Name == "tool" {
+								for _, t := range props.Tools {
+									if t.ID == l.ID && t.IsDead {
+										continue outer
+									}
+								}
+							}
+
 							switch note.Level {
 							case models.BROKEN:
 								brokenCount++

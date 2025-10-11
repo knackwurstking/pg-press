@@ -252,7 +252,7 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	}
 
 	// Create feed entry
-	title := "Werkzeug als defekt markiert"
+	title := "Werkzeug als Tod markiert"
 	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
 		tool.String(), tool.Type, tool.Code, string(tool.Position))
 	if tool.Press != nil {

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"strconv"
+	"strings"
+	"time"
+)
 
 const (
 	INFO Level = iota
@@ -9,6 +13,11 @@ const (
 )
 
 type Level int
+
+type Linked struct {
+	Name string
+	ID   int64
+}
 
 type Note struct {
 	ID        int64     `json:"id"`
@@ -60,6 +69,8 @@ func (n *Note) IsLinked() bool {
 }
 
 // GetLinked returns the linked entity string
-func (n *Note) GetLinked() string {
-	return n.Linked
+func (n *Note) GetLinked() Linked {
+	s := strings.Split(n.Linked, "_")
+	id, _ := strconv.ParseInt(s[1], 10, 64)
+	return Linked{Name: s[0], ID: id}
 }

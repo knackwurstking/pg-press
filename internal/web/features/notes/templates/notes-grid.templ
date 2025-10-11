@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"strconv"
-	"strings"
 )
 
 templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
@@ -13,6 +11,16 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 		<div class="notes-list grid gap" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
 			for _, note := range notes {
 				{{
+					// Remove notes from dead tools
+					skip := false
+					l := note.GetLinked()
+					for _, t := range tools {
+						if t.ID == l.ID && t.IsDead {
+							skip = true
+						}
+					}
+
+					// Set card color based on the note level
 					filterClass := ""
 					switch note.Level {
 					case models.INFO:
@@ -23,7 +31,10 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 						filterClass = "destructive outline"
 					}
 				}}
-				@NotesCard(note, filterClass, tools)
+				// Render note only for tools not dead
+				if !skip {
+					@NotesCard(note, filterClass, tools)
+				}
 			}
 		</div>
 	} else {
@@ -91,32 +102,32 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 			<div class="card-footer">
 				<small class="text-muted">
 					Verknüpft mit:
-					if strings.HasPrefix(note.Linked, "tool_") {
-						{{ toolIDStr := strings.TrimPrefix(note.Linked, "tool_") }}
-						{{ toolID, _ := strconv.ParseInt(toolIDStr, 10, 64) }}
-						for _, tool := range tools {
-							if tool.ID == toolID {
-								<a
-									href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
-									class="tool-link"
-								>
-									{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
-									if tool.Press != nil {
-										({ fmt.Sprintf("Presse %d", *tool.Press) })
-									}
-								</a>
+					{{ linked := note.GetLinked() }}
+					switch linked.Name {
+						case "tool":
+							for _, tool := range tools {
+								if tool.ID == linked.ID {
+									<a
+										href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
+										class="tool-link"
+									>
+										{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
+										if tool.Press != nil {
+											({ fmt.Sprintf("Presse %d", *tool.Press) })
+										}
+									</a>
+								}
 							}
-						}
-					} else if strings.HasPrefix(note.Linked, "press_") {
-						{{ pressIDStr := strings.TrimPrefix(note.Linked, "press_") }}
-						<a
-							href={ fmt.Sprintf("%s/tools/press/%s", env.ServerPathPrefix, pressIDStr) }
-							class="press-link"
-						>
-							{ fmt.Sprintf("Presse %s", pressIDStr) }
-						</a>
-					} else {
-						<span>{ note.Linked }</span>
+						case "press":
+							<a
+								href={ fmt.Sprintf("%s/tools/press/%d",
+									env.ServerPathPrefix, linked.ID) }
+								class="press-link"
+							>
+								{ fmt.Sprintf("Presse %d", linked.ID) }
+							</a>
+						default:
+							<span>{ note.Linked }</span>
 					}
 				</small>
 			</div>
