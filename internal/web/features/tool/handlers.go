@@ -433,7 +433,8 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		_, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user)
+		h.LogInfo("Starting regeneration for tool %d", tool.ID)
+		_, err := h.DB.ToolRegenerations.AddToolRegeneration(tool.ID, cycleID, "", user)
 		if err != nil {
 			h.LogError("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
@@ -516,12 +517,15 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		_, err := h.DB.ToolRegenerations.AddToolRegeneration(cycleID, tool.ID, "", user)
+		h.LogInfo("Starting regeneration for tool %d", tool.ID)
+		_, err := h.DB.ToolRegenerations.AddToolRegeneration(
+			tool.ID, cycleID, "", user)
 		if err != nil {
 			h.LogError("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 
+		h.LogInfo("Stopping regeneration for tool %d", tool.ID)
 		err = h.DB.ToolRegenerations.StopToolRegeneration(tool.ID, user)
 		if err != nil {
 			h.LogError("Failed to stop regeneration for tool %d: %v",

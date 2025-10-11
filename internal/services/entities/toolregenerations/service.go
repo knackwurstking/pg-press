@@ -165,7 +165,7 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 		return nil, err
 	}
 
-	r.Log.Info("Starting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
+	r.Log.Debug("Starting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
 
 	// Update the tool's regeneration status
 	r.Log.Info("Setting tool to regenerating status: tool: %d", toolID)
@@ -174,7 +174,7 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 	}
 
 	// Create a new regeneration record
-	r.Log.Info("Creating regeneration record: tool: %d", toolID)
+	r.Log.Debug("Creating regeneration record: tool: %d", toolID)
 	regeneration, err := r.Add(
 		models.NewRegeneration(toolID, cycleID, reason, &user.TelegramID),
 		user,
@@ -188,7 +188,7 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 		return nil, err
 	}
 
-	r.Log.Info("Started tool regeneration successfully: tool: %d, regen_id: %d", toolID, regeneration.ID)
+	r.Log.Debug("Started tool regeneration successfully: tool: %d, regen_id: %d", toolID, regeneration.ID)
 	return regeneration, nil
 }
 
@@ -202,14 +202,15 @@ func (r *Service) StopToolRegeneration(toolID int64, user *models.User) error {
 		return err
 	}
 
-	r.Log.Info("Stopping tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
+	r.Log.Debug("Stopping tool regeneration by %s (%d): tool: %d",
+		user.Name, user.TelegramID, toolID)
 
 	// Set the tool's regeneration status to false
 	if err := r.tools.UpdateRegenerating(toolID, false, user); err != nil {
 		return fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
-	r.Log.Info("Stopped tool regeneration: tool: %d", toolID)
+	r.Log.Debug("Stopped tool regeneration: tool: %d", toolID)
 	return nil
 }
 
