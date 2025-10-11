@@ -88,7 +88,7 @@ templ sectionActions(user *models.User, toolID int64) {
 		</button>
 		<button
 			class="destructive flex gap"
-			hx-delete={ fmt.Sprintf(
+			hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/mark-dead?id=%d",
 				env.ServerPathPrefix, toolID,
 			) }

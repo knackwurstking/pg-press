@@ -313,6 +313,7 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 		props.InputTotalCycles = cycle.TotalCycles
 		props.OriginalDate = &cycle.Date
 
+		// Set the cycles (original) tool to props
 		if props.Tool, err = h.DB.Tools.Get(cycle.ToolID); err != nil {
 			return h.HandleError(c, err, "failed to load tool data")
 		}
@@ -327,48 +328,16 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 				return h.HandleError(c, err, "failed to load available tools")
 			}
 
-			// Include all tools in the database for selection
-			for _, toolWithNotes := range allTools {
-				tool := toolWithNotes.Tool
-				props.AvailableTools = append(props.AvailableTools, tool)
+			// Filter out tools not matching the original tools position
+			for _, t := range allTools {
+				if t.Tool.Position == props.Tool.Position {
+					props.AvailableTools = append(props.AvailableTools, t.Tool)
+				}
 			}
 
-			// Sort tools for better user experience
-			// Order: Press number (assigned first, then unassigned), then position, then format/code
+			// Sort tools alphabetically by code
 			sort.Slice(props.AvailableTools, func(i, j int) bool {
-				a, b := props.AvailableTools[i], props.AvailableTools[j]
-
-				// Primary sort: tools with press assignment come first
-				aHasPress := a.Press != nil
-				bHasPress := b.Press != nil
-				if aHasPress != bHasPress {
-					return aHasPress // true comes before false
-				}
-
-				// Secondary sort: by press number (if both have press)
-				if aHasPress && bHasPress {
-					if *a.Press != *b.Press {
-						return *a.Press < *b.Press
-					}
-				}
-
-				// Tertiary sort: by position (top, top cassette, bottom)
-				if a.Position != b.Position {
-					return a.Position < b.Position
-				}
-
-				// Quaternary sort: by format (width x height)
-				if a.Format != b.Format {
-					if a.Format.Width != b.Format.Width {
-						return a.Format.Width < b.Format.Width
-					}
-					if a.Format.Height != b.Format.Height {
-						return a.Format.Height < b.Format.Height
-					}
-				}
-
-				// Final sort: by code
-				return a.Code < b.Code
+				return props.AvailableTools[i].String() < props.AvailableTools[j].String()
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {

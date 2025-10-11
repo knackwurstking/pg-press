@@ -287,7 +287,7 @@ func (t *Service) List() ([]*models.Tool, error) {
 	return tools, nil
 }
 
-func (t *Service) ListActiveTools() ([]*models.Tool, error) {
+func (t *Service) ListToolsNotDead() ([]*models.Tool, error) {
 	t.Log.Debug("Listing active tools")
 
 	const query = `

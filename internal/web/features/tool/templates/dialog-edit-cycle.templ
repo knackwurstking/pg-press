@@ -53,9 +53,9 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 	}) {
 		<!-- Tool selection or display -->
 		if props.AllowToolChange && len(props.AvailableTools) > 0 {
-			<section class="tool-selection flex flex-col gap-sm">
+			<section class="tool-selection flex flex-col gap-sm min-w-0">
 				<label for="tool_id">Werkzeug auswählen</label>
-				<select id="tool_id" name="tool_id" required>
+				<select id="tool_id" name="tool_id" required class="w-full max-w-full min-w-0 text-sm overflow-hidden text-ellipsis">
 					<option value="" disabled selected?={ props.Tool == nil }>
 						Werkzeug auswählen
 					</option>
@@ -63,20 +63,23 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 						<option
 							value={ fmt.Sprintf("%d", tool.ID) }
 							selected?={ props.Tool != nil && props.Tool.ID == tool.ID }
+							if tool.IsDead {
+								class="text-gray-500 italic"
+							}
 						>
 							{{
-							pressInfo := "Keine Presse"
-							if tool.Press != nil {
-								pressInfo = fmt.Sprintf("Presse %d", *tool.Press)
-							}
-							regenInfo := ""
-							if tool.Regenerating {
-								regenInfo = " [REGEN]"
-							}
+								statusText := ""
+								if tool.Press != nil {
+									statusText = fmt.Sprintf(" P%d", *tool.Press)
+								}
+								if tool.Regenerating {
+									statusText += " R"
+								}
+								if tool.IsDead {
+									statusText += " ✗"
+								}
 							}}
-							{ fmt.Sprintf("%s %s %s - %s (%s)%s",
-							                        tool.Format.String(), tool.Code, tool.Type,
-							                        tool.Position.GermanString(), pressInfo, regenInfo) }
+							{ fmt.Sprintf("%s %s%s", tool.Code, tool.Format.String(), statusText) }
 						</option>
 					}
 				</select>

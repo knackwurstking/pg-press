@@ -45,6 +45,11 @@ func RegisterEchoRoutes(e *echo.Echo, routes []*EchoRoute) {
 			if !strings.HasSuffix(route.Path, "/") {
 				e.DELETE(env.ServerPathPrefix+route.Path+"/", route.Handler)
 			}
+		case http.MethodPatch:
+			e.PATCH(env.ServerPathPrefix+route.Path, route.Handler)
+			if !strings.HasSuffix(route.Path, "/") {
+				e.PATCH(env.ServerPathPrefix+route.Path+"/", route.Handler)
+			}
 		default:
 			panic("unhandled method: " + route.Method)
 		}
