@@ -76,7 +76,8 @@ templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 		<div class="flex flex-col gap-sm">
 			if tool.Status() != models.StatusRegenerating {
 				<form
-					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-put={ templ.URL(fmt.Sprintf("%s/htmx/tools/status",
+						env.ServerPathPrefix)) }
 					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 					hx-swap="outerHTML"
 				>
@@ -95,7 +96,8 @@ templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 				</form>
 			} else {
 				<form
-					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-put={ templ.URL(fmt.Sprintf("%s/htmx/tools/status",
+						env.ServerPathPrefix)) }
 					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 					hx-swap="outerHTML"
 				>
@@ -113,7 +115,8 @@ templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 					</button>
 				</form>
 				<form
-					hx-put={ fmt.Sprintf("%s/htmx/tools/status", env.ServerPathPrefix) }
+					hx-put={ templ.URL(fmt.Sprintf("%s/htmx/tools/status",
+						env.ServerPathPrefix)) }
 					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 					hx-swap="outerHTML"
 				>

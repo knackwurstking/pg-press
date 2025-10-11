@@ -43,7 +43,7 @@ templ DialogEditNote(props DialogEditNoteProps) {
 	}}
 	@dialogs.Base(dialogs.BaseProps{
 		Type:                  baseType,
-		Href:                  baseHref,
+		Href:                  templ.URL(baseHref),
 		ID:                    "notes-edit-dialog",
 		SubmitButtonText:      submitButtonText,
 		Behavior:              behavior,

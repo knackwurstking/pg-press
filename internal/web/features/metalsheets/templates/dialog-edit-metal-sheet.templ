@@ -28,8 +28,7 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 			baseType = "PUT"
 			baseHref = fmt.Sprintf(
 				"%s/htmx/metal-sheets/edit?id=%d",
-				env.ServerPathPrefix,
-				props.MetalSheet.ID,
+				env.ServerPathPrefix, props.MetalSheet.ID,
 			)
 			submitButtonText = "Aktualisieren"
 		}
@@ -37,7 +36,7 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	@dialogs.Base(dialogs.BaseProps{
 		ID:                    "metal-sheet-edit-dialog",
 		Type:                  baseType,
-		Href:                  baseHref,
+		Href:                  templ.URL(baseHref),
 		SubmitButtonText:      submitButtonText,
 		Behavior:              "custom",
 		CustomWindowEventName: "visibilitychange",

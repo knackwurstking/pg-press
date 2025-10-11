@@ -45,7 +45,7 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 	}}
 	@dialogs.Base(dialogs.BaseProps{
 		Type:                  baseType,
-		Href:                  baseHref,
+		Href:                  templ.URL(baseHref),
 		ID:                    "cycle-edit-dialog",
 		SubmitButtonText:      submitButtonText,
 		Behavior:              "custom",

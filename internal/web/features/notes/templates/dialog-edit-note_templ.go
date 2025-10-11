@@ -183,7 +183,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
 			Type:                  baseType,
-			Href:                  baseHref,
+			Href:                  templ.URL(baseHref),
 			ID:                    "notes-edit-dialog",
 			SubmitButtonText:      submitButtonText,
 			Behavior:              behavior,

@@ -298,7 +298,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
 			Type:                  baseType,
-			Href:                  baseHref,
+			Href:                  templ.URL(baseHref),
 			ID:                    "tool-edit-dialog",
 			SubmitButtonText:      submitButtonText,
 			Behavior:              behavior,

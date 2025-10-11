@@ -21,21 +21,21 @@ templ HomePage() {
 				<div class="flex flex-col gap justify-center">
 					<!-- Anchor Button => Trouble Reports Page -->
 					@pageItem(
-						env.ServerPathPrefix+"/trouble-reports",
+						templ.URL(env.ServerPathPrefix+"/trouble-reports"),
 						"exclamation-triangle",
 						"Problemberichte",
 						"Verwalten Sie Problemberichte und Lösungen",
 					)
 					<!-- Anchor Button => Tools Page -->
 					@pageItem(
-						env.ServerPathPrefix+"/tools",
+						templ.URL(env.ServerPathPrefix+"/tools"),
 						"tools",
 						"Werkzeuglisten",
 						"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 					)
 					<!-- Anchor Button => Notes Page -->
 					@pageItem(
-						env.ServerPathPrefix+"/notes",
+						templ.URL(env.ServerPathPrefix+"/notes"),
 						"journal-text",
 						"Notizen Verwaltung",
 						"Verwalten Sie Notizen für Werkzeuge und Pressen",
@@ -54,7 +54,7 @@ templ navContent(relPath string) {
 	</div>
 }
 
-templ pageItem(href, icon, title, description string) {
+templ pageItem(href templ.SafeURL, icon, title, description string) {
 	<a
 		role="button"
 		class="ghost secondary flex flex-row gap justify-between items-center"

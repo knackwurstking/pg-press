@@ -1,6 +1,6 @@
 # TODOs
 
-- [ ] Use templ.URL everywhere
+- [x] Use templ.URL everywhere
 - [ ] Add regenerations list management to tools for deletion (admin only)
 - [ ] Implement a cassette binding system, allow binding to top tool
 - [ ] Allow disabling cycle tracking for cassettes

@@ -18,7 +18,7 @@ type BaseProps struct {
 	ID string
 
 	Type             string // Type like "POST", "PUT"
-	Href             string
+	Href             templ.SafeURL
 	SubmitButtonText string
 
 	Error string

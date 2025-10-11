@@ -54,7 +54,7 @@ func HomePage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = pageItem(
-				env.ServerPathPrefix+"/trouble-reports",
+				templ.URL(env.ServerPathPrefix+"/trouble-reports"),
 				"exclamation-triangle",
 				"Problemberichte",
 				"Verwalten Sie Problemberichte und Lösungen",
@@ -67,7 +67,7 @@ func HomePage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = pageItem(
-				env.ServerPathPrefix+"/tools",
+				templ.URL(env.ServerPathPrefix+"/tools"),
 				"tools",
 				"Werkzeuglisten",
 				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
@@ -80,7 +80,7 @@ func HomePage() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = pageItem(
-				env.ServerPathPrefix+"/notes",
+				templ.URL(env.ServerPathPrefix+"/notes"),
 				"journal-text",
 				"Notizen Verwaltung",
 				"Verwalten Sie Notizen für Werkzeuge und Pressen",
@@ -153,7 +153,7 @@ func navContent(relPath string) templ.Component {
 	})
 }
 
-func pageItem(href, icon, title, description string) templ.Component {
+func pageItem(href templ.SafeURL, icon, title, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

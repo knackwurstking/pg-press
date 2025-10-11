@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
@@ -99,7 +100,7 @@ templ ProfilePage(user *models.User) {
 				class="profile-dialog border clean"
 				oncancel="event.preventDefault()"
 			>
-				<form action="./profile">
+				<form action={ templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)) }>
 					<!-- User name -->
 					<label class="flex flex-col">
 						<strong>Benutzername ändern</strong>

@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"fmt"
 	"time"
+
+	"github.com/a-h/templ"
 )
 
 var (
@@ -28,15 +30,15 @@ func AssetVersion() string {
 }
 
 // AssetURL generates a versioned URL for an asset
-func AssetURL(serverPathPrefix, assetPath string) string {
+func AssetURL(serverPathPrefix, assetPath string) templ.SafeURL {
 	version := AssetVersion()
 	baseURL := serverPathPrefix + assetPath
 
 	if version != "" {
-		return fmt.Sprintf("%s?v=%s", baseURL, version)
+		return templ.SafeURL(fmt.Sprintf("%s?v=%s", baseURL, version))
 	}
 
-	return baseURL
+	return templ.URL(baseURL)
 }
 
 // AssetURLWithHash generates a URL with content-based hash (for stronger caching)
