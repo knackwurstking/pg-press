@@ -187,10 +187,10 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for press %d: %v", pn, err)
+		h.Log.Error("Failed to create feed for press %d: %v", pn, err)
 	}
 
-	h.LogInfo("Successfully completed tool change for press %d", pn)
+	h.Log.Info("Successfully completed tool change for press %d", pn)
 
 	return c.NoContent(http.StatusOK)
 }

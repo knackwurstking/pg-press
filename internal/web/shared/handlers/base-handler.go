@@ -16,15 +16,15 @@ import (
 
 // BaseHandler provides common functionality for all handlers
 type BaseHandler struct {
-	DB     *services.Registry
-	Logger *logger.Logger
+	DB  *services.Registry
+	Log *logger.Logger
 }
 
 // NewBaseHandler creates a new base handler with database and logger
 func NewBaseHandler(db *services.Registry, logger *logger.Logger) *BaseHandler {
 	return &BaseHandler{
-		DB:     db,
-		Logger: logger,
+		DB:  db,
+		Log: logger,
 	}
 }
 
@@ -69,9 +69,7 @@ func (b *BaseHandler) RenderNotFound(c echo.Context, message string) error {
 // HandleError processes errors and returns appropriate HTTP responses
 func (b *BaseHandler) HandleError(c echo.Context, err error, context string) error {
 	message := fmt.Sprintf("%s: %v", context, err)
-	if b.Logger != nil {
-		b.Logger.Error("%s", message)
-	}
+	b.Log.Error("%s", message)
 
 	statusCode := utils.GetHTTPStatusCode(err)
 	if statusCode == 0 {
@@ -183,32 +181,4 @@ func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
 		return false
 	}
 	return boolValue
-}
-
-// LogDebug logs a debug message if logger is available
-func (b *BaseHandler) LogDebug(format string, args ...any) {
-	if b.Logger != nil {
-		b.Logger.Debug(format, args...)
-	}
-}
-
-// LogInfo logs an informational message if logger is available
-func (b *BaseHandler) LogInfo(format string, args ...any) {
-	if b.Logger != nil {
-		b.Logger.Info(format, args...)
-	}
-}
-
-// LogError logs an error message if logger is available
-func (b *BaseHandler) LogWarn(format string, args ...any) {
-	if b.Logger != nil {
-		b.Logger.Warn(format, args...)
-	}
-}
-
-// LogError logs an error message if logger is available
-func (b *BaseHandler) LogError(format string, args ...any) {
-	if b.Logger != nil {
-		b.Logger.Error(format, args...)
-	}
 }

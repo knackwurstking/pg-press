@@ -212,7 +212,7 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogInfo("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
+	h.Log.Info("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
 
 	// Get cycle summary data using service
 	cycles, toolsMap, usersMap, err := h.DB.PressCycles.GetCycleSummaryData(press, h.DB.Tools, h.DB.Users)

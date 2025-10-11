@@ -33,14 +33,14 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 	apiKey := h.GetSanitizedFormValue(c, constants.APIKeyFormField)
 	if apiKey != "" {
 		if h.processApiKeyLogin(apiKey, c) {
-			h.LogInfo("Successful login for user from %s", remoteIP)
+			h.Log.Info("Successful login for user from %s", remoteIP)
 			if err := h.RedirectTo(c, "./profile"); err != nil {
 				return h.RenderInternalError(c,
 					"failed to redirect to profile page: "+err.Error())
 			}
 			return nil
 		} else {
-			h.LogInfo("Failed login attempt from %s", remoteIP)
+			h.Log.Info("Failed login attempt from %s", remoteIP)
 		}
 	}
 
@@ -64,7 +64,7 @@ func (h *Handler) GetLogout(c echo.Context) error {
 
 	if cookie, err := c.Cookie(constants.CookieName); err == nil {
 		if err := h.DB.Cookies.Remove(cookie.Value); err != nil {
-			h.LogError("Failed to remove cookie from database for user %s from %s: %v",
+			h.Log.Error("Failed to remove cookie from database for user %s from %s: %v",
 				user.Name, remoteIP, err)
 		}
 	}
@@ -84,7 +84,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	// Validate API key format
 	if len(apiKey) < 16 {
-		h.LogDebug("API key too short from %s", remoteIP)
+		h.Log.Debug("API key too short from %s", remoteIP)
 		return false
 	}
 
@@ -92,9 +92,9 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 
 	if err != nil {
 		if !utils.IsNotFoundError(err) {
-			h.LogError("Database error during authentication from %s: %v", remoteIP, err)
+			h.Log.Error("Database error during authentication from %s: %v", remoteIP, err)
 		} else {
-			h.LogDebug("Invalid API key from %s", remoteIP)
+			h.Log.Debug("Invalid API key from %s", remoteIP)
 		}
 
 		return false
@@ -103,7 +103,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	// Check for existing session
 	if existingCookie, err := ctx.Cookie(constants.CookieName); err == nil {
 		if err := h.DB.Cookies.Remove(existingCookie.Value); err != nil {
-			h.LogError("Failed to remove existing cookie for user %s from %s: %v",
+			h.Log.Error("Failed to remove existing cookie for user %s from %s: %v",
 				user.Name, remoteIP, err)
 		}
 	}
@@ -121,7 +121,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	// Log cookie creation details for debugging PWA issues
-	h.LogDebug("Creating cookie for user %s from %s: HTTPS=%v, UserAgent='%s', Scheme='%s', Path='%s'",
+	h.Log.Debug("Creating cookie for user %s from %s: HTTPS=%v, UserAgent='%s', Scheme='%s', Path='%s'",
 		user.Name, remoteIP, isHTTPS, userAgent, ctx.Scheme(), cookiePath)
 
 	cookie := &http.Cookie{
@@ -135,20 +135,20 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 	ctx.SetCookie(cookie)
 
-	h.LogDebug("Cookie set successfully: Name=%s, Secure=%v, SameSite=%v, Path=%s, Expires=%v",
+	h.Log.Debug("Cookie set successfully: Name=%s, Secure=%v, SameSite=%v, Path=%s, Expires=%v",
 		cookie.Name, cookie.Secure, cookie.SameSite, cookie.Path, cookie.Expires)
 
 	sessionCookie := models.NewCookie(userAgent, cookieValue, apiKey)
 	if err := h.DB.Cookies.Add(sessionCookie); err != nil {
-		h.LogError("Failed to store session cookie for user %s from %s: %v", user.Name, remoteIP, err)
+		h.Log.Error("Failed to store session cookie for user %s from %s: %v", user.Name, remoteIP, err)
 		return false
 	}
 
-	h.LogDebug("Session cookie stored in database for user %s", user.Name)
+	h.Log.Debug("Session cookie stored in database for user %s", user.Name)
 
 	// Log security-relevant information
 	if user.IsAdmin() {
-		h.LogInfo("Administrator %s logged in from %s", user.Name, remoteIP)
+		h.Log.Info("Administrator %s logged in from %s", user.Name, remoteIP)
 	}
 
 	return true

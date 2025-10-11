@@ -37,7 +37,7 @@ func NewHandler(db *services.Registry) *Handler {
 }
 
 func (h *Handler) GetPage(c echo.Context) error {
-	h.LogDebug("Rendering trouble reports page")
+	h.Log.Debug("Rendering trouble reports page")
 
 	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -53,7 +53,7 @@ func (h *Handler) GetSharePDF(c echo.Context) error {
 		return h.RenderBadRequest(c, err.Error())
 	}
 
-	h.LogInfo("Generating PDF for trouble report %d", id)
+	h.Log.Info("Generating PDF for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
@@ -65,7 +65,7 @@ func (h *Handler) GetSharePDF(c echo.Context) error {
 		return h.HandleError(c, err, "failed to generate PDF")
 	}
 
-	h.LogInfo("Successfully generated PDF for trouble report %d (size: %d bytes)",
+	h.Log.Info("Successfully generated PDF for trouble report %d (size: %d bytes)",
 		tr.ID, pdfBuffer.Len())
 
 	return h.shareResponse(c, tr, pdfBuffer)
@@ -77,7 +77,7 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 		return h.RenderBadRequest(c, err.Error())
 	}
 
-	h.LogDebug("Fetching attachment %d", attachmentID)
+	h.Log.Debug("Fetching attachment %d", attachmentID)
 
 	// Get the attachment from the attachments table
 	attachment, err := h.DB.Attachments.Get(attachmentID)
@@ -97,14 +97,14 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 	c.Response().Header().Set("Content-Disposition",
 		fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	h.LogInfo("Serving attachment %d (size: %d bytes, type: %s)",
+	h.Log.Info("Serving attachment %d (size: %d bytes, type: %s)",
 		attachmentID, len(attachment.Data), attachment.MimeType)
 
 	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
 }
 
 func (h *Handler) GetModificationsForID(c echo.Context) error {
-	h.LogInfo("Handling modifications for trouble report")
+	h.Log.Info("Handling modifications for trouble report")
 
 	// Parse ID parameter
 	id, err := h.ParseInt64Param(c, "id")
@@ -113,7 +113,7 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 	}
 
 	// Fetch modifications for this trouble report
-	h.LogDebug("Fetching modifications for trouble report %d", id)
+	h.Log.Debug("Fetching modifications for trouble report %d", id)
 
 	modifications, err := h.DB.Modifications.ListWithUser(
 		models.ModificationTypeTroubleReport,
@@ -125,7 +125,7 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 		return h.HandleError(c, err, "failed to retrieve modifications")
 	}
 
-	h.LogDebug(
+	h.Log.Debug(
 		"Found %d modifications for trouble report %d",
 		len(modifications), id)
 
@@ -167,14 +167,14 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("User %s fetching trouble reports list", user.Name)
+	h.Log.Debug("User %s fetching trouble reports list", user.Name)
 
 	trs, err := h.DB.TroubleReports.ListWithAttachments()
 	if err != nil {
 		return h.HandleError(c, err, "failed to load trouble reports")
 	}
 
-	h.LogDebug("Found %d trouble reports for user %s", len(trs), user.Name)
+	h.Log.Debug("Found %d trouble reports for user %s", len(trs), user.Name)
 
 	troubleReportsList := templates.ListReports(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
@@ -199,13 +199,13 @@ func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 		return h.RenderUnauthorized(c, "administrator privileges required")
 	}
 
-	h.LogInfo("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
+	h.Log.Info("Administrator %s (Telegram ID: %d) is deleting trouble report %d",
 		user.Name, user.TelegramID, id)
 
 	if removedReport, err := h.DB.TroubleReports.RemoveWithAttachments(id, user); err != nil {
 		return h.HandleError(c, err, "failed to delete trouble report")
 	} else {
-		h.LogInfo("Successfully deleted trouble report %d (%s)",
+		h.Log.Info("Successfully deleted trouble report %d (%s)",
 			removedReport.ID, removedReport.Title)
 
 		// Create feed entry
@@ -213,7 +213,7 @@ func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 		feedContent := fmt.Sprintf("Titel: %s", removedReport.Title)
 		feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for trouble report deletion: %v", err)
+			h.Log.Error("Failed to create feed for trouble report deletion: %v", err)
 		}
 	}
 
@@ -226,14 +226,14 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse ID from query")
 	}
 
-	h.LogDebug("Fetching attachments preview for trouble report %d", id)
+	h.Log.Debug("Fetching attachments preview for trouble report %d", id)
 
 	tr, err := h.DB.TroubleReports.GetWithAttachments(id)
 	if err != nil {
 		return h.HandleError(c, err, "failed to load trouble report")
 	}
 
-	h.LogDebug("Rendering attachments preview with %d attachments",
+	h.Log.Debug("Rendering attachments preview with %d attachments",
 		len(tr.LoadedAttachments))
 
 	attachmentsPreview := components.AttachmentsPreview(
@@ -251,7 +251,7 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
-	h.LogInfo("Handling HTMX rollback for trouble report")
+	h.Log.Info("Handling HTMX rollback for trouble report")
 
 	// Parse ID parameter from query
 	id, err := h.ParseInt64Query(c, "id")
@@ -280,7 +280,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 		return h.RenderUnauthorized(c, "administrator privileges required")
 	}
 
-	h.LogInfo("User %s is rolling back trouble report %d to modification %d",
+	h.Log.Info("User %s is rolling back trouble report %d to modification %d",
 		user.Name, id, modTime)
 
 	// Find the specific modification
@@ -325,7 +325,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 		return h.HandleError(c, err, "failed to rollback trouble report")
 	}
 
-	h.LogInfo("Successfully rolled back trouble report %d", id)
+	h.Log.Info("Successfully rolled back trouble report %d", id)
 
 	// Create feed entry
 	feedTitle := "Problembericht zurückgesetzt"
@@ -333,7 +333,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for trouble report rollback: %v", err)
+		h.Log.Error("Failed to create feed for trouble report rollback: %v", err)
 	}
 
 	// Return success message for HTMX

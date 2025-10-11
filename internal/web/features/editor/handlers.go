@@ -146,7 +146,7 @@ func (h *Handler) loadExistingContent(options *templates.EditorOptions) error {
 		if err == nil {
 			options.Attachments = loadedAttachments
 		} else {
-			h.LogError("Failed to load attachments for trouble report %d: %v", options.ID, err)
+			h.Log.Error("Failed to load attachments for trouble report %d: %v", options.ID, err)
 		}
 
 	// Note: Notes are not supported in the editor as they have a different structure
@@ -200,7 +200,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 			if err := h.DB.Feeds.Add(feed); err != nil {
-				h.LogError("Failed to create feed for trouble report update: %v", err)
+				h.Log.Error("Failed to create feed for trouble report update: %v", err)
 			}
 
 		} else {
@@ -221,7 +221,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 			if err := h.DB.Feeds.Add(feed); err != nil {
-				h.LogError("Failed to create feed for trouble report creation: %v", err)
+				h.Log.Error("Failed to create feed for trouble report creation: %v", err)
 			}
 		}
 

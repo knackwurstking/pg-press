@@ -200,7 +200,7 @@ func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *m
 	// Create and save the feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed: %v", err)
+		h.Log.Error("Failed to create feed: %v", err)
 	}
 }
 
@@ -256,7 +256,7 @@ func (h *Handler) createUpdateFeed(user *models.User, tool *models.Tool, oldShee
 	// Create and save the feed entry
 	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create update feed: %v", err)
+		h.Log.Error("Failed to create update feed: %v", err)
 	}
 }
 

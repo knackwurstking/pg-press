@@ -51,14 +51,14 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 			"failed to parse id from query parameter:"+err.Error())
 	}
 
-	h.LogDebug("Fetching tool %d with notes", id)
+	h.Log.Debug("Fetching tool %d with notes", id)
 
 	tool, err := h.DB.Tools.GetWithNotes(id)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool")
 	}
 
-	h.LogDebug("Successfully fetched tool %d: Type=%s, Code=%s",
+	h.Log.Debug("Successfully fetched tool %d: Type=%s, Code=%s",
 		id, tool.Type, tool.Code)
 
 	page := templates.Page(&templates.PageProps{
@@ -149,7 +149,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool from database")
 	}
 
-	h.LogInfo("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
+	h.Log.Info("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
@@ -164,7 +164,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
 		feed := models.NewFeed(title, content, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for regeneration start: %v", err)
+			h.Log.Error("Failed to create feed for regeneration start: %v", err)
 		}
 
 	case "active":
@@ -178,7 +178,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
 		feed := models.NewFeed(title, content, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for regeneration stop: %v", err)
+			h.Log.Error("Failed to create feed for regeneration stop: %v", err)
 		}
 
 	case "abort":
@@ -192,7 +192,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
 		feed := models.NewFeed(title, content, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for regeneration abort: %v", err)
+			h.Log.Error("Failed to create feed for regeneration abort: %v", err)
 		}
 
 	default:
@@ -239,7 +239,7 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 
 	regeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
 	if err != nil {
-		h.LogError("Failed to get regenerations for tool %d: %v", toolID, err)
+		h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
 	}
 
 	totalCycles := h.getTotalCycles(
@@ -433,10 +433,10 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		h.LogInfo("Starting regeneration for tool %d", tool.ID)
+		h.Log.Info("Starting regeneration for tool %d", tool.ID)
 		_, err := h.DB.ToolRegenerations.AddToolRegeneration(tool.ID, cycleID, "", user)
 		if err != nil {
-			h.LogError("Failed to start regeneration for tool %d: %v",
+			h.Log.Error("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 	}
@@ -451,7 +451,7 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for cycle creation: %v", err)
+		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
 	return nil
@@ -517,18 +517,18 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		h.LogInfo("Starting regeneration for tool %d", tool.ID)
+		h.Log.Info("Starting regeneration for tool %d", tool.ID)
 		_, err := h.DB.ToolRegenerations.AddToolRegeneration(
 			tool.ID, cycleID, "", user)
 		if err != nil {
-			h.LogError("Failed to start regeneration for tool %d: %v",
+			h.Log.Error("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 
-		h.LogInfo("Stopping regeneration for tool %d", tool.ID)
+		h.Log.Info("Stopping regeneration for tool %d", tool.ID)
 		err = h.DB.ToolRegenerations.StopToolRegeneration(tool.ID, user)
 		if err != nil {
-			h.LogError("Failed to stop regeneration for tool %d: %v",
+			h.Log.Error("Failed to stop regeneration for tool %d: %v",
 				tool.ID, err)
 		}
 	}
@@ -555,7 +555,7 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for cycle update: %v", err)
+		h.Log.Error("Failed to create feed for cycle update: %v", err)
 	}
 
 	return nil
@@ -594,7 +594,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for cycle deletion: %v", err)
+		h.Log.Error("Failed to create feed for cycle deletion: %v", err)
 	}
 
 	return h.HTMXGetToolCycles(c)
@@ -695,7 +695,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
 	}
 
-	h.LogDebug("Fetching notes for tool %d", toolID)
+	h.Log.Debug("Fetching notes for tool %d", toolID)
 
 	// Get the tool
 	tool, err := h.DB.Tools.Get(toolID)
@@ -735,7 +735,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
 	}
 
-	h.LogDebug("Fetching metal sheets for tool %d", toolID)
+	h.Log.Debug("Fetching metal sheets for tool %d", toolID)
 
 	tool, err := h.DB.Tools.GetWithNotes(toolID)
 	if err != nil {
@@ -746,7 +746,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	metalSheets, err := h.DB.MetalSheets.GetByToolID(toolID)
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
-		h.LogError("Failed to fetch metal sheets: %v", err)
+		h.Log.Error("Failed to fetch metal sheets: %v", err)
 		metalSheets = []*models.MetalSheet{}
 	}
 

@@ -43,7 +43,7 @@ func NewHandler(db *services.Registry) *Handler {
 }
 
 func (h *Handler) GetToolsPage(c echo.Context) error {
-	h.LogInfo("Rendering tools page")
+	h.Log.Info("Rendering tools page")
 
 	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -54,7 +54,7 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
-	h.LogDebug("Rendering edit tool dialog")
+	h.Log.Debug("Rendering edit tool dialog")
 
 	props := &templates.DialogEditToolProps{}
 
@@ -91,7 +91,7 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("User %s creating new tool", user.Name)
+	h.Log.Debug("User %s creating new tool", user.Name)
 
 	formData, err := h.getEditToolFormData(c)
 	if err != nil {
@@ -106,7 +106,7 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
 		return h.HandleError(c, err, "failed to add tool")
 	} else {
-		h.LogInfo("Created tool ID %d (Type=%s, Code=%s) by user %s",
+		h.Log.Info("Created tool ID %d (Type=%s, Code=%s) by user %s",
 			t.ID, tool.Type, tool.Code, user.Name)
 
 		// Create feed entry
@@ -119,7 +119,7 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 
 		feed := models.NewFeed(title, content, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for tool creation: %v", err)
+			h.Log.Error("Failed to create feed for tool creation: %v", err)
 		}
 	}
 
@@ -137,7 +137,7 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse tool ID: "+err.Error())
 	}
 
-	h.LogWarn("User %s updating tool %d", user.Name, toolID)
+	h.Log.Warn("User %s updating tool %d", user.Name, toolID)
 
 	formData, err := h.getEditToolFormData(c)
 	if err != nil {
@@ -154,7 +154,7 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
 			"failed to update tool: "+err.Error())
 	} else {
-		h.LogInfo("Updated tool %d (Type=%s, Code=%s) by user %s",
+		h.Log.Info("Updated tool %d (Type=%s, Code=%s) by user %s",
 			tool.ID, tool.Type, tool.Code, user.Name)
 
 		// Create feed entry
@@ -167,7 +167,7 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 
 		feed := models.NewFeed(title, content, user.TelegramID)
 		if err := h.DB.Feeds.Add(feed); err != nil {
-			h.LogError("Failed to create feed for tool update: %v", err)
+			h.Log.Error("Failed to create feed for tool update: %v", err)
 		}
 	}
 
@@ -188,7 +188,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("User %s deleting tool %d", user.Name, toolID)
+	h.Log.Debug("User %s deleting tool %d", user.Name, toolID)
 
 	// Get tool data before deletion for the feed
 	tool, err := h.DB.Tools.Get(toolID)
@@ -211,7 +211,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for tool deletion: %v", err)
+		h.Log.Error("Failed to create feed for tool deletion: %v", err)
 	}
 
 	// Set redirect header to tools page
@@ -220,7 +220,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
-	h.LogDebug("Rendering press section")
+	h.Log.Debug("Rendering press section")
 
 	pressUtilization, err := h.DB.Tools.GetPressUtilization()
 	if err != nil {
@@ -237,7 +237,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
-	h.LogDebug("Rendering tools section")
+	h.Log.Debug("Rendering tools section")
 
 	// Get tools from database
 	tools, err := h.DB.Tools.ListWithNotes()
@@ -254,7 +254,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
-	h.LogDebug("Getting overlapping tools for admin section")
+	h.Log.Debug("Getting overlapping tools for admin section")
 
 	// Get user from context for audit trail
 	user, err := h.GetUserFromContext(c)
@@ -262,7 +262,7 @@ func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogInfo("User %s requested overlapping tools analysis", user.Name)
+	h.Log.Info("User %s requested overlapping tools analysis", user.Name)
 
 	// Get overlapping tools from service
 	overlappingTools, err := h.DB.PressCycles.GetOverlappingTools(h.DB.Tools, h.DB.Users)

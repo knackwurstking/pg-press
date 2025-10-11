@@ -32,32 +32,32 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	// Get all notes with defensive error handling
 	notes, err := h.DB.Notes.List()
 	if err != nil {
-		h.LogError("Failed to retrieve notes from database: %v", err)
+		h.Log.Error("Failed to retrieve notes from database: %v", err)
 		return h.HandleError(c, err, "failed to get notes from database")
 	}
 
 	// Handle case where notes might be nil
 	if notes == nil {
-		h.LogDebug("No notes found in database, initializing empty slice")
+		h.Log.Debug("No notes found in database, initializing empty slice")
 		notes = []*models.Note{}
 	}
 
-	h.LogDebug("Retrieved %d notes from database", len(notes))
+	h.Log.Debug("Retrieved %d notes from database", len(notes))
 
 	// Get all tools to show relationships
 	tools, err := h.DB.Tools.List()
 	if err != nil {
-		h.LogError("Failed to retrieve tools from database: %v", err)
+		h.Log.Error("Failed to retrieve tools from database: %v", err)
 		return h.HandleError(c, err, "failed to get tools from database")
 	}
 
 	// Handle case where tools might be nil
 	if tools == nil {
-		h.LogDebug("No tools found in database, initializing empty slice")
+		h.Log.Debug("No tools found in database, initializing empty slice")
 		tools = []*models.Tool{}
 	}
 
-	h.LogDebug("Retrieved %d tools from database", len(tools))
+	h.Log.Debug("Retrieved %d tools from database", len(tools))
 
 	page := templates.Page(&templates.PageProps{
 		Notes: notes,
@@ -96,7 +96,7 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 
 	// Check if we're editing an existing note
 	if noteID, _ := h.ParseInt64Query(c, "id"); noteID > 0 {
-		h.LogDebug("Opening edit dialog for note %d", noteID)
+		h.Log.Debug("Opening edit dialog for note %d", noteID)
 
 		note, err := h.DB.Notes.Get(noteID)
 		if err != nil {
@@ -104,7 +104,7 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 		}
 		props.Note = note
 	} else {
-		h.LogDebug("Opening create dialog for new note")
+		h.Log.Debug("Opening create dialog for new note")
 	}
 
 	dialog := templates.DialogEditNote(*props)
@@ -122,7 +122,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("User %s creating new note", user.Name)
+	h.Log.Debug("User %s creating new note", user.Name)
 
 	note, err := h.parseNoteFromForm(c)
 	if err != nil {
@@ -135,7 +135,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 		return h.HandleError(c, err, "failed to create note")
 	}
 
-	h.LogInfo("User %s created note %d", user.Name, noteID)
+	h.Log.Info("User %s created note %d", user.Name, noteID)
 
 	// Create feed entry
 	title := "Neue Notiz erstellt"
@@ -148,7 +148,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for cycle creation: %v", err)
+		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
 	// Trigger reload of notes sections
@@ -168,7 +168,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse note ID: "+err.Error())
 	}
 
-	h.LogDebug("User %s updating note %d", user.Name, noteID)
+	h.Log.Debug("User %s updating note %d", user.Name, noteID)
 
 	note, err := h.parseNoteFromForm(c)
 	if err != nil {
@@ -183,7 +183,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 		return h.HandleError(c, err, "failed to update note")
 	}
 
-	h.LogInfo("User %s updated note %d", user.Name, noteID)
+	h.Log.Info("User %s updated note %d", user.Name, noteID)
 
 	// Create feed entry
 	title := "Notiz aktualisiert"
@@ -196,7 +196,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for cycle creation: %v", err)
+		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
 	// Trigger reload of notes sections
@@ -216,19 +216,19 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse note ID: "+err.Error())
 	}
 
-	h.LogDebug("User %s deleting note %d", user.Name, noteID)
+	h.Log.Debug("User %s deleting note %d", user.Name, noteID)
 
 	// Delete the note
 	if err := h.DB.Notes.Delete(noteID, user); err != nil {
 		return h.HandleError(c, err, "failed to delete note")
 	}
 
-	h.LogInfo("User %s deleted note %d", user.Name, noteID)
+	h.Log.Info("User %s deleted note %d", user.Name, noteID)
 
 	// Create feed entry
 	feed := models.NewFeed("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for note deletion: %v", err)
+		h.Log.Error("Failed to create feed for note deletion: %v", err)
 	}
 
 	// Trigger reload of notes sections

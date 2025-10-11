@@ -35,7 +35,7 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("Rendering profile page for user %s", user.Name)
+	h.Log.Debug("Rendering profile page for user %s", user.Name)
 
 	if err = h.handleUserNameChange(c, user); err != nil {
 		return h.HandleError(c, err, "error updating username")
@@ -54,14 +54,14 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	h.LogDebug("Fetching cookies for user %s", user.Name)
+	h.Log.Debug("Fetching cookies for user %s", user.Name)
 
 	cookies, err := h.DB.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		return h.HandleError(c, err, "failed to list cookies: "+err.Error())
 	}
 
-	h.LogDebug("Found %d cookies for user %s", len(cookies), user.Name)
+	h.Log.Debug("Found %d cookies for user %s", len(cookies), user.Name)
 
 	cookiesTable := templates.CookiesDetails(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
@@ -79,7 +79,7 @@ func (h *Handler) HTMXDeleteCookies(c echo.Context) error {
 		return h.RenderBadRequest(c, err.Error())
 	}
 
-	h.LogInfo("Deleting cookie with value: %s", value)
+	h.Log.Info("Deleting cookie with value: %s", value)
 
 	if err := h.DB.Cookies.Remove(value); err != nil {
 		return h.HandleError(c, err, "failed to delete cookie")
@@ -100,7 +100,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 			"username must be between 1 and 100 characters")
 	}
 
-	h.LogInfo("User %s (Telegram ID: %d) is changing username to %s",
+	h.Log.Info("User %s (Telegram ID: %d) is changing username to %s",
 		user.Name, user.TelegramID, userName)
 
 	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
@@ -110,7 +110,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 		return err
 	}
 
-	h.LogInfo("Successfully updated username for user %d from %s to %s",
+	h.Log.Info("Successfully updated username for user %d from %s to %s",
 		user.TelegramID, user.Name, userName)
 
 	// Create feed entry
@@ -118,7 +118,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.LogError("Failed to create feed for username change: %v", err)
+		h.Log.Error("Failed to create feed for username change: %v", err)
 	}
 
 	user.Name = userName

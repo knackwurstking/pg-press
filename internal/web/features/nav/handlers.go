@@ -31,17 +31,17 @@ func (h *Handler) GetFeedCounter(c echo.Context) error {
 		// Get user from echo context
 		user, err := h.GetUserFromContext(c)
 		if err != nil {
-			h.LogError("WebSocket authentication failed from %s: %v", remoteIP, err)
+			h.Log.Error("WebSocket authentication failed from %s: %v", remoteIP, err)
 			ws.Close()
 			return
 		}
 
-		h.LogInfo("WebSocket connection established for user %s from %s", user.Name, remoteIP)
+		h.Log.Info("WebSocket connection established for user %s from %s", user.Name, remoteIP)
 
 		// Register the connection with the feed notifier
 		feedConn := h.wsFeedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			h.LogError("Failed to register WebSocket connection for user %s from %s",
+			h.Log.Error("Failed to register WebSocket connection for user %s from %s",
 				user.Name, remoteIP)
 			ws.Close()
 			return
@@ -49,7 +49,7 @@ func (h *Handler) GetFeedCounter(c echo.Context) error {
 
 		// Track active connections
 		defer func() {
-			h.LogInfo("WebSocket connection closed for user %s from %s",
+			h.Log.Info("WebSocket connection closed for user %s from %s",
 				user.Name, remoteIP)
 		}()
 
