@@ -11,6 +11,7 @@ import (
 type ToolCyclesProps struct {
 	User             *models.User
 	Tool             *models.Tool
+	Tools            []*models.Tool
 	ToolPosition     string
 	TotalCycles      int64
 	Cycles           []*models.Cycle
@@ -24,7 +25,7 @@ templ ToolCycles(props *ToolCyclesProps) {
 			<div class="flex justify-between items-center mb">
 				<h5>Aktueller Status</h5>
 			</div>
-			<div class="flex gap justify-between items-center">
+			<div class="flex flex-col gap">
 				<span class="flex gap-lg">
 					@components.ToolStatusEdit(&components.ToolStatusEditProps{
 						Tool:              props.Tool,
@@ -45,6 +46,25 @@ templ ToolCycles(props *ToolCyclesProps) {
 						</a>
 					}
 				</span>
+				// TODO: Also do somethings on position top here? Maybe link to tool binding to this tool here
+				if props.User.IsAdmin() && props.Tool.Position == models.PositionTopCassette {
+					<span class="flex gap">
+						<select>
+							<option
+								value=""
+								disabled
+								selected?={ props.Tool.Binding == nil || *props.Tool.Binding > 0 }
+							>Werkzeug Verknüpfen</option>
+							// Render options, all top tools unbound
+							for _, t := range props.Tools {
+								if t.Binding == nil && t.Position == models.PositionTop {
+									// TODO: HTMX handler for patching tools "binding" data
+									<option value={ t.ID }>{ t.String() } { t.Type }</option>
+								}
+							}
+						</select>
+					</span>
+				}
 			</div>
 		</section>
 		<section class="cycles">

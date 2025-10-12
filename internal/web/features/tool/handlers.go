@@ -244,9 +244,18 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		filteredCycles...,
 	)
 
+	var tools []*models.Tool
+	if tool.Position == models.PositionTopCassette {
+		tools, err = h.DB.Tools.List()
+		if err != nil {
+			return h.HandleError(c, err, "failed to get tools")
+		}
+	}
+
 	cyclesSection := templates.ToolCycles(&templates.ToolCyclesProps{
 		User:             user,
 		Tool:             tool,
+		Tools:            tools,
 		TotalCycles:      totalCycles,
 		Cycles:           filteredCycles,
 		LastRegeneration: regeneration,
