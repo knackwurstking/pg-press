@@ -364,9 +364,7 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 		if err != nil {
 			return nil, errors.New("invalid width: " + err.Error())
 		}
-		if width <= 0 || width > 10000 {
-			return nil, errors.New("width must be between 1 and 10000")
-		}
+
 		data.Format.Width = width
 	}
 
@@ -376,9 +374,7 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 		if err != nil {
 			return nil, errors.New("invalid height: " + err.Error())
 		}
-		if height <= 0 || height > 10000 {
-			return nil, errors.New("height must be between 1 and 10000")
-		}
+
 		data.Format.Height = height
 	}
 
