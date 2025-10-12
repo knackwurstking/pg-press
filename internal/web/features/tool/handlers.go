@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -742,4 +743,10 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
+	// TODO: Update tools binding, get id from param and 'target_id' from hx-vals (however)
+
+	return errors.New("under construction")
 }

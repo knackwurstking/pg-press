@@ -62,6 +62,10 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 			// Delete a cycle table entry
 			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete",
 				r.handler.HTMXDeleteToolCycle),
+
+			// Update tools binding data
+			helpers.NewEchoRoute(http.MethodPatch, "/htmx/tools/tool/:id/bind",
+				r.handler.HTMXPatchToolBinding),
 		},
 	)
 }

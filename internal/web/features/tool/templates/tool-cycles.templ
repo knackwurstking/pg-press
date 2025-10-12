@@ -49,7 +49,15 @@ templ ToolCycles(props *ToolCyclesProps) {
 				// TODO: Also do somethings on position top here? Maybe link to tool binding to this tool here
 				if props.User.IsAdmin() && props.Tool.Position == models.PositionTopCassette {
 					<span class="flex gap">
-						<select>
+						<select
+							hx-patch={ fmt.Sprintf(
+								"%s/htmx/tools/tool/%d/bind",
+								env.ServerPathPrefix,
+								props.Tool.ID,
+							) }
+							hx-trigger="change"
+							hx-vals="js:{target_id: event.target.value}"
+						>
 							<option
 								value=""
 								disabled
@@ -58,7 +66,6 @@ templ ToolCycles(props *ToolCyclesProps) {
 							// Render options, all top tools unbound
 							for _, t := range props.Tools {
 								if t.Binding == nil && t.Position == models.PositionTop {
-									// TODO: HTMX handler for patching tools "binding" data
 									<option value={ t.ID }>{ t.String() } { t.Type }</option>
 								}
 							}
