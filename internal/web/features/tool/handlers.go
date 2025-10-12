@@ -231,7 +231,7 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get press cycles")
 	}
 
-	filteredCycles := models.FilterByToolPosition(
+	filteredCycles := models.FilterCyclesByToolPosition(
 		tool.Position, toolCycles...)
 
 	regeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
@@ -281,7 +281,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	}
 
 	// Filter cycles by position
-	filteredCycles := models.FilterByToolPosition(tool.Position, toolCycles...)
+	filteredCycles := models.FilterCyclesByToolPosition(tool.Position, toolCycles...)
 
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)

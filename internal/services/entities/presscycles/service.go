@@ -351,33 +351,6 @@ func (s *Service) GetPressCycles(pressNumber models.PressNumber, limit *int, off
 	return cycles, nil
 }
 
-// scanPressCyclesRows scans multiple press cycles from sql.Rows and calculates partial cycles
-func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
-	cycles, err := ScanPressCyclesFromRows(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	// Calculate partial cycles for each cycle
-	for _, cycle := range cycles {
-		cycle.PartialCycles = p.GetPartialCycles(cycle)
-	}
-
-	return cycles, nil
-}
-
-// ToolSummary represents a summary of a tool's usage during a specific period
-type ToolSummary struct {
-	ToolID            int64           `json:"tool_id"`
-	ToolCode          string          `json:"tool_code"`
-	Position          models.Position `json:"position"`
-	StartDate         time.Time       `json:"start_date"`
-	EndDate           time.Time       `json:"end_date"`
-	MaxCycles         int64           `json:"max_cycles"`
-	TotalPartial      int64           `json:"total_partial"`
-	IsFirstAppearance bool            `json:"is_first_appearance"`
-}
-
 // GetCycleSummaryData retrieves complete cycle summary data for a press.
 // This is a convenience method that gathers all data needed for cycle summaries:
 // - All cycles for the specified press
@@ -486,14 +459,16 @@ func (s *Service) GetCycleSummaryStats(cycles []*models.Cycle) (int64, int64, in
 //	    return err
 //	}
 //	// Use summaries for detailed tool usage reports
-func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*models.Tool) ([]*ToolSummary, error) {
+func (s *Service) GetToolSummaries(
+	cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
+) ([]*models.ToolSummary, error) {
 	if cycles == nil {
 		return nil, fmt.Errorf("cannot create tool summaries from nil cycles data")
 	}
 
 	s.Log.Debug("Creating tool summaries from cycles data")
 
-	var toolSummaries []*ToolSummary
+	var toolSummaries []*models.ToolSummary
 
 	// Create a summary for each individual cycle
 	for _, cycle := range cycles {
@@ -503,7 +478,7 @@ func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*m
 			toolCode = fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
 		}
 
-		toolSummaries = append(toolSummaries, &ToolSummary{
+		toolSummaries = append(toolSummaries, &models.ToolSummary{
 			ToolID:            cycle.ToolID,
 			ToolCode:          toolCode,
 			Position:          cycle.ToolPosition,
@@ -530,8 +505,23 @@ func (s *Service) GetToolSummaries(cycles []*models.Cycle, toolsMap map[int64]*m
 	return consolidatedSummaries, nil
 }
 
+// scanPressCyclesRows scans multiple press cycles from sql.Rows and calculates partial cycles
+func (p *Service) scanPressCyclesRows(rows *sql.Rows) ([]*models.Cycle, error) {
+	cycles, err := ScanPressCyclesFromRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate partial cycles for each cycle
+	for _, cycle := range cycles {
+		cycle.PartialCycles = p.GetPartialCycles(cycle)
+	}
+
+	return cycles, nil
+}
+
 // sortToolSummariesChronologically sorts tool summaries by date and position
-func (s *Service) sortToolSummariesChronologically(summaries []*ToolSummary) {
+func (s *Service) sortToolSummariesChronologically(summaries []*models.ToolSummary) {
 	for i := 0; i < len(summaries)-1; i++ {
 		for j := i + 1; j < len(summaries); j++ {
 			if summaries[i].StartDate.After(summaries[j].StartDate) ||
@@ -544,8 +534,8 @@ func (s *Service) sortToolSummariesChronologically(summaries []*ToolSummary) {
 }
 
 // consolidateToolSummaries consolidates consecutive entries for the same tool in the same position
-func (s *Service) consolidateToolSummaries(summaries []*ToolSummary) []*ToolSummary {
-	var consolidatedSummaries []*ToolSummary
+func (s *Service) consolidateToolSummaries(summaries []*models.ToolSummary) []*models.ToolSummary {
+	var consolidatedSummaries []*models.ToolSummary
 	lastToolByPosition := make(map[models.Position]int64)
 	positionIndexMap := make(map[models.Position]int)
 
@@ -575,7 +565,7 @@ func (s *Service) consolidateToolSummaries(summaries []*ToolSummary) []*ToolSumm
 			existingSummary.TotalPartial += summary.TotalPartial
 		} else {
 			// Create new entry
-			newSummary := &ToolSummary{
+			newSummary := &models.ToolSummary{
 				ToolID:            summary.ToolID,
 				ToolCode:          summary.ToolCode,
 				Position:          summary.Position,
@@ -598,8 +588,8 @@ func (s *Service) consolidateToolSummaries(summaries []*ToolSummary) []*ToolSumm
 }
 
 // fixToolSummaryStartDates fixes start dates based on tool changes per position
-func (s *Service) fixToolSummaryStartDates(summaries []*ToolSummary) {
-	positionEntries := make(map[models.Position][]*ToolSummary)
+func (s *Service) fixToolSummaryStartDates(summaries []*models.ToolSummary) {
+	positionEntries := make(map[models.Position][]*models.ToolSummary)
 	for _, summary := range summaries {
 		positionEntries[summary.Position] = append(positionEntries[summary.Position], summary)
 	}
@@ -630,7 +620,7 @@ func (s *Service) fixToolSummaryStartDates(summaries []*ToolSummary) {
 }
 
 // sortToolSummariesByCycles sorts tool summaries by cycle count and then by position
-func (s *Service) sortToolSummariesByCycles(summaries []*ToolSummary) {
+func (s *Service) sortToolSummariesByCycles(summaries []*models.ToolSummary) {
 	for i := 0; i < len(summaries)-1; i++ {
 		for j := i + 1; j < len(summaries); j++ {
 			// Primary sort: by cycle count
@@ -677,7 +667,7 @@ func (s *Service) GetOverlappingTools(
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 
 	// Get all tool summaries for all presses
-	allToolSummaries := make(map[models.PressNumber][]*ToolSummary)
+	allToolSummaries := make(map[models.PressNumber][]*models.ToolSummary)
 
 	for _, press := range validPresses {
 		cycles, toolsMap, _, err := s.GetCycleSummaryData(press, toolsService, usersService)
@@ -696,11 +686,11 @@ func (s *Service) GetOverlappingTools(
 	}
 
 	// Group summaries by tool ID
-	toolGroups := make(map[int64]map[models.PressNumber][]*ToolSummary)
+	toolGroups := make(map[int64]map[models.PressNumber][]*models.ToolSummary)
 	for press, summaries := range allToolSummaries {
 		for _, summary := range summaries {
 			if toolGroups[summary.ToolID] == nil {
-				toolGroups[summary.ToolID] = make(map[models.PressNumber][]*ToolSummary)
+				toolGroups[summary.ToolID] = make(map[models.PressNumber][]*models.ToolSummary)
 			}
 			toolGroups[summary.ToolID][press] = append(toolGroups[summary.ToolID][press], summary)
 		}

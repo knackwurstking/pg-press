@@ -41,29 +41,7 @@ func NewPressCycleWithID(id int64, press PressNumber, toolID int64, toolPosition
 	}
 }
 
-// TODO: Do we really need this?
-func (c *Cycle) SetTool(tool *Tool) {
-	c.tool = tool
-}
-
-// TODO: Do we really need this?
-func (c *Cycle) GetTool() *Tool {
-	return c.tool
-}
-
-func FilterByTool(toolID int64, cycles ...*Cycle) []*Cycle {
-	var filteredCycles []*Cycle
-
-	for _, cycle := range cycles {
-		if cycle.ToolID == toolID {
-			filteredCycles = append(filteredCycles, cycle)
-		}
-	}
-
-	return filteredCycles
-}
-
-func FilterByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {
+func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {
 	var filteredCycles []*Cycle
 
 	for _, cycle := range cycles {
