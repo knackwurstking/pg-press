@@ -16,7 +16,7 @@ func ScanTool(scannable interfaces.Scannable) (*models.Tool, error) {
 	var format []byte
 
 	err := scannable.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press)
+		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press, &tool.Binding)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Quick Migration Helper Script
-# Simple wrapper for running the tools dead status migration
-
 set -e
 
 # Colors for output
@@ -33,8 +30,6 @@ show_usage() {
     echo "  $0 /path/to/db.db     # Migrate specific database"
     echo
     echo "Advanced options:"
-    echo "  --test               # Run migration test first"
-    echo "  --verify-only        # Only run verification"
     echo "  --help               # Show detailed help"
 }
 
@@ -42,22 +37,7 @@ show_usage() {
 case "$1" in
     --help|-h)
         show_usage
-        echo
-        print_info "For detailed migration information, see:"
-        print_info "  ./scripts/README.md"
-        print_info "  ./scripts/migrate-tools-dead-status.sh --help"
         exit 0
-        ;;
-    --test)
-        print_info "Running migration test..."
-        ./scripts/test-migration.sh
-        exit $?
-        ;;
-    --verify-only)
-        DB_PATH="${2:-./pg-press.db}"
-        print_info "Running verification for: $DB_PATH"
-        ./scripts/verify-tools-schema.sh -d "$DB_PATH"
-        exit $?
         ;;
 esac
 
@@ -82,13 +62,6 @@ fi
 
 # Run the migration
 print_info "Running migration script..."
-./scripts/migrate-tools-dead-status.sh -d "$DB_PATH"
-
-# Run verification
-print_info "Verifying migration results..."
-./scripts/verify-tools-schema.sh -d "$DB_PATH" --stats-only
+./scripts/migrate-tools-binding.sh -d "$DB_PATH"
 
 print_success "Migration completed!"
-print_info "You can now use the new dead status features:"
-print_info "  ./pg-press tools mark-dead <tool-id>"
-print_info "  ./pg-press tools list-dead"

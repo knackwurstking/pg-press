@@ -59,8 +59,8 @@ func (b *BaseService) HandleDeleteError(err error, entityName string) error {
 	return fmt.Errorf("delete error: %s: %v", entityName, err)
 }
 
-// CheckExistence checks if a record exists with the given query and parameters
-func (b *BaseService) CheckExistence(query string, args ...interface{}) (bool, error) {
+// checkExistence checks if a record exists with the given query and parameters
+func (b *BaseService) CheckExistence(query string, args ...any) (bool, error) {
 	var count int
 	err := b.DB.QueryRow(query, args...).Scan(&count)
 	if err != nil {

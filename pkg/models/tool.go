@@ -25,10 +25,31 @@ const (
 )
 
 type (
-	Status      string
-	Position    string
-	PressNumber int8
+	Status string
 )
+
+type PressNumber int8
+
+func IsEqualPressNumbers(a, b *PressNumber) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
+}
+
+// IsValid checks if the press number is within the valid range (0-5)
+func IsValidPressNumber(n *PressNumber) bool {
+	if n == nil {
+		return false
+	}
+
+	return slices.Contains([]PressNumber{0, 2, 3, 4, 5}, *n)
+}
+
+type Position string
 
 func (p Position) GermanString() string {
 	switch p {
@@ -41,15 +62,6 @@ func (p Position) GermanString() string {
 	default:
 		return "unknown"
 	}
-}
-
-// IsValid checks if the press number is within the valid range (0-5)
-func IsValidPressNumber(n *PressNumber) bool {
-	if n == nil {
-		return false
-	}
-
-	return slices.Contains([]PressNumber{0, 2, 3, 4, 5}, *n)
 }
 
 type Format struct {
@@ -76,6 +88,7 @@ type Tool struct {
 	Regenerating bool         `json:"regenerating"`
 	IsDead       bool         `json:"is_dead"`
 	Press        *PressNumber `json:"press"` // Press number (0-5) when status is active
+	Binding      *int64       `json:"binding"`
 }
 
 func NewTool(position Position, format Format, code string, _type string) *Tool {
