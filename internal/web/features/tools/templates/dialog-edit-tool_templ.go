@@ -277,14 +277,14 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" required></span> <span class=\"flex flex-col gap-0\"><label for=\"code\">Code</label> <input type=\"text\" id=\"code\" name=\"code\" placeholder=\"z.B. G01, G02, XXL01, 3573\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\"></span> <span class=\"flex flex-col gap-0\"><label for=\"code\">Code</label> <input type=\"text\" id=\"code\" name=\"code\" placeholder=\"z.B. G01, G02, XXL01, 3573\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputCode)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 192, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 191, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {

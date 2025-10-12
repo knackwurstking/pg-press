@@ -378,13 +378,10 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 		data.Format.Height = height
 	}
 
-	// Parse type with validation
+	// Parse type with validation (Optional)
 	data.Type = strings.TrimSpace(c.FormValue("type"))
-	if data.Type == "" {
-		return nil, errors.New("type is required")
-	}
-	if len(data.Type) > 50 {
-		return nil, errors.New("type must be 50 characters or less")
+	if len(data.Type) > 25 {
+		return nil, errors.New("type must be 25 characters or less")
 	}
 
 	// Parse code with validation
@@ -392,8 +389,8 @@ func (h *Handler) getEditToolFormData(c echo.Context) (*EditToolDialogFormData, 
 	if data.Code == "" {
 		return nil, errors.New("code is required")
 	}
-	if len(data.Code) > 50 {
-		return nil, errors.New("code must be 50 characters or less")
+	if len(data.Code) > 25 {
+		return nil, errors.New("code must be 25 characters or less")
 	}
 
 	// Parse press selection with validation

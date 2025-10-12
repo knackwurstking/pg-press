@@ -15,16 +15,9 @@ func ValidateTool(tool *models.Tool) error {
 		return err
 	}
 
-	if err := validation.ValidateNotEmpty(tool.Type, "type"); err != nil {
-		return err
-	}
-
 	if err := validation.ValidateNotEmpty(tool.Code, "code"); err != nil {
 		return err
 	}
-
-	// Format validation would be handled by the model's own validation
-	// since models.Format might not be a pointer type
 
 	return nil
 }
