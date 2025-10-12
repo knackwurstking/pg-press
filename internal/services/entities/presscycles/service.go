@@ -61,25 +61,55 @@ func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 	s.Log.Debug("Calculating partial cycles: press: %d, tool: %d, position: %s, total: %d",
 		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles)
 
-	query := `
-		SELECT total_cycles
-		FROM press_cycles
-		WHERE press_number = ? AND tool_id > 0 AND tool_position = ? AND total_cycles < ?
-		ORDER BY total_cycles DESC
-		LIMIT 1
-	`
+	var (
+		previousTotalCycles int64
+		row                 *sql.Row
+		query               string
+	)
+	if cycle.ToolPosition == models.PositionTopCassette {
+		query = `
+			SELECT total_cycles
+			FROM press_cycles
+			WHERE press_number = ? AND
+				tool_id > 0 AND
+				(tool_position = ? OR tool_position = ?) AND
+				total_cycles < ?
+			ORDER BY total_cycles DESC
+			LIMIT 1
+		`
+		row = s.DB.QueryRow(
+			query,
+			cycle.PressNumber,
+			models.PositionTopCassette, models.PositionTop,
+			cycle.TotalCycles,
+		)
+	} else {
+		query = `
+			SELECT total_cycles
+			FROM press_cycles
+			WHERE press_number = ? AND tool_id > 0 AND tool_position = ? AND total_cycles < ?
+			ORDER BY total_cycles DESC
+			LIMIT 1
+		`
+		row = s.DB.QueryRow(
+			query,
+			cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles,
+		)
+	}
 
-	var previousTotalCycles int64
-	err := s.DB.QueryRow(query, cycle.PressNumber, cycle.ToolPosition, cycle.TotalCycles).Scan(&previousTotalCycles)
-	if err != nil {
+	if err := row.Scan(&previousTotalCycles); err != nil {
 		if err != sql.ErrNoRows {
 			s.Log.Error("Failed to get previous total cycles: %v", err)
 		}
-		s.Log.Debug("No previous cycles found, using total cycles: %d", cycle.TotalCycles)
+
+		s.Log.Debug("No previous cycles found, using total cycles: %d",
+			cycle.TotalCycles)
+
 		return cycle.TotalCycles
 	}
 
 	partialCycles := cycle.TotalCycles - previousTotalCycles
+
 	s.Log.Debug("Calculated partial cycles: %d (total: %d - previous: %d)",
 		partialCycles, cycle.TotalCycles, previousTotalCycles)
 
