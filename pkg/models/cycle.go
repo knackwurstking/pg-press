@@ -13,9 +13,6 @@ type Cycle struct {
 	TotalCycles   int64       `json:"total_cycles"`
 	PartialCycles int64       `json:"partial_cycles"`
 	PerformedBy   int64       `json:"performed_by"`
-
-	// TODO: Do we really need this?
-	tool *Tool
 }
 
 func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycles, user int64) *Cycle {

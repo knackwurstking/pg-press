@@ -46,7 +46,7 @@ templ ToolCycles(props *ToolCyclesProps) {
 						</a>
 					}
 				</span>
-				// TODO: Also do somethings on position top here? Maybe link to tool binding to this tool here
+				// TODO: Support bind/unbind for top position tools too
 				if props.User.IsAdmin() && props.Tool.Position == models.PositionTopCassette {
 					<span class="flex gap">
 						<select

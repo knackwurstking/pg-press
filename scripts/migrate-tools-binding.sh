@@ -1,5 +1,4 @@
 #!/bin/bash
-# TODO: Added "binding", need migration script for this
 
 set -e
 
