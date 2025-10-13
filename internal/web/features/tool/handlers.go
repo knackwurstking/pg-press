@@ -586,95 +586,6 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	return h.HTMXGetToolCycles(c)
 }
 
-func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
-	return components.ToolStatusEdit(&components.ToolStatusEditProps{
-		Tool:              tool,
-		Editable:          editable,
-		UserHasPermission: user.IsAdmin(),
-	})
-}
-
-func (h *Handler) getCycleFormData(c echo.Context) (*EditToolCycleDialogFormData, error) {
-	form := &EditToolCycleDialogFormData{}
-
-	if pressString := c.FormValue("press_number"); pressString != "" {
-		press, err := strconv.Atoi(pressString)
-		if err != nil {
-			return nil, err
-		}
-
-		pn := models.PressNumber(press)
-		form.PressNumber = &pn
-	}
-
-	if dateString := c.FormValue("original_date"); dateString != "" {
-		var err error
-		form.Date, err = time.Parse(constants.DateFormat, dateString)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		form.Date = time.Now()
-	}
-
-	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
-		return nil, fmt.Errorf("form value total_cycles is required")
-	} else {
-		var err error
-		form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	form.Regenerating = c.FormValue("regenerating") != ""
-
-	// Parse tool_id if present (for tool change mode)
-	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
-		toolID, err := strconv.ParseInt(toolIDString, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("invalid tool_id: %v", err)
-		}
-		form.ToolID = &toolID
-	}
-
-	return form, nil
-}
-
-func (h *Handler) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
-	// Get regeneration for this tool
-	var startCycleID int64
-	if r, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
-		startCycleID = r.CycleID
-	}
-
-	var totalCycles int64
-
-	for _, cycle := range cycles {
-		if cycle.ID <= startCycleID {
-			continue
-		}
-
-		totalCycles += cycle.PartialCycles
-	}
-
-	return totalCycles
-}
-
-func (h *Handler) getToolFromQuery(c echo.Context) (*models.Tool, error) {
-	toolID, err := h.ParseInt64Query(c, "tool_id")
-	if err != nil {
-		return nil, err
-	}
-
-	tool, err := h.DB.Tools.Get(toolID)
-	if err != nil {
-		return nil, err
-	}
-
-	return tool, nil
-}
-
 func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	toolID, err := h.ParseInt64Query(c, "tool_id")
 	if err != nil {
@@ -749,4 +660,105 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	// TODO: Update tools binding, get id from param and 'target_id' from hx-vals (however)
 
 	return errors.New("under construction")
+}
+
+// *************** //
+// Private Methods //
+// *************** //
+
+func (h *Handler) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
+	// Get regeneration for this tool
+	var startCycleID int64
+	if r, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
+		startCycleID = r.CycleID
+	}
+
+	var totalCycles int64
+
+	for _, cycle := range cycles {
+		if cycle.ID <= startCycleID {
+			continue
+		}
+
+		totalCycles += cycle.PartialCycles
+	}
+
+	return totalCycles
+}
+
+// ************************ //
+// TEMPL: Rendering methods //
+// ************************ //
+
+func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
+	return components.ToolStatusEdit(&components.ToolStatusEditProps{
+		Tool:              tool,
+		Editable:          editable,
+		UserHasPermission: user.IsAdmin(),
+	})
+}
+
+// ********************* //
+// Get (input) form data //
+// ********************* //
+
+func (h *Handler) getCycleFormData(c echo.Context) (*EditToolCycleDialogFormData, error) {
+	form := &EditToolCycleDialogFormData{}
+
+	if pressString := c.FormValue("press_number"); pressString != "" {
+		press, err := strconv.Atoi(pressString)
+		if err != nil {
+			return nil, err
+		}
+
+		pn := models.PressNumber(press)
+		form.PressNumber = &pn
+	}
+
+	if dateString := c.FormValue("original_date"); dateString != "" {
+		var err error
+		form.Date, err = time.Parse(constants.DateFormat, dateString)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		form.Date = time.Now()
+	}
+
+	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
+		return nil, fmt.Errorf("form value total_cycles is required")
+	} else {
+		var err error
+		form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	form.Regenerating = c.FormValue("regenerating") != ""
+
+	// Parse tool_id if present (for tool change mode)
+	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
+		toolID, err := strconv.ParseInt(toolIDString, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid tool_id: %v", err)
+		}
+		form.ToolID = &toolID
+	}
+
+	return form, nil
+}
+
+func (h *Handler) getToolFromQuery(c echo.Context) (*models.Tool, error) {
+	toolID, err := h.ParseInt64Query(c, "tool_id")
+	if err != nil {
+		return nil, err
+	}
+
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool, nil
 }
