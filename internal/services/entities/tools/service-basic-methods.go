@@ -35,7 +35,15 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	`, ToolQueryInsert)
 
-	result, err := t.DB.Exec(query, tool.Position, formatBytes, tool.Type, tool.Code, tool.Regenerating, tool.IsDead, tool.Press, tool.Binding)
+	result, err := t.DB.Exec(query,
+		tool.Position,
+		formatBytes,
+		tool.Type,
+		tool.Code,
+		tool.Regenerating,
+		tool.IsDead,
+		tool.Press,
+		tool.Binding)
 	if err != nil {
 		return 0, t.HandleInsertError(err, "tools")
 	}
@@ -70,9 +78,11 @@ func (t *Service) Get(id int64) (*models.Tool, error) {
 		row, ScanTool, "tools")
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError(fmt.Sprintf("tool with ID %d not found", id))
+			return nil, utils.NewNotFoundError(
+				fmt.Sprintf("tool with ID %d not found", id))
 		}
-		return nil, err
+
+		return nil, t.HandleSelectError(err, "tools")
 	}
 
 	return tool, nil

@@ -1,8 +1,8 @@
 package tool
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 	"sort"
 	"strconv"
 	"time"
@@ -657,9 +657,60 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
-	// TODO: Update tools binding, get id from param and 'target_id' from hx-vals (however)
+	// Get tool from param "/:id"
+	toolID, err := h.ParseInt64Param(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
+	}
 
-	return errors.New("under construction")
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool")
+	}
+	// Check for existing binding
+	if tool.Binding != nil {
+		// Tool already has a binding
+		return h.RenderBadRequest(c, fmt.Sprintf(
+			"tool \"%s\" already has a binding", tool.String()))
+	}
+
+	// Get "hx-vals" (JSON) data from body
+	var hxVals struct {
+		TargetID string `json:"target_id"`
+	}
+
+	if err := c.Bind(&hxVals); err != nil {
+		return h.RenderBadRequest(c, "failed to parse hx-vals JSON: "+err.Error())
+	}
+
+	// Parse target_id to int64
+	targetID, err := strconv.ParseInt(hxVals.TargetID, 10, 64)
+	if err != nil {
+		return h.RenderBadRequest(c, "invalid target_id: "+err.Error())
+	}
+
+	h.Log.Info("Updating tool binding: tool %d -> target %d",
+		toolID, targetID)
+
+	// Make sure to check for position first (target == top && toolID == cassette)
+	var (
+		cassette int64
+		target   int64 // top position
+	)
+	if tool.Position == models.PositionTopCassette {
+		cassette = tool.ID
+		target = targetID
+	} else {
+		cassette = targetID // If this is not a cassette, the bind method will return an error
+		target = tool.ID
+	}
+
+	// Bind tool to target, this will get an error if target already has a binding
+	if err = h.DB.Tools.Bind(cassette, target); err != nil {
+		return h.HandleError(c, err, "failed to bind tool")
+	}
+
+	return c.NoContent(http.StatusCreated)
 }
 
 // *************** //

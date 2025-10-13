@@ -385,3 +385,37 @@ func (t *Service) ReviveTool(toolID int64, user *models.User) error {
 
 	return nil
 }
+
+func (s *Service) Bind(cassette, target int64) error {
+	if err := s.validateBindingTools(cassette, target); err != nil {
+		return err
+	}
+
+	// Now the actual binding logic
+	query := `
+		UPDATE tools SET binding = $1 WHERE id = $2;
+		UPDATE tools SET binding = $2 WHERE id = $1;
+	`
+	if _, err := s.DB.Exec(query, target, cassette); err != nil {
+		return s.HandleUpdateError(err, "tools")
+	}
+
+	return nil
+}
+
+func (s *Service) UnBind(cassette, target int64) error {
+	if err := s.validateBindingTools(cassette, target); err != nil {
+		return err
+	}
+
+	// Clear the binding by setting binding to NULL for both tools
+	query := `
+		UPDATE tools SET binding = NULL WHERE id = $1;
+		UPDATE tools SET binding = NULL WHERE id = $2;
+	`
+	if _, err := s.DB.Exec(query, cassette, target); err != nil {
+		return s.HandleUpdateError(err, "tools")
+	}
+
+	return nil
+}

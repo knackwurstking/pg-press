@@ -26,6 +26,10 @@ func ValidateTool(tool *models.Tool) error {
 	return nil
 }
 
+// ************************** //
+// Service validation methods //
+// ************************** //
+
 func (t *Service) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
 	formatBytes, err := json.Marshal(tool.Format)
 	if err != nil {
@@ -48,6 +52,30 @@ func (t *Service) validateToolUniqueness(tool *models.Tool, excludeID int64) err
 				tool.Position, tool.Format, tool.Code,
 			),
 		)
+	}
+
+	return nil
+}
+
+func (s *Service) validateBindingTools(cassetteID, targetID int64) error {
+	// Validate cassete tool, has to be a top cassette position tool
+	tool, err := s.Get(cassetteID)
+	if err != nil {
+		return err
+	}
+	if tool.Position != models.PositionTopCassette {
+		return utils.NewValidationError(
+			fmt.Sprintf("tool %d is not a top cassette", cassetteID))
+	}
+
+	// Validate target tools position, has to be a top position tool
+	tool, err = s.Get(targetID)
+	if err != nil {
+		return err
+	}
+	if tool.Position != models.PositionTop {
+		return utils.NewValidationError(
+			fmt.Sprintf("tool %d is not a top tool", targetID))
 	}
 
 	return nil
