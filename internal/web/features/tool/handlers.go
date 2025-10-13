@@ -245,6 +245,7 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		filteredCycles...,
 	)
 
+	// TODO: Also filter tools by format
 	var filteredTools []*models.Tool
 	if tool.Position == models.PositionTopCassette || tool.Position == models.PositionTop {
 		// Get all tools
@@ -254,16 +255,21 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		}
 		// Filter tools for binding
 		for _, t := range tools {
+			if t.Format != tool.Format {
+				continue
+			}
+
 			if tool.Position == models.PositionTop {
-				// Filter tools for binding in case of position top
 				if t.Position == models.PositionTopCassette {
 					filteredTools = append(filteredTools, t)
 				}
-			} else {
-				// Filter tools for binding in case of position top cassette
-				if t.Position == models.PositionTop {
-					filteredTools = append(filteredTools, t)
-				}
+
+				continue
+			}
+
+			// Else: position top cassette
+			if t.Position == models.PositionTop {
+				filteredTools = append(filteredTools, t)
 			}
 		}
 	}
