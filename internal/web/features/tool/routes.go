@@ -28,46 +28,89 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.GetToolPage),
 
 			// HTMX
-			// Tool status management
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-edit",
-				r.handler.HTMXGetStatusEdit),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/status-display",
-				r.handler.HTMXGetStatusDisplay),
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/status",
-				r.handler.HTMXUpdateToolStatus),
+
+			// Tool status and regenerations management
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/status-edit",
+				r.handler.HTMXGetStatusEdit,
+			),
+
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/status-display",
+				r.handler.HTMXGetStatusDisplay,
+			),
+
+			helpers.NewEchoRoute(
+				http.MethodPut,
+				"/htmx/tools/status",
+				r.handler.HTMXUpdateToolStatus,
+			),
 
 			// Section loading
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/notes",
-				r.handler.HTMXGetToolNotes),
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/metal-sheets",
-				r.handler.HTMXGetToolMetalSheets),
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/notes",
+				r.handler.HTMXGetToolNotes,
+			),
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/metal-sheets",
+				r.handler.HTMXGetToolMetalSheets,
+			),
 
 			// Cycles table rows
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycles",
-				r.handler.HTMXGetToolCycles),
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/cycles",
+				r.handler.HTMXGetCycles,
+			),
 
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/total-cycles",
-				r.handler.HTMXGetToolTotalCycles),
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/total-cycles",
+				r.handler.HTMXGetToolTotalCycles,
+			),
 
 			// Get, add or edit a cycles table entry
-			helpers.NewEchoRoute(http.MethodGet, "/htmx/tools/cycle/edit",
-				r.handler.HTMXGetToolCycleEditDialog),
+			helpers.NewEchoRoute(
+				http.MethodGet,
+				"/htmx/tools/cycle/edit",
+				r.handler.HTMXGetToolCycleEditDialog,
+			),
 
-			helpers.NewEchoRoute(http.MethodPost, "/htmx/tools/cycle/edit",
-				r.handler.HTMXPostToolCycleEditDialog),
+			helpers.NewEchoRoute(
+				http.MethodPost,
+				"/htmx/tools/cycle/edit",
+				r.handler.HTMXPostToolCycleEditDialog,
+			),
 
-			helpers.NewEchoRoute(http.MethodPut, "/htmx/tools/cycle/edit",
-				r.handler.HTMXPutToolCycleEditDialog),
+			helpers.NewEchoRoute(
+				http.MethodPut,
+				"/htmx/tools/cycle/edit",
+				r.handler.HTMXPutToolCycleEditDialog,
+			),
 
 			// Delete a cycle table entry
-			helpers.NewEchoRoute(http.MethodDelete, "/htmx/tools/cycle/delete",
-				r.handler.HTMXDeleteToolCycle),
+			helpers.NewEchoRoute(
+				http.MethodDelete,
+				"/htmx/tools/cycle/delete",
+				r.handler.HTMXDeleteToolCycle,
+			),
 
 			// Update tools binding data
-			helpers.NewEchoRoute(http.MethodPatch, "/htmx/tools/tool/:id/bind",
-				r.handler.HTMXPatchToolBinding),
-			helpers.NewEchoRoute(http.MethodPatch, "/htmx/tools/tool/:id/unbind",
-				r.handler.HTMXPatchToolUnBinding),
+			helpers.NewEchoRoute(
+				http.MethodPatch,
+				"/htmx/tools/tool/:id/bind",
+				r.handler.HTMXPatchToolBinding,
+			),
+
+			helpers.NewEchoRoute(
+				http.MethodPatch,
+				"/htmx/tools/tool/:id/unbind",
+				r.handler.HTMXPatchToolUnBinding,
+			),
 		},
 	)
 }
