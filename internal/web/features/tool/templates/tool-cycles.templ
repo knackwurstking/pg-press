@@ -11,7 +11,7 @@ import (
 type ToolCyclesProps struct {
 	User             *models.User
 	Tool             *models.Tool
-	Tools            []*models.Tool
+	ToolsForBinding  []*models.Tool
 	ToolPosition     string
 	TotalCycles      int64
 	Cycles           []*models.Cycle
@@ -47,65 +47,8 @@ templ ToolCycles(props *ToolCyclesProps) {
 					}
 				</span>
 				// (Un)Bind Top and TopCassette tools
-				if len(props.Tools) > 0 {
-					<span
-						class="flex gap"
-						if !props.User.IsAdmin() {
-							disabled
-						}
-					>
-						{{
-							var positionForBinding models.Position
-							if props.Tool.Position == models.PositionTop {
-								positionForBinding = models.PositionTopCassette
-							} else {
-								positionForBinding = models.PositionTop
-							}
-						}}
-						<select
-							id="tool-binding-select"
-							hx-patch={ fmt.Sprintf(
-								"%s/htmx/tools/tool/%d/bind",
-								env.ServerPathPrefix,
-								props.Tool.ID,
-							) }
-							hx-trigger="change"
-							hx-vals="js:{target_id: event.target.value}"
-							hx-swap="none"
-						>
-							<option
-								value=""
-								disabled
-								selected?={ props.Tool.Binding == nil || *props.Tool.Binding > 0 }
-							>
-								{ positionForBinding.GermanString() } Binden
-							</option>
-							// Render options, all top tools unbound
-							for _, t := range props.Tools {
-								<option
-									value={ t.ID }
-									selected?={ props.Tool.Binding != nil && t.ID == *props.Tool.Binding }
-								>{ t.String() } { t.Type }</option>
-							}
-						</select>
-						<button
-							class="small ghost destructive"
-							hx-patch={ fmt.Sprintf(
-										"%s/htmx/tools/tool/%d/unbind",
-										env.ServerPathPrefix,
-										props.Tool.ID,
-									) }
-							hx-trigger="click"
-							hx-swap="none"
-							hx-on:htmx:after-request="
-								if(event.detail.successful) {
-									document.getElementById('tool-binding-select').selectedIndex = 0;
-								}
-							"
-						>
-							{ positionForBinding.GermanString() } Entbinden
-						</button>
-					</span>
+				if len(props.ToolsForBinding) > 0 {
+					@BindingSection(props.Tool, props.ToolsForBinding, props.User.IsAdmin(), nil)
 				}
 			</div>
 		</section>
@@ -161,7 +104,7 @@ templ ToolCycles(props *ToolCyclesProps) {
 						</tr>
 					</thead>
 					<tbody>
-						@toolCyclesTableRows(props)
+						@toolCycleRows(props)
 					</tbody>
 				</table>
 			</figure>
@@ -169,7 +112,76 @@ templ ToolCycles(props *ToolCyclesProps) {
 	</div>
 }
 
-templ toolCyclesTableRows(props *ToolCyclesProps) {
+// TODO: Add a link button to the tool bound to this
+templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
+	{{
+		var positionForBinding models.Position
+		if tool.Position == models.PositionTop {
+			positionForBinding = models.PositionTopCassette
+		} else {
+			positionForBinding = models.PositionTop
+		}
+	}}
+	<span
+		id="binding-section"
+		class="flex gap"
+		if !isAdmin {
+			disabled
+		}
+	>
+		<select
+			id="tool-binding-select"
+			hx-patch={ fmt.Sprintf(
+				"%s/htmx/tools/tool/%d/bind",
+				env.ServerPathPrefix,
+				tool.ID,
+			) }
+			hx-vals="js:{target_id: event.target.value}"
+			hx-trigger="change"
+			hx-target="#binding-section"
+			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+			if tool.Binding != nil {
+				disabled
+			}
+		>
+			<option
+				value=""
+				disabled
+				selected?={ tool.Binding == nil }
+			>
+				{ positionForBinding.GermanString() } Binden
+			</option>
+			// Render options, all top tools unbound
+			for _, t := range toolsForBinding {
+				<option
+					value={ t.ID }
+					selected?={ tool.Binding != nil && t.ID == *tool.Binding }
+				>{ t.String() } { t.Type }</option>
+			}
+		</select>
+		<button
+			class="small ghost destructive"
+			hx-patch={ fmt.Sprintf(
+				"%s/htmx/tools/tool/%d/unbind",
+				env.ServerPathPrefix,
+				tool.ID,
+			) }
+			hx-trigger="click"
+			hx-trigger="change"
+			hx-target="#binding-section"
+			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+			if tool.Binding == nil {
+				disabled
+			}
+		>
+			{ positionForBinding.GermanString() } Entbinden
+		</button>
+	</span>
+}
+
+templ toolCycleRows(props *ToolCyclesProps) {
 	if len(props.Cycles) == 0 {
 		<tr>
 			<td colspan="5" class="text-center">
@@ -178,12 +190,12 @@ templ toolCyclesTableRows(props *ToolCyclesProps) {
 		</tr>
 	} else {
 		for _, cycle := range props.Cycles {
-			@renderToolCycleRowWithPartialCalc(props, cycle)
+			@toolCycleRowWithPartialCalc(props, cycle)
 		}
 	}
 }
 
-templ renderToolCycleRowWithPartialCalc(props *ToolCyclesProps, cycle *models.Cycle) {
+templ toolCycleRowWithPartialCalc(props *ToolCyclesProps, cycle *models.Cycle) {
 	<tr
 		if props.LastRegeneration != nil && props.LastRegeneration.CycleID == cycle.ID {
 			style="color: var(--ui-muted);"
