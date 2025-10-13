@@ -11,7 +11,6 @@ import (
 type ToolCyclesProps struct {
 	User             *models.User
 	Tool             *models.Tool
-	BoundTool        *models.Tool
 	Tools            []*models.Tool
 	ToolPosition     string
 	TotalCycles      int64
@@ -107,29 +106,6 @@ templ ToolCycles(props *ToolCyclesProps) {
 							{ positionForBinding.GermanString() } Entbinden
 						</button>
 					</span>
-				}
-				// Navigation link to bound tool if binding exists
-				if props.Tool.Binding != nil && props.BoundTool != nil {
-					<div class="card compact info flex gap items-center px-md py-sm">
-						<i class="bi bi-arrow-left-right text-lg"></i>
-						<div class="flex flex-col gap-xs">
-							<span class="text-sm text-medium">Gebunden mit:</span>
-							<a
-								role="button"
-								class="small primary flex gap items-center"
-								href={ fmt.Sprintf(
-									"%s/tools/%d",
-									env.ServerPathPrefix, *props.Tool.Binding,
-								) }
-								title={ fmt.Sprintf("Zu %s %s navigieren",
-									props.BoundTool.String(), props.BoundTool.Position.GermanString()) }
-							>
-								<i class="bi bi-box-arrow-up-right"></i>
-								{ props.BoundTool.String() } { props.BoundTool.Type }
-								<span class="text-xs muted">({ props.BoundTool.Position.GermanString() })</span>
-							</a>
-						</div>
-					</div>
 				}
 			</div>
 		</section>

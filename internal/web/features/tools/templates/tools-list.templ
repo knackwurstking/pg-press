@@ -37,9 +37,6 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 						@components.PositionBadge(
 							tool.Position, "muted text-bold")
 						@components.ToolStatusBadge(tool.Tool)
-						if tool.Binding != nil {
-							<i class="bi bi-link-45deg text-info" title="Werkzeug ist gebunden"></i>
-						}
 					</span>
 				</span>
 				<span

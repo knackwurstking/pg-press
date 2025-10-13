@@ -61,7 +61,6 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 
 	page := templates.Page(&templates.PageProps{
 		User:       user,
-		Tool:       tool.Tool,
 		ToolString: tool.String(),
 		ToolID:     tool.ID,
 		Position:   tool.Position,
@@ -274,20 +273,9 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		}
 	}
 
-	// Fetch bound tool if binding exists
-	var boundTool *models.Tool
-	if tool.Binding != nil {
-		boundTool, err = h.DB.Tools.Get(*tool.Binding)
-		if err != nil {
-			h.Log.Error("Failed to get bound tool %d: %v", *tool.Binding, err)
-			// Continue without bound tool - don't fail the whole request
-		}
-	}
-
 	cyclesSection := templates.ToolCycles(&templates.ToolCyclesProps{
 		User:             user,
 		Tool:             tool,
-		BoundTool:        boundTool,
 		Tools:            filteredTools,
 		TotalCycles:      totalCycles,
 		Cycles:           filteredCycles,

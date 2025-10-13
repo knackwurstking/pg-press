@@ -10,9 +10,9 @@
   - [x] Removed top cassette from the "umbau" page for now
   - [x] Auto update press if a binding changed
   - [x] Filter bindable tools list for format
-  - [ ] Throw error if a tool already is avaible at a position for a press (edit tool dialog) [WIP]
-  - [ ] Disallow double bindings, which is possible right now [WIP]
-  - [ ] UI: Add some links (anchor) to the tool page containing a binding [WIP]
+  - [ ] Throw error if a tool already is avaible at a position for a press (edit tool dialog)
+  - [ ] Disallow double bindings, which is possible right now
+  - [ ] UI: Add some links (anchor) to the tool page containing a binding
   - [ ] Handle cycle tracking, currently ignored, need to manually add this for the cassette if needed
 
 - [ ] Add regenerations list management to tools for deletion (admin only)
