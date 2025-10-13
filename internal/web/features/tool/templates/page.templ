@@ -12,6 +12,7 @@ import (
 type PageProps struct {
 	User *models.User
 
+	Tool       *models.Tool
 	ToolString string
 	ToolID     int64
 	Position   models.Position
@@ -28,7 +29,7 @@ templ Page(props *PageProps) {
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			@sectionActions(props.User, props.ToolID)
+			@sectionActions(props.User, props.Tool)
 			<section
 				id="notes-section"
 				hx-get={ fmt.Sprintf(
@@ -72,12 +73,26 @@ templ Page(props *PageProps) {
 	}
 }
 
-templ sectionActions(user *models.User, toolID int64) {
+templ sectionActions(user *models.User, tool *models.Tool) {
 	<section class="action-bar flex gap justify-end items-center">
+		if tool.Binding != nil && (tool.Position == models.PositionTop || tool.Position == models.PositionTopCassette) {
+			<a
+				role="button"
+				class="secondary flex gap"
+				href={ fmt.Sprintf(
+					"%s/tools/%d",
+					env.ServerPathPrefix, *tool.Binding,
+				) }
+				title="Zum gebundenen Werkzeug navigieren"
+			>
+				<i class="bi bi-link-45deg"></i>
+				Gebundenes Werkzeug
+			</a>
+		}
 		<button
 			class="primary flex gap"
 			hx-get={ fmt.Sprintf("%s/htmx/tools/edit?id=%d&reload_page=true",
-				env.ServerPathPrefix, toolID) }
+				env.ServerPathPrefix, tool.ID) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -90,7 +105,7 @@ templ sectionActions(user *models.User, toolID int64) {
 			class="destructive flex gap"
 			hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/mark-dead?id=%d",
-				env.ServerPathPrefix, toolID,
+				env.ServerPathPrefix, tool.ID,
 			) }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"

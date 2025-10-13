@@ -57,25 +57,42 @@ func (t *Service) validateToolUniqueness(tool *models.Tool, excludeID int64) err
 	return nil
 }
 
+// validateBindingTools validates that two tools can be bound together.
+// It ensures:
+// - The cassette tool is a top cassette position tool
+// - The target tool is a top position tool
+// - Neither tool is already bound to another tool (prevents multiple bindings)
 func (s *Service) validateBindingTools(cassetteID, targetID int64) error {
 	// Validate cassete tool, has to be a top cassette position tool
-	tool, err := s.Get(cassetteID)
+	cassetteTool, err := s.Get(cassetteID)
 	if err != nil {
 		return err
 	}
-	if tool.Position != models.PositionTopCassette {
+	if cassetteTool.Position != models.PositionTopCassette {
 		return utils.NewValidationError(
 			fmt.Sprintf("tool %d is not a top cassette", cassetteID))
 	}
 
+	// Check if cassette tool is already bound
+	if cassetteTool.Binding != nil {
+		return utils.NewValidationError(
+			fmt.Sprintf("cassette tool %d is already bound to tool %d", cassetteID, *cassetteTool.Binding))
+	}
+
 	// Validate target tools position, has to be a top position tool
-	tool, err = s.Get(targetID)
+	targetTool, err := s.Get(targetID)
 	if err != nil {
 		return err
 	}
-	if tool.Position != models.PositionTop {
+	if targetTool.Position != models.PositionTop {
 		return utils.NewValidationError(
 			fmt.Sprintf("tool %d is not a top tool", targetID))
+	}
+
+	// Check if target tool is already bound
+	if targetTool.Binding != nil {
+		return utils.NewValidationError(
+			fmt.Sprintf("target tool %d is already bound to tool %d", targetID, *targetTool.Binding))
 	}
 
 	return nil

@@ -389,7 +389,6 @@ func (t *Service) ReviveTool(toolID int64, user *models.User) error {
 	return nil
 }
 
-// TODO: Disallow double bindings
 func (s *Service) Bind(cassette, target int64) error {
 	if err := s.validateBindingTools(cassette, target); err != nil {
 		return err
