@@ -7,5 +7,6 @@
 - Implement a cassette binding system, allow binding to top tool
   - [x] Implement binding to the tools service
   - [x] Update the tool page and allow bind a tool of type (position top cassette) to a top tool, things need to match: "format"
+  - [ ] Handle binding for the "umbau" feature
 
 - [ ] Add regenerations list management to tools for deletion (admin only)

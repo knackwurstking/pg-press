@@ -245,18 +245,33 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	var tools []*models.Tool
-	if tool.Position == models.PositionTopCassette {
-		tools, err = h.DB.Tools.List()
+	var filteredTools []*models.Tool
+	if tool.Position == models.PositionTopCassette || tool.Position == models.PositionTop {
+		// Get all tools
+		tools, err := h.DB.Tools.List()
 		if err != nil {
 			return h.HandleError(c, err, "failed to get tools")
+		}
+		// Filter tools for binding
+		for _, t := range tools {
+			if tool.Position == models.PositionTop {
+				// Filter tools for binding in case of position top
+				if t.Position == models.PositionTopCassette {
+					filteredTools = append(filteredTools, t)
+				}
+			} else {
+				// Filter tools for binding in case of position top cassette
+				if t.Position == models.PositionTop {
+					filteredTools = append(filteredTools, t)
+				}
+			}
 		}
 	}
 
 	cyclesSection := templates.ToolCycles(&templates.ToolCyclesProps{
 		User:             user,
 		Tool:             tool,
-		Tools:            tools,
+		Tools:            filteredTools,
 		TotalCycles:      totalCycles,
 		Cycles:           filteredCycles,
 		LastRegeneration: regeneration,
@@ -674,17 +689,13 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 			"tool \"%s\" already has a binding", tool.String()))
 	}
 
-	// Get "hx-vals" (JSON) data from body
-	var hxVals struct {
-		TargetID string `json:"target_id"`
+	targetIDString := c.FormValue("target_id")
+	if targetIDString == "" {
+		return h.RenderBadRequest(c, fmt.Sprintf(
+			"failed to parse target_id: %+v", targetIDString))
 	}
-
-	if err := c.Bind(&hxVals); err != nil {
-		return h.RenderBadRequest(c, "failed to parse hx-vals JSON: "+err.Error())
-	}
-
 	// Parse target_id to int64
-	targetID, err := strconv.ParseInt(hxVals.TargetID, 10, 64)
+	targetID, err := strconv.ParseInt(targetIDString, 10, 64)
 	if err != nil {
 		return h.RenderBadRequest(c, "invalid target_id: "+err.Error())
 	}
@@ -708,6 +719,20 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	// Bind tool to target, this will get an error if target already has a binding
 	if err = h.DB.Tools.Bind(cassette, target); err != nil {
 		return h.HandleError(c, err, "failed to bind tool")
+	}
+
+	return c.NoContent(http.StatusCreated)
+}
+
+func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
+	// Get tool from param "/:id"
+	toolID, err := h.ParseInt64Param(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse tool_id: "+err.Error())
+	}
+
+	if err := h.DB.Tools.UnBind(toolID); err != nil {
+		return h.HandleError(c, err, "failed to unbind tool")
 	}
 
 	return c.NoContent(http.StatusCreated)

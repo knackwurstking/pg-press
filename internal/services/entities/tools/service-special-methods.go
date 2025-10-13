@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
@@ -392,28 +393,52 @@ func (s *Service) Bind(cassette, target int64) error {
 	}
 
 	// Now the actual binding logic
-	query := `
-		UPDATE tools SET binding = $1 WHERE id = $2;
-		UPDATE tools SET binding = $2 WHERE id = $1;
-	`
-	if _, err := s.DB.Exec(query, target, cassette); err != nil {
-		return s.HandleUpdateError(err, "tools")
+	queries := []string{
+		`UPDATE tools SET binding = :target WHERE id = :cassette;`,
+		`UPDATE tools SET binding = :cassette WHERE id = :target;`,
+	}
+
+	for _, query := range queries {
+		if _, err := s.DB.Exec(query,
+			sql.Named("target", target),
+			sql.Named("cassette", cassette),
+		); err != nil {
+			return s.HandleUpdateError(err, "tools")
+		}
 	}
 
 	return nil
 }
 
-func (s *Service) UnBind(cassette, target int64) error {
-	if err := s.validateBindingTools(cassette, target); err != nil {
+func (s *Service) UnBind(toolID int64) error {
+	if err := validation.ValidateID(toolID, "tool"); err != nil {
 		return err
+	}
+
+	// Get the tool to find its binding
+	tool, err := s.Get(toolID)
+	if err != nil {
+		return err
+	}
+
+	// If no binding exists, nothing to unbind
+	if tool.Binding == nil {
+		return nil
 	}
 
 	// Clear the binding by setting binding to NULL for both tools
 	query := `
-		UPDATE tools SET binding = NULL WHERE id = $1;
-		UPDATE tools SET binding = NULL WHERE id = $2;
+		UPDATE
+			tools
+		SET
+			binding = NULL
+		WHERE
+			id = :toolID OR id = :binding;
 	`
-	if _, err := s.DB.Exec(query, cassette, target); err != nil {
+	if _, err := s.DB.Exec(query,
+		sql.Named("toolID", toolID),
+		sql.Named("binding", *tool.Binding),
+	); err != nil {
 		return s.HandleUpdateError(err, "tools")
 	}
 

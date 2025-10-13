@@ -46,10 +46,24 @@ templ ToolCycles(props *ToolCyclesProps) {
 						</a>
 					}
 				</span>
-				// TODO: Support bind/unbind for top position tools too
-				if props.User.IsAdmin() && props.Tool.Position == models.PositionTopCassette {
-					<span class="flex gap">
+				// (Un)Bind Top and TopCassette tools
+				if len(props.Tools) > 0 {
+					<span
+						class="flex gap"
+						if !props.User.IsAdmin() {
+							disabled
+						}
+					>
+						{{
+							var positionForBinding models.Position
+							if props.Tool.Position == models.PositionTop {
+								positionForBinding = models.PositionTopCassette
+							} else {
+								positionForBinding = models.PositionTop
+							}
+						}}
 						<select
+							id="tool-binding-select"
 							hx-patch={ fmt.Sprintf(
 								"%s/htmx/tools/tool/%d/bind",
 								env.ServerPathPrefix,
@@ -57,19 +71,40 @@ templ ToolCycles(props *ToolCyclesProps) {
 							) }
 							hx-trigger="change"
 							hx-vals="js:{target_id: event.target.value}"
+							hx-swap="none"
 						>
 							<option
 								value=""
 								disabled
 								selected?={ props.Tool.Binding == nil || *props.Tool.Binding > 0 }
-							>Werkzeug Verknüpfen</option>
+							>
+								{ positionForBinding.GermanString() } Binden
+							</option>
 							// Render options, all top tools unbound
 							for _, t := range props.Tools {
-								if t.Binding == nil && t.Position == models.PositionTop {
-									<option value={ t.ID }>{ t.String() } { t.Type }</option>
-								}
+								<option
+									value={ t.ID }
+									selected?={ props.Tool.Binding != nil && t.ID == *props.Tool.Binding }
+								>{ t.String() } { t.Type }</option>
 							}
 						</select>
+						<button
+							class="small ghost destructive"
+							hx-patch={ fmt.Sprintf(
+										"%s/htmx/tools/tool/%d/unbind",
+										env.ServerPathPrefix,
+										props.Tool.ID,
+									) }
+							hx-trigger="click"
+							hx-swap="none"
+							hx-on:htmx:after-request="
+								if(event.detail.successful) {
+									document.getElementById('tool-binding-select').selectedIndex = 0;
+								}
+							"
+						>
+							{ positionForBinding.GermanString() } Entbinden
+						</button>
 					</span>
 				}
 			</div>
