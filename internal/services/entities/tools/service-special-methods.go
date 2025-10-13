@@ -282,18 +282,20 @@ func (t *Service) UpdatePress(toolID int64, press *models.PressNumber, user *mod
 		return fmt.Errorf("failed to get tool for press update: %v", err)
 	}
 
-	if models.IsEqualPressNumbers(tool.Press, press) {
-		return nil
-	}
-
-	if err := tool.SetPress(press); err != nil {
-		return fmt.Errorf("failed to set press for tool %d: %v", toolID, err)
-	}
-
 	query := `UPDATE tools SET press = ? WHERE id = ?`
 	result, err := t.DB.Exec(query, press, toolID)
 	if err != nil {
 		return t.HandleUpdateError(err, "tools")
+	}
+
+	// Handle binding
+	if tool.Binding != nil {
+		// Update press for bound tool
+		query = `UPDATE tools SET press = ? WHERE id = ?`
+		result, err = t.DB.Exec(query, press, *tool.Binding)
+		if err != nil {
+			return t.HandleUpdateError(err, "tools")
+		}
 	}
 
 	if err := t.CheckRowsAffected(result, "tool", toolID); err != nil {
@@ -392,16 +394,30 @@ func (s *Service) Bind(cassette, target int64) error {
 		return err
 	}
 
+	// Get press from the target tool
+	var press *models.PressNumber
+	if t, err := s.Get(target); err != nil {
+		return err
+	} else {
+		press = t.Press
+	}
+
 	// Now the actual binding logic
 	queries := []string{
+		// Bindings
 		`UPDATE tools SET binding = :target WHERE id = :cassette;`,
 		`UPDATE tools SET binding = :cassette WHERE id = :target;`,
+		// Unbind press
+		`UPDATE tools SET press = NULL WHERE press = :press AND position = "cassette top";`,
+		// Bind press from target to cassette
+		`UPDATE tools SET press = :press WHERE id = :cassette;`,
 	}
 
 	for _, query := range queries {
 		if _, err := s.DB.Exec(query,
 			sql.Named("target", target),
 			sql.Named("cassette", cassette),
+			sql.Named("press", press),
 		); err != nil {
 			return s.HandleUpdateError(err, "tools")
 		}

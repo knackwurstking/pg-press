@@ -102,8 +102,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 		return h.RenderBadRequest(c, "missing bottom tool")
 	}
 
-	topCassetteToolStr := h.GetSanitizedFormValue(c, "top-cassette") // Optional
-
 	// Get all tools to find by string representation
 	tools, err := h.DB.Tools.List()
 	if err != nil {
@@ -119,14 +117,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	bottomTool, err := h.findToolByString(tools, bottomToolStr, models.PositionBottom)
 	if err != nil {
 		return h.RenderBadRequest(c, "invalid bottom tool: "+err.Error())
-	}
-
-	var topCassetteTool *models.Tool
-	if topCassetteToolStr != "" {
-		topCassetteTool, err = h.findToolByString(tools, topCassetteToolStr, models.PositionTopCassette)
-		if err != nil {
-			return h.RenderBadRequest(c, "invalid top cassette tool: "+err.Error())
-		}
 	}
 
 	// Get currently assigned tools for this press
@@ -160,10 +150,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 
 	// Assign new tools to press (without creating initial cycles)
 	toolsToAssign := []*models.Tool{topTool, bottomTool}
-	if topCassetteTool != nil {
-		toolsToAssign = append(toolsToAssign, topCassetteTool)
-	}
-
 	for _, tool := range toolsToAssign {
 		// Assign tool to press
 		if err := h.DB.Tools.UpdatePress(tool.ID, &pn, user); err != nil {
@@ -180,9 +166,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 			"Eingebautes Unterteil: %s",
 		pn, topTool.String(), bottomTool.String(),
 	)
-	if topCassetteTool != nil {
-		content += fmt.Sprintf("\nEingebaute Obere Kassette: %s", topCassetteTool.String())
-	}
 	content += fmt.Sprintf("\nGesamtzyklen: %d", totalCycles)
 
 	feed := models.NewFeed(title, content, user.TelegramID)

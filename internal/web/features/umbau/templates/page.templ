@@ -36,9 +36,8 @@ func (pp *PageProps) GetDataListOptions(position models.Position) []DataListOpti
 
 func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
-		models.PositionTop:         nil,
-		models.PositionTopCassette: nil,
-		models.PositionBottom:      nil,
+		models.PositionTop:    nil,
+		models.PositionBottom: nil,
 	}
 
 	for _, t := range pp.Tools {
@@ -72,8 +71,6 @@ templ Page(props *PageProps) {
 				<hr/>
 				@sectionTop(slots[models.PositionTop])
 				<hr/>
-				@sectionTopCassette(slots[models.PositionTopCassette])
-				<hr/>
 				@sectionBottom(slots[models.PositionBottom])
 				<hr/>
 				@formActions(props.User)
@@ -85,11 +82,6 @@ templ Page(props *PageProps) {
 templ toolsDataLists(props *PageProps) {
 	<datalist id="tools-list-top">
 		for _, o := range props.GetDataListOptions(models.PositionTop) {
-			<option value={ o.Label }></option>
-		}
-	</datalist>
-	<datalist id="tools-list-top-cassette">
-		for _, o := range props.GetDataListOptions(models.PositionTopCassette) {
 			<option value={ o.Label }></option>
 		}
 	</datalist>
@@ -132,27 +124,6 @@ templ sectionTop(tool *models.Tool) {
 				placeholder="Werkzeug"
 				list="tools-list-top"
 				required
-			/>
-		</span>
-	</section>
-}
-
-templ sectionTopCassette(tool *models.Tool) {
-	<section>
-		<h3>{ models.PositionTopCassette.GermanString() } (optional)</h3>
-		if tool != nil {
-			<p>Aktuelles Werkzeug: { tool.String() }</p>
-		} else {
-			<p>Aktuelles Werkzeug: -</p>
-		}
-		<span class="flex flex-col">
-			<label for="top-cassette">Neues Werkzeug:</label>
-			<input
-				type="text"
-				id="top-cassette"
-				name="top-cassette"
-				placeholder="Werkzeug"
-				list="tools-list-top-cassette"
 			/>
 		</span>
 	</section>
