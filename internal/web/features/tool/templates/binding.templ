@@ -1,0 +1,76 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+// TODO: Add a link button to the tool bound to this
+templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
+	{{
+		var positionForBinding models.Position
+		if tool.Position == models.PositionTop {
+			positionForBinding = models.PositionTopCassette
+		} else {
+			positionForBinding = models.PositionTop
+		}
+	}}
+	<span
+		id="binding-section"
+		class="flex gap"
+		if !isAdmin {
+			disabled
+		}
+	>
+		<select
+			id="tool-binding-select"
+			hx-patch={ fmt.Sprintf(
+				"%s/htmx/tools/tool/%d/bind",
+				env.ServerPathPrefix,
+				tool.ID,
+			) }
+			hx-vals="js:{target_id: event.target.value}"
+			hx-trigger="change"
+			hx-target="#binding-section"
+			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+			if tool.Binding != nil {
+				disabled
+			}
+		>
+			<option
+				value=""
+				disabled
+				selected?={ tool.Binding == nil }
+			>
+				{ positionForBinding.GermanString() } Binden
+			</option>
+			// Render options, all top tools unbound
+			for _, t := range toolsForBinding {
+				<option
+					value={ t.ID }
+					selected?={ tool.Binding != nil && t.ID == *tool.Binding }
+				>{ t.String() } { t.Type }</option>
+			}
+		</select>
+		<button
+			class="small ghost destructive"
+			hx-patch={ fmt.Sprintf(
+				"%s/htmx/tools/tool/%d/unbind",
+				env.ServerPathPrefix,
+				tool.ID,
+			) }
+			hx-trigger="click"
+			hx-trigger="change"
+			hx-target="#binding-section"
+			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+			if tool.Binding == nil {
+				disabled
+			}
+		>
+			{ positionForBinding.GermanString() } Entbinden
+		</button>
+	</span>
+}

@@ -32,7 +32,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 		LoadedNotes: notes,
 	}
 
-	notesSection := templates.SectionNotes(toolWithNotes)
+	notesSection := templates.Notes(toolWithNotes)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render tool notes section")

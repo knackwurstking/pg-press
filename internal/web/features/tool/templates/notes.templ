@@ -1,0 +1,39 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+templ Notes(tool *models.ToolWithNotes) {
+	<div class="flex justify-between items-center mb">
+		<h4>Notizen</h4>
+		<button
+			class="icon secondary small flex"
+			hx-get={ fmt.Sprintf(
+				"%s/htmx/notes/edit?link_to_tables=tool_%d",
+				env.ServerPathPrefix, tool.ID,
+			) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			title="Neue Notiz hinzufügen"
+		>
+			<i class="bi bi-plus-lg"></i>
+		</button>
+	</div>
+	if len(tool.LoadedNotes) > 0 {
+		<div class="notes-list">
+			for _, note := range tool.LoadedNotes {
+				@components.NoteCard(note)
+			}
+		</div>
+	} else {
+		<div class="empty-state">
+			<p class="text-muted">Keine Notizen für dieses Werkzeug vorhanden.</p>
+		</div>
+	}
+}

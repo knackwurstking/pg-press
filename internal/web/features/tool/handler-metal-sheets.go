@@ -32,7 +32,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 		metalSheets = []*models.MetalSheet{}
 	}
 
-	metalSheetsSection := templates.SectionMetalSheets(user, metalSheets, tool)
+	metalSheetsSection := templates.MetalSheets(user, metalSheets, tool)
 
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render tool metal sheets section")
