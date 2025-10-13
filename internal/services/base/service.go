@@ -124,11 +124,3 @@ func (b *BaseService) PrepareNullableString(value string) interface{} {
 	}
 	return value
 }
-
-// HandleNullableString converts NULL values to empty strings when scanning
-func (b *BaseService) HandleNullableString(value sql.NullString) string {
-	if value.Valid {
-		return value.String
-	}
-	return ""
-}
