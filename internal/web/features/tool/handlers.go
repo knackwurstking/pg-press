@@ -305,7 +305,7 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 	props := &templates.DialogEditCycleProps{}
 
 	// Check if we're in tool change mode
-	toolChangeMode := c.QueryParam("tool_change_mode") == "true"
+	toolChangeMode := h.ParseBoolQuery(c, "tool_change_mode")
 
 	if c.QueryParam("id") != "" {
 		cycleID, err := h.ParseInt64Query(c, "id")
@@ -699,7 +699,7 @@ func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *
 }
 
 // ********************* //
-// Get (input) form data //
+// Get (html) form data //
 // ********************* //
 
 func (h *Handler) getCycleFormData(c echo.Context) (*EditToolCycleDialogFormData, error) {
