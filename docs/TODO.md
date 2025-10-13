@@ -13,6 +13,7 @@
   - [ ] Handle cycle tracking, currently ignored, need to manually add this for the cassette if needed
   - [ ] Throw error if a tool already is avaible at a position for a press (edit tool dialog)
   - [ ] Filter bindable tools list for format
+  - [ ] UI: Add some links (anchor) to the tool page containing a binding
 
 - [ ] Add regenerations list management to tools for deletion (admin only)
 - [ ] Using select for tools page filters
