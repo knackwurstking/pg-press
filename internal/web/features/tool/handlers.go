@@ -245,7 +245,6 @@ func (h *Handler) HTMXGetToolCycles(c echo.Context) error {
 		filteredCycles...,
 	)
 
-	// TODO: Also filter tools by format
 	var filteredTools []*models.Tool
 	if tool.Position == models.PositionTopCassette || tool.Position == models.PositionTop {
 		// Get all tools
