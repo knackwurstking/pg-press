@@ -41,7 +41,7 @@ func MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) tem
 			return templ_7745c5c3_Err
 		}
 		if len(metalSheets) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<tr><td colspan=\"4\" class=\"text-center\">Keine Bleche für dieses Werkzeug gefunden</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<tr><td colspan=\"4\" class=\"text-center\"><i><small>Keine Bleche für dieses Werkzeug gefunden</small></i></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -168,7 +168,7 @@ func MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet) 
 			return templ_7745c5c3_Err
 		}
 		if len(metalSheets) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<tr><td colspan=\"7\" class=\"text-center\">Keine Bleche für dieses Werkzeug gefunden</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<tr><td colspan=\"7\" class=\"text-center\"><i><small>Keine Bleche für dieses Werkzeug gefunden</small></i></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

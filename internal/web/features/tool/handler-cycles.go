@@ -34,7 +34,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	filteredCycles := models.FilterCyclesByToolPosition(
 		tool.Position, toolCycles...)
 
-	regeneration, err := h.DB.ToolRegenerations.GetLastRegeneration(toolID)
+	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
 	if err != nil {
 		h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
 	}
@@ -52,12 +52,12 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 
 	// Render the template
 	cyclesSection := templates.Cycles(&templates.CyclesProps{
-		User:             user,
-		Tool:             tool,
-		ToolsForBinding:  toolsForBinding,
-		TotalCycles:      totalCycles,
-		Cycles:           filteredCycles,
-		LastRegeneration: regeneration,
+		User:            user,
+		Tool:            tool,
+		ToolsForBinding: toolsForBinding,
+		TotalCycles:     totalCycles,
+		Cycles:          filteredCycles,
+		Regenerations:   regenerations,
 	})
 
 	if err := cyclesSection.Render(

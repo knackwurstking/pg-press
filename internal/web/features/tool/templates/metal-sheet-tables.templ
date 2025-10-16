@@ -22,7 +22,7 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 				if len(metalSheets) == 0 {
 					<tr>
 						<td colspan="4" class="text-center">
-							Keine Bleche für dieses Werkzeug gefunden
+							<i><small>Keine Bleche für dieses Werkzeug gefunden</small></i>
 						</td>
 					</tr>
 				} else {
@@ -93,7 +93,7 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 				if len(metalSheets) == 0 {
 					<tr>
 						<td colspan="7" class="text-center">
-							Keine Bleche für dieses Werkzeug gefunden
+							<i><small>Keine Bleche für dieses Werkzeug gefunden</small></i>
 						</td>
 					</tr>
 				} else {

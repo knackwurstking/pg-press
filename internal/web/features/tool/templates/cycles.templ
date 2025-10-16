@@ -9,51 +9,37 @@ import (
 )
 
 type CyclesProps struct {
-	User             *models.User
-	Tool             *models.Tool
-	ToolsForBinding  []*models.Tool
-	ToolPosition     string
-	TotalCycles      int64
-	Cycles           []*models.Cycle
-	LastRegeneration *models.Regeneration
+	User            *models.User
+	Tool            *models.Tool
+	ToolsForBinding []*models.Tool
+	ToolPosition    string
+	TotalCycles     int64
+	Cycles          []*models.Cycle
+	Regenerations   []*models.Regeneration
 }
 
-// TODO: Adding a regenerations list somewhere
 templ Cycles(props *CyclesProps) {
 	<div class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
-		<section class="status">
+		<section id="tool-status-section">
 			<div class="flex justify-between items-center mb">
 				<h5>Aktueller Status</h5>
 			</div>
-			<div class="flex flex-col gap">
-				<span class="flex gap-lg">
-					@components.ToolStatusEdit(&components.ToolStatusEditProps{
-						Tool:              props.Tool,
-						UserHasPermission: props.User.IsAdmin(),
-					})
-					if props.Tool.IsActive() {
-						<a
-							role="button"
-							class="small ghost flex gap"
-							href={ fmt.Sprintf(
-							"%s/tools/press/%d",
-							env.ServerPathPrefix, *props.Tool.Press,
-						) }
-							title="Zur Pressenübersicht"
-						>
-							<i class="bi bi-arrow-right"></i>
-							Presse { fmt.Sprintf("%d", *props.Tool.Press) }
-						</a>
-					}
-				</span>
-				// (Un)Bind Top and TopCassette tools
-				if len(props.ToolsForBinding) > 0 {
-					@BindingSection(props.Tool, props.ToolsForBinding, props.User.IsAdmin(), nil)
-				}
-			</div>
+			@toolStatus(props.Tool, props.ToolsForBinding, props.User)
 		</section>
-		<section class="cycles">
+		<section id="regenerations-section">
+			<div class="flex justify-between items-center mb">
+				<h5>Regerationen</h5>
+			</div>
+			if len(props.Regenerations) == 0 {
+				<span class="flex justify-center items-center">
+					<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
+				</span>
+			} else {
+				@regenerationsTable(props.Regenerations)
+			}
+		</section>
+		<section id="cycles-section">
 			<div class="flex justify-between items-center mb">
 				<h5>Pressennutzungsverlauf</h5>
 				<button
@@ -83,43 +69,84 @@ templ Cycles(props *CyclesProps) {
 					@components.TotalCycles(props.TotalCycles, true)
 				</span>
 			</section>
-			<figure class="w-full overflow-x-scroll">
-				<table name="tool-cycles-table" class="table borderless compact">
-					<thead>
-						<tr>
-							<th name="press">Presse</th>
-							<th name="date">Datum</th>
-							<th name="total">Gesamtzyklen</th>
-							<th name="partial">Teilzyklen (berechnet)</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						@cycleRows(props)
-					</tbody>
-				</table>
-			</figure>
+			@cyclesTable(props.Tool, props.Cycles, props.Regenerations, props.User)
 		</section>
 	</div>
 }
 
-templ cycleRows(props *CyclesProps) {
-	if len(props.Cycles) == 0 {
-		<tr>
-			<td colspan="5" class="text-center">
-				Kein Pressenverlauf verfügbar
-			</td>
-		</tr>
-	} else {
-		for _, cycle := range props.Cycles {
-			@cycleRowWithPartialCalc(props, cycle)
+templ toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models.User) {
+	<div class="flex flex-col gap">
+		<span class="flex gap-lg">
+			// Show status and start or stop a regenaration
+			@components.ToolStatusEdit(&components.ToolStatusEditProps{
+				Tool:              tool,
+				UserHasPermission: user.IsAdmin(),
+			})
+			// On active tools, link (button) to press page
+			if tool.IsActive() {
+				<a
+					role="button"
+					class="small ghost flex gap"
+					href={ fmt.Sprintf(
+					"%s/tools/press/%d",
+					env.ServerPathPrefix, *tool.Press,
+				) }
+					title="Zur Pressenübersicht"
+				>
+					<i class="bi bi-arrow-right"></i>
+					Presse { fmt.Sprintf("%d", *tool.Press) }
+				</a>
+			}
+		</span>
+		// (Un)Bind Top and TopCassette tools
+		if len(toolsForBinding) > 0 {
+			@BindingSection(tool, toolsForBinding, user.IsAdmin(), nil)
 		}
-	}
+	</div>
 }
 
-templ cycleRowWithPartialCalc(props *CyclesProps, cycle *models.Cycle) {
+templ regenerationsTable(regenerations []*models.Regeneration) {
+	// TODO: Adding a regenerations list somewhere
+}
+
+templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.Regeneration, user *models.User) {
+	<figure class="w-full overflow-x-scroll">
+		<table name="tool-cycles-table" class="table borderless compact">
+			<thead>
+				<tr>
+					<th name="press">Presse</th>
+					<th name="date">Datum</th>
+					<th name="total">Gesamtzyklen</th>
+					<th name="partial">Teilzyklen (berechnet)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(cycles) == 0 {
+					<tr>
+						<td colspan="5" class="text-center">
+							<i><small>Kein Pressenverlauf verfügbar</small></i>
+						</td>
+					</tr>
+				} else {
+					{{
+						var lastRegeneration *models.Regeneration
+						if len(regenerations) > 0 {
+							lastRegeneration = regenerations[0]
+						}
+					}}
+					for _, cycle := range cycles {
+						@cycleRowWithPartialCalc(tool, cycle, lastRegeneration, user)
+					}
+				}
+			</tbody>
+		</table>
+	</figure>
+}
+
+templ cycleRowWithPartialCalc(tool *models.Tool, cycle *models.Cycle, lastRegeneration *models.Regeneration, user *models.User) {
 	<tr
-		if props.LastRegeneration != nil && props.LastRegeneration.CycleID == cycle.ID {
+		if lastRegeneration != nil && lastRegeneration.CycleID == cycle.ID {
 			style="color: var(--ui-muted);"
 		}
 	>
@@ -144,14 +171,14 @@ templ cycleRowWithPartialCalc(props *CyclesProps, cycle *models.Cycle) {
 					class="icon small ghost"
 					hx-get={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
+						env.ServerPathPrefix, cycle.ID, tool.ID,
 					) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					title="Bearbeiten"
-					if !props.User.IsAdmin() {
+					if !user.IsAdmin() {
 						disabled
 					}
 				>
@@ -162,7 +189,7 @@ templ cycleRowWithPartialCalc(props *CyclesProps, cycle *models.Cycle) {
 					class="icon destructive small ghost"
 					hx-delete={ fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, props.Tool.ID,
+						env.ServerPathPrefix, cycle.ID, tool.ID,
 					) }
 					hx-trigger="click"
 					hx-target="section.cycles"
@@ -170,7 +197,7 @@ templ cycleRowWithPartialCalc(props *CyclesProps, cycle *models.Cycle) {
 					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
 					title="Löschen"
-					if !props.User.IsAdmin() {
+					if !user.IsAdmin() {
 						disabled
 					}
 				>
