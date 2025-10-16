@@ -18,6 +18,7 @@ type CyclesProps struct {
 	LastRegeneration *models.Regeneration
 }
 
+// TODO: Adding a regenerations list somewhere
 templ Cycles(props *CyclesProps) {
 	<div class="flex flex-col gap">
 		<h4>Werkzeugnutzung & Zyklen</h4>
@@ -76,7 +77,7 @@ templ Cycles(props *CyclesProps) {
 			<section>
 				<h6 class="mb">
 					Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
-    			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+			    			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
 				</h6>
 				<span>
 					@components.TotalCycles(props.TotalCycles, true)
