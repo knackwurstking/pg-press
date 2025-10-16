@@ -28,7 +28,7 @@ templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
 				<span class="text-semibold">
 					{ tool.String() }
 				</span>
-				<span>
+				<span class="flex gap">
 					@PositionBadge(tool.Position, "primary text-bold")
 					if options.EnableStatusBadge {
 						@ToolStatusBadge(tool)
