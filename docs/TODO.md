@@ -12,7 +12,7 @@
   - [x] Filter bindable tools list for format
   - [x] Throw error if a tool already is avaible at a position for a press (edit tool dialog)
   - [x] Disallow double bindings, which is possible right now
-  - [ ] UI: Add some links (anchor) to the tool page containing a binding
+  - [x] UI: Add some links (anchor) to the tool page containing a binding
 
 - [ ] Add regenerations list management to tools for deletion (admin only)
 - [ ] Using select for tools page filters
