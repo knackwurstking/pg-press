@@ -118,25 +118,7 @@ templ PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
 			</div>
 		} else {
 			for _, tool := range tools {
-				<a
-					role="button"
-					class="outline contrast flex justify-between items-center p"
-					href={ fmt.Sprintf("%s/tools/tool/%d",
-						env.ServerPathPrefix, tool.ID) }
-				>
-					<span class="flex flex-wrap flex-col gap-0 justify-start w-full">
-						<span class="text-semibold">
-							{ fmt.Sprintf("%s %s %s",
-								tool.Format.String(), tool.Code, tool.Type) }
-						</span>
-						<span>
-							@components.PositionBadge(
-								tool.Position, "primary text-bold",
-							)
-						</span>
-					</span>
-					<i class="bi bi-chevron-right"></i>
-				</a>
+				@components.ToolAnchor(tool, nil)
 			}
 		}
 	</div>

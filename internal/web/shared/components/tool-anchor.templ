@@ -1,0 +1,53 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+type ToolAnchorOptions struct {
+	EnableStatusBadge bool
+	EnableTotalCycles bool
+}
+
+templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
+	{{
+		if options == nil {
+			options = &ToolAnchorOptions{}
+		}
+	}}
+	<a
+		role="button"
+		class="outline contrast flex justify-between items-center p"
+		href={ fmt.Sprintf("%s/tools/tool/%d",
+			env.ServerPathPrefix, tool.ID) }
+	>
+		<span class="flex flex-wrap flex-col gap-0 justify-start w-full">
+			<span class="flex flex-col gap-sm">
+				<span class="text-semibold">
+					{ tool.String() }
+				</span>
+				<span>
+					@PositionBadge(tool.Position, "primary text-bold")
+					if options.EnableStatusBadge {
+						@ToolStatusBadge(tool)
+					}
+				</span>
+			</span>
+			if options.EnableTotalCycles {
+				<span
+					class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+					hx-get={ fmt.Sprintf(
+						"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
+						env.ServerPathPrefix, tool.ID, tool.Position,
+					) }
+					hx-trigger="load"
+					hx-swap="innerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				></span>
+			}
+		</span>
+		<i class="bi bi-chevron-right"></i>
+	</a>
+}
