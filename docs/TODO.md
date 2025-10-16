@@ -11,5 +11,5 @@
 - [x] Throw error if a tool already is avaible at a position for a press (edit tool dialog)
 - [x] Disallow double bindings, which is possible right now
 - [x] UI: Add some links (anchor) to the tool page containing a binding
-- [ ] Add regenerations list management to tools for deletion (admin only)
 - [ ] Using select for tools page filters
+- [ ] Add regenerations list management to tools for deletion (admin only)

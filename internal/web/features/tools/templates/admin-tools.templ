@@ -1,0 +1,106 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/pkg/models"
+	"time"
+)
+
+templ AdminOverlappingTools(overlappingTools []*models.OverlappingTool) {
+	<span
+		hx-get={ env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools" }
+		hx-trigger="pageLoaded from:body"
+		hx-target="#section-admin-overlapping-tools"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary class="mb">
+		<h4>
+			<i class="bi bi-exclamation-triangle mr"></i>
+			Admin Tools: Werkzeug-Überschneidungen
+		</h4>
+	</summary>
+	<div class="admin-overlapping-tools">
+		if len(overlappingTools) == 0 {
+			<div class="card success outline p text-center">
+				<div class="flex justify-center items-center gap">
+					<i class="bi bi-check-circle-fill text-lg"></i>
+					<div>
+						<h5 class="m-0">Keine Überschneidungen gefunden</h5>
+						<p class="muted border m-0">Alle Werkzeuge sind korrekt auf einzelne Pressen beschränkt.</p>
+					</div>
+				</div>
+			</div>
+		} else {
+			<div class="card warning outline p mb">
+				<div class="flex items-center gap">
+					<i class="bi bi-exclamation-triangle-fill text-lg"></i>
+					<div>
+						<h5 class="m-0">Überschneidungen erkannt!</h5>
+						<p class="muted border m-0">
+							{ fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)) }
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="flex flex-col gap">
+				for _, tool := range overlappingTools {
+					<div class="card error outline p">
+						<div class="mb">
+							<h6 class="m-0">{ tool.ToolCode }</h6>
+							<small>
+								<pre>
+									@templ.Raw(fmt.Sprintf(
+										"Tool ID:  %s\n"+
+											"Zeitraum: %s - %s",
+										fmt.Sprintf("%d", tool.ToolID),
+										tool.StartDate.Format("02.01.2006"),
+										tool.EndDate.Format("02.01.2006"),
+									))
+								</pre>
+							</small>
+						</div>
+						<div class="overlapping-instances">
+							<h6>Betroffene Pressen:</h6>
+							<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ui-spacing);">
+								for _, instance := range tool.Overlaps {
+									<div class="border p-sm">
+										<div class="flex justify-between items-center mb-sm">
+											<strong>Presse { fmt.Sprintf("%d", instance.PressNumber) }</strong>
+											@components.PositionBadge(instance.Position, "secondary")
+										</div>
+										<pre>
+											@templ.Raw(fmt.Sprintf(
+												"Start: %s\n"+
+													"Ende:  %s\n"+
+													"Dauer: %s",
+												instance.StartDate.Format("02.01.2006 15:04"),
+												instance.EndDate.Format("02.01.2006 15:04"),
+												formatDuration(instance.EndDate.Sub(instance.StartDate)),
+											))
+										</pre>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+func formatDuration(d time.Duration) string {
+	days := int(d.Hours() / 24)
+	hours := int(d.Hours()) % 24
+
+	if days > 0 {
+		return fmt.Sprintf("%d Tage, %d Stunden", days, hours)
+	} else if hours > 0 {
+		return fmt.Sprintf("%d Stunden", hours)
+	} else {
+		minutes := int(d.Minutes())
+		return fmt.Sprintf("%d Minuten", minutes)
+	}
+}
