@@ -3,7 +3,10 @@ package templates
 import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"slices"
+)
+
+const (
+	IDToolsFilter = "tools-filter"
 )
 
 templ SectionTools(tools []*models.ToolWithNotes) {
@@ -39,185 +42,78 @@ templ SectionTools(tools []*models.ToolWithNotes) {
 			@ToolsList(tools)
 		</ul>
 	</div>
-	<script>
-		function filterToolsList() {
-		    var params = new URLSearchParams(location.search);
-
-    		var formatInput = document.querySelector(`input[list="formats"]`).value;
-            if (formatInput) {
-                params.set("format", formatInput);
-            } else {
-                params.delete("format");
-            }
-            formatInput = formatInput.toLowerCase();
-
-    		var codeInput = document.querySelector(`input[list="codes"]`).value;
-            if (codeInput) {
-                params.set("code", codeInput);
-            } else {
-                params.delete("code");
-            }
-            codeInput = codeInput.toLowerCase();
-
-    		var typeInput = document.querySelector(`input[list="types"]`).value;
-            if (typeInput) {
-                params.set("type", typeInput);
-            } else {
-                params.delete("type");
-            }
-            typeInput = typeInput.toLowerCase();
-
-    		var positionInput = document.querySelector(`input[list="positions"]`).value;
-            if (positionInput) {
-                params.set("position", positionInput);
-            } else {
-                params.delete("position");
-            }
-            positionInput = positionInput.toLowerCase();
-
-    		for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
-    		    var format = el.getAttribute("data-format").toLowerCase();
-    		    var code = el.getAttribute("data-code").toLowerCase();
-    		    var type = el.getAttribute("data-type").toLowerCase();
-    		    var position = el.getAttribute("data-position").toLowerCase();
-
-    			if (
-              		(format.includes(formatInput) || formatInput === "") &&
-    				(code.includes(codeInput) || codeInput === "") &&
-    				(type.includes(typeInput) || typeInput === "") &&
-    				(position.includes(positionInput) || positionInput === "")
-    			) {
-                    el.style.display = "block";
-    			} else {
-    			    el.style.display = "none";
-    			}
-    		}
-
-            var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
- 			window.history.replaceState({}, '', newUrl);
-		}
-
-        setTimeout(function() {
-            // Load URL Query
-            var params = new URLSearchParams(window.location.search);
-
-			var formatInput = document.querySelector(`input[list="formats"]`);
-			var codeInput = document.querySelector(`input[list="codes"]`);
-			var typeInput = document.querySelector(`input[list="types"]`);
-			var positionInput = document.querySelector(`input[list="positions"]`);
-
-			if (formatInput && params.has('format')) {
-				formatInput.value = params.get('format');
-			}
-			if (codeInput && params.has('code')) {
-				codeInput.value = params.get('code');
-			}
-			if (typeInput && params.has('type')) {
-				typeInput.value = params.get('type');
-			}
-			if (positionInput && params.has('position')) {
-				positionInput.value = params.get('position');
-			}
-
-        	filterToolsList();
-        }, 100);
-	</script>
+	@sectionToolsFilterScript()
 }
 
-// TODO: Switch to select inputs instead for using datalists
 templ sectionToolsFilter(tools []*models.ToolWithNotes) {
-	{{
-		formats := []string{}
-		codes := []string{}
-		types := []string{}
-		positions := []string{}
-
-		for _, t := range tools {
-			if f := t.Format.String(); !slices.Contains(formats, f) {
-				formats = append(formats, f)
-			}
-
-			if c := t.Code; !slices.Contains(codes, c) {
-				codes = append(codes, c)
-			}
-
-			if t := t.Type; !slices.Contains(types, t) {
-				types = append(types, t)
-			}
-
-			if p := t.Position.GermanString(); !slices.Contains(positions, p) {
-				positions = append(positions, p)
-			}
-		}
-	}}
 	<div class="flex gap-sm flex-wrap justify-evenly">
 		<!-- Filter for Tool Format -->
-		<label class="flex flex-1 flex-col gap-0" style="max-width: 8rem;">
-			Format
+		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
+			Suche (Lazy)
 			<input
-				id="tool-format-input"
-				type="text"
-				list="formats"
-				placeholder="Format"
+				id={ IDToolsFilter }
+				type="search"
 				oninput="filterToolsList();"
+				placeholder="Suche nach Werkzeugen..."
 				hx-preserve="true"
 			/>
-			<datalist id="formats">
-				for _, f := range formats {
-					<option value={ f }></option>
-				}
-			</datalist>
-		</label>
-		<!-- Filter for Tool Code -->
-		<label class="flex flex-1 flex-col gap-0" style="max-width: 10rem;">
-			Code
-			<input
-				id="tool-code-input"
-				type="text"
-				list="codes"
-				placeholder="Code"
-				oninput="filterToolsList();"
-				hx-preserve="true"
-			/>
-			<datalist id="codes">
-				for _, c := range codes {
-					<option value={ c }></option>
-				}
-			</datalist>
-		</label>
-		<!-- Filter for Tool Type -->
-		<label class="flex flex-1 flex-col gap-0" style="max-width: 12rem;">
-			Type
-			<input
-				id="tool-type-input"
-				type="text"
-				list="types"
-				placeholder="Type"
-				oninput="filterToolsList();"
-				hx-preserve="true"
-			/>
-			<datalist id="types">
-				for _, t := range types {
-					<option value={ t }></option>
-				}
-			</datalist>
-		</label>
-		<!-- Filter for Tool Position -->
-		<label class="flex flex-1 flex-col gap-0" style="max-width: 8rem;">
-			Position
-			<input
-				id="tool-position-input"
-				type="text"
-				list="positions"
-				placeholder="Position"
-				oninput="filterToolsList();"
-				hx-preserve="true"
-			/>
-			<datalist id="positions">
-				for _, p := range positions {
-					<option value={ p }></option>
-				}
-			</datalist>
 		</label>
 	</div>
+}
+
+templ sectionToolsFilterScript() {
+	<script>
+		function filter(value) {
+			for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
+				var format = el.getAttribute("data-format").toLowerCase();
+				var code = el.getAttribute("data-code").toLowerCase();
+				var type = el.getAttribute("data-type").toLowerCase();
+				var position = el.getAttribute("data-position").toLowerCase();
+
+				// Build string from data-*
+				var dataString = [format, code, type, position].join('|');
+
+				// Generate special regexp from search
+				var valueSplit = document.querySelector("input#{{ IDToolsFilter }}").value.toLowerCase().split(' ');
+
+				// Check and Set "block" or "none"
+				let shouldNotHide = true;
+				for (var char of valueSplit) {
+					if (char === "") continue;
+
+					if (!dataString.includes(char)) {
+						shouldNotHide = false;
+						break;
+					}
+				}
+
+				el.style.display = shouldNotHide ? "block" : "none";
+			}
+		}
+
+		function filterToolsList() {
+			var params = new URLSearchParams(location.search);
+
+			var inputValue = document.querySelector("input#{{ IDToolsFilter }}").value;
+
+			if (inputValue !== "") {
+				params.set("tools_filter", inputValue);
+			} else {
+				params.delete("tools_filter");
+			}
+
+			filter(inputValue);
+
+
+			// Update browser history to include filter parameters
+			var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+			window.history.replaceState({}, '', newUrl);
+		}
+
+		setTimeout(function() {
+			var params = new URLSearchParams(window.location.search);
+			document.querySelector("input#{{ IDToolsFilter }}").value = params.get("tools_filter");
+			filterToolsList();
+		}, 100);
+	</script>
 }
