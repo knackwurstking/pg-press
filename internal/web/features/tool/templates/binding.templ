@@ -7,7 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// TODO: Add a link button to the tool bound to this
 templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
 	{{
 		var linkedTool *models.Tool
