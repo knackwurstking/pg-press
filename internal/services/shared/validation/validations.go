@@ -21,7 +21,7 @@ func ValidatePositiveInt64(value int64, fieldName string) error {
 	return nil
 }
 
-func ValidateNotNil(entity interface{}, entityName string) error {
+func ValidateNotNil(entity any, entityName string) error {
 	if entity == nil {
 		return utils.NewValidationError(fmt.Sprintf("%s cannot be nil", entityName))
 	}
