@@ -397,7 +397,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle deletion: %v", err)
 	}
 
-	return h.HTMXGetCycles(c)
+	return nil
 }
 
 func (h *Handler) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {

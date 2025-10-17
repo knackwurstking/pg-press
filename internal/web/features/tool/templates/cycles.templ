@@ -131,43 +131,19 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *mod
 								<span>{ regen.Reason }</span>
 							</td>
 							<td>
-								// Edit Regeneration -> This will allow adding/editing a reason for this regeneration
-								<button
-									class="icon small ghost"
-									hx-get={ fmt.Sprintf(
+								@components.TableActions(components.TableActionsOptions{
+									EditHref: fmt.Sprintf(
 										"%s/htmx/tools/tool/%d/edit-regeneration",
 										env.ServerPathPrefix, regen.GetTool().ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Bearbeiten"
-								>
-									<i class="bi bi-pencil"></i>
-								</button>
-								// Admin only action: Delete this regeneration
-								<button
-									class="icon destructive small ghost"
-									hx-delete={ fmt.Sprintf(
+									),
+									EditAdminOnly: false,
+									DeleteHref: fmt.Sprintf(
 										"%s/htmx/tools/tool/%d/delete-regeneration",
 										env.ServerPathPrefix, regen.GetTool().ID,
-									) }
-									hx-trigger="click"
-									hx-confirm="Diesen Eintrag löschen?"
-									hx-on:htmx:response-success='
-										window.dispatch(new Event("visibilitychange"));
-									'
-									hx-on:htmx:response-error="
-										alert(event.detail.xhr.responseText);
-									"
-									title="Löschen"
-									if !user.IsAdmin() {
-										disabled
-									}
-								>
-									<i class="bi bi-trash"></i>
-								</button>
+									),
+									DeleteAdminOnly: true,
+									User:            user,
+								})
 							</td>
 						</tr>
 					}
@@ -242,45 +218,19 @@ templ cycleRowWithPartialCalc(
 			</span>
 		</td>
 		<td>
-			<span class="button-group flex justify-end items-center">
-				// HTMX Button: Goto: Edit cycle entry dialog
-				<button
-					class="icon small ghost"
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, tool.ID,
-					) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Bearbeiten"
-					if !user.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-pencil"></i>
-				</button>
-				// HTMX Button: Delete cycle from database table and reload section.cycles
-				<button
-					class="icon destructive small ghost"
-					hx-delete={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-						env.ServerPathPrefix, cycle.ID, tool.ID,
-					) }
-					hx-trigger="click"
-					hx-target="section.cycles"
-					hx-swap="innerHTML"
-					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?", cycle.TotalCycles) }
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-					title="Löschen"
-					if !user.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-trash"></i>
-				</button>
-			</span>
+			@components.TableActions(components.TableActionsOptions{
+				EditHref: fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
+					env.ServerPathPrefix, cycle.ID, tool.ID,
+				),
+				EditAdminOnly: true,
+				DeleteHref: fmt.Sprintf(
+					"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
+					env.ServerPathPrefix, cycle.ID, tool.ID,
+				),
+				DeleteAdminOnly: true,
+				User:            user,
+			})
 		</td>
 	</tr>
 }

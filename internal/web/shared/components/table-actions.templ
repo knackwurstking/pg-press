@@ -1,0 +1,55 @@
+package components
+
+import "github.com/knackwurstking/pgpress/pkg/models"
+
+type TableActionsOptions struct {
+	EditHref        string
+	EditAdminOnly   bool
+	DeleteHref      string
+	DeleteAdminOnly bool
+	User            *models.User
+}
+
+templ TableActions(options TableActionsOptions) {
+	<span class="button-group flex justify-end items-center">
+		// Edit Regeneration -> This will allow adding/editing a reason for this regeneration
+		if options.EditHref != "" {
+			<button
+				class="icon small ghost"
+				hx-get={ options.EditHref }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Bearbeiten"
+				if options.EditAdminOnly && !options.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-pencil"></i>
+			</button>
+		}
+		if options.DeleteHref != "" {
+			// Admin only action: Delete this regeneration
+			<button
+				class="icon destructive small ghost"
+				hx-delete={ options.DeleteHref }
+				hx-trigger="click"
+				hx-confirm="Diesen Eintrag löschen?"
+				hx-swap="none"
+				hx-on:htmx:response-success='
+				window.dispatch(new Event("visibilitychange"));
+			'
+				hx-on:htmx:response-error="
+				alert(event.detail.xhr.responseText);
+			"
+				title="Löschen"
+				if options.DeleteAdminOnly && !options.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-trash"></i>
+			</button>
+		}
+	</span>
+}
