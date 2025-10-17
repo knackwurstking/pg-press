@@ -368,8 +368,8 @@ func regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user *
 			}
 			templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
 				EditHref: fmt.Sprintf(
-					"%s/htmx/tools/tool/%d/edit-regeneration",
-					env.ServerPathPrefix, regen.GetTool().ID,
+					"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
+					env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
 				),
 				EditAdminOnly: false,
 				DeleteHref: fmt.Sprintf(
