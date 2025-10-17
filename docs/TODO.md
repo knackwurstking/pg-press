@@ -15,4 +15,4 @@
 - [x] Add regenerations list management to tools for deletion (admin only)
 - [x] Create table action components: "edit", "delete"
 - [x] Add table actions to the regenerations table for edit (reason) and delete
-- [ ] Create and use shared constants for date format (grep for `date.format`) `internale/constants/html.go` [WIP]
+- [x] Create and use shared constants for date format (grep for `date.format`) `internale/constants/html.go`
