@@ -51,41 +51,63 @@ func NewService(db *sql.DB, tools ToolsService) *Service {
 	}
 }
 
-// Add records a new tool regeneration event
-func (r *Service) Add(regeneration *models.Regeneration, user *models.User) (*models.Regeneration, error) {
-	if err := ValidateToolRegeneration(regeneration); err != nil {
+func (s *Service) Get(id int64) (*models.Regeneration, error) {
+	if err := validation.ValidateID(id, EntityName); err != nil {
 		return nil, err
+	}
+
+	r := s.DB.QueryRow(
+		`
+			SELECT * FROM tool_regenerations WHERE id = ?
+		`,
+		id,
+	)
+
+	regeneration, err := scanner.ScanSingleRow(
+		r, ScanToolRegeneration,
+		EntityName,
+	)
+	if err != nil {
+		return nil, s.HandleScanError(err, EntityName)
+	}
+
+	return regeneration, nil
+}
+
+// Add records a new tool regeneration event
+func (s *Service) Add(regeneration *models.Regeneration, user *models.User) (int64, error) {
+	if err := ValidateToolRegeneration(regeneration); err != nil {
+		return 0, err
 	}
 
 	if err := validation.ValidateNotNil(user, "user"); err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	r.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
+	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
 	query := `
 		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
 		VALUES (?, ?, ?, ?)
-		RETURNING id, tool_id, cycle_id, reason, performed_by
 	`
 
-	row := r.DB.QueryRow(query,
+	row, err := s.DB.Exec(query,
 		regeneration.ToolID,
 		regeneration.CycleID,
 		regeneration.Reason,
 		user.TelegramID,
 	)
-
-	result, err := scanner.ScanSingleRow(row, ScanToolRegeneration, "tool_regenerations")
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError("failed to create tool regeneration")
-		}
-		return nil, err
+		return 0, s.HandleInsertError(err, EntityName)
 	}
 
-	return result, nil
+	id, err := row.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
+	}
+
+	return id, nil
 }
 
 // Update updates an existing regeneration record
@@ -117,7 +139,7 @@ func (r *Service) Update(regeneration *models.Regeneration, user *models.User) e
 		regeneration.ID,
 	)
 	if err != nil {
-		return r.HandleUpdateError(err, "tool_regenerations")
+		return r.HandleUpdateError(err, EntityName)
 	}
 
 	if err := r.CheckRowsAffected(result, "tool_regeneration", regeneration.ID); err != nil {
@@ -138,7 +160,7 @@ func (r *Service) Delete(id int64) error {
 	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	result, err := r.DB.Exec(query, id)
 	if err != nil {
-		return r.HandleDeleteError(err, "tool_regenerations")
+		return r.HandleDeleteError(err, EntityName)
 	}
 
 	if err := r.CheckRowsAffected(result, "tool_regeneration", id); err != nil {
@@ -149,17 +171,17 @@ func (r *Service) Delete(id int64) error {
 }
 
 // AddToolRegeneration starts the tool regeneration process
-func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user *models.User) (*models.Regeneration, error) {
+func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user *models.User) (int64, error) {
 	if err := validation.ValidateID(toolID, "tool"); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if err := validation.ValidateID(cycleID, "cycle"); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if err := validation.ValidateNotNil(user, "user"); err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	r.Log.Debug("Starting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
@@ -167,12 +189,12 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 	// Update the tool's regeneration status
 	r.Log.Debug("Setting tool to regenerating status: tool: %d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, true, user); err != nil {
-		return nil, fmt.Errorf("failed to update tool regeneration status: %v", err)
+		return 0, fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
 	// Create a new regeneration record
 	r.Log.Debug("Creating regeneration record: tool: %d", toolID)
-	regeneration, err := r.Add(
+	regenerationID, err := r.Add(
 		models.NewRegeneration(toolID, cycleID, reason, &user.TelegramID),
 		user,
 	)
@@ -182,11 +204,14 @@ func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user
 		if undoErr := r.tools.UpdateRegenerating(toolID, false, user); undoErr != nil {
 			r.Log.Error("Failed to undo tool regeneration status: %v", undoErr)
 		}
-		return nil, err
+		return 0, err
 	}
 
-	r.Log.Debug("Started tool regeneration successfully: tool: %d, regen_id: %d", toolID, regeneration.ID)
-	return regeneration, nil
+	r.Log.Debug(
+		"Started tool regeneration successfully: tool: %d, regen_id: %d",
+		toolID, regenerationID,
+	)
+	return regenerationID, nil
 }
 
 // StopToolRegeneration stops the tool regeneration process for the given tool ID
@@ -264,7 +289,7 @@ func (r *Service) GetLastRegeneration(toolID int64) (*models.Regeneration, error
 	`
 
 	row := r.DB.QueryRow(query, toolID)
-	regen, err := scanner.ScanSingleRow(row, ScanToolRegeneration, "tool_regenerations")
+	regen, err := scanner.ScanSingleRow(row, ScanToolRegeneration, EntityName)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, utils.NewNotFoundError(fmt.Sprintf("tool regeneration for tool_id: %d", toolID))
@@ -288,7 +313,7 @@ func (r *Service) HasRegenerationsForCycle(cycleID int64) (bool, error) {
 	var count int
 	err := r.DB.QueryRow(query, cycleID).Scan(&count)
 	if err != nil {
-		return false, r.HandleSelectError(err, "tool_regenerations")
+		return false, r.HandleSelectError(err, EntityName)
 	}
 
 	return count > 0, nil
@@ -310,7 +335,7 @@ func (r *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, 
 
 	rows, err := r.DB.Query(query, toolID)
 	if err != nil {
-		return nil, r.HandleSelectError(err, "tool_regenerations")
+		return nil, r.HandleSelectError(err, EntityName)
 	}
 	defer rows.Close()
 
