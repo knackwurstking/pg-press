@@ -7,20 +7,14 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type DialogEditRegenerationProps struct {
-	Tool         *models.Tool
-	Regeneration *models.ResolvedRegeneration
-	Reason       string
-}
-
-templ DialogEditRegeneration(props *DialogEditRegenerationProps) {
+templ DialogEditRegeneration(rr *models.ResolvedRegeneration) {
 	{{
 		var (
 			baseType         = "PUT"
 			submitButtonText = "Aktualisieren"
 			baseHref         = fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-				env.ServerPathPrefix, props.Tool.ID, props.Regeneration.ID,
+				env.ServerPathPrefix, rr.GetTool().ID, rr.ID,
 			)
 		)
 	}}
@@ -33,8 +27,8 @@ templ DialogEditRegeneration(props *DialogEditRegenerationProps) {
 		CustomWindowEventName: "visibilitychange",
 	}) {
 		<section>
-			<p>Tool: { props.Tool.String() } </p>
-			<p>Regeneriert am: { props.Regeneration.GetCycle().Date.Format("02.01.06") }</p>
+			<p>Tool: { rr.GetTool().String() } </p>
+			<p>Regeneriert am: { rr.GetCycle().Date.Format("02.01.06") }</p>
 		</section>
 		<label class="flex flex-col gap-0">
 			Grund
@@ -42,7 +36,7 @@ templ DialogEditRegeneration(props *DialogEditRegenerationProps) {
 				id="reason"
 				name="reason"
 				type="text"
-				value={ props.Reason }
+				value={ rr.Reason }
 			/>
 		</label>
 	}
