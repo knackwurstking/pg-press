@@ -102,11 +102,20 @@ templ toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models
 
 templ regenerationsTable(regenerations []*models.Regeneration) {
 	// TODO: Adding a regenerations list somewhere
+	<figure class="w-full overflow-x-scroll">
+		<table title="Regenrationen">
+			// ...
+		</table>
+	</figure>
 }
 
 templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.Regeneration, user *models.User) {
 	<figure class="w-full overflow-x-scroll">
-		<table name="tool-cycles-table" class="table borderless compact">
+		<table
+			name="tool-cycles-table"
+			class="table borderless compact"
+			title="Zyklusverlauf"
+		>
 			<thead>
 				<tr>
 					<th name="press">Presse</th>
