@@ -15,7 +15,7 @@ type CyclesProps struct {
 	ToolPosition    string
 	TotalCycles     int64
 	Cycles          []*models.Cycle
-	Regenerations   []*models.Regeneration
+	Regenerations   []*models.ResolvedRegeneration
 }
 
 templ Cycles(props *CyclesProps) {
@@ -100,16 +100,45 @@ templ toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models
 	</div>
 }
 
-templ regenerationsTable(regenerations []*models.Regeneration) {
-	// TODO: Adding a regenerations list somewhere
+// TODO: Add new table column "actions" with buttons: "Edit" (reason reason), "delete"
+templ regenerationsTable(regenerations []*models.ResolvedRegeneration) {
 	<figure class="w-full overflow-x-scroll">
-		<table title="Regenrationen">
-			// ...
+		<table title="Regenerationen">
+			<thead>
+				<tr>
+					<th name="date">Datum</th>
+					<th name="performed_by">Erledigt von</th>
+					<th name="reason">Grund</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(regenerations) == 0 {
+					<tr>
+						<td colspan="4" class="text-center">
+							<i><small>Keine Regenerationen verzeichnet</small></i>
+						</td>
+					</tr>
+				} else {
+					for _, regen := range regenerations {
+						<tr>
+							<td>
+								<span>{ regen.GetCycle().Date.Format("02.01.2006") }</span>
+							</td>
+							<td>
+								<span>{ regen.GetUser().Name }</span>
+							</td>
+							<td>
+								<span>{ regen.Reason }</span>
+							</td>
+						</tr>
+					}
+				}
+			</tbody>
 		</table>
 	</figure>
 }
 
-templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.Regeneration, user *models.User) {
+templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.ResolvedRegeneration, user *models.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table
 			name="tool-cycles-table"
@@ -134,7 +163,7 @@ templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*mo
 					</tr>
 				} else {
 					{{
-						var lastRegeneration *models.Regeneration
+						var lastRegeneration *models.ResolvedRegeneration
 						if len(regenerations) > 0 {
 							lastRegeneration = regenerations[0]
 						}
@@ -148,7 +177,12 @@ templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*mo
 	</figure>
 }
 
-templ cycleRowWithPartialCalc(tool *models.Tool, cycle *models.Cycle, lastRegeneration *models.Regeneration, user *models.User) {
+templ cycleRowWithPartialCalc(
+	tool *models.Tool,
+	cycle *models.Cycle,
+	lastRegeneration *models.ResolvedRegeneration,
+	user *models.User,
+) {
 	<tr
 		if lastRegeneration != nil && lastRegeneration.CycleID == cycle.ID {
 			style="color: var(--ui-muted);"

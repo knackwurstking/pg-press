@@ -26,17 +26,33 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get tool")
 	}
 
-	toolCycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
-	if err != nil {
-		return h.HandleError(c, err, "failed to get press cycles")
+	var filteredCycles []*models.Cycle
+	{
+		cycles, err := h.DB.PressCycles.GetPressCyclesForTool(toolID)
+		if err != nil {
+			return h.HandleError(c, err, "failed to get press cycles")
+		}
+
+		filteredCycles = models.FilterCyclesByToolPosition(
+			tool.Position, cycles...)
 	}
 
-	filteredCycles := models.FilterCyclesByToolPosition(
-		tool.Position, toolCycles...)
+	var resolvedRegenerations []*models.ResolvedRegeneration
+	{ // Get (resolved) regeneration history for this tool
+		regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
+		if err != nil {
+			h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
+		}
 
-	regenerations, err := h.DB.ToolRegenerations.GetRegenerationHistory(toolID)
-	if err != nil {
-		h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
+		// Resolve regenerations
+		for _, r := range regenerations {
+			rr, err := h.resolveRegeneration(c, r)
+			if err != nil {
+				return err
+			}
+
+			resolvedRegenerations = append(resolvedRegenerations, rr)
+		}
 	}
 
 	totalCycles := h.getTotalCycles(
@@ -57,7 +73,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 		ToolsForBinding: toolsForBinding,
 		TotalCycles:     totalCycles,
 		Cycles:          filteredCycles,
-		Regenerations:   regenerations,
+		Regenerations:   resolvedRegenerations,
 	})
 
 	if err := cyclesSection.Render(
@@ -402,4 +418,29 @@ func (h *Handler) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
 	}
 
 	return totalCycles
+}
+
+func (h *Handler) resolveRegeneration(c echo.Context, r *models.Regeneration) (*models.ResolvedRegeneration, error) {
+	tool, err := h.DB.Tools.Get(r.ToolID)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get tool %d for regeneration %d",
+				r.ToolID, r.ID))
+	}
+
+	cycle, err := h.DB.PressCycles.Get(r.CycleID)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get press cycle %d for regeneration %d",
+				r.CycleID, r.ID))
+	}
+
+	user, err := h.DB.Users.Get(*r.PerformedBy)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get user %d for regeneration %d",
+				*r.PerformedBy, r.ID))
+	}
+
+	return models.NewResolvedRegeneration(r, tool, cycle, user), nil
 }
