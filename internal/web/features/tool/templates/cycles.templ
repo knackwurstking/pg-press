@@ -106,7 +106,6 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *mod
 			<thead>
 				<tr>
 					<th name="date">Datum</th>
-					<th name="performed_by">Erledigt von</th>
 					<th name="reason">Grund</th>
 					<th name="actions"></th>
 				</tr>
@@ -114,7 +113,7 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *mod
 			<tbody>
 				if len(regenerations) == 0 {
 					<tr>
-						<td colspan="4" class="text-center">
+						<td colspan="3" class="text-center">
 							<i><small>Keine Regenerationen verzeichnet</small></i>
 						</td>
 					</tr>
@@ -131,9 +130,6 @@ templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user 
 		<tr>
 			<td>
 				<span>{ regen.GetCycle().Date.Format("02.01.2006") }</span>
-			</td>
-			<td>
-				<span>{ regen.GetUser().Name }</span>
 			</td>
 			<td>
 				<span>{ regen.Reason }</span>
