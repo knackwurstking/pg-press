@@ -25,12 +25,12 @@ run:
 dev:
 	which gow || \
 		( \
-		    echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && \
-    		exit 1 \
+			echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && \
+			exit 1 \
 		)
 	export LOG_LEVEL=DEBUG && \
-		export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
-		gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
+	export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
+	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
 
 build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
