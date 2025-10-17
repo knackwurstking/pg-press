@@ -15,13 +15,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-type DialogEditRegenerationProps struct {
-	Tool         *models.Tool
-	Regeneration *models.ResolvedRegeneration
-	Reason       string
-}
-
-func DialogEditRegeneration(props *DialogEditRegenerationProps) templ.Component {
+func DialogEditRegeneration(rr *models.ResolvedRegeneration) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,7 +42,7 @@ func DialogEditRegeneration(props *DialogEditRegenerationProps) templ.Component 
 			submitButtonText = "Aktualisieren"
 			baseHref         = fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-				env.ServerPathPrefix, props.Tool.ID, props.Regeneration.ID,
+				env.ServerPathPrefix, rr.GetTool().ID, rr.ID,
 			)
 		)
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -68,9 +62,9 @@ func DialogEditRegeneration(props *DialogEditRegenerationProps) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.String())
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(rr.GetTool().String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 36, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 30, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -81,9 +75,9 @@ func DialogEditRegeneration(props *DialogEditRegenerationProps) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Regeneration.GetCycle().Date.Format("02.01.06"))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(rr.GetCycle().Date.Format("02.01.06"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 37, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 31, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -94,9 +88,9 @@ func DialogEditRegeneration(props *DialogEditRegenerationProps) templ.Component 
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Reason)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(rr.Reason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 45, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 39, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
