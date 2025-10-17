@@ -28,6 +28,7 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.GetToolPage),
 
 			// HTMX
+			// TODO: Add route for "/htmx/tools/tool/:id/edit-regeneration"
 
 			// Tool status and regenerations management
 			helpers.NewEchoRoute(

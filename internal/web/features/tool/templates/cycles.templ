@@ -32,7 +32,7 @@ templ Cycles(props *CyclesProps) {
 					<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug </small> </i>
 				</span>
 			} else {
-				@regenerationsTable(props.Regenerations)
+				@regenerationsTable(props.Regenerations, props.User)
 			}
 		</section>
 		<section id="cycles-section">
@@ -100,8 +100,7 @@ templ toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models
 	</div>
 }
 
-// TODO: Add new table column "actions" with buttons: "Edit" (reason reason), "delete"
-templ regenerationsTable(regenerations []*models.ResolvedRegeneration) {
+templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *models.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table title="Regenerationen">
 			<thead>
@@ -109,6 +108,7 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration) {
 					<th name="date">Datum</th>
 					<th name="performed_by">Erledigt von</th>
 					<th name="reason">Grund</th>
+					<th name="actions"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -129,6 +129,45 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration) {
 							</td>
 							<td>
 								<span>{ regen.Reason }</span>
+							</td>
+							<td>
+								// Edit Regeneration -> This will allow adding/editing a reason for this regeneration
+								<button
+									class="icon small ghost"
+									hx-get={ fmt.Sprintf(
+										"%s/htmx/tools/tool/%d/edit-regeneration",
+										env.ServerPathPrefix, regen.GetTool().ID,
+									) }
+									hx-trigger="click"
+									hx-target="body"
+									hx-swap="beforeend"
+									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+									title="Bearbeiten"
+								>
+									<i class="bi bi-pencil"></i>
+								</button>
+								// Admin only action: Delete this regeneration
+								<button
+									class="icon destructive small ghost"
+									hx-delete={ fmt.Sprintf(
+										"%s/htmx/tools/tool/%d/delete-regeneration",
+										env.ServerPathPrefix, regen.GetTool().ID,
+									) }
+									hx-trigger="click"
+									hx-confirm="Diesen Eintrag löschen?"
+									hx-on:htmx:response-success='
+										window.dispatch(new Event("visibilitychange"));
+									'
+									hx-on:htmx:response-error="
+										alert(event.detail.xhr.responseText);
+									"
+									title="Löschen"
+									if !user.IsAdmin() {
+										disabled
+									}
+								>
+									<i class="bi bi-trash"></i>
+								</button>
 							</td>
 						</tr>
 					}
