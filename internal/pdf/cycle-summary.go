@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf/v2"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -293,13 +294,13 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		if summary.isFirstAppearance {
 			startDateStr = ""
 		} else {
-			startDateStr = summary.startDate.Format("02.01.06")
+			startDateStr = summary.startDate.Format(constants.DateFormat)
 		}
 
 		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
 		// End date
-		endDateStr := summary.endDate.Format("02.01.06")
+		endDateStr := summary.endDate.Format(constants.DateFormat)
 		o.PDF.CellFormat(colWidths[3], 6, endDateStr, "1", 0, "C", fill, 0, "")
 
 		// Max cycles

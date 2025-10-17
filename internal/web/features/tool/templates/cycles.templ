@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -129,7 +130,7 @@ templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user 
 	for _, regen := range regenerations {
 		<tr>
 			<td>
-				<span>{ regen.GetCycle().Date.Format("02.01.2006") }</span>
+				<span>{ regen.GetCycle().Date.Format(constants.DateFormat) }</span>
 			</td>
 			<td>
 				<span>{ regen.Reason }</span>
@@ -207,7 +208,7 @@ templ cycleRowWithPartialCalc(
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>
 		<td>
-			<span class="text-sm">{ cycle.Date.Format("02.01.2006") }</span>
+			<span class="text-sm">{ cycle.Date.Format(constants.DateFormat) }</span>
 		</td>
 		<td>
 			{ fmt.Sprintf("%d", cycle.TotalCycles) }

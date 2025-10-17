@@ -109,8 +109,8 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 					value=""
 					disabled
 					selected?={ props.Tool != nil &&
-								props.Tool.Press == nil &&
-								props.InputPressNumber == nil }
+						props.Tool.Press == nil &&
+						props.InputPressNumber == nil }
 				>
 					Presse auswählen
 				</option>
@@ -118,10 +118,9 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 					<option
 						value={ fmt.Sprintf("%d", i) }
 						selected?={ (props.InputPressNumber != nil &&
-										int(*props.InputPressNumber) == i) ||
-									(props.InputPressNumber == nil &&
-										props.Tool != nil &&
-										isPress(props.Tool.Press, i)) }
+							int(*props.InputPressNumber) == i) || (props.InputPressNumber == nil &&
+							props.Tool != nil &&
+							isPress(props.Tool.Press, i)) }
 					>
 						Presse { fmt.Sprintf("%d", i) }
 					</option>
@@ -172,11 +171,11 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 				<script>
 					function checkboxOnChangeHandler(e) {
 						if (e.checked) {
-                            if (!confirm("Sicher, diesen Zustand ändern?")) {
-                                e.checked = false
-                            };
-                        }
-              		}
+							if (!confirm("Sicher, diesen Zustand ändern?")) {
+								e.checked = false;
+							}
+						}
+					}
 				</script>
 				<input
 					name="regenerating"

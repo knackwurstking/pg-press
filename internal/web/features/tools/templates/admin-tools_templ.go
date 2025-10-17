@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -44,7 +45,7 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 13, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 14, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -67,7 +68,7 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 42, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 43, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -85,7 +86,7 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tool.ToolCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 51, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 52, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -99,8 +100,8 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 					"Tool ID:  %s\n"+
 						"Zeitraum: %s - %s",
 					fmt.Sprintf("%d", tool.ToolID),
-					tool.StartDate.Format("02.01.2006"),
-					tool.EndDate.Format("02.01.2006"),
+					tool.StartDate.Format(constants.DateFormat),
+					tool.EndDate.Format(constants.DateFormat),
 				)).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -117,7 +118,7 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", instance.PressNumber))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 70, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 71, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -139,8 +140,8 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 						"Start: %s\n"+
 							"Ende:  %s\n"+
 							"Dauer: %s",
-						instance.StartDate.Format("02.01.2006 15:04"),
-						instance.EndDate.Format("02.01.2006 15:04"),
+						instance.StartDate.Format(constants.DateTimeFormat),
+						instance.EndDate.Format(constants.DateTimeFormat),
 						formatDuration(instance.EndDate.Sub(instance.StartDate)),
 					)).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {

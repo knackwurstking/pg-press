@@ -250,10 +250,9 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				if (props.InputPressNumber != nil &&
-					int(*props.InputPressNumber) == i) ||
-					(props.InputPressNumber == nil &&
-						props.Tool != nil &&
-						isPress(props.Tool.Press, i)) {
+					int(*props.InputPressNumber) == i) || (props.InputPressNumber == nil &&
+					props.Tool != nil &&
+					isPress(props.Tool.Press, i)) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -266,7 +265,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 126, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 125, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -289,7 +288,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 137, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 136, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -307,7 +306,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.OriginalDate.Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 139, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 138, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -330,7 +329,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.InputTotalCycles))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 154, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 153, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -356,7 +355,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span><script>\n\t\t\t\t\tfunction checkboxOnChangeHandler(e) {\n\t\t\t\t\t\tif (e.checked) {\n                            if (!confirm(\"Sicher, diesen Zustand ändern?\")) {\n                                e.checked = false\n                            };\n                        }\n              \t\t}\n\t\t\t\t</script><input name=\"regenerating\" type=\"checkbox\" onchange=\"checkboxOnChangeHandler(this);\"></label></section>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span><script>\n\t\t\t\t\tfunction checkboxOnChangeHandler(e) {\n\t\t\t\t\t\tif (e.checked) {\n\t\t\t\t\t\t\tif (!confirm(\"Sicher, diesen Zustand ändern?\")) {\n\t\t\t\t\t\t\t\te.checked = false;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t</script><input name=\"regenerating\" type=\"checkbox\" onchange=\"checkboxOnChangeHandler(this);\"></label></section>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

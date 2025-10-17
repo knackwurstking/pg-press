@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -55,8 +56,8 @@ templ AdminOverlappingTools(overlappingTools []*models.OverlappingTool) {
 										"Tool ID:  %s\n"+
 											"Zeitraum: %s - %s",
 										fmt.Sprintf("%d", tool.ToolID),
-										tool.StartDate.Format("02.01.2006"),
-										tool.EndDate.Format("02.01.2006"),
+										tool.StartDate.Format(constants.DateFormat),
+										tool.EndDate.Format(constants.DateFormat),
 									))
 								</pre>
 							</small>
@@ -75,8 +76,8 @@ templ AdminOverlappingTools(overlappingTools []*models.OverlappingTool) {
 												"Start: %s\n"+
 													"Ende:  %s\n"+
 													"Dauer: %s",
-												instance.StartDate.Format("02.01.2006 15:04"),
-												instance.EndDate.Format("02.01.2006 15:04"),
+												instance.StartDate.Format(constants.DateTimeFormat),
+												instance.EndDate.Format(constants.DateTimeFormat),
 												formatDuration(instance.EndDate.Sub(instance.StartDate)),
 											))
 										</pre>

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/models"
 
@@ -355,7 +356,7 @@ func listCyclesCommand() cli.Command {
 								cycle.PressNumber,
 								cycle.ToolPosition.GermanString(),
 								cycle.TotalCycles,
-								cycle.Date.Format("2006-01-02 15:04"),
+								cycle.Date.Format(constants.DateTimeFormat),
 								cycle.PerformedBy,
 							)
 						}

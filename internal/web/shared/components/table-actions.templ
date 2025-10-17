@@ -35,12 +35,14 @@ templ TableActions(options TableActionsOptions) {
 				hx-trigger="click"
 				hx-confirm="Diesen Eintrag löschen?"
 				hx-swap="none"
-				hx-on:htmx:response-success='
-				window.dispatch(new Event("visibilitychange"));
-			'
+				hx-on:htmx:after-request='
+					if (event.detail.successful) {
+						window.dispatchEvent(new Event("visibilitychange"));
+					}
+				'
 				hx-on:htmx:response-error="
-				alert(event.detail.xhr.responseText);
-			"
+					alert(event.detail.xhr.responseText);
+				"
 				title="Löschen"
 				if options.DeleteAdminOnly && !options.User.IsAdmin() {
 					disabled
