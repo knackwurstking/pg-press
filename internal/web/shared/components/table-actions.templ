@@ -12,7 +12,6 @@ type TableActionsOptions struct {
 
 templ TableActions(options TableActionsOptions) {
 	<span class="button-group flex justify-end items-center">
-		// Edit Regeneration -> This will allow adding/editing a reason for this regeneration
 		if options.EditHref != "" {
 			<button
 				class="icon small ghost"
@@ -30,7 +29,6 @@ templ TableActions(options TableActionsOptions) {
 			</button>
 		}
 		if options.DeleteHref != "" {
-			// Admin only action: Delete this regeneration
 			<button
 				class="icon destructive small ghost"
 				hx-delete={ options.DeleteHref }
