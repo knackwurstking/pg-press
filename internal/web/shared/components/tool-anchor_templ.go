@@ -58,7 +58,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><span class=\"flex flex-wrap flex-col gap-0 justify-start w-full\"><span class=\"flex flex-col gap-sm\"><span class=\"text-semibold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><span class=\"flex gap justify-between w-full\"><span class=\"flex flex-col gap-sm\"><span class=\"text-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

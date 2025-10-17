@@ -23,7 +23,7 @@ templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
 		href={ fmt.Sprintf("%s/tools/tool/%d",
 			env.ServerPathPrefix, tool.ID) }
 	>
-		<span class="flex flex-wrap flex-col gap-0 justify-start w-full">
+		<span class="flex gap justify-between w-full">
 			<span class="flex flex-col gap-sm">
 				<span class="text-semibold">
 					{ tool.String() }
