@@ -2,7 +2,9 @@ package tool
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -11,7 +13,7 @@ type RegenerationEditFormData struct {
 }
 
 func (h *Handler) HTMXGetEditRegeneration(c echo.Context) error {
-	// TODO: ...
+	// TODO: Get data and open dialog
 
 	return errors.New("under construction")
 }
@@ -24,7 +26,7 @@ func (h *Handler) HTMXPutEditRegeneration(c echo.Context) error {
 
 	regenerationID, err := h.ParseInt64Query(c, "id")
 	if err != nil {
-		return h.RenderBadRequest(c, "failed to get tool id from url param: "+err.Error())
+		return h.RenderBadRequest(c, "failed to get the regeneration id from url query: "+err.Error())
 	}
 
 	formData := h.parseRegenerationEditFormData(c)
@@ -53,4 +55,29 @@ func (h *Handler) parseRegenerationEditFormData(c echo.Context) *RegenerationEdi
 	return &RegenerationEditFormData{
 		Reason: c.FormValue("reason"),
 	}
+}
+
+func (h *Handler) resolveRegeneration(c echo.Context, r *models.Regeneration) (*models.ResolvedRegeneration, error) {
+	tool, err := h.DB.Tools.Get(r.ToolID)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get tool %d for regeneration %d",
+				r.ToolID, r.ID))
+	}
+
+	cycle, err := h.DB.PressCycles.Get(r.CycleID)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get press cycle %d for regeneration %d",
+				r.CycleID, r.ID))
+	}
+
+	user, err := h.DB.Users.Get(*r.PerformedBy)
+	if err != nil {
+		return nil, h.HandleError(c, err,
+			fmt.Sprintf("failed to get user %d for regeneration %d",
+				*r.PerformedBy, r.ID))
+	}
+
+	return models.NewResolvedRegeneration(r, tool, cycle, user), nil
 }

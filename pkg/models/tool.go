@@ -116,6 +116,10 @@ func (t *Tool) Status() Status {
 }
 
 func (t *Tool) String() string {
+	if t.Type != "" {
+		return fmt.Sprintf("%s %s %s", t.Format, t.Code, t.Type)
+	}
+
 	return fmt.Sprintf("%s %s", t.Format, t.Code)
 }
 

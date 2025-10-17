@@ -41,7 +41,6 @@ func (r *Routes) RegisterRoutes(e *echo.Echo) {
 				r.handler.HTMXPutEditRegeneration,
 			),
 
-			// TODO: Add route for "/htmx/tools/tool/:id/delete-regeneration"
 			helpers.NewEchoRoute(
 				http.MethodDelete,
 				"/htmx/tools/tool/:id/delete-regeneration",

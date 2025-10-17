@@ -1,0 +1,49 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/pkg/models"
+)
+
+type DialogEditRegenerationProps struct {
+	Tool         *models.Tool
+	Regeneration *models.ResolvedRegeneration
+	Reason       string
+}
+
+templ DialogEditRegeneration(props *DialogEditRegenerationProps) {
+	{{
+		var (
+			baseType         = "PUT"
+			submitButtonText = "Aktualisieren"
+			baseHref         = fmt.Sprintf(
+				"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
+				env.ServerPathPrefix, props.Tool.ID, props.Regeneration.ID,
+			)
+		)
+	}}
+	@dialogs.Base(dialogs.BaseProps{
+		Type:                  baseType,
+		Href:                  templ.URL(baseHref),
+		ID:                    "regeneration-edit-dialog",
+		SubmitButtonText:      submitButtonText,
+		Behavior:              "custom",
+		CustomWindowEventName: "visibilitychange",
+	}) {
+		<section>
+			<p>Tool: { props.Tool.String() } </p>
+			<p>Regeneriert am: { props.Regeneration.GetCycle().Date.Format("02.01.06") }</p>
+		</section>
+		<label class="flex flex-col gap-0">
+			Grund
+			<input
+				id="reason"
+				name="reason"
+				type="text"
+				value={ props.Reason }
+			/>
+		</label>
+	}
+}

@@ -419,28 +419,3 @@ func (h *Handler) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
 
 	return totalCycles
 }
-
-func (h *Handler) resolveRegeneration(c echo.Context, r *models.Regeneration) (*models.ResolvedRegeneration, error) {
-	tool, err := h.DB.Tools.Get(r.ToolID)
-	if err != nil {
-		return nil, h.HandleError(c, err,
-			fmt.Sprintf("failed to get tool %d for regeneration %d",
-				r.ToolID, r.ID))
-	}
-
-	cycle, err := h.DB.PressCycles.Get(r.CycleID)
-	if err != nil {
-		return nil, h.HandleError(c, err,
-			fmt.Sprintf("failed to get press cycle %d for regeneration %d",
-				r.CycleID, r.ID))
-	}
-
-	user, err := h.DB.Users.Get(*r.PerformedBy)
-	if err != nil {
-		return nil, h.HandleError(c, err,
-			fmt.Sprintf("failed to get user %d for regeneration %d",
-				*r.PerformedBy, r.ID))
-	}
-
-	return models.NewResolvedRegeneration(r, tool, cycle, user), nil
-}
