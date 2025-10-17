@@ -19,29 +19,24 @@ type CyclesProps struct {
 }
 
 templ Cycles(props *CyclesProps) {
+	@components.SectionTitle(components.TitleLevelMain, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
-		<h4>Werkzeugnutzung & Zyklen</h4>
 		<section id="tool-status-section">
-			<div class="flex justify-between items-center mb">
-				<h5>Aktueller Status</h5>
-			</div>
+			@components.SectionTitle(components.TitleLevelSub, "Aktueller Status")
 			@toolStatus(props.Tool, props.ToolsForBinding, props.User)
 		</section>
 		<section id="regenerations-section">
-			<div class="flex justify-between items-center mb">
-				<h5>Regerationen</h5>
-			</div>
+			@components.SectionTitle(components.TitleLevelSub, "Regerationen")
 			if len(props.Regenerations) == 0 {
 				<span class="flex justify-center items-center">
-					<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
+					<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug </small> </i>
 				</span>
 			} else {
 				@regenerationsTable(props.Regenerations)
 			}
 		</section>
 		<section id="cycles-section">
-			<div class="flex justify-between items-center mb">
-				<h5>Pressennutzungsverlauf</h5>
+			@components.SectionTitle(components.TitleLevelSub, "Pressennutzungsverlauf") {
 				<button
 					class="icon secondary small flex"
 					hx-get={ fmt.Sprintf(
@@ -59,7 +54,7 @@ templ Cycles(props *CyclesProps) {
 				>
 					<i class="bi bi-plus-lg"></i>
 				</button>
-			</div>
+			}
 			<section>
 				<h6 class="mb">
 					Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",

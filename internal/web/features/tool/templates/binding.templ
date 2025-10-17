@@ -18,7 +18,7 @@ templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin 
 			positionForBinding = models.PositionTop
 		}
 	}}
-	<h5>Werkzeuge Binden</h5>
+	@components.SectionTitle(components.TitleLevelSub, "Werkzeuge Binden")
 	<span
 		id="binding-section"
 		class="flex gap"

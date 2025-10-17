@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -13,8 +14,7 @@ templ MetalSheets(
 	{{ metalSheets := metalSheets.Sort() }}
 	// NOTE: For now only top and bottom position can contain metal sheets
 	if tool.Position == models.PositionTop || tool.Position == models.PositionBottom {
-		<div class="flex justify-between items-center mb">
-			<h4>Bleche</h4>
+		@components.SectionTitle(components.TitleLevelMain, "Bleche") {
 			<button
 				class="icon secondary small flex"
 				hx-get={ fmt.Sprintf(
@@ -29,7 +29,7 @@ templ MetalSheets(
 			>
 				<i class="bi bi-plus-lg"></i>
 			</button>
-		</div>
+		}
 		<div class="table-container">
 			switch tool.Position {
 				case models.PositionBottom:

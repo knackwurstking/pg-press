@@ -8,8 +8,7 @@ import (
 )
 
 templ Notes(tool *models.ToolWithNotes) {
-	<div class="flex justify-between items-center mb">
-		<h4>Notizen</h4>
+	@components.SectionTitle(components.TitleLevelSub, "Notizen") {
 		<button
 			class="icon secondary small flex"
 			hx-get={ fmt.Sprintf(
@@ -24,7 +23,7 @@ templ Notes(tool *models.ToolWithNotes) {
 		>
 			<i class="bi bi-plus-lg"></i>
 		</button>
-	</div>
+	}
 	if len(tool.LoadedNotes) > 0 {
 		<div class="notes-list">
 			for _, note := range tool.LoadedNotes {

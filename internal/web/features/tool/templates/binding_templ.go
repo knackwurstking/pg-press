@@ -45,7 +45,11 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 		} else {
 			positionForBinding = models.PositionTop
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h5>Werkzeuge Binden</h5><span id=\"binding-section\" class=\"flex gap\"")
+		templ_7745c5c3_Err = components.SectionTitle(components.TitleLevelSub, "Werkzeuge Binden").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<span id=\"binding-section\" class=\"flex gap\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
