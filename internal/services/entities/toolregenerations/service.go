@@ -26,8 +26,8 @@ type ToolsService interface {
 func NewService(db *sql.DB, tools ToolsService) *Service {
 	baseService := base.NewBaseService(db, "Tool Regenerations")
 
-	query := `
-		CREATE TABLE IF NOT EXISTS tool_regenerations (
+	query := fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %[1]s (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			tool_id INTEGER NOT NULL,
 			cycle_id INTEGER NOT NULL,
@@ -37,11 +37,11 @@ func NewService(db *sql.DB, tools ToolsService) *Service {
 			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL,
 			FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL
 		);
-		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
-		CREATE INDEX IF NOT EXISTS idx_tool_regenerations_cycle_id ON tool_regenerations(cycle_id);
-	`
+		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_id ON %[1]s(tool_id);
+		CREATE INDEX IF NOT EXISTS idx_%[1]s_cycle_id ON %[1]s(cycle_id);
+	`, TableName)
 
-	if err := baseService.CreateTable(query, "tool_regenerations"); err != nil {
+	if err := baseService.CreateTable(query, TableName); err != nil {
 		panic(err)
 	}
 
@@ -57,9 +57,9 @@ func (s *Service) Get(id int64) (*models.Regeneration, error) {
 	}
 
 	r := s.DB.QueryRow(
-		`
-			SELECT * FROM tool_regenerations WHERE id = ?
-		`,
+		fmt.Sprintf(`
+			SELECT * FROM %s WHERE id = ?
+		`, TableName),
 		id,
 	)
 
@@ -87,10 +87,10 @@ func (s *Service) Add(regeneration *models.Regeneration, user *models.User) (int
 	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
 
-	query := `
-		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
+	query := fmt.Sprintf(`
+		INSERT INTO %s (tool_id, cycle_id, reason, performed_by)
 		VALUES (?, ?, ?, ?)
-	`
+	`, TableName)
 
 	row, err := s.DB.Exec(query,
 		regeneration.ToolID,
@@ -126,11 +126,11 @@ func (r *Service) Update(regeneration *models.Regeneration, user *models.User) e
 
 	r.Log.Debug("Updating tool regeneration by %s (%d): id: %d", user.Name, user.TelegramID, regeneration.ID)
 
-	query := `
-		UPDATE tool_regenerations
+	query := fmt.Sprintf(`
+		UPDATE %s
 		SET cycle_id = ?, reason = ?, performed_by = ?
 		WHERE id = ?
-	`
+	`, TableName)
 
 	result, err := r.DB.Exec(query,
 		regeneration.CycleID,
@@ -157,7 +157,7 @@ func (r *Service) Delete(id int64) error {
 
 	r.Log.Debug("Deleting tool regeneration: %d", id)
 
-	query := `DELETE FROM tool_regenerations WHERE id = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableName)
 	result, err := r.DB.Exec(query, id)
 	if err != nil {
 		return r.HandleDeleteError(err, EntityName)
@@ -280,13 +280,13 @@ func (r *Service) GetLastRegeneration(toolID int64) (*models.Regeneration, error
 
 	r.Log.Debug("Getting last regeneration for tool: %d", toolID)
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
-		FROM tool_regenerations
+		FROM %s
 		WHERE tool_id = ?
 		ORDER BY id DESC
 		LIMIT 1
-	`
+	`, TableName)
 
 	row := r.DB.QueryRow(query, toolID)
 	regen, err := scanner.ScanSingleRow(row, ScanToolRegeneration, EntityName)
@@ -309,7 +309,7 @@ func (r *Service) HasRegenerationsForCycle(cycleID int64) (bool, error) {
 
 	r.Log.Debug("Checking if cycle has regenerations: %d", cycleID)
 
-	query := `SELECT COUNT(*) FROM tool_regenerations WHERE cycle_id = ?`
+	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableName)
 	var count int
 	err := r.DB.QueryRow(query, cycleID).Scan(&count)
 	if err != nil {
@@ -326,12 +326,12 @@ func (r *Service) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, 
 
 	r.Log.Debug("Getting regeneration history for tool: %d", toolID)
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
-		FROM tool_regenerations
+		FROM %s
 		WHERE tool_id = ?
 		ORDER BY id DESC
-	`
+	`, TableName)
 
 	rows, err := r.DB.Query(query, toolID)
 	if err != nil {
