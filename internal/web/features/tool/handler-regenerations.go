@@ -66,9 +66,16 @@ func (h *Handler) HTMXPutEditRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
-	// TODO: ...
+	regenerationID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to get the regeneration id from url query: "+err.Error())
+	}
 
-	return errors.New("under construction")
+	if err := h.DB.ToolRegenerations.Delete(regenerationID); err != nil {
+		return h.HandleError(c, err, "failed to delete regeneration")
+	}
+
+	return nil
 }
 
 func (h *Handler) parseRegenerationEditFormData(c echo.Context) *RegenerationEditFormData {

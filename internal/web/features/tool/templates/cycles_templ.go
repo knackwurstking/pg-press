@@ -360,8 +360,8 @@ func regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user *
 				),
 				EditAdminOnly: false,
 				DeleteHref: fmt.Sprintf(
-					"%s/htmx/tools/tool/%d/delete-regeneration",
-					env.ServerPathPrefix, regen.GetTool().ID,
+					"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
+					env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
 				),
 				DeleteAdminOnly: true,
 				User:            user,
