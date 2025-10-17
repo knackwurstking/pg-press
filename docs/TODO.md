@@ -13,5 +13,6 @@
 - [x] UI: Add some links (anchor) to the tool page containing a binding
 - [x] Simplify tools filter
 - [x] Add regenerations list management to tools for deletion (admin only)
+- [x] Create table action components: "edit", "delete"
 - [ ] Add table actions to the regenerations table for edit (reason) and delete [WIP]
-- [ ] Create table action components: "edit", "delete"
+- [ ] Create and use shared constants for date format `internale/constants/html.go` [WIP]
