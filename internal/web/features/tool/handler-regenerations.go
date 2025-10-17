@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/knackwurstking/pgpress/internal/web/features/tool/templates"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/labstack/echo/v4"
 )
@@ -13,7 +14,26 @@ type RegenerationEditFormData struct {
 }
 
 func (h *Handler) HTMXGetEditRegeneration(c echo.Context) error {
-	// TODO: Get data and open dialog
+	regenerationID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, err.Error())
+	}
+
+	regeneration, err := h.DB.ToolRegenerations.Get(regenerationID)
+	if err != nil {
+		return h.HandleError(c, err, "get regeneration failed")
+	}
+
+	resolvedRegeneration, err := h.resolveRegeneration(c, regeneration)
+	if err != nil {
+		return err
+	}
+
+	dialog := templates.DialogEditRegeneration(resolvedRegeneration)
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return h.HandleError(c, err, "render dialog failed")
+	}
 
 	return errors.New("under construction")
 }
