@@ -119,38 +119,42 @@ templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *mod
 						</td>
 					</tr>
 				} else {
-					for _, regen := range regenerations {
-						<tr>
-							<td>
-								<span>{ regen.GetCycle().Date.Format("02.01.2006") }</span>
-							</td>
-							<td>
-								<span>{ regen.GetUser().Name }</span>
-							</td>
-							<td>
-								<span>{ regen.Reason }</span>
-							</td>
-							<td>
-								@components.TableActions(components.TableActionsOptions{
-									EditHref: fmt.Sprintf(
-										"%s/htmx/tools/tool/%d/edit-regeneration",
-										env.ServerPathPrefix, regen.GetTool().ID,
-									),
-									EditAdminOnly: false,
-									DeleteHref: fmt.Sprintf(
-										"%s/htmx/tools/tool/%d/delete-regeneration",
-										env.ServerPathPrefix, regen.GetTool().ID,
-									),
-									DeleteAdminOnly: true,
-									User:            user,
-								})
-							</td>
-						</tr>
-					}
+					@regenerationsTableRows(regenerations, user)
 				}
 			</tbody>
 		</table>
 	</figure>
+}
+
+templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user *models.User) {
+	for _, regen := range regenerations {
+		<tr>
+			<td>
+				<span>{ regen.GetCycle().Date.Format("02.01.2006") }</span>
+			</td>
+			<td>
+				<span>{ regen.GetUser().Name }</span>
+			</td>
+			<td>
+				<span>{ regen.Reason }</span>
+			</td>
+			<td>
+				@components.TableActions(components.TableActionsOptions{
+					EditHref: fmt.Sprintf(
+						"%s/htmx/tools/tool/%d/edit-regeneration",
+						env.ServerPathPrefix, regen.GetTool().ID,
+					),
+					EditAdminOnly: false,
+					DeleteHref: fmt.Sprintf(
+						"%s/htmx/tools/tool/%d/delete-regeneration",
+						env.ServerPathPrefix, regen.GetTool().ID,
+					),
+					DeleteAdminOnly: true,
+					User:            user,
+				})
+			</td>
+		</tr>
+	}
 }
 
 templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.ResolvedRegeneration, user *models.User) {
