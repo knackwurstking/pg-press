@@ -16,3 +16,5 @@
 - [x] Create table action components: "edit", "delete"
 - [x] Add table actions to the regenerations table for edit (reason) and delete
 - [x] Create and use shared constants for date format (grep for `date.format`) `internale/constants/html.go`
+- [ ] UI: Fix binding section: overflow on mobile
+- [ ] UI: Improve box shadow styles, especially for the dark theme
