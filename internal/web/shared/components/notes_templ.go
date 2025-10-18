@@ -45,7 +45,7 @@ func NoteCard(note *models.Note) templ.Component {
 		case models.BROKEN:
 			filterClass = "destructive outline"
 		}
-		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("card compact elevated %s", filterClass)}
+		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("card compact elevation-2 %s", filterClass)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

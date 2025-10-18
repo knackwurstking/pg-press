@@ -48,7 +48,7 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 
 templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 	<div
-		class={ fmt.Sprintf("note-card card compact elevated %s", filterClass) }
+		class={ fmt.Sprintf("note-card card compact elevation-2 %s", filterClass) }
 		data-note-level={ fmt.Sprintf("%d", note.Level) }
 	>
 		<div class="card-header flex gap-sm justify-between items-center">

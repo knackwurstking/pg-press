@@ -18,7 +18,7 @@ templ NoteCard(note *models.Note) {
 			filterClass = "destructive outline"
 		}
 	}}
-	<div class={ fmt.Sprintf("card compact elevated %s", filterClass) }>
+	<div class={ fmt.Sprintf("card compact elevation-2 %s", filterClass) }>
 		<div class="card-header flex gap-sm justify-between items-center">
 			<span class="note-importance flex gap">
 				switch note.Level {
