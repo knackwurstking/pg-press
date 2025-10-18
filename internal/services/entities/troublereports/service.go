@@ -188,14 +188,11 @@ func (s *Service) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
 	tr.ID = id
 
 	// Save initial modification
-	modData := models.TroubleReportModData{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-		UseMarkdown:       tr.UseMarkdown,
-	}
 	if _, err := s.modifications.Add(
-		u.TelegramID, models.ModificationTypeTroubleReport, id, modData,
+		u.TelegramID,
+		models.ModificationTypeTroubleReport,
+		id,
+		models.NewTroubleReportModData(tr),
 	); err != nil {
 		s.Log.Error("Failed to save initial modification for trouble report %d: %v", id, err)
 		// Don't fail the entire operation for modification tracking
@@ -242,20 +239,12 @@ func (s *Service) Update(tr *models.TroubleReport, u *models.User) error {
 		return err
 	}
 
-	// Save modification
-	// Save modification for tracking changes
-	modData := models.TroubleReportModData{
-		Title:             tr.Title,
-		Content:           tr.Content,
-		LinkedAttachments: tr.LinkedAttachments,
-		UseMarkdown:       tr.UseMarkdown,
-	}
+	// Save modification, tracking changes
 	if _, err := s.modifications.Add(
 		u.TelegramID,
 		models.ModificationTypeTroubleReport,
-
 		tr.ID,
-		modData,
+		models.NewTroubleReportModData(tr),
 	); err != nil {
 		s.Log.Error("Failed to save modification for trouble report %d: %v", tr.ID, err)
 		// Don't fail the entire operation for modification tracking

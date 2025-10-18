@@ -10,6 +10,15 @@ type TroubleReportModData struct {
 	UseMarkdown       bool    `json:"use_markdown"`
 }
 
+func NewTroubleReportModData(tr *TroubleReport) *TroubleReportModData {
+	return &TroubleReportModData{
+		Title:             tr.Title,
+		Content:           tr.Content,
+		LinkedAttachments: tr.LinkedAttachments,
+		UseMarkdown:       tr.UseMarkdown,
+	}
+}
+
 func (trd *TroubleReportModData) CopyTo(tr *TroubleReport) *TroubleReport {
 	tr.Title = trd.Title
 	tr.Content = trd.Content
