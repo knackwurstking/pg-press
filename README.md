@@ -2,6 +2,38 @@
 
 A comprehensive web application for press and tool management in manufacturing environments. Built with Go and designed for efficient tracking of manufacturing processes, tool lifecycle management, and maintenance reporting.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+  - [🔧 Tool Management](#-tool-management)
+  - [📊 Press Cycle Tracking](#-press-cycle-tracking)
+  - [📋 Trouble Reports](#-trouble-reports)
+  - [📝 Notes System](#-notes-system)
+  - [🔄 Real-time Updates](#-real-time-updates)
+  - [🚀 Performance Optimizations](#-performance-optimizations)
+- [Technology Stack](#technology-stack)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Development Setup](#development-setup)
+- [Configuration](#configuration)
+  - [Environment Variables](#environment-variables)
+  - [Production Deployment](#production-deployment)
+- [API Documentation](#api-documentation)
+  - [Web Interface](#web-interface)
+  - [Main Pages](#main-pages)
+  - [Dynamic Features](#dynamic-features)
+- [Database Schema](#database-schema)
+- [Development](#development)
+  - [Project Structure](#project-structure)
+  - [Make Commands](#make-commands)
+  - [CLI Commands](#cli-commands)
+  - [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
+- [Changelog](#changelog)
+
 ## Overview
 
 PG Press is a manufacturing management system that provides real-time tracking and management of:
@@ -61,7 +93,7 @@ PG Press is a manufacturing management system that provides real-time tracking a
 
 ## Technology Stack
 
-- **Backend**: Go 1.25+ with Echo web framework
+- **Backend**: Go 1.25.0 with Echo web framework
 - **Database**: SQLite with comprehensive schema
 - **Frontend**: HTMX for dynamic interactions, vanilla JavaScript
 - **Templates**: Templ for type-safe HTML generation
@@ -74,7 +106,7 @@ PG Press is a manufacturing management system that provides real-time tracking a
 
 ### Prerequisites
 
-- Go 1.25 or higher
+- Go 1.25.0 or higher
 - Make (for build automation)
 - Git
 
@@ -87,9 +119,10 @@ PG Press is a manufacturing management system that provides real-time tracking a
    cd pg-press
    ```
 
-2. **Build the application**
+2. **Initialize and build the application**
 
    ```bash
+   make init
    make build
    ```
 
@@ -108,7 +141,7 @@ PG Press is a manufacturing management system that provides real-time tracking a
    ```
 
 5. **Access the application**
-   Open your browser to `http://localhost:8080`
+   Open your browser to `http://localhost:9020`
 
 ### Development Setup
 
@@ -118,37 +151,43 @@ For development with hot reloading:
 make dev
 ```
 
-This will start the server with automatic rebuilding on file changes.
+This will start the server with automatic rebuilding on file changes using `gow`.
 
 ## Configuration
 
 ### Environment Variables
 
-| Variable             | Description               | Default        | Example          |
-| -------------------- | ------------------------- | -------------- | ---------------- |
-| `SERVER_ADDR`        | Server bind address       | `:8080`        | `localhost:3000` |
-| `SERVER_PATH_PREFIX` | URL path prefix           | `/`            | `/pg-press`      |
-| `DATABASE_PATH`      | SQLite database file      | `pg-press.db`  | `/data/app.db`   |
-| `ASSET_VERSION`      | Asset versioning override | auto-generated | `v1.2.3`         |
+| Variable             | Description          | Default       | Example          |
+| -------------------- | -------------------- | ------------- | ---------------- |
+| `SERVER_ADDR`        | Server bind address  | `:9020`       | `localhost:3000` |
+| `SERVER_PATH_PREFIX` | URL path prefix      | `/pg-press`   | `/`              |
+| `DATABASE_PATH`      | SQLite database file | `pg-press.db` | `/data/app.db`   |
+| `LOG_LEVEL`          | Logging level        | `INFO`        | `DEBUG`          |
 
 ### Production Deployment
 
 1. **Build production binary**
 
    ```bash
-   make build-prod
+   make build
    ```
 
 2. **Set production environment**
 
    ```bash
-   export SERVER_ADDR=":8080"
+   export SERVER_ADDR=":9020"
    export SERVER_PATH_PREFIX="/pg-press"
    ```
 
-3. **Run with systemd or supervisor**
+3. **Run with systemd**
+
+   A systemd service file is provided at `cmd/pg-press/pg-press.service`. Configure and install it:
+
    ```bash
-   ./bin/pg-press server
+   sudo cp cmd/pg-press/pg-press.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable pg-press
+   sudo systemctl start pg-press
    ```
 
 ## API Documentation
@@ -174,8 +213,6 @@ PG Press uses an HTMX-based web interface that provides dynamic interactions wit
 - **Form Handling**: Server-rendered forms with validation
 - **File Uploads**: Drag-and-drop attachment support
 
-For complete endpoint documentation, see [docs/API.md](docs/API.md).
-
 ## Database Schema
 
 The application uses SQLite with a comprehensive schema supporting:
@@ -186,16 +223,7 @@ The application uses SQLite with a comprehensive schema supporting:
 - **Documentation**: Notes, reports, and attachments
 - **Audit Trail**: Complete modification history
 
-See [docs/DATABASE.md](docs/DATABASE.md) for detailed schema information.
-
-## Documentation
-
-- [🌟 Features Overview](docs/FEATURES.md) - Comprehensive feature documentation
-- [🗄️ Database Schema](docs/DATABASE.md) - Complete database structure
-- [⚡ Caching Strategy](docs/CACHING.md) - Asset optimization details
-- [🌐 API Documentation](docs/API.md) - HTMX architecture and endpoints
-- [🛤️ Routing Documentation](docs/ROUTING.md) - All available routes
-- [📚 Documentation Index](docs/README.md) - Complete documentation overview and navigation
+The database is automatically initialized on first run with proper SQLite optimizations including WAL mode and foreign key constraints.
 
 ## Development
 
@@ -203,17 +231,20 @@ See [docs/DATABASE.md](docs/DATABASE.md) for detailed schema information.
 
 ```
 pg-press/
-├── cmd/pg-press/          # Application entry points
+├── cmd/pg-press/          # Application entry points and CLI commands
 ├── internal/              # Internal application code
-│   ├── database/          # Database connection management
-│   ├── services/          # Business logic layer
-│   ├── web/              # Web handlers and templates
-│   └── constants/        # Application constants
+│   ├── constants/         # Application constants
+│   ├── env/              # Environment configuration
+│   ├── interfaces/       # Interface definitions
+│   ├── pdf/              # PDF generation utilities
+│   ├── services/         # Business logic layer
+│   └── web/              # Web handlers and templates
 ├── pkg/                  # Reusable packages
+│   ├── constants/        # Shared constants
+│   ├── logger/           # Logging system
 │   ├── models/           # Data models
-│   ├── utils/            # Utility functions
-│   └── logger/           # Logging system
-├── docs/                 # Documentation
+│   ├── modification/     # Modification tracking
+│   └── utils/            # Utility functions
 ├── scripts/              # Build and deployment scripts
 └── bin/                  # Compiled binaries
 ```
@@ -221,14 +252,26 @@ pg-press/
 ### Make Commands
 
 ```bash
+make init       # Initialize project (tidy modules, update submodules)
 make build      # Build production binary
-make build-dev  # Build development binary
-make dev        # Run with hot reload
-make run        # Run production build
-make test       # Run all tests
+make run        # Generate templates and run
+make dev        # Run with hot reload using gow
+make generate   # Generate templ templates
 make clean      # Clean build artifacts
-make docs       # Generate documentation
+make count      # Count lines of code
 ```
+
+### CLI Commands
+
+The application includes a comprehensive CLI for management tasks:
+
+- `pg-press user` - User management (add, remove, modify, list)
+- `pg-press api-key` - API key generation
+- `pg-press cookies` - Cookie cleanup and maintenance
+- `pg-press feeds` - Activity feed management
+- `pg-press cycles` - Press cycle data management
+- `pg-press tools` - Tool management operations
+- `pg-press server` - Start the web server
 
 ### Contributing
 
@@ -248,7 +291,6 @@ For support and questions:
 
 - Create an issue on GitHub
 - Contact the development team
-- Check the documentation in `/docs`
 
 ## Changelog
 
@@ -261,3 +303,5 @@ For support and questions:
 - Real-time updates via WebSocket
 - PDF export functionality
 - Advanced caching system
+- CLI management tools
+- Systemd service integration
