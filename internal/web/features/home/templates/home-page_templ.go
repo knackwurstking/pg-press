@@ -166,7 +166,7 @@ func pageItem(href templ.SafeURL, icon, title, description string) templ.Compone
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a role=\"button\" class=\"ghost secondary flex flex-row gap justify-between items-center\" style=\"width: 90%; margin: 0 auto;\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a role=\"button\" class=\"ghost contrast flex flex-row gap justify-between items-center\" style=\"width: 90%; margin: 0 auto;\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
