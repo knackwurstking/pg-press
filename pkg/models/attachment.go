@@ -35,18 +35,6 @@ type Attachment struct {
 
 // Validate checks if the attachment has valid data.
 func (a *Attachment) Validate() error {
-	if a.ID == "" {
-		return utils.NewValidationError("id cannot be empty")
-	}
-
-	if len(a.ID) < MinIDLength {
-		return utils.NewValidationError("id too short")
-	}
-
-	if len(a.ID) > MaxIDLength {
-		return utils.NewValidationError("id too long")
-	}
-
 	if a.MimeType == "" {
 		return utils.NewValidationError("mime_type cannot be empty")
 	}

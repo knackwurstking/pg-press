@@ -29,7 +29,7 @@ func RollbackResponseStatusOK() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"card success p mb\"><div class=\"flex\"><div class=\"shrink-0\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div style=\"margin-left: var(--ui-spacing);\"><p class=\"text-sm text-semibold\">Successfully rolled back trouble report. The page will refresh automatically.</p></div></div></div><script>\n\t\tsetTimeout(function() {\n\t\t\twindow.location.reload();\n\t\t}, 2000);\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"card success p mb\"><div class=\"flex\"><div class=\"shrink-0\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg></div><div style=\"margin-left: var(--ui-spacing);\"><p class=\"text-sm text-semibold\">Successfully rolled back trouble report. The page will refresh automatically.</p></div></div></div><script>\n\t\tsetTimeout(function() {\n\t\t\twindow.location.reload();\n\t\t}, 2500);\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

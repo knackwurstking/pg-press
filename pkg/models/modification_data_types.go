@@ -10,6 +10,15 @@ type TroubleReportModData struct {
 	UseMarkdown       bool    `json:"use_markdown"`
 }
 
+func (trd *TroubleReportModData) CopyTo(tr *TroubleReport) *TroubleReport {
+	tr.Title = trd.Title
+	tr.Content = trd.Content
+	tr.LinkedAttachments = trd.LinkedAttachments
+	tr.UseMarkdown = trd.UseMarkdown
+
+	return tr
+}
+
 // MetalSheetModData represents the data structure for metal sheet modifications
 type MetalSheetModData struct {
 	TileHeight  float64 `json:"tile_height"`

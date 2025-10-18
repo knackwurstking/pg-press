@@ -4,15 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
-	"slices"
+
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/pdf"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/troublereports/templates"
@@ -250,89 +246,93 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
-	h.Log.Info("Handling HTMX rollback for trouble report")
-
-	// Parse ID parameter from query
-	id, err := h.ParseInt64Query(c, "id")
-	if err != nil {
-		return h.RenderBadRequest(c, "failed to parse ID query")
-	}
-
-	// Get modification timestamp from form data
-	modTimeStr := c.FormValue("modification_time")
-	if modTimeStr == "" {
-		return h.RenderBadRequest(c, "modification_time form value is required")
-	}
-
-	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
-	if err != nil {
-		return h.RenderBadRequest(c, "invalid modification_time format: "+err.Error())
-	}
-
 	// Get user from context
 	user, err := h.GetUserFromContext(c)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get user from context")
 	}
 
-	if !user.IsAdmin() {
-		return h.RenderUnauthorized(c, "administrator privileges required")
+	// Parse ID parameter from query
+	trID, err := h.ParseInt64Query(c, "id")
+	if err != nil {
+		return h.RenderBadRequest(c, "failed to parse ID query")
+	}
+
+	var modTime int64
+	{ // Get modification timestamp from form data
+		modTimeStr := c.FormValue("modification_time")
+		if modTimeStr == "" {
+			return h.RenderBadRequest(c,
+				"modification_time form value is required")
+		}
+
+		modTime, err = strconv.ParseInt(modTimeStr, 10, 64)
+		if err != nil {
+			return h.RenderBadRequest(c,
+				"invalid modification_time format: "+err.Error())
+		}
 	}
 
 	h.Log.Info("User %s is rolling back trouble report %d to modification %d",
-		user.Name, id, modTime)
+		user.Name, trID, modTime)
 
 	// Find the specific modification
 	modifications, err := h.DB.Modifications.ListAll(
-		models.ModificationTypeTroubleReport, id)
+		models.ModificationTypeTroubleReport,
+		trID,
+	)
 	if err != nil {
 		return h.HandleError(c, err, "failed to retrieve modifications")
 	}
 
 	var targetMod *models.Modification[any]
-	for _, mod := range modifications {
-		if mod.CreatedAt.UnixMilli() == modTime {
-			targetMod = mod
-			break
+	{ // Try to get the requested mod
+		for _, mod := range modifications {
+			if mod.CreatedAt.UnixMilli() == modTime {
+				targetMod = mod
+				break
+			}
+		}
+
+		if targetMod == nil {
+			return h.RenderNotFound(c, "modification not found")
 		}
 	}
 
-	if targetMod == nil {
-		return h.RenderNotFound(c, "modification not found")
+	var tr *models.TroubleReport
+	{ // Rollback trouble report to the mod
+		var modData models.TroubleReportModData
+		if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
+			return h.RenderInternalError(c,
+				"failed to parse modification data: "+err.Error())
+		}
+
+		// Get the current trouble report
+		tr, err = h.DB.TroubleReports.Get(trID)
+		if err != nil {
+			return h.HandleError(c, err, "failed to retrieve trouble report")
+		}
+
+		// Update the trouble report
+		err := h.DB.TroubleReports.Update(modData.CopyTo(tr), user)
+		if err != nil {
+			return h.HandleError(c, err, "failed to rollback trouble report")
+		}
 	}
-
-	// Unmarshal the modification data
-	var modData models.TroubleReportModData
-	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		return h.RenderInternalError(c,
-			"failed to parse modification data: "+err.Error())
-	}
-
-	// Get the current trouble report
-	tr, err := h.DB.TroubleReports.Get(id)
-	if err != nil {
-		return h.HandleError(c, err, "failed to retrieve trouble report")
-	}
-
-	// Apply the rollback
-	tr.Title = modData.Title
-	tr.Content = modData.Content
-	tr.LinkedAttachments = modData.LinkedAttachments
-
-	// Update the trouble report
-	if err := h.DB.TroubleReports.Update(tr, user); err != nil {
-		return h.HandleError(c, err, "failed to rollback trouble report")
-	}
-
-	h.Log.Info("Successfully rolled back trouble report %d", id)
 
 	// Create feed entry
 	feedTitle := "Problembericht zurückgesetzt"
+
 	feedContent := fmt.Sprintf("Titel: %s\nZurückgesetzt auf Version vom: %s",
 		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
+
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
+
 	if err := h.DB.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for trouble report rollback: %v", err)
+		h.Log.Error(
+			"Failed to create feed for trouble report rollback: %v",
+			err,
+		)
 	}
 
 	// Return success message for HTMX
@@ -344,156 +344,6 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	}
 
 	return nil
-}
-
-func (h *Handler) processAttachments(ctx echo.Context) ([]*models.Attachment, error) {
-	var attachments []*models.Attachment
-
-	// Get existing attachments if editing
-	if idStr := ctx.QueryParam("id"); idStr != "" {
-		id, err := strconv.ParseInt(idStr, 10, 64)
-		if err == nil {
-			if existingTR, err := h.DB.TroubleReports.Get(id); err == nil {
-				if loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(
-					existingTR); err == nil {
-					attachments = make([]*models.Attachment, len(loadedAttachments))
-					copy(attachments, loadedAttachments)
-				}
-			}
-		}
-	}
-
-	// Handle new file uploads
-	form, err := ctx.MultipartForm()
-	if err != nil {
-		return attachments, nil
-	}
-
-	attachmentsToRemoveSeq := strings.SplitSeq(
-		form.Value[constants.ExistingAttachmentsRemovalFormField][0],
-		",")
-	for atr := range attachmentsToRemoveSeq {
-		for i, a := range attachments {
-			if a.ID == atr {
-				attachments = slices.Delete(attachments, i, 1)
-				break
-			}
-		}
-	}
-
-	files := form.File[constants.AttachmentsFormField]
-	for i, fileHeader := range files {
-		if len(attachments) >= 10 {
-			break
-		}
-
-		if fileHeader.Size == 0 {
-			continue
-		}
-
-		attachment, err := h.processFileUpload(fileHeader, i+len(attachments))
-		if err != nil {
-			return nil, fmt.Errorf("failed to process file %s: %v", fileHeader.Filename, err)
-		}
-
-		if attachment != nil {
-			attachments = append(attachments, attachment)
-		}
-	}
-
-	return attachments, nil
-}
-
-func (h *Handler) processFileUpload(
-	fileHeader *multipart.FileHeader, index int,
-) (*models.Attachment, error) {
-	if fileHeader.Size > models.MaxDataSize {
-		return nil, fmt.Errorf("file %s is too large (max 10MB)",
-			fileHeader.Filename)
-	}
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %v", err)
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
-	}
-
-	// Create temporary ID
-	sanitizedFilename := h.SanitizeFilename(fileHeader.Filename)
-	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	attachmentID := fmt.Sprintf("temp_%s_%s_%d",
-		sanitizedFilename, timestamp, index)
-
-	// Ensure ID doesn't exceed maximum length
-	if len(attachmentID) > models.MaxIDLength {
-		maxFilenameLen := models.MaxIDLength - len(timestamp) -
-			len(fmt.Sprintf("temp_%d", index)) - 2
-
-		if maxFilenameLen > 0 && len(sanitizedFilename) > maxFilenameLen {
-			sanitizedFilename = sanitizedFilename[:maxFilenameLen]
-			attachmentID = fmt.Sprintf("temp_%s_%s_%d",
-				sanitizedFilename, timestamp, index)
-		} else {
-			attachmentID = fmt.Sprintf("temp_%s_%d", timestamp, index)
-		}
-	}
-
-	// Detect MIME type
-	mimeType := fileHeader.Header.Get("Content-Type")
-	if mimeType == "" || mimeType == "application/octet-stream" {
-		detectedType := http.DetectContentType(data)
-		if detectedType != "application/octet-stream" {
-			mimeType = detectedType
-		} else {
-			mimeType = h.getMimeTypeFromFilename(fileHeader.Filename)
-		}
-	}
-
-	// Validate that the file is an image
-	if !strings.HasPrefix(mimeType, "image/") {
-		return nil, fmt.Errorf("only image files are allowed (JPG, PNG, GIF, BMP, SVG, WebP)")
-	}
-
-	attachment := &models.Attachment{
-		ID:       attachmentID,
-		MimeType: mimeType,
-		Data:     data,
-	}
-
-	if err := attachment.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid attachment: %v", err)
-	}
-
-	return attachment, nil
-}
-
-func (h *Handler) getMimeTypeFromFilename(filename string) string {
-	ext := strings.ToLower(filename)
-	if idx := strings.LastIndex(ext, "."); idx >= 0 {
-		ext = ext[idx:]
-
-		switch ext {
-		case ".jpg", ".jpeg":
-			return "image/jpeg"
-		case ".png":
-			return "image/png"
-		case ".gif":
-			return "image/gif"
-		case ".svg":
-			return "image/svg+xml"
-		case ".webp":
-			return "image/webp"
-		case ".bmp":
-			return "image/bmp"
-		}
-	}
-
-	return "application/octet-stream"
 }
 
 func (h *Handler) shareResponse(
