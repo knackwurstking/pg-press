@@ -36,7 +36,7 @@ func NotesGrid(notes []*models.Note, tools []*models.Tool) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(notes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"notes-list grid gap\" style=\"grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"notes-list grid gap-lg p\" style=\"grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -107,7 +107,7 @@ func NotesCard(note *models.Note, filterClass string, tools []*models.Tool) temp
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var3 = []any{fmt.Sprintf("note-card card compact %s", filterClass)}
+		var templ_7745c5c3_Var3 = []any{fmt.Sprintf("note-card card compact elevated %s", filterClass)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

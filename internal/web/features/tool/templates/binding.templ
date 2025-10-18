@@ -18,68 +18,71 @@ templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin 
 			positionForBinding = models.PositionTop
 		}
 	}}
-	@components.SectionTitle(components.TitleLevelSub, "Werkzeuge Binden")
-	<span
-		id="binding-section"
-		class="flex gap"
-		if !isAdmin {
-			disabled
-		}
-	>
-		<select
-			id="tool-binding-select"
-			hx-patch={ fmt.Sprintf(
+	<span id="binding-section" class="flex flex-col gap">
+		@components.SectionTitle(components.TitleLevelSub, "Werkzeuge Binden")
+		<span
+			class="flex gap flex-wrap"
+			if !isAdmin {
+				disabled
+			}
+		>
+			<select
+				id="tool-binding-select"
+				hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/bind",
 				env.ServerPathPrefix,
 				tool.ID,
 			) }
-			hx-vals="js:{target_id: event.target.value}"
-			hx-trigger="change"
-			hx-target="#binding-section"
-			hx-swap="outerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-			if tool.Binding != nil {
-				disabled
-			}
-		>
-			<option
-				value=""
-				disabled
-				selected?={ tool.Binding == nil }
+				hx-vals="js:{target_id: event.target.value}"
+				hx-trigger="change"
+				hx-target="#binding-section"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+				if tool.Binding != nil {
+					disabled
+				}
 			>
-				{ positionForBinding.GermanString() } Binden
-			</option>
-			// Render options, all top tools unbound
-			for _, t := range toolsForBinding {
-				{{ linkedTool = t }}
 				<option
-					value={ t.ID }
-					selected?={ tool.Binding != nil && t.ID == *tool.Binding }
-				>{ t.String() } { t.Type }</option>
-			}
-		</select>
-		<button
-			class="small ghost destructive"
-			hx-patch={ fmt.Sprintf(
+					value=""
+					disabled
+					selected?={ tool.Binding == nil }
+				>
+					{ positionForBinding.GermanString() } Binden
+				</option>
+				// Render options, all top tools unbound
+				for _, t := range toolsForBinding {
+					if t.Binding != nil && *t.Binding == tool.ID {
+						{{ linkedTool = t }}
+					}
+					<option
+						value={ t.ID }
+						selected?={ tool.Binding != nil && t.ID == *tool.Binding }
+					>{ t.String() }</option>
+				}
+			</select>
+			<button
+				class="small ghost destructive"
+				hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/unbind",
 				env.ServerPathPrefix,
 				tool.ID,
 			) }
-			hx-trigger="click"
-			hx-trigger="change"
-			hx-target="#binding-section"
-			hx-swap="outerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-			if tool.Binding == nil {
-				disabled
-			}
-		>
-			Entbinden
-		</button>
-	</span>
-	if linkedTool != nil {
-		<span>
-			@components.ToolAnchor(linkedTool, nil)
+				hx-trigger="click"
+				hx-trigger="change"
+				hx-target="#binding-section"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+				if tool.Binding == nil {
+					disabled
+				}
+			>
+				Entbinden
+			</button>
 		</span>
-	}
+		if linkedTool != nil {
+			<span>
+				@components.ToolAnchor(linkedTool, nil)
+			</span>
+		}
+	</span>
 }

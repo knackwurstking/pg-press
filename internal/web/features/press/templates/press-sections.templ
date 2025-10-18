@@ -26,7 +26,7 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 	}}
 	if len(pressNotes) > 0 {
 		// Press Notes
-		<section class="notes-list flex flex-col gap">
+		<section class="notes-list flex flex-col gap-lg p">
 			for _, note := range pressNotes {
 				@components.NoteCard(note)
 			}
@@ -64,7 +64,7 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 		</section>
 	}
 	if len(toolNotes) > 0 {
-		<section class="notes-list flex flex-col gap">
+		<section class="notes-list flex flex-col gap-lg p">
 			{{
 				topToolNotes := make([]*models.Note, 0)
 				topCassetteToolNotes := make([]*models.Note, 0)

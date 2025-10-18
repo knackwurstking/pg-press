@@ -4,21 +4,20 @@ templ FeedCounter(count int) {
 	if count > 0 {
 		<span
 			style="
-                position: absolute;
-                color: var(--ui-destructive);
-                background-color: var(--ui-destructive-text);
-                top: 0;
-                right: 0;
-                width: 1rem;
-                height: 1rem;
-                font-size: 0.75rem;
-                border-radius: 50%;
-            "
+				position: absolute;
+				top: 0;
+				right: 0;
+				width: 1rem;
+				height: 1rem;
+				font-size: 0.75rem;
+				border-radius: 50%;
+			"
+			class="destructive ghost"
 			id="feed-counter"
 			class="flex justify-center items-center"
 		>
-			if count > 9 {
-				9+
+			if count > 99 {
+				99+
 			} else {
 				{ count }
 			}

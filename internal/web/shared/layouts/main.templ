@@ -65,17 +65,15 @@ templ Main(options MainOptions) {
 			}
 		</head>
 		<body hx-ext="ws">
-			<header class="container fluid">
-				<nav class="flex gap justify-between">
-					<div class="flex gap justify-start items-center">
-						<div>
-							<h5>{ options.AppBarTitle }</h5>
-						</div>
-					</div>
+			<header class="app-bar top fixed shadow-lg">
+				<div class="app-bar-left">
+					<h5>{ options.AppBarTitle }</h5>
+				</div>
+				<div class="app-bar-right">
 					if options.NavContent != nil {
 						@options.NavContent
 					}
-				</nav>
+				</div>
 			</header>
 			{ children... }
 			<template name="image-viewer">

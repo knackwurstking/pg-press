@@ -30,12 +30,12 @@ func FeedCounter(count int) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if count > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<span style=\"\n                position: absolute;\n                color: var(--ui-destructive);\n                background-color: var(--ui-destructive-text);\n                top: 0;\n                right: 0;\n                width: 1rem;\n                height: 1rem;\n                font-size: 0.75rem;\n                border-radius: 50%;\n            \" id=\"feed-counter\" class=\"flex justify-center items-center\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<span style=\"\n\t\t\t\tposition: absolute;\n\t\t\t\ttop: 0;\n\t\t\t\tright: 0;\n\t\t\t\twidth: 1rem;\n\t\t\t\theight: 1rem;\n\t\t\t\tfont-size: 0.75rem;\n\t\t\t\tborder-radius: 50%;\n\t\t\t\" class=\"destructive ghost\" id=\"feed-counter\" class=\"flex justify-center items-center\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if count > 9 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "9+")
+			if count > 99 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "99+")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -43,7 +43,7 @@ func FeedCounter(count int) templ.Component {
 				var templ_7745c5c3_Var2 string
 				templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(count)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/wshandlers/templates/feed-counter.templ`, Line: 23, Col: 11}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/wshandlers/templates/feed-counter.templ`, Line: 22, Col: 11}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 				if templ_7745c5c3_Err != nil {
