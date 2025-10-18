@@ -23,26 +23,30 @@ templ AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) 
 			</div>
 			<div class="attachments-preview-scroll flex gap">
 				for _, attachment := range attachments {
-					<div
-						class="attachment-preview-item flex flex-col gap items-center select-none ghost"
-						onclick={ layouts.OpenImageViewer(attachment.GetID()) }
-						tabindex="0"
-						role="button"
-						aria-label={ fmt.Sprintf("Bild %s anzeigen", attachment.ID) }
-					>
-						<div class="attachment-preview-image">
-							<img
-								loading="lazy"
-								src={ fmt.Sprintf("%s/%s/attachment?attachment_id=%s",
-								 env.ServerPathPrefix, path, attachment.ID) }
-								alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
-								class="preview-thumbnail select-none"
-								loading="lazy"
-							/>
-						</div>
-					</div>
+					@attachmentPreviewItem(attachment, path)
 				}
 			</div>
 		</div>
 	}
+}
+
+templ attachmentPreviewItem(attachment *models.Attachment, path AttachmentPath) {
+	<div
+		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
+		onclick={ layouts.OpenImageViewer(attachment.GetID()) }
+		tabindex="0"
+		role="button"
+		aria-label={ fmt.Sprintf("Bild %s anzeigen", attachment.ID) }
+	>
+		<div class="attachment-preview-image">
+			<img
+				loading="lazy"
+				src={ fmt.Sprintf("%s/%s/attachment?attachment_id=%s",
+				 env.ServerPathPrefix, path, attachment.ID) }
+				alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
+				class="preview-thumbnail select-none"
+				loading="lazy"
+			/>
+		</div>
+	</div>
 }

@@ -21,7 +21,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 
 	"github.com/labstack/echo/v4"
 )
@@ -130,14 +129,14 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 		len(modifications), id)
 
 	// Convert to the format expected by the modifications page
-	var m modification.Mods[models.TroubleReportModData]
+	var m models.Mods[models.TroubleReportModData]
 	for _, mod := range modifications {
 		var data models.TroubleReportModData
 		if err := json.Unmarshal(mod.Modification.Data, &data); err != nil {
 			continue
 		}
 
-		modEntry := modification.NewMod(&mod.User, data)
+		modEntry := models.NewMod(&mod.User, data)
 		modEntry.Time = mod.Modification.CreatedAt.UnixMilli()
 		m = append(m, modEntry)
 	}

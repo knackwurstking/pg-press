@@ -13,10 +13,10 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
-	"github.com/knackwurstking/pgpress/pkg/modification"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ.Component) templ.Component {
+func ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -49,14 +49,14 @@ func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-screen\"><!-- Help Text --><div class=\"card info p\" style=\"margin-top: calc(var(--ui-spacing) * 2);\"><div class=\"flex\"><div class=\"shrink-0\"><svg width=\"20\" height=\"20\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z\" clip-rule=\"evenodd\"></path></svg></div><div class=\"ml\"><h3 class=\"text-sm text-semibold\">About Rollbacks</h3><div class=\"mt text-sm\"><p>Rolling back will restore the selected version and create a new modification entry. The current version will be preserved in the history.</p></div></div></div></div><div class=\"container\"><!-- Page Header --><div class=\"card elevated p-lg mb\"><div class=\"flex items-center justify-between\"><div><h1 class=\"text-2xl text-bold\">Modifications History</h1><p class=\"text-sm muted mt\">View and rollback to previous versions</p></div><div class=\"flex items-center gap\"><span class=\"badge info\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-screen\"><!-- Help Text --><div class=\"card info compact m\" style=\"margin-top: calc(var(--ui-spacing) * 2);\"><div class=\"card-header flex gap items-center\"><i class=\"bi bi-info-circle\"></i><h3 class=\"text-sm text-semibold\">About Rollbacks</h3></div><div class=\"card-body\"><div class=\"text-sm\"><p>Rolling back will restore the selected version and create a new modification entry. The current version will be preserved in the history.</p></div></div></div><div class=\"container\"><!-- Page Header --><div class=\"card mb\"><div class=\"card-body flex items-center justify-between\"><div><h1 class=\"text-2xl text-bold\">Modifications History</h1><p class=\"text-sm muted mt\">View and rollback to previous versions</p></div><div class=\"flex items-center gap\"><span class=\"badge info\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d versions", len(m)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/base/mod-page.templ`, Line: 46, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/base/mod-page.templ`, Line: 48, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -67,7 +67,7 @@ func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ
 				return templ_7745c5c3_Err
 			}
 			if len(m) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"card p-xl text-center\"><div class=\"muted mb\"><svg width=\"48\" height=\"48\" style=\"margin: 0 auto;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\"></path></svg></div><h3 class=\"text-lg text-semibold mb\">No Modifications Found</h3><p class=\"muted\">This item has no modification history yet.</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"card text-center\"><div class=\"card-body\"><div class=\"muted mb\"><svg width=\"48\" height=\"48\" style=\"margin: 0 auto;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\"></path></svg></div><h3 class=\"text-lg text-semibold mb\">No Modifications Found</h3><p class=\"muted\">This item has no modification history yet.</p></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -77,7 +77,7 @@ func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ
 					return templ_7745c5c3_Err
 				}
 				if len(m) > 0 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"card p\"><div class=\"flex items-center mb\"><span class=\"badge primary\">Current Version</span></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"card compact\"><div class=\"card-body\"><div class=\"flex items-center mb\"><span class=\"badge primary\">Current Version</span></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -85,7 +85,7 @@ func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -99,7 +99,7 @@ func ModPage[T any](m modification.Mods[T], f func(m *modification.Mod[T]) templ
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					for i, mod := range m.Reversed() {
+					for i, mod := range m {
 						if i > 0 {
 							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"p mb\">")
 							if templ_7745c5c3_Err != nil {

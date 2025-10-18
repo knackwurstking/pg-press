@@ -109,8 +109,8 @@ func MarkdownStyles() templ.Component {
 
 func MarkdownScript() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_MarkdownScript_abec`,
-		Function: `function __templ_MarkdownScript_abec(){// Core markdown rendering function
+		Name: `__templ_MarkdownScript_9214`,
+		Function: `function __templ_MarkdownScript_9214(){// Core markdown rendering function
 	function renderMarkdownToHTML(content) {
 		if (!content || content.trim() === '') {
 			return '';
@@ -128,9 +128,12 @@ func MarkdownScript() templ.ComponentScript {
 			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
 			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
 			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
-			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
-			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm,
+				'<ul>$1</ul>')
+			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm,
+				'<ol>$1</ol>')
+			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm,
+				'<blockquote>$1</blockquote>')
 			.replace(/class="[uo]l-item"/g, '')
 			.replace(/<bq-line>/g, '')
 			.replace(/<\/bq-line>/g, '\n');
@@ -165,7 +168,9 @@ func MarkdownScript() templ.ComponentScript {
 				if (html) {
 					container.innerHTML = html;
 				} else {
-					container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+					container.innerHTML = '<pre>' +
+						content.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+						'</pre>';
 				}
 			}
 		});
@@ -200,8 +205,8 @@ func MarkdownScript() templ.ComponentScript {
 		setTimeout(processMarkdownContent, 50);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_MarkdownScript_abec`),
-		CallInline: templ.SafeScriptInline(`__templ_MarkdownScript_abec`),
+		Call:       templ.SafeScript(`__templ_MarkdownScript_9214`),
+		CallInline: templ.SafeScriptInline(`__templ_MarkdownScript_9214`),
 	}
 }
 

@@ -65,7 +65,10 @@ templ Base(props BaseProps) {
 				</div>
 			}
 			// Content
-			<div name="dialog-content" class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full">
+			<div
+				name="dialog-content"
+				class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full"
+			>
 				{ children... }
 			</div>
 			<footer class="flex gap justify-end">
@@ -88,7 +91,7 @@ templ Base(props BaseProps) {
 			</footer>
 		</form>
 		<script defer>
-                document.querySelector('#{{ props.ID }}').showModal();
-            </script>
+			document.querySelector('#{{ props.ID }}').showModal();
+		</script>
 	</dialog>
 }

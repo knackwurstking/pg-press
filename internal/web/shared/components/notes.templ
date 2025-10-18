@@ -57,7 +57,11 @@ templ NoteCard(note *models.Note) {
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					hx-on:htmx:after-request="if(event.detail.successful) window.dispatchEvent(new Event('visibilitychange'))"
+					hx-on:htmx:after-request="
+						if(event.detail.successful) {
+							window.dispatchEvent(new Event('visibilitychange'));
+						}
+					"
 					title="Notiz löschen"
 				>
 					<i class="bi bi-trash"></i>

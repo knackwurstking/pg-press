@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/modification"
 	"io"
 )
 
 // Individual modification entry with rollback functionality
-templ ModificationEntry(mod *modification.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
-	<div class="card primary p mb" style="border-left: 4px solid var(--ui-primary);">
-		<div class="flex justify-between items-center mb">
-			<div class="flex items-center gap-sm">
+templ ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
+	<div class="card seamless p mb">
+		<div class="flex flex-col gap mb">
+			<div class="flex gap-sm justify-between items-center">
 				<span class="text-semibold">Modified by { mod.GetUserName() }</span>
 				<span class="badge info text-xs">v{ fmt.Sprintf("%d", mod.Time) }</span>
 			</div>
-			<div class="flex items-center gap">
+			<div class="flex gap-sm justify-between items-center">
 				<span class="text-sm muted">{ mod.GetTimeString() }</span>
 				if canRollback {
 					@RollbackButton(reportID, mod.Time)
@@ -69,10 +68,10 @@ templ RollbackButton(reportID int64, modificationTime int64) {
 }
 
 // Render function factory that returns a templ.Component for use with modificationspage.Page
-func CreateModificationRenderer(reportID int64, canRollback bool) func(*modification.Mod[models.TroubleReportModData]) templ.Component {
+func CreateModificationRenderer(reportID int64, canRollback bool) func(*models.Mod[models.TroubleReportModData]) templ.Component {
 	renderOnce := true
 
-	return func(mod *modification.Mod[models.TroubleReportModData]) templ.Component {
+	return func(mod *models.Mod[models.TroubleReportModData]) templ.Component {
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 			// Render rollback messages container only once
 			if renderOnce {

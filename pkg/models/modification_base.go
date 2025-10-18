@@ -1,4 +1,3 @@
-// TOOD: Create a modification service to store modifications and move types to models
 // Data:
 //   - id (int64)
 

@@ -33,8 +33,15 @@ templ Main(options MainOptions) {
 			<!-- Icons and manifest -->
 			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
 			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
-			<link rel="apple-touch-icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
-			<link rel="mask-icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#3e3c49"/>
+			<link
+				rel="apple-touch-icon"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }
+			/>
+			<link
+				rel="mask-icon"
+				href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") }
+				color="#3e3c49"
+			/>
 			<!-- PWA Manifest -->
 			<link
 				rel="manifest"
