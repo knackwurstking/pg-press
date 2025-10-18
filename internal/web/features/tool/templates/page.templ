@@ -107,9 +107,7 @@ templ sectionActions(user *models.User, toolID int64) {
 }
 
 templ navContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
+	@components.NavFeedButton()
+	@components.NavProfileButton()
+	@components.NavHomeButton()
 }

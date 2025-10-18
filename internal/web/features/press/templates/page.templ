@@ -16,8 +16,8 @@ type PageProps struct {
 templ Page(props PageProps) {
 	@layouts.Main(
 		layouts.MainOptions{
-			PageTitle:   fmt.Sprintf("PG Presse | Werkzeuge Presse %d", props.Press),
-			AppBarTitle: fmt.Sprintf("Werkzeug Presse %d", props.Press),
+			PageTitle:   fmt.Sprintf("PG Presse | Presse %d", props.Press),
+			AppBarTitle: fmt.Sprintf("Presse %d", props.Press),
 			NavContent:  navContent(),
 		},
 	) {
@@ -111,9 +111,7 @@ templ Page(props PageProps) {
 }
 
 templ navContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
+	@components.NavFeedButton()
+	@components.NavProfileButton()
+	@components.NavHomeButton()
 }

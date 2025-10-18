@@ -36,12 +36,10 @@ templ MarkdownHelpPage() {
 }
 
 templ helpNavContent() {
-	<div class="flex items-center gap-sm">
-		<a href={ templ.URL(env.ServerPathPrefix + "/") } class="flex items-center gap-xs muted hover:contrast transition-colors">
-			<i class="bi bi-house"></i>
-			<span class="hidden sm:inline">Startseite</span>
-		</a>
-	</div>
+	<a href={ templ.URL(env.ServerPathPrefix + "/") } class="flex items-center gap-xs muted hover:contrast transition-colors">
+		<i class="bi bi-house"></i>
+		<span class="hidden sm:inline">Startseite</span>
+	</a>
 }
 
 templ additionalHead() {

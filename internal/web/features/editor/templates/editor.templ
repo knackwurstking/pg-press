@@ -278,14 +278,12 @@ templ EditorPage(options *EditorOptions) {
 }
 
 templ navContent(options *EditorOptions) {
-	<div class="flex flex-row gap justify-end items-center">
-		if options.ReturnURL != "" {
-			<a href={ templ.URL(options.ReturnURL) } class="secondary flex gap">
-				<i class="bi bi-arrow-left"></i>
-				Zurück
-			</a>
-		}
-	</div>
+	if options.ReturnURL != "" {
+		<a href={ templ.URL(options.ReturnURL) } class="secondary flex gap">
+			<i class="bi bi-arrow-left"></i>
+			Zurück
+		</a>
+	}
 }
 
 templ editorStyles() {

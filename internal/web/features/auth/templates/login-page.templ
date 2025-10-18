@@ -42,8 +42,6 @@ templ LoginPage(apiKey string, invalidApiKey bool) {
 }
 
 templ navContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
+	@components.NavProfileButton()
+	@components.NavHomeButton()
 }

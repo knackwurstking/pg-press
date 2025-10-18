@@ -111,9 +111,7 @@ templ ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component)
 }
 
 templ modPageNavContent() {
-	<div class="flex flex-row gap justify-end items-center">
-		@components.NavFeedButton()
-		@components.NavProfileButton()
-		@components.NavHomeButton()
-	</div>
+	@components.NavFeedButton()
+	@components.NavProfileButton()
+	@components.NavHomeButton()
 }
