@@ -72,7 +72,7 @@ func ModPage[T any](mods models.Mods[T], itemRenderFunc func(mod *models.Mod[T],
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Current Version (Latest Modification) --> <div class=\"card compact\"><div class=\"card-body\"><div class=\"flex items-center mb\"><span class=\"badge primary\">Current Version</span></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Current Version (Latest Modification) --> <div class=\"card compact\"><div class=\"card-body\"><div class=\"flex items-center mb\"><span class=\"badge primary shadow\">Current Version</span></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
