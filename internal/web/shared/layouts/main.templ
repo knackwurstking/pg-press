@@ -66,6 +66,21 @@ templ Main(options MainOptions) {
 			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
 			<script>
 				const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant
+
+				// For the ui.min.css i need to set the data-theme to light/dark
+				function updateDataTheme() {
+					if (matchMedia('(prefers-color-scheme: dark)').matches) {
+						document.querySelector("html").setAttribute("data-theme", "dark");
+					} else {
+						document.querySelector("html").setAttribute("data-theme", "light");
+					}
+				}
+
+				updateDataTheme();
+
+				matchMedia('(prefers-color-scheme: dark)').addEventListener("change", function(event) {
+					updateDataTheme();
+				});
 			</script>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead

@@ -196,7 +196,7 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"; // Inject the constant\n\t\t\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"; // Inject the constant\n\n\t\t\t\t// For the ui.min.css i need to set the data-theme to light/dark\n\t\t\t\tfunction updateDataTheme() {\n\t\t\t\t\tif (matchMedia('(prefers-color-scheme: dark)').matches) {\n\t\t\t\t\t\tdocument.querySelector(\"html\").setAttribute(\"data-theme\", \"dark\");\n\t\t\t\t\t} else {\n\t\t\t\t\t\tdocument.querySelector(\"html\").setAttribute(\"data-theme\", \"light\");\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tupdateDataTheme();\n\n\t\t\t\tmatchMedia('(prefers-color-scheme: dark)').addEventListener(\"change\", function(event) {\n\t\t\t\t\tupdateDataTheme();\n\t\t\t\t});\n\t\t\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -213,7 +213,7 @@ func Main(options MainOptions) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(options.AppBarTitle)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/layouts/main.templ`, Line: 77, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/layouts/main.templ`, Line: 92, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
