@@ -142,13 +142,13 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 	if err != nil {
 		return h.HandleError(c, err, "failed to retrieve user from context")
 	}
-	canRollback := currentUser != nil && currentUser.IsAdmin()
+	isAdmin := currentUser != nil && currentUser.IsAdmin()
 
 	// Create render function using the new template
-	f := templates.CreateModificationRenderer(id, canRollback)
+	itemRenderFunc := templates.CreateModificationRenderer(id, isAdmin)
 
 	// Rendering the page template
-	page := base.ModPage(m, f)
+	page := base.ModPage(m, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render page: "+err.Error())
 	}

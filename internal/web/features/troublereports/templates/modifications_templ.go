@@ -17,6 +17,7 @@ import (
 )
 
 // Individual modification entry with rollback functionality
+// TODO: Mark current and disable rollback button
 func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -45,7 +46,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetUserName())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 16, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 17, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -58,7 +59,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", mod.Time))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 17, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 18, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -71,7 +72,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 20, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 21, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -94,7 +95,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 30, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 31, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -107,7 +108,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 34, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 35, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -120,7 +121,7 @@ func ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID in
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(mod.Data.LinkedAttachments)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 39, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 40, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -164,13 +165,13 @@ func RollbackButton(reportID int64, modificationTime int64) templ.Component {
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("%s/htmx/trouble-reports/rollback?id=%d",
 			env.ServerPathPrefix, reportID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 54, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 55, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-target=\"#rollback-messages\" hx-swap=\"none\" hx-on:htmx:after-request=\"\n\t\t\tif (event.detail.successful) {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\t\t\" class=\"inline\"><input type=\"hidden\" name=\"modification_time\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" hx-swap=\"none\" hx-on:htmx:after-request=\"\n\t\t\tif (event.detail.successful) {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\t\t\" class=\"inline\"><input type=\"hidden\" name=\"modification_time\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -192,22 +193,22 @@ func RollbackButton(reportID int64, modificationTime int64) templ.Component {
 }
 
 // Render function factory that returns a templ.Component for use with modificationspage.Page
-func CreateModificationRenderer(reportID int64, canRollback bool) func(*models.Mod[models.TroubleReportModData]) templ.Component {
-	renderOnce := true
+func CreateModificationRenderer(
+	reportID int64, isAdmin bool,
+) func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
 
-	return func(mod *models.Mod[models.TroubleReportModData]) templ.Component {
+	return func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-			// Render rollback messages container only once
-			if renderOnce {
-				if _, err := w.Write([]byte(`<div id="rollback-messages"></div>`)); err != nil {
-					return err
-				}
+			canRollback := isAdmin
 
-				renderOnce = false
+			if isCurrent {
+				canRollback = false
 			}
 
 			// Render the modification entry
 			entry := ModificationEntry(mod, reportID, canRollback)
+
 			return entry.Render(ctx, w)
 		})
 	}

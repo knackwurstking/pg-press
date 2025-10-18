@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component) {
+templ ModPage[T any](mods models.Mods[T], itemRenderFunc func(mod *models.Mod[T], isCurrent bool) templ.Component) {
 	@layouts.Main(
 		layouts.MainOptions{
 			PageTitle:   "PG Presse | Problemberichte",
@@ -45,7 +45,7 @@ templ ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component)
 						</div>
 						<div class="flex items-center gap">
 							<span class="badge info">
-								{ fmt.Sprintf("%d versions", len(m)) }
+								{ fmt.Sprintf("%d versions", len(mods)) }
 							</span>
 							<a
 								href="javascript:history.back()"
@@ -59,7 +59,7 @@ templ ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component)
 				</div>
 				<!-- Modifications List -->
 				<div class="flex flex-col gap">
-					if len(m) == 0 {
+					if len(mods) == 0 {
 						<div class="card text-center">
 							<div class="card-body">
 								<div class="muted mb">
@@ -73,36 +73,36 @@ templ ModPage[T any](m models.Mods[T], f func(m *models.Mod[T]) templ.Component)
 						</div>
 					} else {
 						<!-- Current Version (Latest Modification) -->
-						if len(m) > 0 {
-							<div class="card compact">
-								<div class="card-body">
-									<div class="flex items-center mb">
-										<span class="badge primary">
-											Current Version
-										</span>
-									</div>
-									@f(m.Current())
+						<div class="card compact">
+							<div class="card-body">
+								<div class="flex items-center mb">
+									<span class="badge primary shadow">
+										Current Version
+									</span>
 								</div>
+								@itemRenderFunc(mods.Current(), true)
 							</div>
-						}
+						</div>
 						<!-- Previous Versions -->
-						if len(m) > 1 {
-							<div class="card">
-								<div class="card-header">
-									<h2 class="text-lg text-semibold">Previous Versions</h2>
-									<p class="text-sm muted">Click "Rollback" to restore a previous version</p>
-								</div>
-								<div class="card-body">
-									for i, mod := range m {
-										if i > 0 {
-											<div class="p mb">
-												@f(mod)
-											</div>
-										}
-									}
-								</div>
+						<div class="card">
+							<div class="card-header">
+								<h2 class="text-lg text-semibold">Previous Versions</h2>
+								<p class="text-sm muted">Click "Rollback" to restore a previous version</p>
 							</div>
-						}
+							<div class="card-body">
+								for _, mod := range mods {
+									{{ isCurrent := mods.Current().Time == mod.Time }}
+									<div
+										class="p mb"
+										if isCurrent {
+											disabled
+										}
+									>
+										@itemRenderFunc(mod, isCurrent)
+									</div>
+								}
+							</div>
+						</div>
 					}
 				</div>
 			</div>

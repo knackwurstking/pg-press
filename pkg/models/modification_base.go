@@ -48,7 +48,8 @@ func (m *Mods[T]) Current() *Mod[T] {
 	if len(*m) == 0 {
 		return nil
 	}
-	return (*m)[len(*m)-1]
+
+	return (*m)[0]
 }
 
 func (m *Mods[T]) Get(time int64) (*Mod[T], error) {

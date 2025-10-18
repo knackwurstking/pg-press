@@ -9,6 +9,7 @@ import (
 )
 
 // Individual modification entry with rollback functionality
+// TODO: Mark current and disable rollback button
 templ ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
 	<div class="card seamless p mb">
 		<div class="flex flex-col gap mb">
@@ -52,7 +53,6 @@ templ RollbackButton(reportID int64, modificationTime int64) {
 	<form
 		hx-post={ templ.URL(fmt.Sprintf("%s/htmx/trouble-reports/rollback?id=%d",
 			env.ServerPathPrefix, reportID)) }
-		hx-target="#rollback-messages"
 		hx-swap="none"
 		hx-on:htmx:after-request="
 			if (event.detail.successful) {
@@ -73,22 +73,22 @@ templ RollbackButton(reportID int64, modificationTime int64) {
 }
 
 // Render function factory that returns a templ.Component for use with modificationspage.Page
-func CreateModificationRenderer(reportID int64, canRollback bool) func(*models.Mod[models.TroubleReportModData]) templ.Component {
-	renderOnce := true
+func CreateModificationRenderer(
+	reportID int64, isAdmin bool,
+) func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
 
-	return func(mod *models.Mod[models.TroubleReportModData]) templ.Component {
+	return func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-			// Render rollback messages container only once
-			if renderOnce {
-				if _, err := w.Write([]byte(`<div id="rollback-messages"></div>`)); err != nil {
-					return err
-				}
+			canRollback := isAdmin
 
-				renderOnce = false
+			if isCurrent {
+				canRollback = false
 			}
 
 			// Render the modification entry
 			entry := ModificationEntry(mod, reportID, canRollback)
+
 			return entry.Render(ctx, w)
 		})
 	}
