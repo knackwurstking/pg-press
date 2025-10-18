@@ -335,15 +335,6 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 		)
 	}
 
-	// Return success message for HTMX
-	// TODO: This response is useless, just reload somehow. Have a look at the templ function
-	err = templates.RollbackResponseStatusOK().Render(
-		c.Request().Context(), c.Response(),
-	)
-	if err != nil {
-		return h.HandleError(c, err, "failed to render response")
-	}
-
 	return nil
 }
 
