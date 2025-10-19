@@ -158,7 +158,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, ">Cassette Oberteil</option></select></span> <span class=\"flex flex-col gap-0 w-fit\"><label for=\"press\">Presse</label> <select id=\"pressSelection\" name=\"press-selection\"><option value=\"\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, ">Kassette</option></select></span> <span class=\"flex flex-col gap-0 w-fit\"><label for=\"press\">Presse</label> <select id=\"pressSelection\" name=\"press-selection\"><option value=\"\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
