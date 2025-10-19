@@ -67,13 +67,8 @@ templ sectionToolsFilterScript() {
 	<script>
 		function filter(value) {
 			for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
-				var format = el.getAttribute("data-format").toLowerCase();
-				var code = el.getAttribute("data-code").toLowerCase();
-				var type = el.getAttribute("data-type").toLowerCase();
-				var position = el.getAttribute("data-position").toLowerCase();
-
-				// Build string from data-*
-				var dataString = [format, code, type, position].join('|');
+				// Get the text content of the element
+				var textContent = el.textContent.toLowerCase();
 
 				// Generate special regexp from search
 				var valueSplit = document.querySelector("input#{{ IDToolsFilter }}").value.toLowerCase().split(' ');
@@ -83,7 +78,7 @@ templ sectionToolsFilterScript() {
 				for (var char of valueSplit) {
 					if (char === "") continue;
 
-					if (!dataString.includes(char)) {
+					if (!textContent.includes(char)) {
 						shouldNotHide = false;
 						break;
 					}

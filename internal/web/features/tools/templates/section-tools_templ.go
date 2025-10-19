@@ -157,25 +157,25 @@ func sectionToolsFilterScript() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<script>\n\t\tfunction filter(value) {\n\t\t\tfor (var el of document.querySelectorAll(`.all-tools ul > *`)) {\n\t\t\t\tvar format = el.getAttribute(\"data-format\").toLowerCase();\n\t\t\t\tvar code = el.getAttribute(\"data-code\").toLowerCase();\n\t\t\t\tvar type = el.getAttribute(\"data-type\").toLowerCase();\n\t\t\t\tvar position = el.getAttribute(\"data-position\").toLowerCase();\n\n\t\t\t\t// Build string from data-*\n\t\t\t\tvar dataString = [format, code, type, position].join('|');\n\n\t\t\t\t// Generate special regexp from search\n\t\t\t\tvar valueSplit = document.querySelector(\"input#")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<script>\n\t\tfunction filter(value) {\n\t\t\tfor (var el of document.querySelectorAll(`.all-tools ul > *`)) {\n\t\t\t\t// Get the text content of the element\n\t\t\t\tvar textContent = el.textContent.toLowerCase();\n\n\t\t\t\t// Generate special regexp from search\n\t\t\t\tvar valueSplit = document.querySelector(\"input#")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Var7, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 79, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 74, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\").value.toLowerCase().split(' ');\n\n\t\t\t\t// Check and Set \"block\" or \"none\"\n\t\t\t\tlet shouldNotHide = true;\n\t\t\t\tfor (var char of valueSplit) {\n\t\t\t\t\tif (char === \"\") continue;\n\n\t\t\t\t\tif (!dataString.includes(char)) {\n\t\t\t\t\t\tshouldNotHide = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tel.style.display = shouldNotHide ? \"block\" : \"none\";\n\t\t\t}\n\t\t}\n\n\t\tfunction filterToolsList() {\n\t\t\tvar params = new URLSearchParams(location.search);\n\n\t\t\tvar inputValue = document.querySelector(\"input#")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\").value.toLowerCase().split(' ');\n\n\t\t\t\t// Check and Set \"block\" or \"none\"\n\t\t\t\tlet shouldNotHide = true;\n\t\t\t\tfor (var char of valueSplit) {\n\t\t\t\t\tif (char === \"\") continue;\n\n\t\t\t\t\tif (!textContent.includes(char)) {\n\t\t\t\t\t\tshouldNotHide = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tel.style.display = shouldNotHide ? \"block\" : \"none\";\n\t\t\t}\n\t\t}\n\n\t\tfunction filterToolsList() {\n\t\t\tvar params = new URLSearchParams(location.search);\n\n\t\t\tvar inputValue = document.querySelector(\"input#")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 99, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 94, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +187,7 @@ func sectionToolsFilterScript() templ.Component {
 		}
 		templ_7745c5c3_Var9, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 117, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 112, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {

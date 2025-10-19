@@ -17,13 +17,7 @@ templ ToolsList(tools []*models.ResolvedTool) {
 }
 
 templ toolListItem(id int64, tool *models.ResolvedTool) {
-	<li
-		id={ fmt.Sprintf("tool-%d", id) }
-		data-format={ tool.Format.String() }
-		data-code={ tool.Code }
-		data-type={ tool.Type }
-		data-position={ tool.Position.GermanString() }
-	>
+	<li id={ fmt.Sprintf("tool-%d", id) }>
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge:  true,
 			EnableBindingBadge: true,
