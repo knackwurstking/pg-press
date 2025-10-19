@@ -43,7 +43,7 @@ templ Base(props BaseProps) {
 		onclick="if (event.target === this) event.preventDefault()"
 	>
 		<form
-			class="flex flex-col gap p"
+			class="flex flex-col gap p w-full"
 			if props.Type == "POST" {
 				hx-post={ props.Href }
 			}

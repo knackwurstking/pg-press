@@ -88,7 +88,7 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" oncancel=\"event.preventDefault()\" onclick=\"if (event.target === this) event.preventDefault()\"><form class=\"flex flex-col gap p\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" oncancel=\"event.preventDefault()\" onclick=\"if (event.target === this) event.preventDefault()\"><form class=\"flex flex-col gap p w-full\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
