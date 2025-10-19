@@ -29,7 +29,7 @@ templ Main(options MainOptions) {
 			<meta name="apple-mobile-web-app-title" content="pgpress"/>
 			<meta name="application-name" content="pgpress"/>
 			<meta name="msapplication-TileColor" content="#b8bb26"/>
-			<meta name="theme-color" content="#1d2021"/>
+			<meta name="theme-color" content="#f9f5d7" id="theme-color-meta"/>
 			<!-- Icons and manifest -->
 			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
 			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
@@ -69,10 +69,15 @@ templ Main(options MainOptions) {
 
 				// For the ui.min.css i need to set the data-theme to light/dark
 				function updateDataTheme() {
+					const themeColorMeta = document.getElementById('theme-color-meta');
 					if (matchMedia('(prefers-color-scheme: dark)').matches) {
 						document.querySelector("html").setAttribute("data-theme", "dark");
+						// Dark theme background color
+						if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
 					} else {
 						document.querySelector("html").setAttribute("data-theme", "light");
+						// Light theme background color
+						if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
 					}
 				}
 
