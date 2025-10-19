@@ -31,15 +31,15 @@ func NewHandler(db *services.Registry) *Handler {
 // getOrderedToolsForPress gets tools for a press, validates unique positions, and returns ordered tools + toolsMap
 func (h *Handler) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[int64]*models.Tool, error) {
 	// Get tools from database
-	tools, err := h.DB.Tools.ListWithNotes()
+	tools, err := h.DB.Tools.List()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Filter tools for this press
 	var pressTools []*models.Tool
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
+	for _, t := range tools {
+		tool := t
 		if tool.Press != nil && *tool.Press == press {
 			pressTools = append(pressTools, tool)
 		}
@@ -146,14 +146,14 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	}
 
 	// Get tools for this press to create toolsMap
-	tools, err := h.DB.Tools.ListWithNotes()
+	tools, err := h.DB.Tools.List()
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tools from database")
 	}
 
 	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
+	for _, t := range tools {
+		tool := t
 		toolsMap[tool.ID] = tool
 	}
 

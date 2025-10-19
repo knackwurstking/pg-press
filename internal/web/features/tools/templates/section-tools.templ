@@ -11,7 +11,7 @@ const (
 
 // TODO: Skip top cassette tools which are bound to an top tool
 // TODO: Show Cassette info for each top tool which have a binding
-templ SectionTools(tools []*models.ToolWithNotes) {
+templ SectionTools(tools []*models.ResolvedTool) {
 	<span
 		hx-get={ env.ServerPathPrefix + "/htmx/tools/section/tools" }
 		hx-trigger="pageLoaded from:body"
@@ -47,7 +47,7 @@ templ SectionTools(tools []*models.ToolWithNotes) {
 	@sectionToolsFilterScript()
 }
 
-templ sectionToolsFilter(tools []*models.ToolWithNotes) {
+templ sectionToolsFilter(tools []*models.ResolvedTool) {
 	<div class="flex gap-sm flex-wrap justify-evenly">
 		<!-- Filter for Tool Format -->
 		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">

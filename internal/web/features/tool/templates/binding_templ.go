@@ -15,6 +15,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// Use the resolve tool here
 func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -74,7 +75,7 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 			tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 35, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 36, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -107,7 +108,7 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(positionForBinding.GermanString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 50, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 51, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -128,7 +129,7 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 58, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 59, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -151,7 +152,7 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(t.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 60, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 61, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -173,7 +174,7 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 			tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 69, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 70, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -198,7 +199,10 @@ func BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin b
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.ToolAnchor(linkedTool, nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.ToolAnchor(
+				models.NewResolvedTool(linkedTool, nil, nil),
+				nil,
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

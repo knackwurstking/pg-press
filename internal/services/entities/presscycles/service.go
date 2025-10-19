@@ -19,7 +19,7 @@ type Service struct {
 
 // ToolsService defines the interface for tools service methods used by PressCycles
 type ToolsService interface {
-	ListWithNotes() ([]*models.ToolWithNotes, error)
+	List() ([]*models.Tool, error)
 }
 
 func NewService(db *sql.DB) *Service {
@@ -386,14 +386,14 @@ func (s *Service) GetCycleSummaryData(pressNumber models.PressNumber, toolsServi
 	}
 
 	// Get tools to create toolsMap
-	tools, err := toolsService.ListWithNotes()
+	tools, err := toolsService.List()
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get tools: %v", err)
 	}
 
 	toolsMap := make(map[int64]*models.Tool)
-	for _, toolWithNotes := range tools {
-		tool := toolWithNotes.Tool
+	for _, tool := range tools {
+		tool := tool
 		toolsMap[tool.ID] = tool
 	}
 

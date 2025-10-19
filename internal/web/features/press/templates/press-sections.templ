@@ -118,8 +118,8 @@ templ PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
 				Keine aktiven Werkzeuge für diese Presse
 			</div>
 		} else {
-			for _, tool := range tools {
-				@components.ToolAnchor(tool, nil)
+			for _, t := range tools {
+				@components.ToolAnchor(models.NewResolvedTool(t, nil, nil), nil)
 			}
 		}
 	</div>

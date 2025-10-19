@@ -8,43 +8,6 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func (t *Service) AddWithNotes(tool *models.Tool, user *models.User, notes ...*models.Note) (*models.ToolWithNotes, error) {
-	if err := ValidateTool(tool); err != nil {
-		return nil, err
-	}
-
-	if err := validation.ValidateNotNil(user, "user"); err != nil {
-		return nil, err
-	}
-
-	t.Log.Debug("Adding tool with notes by %s: notes_count: %d",
-		user.String(), len(notes))
-
-	var createdNotes []*models.Note
-	for _, note := range notes {
-		noteID, err := t.notes.Add(note)
-		if err != nil {
-			// Cleanup previously created notes on failure
-			for _, cn := range createdNotes {
-				if deleteErr := t.notes.Delete(cn.ID, user); deleteErr != nil {
-					t.Log.Error("Failed to cleanup note %d: %v", cn.ID, deleteErr)
-				}
-			}
-			return nil, fmt.Errorf("failed to create note: %v", err)
-		}
-		note.ID = noteID
-		createdNotes = append(createdNotes, note)
-	}
-
-	toolID, err := t.Add(tool, user)
-	if err != nil {
-		return nil, err
-	}
-
-	tool.ID = toolID
-	return &models.ToolWithNotes{Tool: tool, LoadedNotes: createdNotes}, nil
-}
-
 func (t *Service) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
 	t.Log.Debug("Getting active tools for press: %d", pressNumber)
 
@@ -117,26 +80,6 @@ func (t *Service) GetPressUtilization() ([]models.PressUtilization, error) {
 	return utilization, nil
 }
 
-func (t *Service) GetWithNotes(id int64) (*models.ToolWithNotes, error) {
-	if err := validation.ValidateID(id, "tool"); err != nil {
-		return nil, err
-	}
-
-	t.Log.Debug("Getting tool with notes: %d", id)
-
-	tool, err := t.Get(id)
-	if err != nil {
-		return nil, err
-	}
-
-	notes, err := t.notes.GetByTool(id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load notes for tool")
-	}
-
-	return &models.ToolWithNotes{Tool: tool, LoadedNotes: notes}, nil
-}
-
 func (t *Service) ListToolsNotDead() ([]*models.Tool, error) {
 	t.Log.Debug("Listing active tools")
 
@@ -189,81 +132,6 @@ func (t *Service) ListDeadTools() ([]*models.Tool, error) {
 	}
 
 	return tools, nil
-}
-
-func (t *Service) ListWithNotes() ([]*models.ToolWithNotes, error) {
-	t.Log.Debug("Listing tools with notes")
-
-	tools, err := t.List()
-	if err != nil {
-		return nil, err
-	}
-
-	var result []*models.ToolWithNotes
-	for _, tool := range tools {
-		notes, err := t.notes.GetByTool(tool.ID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to load notes for tool %d", tool.ID)
-		}
-		result = append(result, &models.ToolWithNotes{Tool: tool, LoadedNotes: notes})
-	}
-
-	return result, nil
-}
-
-func (t *Service) Update(tool *models.Tool, user *models.User) error {
-	if err := ValidateTool(tool); err != nil {
-		return err
-	}
-
-	if err := validation.ValidateID(tool.ID, "tool"); err != nil {
-		return err
-	}
-
-	if err := validation.ValidateNotNil(user, "user"); err != nil {
-		return err
-	}
-
-	t.Log.Debug("Updating tool by %s: id: %d", user.String(), tool.ID)
-
-	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
-		return err
-	}
-
-	formatBytes, err := marshalFormat(tool.Format)
-	if err != nil {
-		return err
-	}
-
-	query := fmt.Sprintf(`
-		UPDATE
-			tools
-		SET
-			%s
-		WHERE
-			id = ?
-	`, ToolQueryUpdate)
-
-	result, err := t.DB.Exec(query,
-		tool.Position,
-		formatBytes,
-		tool.Type,
-		tool.Code,
-		tool.Regenerating,
-		tool.IsDead,
-		tool.Press,
-		tool.Binding,
-		tool.ID,
-	)
-	if err != nil {
-		return t.HandleUpdateError(err, "tools")
-	}
-
-	if err := t.CheckRowsAffected(result, "tool", tool.ID); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (t *Service) UpdatePress(toolID int64, press *models.PressNumber, user *models.User) error {

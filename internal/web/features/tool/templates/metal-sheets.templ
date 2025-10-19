@@ -9,7 +9,7 @@ import (
 )
 
 templ MetalSheets(
-	user *models.User, metalSheets models.MetalSheetList, tool *models.ToolWithNotes,
+	user *models.User, metalSheets models.MetalSheetList, tool *models.Tool,
 ) {
 	{{ metalSheets := metalSheets.Sort() }}
 	// NOTE: For now only top and bottom position can contain metal sheets

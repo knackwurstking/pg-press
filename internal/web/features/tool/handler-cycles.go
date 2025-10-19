@@ -147,15 +147,15 @@ func (h *Handler) HTMXGetToolCycleEditDialog(c echo.Context) error {
 			props.AllowToolChange = true
 
 			// Get all tools
-			allTools, err := h.DB.Tools.ListWithNotes()
+			allTools, err := h.DB.Tools.List()
 			if err != nil {
 				return h.HandleError(c, err, "failed to load available tools")
 			}
 
 			// Filter out tools not matching the original tools position
 			for _, t := range allTools {
-				if t.Tool.Position == props.Tool.Position {
-					props.AvailableTools = append(props.AvailableTools, t.Tool)
+				if t.Position == props.Tool.Position {
+					props.AvailableTools = append(props.AvailableTools, t)
 				}
 			}
 

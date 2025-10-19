@@ -20,7 +20,8 @@ type ToolAnchorOptions struct {
 	EnableTotalCycles  bool
 }
 
-func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
+// TODO: Need some kind of a resolved tool type which includes the binding information from the tool
+func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -53,7 +54,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d",
 			env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 25, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 26, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -66,7 +67,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 30, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 31, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -81,44 +82,61 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if options.EnableStatusBadge {
-			templ_7745c5c3_Err = ToolStatusBadge(tool).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ToolStatusBadge(tool.Tool).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if options.EnableBindingBadge {
-			templ_7745c5c3_Err = ToolBindingBadge(tool).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if options.EnableTotalCycles {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<span class=\"total-cycles-container flex justify-end items-center w-full pr text-sm\" hx-get=\"")
+		if tool.Position == models.PositionTop && tool.IsBound() {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " <span class=\"text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-				"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
-				env.ServerPathPrefix, tool.ID, tool.Position,
-			))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(*tool.Binding)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 48, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 41, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <i class=\"bi bi-chevron-right\"></i></a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if options.EnableTotalCycles {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<span class=\"total-cycles-container flex justify-end items-center w-full pr text-sm\" hx-get=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
+				"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
+				env.ServerPathPrefix, tool.ID, tool.Position,
+			))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 50, Col: 6}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-trigger=\"load\" hx-swap=\"innerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span> <i class=\"bi bi-chevron-right\"></i></a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -12,7 +12,8 @@ type ToolAnchorOptions struct {
 	EnableTotalCycles  bool
 }
 
-templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
+// TODO: Need some kind of a resolved tool type which includes the binding information from the tool
+templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 	{{
 		if options == nil {
 			options = &ToolAnchorOptions{}
@@ -32,12 +33,13 @@ templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
 				<span class="flex gap">
 					@PositionBadge(tool.Position, "primary text-bold")
 					if options.EnableStatusBadge {
-						@ToolStatusBadge(tool)
-					}
-					if options.EnableBindingBadge {
-						@ToolBindingBadge(tool)
+						@ToolStatusBadge(tool.Tool)
 					}
 				</span>
+				if tool.Position == models.PositionTop && tool.IsBound() {
+					// TODO: Show the name of the cassette this is pointing to
+					<span class="text-sm">{ *tool.Binding }</span>
+				}
 			</span>
 			if options.EnableTotalCycles {
 				<span

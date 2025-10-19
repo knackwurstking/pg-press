@@ -27,12 +27,8 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	}
 
 	// Create ToolWithNotes for template compatibility
-	toolWithNotes := &models.ToolWithNotes{
-		Tool:        tool,
-		LoadedNotes: notes,
-	}
-
-	notesSection := templates.Notes(toolWithNotes)
+	resolvedTool := models.NewResolvedTool(tool, nil, notes)
+	notesSection := templates.Notes(resolvedTool)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render tool notes section")

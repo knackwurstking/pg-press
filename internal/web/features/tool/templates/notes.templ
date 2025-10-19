@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ Notes(tool *models.ToolWithNotes) {
+templ Notes(tool *models.ResolvedTool) {
 	@components.SectionTitle(components.TitleLevelSub, "Notizen") {
 		<button
 			class="icon secondary small flex"
@@ -24,9 +24,9 @@ templ Notes(tool *models.ToolWithNotes) {
 			<i class="bi bi-plus-lg"></i>
 		</button>
 	}
-	if len(tool.LoadedNotes) > 0 {
+	if len(tool.GetNotes()) > 0 {
 		<div class="notes-list">
-			for _, note := range tool.LoadedNotes {
+			for _, note := range tool.GetNotes() {
 				@components.NoteCard(note)
 			}
 		</div>

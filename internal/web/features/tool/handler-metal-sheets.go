@@ -19,7 +19,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 
 	h.Log.Debug("Fetching metal sheets for tool %d", toolID)
 
-	tool, err := h.DB.Tools.GetWithNotes(toolID)
+	tool, err := h.DB.Tools.Get(toolID)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool")
 	}

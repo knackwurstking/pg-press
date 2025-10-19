@@ -41,7 +41,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 
 	h.Log.Debug("Fetching tool %d with notes", id)
 
-	tool, err := h.DB.Tools.GetWithNotes(id)
+	tool, err := h.DB.Tools.Get(id)
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tool")
 	}

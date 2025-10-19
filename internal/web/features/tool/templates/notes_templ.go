@@ -15,7 +15,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func Notes(tool *models.ToolWithNotes) templ.Component {
+func Notes(tool *models.ResolvedTool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -74,12 +74,12 @@ func Notes(tool *models.ToolWithNotes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(tool.LoadedNotes) > 0 {
+		if len(tool.GetNotes()) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"notes-list\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, note := range tool.LoadedNotes {
+			for _, note := range tool.GetNotes() {
 				templ_7745c5c3_Err = components.NoteCard(note).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

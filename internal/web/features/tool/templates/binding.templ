@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// Use the resolve tool here
 templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
 	{{
 		var linkedTool *models.Tool
@@ -81,7 +82,10 @@ templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin 
 		</span>
 		if linkedTool != nil {
 			<span>
-				@components.ToolAnchor(linkedTool, nil)
+				@components.ToolAnchor(
+					models.NewResolvedTool(linkedTool, nil, nil),
+					nil,
+				)
 			</span>
 		}
 	</span>

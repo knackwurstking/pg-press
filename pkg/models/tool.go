@@ -174,10 +174,26 @@ func (t *Tool) IsBound() bool {
 	return t.Binding != nil
 }
 
-// ToolWithNotes represents a tool with its related notes loaded.
-type ToolWithNotes struct {
+type ResolvedTool struct {
 	*Tool
-	LoadedNotes []*Note `json:"loaded_notes"`
+	bindingTool *Tool
+	notes       []*Note
+}
+
+func NewResolvedTool(tool *Tool, bindingTool *Tool, notes []*Note) *ResolvedTool {
+	return &ResolvedTool{
+		Tool:        tool,
+		bindingTool: bindingTool,
+		notes:       notes,
+	}
+}
+
+func (rt *ResolvedTool) GetBindingTool() *Tool {
+	return rt.bindingTool
+}
+
+func (rt *ResolvedTool) GetNotes() []*Note {
+	return rt.notes
 }
 
 // GetPositionOrder returns the sort order for a position (lower number = higher priority)

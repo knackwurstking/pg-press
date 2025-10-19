@@ -17,7 +17,7 @@ templ ToolStatusBadge(tool *models.Tool) {
 				</span>
 			</span>
 		case models.StatusAvailable:
-			if tool.Position != models.PositionTopCassette && !tool.IsBound() {
+			if tool.Position != models.PositionTopCassette || !tool.IsBound() {
 				<span class="badge badge-sm info">
 					Verfügbar
 				</span>
@@ -26,14 +26,6 @@ templ ToolStatusBadge(tool *models.Tool) {
 			<span class="badge badge-sm warning">
 				Regenerierung
 			</span>
-	}
-}
-
-templ ToolBindingBadge(tool *models.Tool) {
-	if tool.Position == models.PositionTopCassette &&  tool.IsBound() {
-		<span class="badge badge-sm warning">
-			Gebunden
-		</span>
 	}
 }
 

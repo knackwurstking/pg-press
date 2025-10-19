@@ -8,13 +8,15 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ ToolsList(tools []*models.ToolWithNotes) {
+templ ToolsList(tools []*models.ResolvedTool) {
 	for _, t := range tools {
-		@toolListItem(t.ID, t)
+		if t.Position != models.PositionTopCassette || !t.IsBound() {
+			@toolListItem(t.ID, t)
+		}
 	}
 }
 
-templ toolListItem(id int64, tool *models.ToolWithNotes) {
+templ toolListItem(id int64, tool *models.ResolvedTool) {
 	<li
 		id={ fmt.Sprintf("tool-%d", id) }
 		data-format={ tool.Format.String() }
@@ -22,7 +24,7 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 		data-type={ tool.Type }
 		data-position={ tool.Position.GermanString() }
 	>
-		@components.ToolAnchor(tool.Tool, &components.ToolAnchorOptions{
+		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge:  true,
 			EnableBindingBadge: true,
 			EnableTotalCycles:  true,

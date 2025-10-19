@@ -56,6 +56,61 @@ func (t *Service) Add(tool *models.Tool, user *models.User) (int64, error) {
 	return id, nil
 }
 
+func (t *Service) Update(tool *models.Tool, user *models.User) error {
+	if err := ValidateTool(tool); err != nil {
+		return err
+	}
+
+	if err := validation.ValidateID(tool.ID, "tool"); err != nil {
+		return err
+	}
+
+	if err := validation.ValidateNotNil(user, "user"); err != nil {
+		return err
+	}
+
+	t.Log.Debug("Updating tool by %s: id: %d", user.String(), tool.ID)
+
+	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
+		return err
+	}
+
+	formatBytes, err := marshalFormat(tool.Format)
+	if err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE
+			tools
+		SET
+			%s
+		WHERE
+			id = ?
+	`, ToolQueryUpdate)
+
+	result, err := t.DB.Exec(query,
+		tool.Position,
+		formatBytes,
+		tool.Type,
+		tool.Code,
+		tool.Regenerating,
+		tool.IsDead,
+		tool.Press,
+		tool.Binding,
+		tool.ID,
+	)
+	if err != nil {
+		return t.HandleUpdateError(err, "tools")
+	}
+
+	if err := t.CheckRowsAffected(result, "tool", tool.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (t *Service) Get(id int64) (*models.Tool, error) {
 	if err := validation.ValidateID(id, "tool"); err != nil {
 		return nil, err

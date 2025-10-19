@@ -99,22 +99,25 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 	}
 
 	tool := models.NewTool(
-		formData.Position, formData.Format, formData.Code, formData.Type,
+		formData.Position,
+		formData.Format,
+		formData.Code,
+		formData.Type,
 	)
-	tool.Press = formData.Press
+	tool.SetPress(formData.Press)
 
-	if t, err := h.DB.Tools.AddWithNotes(tool, user); err != nil {
+	if id, err := h.DB.Tools.Add(tool, user); err != nil {
 		return h.HandleError(c, err, "failed to add tool")
 	} else {
 		h.Log.Info("Created tool ID %d (Type=%s, Code=%s) by user %s",
-			t.ID, tool.Type, tool.Code, user.Name)
+			id, tool.Type, tool.Code, user.Name)
 
 		// Create feed entry
 		title := "Neues Werkzeug erstellt"
 		content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
-			t.String(), t.Type, t.Code, string(t.Position))
-		if t.Press != nil {
-			content += fmt.Sprintf("\nPresse: %d", *t.Press)
+			tool.String(), tool.Type, tool.Code, string(tool.Position))
+		if tool.Press != nil {
+			content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 		}
 
 		feed := models.NewFeed(title, content, user.TelegramID)
@@ -294,16 +297,32 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	h.Log.Debug("Rendering tools section")
 
 	// Get tools from database
-	allTools, err := h.DB.Tools.ListWithNotes()
+	allTools, err := h.DB.Tools.List()
 	if err != nil {
 		return h.HandleError(c, err, "failed to get tools from database")
 	}
 
 	// Filter out dead tools
-	var tools []*models.ToolWithNotes
-	for _, tool := range allTools {
-		if !tool.IsDead {
-			tools = append(tools, tool)
+	var tools []*models.ResolvedTool
+	for _, t := range allTools {
+		if !t.IsDead {
+			// Get the binding tool
+			var bindingTool *models.Tool
+			if t.IsBound() {
+				var err error
+				bindingTool, err = h.DB.Tools.Get(*t.Binding)
+				if err != nil {
+					return h.HandleError(c, err, "failed to get binding tool")
+				}
+			}
+
+			// Get notes for the current tool
+			notes, err := h.DB.Notes.GetByTool(t.ID)
+			if err != nil {
+				return h.HandleError(c, err, "failed to get notes for tool")
+			}
+
+			tools = append(tools, models.NewResolvedTool(t, bindingTool, notes))
 		}
 	}
 

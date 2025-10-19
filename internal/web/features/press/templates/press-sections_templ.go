@@ -241,8 +241,8 @@ func PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) tem
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, tool := range tools {
-				templ_7745c5c3_Err = components.ToolAnchor(tool, nil).Render(ctx, templ_7745c5c3_Buffer)
+			for _, t := range tools {
+				templ_7745c5c3_Err = components.ToolAnchor(models.NewResolvedTool(t, nil, nil), nil).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
