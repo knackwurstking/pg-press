@@ -41,7 +41,7 @@ func Main(options MainOptions) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><!-- Viewport and responsive design --><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover\"><!-- PWA and mobile optimization --><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\"><meta name=\"apple-mobile-web-app-title\" content=\"pgpress\"><meta name=\"application-name\" content=\"pgpress\"><meta name=\"msapplication-TileColor\" content=\"#3e3c49\"><meta name=\"theme-color\" content=\"#000000\"><!-- Icons and manifest --><link rel=\"icon\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"de\"><head><meta charset=\"utf-8\"><!-- Viewport and responsive design --><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover\"><!-- PWA and mobile optimization --><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"apple-mobile-web-app-status-bar-style\" content=\"default\"><meta name=\"apple-mobile-web-app-title\" content=\"pgpress\"><meta name=\"application-name\" content=\"pgpress\"><meta name=\"msapplication-TileColor\" content=\"#b8bb26\"><meta name=\"theme-color\" content=\"#1d2021\"><!-- Icons and manifest --><link rel=\"icon\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +93,7 @@ func Main(options MainOptions) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" color=\"#3e3c49\"><!-- PWA Manifest --><link rel=\"manifest\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" color=\"#b8bb26\"><!-- PWA Manifest --><link rel=\"manifest\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
