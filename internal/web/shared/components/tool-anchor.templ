@@ -25,7 +25,7 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 			env.ServerPathPrefix, tool.ID) }
 	>
 		<span class="flex gap justify-between w-full">
-			<span class="flex flex-col gap-sm">
+			<span class="flex flex-col gap">
 				<span class="text-semibold">
 					{ tool.String() }
 				</span>
@@ -36,8 +36,8 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 					}
 				</span>
 				if tool.Position == models.PositionTop && tool.IsBound() {
-					<span class="text-sm">
-						Kassette: { tool.GetBindingTool().String() }
+					<span class="text-sm italic info ghost">
+						<i>Kassette: { tool.GetBindingTool().String() }</i>
 					</span>
 				}
 			</span>
