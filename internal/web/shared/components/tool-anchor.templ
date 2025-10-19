@@ -25,14 +25,26 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 			env.ServerPathPrefix, tool.ID) }
 	>
 		<span class="flex gap justify-between w-full">
-			<span class="flex flex-col gap">
+			<span class="flex flex-col gap w-full">
 				<span class="text-semibold">
 					{ tool.String() }
 				</span>
-				<span class="flex gap">
+				<span class="flex gap justify-between items-center w-full">
 					@PositionBadge(tool.Position, "primary text-bold")
 					if options.EnableStatusBadge {
 						@ToolStatusBadge(tool.Tool)
+					}
+					if options.EnableTotalCycles {
+						<span
+							class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+							hx-get={ fmt.Sprintf(
+								"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
+								env.ServerPathPrefix, tool.ID, tool.Position,
+							) }
+							hx-trigger="load"
+							hx-swap="innerHTML"
+							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+						></span>
 					}
 				</span>
 				if tool.Position == models.PositionTop && tool.IsBound() {
@@ -45,18 +57,6 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 					</span>
 				}
 			</span>
-			if options.EnableTotalCycles {
-				<span
-					class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
-						env.ServerPathPrefix, tool.ID, tool.Position,
-					) }
-					hx-trigger="load"
-					hx-swap="innerHTML"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				></span>
-			}
 		</span>
 		<i class="bi bi-chevron-right"></i>
 	</a>
