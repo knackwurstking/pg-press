@@ -12,7 +12,6 @@ type ToolAnchorOptions struct {
 	EnableTotalCycles  bool
 }
 
-// TODO: Need some kind of a resolved tool type which includes the binding information from the tool
 templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 	{{
 		if options == nil {
@@ -37,8 +36,9 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 					}
 				</span>
 				if tool.Position == models.PositionTop && tool.IsBound() {
-					// TODO: Show the name of the cassette this is pointing to
-					<span class="text-sm">{ *tool.Binding }</span>
+					<span class="text-sm">
+						Kassette: { tool.GetBindingTool().String() }
+					</span>
 				}
 			</span>
 			if options.EnableTotalCycles {

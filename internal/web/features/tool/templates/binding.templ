@@ -7,11 +7,8 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-// Use the resolve tool here
-templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
+templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
 	{{
-		var linkedTool *models.Tool
-
 		var positionForBinding models.Position
 		if tool.Position == models.PositionTop {
 			positionForBinding = models.PositionTopCassette
@@ -52,9 +49,6 @@ templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin 
 				</option>
 				// Render options, all top tools unbound
 				for _, t := range toolsForBinding {
-					if t.Binding != nil && *t.Binding == tool.ID {
-						{{ linkedTool = t }}
-					}
 					<option
 						value={ t.ID }
 						selected?={ tool.Binding != nil && t.ID == *tool.Binding }
@@ -73,19 +67,16 @@ templ BindingSection(tool *models.Tool, toolsForBinding []*models.Tool, isAdmin 
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if tool.Binding == nil {
+				if !tool.IsBound() {
 					disabled
 				}
 			>
 				Entbinden
 			</button>
 		</span>
-		if linkedTool != nil {
+		if tool.IsBound() {
 			<span>
-				@components.ToolAnchor(
-					models.NewResolvedTool(linkedTool, nil, nil),
-					nil,
-				)
+				@components.ToolAnchor(tool, nil)
 			</span>
 		}
 	</span>

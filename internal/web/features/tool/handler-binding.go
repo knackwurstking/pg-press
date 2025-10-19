@@ -77,7 +77,10 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := templates.BindingSection(tool, toolsForBinding, isAdmin, nil)
+	bs := templates.BindingSection(models.NewResolvedTool(
+		tool, h.getBindingTool(tool, toolsForBinding), nil,
+	), toolsForBinding, isAdmin, nil)
+
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render binding section")
 	}
@@ -118,7 +121,10 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := templates.BindingSection(tool, toolsForBinding, isAdmin, nil)
+	bs := templates.BindingSection(models.NewResolvedTool(
+		tool, h.getBindingTool(tool, toolsForBinding), nil,
+	), toolsForBinding, isAdmin, nil)
+
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render binding section")
 	}
@@ -160,4 +166,16 @@ func (h *Handler) getToolsForBinding(c echo.Context, tool *models.Tool) ([]*mode
 	}
 
 	return filteredToolsForBinding, nil
+}
+
+func (h *Handler) getBindingTool(tool *models.Tool, toolsForBinding []*models.Tool) *models.Tool {
+	var bindingTool *models.Tool
+	if tool.IsBound() {
+		for _, t := range toolsForBinding {
+			if t.ID == *tool.Binding {
+				bindingTool = t
+			}
+		}
+	}
+	return bindingTool
 }

@@ -19,7 +19,7 @@ import (
 
 type CyclesProps struct {
 	User            *models.User
-	Tool            *models.Tool
+	Tool            *models.ResolvedTool
 	ToolsForBinding []*models.Tool
 	ToolPosition    string
 	TotalCycles     int64
@@ -161,7 +161,7 @@ func Cycles(props *CyclesProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = cyclesTable(props.Tool, props.Cycles, props.Regenerations, props.User).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = cyclesTable(props.Tool.Tool, props.Cycles, props.Regenerations, props.User).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -173,7 +173,7 @@ func Cycles(props *CyclesProps) templ.Component {
 	})
 }
 
-func toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models.User) templ.Component {
+func toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user *models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -199,7 +199,7 @@ func toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models.
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.ToolStatusEdit(&components.ToolStatusEditProps{
-			Tool:              tool,
+			Tool:              tool.Tool,
 			UserHasPermission: user.IsAdmin(),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

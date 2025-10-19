@@ -11,7 +11,7 @@ import (
 
 type CyclesProps struct {
 	User            *models.User
-	Tool            *models.Tool
+	Tool            *models.ResolvedTool
 	ToolsForBinding []*models.Tool
 	ToolPosition    string
 	TotalCycles     int64
@@ -65,17 +65,17 @@ templ Cycles(props *CyclesProps) {
 					@components.TotalCycles(props.TotalCycles, true)
 				</span>
 			</section>
-			@cyclesTable(props.Tool, props.Cycles, props.Regenerations, props.User)
+			@cyclesTable(props.Tool.Tool, props.Cycles, props.Regenerations, props.User)
 		</section>
 	</div>
 }
 
-templ toolStatus(tool *models.Tool, toolsForBinding []*models.Tool, user *models.User) {
+templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user *models.User) {
 	<div class="flex flex-col gap">
 		<span class="flex gap-lg">
 			// Show status and start or stop a regenaration
 			@components.ToolStatusEdit(&components.ToolStatusEditProps{
-				Tool:              tool,
+				Tool:              tool.Tool,
 				UserHasPermission: user.IsAdmin(),
 			})
 			// On active tools, link (button) to press page
