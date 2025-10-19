@@ -9,6 +9,8 @@ const (
 	IDToolsFilter = "tools-filter"
 )
 
+// TODO: Skip top cassette tools which are bound to an top tool
+// TODO: Show Cassette info for each top tool which have a binding
 templ SectionTools(tools []*models.ToolWithNotes) {
 	<span
 		hx-get={ env.ServerPathPrefix + "/htmx/tools/section/tools" }
