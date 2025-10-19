@@ -144,11 +144,15 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to get tool form data: "+err.Error())
 	}
 
-	tool := models.NewTool(
-		formData.Position, formData.Format, formData.Code, formData.Type,
-	)
-	tool.ID = toolID
+	tool, err := h.DB.Tools.Get(toolID)
+	if err != nil {
+		return h.HandleError(c, err, "failed to get tool")
+	}
 	tool.Press = formData.Press
+	tool.Position = formData.Position
+	tool.Format = formData.Format
+	tool.Code = formData.Code
+	tool.Type = formData.Type
 
 	if err := h.DB.Tools.Update(tool, user); err != nil {
 		return echo.NewHTTPError(utils.GetHTTPStatusCode(err),
