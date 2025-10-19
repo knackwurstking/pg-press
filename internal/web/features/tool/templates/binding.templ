@@ -76,7 +76,11 @@ templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, 
 		</span>
 		if tool.IsBound() {
 			<span>
-				@components.ToolAnchor(tool, nil)
+				@components.ToolAnchor(
+					models.NewResolvedTool(tool.GetBindingTool(),
+						tool.Tool, tool.GetNotes()),
+					nil,
+				)
 			</span>
 		}
 	</span>

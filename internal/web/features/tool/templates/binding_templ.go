@@ -193,7 +193,11 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.ToolAnchor(tool, nil).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.ToolAnchor(
+				models.NewResolvedTool(tool.GetBindingTool(),
+					tool.Tool, tool.GetNotes()),
+				nil,
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

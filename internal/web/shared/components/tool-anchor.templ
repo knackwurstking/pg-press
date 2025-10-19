@@ -37,7 +37,11 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 				</span>
 				if tool.Position == models.PositionTop && tool.IsBound() {
 					<span class="text-sm italic info ghost">
-						<i>Kassette: { tool.GetBindingTool().String() }</i>
+						if tool.GetBindingTool() == nil {
+							<i>Ooops, there is no binding tool</i>
+						} else {
+							<i>Kassette: { tool.GetBindingTool().String() }</i>
+						}
 					</span>
 				}
 			</span>
