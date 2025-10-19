@@ -110,7 +110,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ">Defekt</option></select></label><!-- Content Field --> <label for=\"content\" class=\"flex flex-col\">Inhalt <textarea name=\"content\" id=\"content\" placeholder=\"Notiz-Inhalt eingeben...\" rows=\"4\" required>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, ">Defekt</option></select></label><!-- Content Field --> <label for=\"content\" class=\"flex flex-col\">Inhalt <textarea name=\"content\" id=\"content\" placeholder=\"Notiz-Inhalt eingeben...\" rows=\"5\" required>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
