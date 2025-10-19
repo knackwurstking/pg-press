@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// TODO: Update the status badge for cassettes which are bound to a top tool
 templ ToolStatusBadge(tool *models.Tool) {
 	switch tool.Status() {
 		case models.StatusActive:

@@ -15,6 +15,7 @@ const (
 	PositionTopCassette = Position("cassette top")
 	PositionBottom      = Position("bottom")
 
+	// TODO: Update the status badge for cassettes which are bound to a top tool
 	StatusActive       = Status("active")
 	StatusAvailable    = Status("available")
 	StatusRegenerating = Status("regenerating")
