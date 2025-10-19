@@ -15,8 +15,9 @@ import (
 )
 
 type ToolAnchorOptions struct {
-	EnableStatusBadge bool
-	EnableTotalCycles bool
+	EnableStatusBadge  bool
+	EnableBindingBadge bool
+	EnableTotalCycles  bool
 }
 
 func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
@@ -52,7 +53,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d",
 			env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 24, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 25, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -65,7 +66,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 29, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 30, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -85,6 +86,12 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
+		if options.EnableBindingBadge {
+			templ_7745c5c3_Err = ToolBindingBadge(tool).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -100,7 +107,7 @@ func ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) templ.Component {
 				env.ServerPathPrefix, tool.ID, tool.Position,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 44, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 48, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {

@@ -9,15 +9,15 @@ import (
 templ PositionBadge(position models.Position, classNames string) {
 	switch position {
 		case models.PositionTop:
-			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
 				{ models.PositionTop.GermanString() }
 			</small>
 		case models.PositionTopCassette:
-			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
 				{ models.PositionTopCassette.GermanString() }
 			</small>
 		case models.PositionBottom:
-			<small class={ fmt.Sprintf("badge badge-sm badge-outline %s", classNames) }>
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
 				{ models.PositionBottom.GermanString() }
 			</small>
 	}

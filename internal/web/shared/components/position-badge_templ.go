@@ -37,7 +37,7 @@ func PositionBadge(position models.Position, classNames string) templ.Component 
 		ctx = templ.ClearChildren(ctx)
 		switch position {
 		case models.PositionTop:
-			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
+			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("badge badge-sm %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -73,7 +73,7 @@ func PositionBadge(position models.Position, classNames string) templ.Component 
 				return templ_7745c5c3_Err
 			}
 		case models.PositionTopCassette:
-			var templ_7745c5c3_Var5 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
+			var templ_7745c5c3_Var5 = []any{fmt.Sprintf("badge badge-sm %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -109,7 +109,7 @@ func PositionBadge(position models.Position, classNames string) templ.Component 
 				return templ_7745c5c3_Err
 			}
 		case models.PositionBottom:
-			var templ_7745c5c3_Var8 = []any{fmt.Sprintf("badge badge-sm badge-outline %s", classNames)}
+			var templ_7745c5c3_Var8 = []any{fmt.Sprintf("badge badge-sm %s", classNames)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

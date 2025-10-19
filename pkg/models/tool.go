@@ -11,22 +11,17 @@ import (
 )
 
 const (
-	PositionTop         = Position("top")
-	PositionTopCassette = Position("cassette top")
-	PositionBottom      = Position("bottom")
-
-	// TODO: Update the status badge for cassettes which are bound to a top tool
-	StatusActive       = Status("active")
-	StatusAvailable    = Status("available")
-	StatusRegenerating = Status("regenerating")
-	StatusDead         = Status("dead")
-
 	ToolCycleWarning int64 = 800000  // Orange
 	ToolCycleError   int64 = 1000000 // Red
 )
 
-type (
-	Status string
+type Status string
+
+const (
+	StatusActive       = Status("active")
+	StatusAvailable    = Status("available")
+	StatusRegenerating = Status("regenerating")
+	StatusDead         = Status("dead")
 )
 
 type PressNumber int8
@@ -51,6 +46,12 @@ func IsValidPressNumber(n *PressNumber) bool {
 }
 
 type Position string
+
+const (
+	PositionTop         = Position("top")
+	PositionTopCassette = Position("cassette top")
+	PositionBottom      = Position("bottom")
+)
 
 func (p Position) GermanString() string {
 	switch p {
@@ -107,12 +108,15 @@ func (t *Tool) Status() Status {
 	if t.IsDead {
 		return StatusDead
 	}
+
 	if t.Regenerating {
 		return StatusRegenerating
 	}
+
 	if t.Press != nil {
 		return StatusActive
 	}
+
 	return StatusAvailable
 }
 
@@ -164,6 +168,10 @@ func (t *Tool) GetPressString() string {
 		return "Nicht zugewiesen"
 	}
 	return fmt.Sprintf("Presse %d", *t.Press)
+}
+
+func (t *Tool) IsBound() bool {
+	return t.Binding != nil
 }
 
 // ToolWithNotes represents a tool with its related notes loaded.

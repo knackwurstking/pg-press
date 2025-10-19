@@ -7,8 +7,9 @@ import (
 )
 
 type ToolAnchorOptions struct {
-	EnableStatusBadge bool
-	EnableTotalCycles bool
+	EnableStatusBadge  bool
+	EnableBindingBadge bool
+	EnableTotalCycles  bool
 }
 
 templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
@@ -32,6 +33,9 @@ templ ToolAnchor(tool *models.Tool, options *ToolAnchorOptions) {
 					@PositionBadge(tool.Position, "primary text-bold")
 					if options.EnableStatusBadge {
 						@ToolStatusBadge(tool)
+					}
+					if options.EnableBindingBadge {
+						@ToolBindingBadge(tool)
 					}
 				</span>
 			</span>

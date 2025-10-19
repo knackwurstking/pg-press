@@ -22,10 +22,10 @@ templ toolListItem(id int64, tool *models.ToolWithNotes) {
 		data-type={ tool.Type }
 		data-position={ tool.Position.GermanString() }
 	>
-		// TODO: Update the status badge for cassettes which are bound to a top tool
 		@components.ToolAnchor(tool.Tool, &components.ToolAnchorOptions{
-			EnableStatusBadge: true,
-			EnableTotalCycles: true,
+			EnableStatusBadge:  true,
+			EnableBindingBadge: true,
+			EnableTotalCycles:  true,
 		})
 	</li>
 }
