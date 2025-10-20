@@ -19,59 +19,20 @@ type CyclesProps struct {
 	Regenerations   []*models.ResolvedRegeneration
 }
 
-// TODO: Split into separate functions
-//   - Extract each section (status, regenerations, cycles) into separate components
-//   - Create a dedicated HTMX attributes builder function
-//   - Simplify the table rendering logic
 templ Cycles(props CyclesProps) {
 	@components.SectionTitle(components.TitleLevelMain, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
-		<section id="tool-status-section">
-			@components.SectionTitle(components.TitleLevelSub, "Aktueller Status")
-			@toolStatus(props.Tool, props.ToolsForBinding, props.User)
-		</section>
-		<section id="regenerations-section">
-			@components.SectionTitle(components.TitleLevelSub, "Regerationen")
-			if len(props.Regenerations) == 0 {
-				<span class="flex justify-center items-center">
-					<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug </small> </i>
-				</span>
-			} else {
-				@regenerationsTable(props.Regenerations, props.User)
-			}
-		</section>
-		<section id="cycles-section">
-			@components.SectionTitle(components.TitleLevelSub, "Pressennutzungsverlauf") {
-				<button
-					class="icon secondary small flex"
-					hx-get={ fmt.Sprintf(
-						"%s/htmx/tools/cycle/edit?tool_id=%d",
-						env.ServerPathPrefix, props.Tool.ID,
-					) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Neuen Eintrag hinzufügen"
-					if !props.User.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-plus-lg"></i>
-				</button>
-			}
-			<section>
-				<h6 class="mb">
-					Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
-						props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
-				</h6>
-				<span>
-					@components.TotalCycles(props.TotalCycles, true)
-				</span>
-			</section>
-			@cyclesTable(props)
-		</section>
+		@toolStatusSection(props)
+		@regenerationsSection(props)
+		@cyclesSection(props)
 	</div>
+}
+
+templ toolStatusSection(props CyclesProps) {
+	<section id="tool-status-section">
+		@components.SectionTitle(components.TitleLevelSub, "Aktueller Status")
+		@toolStatus(props.Tool, props.ToolsForBinding, props.User)
+	</section>
 }
 
 templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user *models.User) {
@@ -107,6 +68,19 @@ templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user
 			})
 		}
 	</div>
+}
+
+templ regenerationsSection(props CyclesProps) {
+	<section id="regenerations-section">
+		@components.SectionTitle(components.TitleLevelSub, "Regerationen")
+		if len(props.Regenerations) == 0 {
+			<span class="flex justify-center items-center">
+				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug </small> </i>
+			</span>
+		} else {
+			@regenerationsTable(props.Regenerations, props.User)
+		}
+	</section>
 }
 
 templ regenerationsTable(regenerations []*models.ResolvedRegeneration, user *models.User) {
@@ -160,6 +134,40 @@ templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user 
 			</td>
 		</tr>
 	}
+}
+
+templ cyclesSection(props CyclesProps) {
+	<section id="cycles-section">
+		@components.SectionTitle(components.TitleLevelSub, "Pressennutzungsverlauf") {
+			<button
+				class="icon secondary small flex"
+				hx-get={ fmt.Sprintf(
+					"%s/htmx/tools/cycle/edit?tool_id=%d",
+					env.ServerPathPrefix, props.Tool.ID,
+				) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neuen Eintrag hinzufügen"
+				if !props.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-plus-lg"></i>
+			</button>
+		}
+		<section>
+			<h6 class="mb">
+				Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
+					props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+			</h6>
+			<span>
+				@components.TotalCycles(props.TotalCycles, true)
+			</span>
+		</section>
+		@cyclesTable(props)
+	</section>
 }
 
 templ cyclesTable(props CyclesProps) {
