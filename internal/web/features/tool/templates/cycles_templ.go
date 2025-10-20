@@ -244,7 +244,7 @@ func toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(toolsForBinding) > 0 {
+		if tool.IsBindable() {
 			templ_7745c5c3_Err = BindingSection(tool, toolsForBinding, user.IsAdmin(), nil).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

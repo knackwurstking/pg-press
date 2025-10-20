@@ -52,7 +52,7 @@ templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, 
 					<option
 						value={ t.ID }
 						selected?={ tool.Binding != nil && t.ID == *tool.Binding }
-					>{ t.String() }</option>
+					>{ t.Code } { t.Type }</option>
 				}
 			</select>
 			<button

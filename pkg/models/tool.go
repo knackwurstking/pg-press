@@ -174,6 +174,10 @@ func (t *Tool) IsBound() bool {
 	return t.Binding != nil
 }
 
+func (t *Tool) IsBindable() bool {
+	return t.Position == PositionTop || t.Position == PositionTopCassette
+}
+
 type ResolvedTool struct {
 	*Tool
 	bindingTool *Tool

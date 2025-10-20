@@ -95,7 +95,7 @@ templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user
 			}
 		</span>
 		// (Un)Bind Top and TopCassette tools
-		if len(toolsForBinding) > 0 {
+		if tool.IsBindable() {
 			@BindingSection(tool, toolsForBinding, user.IsAdmin(), nil)
 		}
 	</div>

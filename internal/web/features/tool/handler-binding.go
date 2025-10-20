@@ -147,7 +147,7 @@ func (h *Handler) getToolsForBinding(c echo.Context, tool *models.Tool) ([]*mode
 	}
 	// Filter tools for binding
 	for _, t := range tools {
-		if t.Format != tool.Format {
+		if t.Format != tool.Format || t.IsBound() {
 			continue
 		}
 
