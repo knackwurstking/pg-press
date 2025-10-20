@@ -77,9 +77,13 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := templates.BindingSection(models.NewResolvedTool(
-		tool, h.getBindingTool(tool), nil,
-	), toolsForBinding, isAdmin, nil)
+	bs := templates.BindingSection(templates.BindingSectionProps{
+		Tool: models.NewResolvedTool(
+			tool, h.getBindingTool(tool), nil,
+		),
+		ToolsForBinding: toolsForBinding,
+		IsAdmin:         isAdmin,
+	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render binding section")
@@ -121,9 +125,13 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := templates.BindingSection(models.NewResolvedTool(
-		tool, h.getBindingTool(tool), nil,
-	), toolsForBinding, isAdmin, nil)
+	bs := templates.BindingSection(templates.BindingSectionProps{
+		Tool: models.NewResolvedTool(
+			tool, h.getBindingTool(tool), nil,
+		),
+		ToolsForBinding: toolsForBinding,
+		IsAdmin:         isAdmin,
+	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.HandleError(c, err, "failed to render binding section")

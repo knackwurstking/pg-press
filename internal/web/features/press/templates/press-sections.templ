@@ -11,14 +11,20 @@ import (
 	"strings"
 )
 
+type PressNotesSectionProps struct {
+	Notes []*models.Note
+	Tools []*models.Tool
+	Press models.PressNumber
+}
+
 // PressNotesSection renders the notes section for all tools on a press
 // TODO: Split into separate functions for press and tool notes
 // TODO: Move sorting logic to a separate (helper) function
-templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
+templ PressNotesSection(props PressNotesSectionProps) {
 	{{
 		pressNotes := make([]*models.Note, 0)
 		toolNotes := make([]*models.Note, 0)
-		for _, n := range notes {
+		for _, n := range props.Notes {
 			if strings.HasPrefix(n.Linked, "press_") {
 				pressNotes = append(pressNotes, n)
 			} else if strings.HasPrefix(n.Linked, "tool_") {
@@ -36,7 +42,8 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 		<section class="flex justify-center mt">
 			<button
 				class="primary"
-				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press) }
+				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d",
+					env.ServerPathPrefix, props.Press) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -53,7 +60,8 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
 				class="primary"
-				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d", env.ServerPathPrefix, press) }
+				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d",
+					env.ServerPathPrefix, props.Press) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -74,7 +82,7 @@ templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models
 				for _, n := range toolNotes {
 					sID, _ := strings.CutPrefix(n.Linked, "tool_")
 					id, _ := strconv.ParseInt(sID, 10, 64)
-					for _, t := range tools {
+					for _, t := range props.Tools {
 						if t.ID != id {
 							continue
 						}

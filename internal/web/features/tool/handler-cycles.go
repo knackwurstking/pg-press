@@ -67,7 +67,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	}
 
 	// Render the template
-	cyclesSection := templates.Cycles(&templates.CyclesProps{
+	cyclesSection := templates.Cycles(templates.CyclesProps{
 		User:            user,
 		Tool:            models.NewResolvedTool(tool, h.getBindingTool(tool), nil),
 		ToolsForBinding: toolsForBinding,

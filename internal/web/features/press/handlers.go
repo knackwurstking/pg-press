@@ -157,7 +157,13 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		toolsMap[tool.ID] = tool
 	}
 
-	cyclesSection := templates.PressCyclesSection(cycles, toolsMap, user, press)
+	cyclesSection := templates.PressCyclesSection(templates.PressCyclesSectionProps{
+		Cycles:   cycles,
+		ToolsMap: toolsMap,
+		User:     user,
+		Press:    press,
+	})
+
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render cycles section: "+err.Error())
 	}
@@ -192,7 +198,12 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		notes = append(notes, n...)
 	}
 
-	notesSection := templates.PressNotesSection(notes, sortedTools, press)
+	notesSection := templates.PressNotesSection(templates.PressNotesSectionProps{
+		Notes: notes,
+		Tools: sortedTools,
+		Press: press,
+	})
+
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render press notes section: "+err.Error())
 	}
