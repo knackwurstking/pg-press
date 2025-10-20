@@ -8,152 +8,114 @@ import (
 type MainOptions struct {
 	PageTitle      string
 	AppBarTitle    string
-	AdditionalHead templ.Component
 	NavContent     templ.Component
+	AdditionalHead templ.Component
 }
 
-// TODO: Split into separate functions
-// 	- Move JavaScript code to external script files or separate script components
-// 	- Extract meta tag generation into a dedicated component
-// 	- Create a separate PWA manifest component
 templ Main(options MainOptions) {
 	<!DOCTYPE html>
 	<html lang="de">
 		<head>
-			<meta charset="utf-8"/>
-			<!-- Viewport and responsive design -->
-			<meta
-				name="viewport"
-				content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover"
-			/>
-			<!-- PWA and mobile optimization -->
-			<meta name="mobile-web-app-capable" content="yes"/>
-			<meta name="apple-mobile-web-app-capable" content="yes"/>
-			<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
-			<meta name="apple-mobile-web-app-title" content="pgpress"/>
-			<meta name="application-name" content="pgpress"/>
-			<meta name="msapplication-TileColor" content="#b8bb26"/>
-			<meta name="theme-color" content="#f9f5d7" id="theme-color-meta"/>
-			<!-- Icons and manifest -->
-			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
-			<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
-			<link
-				rel="apple-touch-icon"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }
-			/>
-			<link
-				rel="mask-icon"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") }
-				color="#b8bb26"
-			/>
-			<!-- PWA Manifest -->
-			<link
-				rel="manifest"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/manifest.json") }
-			/>
-			<!-- Stylesheets -->
-			<link
-				rel="stylesheet"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }
-			/>
-			<link
-				rel="stylesheet"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }
-			/>
-			<link
-				rel="stylesheet"
-				href={ helpers.AssetURL(env.ServerPathPrefix, "/css/layout.css") }
-			/>
+			@mainHeadMeta()
+			@mainHeadLink()
 			<title>{ options.PageTitle }</title>
-			<!-- HTMX for dynamic content -->
-			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
-			<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
-			<script>
-				const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant
-
-				// For the ui.min.css i need to set the data-theme to light/dark
-				function updateDataTheme() {
-					const themeColorMeta = document.getElementById('theme-color-meta');
-					if (matchMedia('(prefers-color-scheme: dark)').matches) {
-						document.querySelector("html").setAttribute("data-theme", "dark");
-						// Dark theme background color
-						if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
-					} else {
-						document.querySelector("html").setAttribute("data-theme", "light");
-						// Light theme background color
-						if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
-					}
-				}
-
-				updateDataTheme();
-
-				matchMedia('(prefers-color-scheme: dark)').addEventListener("change", function(event) {
-					updateDataTheme();
-				});
-			</script>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}
 		</head>
 		<body hx-ext="ws">
-			<header class="app-bar top fixed shadow-sm">
-				<div class="app-bar-left">
-					<h5>{ options.AppBarTitle }</h5>
-				</div>
-				<div class="app-bar-right">
-					if options.NavContent != nil {
-						@options.NavContent
-					}
-				</div>
-			</header>
+			@appBar(options.AppBarTitle, options.NavContent)
 			{ children... }
-			<template name="image-viewer">
-				<dialog
-					name="image-viewer"
-					class="image-viewer fullscreen clean flex justify-center items-center"
-				>
-					<img alt="Attachment" class="attachment"/>
-					<button
-						type="button"
-						class="close icon secondary ghost"
-						onclick="this.closest('dialog').close()"
-						title="Schließen"
-					>
-						<i class="bi bi-x-lg"></i>
-					</button>
-				</dialog>
-			</template>
-			<script>
-				// Debounce function to prevent rapid reloads
-				function debounce(func, wait) {
-					let timeout;
-					return function executedFunction(...args) {
-						const later = function() {
-							clearTimeout(timeout);
-							func(...args);
-						};
-						clearTimeout(timeout);
-						timeout = setTimeout(later, wait);
-					};
-				}
-
-				// Debounced reload function
-				const debouncedReload = debounce(function() {
-					if (document.visibilityState === 'visible') {
-						console.log('Page became visible - reloading HTMX sections');
-						document.body.dispatchEvent(new CustomEvent('pageLoaded'));
-					}
-				}, 500);
-
-				// Listen for visibility changes
-				window.addEventListener("visibilitychange", debouncedReload);
-
-				// Add manual refresh functionality
-				window.refreshPressSections = function() {
-					console.log('Manual refresh triggered');
-					document.body.dispatchEvent(new CustomEvent('pageLoaded'));
-				};
-			</script>
+			@imageViewerTemplate()
 		</body>
 	</html>
+}
+
+templ mainHeadMeta() {
+	<meta charset="utf-8"/>
+	<!-- Viewport and responsive design -->
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover"
+	/>
+	<!-- PWA and mobile optimization -->
+	<meta name="mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+	<meta name="apple-mobile-web-app-title" content="pgpress"/>
+	<meta name="application-name" content="pgpress"/>
+	<meta name="msapplication-TileColor" content="#b8bb26"/>
+	<meta name="theme-color" content="#f9f5d7" id="theme-color-meta"/>
+}
+
+templ mainHeadLink() {
+	<!-- Icons and manifest -->
+	<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
+	<link rel="icon" href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
+	<link
+		rel="apple-touch-icon"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }
+	/>
+	<link
+		rel="mask-icon"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/icon.png") }
+		color="#b8bb26"
+	/>
+	<!-- PWA Manifest -->
+	<link
+		rel="manifest"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/manifest.json") }
+	/>
+	<!-- Stylesheets -->
+	<link
+		rel="stylesheet"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }
+	/>
+	<link
+		rel="stylesheet"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }
+	/>
+	<link
+		rel="stylesheet"
+		href={ helpers.AssetURL(env.ServerPathPrefix, "/css/layout.css") }
+	/>
+}
+
+templ mainHeadScriptImports() {
+	<!-- HTMX for dynamic content -->
+	<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
+	<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
+	<script src={ helpers.AssetURL(env.ServerPathPrefix, "/js/main-layout.js") }></script>
+}
+
+templ appBar(title string, navContent templ.Component) {
+	<header class="app-bar top fixed shadow-sm">
+		<div class="app-bar-left">
+			<h5>{ title }</h5>
+		</div>
+		<div class="app-bar-right">
+			if navContent != nil {
+				@navContent
+			}
+		</div>
+	</header>
+}
+
+templ imageViewerTemplate() {
+	<template name="image-viewer">
+		<dialog
+			name="image-viewer"
+			class="image-viewer fullscreen clean flex justify-center items-center"
+		>
+			<img alt="Attachment" class="attachment"/>
+			<button
+				type="button"
+				class="close icon secondary ghost"
+				onclick="this.closest('dialog').close()"
+				title="Schließen"
+			>
+				<i class="bi bi-x-lg"></i>
+			</button>
+		</dialog>
+	</template>
 }
