@@ -1,5 +1,5 @@
 Use this:
-`c.Response().Header().Set("HX-Trigger", "noteDeleted, pageLoaded")`
+`c.Response().Header().Set("HX-Trigger", "pageLoaded")`
 
 Instead of:
 
