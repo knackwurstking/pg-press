@@ -58,9 +58,6 @@ func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 		return cycle.TotalCycles
 	}
 
-	s.Log.Debug("Calculating partial cycles: press: %d, tool: %d, position: %s, total: %d",
-		cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles)
-
 	var (
 		previousTotalCycles int64
 		row                 *sql.Row
@@ -108,12 +105,7 @@ func (s *Service) GetPartialCycles(cycle *models.Cycle) int64 {
 		return cycle.TotalCycles
 	}
 
-	partialCycles := cycle.TotalCycles - previousTotalCycles
-
-	s.Log.Debug("Calculated partial cycles: %d (total: %d - previous: %d)",
-		partialCycles, cycle.TotalCycles, previousTotalCycles)
-
-	return partialCycles
+	return cycle.TotalCycles - previousTotalCycles
 }
 
 // Get retrieves a specific press cycle by its ID.

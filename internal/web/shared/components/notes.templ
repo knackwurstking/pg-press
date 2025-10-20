@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -36,10 +36,7 @@ templ NoteCard(note *models.Note) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ fmt.Sprintf(
-					"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
-					env.ServerPathPrefix, note.ID, note.Linked,
-				) }
+					hx-get={ helpers.URLGetNotesEdit(&note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -50,10 +47,7 @@ templ NoteCard(note *models.Note) {
 				</button>
 				<button
 					class="icon small destructive"
-					hx-delete={ fmt.Sprintf(
-						"%s/htmx/notes/delete?id=%d",
-						env.ServerPathPrefix, note.ID,
-					) }
+					hx-delete={ helpers.URLDeleteNote(note.ID) }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"

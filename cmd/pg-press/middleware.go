@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
@@ -23,13 +24,19 @@ var (
 )
 
 func init() {
+	// NOTE: Used for updating cookies
 	pages = []string{
 		serverPathPrefix + "/",
 		serverPathPrefix + "/feed",
 		serverPathPrefix + "/profile",
+		serverPathPrefix + "/editor",
+		serverPathPrefix + "/help",
 		serverPathPrefix + "/trouble-reports",
+		serverPathPrefix + "/notes",
+		serverPathPrefix + "/tools",
 	}
 
+	// NOTE: Important for skipping key authentication
 	keyAuthFilesToSkip = []string{
 		// Pages
 		serverPathPrefix + "/login",
@@ -37,11 +44,12 @@ func init() {
 		// CSS
 		serverPathPrefix + "/css/bootstrap-icons.min.css",
 		serverPathPrefix + "/css/ui.min.css",
-		serverPathPrefix + "/css/layout.css",
+		serverPathPrefix + "/css/main-layout.css",
 
 		// Libraries
 		serverPathPrefix + "/js/htmx-v2.0.6.min.js",
 		serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
+		serverPathPrefix + "/js/main-layout.js",
 
 		// Fonts
 		serverPathPrefix + "/bootstrap-icons.woff",
@@ -229,7 +237,17 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		}
 	}
 
-	if slices.Contains(pages, ctx.Request().URL.Path) {
+	// Check if the path matches any of the tracked pages (ignoring prefix and query parameters)
+	pathMatches := false
+	requestPath := ctx.Request().URL.Path
+	for _, page := range pages {
+		if strings.HasSuffix(requestPath, page) {
+			pathMatches = true
+			break
+		}
+	}
+
+	if pathMatches {
 		now := time.Now()
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(constants.CookieExpirationDuration)

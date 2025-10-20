@@ -3,8 +3,8 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -16,18 +16,12 @@ type DialogEditMetalSheetProps struct {
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
 		baseType := "POST"
-		baseHref := fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit?tool_id=%d",
-			env.ServerPathPrefix, props.Tool.ID,
-		)
+		baseHref := helpers.URLPostMetalSheetEdit(props.Tool.ID)
 		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/metal-sheets/edit?id=%d",
-				env.ServerPathPrefix, props.MetalSheet.ID,
-			)
+			baseHref = helpers.URLPutMetalSheetEdit(props.MetalSheet.ID)
 			submitButtonText = "Aktualisieren"
 		}
 	}}

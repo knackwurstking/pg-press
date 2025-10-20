@@ -84,11 +84,6 @@ func (h *Handler) HTMXGetEditNoteDialog(c echo.Context) error {
 		User:         user,
 	}
 
-	// Reload query param
-	if reload := h.ParseBoolQuery(c, "reload"); reload {
-		props.Reload = true
-	}
-
 	// Parse linked tables from query parameter
 	if linkToTables := c.QueryParam("link_to_tables"); linkToTables != "" {
 		props.LinkToTables = strings.Split(linkToTables, ",")

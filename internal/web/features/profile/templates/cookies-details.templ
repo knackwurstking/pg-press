@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
+// TODO: Split into separate functions
 templ CookiesDetails(cookies []*models.Cookie) {
 	if len(cookies) > 0 {
 		<details id="cookies" class="cookies-details" open>
