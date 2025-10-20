@@ -11,9 +11,9 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/knackwurstking/pgpress/pkg/models"
 
 type TableActionsOptions struct {
-	EditHref        string
+	EditHref        templ.SafeURL
 	EditAdminOnly   bool
-	DeleteHref      string
+	DeleteHref      templ.SafeURL
 	DeleteAdminOnly bool
 	User            *models.User
 }

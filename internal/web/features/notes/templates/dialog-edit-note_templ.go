@@ -44,12 +44,12 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 
 		baseType := "POST"
 		submitButtonText := "Erstellen"
-		baseHref := helpers.URLPostNotesEdit(props.LinkToTables...)
+		baseHref := helpers.HXPostNotesEdit(props.LinkToTables...)
 
 		if props.Note.ID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = helpers.URLPutNotesEdit(props.Note.ID, props.LinkToTables...)
+			baseHref = helpers.HXPutNotesEdit(props.Note.ID, props.LinkToTables...)
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -166,7 +166,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
 			Type:             baseType,
-			Href:             templ.URL(baseHref),
+			Href:             baseHref,
 			ID:               "notes-edit-dialog",
 			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

@@ -16,19 +16,19 @@ type DialogEditMetalSheetProps struct {
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
 		baseType := "POST"
-		baseHref := helpers.URLPostMetalSheetEdit(props.Tool.ID)
+		baseHref := helpers.HXPostMetalSheetEdit(props.Tool.ID)
 		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
-			baseHref = helpers.URLPutMetalSheetEdit(props.MetalSheet.ID)
+			baseHref = helpers.HXPutMetalSheetEdit(props.MetalSheet.ID)
 			submitButtonText = "Aktualisieren"
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
 		ID:               "metal-sheet-edit-dialog",
 		Type:             baseType,
-		Href:             templ.URL(baseHref),
+		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
 	}) {
 		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now

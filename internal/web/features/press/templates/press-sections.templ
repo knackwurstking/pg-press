@@ -47,7 +47,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 		<section class="flex justify-center mt">
 			<button
 				class="primary"
-				hx-get={ helpers.URLGetNotesEdit(nil, fmt.Sprintf("press_%d", press)) }
+				hx-get={ helpers.HXGetNotesEdit(nil, fmt.Sprintf("press_%d", press)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -64,7 +64,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
 				class="primary"
-				hx-get={ helpers.URLGetNotesEdit(nil, fmt.Sprintf("press_%d", press)) }
+				hx-get={ helpers.HXGetNotesEdit(nil, fmt.Sprintf("press_%d", press)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -239,9 +239,9 @@ templ renderPressCycleRow(cycle *models.Cycle, props PressCyclesSectionProps) {
 		<td>
 			<span class="button-group flex justify-end items-center">
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        helpers.URLGetCycleEdit(cycle.ToolID, &cycle.ID, true),
+					EditHref:        helpers.HXGetCycleEdit(cycle.ToolID, &cycle.ID, true),
 					EditAdminOnly:   true,
-					DeleteHref:      helpers.URLDeleteCycle(cycle.ID, cycle.ToolID),
+					DeleteHref:      helpers.HXDeleteCycle(cycle.ID, cycle.ToolID),
 					DeleteAdminOnly: true,
 					User:            props.User,
 				})

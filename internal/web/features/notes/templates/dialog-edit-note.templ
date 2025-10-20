@@ -16,17 +16,17 @@ templ DialogEditNote(props DialogEditNoteProps) {
 	{{
 		baseType := "POST"
 		submitButtonText := "Erstellen"
-		baseHref := helpers.URLPostNotesEdit(props.LinkToTables...)
+		baseHref := helpers.HXPostNotesEdit(props.LinkToTables...)
 
 		if props.Note.ID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = helpers.URLPutNotesEdit(props.Note.ID, props.LinkToTables...)
+			baseHref = helpers.HXPutNotesEdit(props.Note.ID, props.LinkToTables...)
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
 		Type:             baseType,
-		Href:             templ.URL(baseHref),
+		Href:             baseHref,
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: submitButtonText,
 	}) {

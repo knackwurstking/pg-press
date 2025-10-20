@@ -352,15 +352,9 @@ func regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user *
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-				EditHref: fmt.Sprintf(
-					"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-					env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
-				),
-				EditAdminOnly: false,
-				DeleteHref: fmt.Sprintf(
-					"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
-					env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
-				),
+				EditHref:        helpers.HXGetToolRegenerationEdit(regen.GetTool().ID, &regen.ID),
+				EditAdminOnly:   false,
+				DeleteHref:      helpers.HXDeleteToolRegeneration(regen.GetTool().ID, regen.ID),
 				DeleteAdminOnly: true,
 				User:            user,
 			}).Render(ctx, templ_7745c5c3_Buffer)
@@ -418,9 +412,9 @@ func cyclesSection(props CyclesProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.URLGetCycleEdit(props.Tool.ID, nil, false))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetCycleEdit(props.Tool.ID, nil, false))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 145, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 139, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -454,7 +448,7 @@ func cyclesSection(props CyclesProps) templ.Component {
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s %s",
 			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 161, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 155, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -577,7 +571,7 @@ func cycleRowWithPartialCalc(
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PressNumber))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 221, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 215, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -590,7 +584,7 @@ func cycleRowWithPartialCalc(
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format(constants.DateFormat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 224, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 218, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -603,7 +597,7 @@ func cycleRowWithPartialCalc(
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 227, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 221, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -616,7 +610,7 @@ func cycleRowWithPartialCalc(
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PartialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 231, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 225, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -627,15 +621,9 @@ func cycleRowWithPartialCalc(
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-			EditHref: fmt.Sprintf(
-				"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-				env.ServerPathPrefix, cycle.ID, props.Tool.ID,
-			),
-			EditAdminOnly: true,
-			DeleteHref: fmt.Sprintf(
-				"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-				env.ServerPathPrefix, cycle.ID, props.Tool.ID,
-			),
+			EditHref:        helpers.HXGetCycleEdit(props.Tool.ID, &cycle.ID, false),
+			EditAdminOnly:   true,
+			DeleteHref:      helpers.HXDeleteCycle(cycle.ID, props.Tool.ID),
 			DeleteAdminOnly: true,
 			User:            props.User,
 		}).Render(ctx, templ_7745c5c3_Buffer)

@@ -36,7 +36,7 @@ templ NoteCard(note *models.Note) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ helpers.URLGetNotesEdit(&note.ID, note.Linked) }
+					hx-get={ helpers.HXGetNotesEdit(&note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -47,7 +47,7 @@ templ NoteCard(note *models.Note) {
 				</button>
 				<button
 					class="icon small destructive"
-					hx-delete={ helpers.URLDeleteNote(note.ID) }
+					hx-delete={ helpers.HXDeleteNote(note.ID) }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"

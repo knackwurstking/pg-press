@@ -44,12 +44,12 @@ func DialogEditMetalSheet(props *DialogEditMetalSheetProps) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 
 		baseType := "POST"
-		baseHref := helpers.URLPostMetalSheetEdit(props.Tool.ID)
+		baseHref := helpers.HXPostMetalSheetEdit(props.Tool.ID)
 		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
-			baseHref = helpers.URLPutMetalSheetEdit(props.MetalSheet.ID)
+			baseHref = helpers.HXPutMetalSheetEdit(props.MetalSheet.ID)
 			submitButtonText = "Aktualisieren"
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -85,7 +85,7 @@ func DialogEditMetalSheet(props *DialogEditMetalSheetProps) templ.Component {
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
 			ID:               "metal-sheet-edit-dialog",
 			Type:             baseType,
-			Href:             templ.URL(baseHref),
+			Href:             baseHref,
 			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

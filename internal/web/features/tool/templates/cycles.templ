@@ -120,15 +120,9 @@ templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user 
 			</td>
 			<td>
 				@components.TableActions(components.TableActionsOptions{
-					EditHref: fmt.Sprintf(
-						"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-						env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
-					),
-					EditAdminOnly: false,
-					DeleteHref: fmt.Sprintf(
-						"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
-						env.ServerPathPrefix, regen.GetTool().ID, regen.ID,
-					),
+					EditHref:        helpers.HXGetToolRegenerationEdit(regen.GetTool().ID, &regen.ID),
+					EditAdminOnly:   false,
+					DeleteHref:      helpers.HXDeleteToolRegeneration(regen.GetTool().ID, regen.ID),
 					DeleteAdminOnly: true,
 					User:            user,
 				})
@@ -142,7 +136,7 @@ templ cyclesSection(props CyclesProps) {
 		@components.SectionTitle(components.TitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ helpers.URLGetCycleEdit(props.Tool.ID, nil, false) }
+				hx-get={ helpers.HXGetCycleEdit(props.Tool.ID, nil, false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -233,15 +227,9 @@ templ cycleRowWithPartialCalc(
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref: fmt.Sprintf(
-					"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
-				),
-				EditAdminOnly: true,
-				DeleteHref: fmt.Sprintf(
-					"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
-				),
+				EditHref:        helpers.HXGetCycleEdit(props.Tool.ID, &cycle.ID, false),
+				EditAdminOnly:   true,
+				DeleteHref:      helpers.HXDeleteCycle(cycle.ID, props.Tool.ID),
 				DeleteAdminOnly: true,
 				User:            props.User,
 			})
