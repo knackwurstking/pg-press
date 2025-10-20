@@ -1,4 +1,3 @@
-// TODO: Split this stuff up into multiple files, a bit more
 package helpers
 
 import (
@@ -66,13 +65,6 @@ func HXGetToolCyclesSectionContent(toolID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/cycles?tool_id=%d",
 		env.ServerPathPrefix, toolID,
-	))
-}
-
-func HXGetToolsPagePressSectionContent() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/section/press",
-		env.ServerPathPrefix,
 	))
 }
 
@@ -149,83 +141,6 @@ func HXPutToolStatus() templ.SafeURL {
 func HXGetToolStatusDisplay(toolID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/status-display?id=%d",
-		env.ServerPathPrefix, toolID,
-	))
-}
-
-func HXGetPressNotesSectionContent(pressNumber models.PressNumber) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/press/%d/notes",
-		env.ServerPathPrefix, pressNumber,
-	))
-}
-
-func HXGetPressActiveToolsSectionContent(pressNumber models.PressNumber) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/press/%d/active-tools",
-		env.ServerPathPrefix, pressNumber,
-	))
-}
-
-func HXGetPressMetalSheetsSectionContent(pressNumber models.PressNumber) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/press/%d/metal-sheets",
-		env.ServerPathPrefix, pressNumber,
-	))
-}
-
-func HXGetPressCyclesSectionContent(pressNumber models.PressNumber) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/press/%d/cycles",
-		env.ServerPathPrefix, pressNumber,
-	))
-}
-
-func HXGetPressCycleSummaryPDF(pressNumber models.PressNumber) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/press/%d/cycle-summary-pdf",
-		env.ServerPathPrefix, pressNumber,
-	))
-}
-
-func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeURL {
-	if regenerationID == nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/tools/tool/%d/edit-regeneration",
-			env.ServerPathPrefix, toolID,
-		))
-	}
-
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, *regenerationID,
-	))
-}
-
-func HXPutToolRegenerationEdit(toolID int64, regenerationID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, regenerationID,
-	))
-}
-
-func HXDeleteToolRegeneration(toolID int64, regenerationID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, regenerationID,
-	))
-}
-
-func HXPatchToolBind(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/bind",
-		env.ServerPathPrefix, toolID,
-	))
-}
-
-func HXPatchToolUnbind(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/unbind",
 		env.ServerPathPrefix, toolID,
 	))
 }
