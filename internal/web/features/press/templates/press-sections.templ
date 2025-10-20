@@ -18,8 +18,6 @@ type PressNotesSectionProps struct {
 }
 
 // PressNotesSection renders the notes section for all tools on a press
-// TODO: Split into separate functions for press and tool notes
-// TODO: Move sorting logic to a separate (helper) function
 templ PressNotesSection(props PressNotesSectionProps) {
 	{{
 		pressNotes := make([]*models.Note, 0)
@@ -32,10 +30,17 @@ templ PressNotesSection(props PressNotesSectionProps) {
 			}
 		}
 	}}
-	if len(pressNotes) > 0 {
+	@pressNotesSection(pressNotes, props.Press)
+	if len(toolNotes) > 0 {
+		@toolNotesSection(toolNotes, props.Tools)
+	}
+}
+
+templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
+	if len(notes) > 0 {
 		// Press Notes
 		<section class="notes-list flex flex-col gap-lg p">
-			for _, note := range pressNotes {
+			for _, note := range notes {
 				@components.NoteCard(note)
 			}
 		</section>
@@ -43,7 +48,7 @@ templ PressNotesSection(props PressNotesSectionProps) {
 			<button
 				class="primary"
 				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d",
-					env.ServerPathPrefix, props.Press) }
+					env.ServerPathPrefix, press) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -61,7 +66,7 @@ templ PressNotesSection(props PressNotesSectionProps) {
 			<button
 				class="primary"
 				hx-get={ fmt.Sprintf("%s/htmx/notes/edit?link_to_tables=press_%d",
-					env.ServerPathPrefix, props.Press) }
+					env.ServerPathPrefix, press) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -73,16 +78,18 @@ templ PressNotesSection(props PressNotesSectionProps) {
 			</button>
 		</section>
 	}
-	if len(toolNotes) > 0 {
-		<section class="notes-list flex flex-col gap-lg p">
-			{{
+}
+
+templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
+	<section class="notes-list flex flex-col gap-lg p">
+		{{
 				topToolNotes := make([]*models.Note, 0)
 				topCassetteToolNotes := make([]*models.Note, 0)
 				bottomToolNotes := make([]*models.Note, 0)
-				for _, n := range toolNotes {
+				for _, n := range notes {
 					sID, _ := strings.CutPrefix(n.Linked, "tool_")
 					id, _ := strconv.ParseInt(sID, 10, 64)
-					for _, t := range props.Tools {
+					for _, t := range tools {
 						if t.ID != id {
 							continue
 						}
@@ -97,27 +104,26 @@ templ PressNotesSection(props PressNotesSectionProps) {
 						}
 					}
 				}
-			}}
-			if len(topToolNotes) > 0 {
-				<h4>{ models.PositionTop.GermanString() }</h4>
-				for _, n := range topToolNotes {
-					@components.NoteCard(n)
-				}
+		}}
+		if len(topToolNotes) > 0 {
+			<h4>{ models.PositionTop.GermanString() }</h4>
+			for _, n := range topToolNotes {
+				@components.NoteCard(n)
 			}
-			if len(topCassetteToolNotes) > 0 {
-				<h4>{ models.PositionTopCassette.GermanString() }</h4>
-				for _, n := range topCassetteToolNotes {
-					@components.NoteCard(n)
-				}
+		}
+		if len(topCassetteToolNotes) > 0 {
+			<h4>{ models.PositionTopCassette.GermanString() }</h4>
+			for _, n := range topCassetteToolNotes {
+				@components.NoteCard(n)
 			}
-			if len(bottomToolNotes) > 0 {
-				<h4>{ models.PositionBottom.GermanString() }</h4>
-				for _, n := range bottomToolNotes {
-					@components.NoteCard(n)
-				}
+		}
+		if len(bottomToolNotes) > 0 {
+			<h4>{ models.PositionBottom.GermanString() }</h4>
+			for _, n := range bottomToolNotes {
+				@components.NoteCard(n)
 			}
-		</section>
-	}
+		}
+	</section>
 }
 
 // PressActiveToolsSection renders the active tools section content for HTMX
