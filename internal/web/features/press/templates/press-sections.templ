@@ -238,45 +238,19 @@ templ renderPressCycleRow(cycle *models.Cycle, props PressCyclesSectionProps) {
 		// Actions
 		<td>
 			<span class="button-group flex justify-end items-center">
-				// HTMX Button: Edit cycle entry dialog
-				// TODO: Use table actions component here
-				<button
-					class="icon small ghost"
-					hx-get={ fmt.Sprintf(
+				@components.TableActions(components.TableActionsOptions{
+					EditHref: fmt.Sprintf(
 						"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d&tool_change_mode=true",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
-					) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					title="Bearbeiten"
-					if !props.User.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-pencil"></i>
-				</button>
-				// HTMX Button: Delete cycle from database table and reload section
-				<button
-					class="icon destructive small ghost"
-					hx-delete={ fmt.Sprintf(
+					),
+					EditAdminOnly: true,
+					DeleteHref: fmt.Sprintf(
 						"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
 						env.ServerPathPrefix, cycle.ID, cycle.ToolID,
-					) }
-					hx-trigger="click"
-					hx-swap="none"
-					hx-confirm={ fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
-						cycle.TotalCycles) }
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-					hx-on:htmx:after-request="window.location.reload();"
-					title="Löschen"
-					if !props.User.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-trash"></i>
-				</button>
+					),
+					DeleteAdminOnly: true,
+					User:            props.User,
+				})
 			</span>
 		</td>
 	</tr>
