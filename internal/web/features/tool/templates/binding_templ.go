@@ -15,7 +15,14 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, isAdmin bool, err error) templ.Component {
+type BindingSectionProps struct {
+	Tool            *models.ResolvedTool
+	ToolsForBinding []*models.Tool
+	IsAdmin         bool
+	Error           error
+}
+
+func BindingSection(props BindingSectionProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,7 +45,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		ctx = templ.ClearChildren(ctx)
 
 		var positionForBinding models.Position
-		if tool.Position == models.PositionTop {
+		if props.Tool.Position == models.PositionTop {
 			positionForBinding = models.PositionTopCassette
 		} else {
 			positionForBinding = models.PositionTop
@@ -55,7 +62,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !isAdmin {
+		if !props.IsAdmin {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -69,10 +76,10 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 			"%s/htmx/tools/tool/%d/bind",
 			env.ServerPathPrefix,
-			tool.ID,
+			props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 33, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 40, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -82,7 +89,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Binding != nil {
+		if props.Tool.Binding != nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -92,7 +99,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Binding == nil {
+		if props.Tool.Binding == nil {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " selected")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -105,7 +112,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(positionForBinding.GermanString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 48, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 55, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -115,7 +122,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, t := range toolsForBinding {
+		for _, t := range props.ToolsForBinding {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -123,7 +130,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(t.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 53, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 60, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -133,7 +140,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if tool.Binding != nil && t.ID == *tool.Binding {
+			if props.Tool.Binding != nil && t.ID == *props.Tool.Binding {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " selected")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -146,7 +153,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(t.Code)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 55, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 62, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -159,7 +166,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(t.Type)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 55, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 62, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -178,10 +185,10 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
 			"%s/htmx/tools/tool/%d/unbind",
 			env.ServerPathPrefix,
-			tool.ID,
+			props.Tool.ID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 64, Col: 4}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/binding.templ`, Line: 71, Col: 4}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -191,7 +198,7 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !tool.IsBound() {
+		if !props.Tool.IsBound() {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -201,14 +208,14 @@ func BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, i
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.IsBound() {
+		if props.Tool.IsBound() {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.ToolAnchor(
-				models.NewResolvedTool(tool.GetBindingTool(),
-					tool.Tool, tool.GetNotes()),
+				models.NewResolvedTool(props.Tool.GetBindingTool(),
+					props.Tool.Tool, props.Tool.GetNotes()),
 				nil,
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

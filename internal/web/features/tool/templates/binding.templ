@@ -7,10 +7,17 @@ import (
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
-templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, isAdmin bool, err error) {
+type BindingSectionProps struct {
+	Tool            *models.ResolvedTool
+	ToolsForBinding []*models.Tool
+	IsAdmin         bool
+	Error           error
+}
+
+templ BindingSection(props BindingSectionProps) {
 	{{
 		var positionForBinding models.Position
-		if tool.Position == models.PositionTop {
+		if props.Tool.Position == models.PositionTop {
 			positionForBinding = models.PositionTopCassette
 		} else {
 			positionForBinding = models.PositionTop
@@ -20,7 +27,7 @@ templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, 
 		@components.SectionTitle(components.TitleLevelSub, "Werkzeuge Binden")
 		<span
 			class="flex gap flex-wrap"
-			if !isAdmin {
+			if !props.IsAdmin {
 				disabled
 			}
 		>
@@ -29,29 +36,29 @@ templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, 
 				hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/bind",
 				env.ServerPathPrefix,
-				tool.ID,
+				props.Tool.ID,
 			) }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if tool.Binding != nil {
+				if props.Tool.Binding != nil {
 					disabled
 				}
 			>
 				<option
 					value=""
 					disabled
-					selected?={ tool.Binding == nil }
+					selected?={ props.Tool.Binding == nil }
 				>
 					{ positionForBinding.GermanString() } Binden
 				</option>
 				// Render options, all top tools unbound
-				for _, t := range toolsForBinding {
+				for _, t := range props.ToolsForBinding {
 					<option
 						value={ t.ID }
-						selected?={ tool.Binding != nil && t.ID == *tool.Binding }
+						selected?={ props.Tool.Binding != nil && t.ID == *props.Tool.Binding }
 					>{ t.Code } { t.Type }</option>
 				}
 			</select>
@@ -60,25 +67,25 @@ templ BindingSection(tool *models.ResolvedTool, toolsForBinding []*models.Tool, 
 				hx-patch={ fmt.Sprintf(
 				"%s/htmx/tools/tool/%d/unbind",
 				env.ServerPathPrefix,
-				tool.ID,
+				props.Tool.ID,
 			) }
 				hx-trigger="click"
 				hx-trigger="change"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if !tool.IsBound() {
+				if !props.Tool.IsBound() {
 					disabled
 				}
 			>
 				Entbinden
 			</button>
 		</span>
-		if tool.IsBound() {
+		if props.Tool.IsBound() {
 			<span>
 				@components.ToolAnchor(
-					models.NewResolvedTool(tool.GetBindingTool(),
-						tool.Tool, tool.GetNotes()),
+					models.NewResolvedTool(props.Tool.GetBindingTool(),
+						props.Tool.Tool, props.Tool.GetNotes()),
 					nil,
 				)
 			</span>
