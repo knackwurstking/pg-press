@@ -119,7 +119,11 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get metal sheets for press")
 	}
 
-	metalSheetsSection := templates.MetalSheetsSection(metalSheets, toolsMap, press)
+	metalSheetsSection := templates.MetalSheetsSection(templates.MetalSheetSectionProps{
+		MetalSheets: metalSheets,
+		ToolsMap:    toolsMap,
+		Press:       press,
+	})
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render metal sheets section: "+err.Error())
 	}

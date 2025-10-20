@@ -135,17 +135,23 @@ templ PressActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
 	</div>
 }
 
+type MetalSheetSectionProps struct {
+	MetalSheets []*models.MetalSheet
+	ToolsMap    map[int64]*models.Tool
+	Press       models.PressNumber
+}
+
 // MetalSheetsSection renders the metal sheets section content for HTMX
-templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, press models.PressNumber) {
-	{{ expectedMachineType := models.GetMachineTypeForPress(press) }}
+templ MetalSheetsSection(props MetalSheetSectionProps) {
+	{{ expectedMachineType := models.GetMachineTypeForPress(props.Press) }}
 	<div class="flex flex-col gap-sm">
 		<div class="text-center">
 			<small class="text-muted">
 				Zeigt nur Bleche für { expectedMachineType.DisplayName() }
-				(Presse { fmt.Sprintf("%d", press) })
+				(Presse { fmt.Sprintf("%d", props.Press) })
 			</small>
 		</div>
-		@MetalSheetTablesCollapsible(metalSheets, toolsMap)
+		@MetalSheetTablesCollapsible(props.MetalSheets, props.ToolsMap)
 	</div>
 }
 
@@ -187,7 +193,7 @@ templ renderPressCyclesRows(props PressCyclesSectionProps) {
 		</tr>
 	} else {
 		for _, cycle := range props.Cycles {
-			@renderPressCycleRow(cycle, props.ToolsMap, props.User)
+			@renderPressCycleRow(cycle, props)
 		}
 	}
 }
@@ -197,7 +203,7 @@ templ renderPressCyclesRows(props PressCyclesSectionProps) {
 // 	- Create URL builder helper functions
 //	- Extract button rendering to a separate component
 //	- Consolidate permission checks
-templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
+templ renderPressCycleRow(cycle *models.Cycle, props PressCyclesSectionProps) {
 	<tr>
 		// Cycle Date
 		<td>
@@ -205,7 +211,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 		</td>
 		// Cycle Tool
 		<td>
-			{{ tool, exists := toolsMap[cycle.ToolID] }}
+			{{ tool, exists := props.ToolsMap[cycle.ToolID] }}
 			if exists && tool != nil {
 				<span class="text-xs">
 					{ fmt.Sprintf("%s %s %s",
@@ -233,6 +239,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 		<td>
 			<span class="button-group flex justify-end items-center">
 				// HTMX Button: Edit cycle entry dialog
+				// TODO: Use table actions component here
 				<button
 					class="icon small ghost"
 					hx-get={ fmt.Sprintf(
@@ -244,7 +251,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 					hx-swap="beforeend"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					title="Bearbeiten"
-					if !user.IsAdmin() {
+					if !props.User.IsAdmin() {
 						disabled
 					}
 				>
@@ -264,7 +271,7 @@ templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, 
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
 					hx-on:htmx:after-request="window.location.reload();"
 					title="Löschen"
-					if !user.IsAdmin() {
+					if !props.User.IsAdmin() {
 						disabled
 					}
 				>
