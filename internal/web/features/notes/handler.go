@@ -216,10 +216,8 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 		return h.RenderBadRequest(c, "failed to parse note ID: "+err.Error())
 	}
 
-	h.Log.Debug("User %s deleting note %d", user.Name, noteID)
-
 	// Delete the note
-	if err := h.DB.Notes.Delete(noteID, user); err != nil {
+	if err := h.DB.Notes.Delete(noteID); err != nil {
 		return h.HandleError(c, err, "failed to delete note")
 	}
 

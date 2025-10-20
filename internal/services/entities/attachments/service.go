@@ -19,16 +19,15 @@ type Service struct {
 func NewService(db *sql.DB) *Service {
 	base := base.NewBaseService(db, "Attachments")
 
-	query := `
-		CREATE TABLE IF NOT EXISTS attachments (
+	if err := base.CreateTable(
+		`CREATE TABLE IF NOT EXISTS attachments (
 			id INTEGER NOT NULL,
 			mime_type TEXT NOT NULL,
 			data BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
-	if err := base.CreateTable(query, "attachments"); err != nil {
+		);`,
+		"attachments",
+	); err != nil {
 		panic(err)
 	}
 
@@ -38,10 +37,7 @@ func NewService(db *sql.DB) *Service {
 }
 
 func (a *Service) List() ([]*models.Attachment, error) {
-	a.Log.Debug("Listing attachments")
-
-	query := `SELECT id, mime_type, data FROM attachments ORDER BY id ASC`
-	rows, err := a.DB.Query(query)
+	rows, err := a.DB.Query(`SELECT id, mime_type, data FROM attachments ORDER BY id ASC`)
 	if err != nil {
 		return nil, a.HandleSelectError(err, "attachments")
 	}
@@ -61,11 +57,9 @@ func (a *Service) Get(id int64) (*models.Attachment, error) {
 		return nil, err
 	}
 
-	a.Log.Debug("Getting attachment: %d", id)
+	a.Log.Debug("Getting attachment for ID: %d", id)
 
-	query := `SELECT id, mime_type, data FROM attachments WHERE id = ?`
-	row := a.DB.QueryRow(query, id)
-
+	row := a.DB.QueryRow(`SELECT id, mime_type, data FROM attachments WHERE id = ?`, id)
 	attachment, err := scanner.ScanSingleRow(row, scanAttachment, "attachments")
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/interfaces"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
@@ -110,17 +109,4 @@ func (b *BaseService) ExecuteInTransaction(fn func(tx *sql.Tx) error) error {
 
 	err = fn(tx)
 	return err
-}
-
-// ScanEntity provides a generic way to scan database rows into structs
-func (b *BaseService) ScanEntity(scanner interfaces.Scannable, dest ...interface{}) error {
-	return scanner.Scan(dest...)
-}
-
-// PrepareNullableString converts empty strings to nil for database storage
-func (b *BaseService) PrepareNullableString(value string) interface{} {
-	if value == "" {
-		return nil
-	}
-	return value
 }

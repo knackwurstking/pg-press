@@ -4,6 +4,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
+	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
 const (
@@ -44,6 +47,18 @@ func NewNoteLinked(l Level, message string, linked string) *Note {
 		CreatedAt: time.Now(),
 		Linked:    linked,
 	}
+}
+
+func (n *Note) Validate() error {
+	if err := validation.ValidateNotEmpty(n.Content, "content"); err != nil {
+		return err
+	}
+
+	if n.Level < 0 {
+		return utils.NewValidationError("level must be non-negative")
+	}
+
+	return nil
 }
 
 // Important returns true if the note level is ATTENTION or BROKEN

@@ -10,7 +10,7 @@ import (
 // NotesService defines the interface for notes service methods used by Tools
 type NotesService interface {
 	Add(note *models.Note) (int64, error)
-	Delete(id int64, user *models.User) error
+	Delete(id int64) error
 	GetByTool(toolID int64) ([]*models.Note, error)
 }
 
