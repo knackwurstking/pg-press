@@ -9,7 +9,6 @@ import (
 )
 
 // Individual modification entry with rollback functionality
-// TODO: Mark current and disable rollback button
 templ ModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
 	<div class="card seamless p mb">
 		<div class="flex flex-col gap mb">

@@ -17,8 +17,6 @@ const (
 	IDToolsFilter = "tools-filter"
 )
 
-// TODO: Skip top cassette tools which are bound to an top tool
-// TODO: Show Cassette info for each top tool which have a binding
 func SectionTools(tools []*models.ResolvedTool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -47,7 +45,7 @@ func SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/tools")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 16, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 14, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -68,7 +66,7 @@ func SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/edit")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 33, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 31, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -122,7 +120,7 @@ func sectionToolsFilter(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 56, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 54, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -163,7 +161,7 @@ func sectionToolsFilterScript() templ.Component {
 		}
 		templ_7745c5c3_Var7, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 74, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 72, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -175,7 +173,7 @@ func sectionToolsFilterScript() templ.Component {
 		}
 		templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 94, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 92, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -187,7 +185,7 @@ func sectionToolsFilterScript() templ.Component {
 		}
 		templ_7745c5c3_Var9, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 112, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-tools.templ`, Line: 110, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
