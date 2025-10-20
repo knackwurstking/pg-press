@@ -11,35 +11,59 @@ CYAN='\033[0;36m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Define the pages we want to track
+# Define the pages we want to track (without /pg-press prefix)
 TRACKED_PAGES=(
-    "/pg-press/"
-    "/pg-press/feed"
-    "/pg-press/profile"
-    "/pg-press/editor"
-    "/pg-press/help"
-    "/pg-press/trouble-reports"
-    "/pg-press/notes"
-    "/pg-press/tools"
+    "/"
+    "/feed"
+    "/profile"
+    "/editor"
+    "/help"
+    "/trouble-reports"
+    "/notes"
+    "/tools"
 )
 
 # Function to check if a path should be tracked
 is_tracked_page() {
     local path="$1"
-    # Remove /pg-press prefix if present
+    # Remove /pg-press prefix if present (handle both with and without trailing slash)
     local clean_path="${path#/pg-press}"
 
-    # Handle root path special case
-    if [[ "$clean_path" == "/" ]] || [[ "$path" == "/pg-press/" ]]; then
-        return 0
+    # If nothing was removed or only "/" remains, it's the root
+    if [[ -z "$clean_path" ]] || [[ "$clean_path" == "/" ]]; then
+        clean_path="/"
     fi
 
-    # Check other paths
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${YELLOW}[DEBUG] is_tracked_page: original path='$path', clean_path='$clean_path'${NC}" >&2
+    fi
+
+    # Check if the clean path matches any tracked page
     for page in "${TRACKED_PAGES[@]}"; do
-        if [[ "$page" != "/" ]] && [[ "$clean_path" == "$page"* ]]; then
-            return 0
+        if [[ "$DEBUG" == true ]]; then
+            echo -e "${YELLOW}[DEBUG] is_tracked_page: checking against tracked page='$page'${NC}" >&2
+        fi
+        if [[ "$page" == "/" ]]; then
+            # Root path special case
+            if [[ "$clean_path" == "/" ]]; then
+                if [[ "$DEBUG" == true ]]; then
+                    echo -e "${GREEN}[DEBUG] is_tracked_page: MATCHED root path${NC}" >&2
+                fi
+                return 0
+            fi
+        else
+            # For non-root paths, check if clean_path starts with the tracked page
+            if [[ "$clean_path" == "$page" ]] || [[ "$clean_path" == "$page/"* ]]; then
+                if [[ "$DEBUG" == true ]]; then
+                    echo -e "${GREEN}[DEBUG] is_tracked_page: MATCHED '$page'${NC}" >&2
+                fi
+                return 0
+            fi
         fi
     done
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${RED}[DEBUG] is_tracked_page: NO MATCH found${NC}" >&2
+    fi
     return 1
 }
 
@@ -62,17 +86,8 @@ parse_log_line() {
 
     # Extract components using regex
     # Pattern: ✅ DATE TIME [Server] STATUS METHOD PATH (IP) DURATION User{ID: NUM, Name: NAME}
-    # Define regex separately to avoid bash parsing issues
-    # Account for emoji prefix (✅, ❌, etc.) at the beginning of lines
-    local prefix_pattern='[^[:space:]]+ '
-    local date_pattern='([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})'
-    local server_pattern='\[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+'
-    local path_pattern='([^[:space:]]+)'
-    local ip_pattern=' \(([^)]+)\)'
-    local duration_pattern=' ([^[:space:]]+)'
-    local user_pattern=' User\{ID: ([0-9]+), Name: ([^}]+)\}'
-
-    local full_regex="${prefix_pattern}${date_pattern}.*${server_pattern}${path_pattern}${ip_pattern}${duration_pattern}${user_pattern}"
+    # Using a simpler, more explicit regex pattern
+    local full_regex='^.+ ([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) \[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+([^[:space:]]+) \(([^)]+)\) ([^[:space:]]+) User\{ID: ([0-9]+), Name: ([^}]+)\}$'
 
     if [[ "$DEBUG" == true ]]; then
         echo -e "${YELLOW}[DEBUG] Regex: ${NC}$full_regex"
