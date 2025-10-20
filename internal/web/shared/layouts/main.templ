@@ -12,6 +12,10 @@ type MainOptions struct {
 	NavContent     templ.Component
 }
 
+// TODO: Split into separate functions
+// 	- Move JavaScript code to external script files or separate script components
+// 	- Extract meta tag generation into a dedicated component
+// 	- Create a separate PWA manifest component
 templ Main(options MainOptions) {
 	<!DOCTYPE html>
 	<html lang="de">

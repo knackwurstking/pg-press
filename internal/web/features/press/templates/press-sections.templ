@@ -12,6 +12,8 @@ import (
 )
 
 // PressNotesSection renders the notes section for all tools on a press
+// TODO: Split into separate functions for press and tool notes
+// TODO: Move sorting logic to a separate (helper) function
 templ PressNotesSection(notes []*models.Note, tools []*models.Tool, press models.PressNumber) {
 	{{
 		pressNotes := make([]*models.Note, 0)
@@ -176,6 +178,10 @@ templ renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.T
 }
 
 // renderCycleRow renders a single cycle table row
+// TODO: Split into separate functions
+// 	- Create URL builder helper functions
+//	- Extract button rendering to a separate component
+//	- Consolidate permission checks
 templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
 	<tr>
 		// Cycle Date

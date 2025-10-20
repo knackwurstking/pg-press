@@ -13,6 +13,10 @@ type DialogEditMetalSheetProps struct {
 	Tool       *models.Tool
 }
 
+// TODO: Split into separate functions
+// 	-Create a form field component that handles the value binding
+// 	- Extract common input field rendering logic
+// 	- Use a map/configuration object for field definitions
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
 		var (
