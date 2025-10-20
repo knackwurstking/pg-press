@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -34,38 +35,19 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 								<span class="badge small">{ sheet.Identifier.String() }</span>
 							</td>
 							<td class="button-group flex justify-end items-center">
-								<button
-									class="icon primary small ghost"
-									hx-get={ fmt.Sprintf(
+								@components.TableActions(components.TableActionsOptions{
+									EditHref: fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Bearbeiten"
-								>
-									<i class="bi bi-pencil"></i>
-								</button>
-								<button
-									class="icon destructive small ghost"
-									hx-delete={ fmt.Sprintf(
+									),
+									EditAdminOnly: false,
+									DeleteHref: fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d",
 										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Löschen"
-									if !user.IsAdmin() {
-										disabled
-									}
-								>
-									<i class="bi bi-trash"></i>
-								</button>
+									),
+									DeleteAdminOnly: true,
+									User:            user,
+								})
 							</td>
 						</tr>
 					}
@@ -108,37 +90,18 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 								<span class="badge small">{ sheet.Identifier.String() }</span>
 							</td>
 							<td class="button-group flex justify-end items-center">
-								<button
-									class="icon primary small ghost"
-									hx-get={ fmt.Sprintf(
+								@components.TableActions(components.TableActionsOptions{
+									EditHref: fmt.Sprintf(
 										"%s/htmx/metal-sheets/edit?id=%d",
 										env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-target="body"
-									hx-swap="beforeend"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Bearbeiten"
-								>
-									<i class="bi bi-pencil"></i>
-								</button>
-								<button
-									class="icon destructive small ghost"
-									hx-delete={ fmt.Sprintf(
+									),
+									EditAdminOnly: false,
+									DeleteHref: fmt.Sprintf(
 										"%s/htmx/metal-sheets/delete?id=%d", env.ServerPathPrefix, sheet.ID,
-									) }
-									hx-trigger="click"
-									hx-confirm="Sind Sie sicher, dass Sie dieses Blech löschen möchten?"
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-									title="Löschen"
-									if !user.IsAdmin() {
-										disabled
-									}
-								>
-									<i class="bi bi-trash"></i>
-								</button>
+									),
+									DeleteAdminOnly: true,
+									User:            user,
+								})
 							</td>
 						</tr>
 					}

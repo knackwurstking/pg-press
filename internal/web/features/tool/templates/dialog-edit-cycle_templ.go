@@ -109,7 +109,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tool.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 64, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 62, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {
@@ -149,7 +149,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s%s", tool.Code, tool.Format.String(), statusText))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 82, Col: 76}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 80, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -172,7 +172,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.Tool.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 89, Col: 89}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 87, Col: 89}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -191,7 +191,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 97, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 95, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -204,7 +204,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Tool.Position.GermanString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 100, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 98, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 119, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 117, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -265,7 +265,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 125, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 123, Col: 35}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -288,7 +288,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 136, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 134, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -306,7 +306,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(props.OriginalDate.Format(constants.DateFormat))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 138, Col: 60}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 136, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -329,7 +329,7 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.InputTotalCycles))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 153, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-cycle.templ`, Line: 151, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -362,12 +362,10 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
-			Type:                  baseType,
-			Href:                  templ.URL(baseHref),
-			ID:                    "cycle-edit-dialog",
-			SubmitButtonText:      submitButtonText,
-			Behavior:              "custom",
-			CustomWindowEventName: "visibilitychange",
+			Type:             baseType,
+			Href:             templ.URL(baseHref),
+			ID:               "cycle-edit-dialog",
+			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

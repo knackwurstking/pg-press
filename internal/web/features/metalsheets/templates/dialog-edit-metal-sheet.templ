@@ -34,12 +34,10 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		ID:                    "metal-sheet-edit-dialog",
-		Type:                  baseType,
-		Href:                  templ.URL(baseHref),
-		SubmitButtonText:      submitButtonText,
-		Behavior:              "custom",
-		CustomWindowEventName: "visibilitychange",
+		ID:               "metal-sheet-edit-dialog",
+		Type:             baseType,
+		Href:             templ.URL(baseHref),
+		SubmitButtonText: submitButtonText,
 	}) {
 		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
 		switch props.Tool.Position {

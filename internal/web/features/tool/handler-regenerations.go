@@ -62,6 +62,7 @@ func (h *Handler) HTMXPutEditRegeneration(c echo.Context) error {
 		return h.HandleError(c, err, "failed to update regeneration")
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -75,6 +76,7 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 		return h.HandleError(c, err, "failed to delete regeneration")
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 

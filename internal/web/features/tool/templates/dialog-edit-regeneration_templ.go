@@ -65,7 +65,7 @@ func DialogEditRegeneration(rr *models.ResolvedRegeneration) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(rr.GetTool().String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 31, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 29, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -78,7 +78,7 @@ func DialogEditRegeneration(rr *models.ResolvedRegeneration) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(rr.GetCycle().Date.Format(constants.DateFormat))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 32, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 30, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -91,7 +91,7 @@ func DialogEditRegeneration(rr *models.ResolvedRegeneration) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(rr.Reason)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 40, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/dialog-edit-regeneration.templ`, Line: 38, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -104,12 +104,10 @@ func DialogEditRegeneration(rr *models.ResolvedRegeneration) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
-			Type:                  baseType,
-			Href:                  templ.URL(baseHref),
-			ID:                    "regeneration-edit-dialog",
-			SubmitButtonText:      submitButtonText,
-			Behavior:              "custom",
-			CustomWindowEventName: "visibilitychange",
+			Type:             baseType,
+			Href:             templ.URL(baseHref),
+			ID:               "regeneration-edit-dialog",
+			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

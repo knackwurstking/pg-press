@@ -8,8 +8,6 @@ package dialogs
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "fmt"
-
 const (
 	DialogContentID = "dialog-content"
 )
@@ -23,9 +21,7 @@ type BaseProps struct {
 
 	Error string
 
-	// Dialog closing setup
-	Behavior              string // Behaviors: "reload", "custom"
-	CustomWindowEventName string // (defaults to dispatching the visibility change event)
+	ReloadOnSubmit bool
 }
 
 func Base(props BaseProps) templ.Component {
@@ -53,14 +49,8 @@ func Base(props BaseProps) templ.Component {
 		onclose := templ.ComponentScript{
 			Call: `this.remove();`,
 		}
-		switch props.Behavior {
-		case "reload":
-			onclose.Call = `this.remove(); window.location.reload();`
-		case "custom":
-			onclose.Call = fmt.Sprintf(`
-				this.remove();
-				window.dispatchEvent(new Event('%s'));
-			`, props.CustomWindowEventName)
+		if props.ReloadOnSubmit {
+			onclose.Call = `this.remove(); location.reload();`
 		}
 		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, onclose)
 		if templ_7745c5c3_Err != nil {
@@ -73,7 +63,7 @@ func Base(props BaseProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 39, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 29, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -100,7 +90,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Href)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 48, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 38, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -119,7 +109,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Href)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 51, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 41, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +132,7 @@ func Base(props BaseProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 63, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 53, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -168,7 +158,7 @@ func Base(props BaseProps) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubmitButtonText)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 89, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 79, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -180,7 +170,7 @@ func Base(props BaseProps) templ.Component {
 		}
 		templ_7745c5c3_Var8, templ_7745c5c3_Err := templruntime.ScriptContentInsideStringLiteral(props.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 94, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/dialogs/base.templ`, Line: 84, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {

@@ -62,12 +62,6 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 			baseHref = fmt.Sprintf("%s/htmx/notes/edit?id=%d&link_to_tables=%s",
 				env.ServerPathPrefix, props.Note.ID, strings.Join(props.LinkToTables, ","))
 		}
-
-		// NOTE: Skip dispatching the "pageLoaded" HTMX event and just reload the page
-		behavior := "custom"
-		if props.Reload {
-			behavior = "reload"
-		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -117,7 +111,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Note.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 85, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 77, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -150,7 +144,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(table)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 102, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 94, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -163,7 +157,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(table)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 105, Col: 14}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/notes/templates/dialog-edit-note.templ`, Line: 97, Col: 14}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -182,12 +176,10 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
-			Type:                  baseType,
-			Href:                  templ.URL(baseHref),
-			ID:                    "notes-edit-dialog",
-			SubmitButtonText:      submitButtonText,
-			Behavior:              behavior,
-			CustomWindowEventName: "visibilitychange",
+			Type:             baseType,
+			Href:             templ.URL(baseHref),
+			ID:               "notes-edit-dialog",
+			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -126,6 +126,7 @@ func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
 		}
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -178,6 +179,7 @@ func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
 		}
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -222,8 +224,8 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	}
 
 	// Set redirect header to tools page
-	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+"/tools")
-	return c.NoContent(http.StatusOK)
+	h.SetHXRedirect(c, "/tools")
+	return nil
 }
 
 func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {

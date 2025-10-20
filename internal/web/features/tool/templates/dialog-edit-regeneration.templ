@@ -20,12 +20,10 @@ templ DialogEditRegeneration(rr *models.ResolvedRegeneration) {
 		)
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		Type:                  baseType,
-		Href:                  templ.URL(baseHref),
-		ID:                    "regeneration-edit-dialog",
-		SubmitButtonText:      submitButtonText,
-		Behavior:              "custom",
-		CustomWindowEventName: "visibilitychange",
+		Type:             baseType,
+		Href:             templ.URL(baseHref),
+		ID:               "regeneration-edit-dialog",
+		SubmitButtonText: submitButtonText,
 	}) {
 		<section>
 			<p>Tool: { rr.GetTool().String() } </p>

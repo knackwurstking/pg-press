@@ -44,12 +44,10 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		Type:                  baseType,
-		Href:                  templ.URL(baseHref),
-		ID:                    "cycle-edit-dialog",
-		SubmitButtonText:      submitButtonText,
-		Behavior:              "custom",
-		CustomWindowEventName: "visibilitychange",
+		Type:             baseType,
+		Href:             templ.URL(baseHref),
+		ID:               "cycle-edit-dialog",
+		SubmitButtonText: submitButtonText,
 	}) {
 		<!-- Tool selection or display -->
 		if props.AllowToolChange && len(props.AvailableTools) > 0 {

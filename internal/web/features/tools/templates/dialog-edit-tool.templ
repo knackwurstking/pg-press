@@ -34,19 +34,12 @@ templ DialogEditTool(props *DialogEditToolProps) {
 			baseHref = fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, props.Tool.ID)
 			submitButtonText = "Aktualisieren"
 		}
-
-		behavior := "custom"
-		if props.ReloadPage {
-			behavior = "reload"
-		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		Type:                  baseType,
-		Href:                  templ.URL(baseHref),
-		ID:                    "tool-edit-dialog",
-		SubmitButtonText:      submitButtonText,
-		Behavior:              behavior,
-		CustomWindowEventName: "visibilitychange",
+		Type:             baseType,
+		Href:             templ.URL(baseHref),
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: submitButtonText,
 	}) {
 		<span class="flex flex-row gap flex-wrap justify-between items-center">
 			<span class="flex flex-col gap-0">

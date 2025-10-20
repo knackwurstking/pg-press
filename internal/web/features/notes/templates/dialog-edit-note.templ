@@ -34,20 +34,12 @@ templ DialogEditNote(props DialogEditNoteProps) {
 			baseHref = fmt.Sprintf("%s/htmx/notes/edit?id=%d&link_to_tables=%s",
 				env.ServerPathPrefix, props.Note.ID, strings.Join(props.LinkToTables, ","))
 		}
-
-		// NOTE: Skip dispatching the "pageLoaded" HTMX event and just reload the page
-		behavior := "custom"
-		if props.Reload {
-			behavior = "reload"
-		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
-		Type:                  baseType,
-		Href:                  templ.URL(baseHref),
-		ID:                    "notes-edit-dialog",
-		SubmitButtonText:      submitButtonText,
-		Behavior:              behavior,
-		CustomWindowEventName: "visibilitychange",
+		Type:             baseType,
+		Href:             templ.URL(baseHref),
+		ID:               "notes-edit-dialog",
+		SubmitButtonText: submitButtonText,
 	}) {
 		<!-- Level Selection -->
 		<label for="level" class="flex flex-col">

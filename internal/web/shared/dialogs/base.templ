@@ -1,7 +1,5 @@
 package dialogs
 
-import "fmt"
-
 const (
 	DialogContentID = "dialog-content"
 )
@@ -15,9 +13,7 @@ type BaseProps struct {
 
 	Error string
 
-	// Dialog closing setup
-	Behavior              string // Behaviors: "reload", "custom"
-	CustomWindowEventName string // (defaults to dispatching the visibility change event)
+	ReloadOnSubmit bool
 }
 
 templ Base(props BaseProps) {
@@ -25,14 +21,8 @@ templ Base(props BaseProps) {
 		onclose := templ.ComponentScript{
 			Call: `this.remove();`,
 		}
-		switch props.Behavior {
-		case "reload":
-			onclose.Call = `this.remove(); window.location.reload();`
-		case "custom":
-			onclose.Call = fmt.Sprintf(`
-				this.remove();
-				window.dispatchEvent(new Event('%s'));
-			`, props.CustomWindowEventName)
+		if props.ReloadOnSubmit {
+			onclose.Call = `this.remove(); location.reload();`
 		}
 	}}
 	<dialog

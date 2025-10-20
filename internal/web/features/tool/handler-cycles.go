@@ -244,6 +244,7 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -348,6 +349,7 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle update: %v", err)
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -397,6 +399,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle deletion: %v", err)
 	}
 
+	h.SetHXTrigger(c)
 	return nil
 }
 

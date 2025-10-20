@@ -2,7 +2,6 @@ package metalsheets
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/internal/services"
@@ -99,6 +98,7 @@ func (h *Handler) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the new metal sheet
 	h.createFeed(user, tool, metalSheet, "Blech erstellt")
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -146,6 +146,7 @@ func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the updated metal sheet showing changes
 	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
 
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -182,7 +183,9 @@ func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 
 	// Create feed entry for the deleted metal sheet
 	h.createFeed(user, tool, existingSheet, "Blech gelöscht")
-	return c.NoContent(http.StatusOK)
+
+	h.SetHXTrigger(c)
+	return nil
 }
 
 // createFeed creates a feed entry for metal sheet operations

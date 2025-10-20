@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
@@ -181,4 +182,12 @@ func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
 		return false
 	}
 	return boolValue
+}
+
+func (b *BaseHandler) SetHXTrigger(c echo.Context) {
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+}
+
+func (b *BaseHandler) SetHXRedirect(c echo.Context, path string) {
+	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+path)
 }

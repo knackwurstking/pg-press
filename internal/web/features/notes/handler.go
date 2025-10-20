@@ -151,8 +151,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
-	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -200,7 +199,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	h.SetHXTrigger(c)
 	return nil
 }
 
@@ -230,7 +229,7 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	h.SetHXTrigger(c)
 	return nil
 }
 

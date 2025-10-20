@@ -86,7 +86,7 @@ func TableActions(options TableActionsOptions) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"click\" hx-confirm=\"Diesen Eintrag löschen?\" hx-swap=\"none\" hx-on:htmx:after-request='\n\t\t\t\t\tif (event.detail.successful) {\n\t\t\t\t\t\twindow.dispatchEvent(new Event(\"visibilitychange\"));\n\t\t\t\t\t}\n\t\t\t\t' hx-on:htmx:response-error=\"\n\t\t\t\t\talert(event.detail.xhr.responseText);\n\t\t\t\t\" title=\"Löschen\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-trigger=\"click\" hx-confirm=\"Diesen Eintrag löschen?\" hx-swap=\"none\" hx-on:htmx:response-error=\"\n\t\t\t\t\talert(event.detail.xhr.responseText);\n\t\t\t\t\" title=\"Löschen\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
