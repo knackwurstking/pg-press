@@ -47,8 +47,16 @@ is_tracked_page() {
 parse_log_line() {
     local line="$1"
 
+    # Debug mode: show raw line
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${YELLOW}[DEBUG] Raw line: ${NC}$line"
+    fi
+
     # Skip non-request lines
     if [[ ! "$line" =~ \[Server\] ]]; then
+        if [[ "$DEBUG" == true ]]; then
+            echo -e "${YELLOW}[DEBUG] Skipped: No [Server] tag found${NC}"
+        fi
         return
     fi
 
@@ -56,8 +64,7 @@ parse_log_line() {
     # Pattern: ✅ DATE TIME [Server] STATUS METHOD PATH (IP) DURATION User{ID: NUM, Name: NAME}
     # Define regex separately to avoid bash parsing issues
     # Account for emoji prefix (✅, ❌, etc.) at the beginning of lines
-    local prefix_pattern='.*'
-    #local prefix_pattern='[^[:space:]]+ '
+    local prefix_pattern='[^[:space:]]+ '
     local date_pattern='([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})'
     local server_pattern='\[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+'
     local path_pattern='([^[:space:]]+)'
@@ -66,6 +73,11 @@ parse_log_line() {
     local user_pattern=' User\{ID: ([0-9]+), Name: ([^}]+)\}'
 
     local full_regex="${prefix_pattern}${date_pattern}.*${server_pattern}${path_pattern}${ip_pattern}${duration_pattern}${user_pattern}"
+
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${YELLOW}[DEBUG] Regex: ${NC}$full_regex"
+        echo -e "${YELLOW}[DEBUG] Testing match...${NC}"
+    fi
 
     if [[ "$line" =~ $full_regex ]]; then
         local datetime="${BASH_REMATCH[1]}"
@@ -77,6 +89,11 @@ parse_log_line() {
         local user_id="${BASH_REMATCH[7]}"
         local user_name="${BASH_REMATCH[8]}"
 
+        if [[ "$DEBUG" == true ]]; then
+            echo -e "${GREEN}[DEBUG] Match found!${NC}"
+            echo -e "${YELLOW}[DEBUG] Extracted: datetime=$datetime, status=$status, method=$method, path=$path, user_id=$user_id, user_name=$user_name${NC}"
+        fi
+
         # Only process successful requests (200 status)
         if [[ "$status" == "200" ]] && is_tracked_page "$path"; then
             # Clean up the path for display
@@ -87,7 +104,11 @@ parse_log_line() {
 
             # Format output
             echo -e "${GREEN}[${datetime}]${NC} ${CYAN}User ID: ${user_id}${NC} | ${YELLOW}${user_name}${NC} | ${BLUE}${display_path}${NC}"
+        elif [[ "$DEBUG" == true ]]; then
+            echo -e "${YELLOW}[DEBUG] Filtered out: status=$status, tracked=$(is_tracked_page "$path" && echo "yes" || echo "no")${NC}"
         fi
+    elif [[ "$DEBUG" == true ]]; then
+        echo -e "${RED}[DEBUG] No regex match!${NC}"
     fi
 }
 
@@ -103,6 +124,7 @@ show_help() {
     echo "  -s, --since TIME  Show entries since TIME (e.g., '1 hour ago', 'today')"
     echo "  -u, --until TIME  Show entries until TIME"
     echo "  -l, --log FILE    Read from log file instead of journalctl"
+    echo "  -d, --debug       Enable debug mode to show raw lines and parsing info"
     echo "  -h, --help        Show this help message"
     echo ""
     echo "Tracked pages:"
@@ -117,6 +139,7 @@ show_help() {
     echo "  $0 -s today -f           # Follow today's activity"
     echo "  $0 -l server.log         # Read from log file"
     echo "  $0 -l server.log -f      # Follow log file"
+    echo "  $0 -d                    # Debug mode to troubleshoot parsing"
     echo ""
     echo "Note: If journalctl is not available, use the -l option to specify a log file."
 }
@@ -130,12 +153,32 @@ check_journalctl() {
     fi
 }
 
+# Function to detect the correct service name and scope
+detect_service() {
+    local service_variations=("pg-press" "pgpress" "pg_press")
+    local scopes=("--user" "")
+
+    for scope in "${scopes[@]}"; do
+        for service in "${service_variations[@]}"; do
+            # Try to get one line from the service
+            if journalctl $scope -u "$service" -n 1 &>/dev/null; then
+                echo "$scope|$service"
+                return 0
+            fi
+        done
+    done
+
+    # Nothing found
+    return 1
+}
+
 # Parse command line arguments
 FOLLOW=false
 LINES=""
 SINCE=""
 UNTIL=""
 LOG_FILE=""
+DEBUG=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -158,6 +201,10 @@ while [[ $# -gt 0 ]]; do
         -l|--log)
             LOG_FILE="$2"
             shift 2
+            ;;
+        -d|--debug)
+            DEBUG=true
+            shift
             ;;
         -h|--help)
             show_help
@@ -224,8 +271,28 @@ else
         exit 1
     fi
 
+    # Detect the correct service name and scope
+    echo -e "${CYAN}Detecting pg-press service...${NC}"
+    SERVICE_INFO=$(detect_service)
+
+    if [[ $? -ne 0 ]]; then
+        echo -e "${RED}Error: Could not find pg-press service in journalctl.${NC}"
+        echo "Tried variations: pg-press, pgpress, pg_press (in both user and system scope)"
+        echo ""
+        echo "Please check if the service is running or use the -l option with a log file."
+        echo "Example: $0 -l /path/to/pg-press.log"
+        exit 1
+    fi
+
+    # Parse service info
+    IFS='|' read -r SCOPE SERVICE_NAME <<< "$SERVICE_INFO"
+
     # Build journalctl command
-    JOURNAL_CMD="journalctl --user -u pg-press --output cat"
+    JOURNAL_CMD="journalctl $SCOPE -u $SERVICE_NAME --output cat"
+
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${GREEN}[DEBUG] Detected service: $SERVICE_NAME (scope: ${SCOPE:-system})${NC}"
+    fi
 
     if [[ -n "$SINCE" ]]; then
         JOURNAL_CMD="$JOURNAL_CMD --since \"$SINCE\""
@@ -243,7 +310,11 @@ else
         JOURNAL_CMD="$JOURNAL_CMD --no-pager"
     fi
 
-    echo -e "Reading from: ${CYAN}journalctl (pg-press service)${NC}"
+    echo -e "Reading from: ${CYAN}journalctl ($SERVICE_NAME${SCOPE:+ }${SCOPE#--})${NC}"
+
+    if [[ "$DEBUG" == true ]]; then
+        echo -e "${YELLOW}[DEBUG] Running: $JOURNAL_CMD${NC}"
+    fi
     echo ""
 
     # Process logs
