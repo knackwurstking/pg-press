@@ -56,7 +56,8 @@ parse_log_line() {
     # Pattern: ✅ DATE TIME [Server] STATUS METHOD PATH (IP) DURATION User{ID: NUM, Name: NAME}
     # Define regex separately to avoid bash parsing issues
     # Account for emoji prefix (✅, ❌, etc.) at the beginning of lines
-    local prefix_pattern='[^[:space:]]+ '
+    local prefix_pattern='.*'
+    #local prefix_pattern='[^[:space:]]+ '
     local date_pattern='([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})'
     local server_pattern='\[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+'
     local path_pattern='([^[:space:]]+)'
