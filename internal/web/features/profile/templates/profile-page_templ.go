@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
@@ -49,14 +50,18 @@ func ProfilePage(user *models.User) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n            .profile-header {\n                background: var(--ui-color-100);\n                padding: calc(var(--ui-spacing) * 2);\n                margin-bottom: calc(var(--ui-spacing) * 2);\n            }\n\n            .telegram-id {\n                color: var(--ui-color-600);\n                font-size: 0.95rem;\n                background: var(--ui-color-200);\n                padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);\n                border-radius: var(--ui-radius);\n                border: var(--ui-border-width) var(--ui-border-style)\n                    var(--ui-color-300);\n            }\n\n            .profile-dialog {\n                background: var(--ui-bg);\n                border-radius: calc(var(--ui-radius) * 2);\n                padding: calc(var(--ui-spacing) * 2);\n                box-shadow: 0 10px 25px var(--ui-backdrop-color);\n            }\n\n            .profile-dialog label {\n                margin-bottom: var(--ui-spacing);\n            }\n\n            .profile-dialog input {\n                margin-top: calc(var(--ui-spacing) / 2);\n                font-size: 1rem;\n            }\n        </style> <main style=\"max-width: 42rem; margin: 0 auto;\" class=\"container fluid\"><div class=\"profile-header border\"><!-- Profile user name with an edit button to the right --><div style=\"margin-bottom: var(--ui-spacing);\" class=\"flex flex-row justify-between items-center\"><h1 style=\"margin: 0; color: var(--ui-text); font-size: 2.25rem;\">")
+			templ_7745c5c3_Err = profilePageStyles().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <main style=\"max-width: 42rem; margin: 0 auto;\" class=\"container fluid\"><div class=\"profile-header border\"><!-- Profile user name with an edit button to the right --><div style=\"margin-bottom: var(--ui-spacing);\" class=\"flex flex-row justify-between items-center\"><h1 style=\"margin: 0; color: var(--ui-text); font-size: 2.25rem;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 60, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 29, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -69,7 +74,7 @@ func ProfilePage(user *models.User) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.TelegramID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 75, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 44, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -82,7 +87,7 @@ func ProfilePage(user *models.User) templ.Component {
 			var templ_7745c5c3_Var5 templ.SafeURL
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/logout")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 79, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 48, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -93,9 +98,9 @@ func ProfilePage(user *models.User) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies")
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetCookies())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 91, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 60, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -108,7 +113,7 @@ func ProfilePage(user *models.User) templ.Component {
 			var templ_7745c5c3_Var7 templ.SafeURL
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 103, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 72, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +126,7 @@ func ProfilePage(user *models.User) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 110, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 79, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -134,7 +139,7 @@ func ProfilePage(user *models.User) templ.Component {
 			var templ_7745c5c3_Var9 templ.SafeURL
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/profile")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 122, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/profile-page.templ`, Line: 91, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -190,6 +195,35 @@ func navContent() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.NavHomeButton().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func profilePageStyles() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<style>\n\t\t.profile-header {\n\t\t\tbackground: var(--ui-color-100);\n\t\t\tpadding: calc(var(--ui-spacing) * 2);\n\t\t\tmargin-bottom: calc(var(--ui-spacing) * 2);\n\t\t}\n\n\t\t.telegram-id {\n\t\t\tcolor: var(--ui-color-600);\n\t\t\tfont-size: 0.95rem;\n\t\t\tbackground: var(--ui-color-200);\n\t\t\tpadding: calc(var(--ui-spacing) / 2) var(--ui-spacing);\n\t\t\tborder-radius: var(--ui-radius);\n\t\t\tborder: var(--ui-border-width) var(--ui-border-style)\n\t\t\t\tvar(--ui-color-300);\n\t\t}\n\n\t\t.profile-dialog {\n\t\t\tbackground: var(--ui-bg);\n\t\t\tborder-radius: calc(var(--ui-radius) * 2);\n\t\t\tpadding: calc(var(--ui-spacing) * 2);\n\t\t\tbox-shadow: 0 10px 25px var(--ui-backdrop-color);\n\t\t}\n\n\t\t.profile-dialog label {\n\t\t\tmargin-bottom: var(--ui-spacing);\n\t\t}\n\n\t\t.profile-dialog input {\n\t\t\tmargin-top: calc(var(--ui-spacing) / 2);\n\t\t\tfont-size: 1rem;\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

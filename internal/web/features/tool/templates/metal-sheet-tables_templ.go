@@ -92,7 +92,7 @@ func MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) tem
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-					EditHref:        helpers.HXGetMetalSheetEdit(&sheet.ID, nil),
+					EditHref:        helpers.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 					EditAdminOnly:   false,
 					DeleteHref:      helpers.HXDeleteMetalSheet(sheet.ID),
 					DeleteAdminOnly: true,
@@ -231,7 +231,7 @@ func MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet) 
 					return templ_7745c5c3_Err
 				}
 				templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-					EditHref:        helpers.HXGetMetalSheetEdit(&sheet.ID, nil),
+					EditHref:        helpers.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 					EditAdminOnly:   false,
 					DeleteHref:      helpers.HXDeleteMetalSheet(sheet.ID),
 					DeleteAdminOnly: true,

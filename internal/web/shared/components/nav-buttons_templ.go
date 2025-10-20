@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/knackwurstking/pgpress/internal/env"
+import "github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 
 func NavProfileButton() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -38,7 +39,7 @@ func NavProfileButton() templ.Component {
 		var templ_7745c5c3_Var2 templ.SafeURL
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/profile")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 9, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 10, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +81,7 @@ func NavHomeButton() templ.Component {
 		var templ_7745c5c3_Var4 templ.SafeURL
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 20, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 21, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -122,7 +123,7 @@ func NavFeedButton() templ.Component {
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(env.ServerPathPrefix + "/feed")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 31, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 32, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -133,9 +134,9 @@ func NavFeedButton() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("connect:" + env.ServerPathPrefix + "/htmx/nav/feed-counter")
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXWsConnectNavFeedCounter())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 32, Col: 70}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/nav-buttons.templ`, Line: 33, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {

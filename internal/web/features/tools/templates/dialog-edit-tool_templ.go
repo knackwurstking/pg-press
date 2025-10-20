@@ -9,10 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
-
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -25,8 +23,6 @@ type DialogEditToolProps struct {
 	InputType           string
 	InputCode           string
 	InputPressSelection *models.PressNumber
-
-	ReloadPage bool
 }
 
 func DialogEditTool(props *DialogEditToolProps) templ.Component {
@@ -53,13 +49,13 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 
 		var (
 			baseType         = "POST"
-			baseHref         = fmt.Sprintf("%s/htmx/tools/edit", env.ServerPathPrefix)
+			baseHref         = helpers.HXPostToolEditDialog()
 			submitButtonText = "Erstellen"
 		)
 
 		if props.Tool != nil && props.Tool.ID > 0 {
 			baseType = "PUT"
-			baseHref = fmt.Sprintf("%s/htmx/tools/edit?id=%d", env.ServerPathPrefix, props.Tool.ID)
+			baseHref = helpers.HXPutToolEditDialog(props.Tool.ID)
 			submitButtonText = "Aktualisieren"
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -91,7 +87,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTop)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 57, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 53, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -114,7 +110,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionBottom)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 65, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 61, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -137,7 +133,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTopCassette)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 73, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 69, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -225,7 +221,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputWidth)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 149, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 145, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -248,7 +244,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputHeight)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 161, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 157, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -266,7 +262,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputType)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 174, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 170, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -279,7 +275,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputCode)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 184, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/dialog-edit-tool.templ`, Line: 180, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -293,7 +289,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 		})
 		templ_7745c5c3_Err = dialogs.Base(dialogs.BaseProps{
 			Type:             baseType,
-			Href:             templ.URL(baseHref),
+			Href:             baseHref,
 			ID:               "tool-edit-dialog",
 			SubmitButtonText: submitButtonText,
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

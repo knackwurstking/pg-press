@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -85,9 +85,9 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/profile/cookies?value=" + cookie.Value)
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXDeleteCookies(cookie.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/cookies-details.templ`, Line: 32, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/profile/templates/cookies-details.templ`, Line: 32, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {

@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"context"
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"io"
 )
@@ -161,10 +161,9 @@ func RollbackButton(reportID int64, modificationTime int64) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("%s/htmx/trouble-reports/rollback?id=%d",
-			env.ServerPathPrefix, reportID)))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXPostTroubleReportsRollback(reportID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 54, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 53, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -177,7 +176,7 @@ func RollbackButton(reportID int64, modificationTime int64) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", modificationTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 63, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/modifications.templ`, Line: 62, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {

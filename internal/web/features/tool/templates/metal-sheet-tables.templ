@@ -36,7 +36,7 @@ templ MetalSheetTableTop(user *models.User, metalSheets []*models.MetalSheet) {
 							</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        helpers.HXGetMetalSheetEdit(&sheet.ID, nil),
+									EditHref:        helpers.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 									EditAdminOnly:   false,
 									DeleteHref:      helpers.HXDeleteMetalSheet(sheet.ID),
 									DeleteAdminOnly: true,
@@ -86,7 +86,7 @@ templ MetalSheetTableBottom(user *models.User, metalSheets []*models.MetalSheet)
 							</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        helpers.HXGetMetalSheetEdit(&sheet.ID, nil),
+									EditHref:        helpers.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 									EditAdminOnly:   false,
 									DeleteHref:      helpers.HXDeleteMetalSheet(sheet.ID),
 									DeleteAdminOnly: true,

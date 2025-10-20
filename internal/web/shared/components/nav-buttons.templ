@@ -1,6 +1,7 @@
 package components
 
 import "github.com/knackwurstking/pgpress/internal/env"
+import "github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 
 templ NavProfileButton() {
 	<a
@@ -29,7 +30,7 @@ templ NavFeedButton() {
 		role="button"
 		class="ghost contrast icon"
 		href={ env.ServerPathPrefix + "/feed" }
-		hx-ws={ "connect:" + env.ServerPathPrefix + "/htmx/nav/feed-counter" }
+		hx-ws={ helpers.HXWsConnectNavFeedCounter() }
 		hx-target="#feed-counter"
 		hx-swap="outerHTML"
 	>

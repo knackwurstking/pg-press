@@ -28,13 +28,13 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 		var (
 			baseType         = "POST"
 			submitButtonText = "Erstellen"
-			baseHref         = helpers.HXPostCycleEdit(props.Tool.ID)
+			baseHref         = helpers.HXPostCycleEditDialog(props.Tool.ID)
 		)
 
 		if props.CycleID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = helpers.HXPutCycleEdit(props.CycleID)
+			baseHref = helpers.HXPutCycleEditDialog(props.CycleID)
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{

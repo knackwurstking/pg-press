@@ -412,9 +412,9 @@ func cyclesSection(props CyclesProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetCycleEdit(props.Tool.ID, nil, false))
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetCycleEditDialog(props.Tool.ID, nil, false))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 139, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/cycles.templ`, Line: 139, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -621,7 +621,7 @@ func cycleRowWithPartialCalc(
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-			EditHref:        helpers.HXGetCycleEdit(props.Tool.ID, &cycle.ID, false),
+			EditHref:        helpers.HXGetCycleEditDialog(props.Tool.ID, &cycle.ID, false),
 			EditAdminOnly:   true,
 			DeleteHref:      helpers.HXDeleteCycle(cycle.ID, props.Tool.ID),
 			DeleteAdminOnly: true,

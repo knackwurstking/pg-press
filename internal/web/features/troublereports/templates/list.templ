@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -23,10 +24,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 					<div
 						class="attachments-preview-placeholder"
 						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-						hx-get={ fmt.Sprintf(
-							"%s/htmx/trouble-reports/attachments-preview?id=%d",
-							env.ServerPathPrefix, tr.ID,
-						) }
+						hx-get={ helpers.HXGetTroubleReportsAttachmentsPreview(tr.ID) }
 						hx-trigger="click"
 						hx-swap="outerHTML"
 						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -74,10 +72,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				</button>
 				// Admin only: Delete Report
 				<button
-					hx-delete={ fmt.Sprintf(
-						"%s/htmx/trouble-reports/data?id=%d",
-						env.ServerPathPrefix, tr.ID,
-					) }
+					hx-delete={ helpers.HXDeleteTroubleReportsData(tr.ID) }
 					hx-trigger="click"
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"

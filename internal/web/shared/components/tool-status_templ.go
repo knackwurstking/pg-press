@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -169,10 +169,9 @@ func toolStatusDisplay(tool *models.Tool) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status-edit?id=%d",
-			env.ServerPathPrefix, tool.ID))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolStatusEdit(tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 58, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 57, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -185,7 +184,7 @@ func toolStatusDisplay(tool *models.Tool) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 59, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 58, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -248,10 +247,9 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("%s/htmx/tools/status",
-				env.ServerPathPrefix)))
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXPutToolStatus())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 82, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 81, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -264,7 +262,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 83, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 82, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -277,7 +275,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 86, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 85, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -303,10 +301,9 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("%s/htmx/tools/status",
-				env.ServerPathPrefix)))
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXPutToolStatus())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 102, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 100, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -319,7 +316,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 103, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 101, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -332,7 +329,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 106, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 104, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -353,10 +350,9 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(templ.URL(fmt.Sprintf("%s/htmx/tools/status",
-				env.ServerPathPrefix)))
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXPutToolStatus())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 121, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 118, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -369,7 +365,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 122, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 119, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -382,7 +378,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tool.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 125, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 122, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -408,10 +404,9 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/htmx/tools/status-display?id=%d",
-			env.ServerPathPrefix, tool.ID))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolStatusDisplay(tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 143, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 139, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -424,7 +419,7 @@ func toolStatusEditForm(tool *models.Tool, userHasPermission bool) templ.Compone
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#tool-status-%d", tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 144, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-status.templ`, Line: 140, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {

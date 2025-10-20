@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -53,7 +54,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("%s/tools/tool/%d",
 			env.ServerPathPrefix, tool.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 25, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 26, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -66,7 +67,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 30, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 31, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -92,12 +93,9 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(
-				"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
-				env.ServerPathPrefix, tool.ID, tool.Position,
-			))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolTotalCycles(tool.ID, tool.Position, false))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 43, Col: 8}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 41, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -131,7 +129,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(bindingTool.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 56, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 54, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -144,7 +142,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(bindingTool.Type)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 56, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/tool-anchor.templ`, Line: 54, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

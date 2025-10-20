@@ -10,7 +10,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/tools/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
+	"github.com/knackwurstking/pgpress/internal/web/shared/base"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
@@ -27,7 +27,7 @@ type EditToolDialogFormData struct {
 }
 
 type Handler struct {
-	*handlers.BaseHandler
+	*base.Handler
 
 	userNameMinLength int
 	userNameMaxLength int
@@ -35,7 +35,7 @@ type Handler struct {
 
 func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db,
+		Handler: base.NewHandler(db,
 			logger.NewComponentLogger("Tools")),
 		userNameMinLength: 1,
 		userNameMaxLength: 100,
@@ -73,8 +73,6 @@ func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
 		props.InputCode = props.Tool.Code
 		props.InputPressSelection = props.Tool.Press
 	}
-
-	props.ReloadPage = h.ParseBoolQuery(c, "reload_page")
 
 	toolEdit := templates.DialogEditTool(props)
 	if err := toolEdit.Render(c.Request().Context(), c.Response()); err != nil {

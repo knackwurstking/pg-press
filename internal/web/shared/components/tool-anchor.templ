@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -37,10 +38,7 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 					if options.EnableTotalCycles {
 						<span
 							class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-							hx-get={ fmt.Sprintf(
-								"%s/htmx/tools/total-cycles?tool_id=%d&tool_position=%s&input=false",
-								env.ServerPathPrefix, tool.ID, tool.Position,
-							) }
+							hx-get={ helpers.HXGetToolTotalCycles(tool.ID, tool.Position, false) }
 							hx-trigger="load"
 							hx-swap="innerHTML"
 							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"

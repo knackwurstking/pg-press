@@ -56,13 +56,13 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 		var (
 			baseType         = "POST"
 			submitButtonText = "Erstellen"
-			baseHref         = helpers.HXPostCycleEdit(props.Tool.ID)
+			baseHref         = helpers.HXPostCycleEditDialog(props.Tool.ID)
 		)
 
 		if props.CycleID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = helpers.HXPutCycleEdit(props.CycleID)
+			baseHref = helpers.HXPutCycleEditDialog(props.CycleID)
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

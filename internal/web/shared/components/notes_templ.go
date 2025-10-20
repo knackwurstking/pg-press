@@ -102,9 +102,9 @@ func NoteCard(note *models.Note) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEdit(&note.ID, note.Linked))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEditDialog(&note.ID, note.Linked))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 39, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/shared/components/notes.templ`, Line: 39, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

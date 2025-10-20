@@ -9,7 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/auth/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
+	"github.com/knackwurstking/pgpress/internal/web/shared/base"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
@@ -18,12 +18,12 @@ import (
 )
 
 type Handler struct {
-	*handlers.BaseHandler
+	*base.Handler
 }
 
 func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
-		BaseHandler: handlers.NewBaseHandler(db, logger.NewComponentLogger("Auth")),
+		Handler: base.NewHandler(db, logger.NewComponentLogger("Auth")),
 	}
 }
 

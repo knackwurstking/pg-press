@@ -36,7 +36,7 @@ templ NoteCard(note *models.Note) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ helpers.HXGetNotesEdit(&note.ID, note.Linked) }
+					hx-get={ helpers.HXGetNotesEditDialog(&note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"

@@ -136,7 +136,7 @@ templ cyclesSection(props CyclesProps) {
 		@components.SectionTitle(components.TitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ helpers.HXGetCycleEdit(props.Tool.ID, nil, false) }
+				hx-get={ helpers.HXGetCycleEditDialog(props.Tool.ID, nil, false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -227,7 +227,7 @@ templ cycleRowWithPartialCalc(
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        helpers.HXGetCycleEdit(props.Tool.ID, &cycle.ID, false),
+				EditHref:        helpers.HXGetCycleEditDialog(props.Tool.ID, &cycle.ID, false),
 				EditAdminOnly:   true,
 				DeleteHref:      helpers.HXDeleteCycle(cycle.ID, props.Tool.ID),
 				DeleteAdminOnly: true,

@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pgpress/internal/constants"
 	"github.com/knackwurstking/pgpress/internal/services"
 	"github.com/knackwurstking/pgpress/internal/web/features/profile/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/handlers"
+	"github.com/knackwurstking/pgpress/internal/web/shared/base"
 	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/knackwurstking/pgpress/pkg/utils"
@@ -15,7 +15,7 @@ import (
 )
 
 type Handler struct {
-	*handlers.BaseHandler
+	*base.Handler
 
 	userNameMinLength int
 	userNameMaxLength int
@@ -23,7 +23,7 @@ type Handler struct {
 
 func NewHandler(db *services.Registry) *Handler {
 	return &Handler{
-		BaseHandler:       handlers.NewBaseHandler(db, logger.NewComponentLogger("Profile")),
+		Handler:           base.NewHandler(db, logger.NewComponentLogger("Profile")),
 		userNameMinLength: 1,
 		userNameMaxLength: 100,
 	}

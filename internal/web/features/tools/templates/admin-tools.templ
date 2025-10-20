@@ -3,15 +3,15 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"time"
 )
 
 templ AdminOverlappingTools(overlappingTools []*models.OverlappingTool) {
 	<span
-		hx-get={ env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools" }
+		hx-get={ helpers.HXGetToolOverlappingTools() }
 		hx-trigger="pageLoaded from:body"
 		hx-target="#section-admin-overlapping-tools"
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"

@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 )
 
@@ -52,9 +52,9 @@ func Page() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools")
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolOverlappingTools())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 21, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 21, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -73,9 +73,9 @@ func Page() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/press")
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolsPagePressSectionContent())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 36, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 36, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -94,9 +94,9 @@ func Page() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/tools")
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolsPageAllToolsSectionContent())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 51, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/page.templ`, Line: 51, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {

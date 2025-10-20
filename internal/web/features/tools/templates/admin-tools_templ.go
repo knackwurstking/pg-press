@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"time"
 )
@@ -43,9 +43,9 @@ func AdminOverlappingTools(overlappingTools []*models.OverlappingTool) templ.Com
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/admin/overlapping-tools")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolOverlappingTools())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 14, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/admin-tools.templ`, Line: 14, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

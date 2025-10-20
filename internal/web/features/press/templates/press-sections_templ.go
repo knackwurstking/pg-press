@@ -108,9 +108,9 @@ func pressNotesSection(notes []*models.Note, press models.PressNumber) templ.Com
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEdit(nil, fmt.Sprintf("press_%d", press)))
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 50, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 50, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -126,9 +126,9 @@ func pressNotesSection(notes []*models.Note, press models.PressNumber) templ.Com
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEdit(nil, fmt.Sprintf("press_%d", press)))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 67, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 67, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -597,7 +597,7 @@ func renderPressCycleRow(cycle *models.Cycle, props PressCyclesSectionProps) tem
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.TableActions(components.TableActionsOptions{
-			EditHref:        helpers.HXGetCycleEdit(cycle.ToolID, &cycle.ID, true),
+			EditHref:        helpers.HXGetCycleEditDialog(cycle.ToolID, &cycle.ID, true),
 			EditAdminOnly:   true,
 			DeleteHref:      helpers.HXDeleteCycle(cycle.ID, cycle.ToolID),
 			DeleteAdminOnly: true,

@@ -56,9 +56,9 @@ func MetalSheets(
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetMetalSheetEdit(&tool.ID, nil))
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetMetalSheetEditDialog(&tool.ID, nil))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/metal-sheets.templ`, Line: 18, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tool/templates/metal-sheets.templ`, Line: 18, Col: 61}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {

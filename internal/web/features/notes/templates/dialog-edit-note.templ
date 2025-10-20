@@ -16,12 +16,12 @@ templ DialogEditNote(props DialogEditNoteProps) {
 	{{
 		baseType := "POST"
 		submitButtonText := "Erstellen"
-		baseHref := helpers.HXPostNotesEdit(props.LinkToTables...)
+		baseHref := helpers.HXPostNotesEditDialog(props.LinkToTables...)
 
 		if props.Note.ID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = helpers.HXPutNotesEdit(props.Note.ID, props.LinkToTables...)
+			baseHref = helpers.HXPutNotesEditDialog(props.Note.ID, props.LinkToTables...)
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{

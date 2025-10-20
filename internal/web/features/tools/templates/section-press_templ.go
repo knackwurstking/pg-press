@@ -13,6 +13,7 @@ import (
 
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -42,9 +43,9 @@ func SectionPress(pressUtilization []models.PressUtilization) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/tools/section/press")
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(helpers.HXGetToolsPagePressSectionContent())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 13, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 14, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -127,7 +128,7 @@ func sectionPressListItem(props pressListItemProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 64, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 65, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -140,7 +141,7 @@ func sectionPressListItem(props pressListItemProps) templ.Component {
 		var templ_7745c5c3_Var5 templ.SafeURL
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(props.Href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 67, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 68, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -153,7 +154,7 @@ func sectionPressListItem(props pressListItemProps) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 71, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 72, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -226,7 +227,7 @@ func renderTopTools(top, cassette string) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(top)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 94, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 95, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -255,7 +256,7 @@ func renderTopTools(top, cassette string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(cassette)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 102, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 103, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -310,7 +311,7 @@ func renderBottomTools(bottom string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(bottom)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 112, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/tools/templates/section-press.templ`, Line: 113, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
