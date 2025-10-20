@@ -19,26 +19,26 @@ templ HomePage() {
 		<main class="container fluid">
 			<nav class="flex flex-col gap-lg justify-center">
 				<!-- Anchor Button => Trouble Reports Page -->
-				@pageItem(
-					templ.URL(env.ServerPathPrefix+"/trouble-reports"),
-					"exclamation-triangle",
-					"Problemberichte",
-					"Verwalten Sie Problemberichte und Lösungen",
-				)
+				@pageItem(pageItemProps{
+					Href:        templ.URL(env.ServerPathPrefix + "/trouble-reports"),
+					Icon:        "exclamation-triangle",
+					Title:       "Problemberichte",
+					Description: "Verwalten Sie Problemberichte und Lösungen",
+				})
 				<!-- Anchor Button => Tools Page -->
-				@pageItem(
-					templ.URL(env.ServerPathPrefix+"/tools"),
-					"tools",
-					"Werkzeuglisten",
-					"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
-				)
+				@pageItem(pageItemProps{
+					Href:        templ.URL(env.ServerPathPrefix + "/tools"),
+					Icon:        "tools",
+					Title:       "Werkzeuglisten",
+					Description: "Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
+				})
 				<!-- Anchor Button => Notes Page -->
-				@pageItem(
-					templ.URL(env.ServerPathPrefix+"/notes"),
-					"journal-text",
-					"Notizen Verwaltung",
-					"Verwalten Sie Notizen für Werkzeuge und Pressen",
-				)
+				@pageItem(pageItemProps{
+					Href:        templ.URL(env.ServerPathPrefix + "/notes"),
+					Icon:        "journal-text",
+					Title:       "Notizen Verwaltung",
+					Description: "Verwalten Sie Notizen für Werkzeuge und Pressen",
+				})
 			</nav>
 		</main>
 	}
@@ -50,20 +50,27 @@ templ navContent(relPath string) {
 	@components.NavHomeButton()
 }
 
-templ pageItem(href templ.SafeURL, icon, title, description string) {
+type pageItemProps struct {
+	Href        templ.SafeURL
+	Icon        string
+	Title       string
+	Description string
+}
+
+templ pageItem(props pageItemProps) {
 	<a
 		role="button"
 		class="ghost contrast flex flex-row gap justify-between items-center"
 		style="width: 90%; margin: 0 auto;"
-		href={ href }
+		href={ props.Href }
 	>
 		<span style="width: 100%;" class="flex flex-row gap items-center">
-			if icon != "" {
-				<i style="margin: var(--ui-spacing);" class={ fmt.Sprintf("bi bi-%s", icon) }></i>
+			if props.Icon != "" {
+				<i style="margin: var(--ui-spacing);" class={ fmt.Sprintf("bi bi-%s", props.Icon) }></i>
 			}
 			<span class="flex flex-col">
-				<strong>{ title }</strong>
-				<small style="text-wrap: auto; text-transform: none;">{ description }</small>
+				<strong>{ props.Title }</strong>
+				<small style="text-wrap: auto; text-transform: none;">{ props.Description }</small>
 			</span>
 		</span>
 		<i class="bi bi-chevron-right"></i>

@@ -53,12 +53,12 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageItem(
-				templ.URL(env.ServerPathPrefix+"/trouble-reports"),
-				"exclamation-triangle",
-				"Problemberichte",
-				"Verwalten Sie Problemberichte und Lösungen",
-			).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageItem(pageItemProps{
+				Href:        templ.URL(env.ServerPathPrefix + "/trouble-reports"),
+				Icon:        "exclamation-triangle",
+				Title:       "Problemberichte",
+				Description: "Verwalten Sie Problemberichte und Lösungen",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -66,12 +66,12 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageItem(
-				templ.URL(env.ServerPathPrefix+"/tools"),
-				"tools",
-				"Werkzeuglisten",
-				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
-			).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageItem(pageItemProps{
+				Href:        templ.URL(env.ServerPathPrefix + "/tools"),
+				Icon:        "tools",
+				Title:       "Werkzeuglisten",
+				Description: "Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -79,12 +79,12 @@ func HomePage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageItem(
-				templ.URL(env.ServerPathPrefix+"/notes"),
-				"journal-text",
-				"Notizen Verwaltung",
-				"Verwalten Sie Notizen für Werkzeuge und Pressen",
-			).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageItem(pageItemProps{
+				Href:        templ.URL(env.ServerPathPrefix + "/notes"),
+				Icon:        "journal-text",
+				Title:       "Notizen Verwaltung",
+				Description: "Verwalten Sie Notizen für Werkzeuge und Pressen",
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -145,7 +145,14 @@ func navContent(relPath string) templ.Component {
 	})
 }
 
-func pageItem(href templ.SafeURL, icon, title, description string) templ.Component {
+type pageItemProps struct {
+	Href        templ.SafeURL
+	Icon        string
+	Title       string
+	Description string
+}
+
+func pageItem(props pageItemProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -171,9 +178,9 @@ func pageItem(href templ.SafeURL, icon, title, description string) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(href)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(props.Href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 58, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 65, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -183,8 +190,8 @@ func pageItem(href templ.SafeURL, icon, title, description string) templ.Compone
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if icon != "" {
-			var templ_7745c5c3_Var6 = []any{fmt.Sprintf("bi bi-%s", icon)}
+		if props.Icon != "" {
+			var templ_7745c5c3_Var6 = []any{fmt.Sprintf("bi bi-%s", props.Icon)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -212,9 +219,9 @@ func pageItem(href templ.SafeURL, icon, title, description string) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 65, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 72, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -225,9 +232,9 @@ func pageItem(href templ.SafeURL, icon, title, description string) templ.Compone
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(description)
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 66, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/home/templates/home-page.templ`, Line: 73, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
