@@ -43,7 +43,7 @@ templ Page() {
 			</section>
 			<!-- Trouble Reports Entries -->
 			<section
-				hx-get={ env.ServerPathPrefix + "/htmx/trouble-reports/data" }
+				hx-get={ helpers.HXGetTroubleReportsData() }
 				hx-trigger="load, pageLoaded from:body"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				id="data"

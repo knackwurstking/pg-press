@@ -9,7 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 // DownloadCycleSummaryPDF provides a script function to download cycle summary PDFs
-func DownloadCycleSummaryPDF(url string) templ.ComponentScript {
+func DownloadCycleSummaryPDF(url templ.SafeURL) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_DownloadCycleSummaryPDF_556d`,
 		Function: `function __templ_DownloadCycleSummaryPDF_556d(url){async function download() {

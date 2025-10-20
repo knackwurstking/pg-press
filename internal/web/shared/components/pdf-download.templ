@@ -2,7 +2,7 @@ package components
 
 // DownloadCycleSummaryPDF provides a script function to download cycle summary PDFs
 
-script DownloadCycleSummaryPDF(url string) {
+script DownloadCycleSummaryPDF(url templ.SafeURL) {
 	async function download() {
 		try {
 			// Show loading state

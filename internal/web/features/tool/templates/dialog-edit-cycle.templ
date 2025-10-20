@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
+	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
@@ -28,24 +28,18 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 		var (
 			baseType         = "POST"
 			submitButtonText = "Erstellen"
-			baseHref         = fmt.Sprintf("%s/htmx/tools/cycle/edit", env.ServerPathPrefix)
+			baseHref         = helpers.HXPostCycleEdit(props.Tool.ID)
 		)
 
-		if props.Tool != nil && props.CycleID <= 0 {
-			baseType = "POST"
-			submitButtonText = "Erstellen"
-			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID)
-		} else if props.CycleID > 0 {
+		if props.CycleID > 0 {
 			baseType = "PUT"
 			submitButtonText = "Aktualisieren"
-			baseHref = fmt.Sprintf("%s/htmx/tools/cycle/edit?id=%d",
-				env.ServerPathPrefix, props.CycleID)
+			baseHref = helpers.HXPutCycleEdit(props.CycleID)
 		}
 	}}
 	@dialogs.Base(dialogs.BaseProps{
 		Type:             baseType,
-		Href:             templ.URL(baseHref),
+		Href:             baseHref,
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: submitButtonText,
 	}) {

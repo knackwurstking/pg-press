@@ -6,6 +6,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pgpress/internal/env"
+	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 // Category: Cycles
@@ -27,6 +28,20 @@ func HXGetCycleEdit(toolID int64, cycleID *int64, toolChangeMode bool) templ.Saf
 	))
 }
 
+func HXPostCycleEdit(toolID int64) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/cycle/edit?tool_id=%d",
+		env.ServerPathPrefix, toolID,
+	))
+}
+
+func HXPutCycleEdit(cycleID int64) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/cycle/edit?id=%d",
+		env.ServerPathPrefix, cycleID,
+	))
+}
+
 func HXDeleteCycle(cycleID, toolID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
@@ -45,15 +60,26 @@ func HXGetFeedList() templ.SafeURL {
 
 // Category: Metal Sheets
 
-func HXGetMetalSheetEdit(metalSheetID *int64) templ.SafeURL {
-	if metalSheetID == nil {
-		return templ.SafeURL(fmt.Sprintf("%s/htmx/metal-sheets/edit", env.ServerPathPrefix))
+func HXGetMetalSheetEdit(metalSheetID *int64, toolID *int64) templ.SafeURL {
+	if metalSheetID == nil && toolID != nil {
+		return templ.SafeURL(fmt.Sprintf(
+			"%s/htmx/metal-sheets/edit&tool_id=%d",
+			env.ServerPathPrefix, *toolID,
+		))
+	}
+
+	if metalSheetID != nil {
+		return templ.SafeURL(fmt.Sprintf(
+			"%s/htmx/metal-sheets/edit?id=%d",
+			env.ServerPathPrefix, *metalSheetID,
+		))
 	}
 
 	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit?id=%d",
-		env.ServerPathPrefix, *metalSheetID,
+		"%s/htmx/metal-sheets/edit",
+		env.ServerPathPrefix,
 	))
+
 }
 
 func HXPostMetalSheetEdit(toolID int64) templ.SafeURL {
@@ -126,24 +152,44 @@ func HXDeleteNote(noteID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/delete?id=%d", env.ServerPathPrefix, noteID))
 }
 
-// TODO: Category: Press
+// Category: Press
 
-// Get
-// "%s/htmx/tools/press/%d/notes"
+func HXGetPressNotesSectionContent(pressNumber models.PressNumber) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/press/%d/notes",
+		env.ServerPathPrefix, pressNumber,
+	))
+}
 
-// Get
-// "%s/htmx/tools/press/%d/active-tools"
+func HXGetPressActiveToolsSectionContent(pressNumber models.PressNumber) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/press/%d/active-tools",
+		env.ServerPathPrefix, pressNumber,
+	))
+}
 
-// Get
-// "%s/htmx/tools/press/%d/metal-sheets"
+func HXGetPressMetalSheetsSectionContent(pressNumber models.PressNumber) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/press/%d/metal-sheets",
+		env.ServerPathPrefix, pressNumber,
+	))
+}
 
-// Get
-// "%s/htmx/tools/press/%d/cycle-summary-pdf"
+func HXGetPressCyclesSectionContent(pressNumber models.PressNumber) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/press/%d/cycles",
+		env.ServerPathPrefix, pressNumber,
+	))
+}
 
-//.Get
-// "%s/htmx/tools/press/%d/cycles"
+func HXGetPressCycleSummaryPDF(pressNumber models.PressNumber) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/press/%d/cycle-summary-pdf",
+		env.ServerPathPrefix, pressNumber,
+	))
+}
 
-// TODO: Category: Tool
+// Category: Tool
 
 func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeURL {
 	if regenerationID == nil {
@@ -159,9 +205,43 @@ func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeUR
 	))
 }
 
+func HXPutToolRegenerationEdit(toolID int64, regenerationID int64) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
+		env.ServerPathPrefix, toolID, regenerationID,
+	))
+}
+
 func HXDeleteToolRegeneration(toolID int64, regenerationID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
 		env.ServerPathPrefix, toolID, regenerationID,
+	))
+}
+
+// Patch
+// "%s/htmx/tools/tool/%d/bind"
+func HXPatchToolBind(toolID int64) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/tool/%d/bind",
+		env.ServerPathPrefix, toolID,
+	))
+}
+
+// Patch
+// "%s/htmx/tools/tool/%d/unbind"
+func HXPatchToolUnbind(toolID int64) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/tools/tool/%d/unbind",
+		env.ServerPathPrefix, toolID,
+	))
+}
+
+// Category: Trouble Reports
+
+func HXGetTroubleReportsData() templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf(
+		"%s/htmx/trouble-reports/data",
+		env.ServerPathPrefix,
 	))
 }
