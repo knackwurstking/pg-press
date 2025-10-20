@@ -1,4 +1,4 @@
-// TODO: Move this stuff somewhere else, or just split it up into multiple files
+// TODO: Split this stuff up into multiple files, a bit more
 package helpers
 
 import (
@@ -9,8 +9,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/env"
 	"github.com/knackwurstking/pgpress/pkg/models"
 )
-
-// Category: Cycles
 
 func HXGetCycleEditDialog(toolID int64, cycleID *int64, toolChangeMode bool) templ.SafeURL {
 	props := make([]string, 0)
@@ -50,111 +48,6 @@ func HXDeleteCycle(cycleID, toolID int64) templ.SafeURL {
 	))
 }
 
-// Category: Feeds
-
-func HXGetFeedList() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/feed/list",
-		env.ServerPathPrefix,
-	))
-}
-
-// Category: Metal Sheets
-
-func HXGetMetalSheetEditDialog(metalSheetID *int64, toolID *int64) templ.SafeURL {
-	if metalSheetID == nil && toolID != nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit&tool_id=%d",
-			env.ServerPathPrefix, *toolID,
-		))
-	}
-
-	if metalSheetID != nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit?id=%d",
-			env.ServerPathPrefix, *metalSheetID,
-		))
-	}
-
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit",
-		env.ServerPathPrefix,
-	))
-
-}
-
-func HXPostMetalSheetEditDialog(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit?tool_id=%d",
-		env.ServerPathPrefix, toolID,
-	))
-}
-
-func HXPutMetalSheetEditDialog(metalSheetID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit?id=%d",
-		env.ServerPathPrefix, metalSheetID,
-	))
-}
-
-func HXDeleteMetalSheet(metalSheetID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/delete?id=%d",
-		env.ServerPathPrefix, metalSheetID,
-	))
-}
-
-// Category: Notes
-
-func HXGetNotesEditDialog(noteID *int64, linkToTables ...string) templ.SafeURL {
-	var params []string
-
-	if noteID != nil {
-		params = append(params, fmt.Sprintf("id=%d", *noteID))
-	}
-
-	if len(linkToTables) > 0 {
-		params = append(params, fmt.Sprintf(
-			"link_to_tables=%s", strings.Join(linkToTables, ","),
-		))
-	}
-
-	url := fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix)
-	if len(params) > 0 {
-		url += "?" + strings.Join(params, "&")
-	}
-
-	return templ.SafeURL(url)
-}
-
-func HXPostNotesEditDialog(linkToTables ...string) templ.SafeURL {
-	if len(linkToTables) == 0 {
-		return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix))
-	}
-
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/notes/edit?link_to_tables=%s",
-		env.ServerPathPrefix, strings.Join(linkToTables, ","),
-	))
-}
-
-func HXPutNotesEditDialog(noteID int64, linkToTables ...string) templ.SafeURL {
-	if len(linkToTables) == 0 {
-		return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/edit?id=%d", env.ServerPathPrefix, noteID))
-	}
-
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
-		env.ServerPathPrefix, noteID, strings.Join(linkToTables, ","),
-	))
-}
-
-func HXDeleteNote(noteID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/delete?id=%d", env.ServerPathPrefix, noteID))
-}
-
-// Category: Tool Page
-
 func HXGetToolNotesSectionContent(toolID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/notes?tool_id=%d",
@@ -176,8 +69,6 @@ func HXGetToolCyclesSectionContent(toolID int64) templ.SafeURL {
 	))
 }
 
-// Category: Tools Page
-
 func HXGetToolsPagePressSectionContent() templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/section/press",
@@ -191,8 +82,6 @@ func HXGetToolsPageAllToolsSectionContent() templ.SafeURL {
 		env.ServerPathPrefix,
 	))
 }
-
-// Category: Tools
 
 func HXGetToolEditDialog(toolID *int64) templ.SafeURL {
 	if toolID == nil {
@@ -264,8 +153,6 @@ func HXGetToolStatusDisplay(toolID int64) templ.SafeURL {
 	))
 }
 
-// Category: Press Page
-
 func HXGetPressNotesSectionContent(pressNumber models.PressNumber) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/press/%d/notes",
@@ -294,16 +181,12 @@ func HXGetPressCyclesSectionContent(pressNumber models.PressNumber) templ.SafeUR
 	))
 }
 
-// Category: Press
-
 func HXGetPressCycleSummaryPDF(pressNumber models.PressNumber) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/press/%d/cycle-summary-pdf",
 		env.ServerPathPrefix, pressNumber,
 	))
 }
-
-// Category: Regeneration
 
 func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeURL {
 	if regenerationID == nil {
@@ -344,60 +227,5 @@ func HXPatchToolUnbind(toolID int64) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/tool/%d/unbind",
 		env.ServerPathPrefix, toolID,
-	))
-}
-
-// Category: Trouble Reports
-
-func HXGetTroubleReportsData() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/data",
-		env.ServerPathPrefix,
-	))
-}
-
-func HXDeleteTroubleReportsData(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/data?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
-}
-
-func HXGetTroubleReportsAttachmentsPreview(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/attachments-preview?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
-}
-
-func HXPostTroubleReportsRollback(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/rollback?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
-}
-
-// Category: Cookies
-
-func HXGetCookies() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/profile/cookies",
-		env.ServerPathPrefix,
-	))
-}
-
-func HXDeleteCookies(value string) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/profile/cookies?value=%s",
-		env.ServerPathPrefix, value,
-	))
-}
-
-// Category: Nav
-
-func HXWsConnectNavFeedCounter() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"connect:%s/htmx/nav/feed-counter",
-		env.ServerPathPrefix,
 	))
 }
