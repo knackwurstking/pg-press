@@ -152,7 +152,7 @@ func (h *Handler) HTMXPostEditNoteDialog(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "noteCreated, pageLoaded")
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
 	return nil
 }
 
@@ -200,7 +200,7 @@ func (h *Handler) HTMXPutEditNoteDialog(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "noteUpdated, pageLoaded")
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
 	return nil
 }
 
@@ -230,7 +230,7 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "noteDeleted, pageLoaded")
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
 	return nil
 }
 
