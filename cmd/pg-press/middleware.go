@@ -47,7 +47,7 @@ func init() {
 		serverPathPrefix + "/css/main-layout.css",
 
 		// Libraries
-		serverPathPrefix + "/js/htmx-v2.0.6.min.js",
+		serverPathPrefix + "/js/htmx-v2.0.7.min.js",
 		serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
 		serverPathPrefix + "/js/main-layout.js",
 
