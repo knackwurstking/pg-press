@@ -13,14 +13,14 @@ NC='\033[0m' # No Color
 
 # Define the pages we want to track
 TRACKED_PAGES=(
-    "/"
-    "/feed"
-    "/profile"
-    "/editor"
-    "/help"
-    "/trouble-reports"
-    "/notes"
-    "/tools"
+    "/pg-press/"
+    "/pg-press/feed"
+    "/pg-press/profile"
+    "/pg-press/editor"
+    "/pg-press/help"
+    "/pg-press/trouble-reports"
+    "/pg-press/notes"
+    "/pg-press/tools"
 )
 
 # Function to check if a path should be tracked
