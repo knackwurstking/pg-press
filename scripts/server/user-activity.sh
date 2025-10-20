@@ -55,6 +55,8 @@ parse_log_line() {
     # Extract components using regex
     # Pattern: ✅ DATE TIME [Server] STATUS METHOD PATH (IP) DURATION User{ID: NUM, Name: NAME}
     # Define regex separately to avoid bash parsing issues
+    # Account for emoji prefix (✅, ❌, etc.) at the beginning of lines
+    local prefix_pattern='[^[:space:]]+ '
     local date_pattern='([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})'
     local server_pattern='\[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+'
     local path_pattern='([^[:space:]]+)'
@@ -62,7 +64,7 @@ parse_log_line() {
     local duration_pattern=' ([^[:space:]]+)'
     local user_pattern=' User\{ID: ([0-9]+), Name: ([^}]+)\}'
 
-    local full_regex="${date_pattern}.*${server_pattern}${path_pattern}${ip_pattern}${duration_pattern}${user_pattern}"
+    local full_regex="${prefix_pattern}${date_pattern}.*${server_pattern}${path_pattern}${ip_pattern}${duration_pattern}${user_pattern}"
 
     if [[ "$line" =~ $full_regex ]]; then
         local datetime="${BASH_REMATCH[1]}"
