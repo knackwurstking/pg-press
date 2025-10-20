@@ -52,7 +52,8 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 						if tool.GetBindingTool() == nil {
 							<i>Ooops, there is no binding tool</i>
 						} else {
-							<i>Kassette: { tool.GetBindingTool().String() }</i>
+							{{ bindingTool := tool.GetBindingTool() }}
+							<i>Kassette: { bindingTool.Code } { bindingTool.Type }</i>
 						}
 					</span>
 				}
