@@ -2,6 +2,7 @@
 
 # Script to monitor and log user activity on specific pages from pg-press service logs
 # Tracks activity on: /, /feed, /profile, /editor, /help, /trouble-reports, /notes, /tools
+# Version: 2.0 - Fixed regex pattern for log parsing
 
 # Color codes for output
 GREEN='\033[0;32m'
