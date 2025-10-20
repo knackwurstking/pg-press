@@ -59,7 +59,7 @@ templ Cycles(props *CyclesProps) {
 			<section>
 				<h6 class="mb">
 					Gesamtzyklen für "{ fmt.Sprintf("%s %s %s",
-			    			props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+						props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
 				</h6>
 				<span>
 					@components.TotalCycles(props.TotalCycles, true)
