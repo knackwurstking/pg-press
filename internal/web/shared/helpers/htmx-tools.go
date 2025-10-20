@@ -85,7 +85,7 @@ func HXGetToolEditDialog(toolID *int64) templ.SafeURL {
 
 	return templ.SafeURL(fmt.Sprintf(
 		"%s/htmx/tools/edit?id=%d",
-		env.ServerPathPrefix, toolID,
+		env.ServerPathPrefix, *toolID,
 	))
 }
 

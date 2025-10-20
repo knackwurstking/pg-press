@@ -15,7 +15,7 @@ templ MetalSheets(
 		@components.SectionTitle(components.TitleLevelMain, "Bleche") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ helpers.HXGetMetalSheetEditDialog(&tool.ID, nil) }
+				hx-get={ helpers.HXGetMetalSheetEditDialog(nil, &tool.ID) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"

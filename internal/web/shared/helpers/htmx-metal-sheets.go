@@ -10,7 +10,7 @@ import (
 func HXGetMetalSheetEditDialog(metalSheetID *int64, toolID *int64) templ.SafeURL {
 	if metalSheetID == nil && toolID != nil {
 		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit&tool_id=%d",
+			"%s/htmx/metal-sheets/edit?tool_id=%d",
 			env.ServerPathPrefix, *toolID,
 		))
 	}
