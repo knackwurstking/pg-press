@@ -23,7 +23,7 @@ type CyclesProps struct {
 //   - Extract each section (status, regenerations, cycles) into separate components
 //   - Create a dedicated HTMX attributes builder function
 //   - Simplify the table rendering logic
-templ Cycles(props *CyclesProps) {
+templ Cycles(props CyclesProps) {
 	@components.SectionTitle(components.TitleLevelMain, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
 		<section id="tool-status-section">
@@ -69,7 +69,7 @@ templ Cycles(props *CyclesProps) {
 					@components.TotalCycles(props.TotalCycles, true)
 				</span>
 			</section>
-			@cyclesTable(props.Tool.Tool, props.Cycles, props.Regenerations, props.User)
+			@cyclesTable(props)
 		</section>
 	</div>
 }
@@ -162,7 +162,7 @@ templ regenerationsTableRows(regenerations []*models.ResolvedRegeneration, user 
 	}
 }
 
-templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*models.ResolvedRegeneration, user *models.User) {
+templ cyclesTable(props CyclesProps) {
 	<figure class="w-full overflow-x-scroll">
 		<table
 			name="tool-cycles-table"
@@ -179,7 +179,7 @@ templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*mo
 				</tr>
 			</thead>
 			<tbody>
-				if len(cycles) == 0 {
+				if len(props.Cycles) == 0 {
 					<tr>
 						<td colspan="5" class="text-center">
 							<i><small>Kein Pressenverlauf verfügbar</small></i>
@@ -188,12 +188,12 @@ templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*mo
 				} else {
 					{{
 						var lastRegeneration *models.ResolvedRegeneration
-						if len(regenerations) > 0 {
-							lastRegeneration = regenerations[0]
+						if len(props.Regenerations) > 0 {
+							lastRegeneration = props.Regenerations[0]
 						}
 					}}
-					for _, cycle := range cycles {
-						@cycleRowWithPartialCalc(tool, cycle, lastRegeneration, user)
+					for _, cycle := range props.Cycles {
+						@cycleRowWithPartialCalc(cycle, lastRegeneration, props)
 					}
 				}
 			</tbody>
@@ -202,10 +202,9 @@ templ cyclesTable(tool *models.Tool, cycles []*models.Cycle, regenerations []*mo
 }
 
 templ cycleRowWithPartialCalc(
-	tool *models.Tool,
 	cycle *models.Cycle,
 	lastRegeneration *models.ResolvedRegeneration,
-	user *models.User,
+	props CyclesProps,
 ) {
 	<tr
 		if lastRegeneration != nil && lastRegeneration.CycleID == cycle.ID {
@@ -230,15 +229,15 @@ templ cycleRowWithPartialCalc(
 			@components.TableActions(components.TableActionsOptions{
 				EditHref: fmt.Sprintf(
 					"%s/htmx/tools/cycle/edit?id=%d&tool_id=%d",
-					env.ServerPathPrefix, cycle.ID, tool.ID,
+					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 				),
 				EditAdminOnly: true,
 				DeleteHref: fmt.Sprintf(
 					"%s/htmx/tools/cycle/delete?id=%d&tool_id=%d",
-					env.ServerPathPrefix, cycle.ID, tool.ID,
+					env.ServerPathPrefix, cycle.ID, props.Tool.ID,
 				),
 				DeleteAdminOnly: true,
-				User:            user,
+				User:            props.User,
 			})
 		</td>
 	</tr>
