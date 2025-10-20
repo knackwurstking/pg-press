@@ -13,20 +13,14 @@ type DialogEditMetalSheetProps struct {
 	Tool       *models.Tool
 }
 
-// TODO: Split into separate functions
-// 	-Create a form field component that handles the value binding
-// 	- Extract common input field rendering logic
-// 	- Use a map/configuration object for field definitions
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
-		var (
-			baseType = "POST"
-			baseHref = fmt.Sprintf(
-				"%s/htmx/metal-sheets/edit?tool_id=%d",
-				env.ServerPathPrefix, props.Tool.ID,
-			)
-			submitButtonText = "Erstellen"
+		baseType := "POST"
+		baseHref := fmt.Sprintf(
+			"%s/htmx/metal-sheets/edit?tool_id=%d",
+			env.ServerPathPrefix, props.Tool.ID,
 		)
+		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			baseType = "PUT"
