@@ -191,39 +191,24 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	remoteIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(constants.CookieName)
 	if err != nil {
-		l.Debug("No cookie found for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
-
-	l.Debug("Found cookie for request from %s: expires=%v, secure=%v",
-		remoteIP, httpCookie.Expires, httpCookie.Secure)
 
 	cookie, err := db.Cookies.Get(httpCookie.Value)
 	if err != nil {
-		l.Debug("Cookie not found in database for request from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
-
-	l.Debug("Cookie found in database for request from %s: lastLogin=%d, userAgent='%s'",
-		remoteIP, cookie.LastLogin, cookie.UserAgent)
 
 	// Check if cookie has expired
 	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
 	if cookie.LastLogin < expirationTime {
-		l.Debug("Expired cookie from %s: lastLogin=%d, expirationTime=%d",
-			remoteIP, cookie.LastLogin, expirationTime)
 		return nil, utils.NewValidationError("cookie: cookie has expired")
 	}
 
-	l.Debug("Cookie is valid (not expired) for request from %s", remoteIP)
-
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
 	if err != nil {
-		l.Error("Failed to get user for cookie from %s: %v", remoteIP, err)
 		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
 	}
-
-	l.Debug("User validated from cookie for request from %s: user=%s", remoteIP, user.Name)
 
 	// Log user agent mismatch as potential security concern
 	// Be more lenient for PWA compatibility - only log significant changes
@@ -252,7 +237,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(constants.CookieExpirationDuration)
 
-		l.Debug("Updating cookie for page visit by user %s from %s: path=%s",
+		l.Info("Updating cookie for page visit by user %s from %s: path=%s",
 			user.Name, remoteIP, ctx.Request().URL.Path)
 
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
@@ -262,7 +247,6 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		}
 	}
 
-	l.Debug("Cookie validation successful for user %s from %s", user.Name, remoteIP)
 	return user, nil
 }
 
