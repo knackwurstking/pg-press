@@ -41,32 +41,40 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 					}
 				}
 			}}
-			@sectionPressListItem(
-				fmt.Sprintf("Presse %d", u.PressNumber),
-				top,
-				topCassette,
-				bottom,
-				fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
-			)
+			@sectionPressListItem(pressListItemProps{
+				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
+				Top:         top,
+				TopCassette: topCassette,
+				Bottom:      bottom,
+				Href:        fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
+			})
 		}
 	</ul>
 }
 
-templ sectionPressListItem(title, top, topCassette, bottom, href string) {
-	<li title={ title }>
+type pressListItemProps struct {
+	Title       string
+	Top         string
+	TopCassette string
+	Bottom      string
+	Href        string
+}
+
+templ sectionPressListItem(props pressListItemProps) {
+	<li title={ props.Title }>
 		<a
 			role="button"
-			href={ href }
+			href={ props.Href }
 			class="outline contrast flex justify-between items-center"
 		>
 			<span class="flex flex-col gap-lg w-full">
-				<h5>{ title }</h5>
+				<h5>{ props.Title }</h5>
 				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
-					if top != "" || topCassette != "" {
-						@renderTopTools(top, topCassette)
+					if props.Top != "" || props.TopCassette != "" {
+						@renderTopTools(props.Top, props.TopCassette)
 					}
-					if bottom != "" {
-						@renderBottomTools(bottom)
+					if props.Bottom != "" {
+						@renderBottomTools(props.Bottom)
 					}
 				</span>
 			</span>
