@@ -17,10 +17,6 @@ import (
 	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
 )
 
-// TODO: Split into separate functions
-//   - Move all JavaScript to an external file
-//   - Create a dedicated search component
-//   - Extract the debounce logic to a utility function
 func Page() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -61,7 +57,7 @@ func Page() templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/editor?type=troublereport&return_url=%s/trouble-reports", env.ServerPathPrefix, env.ServerPathPrefix)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 40, Col: 140}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 36, Col: 140}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -74,7 +70,7 @@ func Page() templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(env.ServerPathPrefix + "/htmx/trouble-reports/data")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 50, Col: 64}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 46, Col: 64}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -167,7 +163,7 @@ func additionalHead() templ.Component {
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(helpers.AssetURL(
 			env.ServerPathPrefix, "/css/trouble-reports/data.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 69, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/troublereports/templates/page.templ`, Line: 65, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
