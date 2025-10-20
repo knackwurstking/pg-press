@@ -88,7 +88,7 @@ parse_log_line() {
     # Extract components using regex
     # Pattern: ✅ DATE TIME [Server] STATUS METHOD PATH (IP) DURATION User{ID: NUM, Name: NAME}
     # Using a simpler, more explicit regex pattern
-    local full_regex='^.* ([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) \[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+([^[:space:]]+) \(([^)]+)\) ([^[:space:]]+) User\{ID: ([0-9]+), Name: ([^}]+)\}'
+    local full_regex='([0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) \[Server\] ([0-9]+) ([A-Z]+)[[:space:]]+([^[:space:]]+) \(([^)]+)\) ([^[:space:]]+) User\{ID: ([0-9]+), Name: ([^}]+)\}'
 
     if [[ "$DEBUG" == true ]]; then
         echo -e "${YELLOW}[DEBUG] Regex: ${NC}$full_regex"
