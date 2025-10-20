@@ -323,8 +323,15 @@ func MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*mo
 	})
 }
 
+type PressCyclesSectionProps struct {
+	Cycles   []*models.Cycle
+	ToolsMap map[int64]*models.Tool
+	User     *models.User
+	Press    models.PressNumber
+}
+
 // PressCyclesSection renders the cycles section content for HTMX
-func PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) templ.Component {
+func PressCyclesSection(props PressCyclesSectionProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -349,7 +356,7 @@ func PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = renderPressCyclesRows(cycles, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = renderPressCyclesRows(props).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -362,7 +369,7 @@ func PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
 }
 
 // renderCyclesRows renders the cycle table rows
-func renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) templ.Component {
+func renderPressCyclesRows(props PressCyclesSectionProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -383,14 +390,14 @@ func renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.To
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(cycles) == 0 {
+		if len(props.Cycles) == 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<tr><td colspan=\"6\" class=\"text-center\">Kein Pressenverlauf verfügbar</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			for _, cycle := range cycles {
-				templ_7745c5c3_Err = renderPressCycleRow(cycle, toolsMap, user).Render(ctx, templ_7745c5c3_Buffer)
+			for _, cycle := range props.Cycles {
+				templ_7745c5c3_Err = renderPressCycleRow(cycle, props.ToolsMap, props.User).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -433,7 +440,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format(constants.DateFormat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 189, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 196, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -453,7 +460,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s %s",
 				tool.Format.String(), tool.Code, tool.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 197, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 204, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -471,7 +478,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.ToolID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 200, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 207, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -489,7 +496,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.ToolPosition.GermanString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 205, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 212, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -502,7 +509,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 209, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 216, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -515,7 +522,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PartialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 214, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 221, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -531,7 +538,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 226, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 233, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -557,7 +564,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 			env.ServerPathPrefix, cycle.ID, cycle.ToolID,
 		))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 244, Col: 6}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 251, Col: 6}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -571,7 +578,7 @@ func renderPressCycleRow(cycle *models.Cycle, toolsMap map[int64]*models.Tool, u
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Diesen Eintrag (%d Zyklen) löschen?",
 			cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 248, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/features/press/templates/press-sections.templ`, Line: 255, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {

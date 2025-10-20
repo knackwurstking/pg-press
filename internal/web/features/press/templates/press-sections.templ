@@ -141,8 +141,15 @@ templ MetalSheetsSection(metalSheets []*models.MetalSheet, toolsMap map[int64]*m
 	</div>
 }
 
+type PressCyclesSectionProps struct {
+	Cycles   []*models.Cycle
+	ToolsMap map[int64]*models.Tool
+	User     *models.User
+	Press    models.PressNumber
+}
+
 // PressCyclesSection renders the cycles section content for HTMX
-templ PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User, press models.PressNumber) {
+templ PressCyclesSection(props PressCyclesSectionProps) {
 	<figure class="w-full overflow-x-scroll">
 		<table name="additional-cycles-table" class="table borderless compact">
 			<thead>
@@ -156,23 +163,23 @@ templ PressCyclesSection(cycles []*models.Cycle, toolsMap map[int64]*models.Tool
 				</tr>
 			</thead>
 			<tbody>
-				@renderPressCyclesRows(cycles, toolsMap, user)
+				@renderPressCyclesRows(props)
 			</tbody>
 		</table>
 	</figure>
 }
 
 // renderCyclesRows renders the cycle table rows
-templ renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[int64]*models.Tool, user *models.User) {
-	if len(cycles) == 0 {
+templ renderPressCyclesRows(props PressCyclesSectionProps) {
+	if len(props.Cycles) == 0 {
 		<tr>
 			<td colspan="6" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
 	} else {
-		for _, cycle := range cycles {
-			@renderPressCycleRow(cycle, toolsMap, user)
+		for _, cycle := range props.Cycles {
+			@renderPressCycleRow(cycle, props.ToolsMap, props.User)
 		}
 	}
 }
