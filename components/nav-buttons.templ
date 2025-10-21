@@ -1,0 +1,42 @@
+package components
+
+import (
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/utils"
+)
+
+templ NavProfileButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ env.ServerPathPrefix + "/profile" }
+		title="Profil"
+	>
+		<i class="bi bi-person-circle"></i>
+	</a>
+}
+
+templ NavHomeButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ env.ServerPathPrefix + "/" }
+		title="Startseite"
+	>
+		<i class="bi bi-house"></i>
+	</a>
+}
+
+templ NavFeedButton() {
+	<a
+		role="button"
+		class="ghost contrast icon"
+		href={ env.ServerPathPrefix + "/feed" }
+		hx-ws={ utils.HXWsConnectNavFeedCounter() }
+		hx-target="#feed-counter"
+		hx-swap="outerHTML"
+	>
+		<i class="bi bi-bell"></i>
+		<span id="feed-counter"></span>
+	</a>
+}
