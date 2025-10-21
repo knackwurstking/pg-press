@@ -88,7 +88,6 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	h.Log.Info("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
 
 	// Handle regeneration start/stop/abort only
-	// FIXME: Ok, this is bullshit, i mean the status does change, but no regeneration entry
 	switch statusStr {
 	case "regenerating":
 		// Start regeneration
@@ -142,9 +141,16 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		return h.HandleError(c, err, "failed to get updated tool from database")
 	}
 
+	// Render the updated status component
 	statusDisplay := h.renderStatusComponent(updatedTool, false, user)
 	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
 		return h.RenderInternalError(c, "failed to render updated tool status: "+err.Error())
+	}
+
+	// Render out-of-band swap for cycles section to trigger reload
+	oobCyclesReload := components.CyclesSectionOOB(toolID)
+	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
+		h.Log.Error("Failed to render out-of-band cycles reload: %v", err)
 	}
 
 	return nil

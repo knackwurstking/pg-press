@@ -138,3 +138,15 @@ templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 		</div>
 	</div>
 }
+
+templ CyclesSectionOOB(toolID int64) {
+	<section
+		id="cycles-section"
+		hx-get={ helpers.HXGetToolCyclesSectionContent(toolID) }
+		hx-trigger="load"
+		hx-swap="innerHTML"
+		hx-swap-oob="true"
+	>
+		@Spinner()
+	</section>
+}
