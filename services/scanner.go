@@ -5,17 +5,13 @@ import (
 	"fmt"
 )
 
-type Scannable interface {
-	Scan(dest ...any) error
-}
-
 func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T, error) {
 	var results []*T
 
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
+			return nil, err
 		}
 
 		results = append(results, item)
@@ -31,7 +27,7 @@ func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T
 func ScanSingleRow[T any](row *sql.Row, scanFunc func(Scannable) (*T, error)) (*T, error) {
 	result, err := scanFunc(row)
 	if err != nil {
-		return nil, fmt.Errorf("scan failed: %v", err)
+		return nil, err
 	}
 
 	return result, nil

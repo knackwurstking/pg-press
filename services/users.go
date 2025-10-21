@@ -17,7 +17,7 @@ type Users struct {
 }
 
 func NewUsers(r *Registry) *Users {
-	base := NewBase(r, logger.NewComponentLogger("Service Users"))
+	base := NewBase(r, logger.NewComponentLogger("Service: Users"))
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
