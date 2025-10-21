@@ -107,9 +107,3 @@ func (m *Modification[T]) Clone() *Modification[T] {
 		CreatedAt: m.CreatedAt,
 	}
 }
-
-// ModificationWithUser represents a modification with user information
-type ModificationWithUser struct {
-	Modification Modification[any] `json:"modification"`
-	User         User              `json:"user"`
-}

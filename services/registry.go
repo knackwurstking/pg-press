@@ -5,11 +5,11 @@ import "database/sql"
 type Registry struct {
 	DB *sql.DB
 
-	Cookies     *Cookies
-	Users       *Users
-	Feeds       *Feeds
-	Attachments *Attachments
-	//Modifications     *modifications.Service
+	Cookies       *Cookies
+	Users         *Users
+	Feeds         *Feeds
+	Attachments   *Attachments
+	Modifications *Modifications
 	//MetalSheets       *metalsheets.Service
 	//Notes             *notes.Service
 	//PressCycles       *presscycles.Service
@@ -27,6 +27,7 @@ func NewRegistry(db *sql.DB) *Registry {
 	registry.Users = NewUsers(registry)
 	registry.Feeds = NewFeeds(registry)
 	registry.Attachments = NewAttachments(registry)
+	registry.Modifications = NewModifications(registry)
 
 	return registry
 }
