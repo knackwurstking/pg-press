@@ -3,7 +3,6 @@ package validation
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/pkg/constants"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
@@ -40,14 +39,6 @@ func ValidateMinLength(value, fieldName string, minLength int) error {
 // ValidateID checks if an ID is valid (positive)
 func ValidateID(id int64, entityName string) error {
 	return ValidatePositiveInt64(id, fmt.Sprintf("%s_id", entityName))
-}
-
-// ValidateAPIKey performs comprehensive API key validation
-func ValidateAPIKey(apiKey string) error {
-	if err := ValidateNotEmpty(apiKey, "api_key"); err != nil {
-		return err
-	}
-	return ValidateMinLength(apiKey, "api_key", constants.MinAPIKeyLength)
 }
 
 // ValidateTimestamp checks if a timestamp is valid (positive)

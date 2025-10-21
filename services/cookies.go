@@ -2,18 +2,24 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 
+	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pgpress/logger"
 	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
 )
 
-type Service struct {
-	*base.BaseService
+const TableNameCookies = "cookies"
+
+type Cookies struct {
+	*Base
 }
 
-func NewService(db *sql.DB) *Service {
-	base := base.NewBaseService(db, "Cookies")
+func NewCookies(registry *Registry) *Cookies {
+	base := NewBase(registry, logger.NewComponentLogger("Service: Cookies"))
 
-	query := `
+	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent TEXT NOT NULL,
 			value TEXT NOT NULL,
@@ -21,120 +27,117 @@ func NewService(db *sql.DB) *Service {
 			last_login INTEGER NOT NULL,
 			PRIMARY KEY("value")
 		);
-	`
+	`, TableNameCookies)
 
-	if err := base.CreateTable(query, "cookies"); err != nil {
+	if err := base.CreateTable(query, TableNameCookies); err != nil {
 		panic(err)
 	}
 
-	return &Service{
-		BaseService: base,
+	return &Cookies{
+		Base: base,
 	}
 }
 
-func (c *Service) List() ([]*models.Cookie, error) {
+func (c *Cookies) List() ([]*models.Cookie, error) {
 	c.Log.Debug("Listing cookies")
 
 	query := `SELECT * FROM cookies ORDER BY last_login DESC`
 	rows, err := c.DB.Query(query)
 	if err != nil {
-		return nil, c.HandleSelectError(err, "cookies")
+		return nil, c.GetSelectError(err)
 	}
 	defer rows.Close()
 
-	cookies, err := scanCookiesFromRows(rows)
+	cookies, err := ScanRows(rows, scanCookie)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to scan cookies: %v", err)
 	}
 
-	c.Log.Debug("Listed cookies: count: %d", len(cookies))
 	return cookies, nil
 }
 
-func (c *Service) ListApiKey(apiKey string) ([]*models.Cookie, error) {
-	if err := validation.ValidateAPIKey(apiKey); err != nil {
+func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
+	c.Log.Debug("Listing cookies by API key")
+
+	if err := ValidateAPIKey(apiKey); err != nil {
 		return nil, err
 	}
-
-	c.Log.Debug("Listing cookies by API key")
 
 	query := `SELECT * FROM cookies WHERE api_key = ? ORDER BY last_login DESC`
 	rows, err := c.DB.Query(query, apiKey)
 	if err != nil {
-		return nil, c.HandleSelectError(err, "cookies")
+		return nil, c.GetSelectError(err)
 	}
 	defer rows.Close()
 
-	cookies, err := scanCookiesFromRows(rows)
+	cookies, err := ScanRows(rows, scanCookie)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to scan cookies: %v", err)
 	}
 
 	return cookies, nil
 }
 
-func (c *Service) Get(value string) (*models.Cookie, error) {
-	if err := validation.ValidateNotEmpty(value, "value"); err != nil {
-		return nil, err
-	}
-
+func (c *Cookies) Get(value string) (*models.Cookie, error) {
 	c.Log.Debug("Getting cookie by value")
 
-	query := `SELECT * FROM cookies WHERE value = ?`
-	row := c.DB.QueryRow(query, value)
+	if value == "" {
+		return nil, errors.NewValidationError("value cannot be empty")
+	}
 
-	cookie, err := scanner.ScanSingleRow(row, scanCookie, "cookies")
+	row := c.DB.QueryRow(`SELECT * FROM cookies WHERE value = ?`, value)
+	cookie, err := ScanSingleRow(row, scanCookie)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, utils.NewNotFoundError(value)
+			return nil, errors.NewNotFoundError(value)
 		}
-		return nil, err
+		return nil, c.GetSelectError(err)
 	}
 
 	return cookie, nil
 }
 
-func (c *Service) Add(cookie *models.Cookie) error {
-	if err := validateCookie(cookie); err != nil {
+func (c *Cookies) Add(cookie *models.Cookie) error {
+	c.Log.Debug("Add new cookie")
+
+	if err := cookie.Validate(); err != nil {
 		return err
 	}
-
-	c.Log.Debug("Adding cookie")
 
 	// Check if cookie already exists
 	exists, err := c.CheckExistence(`SELECT COUNT(*) FROM cookies WHERE value = ?`, cookie.Value)
 	if err != nil {
-		return c.HandleSelectError(err, "cookies")
+		return c.GetSelectError(err)
 	}
 
 	if exists {
-		return utils.NewAlreadyExistsError("cookie already exists")
+		return errors.NewAlreadyExistsError("cookie")
 	}
 
 	query := `INSERT INTO cookies (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
 	_, err = c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return c.HandleInsertError(err, "cookies")
+		return c.GetInsertError(err)
 	}
 
 	return nil
 }
 
-func (c *Service) Update(value string, cookie *models.Cookie) error {
-	if err := validation.ValidateNotEmpty(value, "current_value"); err != nil {
-		return err
+func (c *Cookies) Update(value string, cookie *models.Cookie) error {
+	c.Log.Debug("Updating a cookie")
+
+	if value == "" {
+		return errors.NewValidationError("current_value cannot be empty")
 	}
 
-	if err := validateCookie(cookie); err != nil {
+	if err := cookie.Validate(); err != nil {
 		return err
 	}
-
-	c.Log.Debug("Updating cookie")
 
 	query := `UPDATE cookies SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
 	result, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
-		return c.HandleUpdateError(err, "cookies")
+		return c.GetUpdateError(err)
 	}
 
 	if err := c.CheckRowsAffected(result, "cookie", value); err != nil {
@@ -144,17 +147,17 @@ func (c *Service) Update(value string, cookie *models.Cookie) error {
 	return nil
 }
 
-func (c *Service) Remove(value string) error {
-	if err := validation.ValidateNotEmpty(value, "value"); err != nil {
-		return err
-	}
+func (c *Cookies) Remove(value string) error {
+	c.Log.Debug("Removing cookie with value: %s", utils.MaskString(value))
 
-	c.Log.Debug("Removing cookie")
+	if value == "" {
+		return errors.NewValidationError("value cannot be empty")
+	}
 
 	query := `DELETE FROM cookies WHERE value = ?`
 	result, err := c.DB.Exec(query, value)
 	if err != nil {
-		return c.HandleDeleteError(err, "cookies")
+		return c.GetDeleteError(err)
 	}
 
 	if err := c.CheckRowsAffected(result, "cookie", value); err != nil {
@@ -164,17 +167,17 @@ func (c *Service) Remove(value string) error {
 	return nil
 }
 
-func (c *Service) RemoveApiKey(apiKey string) error {
-	if err := validation.ValidateAPIKey(apiKey); err != nil {
+func (c *Cookies) RemoveApiKey(apiKey string) error {
+	c.Log.Debug("Removing cookies by API key: %s", utils.MaskString(apiKey))
+
+	if err := ValidateAPIKey(apiKey); err != nil {
 		return err
 	}
-
-	c.Log.Debug("Removing cookies by API key")
 
 	query := `DELETE FROM cookies WHERE api_key = ?`
 	result, err := c.DB.Exec(query, apiKey)
 	if err != nil {
-		return c.HandleDeleteError(err, "cookies")
+		return c.GetDeleteError(err)
 	}
 
 	rowsAffected, err := c.GetRowsAffected(result, "remove cookies by API key")
@@ -183,20 +186,17 @@ func (c *Service) RemoveApiKey(apiKey string) error {
 	}
 
 	c.Log.Debug("Successfully removed cookies for API key: count: %d", rowsAffected)
+
 	return nil
 }
 
-func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
-	if err := validation.ValidateTimestamp(beforeTimestamp, "timestamp"); err != nil {
-		return 0, err
-	}
-
+func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
 	c.Log.Debug("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	query := `DELETE FROM cookies WHERE last_login < ?`
 	result, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {
-		return 0, c.HandleDeleteError(err, "cookies")
+		return 0, c.GetDeleteError(err)
 	}
 
 	rowsAffected, err := c.GetRowsAffected(result, "remove expired cookies")
@@ -204,6 +204,17 @@ func (c *Service) RemoveExpired(beforeTimestamp int64) (int64, error) {
 		return 0, err
 	}
 
-	c.Log.Debug("Removed expired cookies: count: %d", rowsAffected)
 	return rowsAffected, nil
+}
+
+func scanCookie(scanner Scannable) (*models.Cookie, error) {
+	cookie := &models.Cookie{}
+	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed to scan cookie: %v", err)
+	}
+	return cookie, nil
 }

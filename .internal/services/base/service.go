@@ -4,31 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/pkg/logger"
 	"github.com/knackwurstking/pgpress/pkg/utils"
 )
 
-// BaseService provides common database operations and utilities for all services
-type BaseService struct {
-	DB  *sql.DB
-	Log *logger.Logger
-}
-
-// NewBaseService creates a new base service with database connection and logger
-func NewBaseService(db *sql.DB, componentName string) *BaseService {
-	return &BaseService{
-		DB:  db,
-		Log: logger.GetComponentLogger(fmt.Sprintf("Service: %s", componentName)),
-	}
-}
-
 // CreateTable executes a table creation query with error handling
-func (b *BaseService) CreateTable(query string, tableName string) error {
-	if _, err := b.DB.Exec(query); err != nil {
-		return fmt.Errorf("failed to create %s table: %v", tableName, err)
-	}
-	return nil
-}
+
 
 // HandleScanError provides consistent error handling for row scanning operations
 func (b *BaseService) HandleScanError(err error, entityName string) error {
