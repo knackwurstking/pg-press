@@ -269,6 +269,37 @@ func (p *Service) Delete(id int64) error {
 	return nil
 }
 
+func (s *Service) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
+	s.Log.Debug("Getting last press cycle for tool: %d", toolID)
+
+	query := `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY date DESC
+		LIMIT 1
+	`
+
+	rows, err := s.DB.Query(query, toolID)
+	if err != nil {
+		return nil, s.HandleSelectError(err, "press_cycles")
+	}
+	defer rows.Close()
+
+	cycles, err := s.scanPressCyclesRows(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cycles) == 0 {
+		return nil, utils.NewNotFoundError(
+			fmt.Sprintf("No cycles found for the tool %d", toolID),
+		)
+	}
+
+	return cycles[0], nil
+}
+
 // GetPressCyclesForTool gets all press cycles for a specific tool
 func (s *Service) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
 	if err := validation.ValidateID(toolID, "tool"); err != nil {

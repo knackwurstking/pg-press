@@ -13,7 +13,8 @@ import (
 
 type Service struct {
 	*base.BaseService
-	tools ToolsService
+	tools       ToolsService
+	pressCycles PressCyclesService
 }
 
 // ToolsService defines the interface for tools service methods used by ToolRegenerations
@@ -23,7 +24,11 @@ type ToolsService interface {
 	UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error
 }
 
-func NewService(db *sql.DB, tools ToolsService) *Service {
+type PressCyclesService interface {
+	GetLastToolCycle(toolID int64) (*models.Cycle, error)
+}
+
+func NewService(db *sql.DB, tools ToolsService, pressCycles PressCyclesService) *Service {
 	baseService := base.NewBaseService(db, "Tool Regenerations")
 
 	query := fmt.Sprintf(`
@@ -48,6 +53,7 @@ func NewService(db *sql.DB, tools ToolsService) *Service {
 	return &Service{
 		BaseService: baseService,
 		tools:       tools,
+		pressCycles: pressCycles,
 	}
 }
 
@@ -75,29 +81,26 @@ func (s *Service) Get(id int64) (*models.Regeneration, error) {
 }
 
 // Add records a new tool regeneration event
-func (s *Service) Add(regeneration *models.Regeneration, user *models.User) (int64, error) {
-	if err := ValidateToolRegeneration(regeneration); err != nil {
-		return 0, err
-	}
-
+func (s *Service) Add(toolID, cycleID int64, reason string, user *models.User) (int64, error) {
 	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return 0, err
 	}
 
+	r := models.NewRegeneration(toolID, cycleID, reason, &user.TelegramID)
+
+	if err := ValidateToolRegeneration(r); err != nil {
+		return 0, err
+	}
+
 	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
-		user.Name, user.TelegramID, regeneration.ToolID, regeneration.CycleID, regeneration.Reason)
+		user.Name, user.TelegramID, r.ToolID, r.CycleID, r.Reason)
 
 	query := fmt.Sprintf(`
 		INSERT INTO %s (tool_id, cycle_id, reason, performed_by)
 		VALUES (?, ?, ?, ?)
 	`, TableName)
 
-	row, err := s.DB.Exec(query,
-		regeneration.ToolID,
-		regeneration.CycleID,
-		regeneration.Reason,
-		user.TelegramID,
-	)
+	row, err := s.DB.Exec(query, r.ToolID, r.CycleID, r.Reason, user.TelegramID)
 	if err != nil {
 		return 0, s.HandleInsertError(err, EntityName)
 	}
@@ -111,20 +114,17 @@ func (s *Service) Add(regeneration *models.Regeneration, user *models.User) (int
 }
 
 // Update updates an existing regeneration record
-func (r *Service) Update(regeneration *models.Regeneration, user *models.User) error {
-	if err := ValidateToolRegeneration(regeneration); err != nil {
-		return err
-	}
-
-	if err := validation.ValidateID(regeneration.ID, "regeneration"); err != nil {
-		return err
-	}
-
+func (s *Service) Update(r *models.Regeneration, user *models.User) error {
 	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return err
 	}
 
-	r.Log.Debug("Updating tool regeneration by %s (%d): id: %d", user.Name, user.TelegramID, regeneration.ID)
+	if err := ValidateToolRegeneration(r); err != nil {
+		return err
+	}
+
+	s.Log.Debug("Updating tool regeneration by %s (%d): id: %d",
+		user.Name, user.TelegramID, r.ID)
 
 	query := fmt.Sprintf(`
 		UPDATE %s
@@ -132,17 +132,12 @@ func (r *Service) Update(regeneration *models.Regeneration, user *models.User) e
 		WHERE id = ?
 	`, TableName)
 
-	result, err := r.DB.Exec(query,
-		regeneration.CycleID,
-		regeneration.Reason,
-		user.TelegramID,
-		regeneration.ID,
-	)
+	result, err := s.DB.Exec(query, r.CycleID, r.Reason, user.TelegramID, r.ID)
 	if err != nil {
-		return r.HandleUpdateError(err, EntityName)
+		return s.HandleUpdateError(err, EntityName)
 	}
 
-	if err := r.CheckRowsAffected(result, "tool_regeneration", regeneration.ID); err != nil {
+	if err := s.CheckRowsAffected(result, "tool_regeneration", r.ID); err != nil {
 		return err
 	}
 
@@ -171,33 +166,27 @@ func (r *Service) Delete(id int64) error {
 }
 
 // AddToolRegeneration starts the tool regeneration process
-func (r *Service) AddToolRegeneration(toolID, cycleID int64, reason string, user *models.User) (int64, error) {
-	if err := validation.ValidateID(toolID, "tool"); err != nil {
-		return 0, err
-	}
-
-	if err := validation.ValidateID(cycleID, "cycle"); err != nil {
-		return 0, err
-	}
-
+func (r *Service) StartToolRegeneration(toolID int64, reason string, user *models.User) (int64, error) {
 	if err := validation.ValidateNotNil(user, "user"); err != nil {
 		return 0, err
 	}
 
-	r.Log.Debug("Starting tool regeneration by %s (%d): tool: %d", user.Name, user.TelegramID, toolID)
+	r.Log.Debug("Starting tool regeneration by %s (%d): tool: %d",
+		user.Name, user.TelegramID, toolID)
+
+	cycle, err := r.pressCycles.GetLastToolCycle(toolID)
+	if err != nil {
+		return 0, err
+	}
 
 	// Update the tool's regeneration status
-	r.Log.Debug("Setting tool to regenerating status: tool: %d", toolID)
 	if err := r.tools.UpdateRegenerating(toolID, true, user); err != nil {
 		return 0, fmt.Errorf("failed to update tool regeneration status: %v", err)
 	}
 
 	// Create a new regeneration record
 	r.Log.Debug("Creating regeneration record: tool: %d", toolID)
-	regenerationID, err := r.Add(
-		models.NewRegeneration(toolID, cycleID, reason, &user.TelegramID),
-		user,
-	)
+	regenerationID, err := r.Add(toolID, cycle.ID, reason, user)
 	if err != nil {
 		// Undo the tool's regeneration status on failure
 		r.Log.Error("Failed to create regeneration record, undoing status change for tool: %d", toolID)
@@ -256,6 +245,16 @@ func (r *Service) AbortToolRegeneration(toolID int64, user *models.User) error {
 		}
 		r.Log.Debug("No regeneration record found to abort: tool: %d", toolID)
 	} else {
+		// Check this regeneration if its finished
+		tool, err := r.tools.Get(toolID)
+		if err != nil {
+			return fmt.Errorf("failed to get tool: %v", err)
+		}
+		if !tool.Regenerating {
+			// Nope, already finished
+			return fmt.Errorf("tool is not regenerating")
+		}
+
 		// Delete the regeneration record
 		r.Log.Debug("Deleting regeneration record: id: %d", lastRegen.ID)
 		if err := r.Delete(lastRegen.ID); err != nil {

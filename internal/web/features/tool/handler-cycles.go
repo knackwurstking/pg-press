@@ -216,7 +216,7 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	pressCycle.Date = form.Date
 
-	cycleID, err := h.DB.PressCycles.Add(pressCycle, user)
+	_, err = h.DB.PressCycles.Add(pressCycle, user)
 	if err != nil {
 		return h.HandleError(c, err, "failed to add cycle")
 	}
@@ -224,7 +224,7 @@ func (h *Handler) HTMXPostToolCycleEditDialog(c echo.Context) error {
 	// Handle regeneration if requested
 	if form.Regenerating {
 		h.Log.Info("Starting regeneration for tool %d", tool.ID)
-		_, err := h.DB.ToolRegenerations.AddToolRegeneration(tool.ID, cycleID, "", user)
+		_, err := h.DB.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
 		if err != nil {
 			h.Log.Error("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
@@ -308,19 +308,8 @@ func (h *Handler) HTMXPutToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		h.Log.Info("Starting regeneration for tool %d", tool.ID)
-		_, err := h.DB.ToolRegenerations.AddToolRegeneration(
-			tool.ID, cycleID, "", user)
-		if err != nil {
-			h.Log.Error("Failed to start regeneration for tool %d: %v",
-				tool.ID, err)
-		}
-
-		h.Log.Info("Stopping regeneration for tool %d", tool.ID)
-		err = h.DB.ToolRegenerations.StopToolRegeneration(tool.ID, user)
-		if err != nil {
-			h.Log.Error("Failed to stop regeneration for tool %d: %v",
-				tool.ID, err)
+		if _, err := h.DB.ToolRegenerations.Add(tool.ID, pressCycle.ID, "", user); err != nil {
+			h.Log.Error("Failed to add tool regeneration: %v", err)
 		}
 	}
 

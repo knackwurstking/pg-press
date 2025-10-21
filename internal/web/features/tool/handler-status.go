@@ -88,10 +88,12 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	h.Log.Info("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
 
 	// Handle regeneration start/stop/abort only
+	// FIXME: Ok, this is bullshit, i mean the status does change, but no regeneration entry
 	switch statusStr {
 	case "regenerating":
 		// Start regeneration
-		if err := h.DB.Tools.UpdateRegenerating(toolID, true, user); err != nil {
+		_, err := h.DB.ToolRegenerations.StartToolRegeneration(toolID, "", user)
+		if err != nil {
 			return h.HandleError(c, err, "failed to start tool regeneration")
 		}
 
@@ -104,8 +106,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		}
 
 	case "active":
-		// Stop regeneration (return to active status)
-		if err := h.DB.Tools.UpdateRegenerating(toolID, false, user); err != nil {
+		if err := h.DB.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
 			return h.HandleError(c, err, "failed to stop tool regeneration")
 		}
 

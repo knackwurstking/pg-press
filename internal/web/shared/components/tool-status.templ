@@ -75,45 +75,37 @@ templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 			<span class="text-sm text-muted">Regenerierung steuern</span>
 		</div>
 		<div class="flex flex-col gap-sm">
-			// TODO: Maybe i shout handle this form stuff a bit smarter :)
-			if tool.Status() != models.StatusRegenerating {
-				<form
-					hx-put={ helpers.HXPutToolStatus() }
-					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
-					hx-swap="outerHTML"
-				>
-					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+			<form
+				hx-put={ helpers.HXPutToolStatus() }
+				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+				hx-swap="outerHTML"
+			>
+				<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+				if tool.Status() != models.StatusRegenerating {
 					<input type="hidden" name="status" value="regenerating"/>
-					<button
-						type="submit"
-						class="small warning w-full m-0 flex gap"
-						if !userHasPermission {
-							disabled
-						}
-					>
-						<i class="bi bi-arrow-clockwise"></i>
-						Regenerierung starten
-					</button>
-				</form>
-			} else {
-				<form
-					hx-put={ helpers.HXPutToolStatus() }
-					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
-					hx-swap="outerHTML"
-				>
-					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+				} else {
 					<input type="hidden" name="status" value="active"/>
-					<button
-						type="submit"
+				}
+				<button
+					type="submit"
+					if tool.Status() != models.StatusRegenerating {
+						class="small warning w-full m-0 flex gap"
+					} else {
 						class="small success w-full m-0 flex gap"
-						if !userHasPermission {
-							disabled
-						}
-					>
-						<i class="bi bi-sign-stop"></i>
+					}
+					if !userHasPermission {
+						disabled
+					}
+				>
+					<i class="bi bi-arrow-clockwise"></i>
+					if tool.Status() != models.StatusRegenerating {
+						Regenerierung starten
+					} else {
 						Regenerierung stoppen
-					</button>
-				</form>
+					}
+				</button>
+			</form>
+			if tool.Status() == models.StatusRegenerating {
 				<form
 					hx-put={ helpers.HXPutToolStatus() }
 					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }

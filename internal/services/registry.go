@@ -39,6 +39,7 @@ func NewRegistry(db *sql.DB) *Registry {
 	attachmentsService := attachments.NewService(db)
 	modificationsService := modifications.NewService(db)
 	toolsService := tools.NewService(db, notesService)
+	pressCyclesService := presscycles.NewService(db)
 
 	return &Registry{
 		db:                db,
@@ -48,9 +49,9 @@ func NewRegistry(db *sql.DB) *Registry {
 		Users:             users.NewService(db),
 		Modifications:     modificationsService,
 		MetalSheets:       metalsheets.NewService(db, notesService),
-		PressCycles:       presscycles.NewService(db),
+		PressCycles:       pressCyclesService,
 		Tools:             toolsService,
-		ToolRegenerations: toolregenerations.NewService(db, toolsService),
+		ToolRegenerations: toolregenerations.NewService(db, toolsService, pressCyclesService),
 		TroubleReports:    troublereports.NewService(db, attachmentsService, modificationsService),
 
 		Notes: notesService,
