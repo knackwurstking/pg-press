@@ -70,7 +70,7 @@ func (u *Users) Get(telegramID int64) (*models.User, error) {
 					telegramID),
 			)
 		}
-		return nil, err
+		return nil, u.GetSelectError(err)
 	}
 
 	return user, nil

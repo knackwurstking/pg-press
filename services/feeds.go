@@ -17,7 +17,7 @@ type Feeds struct {
 }
 
 func NewFeeds(r *Registry) *Feeds {
-	base := NewBase(r, logger.GetComponentLogger("Service: Feeds"))
+	base := NewBase(r, logger.NewComponentLogger("Service: Feeds"))
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %[1]s (
@@ -195,7 +195,7 @@ func (f *Feeds) Get(id int64) (*models.Feed, error) {
 				"feed with id %d not found", id))
 		}
 
-		return nil, err
+		return nil, f.GetSelectError(err)
 	}
 
 	return feed, nil

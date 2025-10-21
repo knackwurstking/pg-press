@@ -14,9 +14,8 @@ import (
 var AppLogger *Logger
 
 var (
-	logOutput        io.Writer = os.Stderr
-	componentLoggers           = make(map[string]*Logger)
-	componentMutex   sync.RWMutex
+	logOutput      io.Writer = os.Stderr
+	componentMutex sync.RWMutex
 )
 
 // Initialize sets up the application logger with appropriate defaults
@@ -31,44 +30,10 @@ func Initialize() {
 	InitializeFromStandardLog()
 }
 
-// SetOutput sets the output for all loggers.
-func SetOutput(output io.Writer) {
-	logOutput = output
-	AppLogger.SetOutput(output)
-
-	componentMutex.Lock()
-	defer componentMutex.Unlock()
-	for _, l := range componentLoggers {
-		l.SetOutput(output)
-	}
-}
-
 // NewComponentLogger creates a new logger for a specific component
 func NewComponentLogger(component string) *Logger {
 	logger := New(logOutput, AppLogger.level, AppLogger.colorPreference)
 	logger.SetPrefix(fmt.Sprintf("[%s]", component))
-	return logger
-}
-
-// GetComponentLogger returns a logger for the specified component, creating it if necessary
-func GetComponentLogger(component string) *Logger {
-	componentMutex.RLock()
-	if logger, exists := componentLoggers[component]; exists {
-		componentMutex.RUnlock()
-		return logger
-	}
-	componentMutex.RUnlock()
-
-	componentMutex.Lock()
-	defer componentMutex.Unlock()
-
-	// Double-check after acquiring write lock
-	if logger, exists := componentLoggers[component]; exists {
-		return logger
-	}
-
-	logger := NewComponentLogger(component)
-	componentLoggers[component] = logger
 	return logger
 }
 
