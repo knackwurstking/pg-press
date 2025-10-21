@@ -50,17 +50,24 @@ templ Page(props *PageProps) {
 					@components.Spinner()
 				</section>
 			}
-			<section
-				id="cycles-section"
-				hx-get={ helpers.HXGetToolCyclesSectionContent(props.ToolID) }
-				hx-trigger="load, pageLoaded from:body"
-				hx-swap="innerHTML"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			>
-				@components.Spinner()
-			</section>
+			@CyclesSection(props.ToolID, false)
 		</main>
 	}
+}
+
+templ CyclesSection(toolID int64, oob bool) {
+	<section
+		id="cycles-section"
+		hx-get={ helpers.HXGetToolCyclesSectionContent(toolID) }
+		hx-trigger="load, pageLoaded from:body"
+		hx-swap="innerHTML"
+		if oob {
+			hx-swap-oob="true"
+		}
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	>
+		@components.Spinner()
+	</section>
 }
 
 templ sectionActions(user *models.User, toolID int64) {

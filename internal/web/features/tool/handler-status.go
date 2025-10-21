@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pgpress/internal/web/features/tool/templates"
 	"github.com/knackwurstking/pgpress/internal/web/shared/components"
 	"github.com/knackwurstking/pgpress/pkg/models"
 	"github.com/labstack/echo/v4"
@@ -148,7 +149,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	}
 
 	// Render out-of-band swap for cycles section to trigger reload
-	oobCyclesReload := components.CyclesSectionOOB(toolID)
+	oobCyclesReload := templates.CyclesSection(toolID, true)
 	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
 		h.Log.Error("Failed to render out-of-band cycles reload: %v", err)
 	}
