@@ -1,5 +1,14 @@
 package env
 
-// MinAPIKeyLength defines the minimum required length for API keys
-// This is a security requirement to ensure sufficient entropy
-const MinAPIKeyLength = 32
+import "time"
+
+const (
+	MinAPIKeyLength = 32
+
+	CookieExpirationDuration = time.Hour * 24 * 31 * 6
+	CookieName               = "pgpress-api-key"
+
+	DateFormat     = "02.01.2006"
+	TimeFormat     = "15:04"
+	DateTimeFormat = DateFormat + " " + TimeFormat
+)

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -92,7 +92,7 @@ func middlewareLogger() echo.MiddlewareFunc {
 				if he, ok := err.(*echo.HTTPError); ok {
 					status = he.Code
 				} else {
-					status = utils.GetHTTPStatusCode(err)
+					status = errors.GetHTTPStatusCode(err)
 				}
 				// Error details are logged in the HTTP error handler
 			}
@@ -145,7 +145,7 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: keyAuthSkipper,
 		KeyLookup: "header:" + echo.HeaderAuthorization +
-			",query:access_token,cookie:" + constants.CookieName,
+			",query:access_token,cookie:" + env.CookieName,
 		AuthScheme: "Bearer",
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
 			return keyAuthValidator(auth, ctx, db)
@@ -176,7 +176,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
 			l.Info("Authentication failed from %s", remoteIP)
-			return false, echo.NewHTTPError(utils.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
+			return false, echo.NewHTTPError(errors.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
 		}
 		l.Debug("API key auth successful for user %s from %s", user.Name, remoteIP)
 	}
@@ -189,7 +189,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	l := clog("Middleware: Cookie Validation")
 
 	remoteIP := ctx.RealIP()
-	httpCookie, err := ctx.Cookie(constants.CookieName)
+	httpCookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
 	}
@@ -200,9 +200,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	}
 
 	// Check if cookie has expired
-	expirationTime := time.Now().Add(-constants.CookieExpirationDuration).UnixMilli()
+	expirationTime := time.Now().Add(-env.CookieExpirationDuration).UnixMilli()
 	if cookie.LastLogin < expirationTime {
-		return nil, utils.NewValidationError("cookie: cookie has expired")
+		return nil, errors.NewValidationError("cookie: cookie has expired")
 	}
 
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
@@ -235,7 +235,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	if pathMatches {
 		now := time.Now()
 		cookie.LastLogin = now.UnixMilli()
-		httpCookie.Expires = now.Add(constants.CookieExpirationDuration)
+		httpCookie.Expires = now.Add(env.CookieExpirationDuration)
 
 		l.Info("Updating cookie for page visit by user %s from %s: path=%s",
 			user.Name, remoteIP, ctx.Request().URL.Path)

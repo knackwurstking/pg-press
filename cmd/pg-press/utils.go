@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/logger"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pgpress/logger"
+	"github.com/knackwurstking/pgpress/services"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -36,23 +36,23 @@ func openDB(customPath string) (*services.Registry, error) {
 	// Configure SQLite connection string with parameters to prevent locking issues
 	connectionString := path + "?_busy_timeout=30000&_journal_mode=WAL&_foreign_keys=on&_synchronous=NORMAL"
 
-	db, err := sql.Open("sqlite3", connectionString)
+	r, err := sql.Open("sqlite3", connectionString)
 	if err != nil {
 		return nil, err
 	}
 
 	// Configure connection pool to prevent resource exhaustion
-	db.SetMaxOpenConns(1)    // SQLite works best with single writer
-	db.SetMaxIdleConns(1)    // Keep one connection alive
-	db.SetConnMaxLifetime(0) // No maximum lifetime
+	r.SetMaxOpenConns(1)    // SQLite works best with single writer
+	r.SetMaxIdleConns(1)    // Keep one connection alive
+	r.SetConnMaxLifetime(0) // No maximum lifetime
 
 	// Test the connection
-	if err = db.Ping(); err != nil {
-		db.Close()
+	if err = r.Ping(); err != nil {
+		r.Close()
 		return nil, err
 	}
 
-	return services.NewRegistry(db), nil
+	return services.NewRegistry(r), nil
 }
 
 // createDBPathOption creates a standardized database path CLI option
@@ -69,12 +69,12 @@ func createDBPathOption(cmd *cli.Command, usage string) *string {
 
 // withDBOperation is a helper that handles common database operations
 func withDBOperation(customDBPath *string, operation func(*services.Registry) error) error {
-	db, err := openDB(*customDBPath)
+	r, err := openDB(*customDBPath)
 	if err != nil {
 		return err
 	}
 
-	return operation(db)
+	return operation(r)
 }
 
 // createSimpleCommand creates a CLI command with standardized database access
@@ -94,7 +94,7 @@ func createSimpleCommand(name, usage string, action func(*services.Registry) err
 
 // handleNotFoundError provides consistent handling for not found errors
 func handleNotFoundError(err error) {
-	if utils.IsNotFoundError(err) {
+	if errors.IsNotFoundError(err) {
 		fmt.Fprintf(os.Stderr, "not found: %s\n", err.Error())
 		os.Exit(exitCodeNotFound)
 	}

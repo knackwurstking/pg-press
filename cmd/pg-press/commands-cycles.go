@@ -5,9 +5,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -32,7 +32,7 @@ func listCyclesAllCommand() cli.Command {
 			pressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Validate press number
 					press := models.PressNumber(*pressNumber)
 					if !models.IsValidPressNumber(&press) {
@@ -40,7 +40,7 @@ func listCyclesAllCommand() cli.Command {
 					}
 
 					// Get all cycles and filter by press
-					allCycles, err := registry.PressCycles.List()
+					allCycles, err := r.PressCycles.List()
 					if err != nil {
 						return fmt.Errorf("failed to retrieve cycles: %v", err)
 					}
@@ -73,7 +73,7 @@ func listCyclesAllCommand() cli.Command {
 							cycle.ToolID,
 							cycle.ToolPosition.GermanString(),
 							cycle.TotalCycles,
-							cycle.Date.Format(constants.DateTimeFormat),
+							cycle.Date.Format(env.DateTimeFormat),
 							cycle.PerformedBy,
 						)
 					}
@@ -99,9 +99,9 @@ func deleteCycleCommand() cli.Command {
 			cycleID := cli.Int64Arg(cmd, "cycle-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// First check if there are any regenerations that reference this cycle
-					hasRegenerations, err := registry.ToolRegenerations.HasRegenerationsForCycle(*cycleID)
+					hasRegenerations, err := r.ToolRegenerations.HasRegenerationsForCycle(*cycleID)
 					if err != nil {
 						return fmt.Errorf("failed to check for regenerations: %v", err)
 					}
@@ -113,7 +113,7 @@ func deleteCycleCommand() cli.Command {
 					fmt.Printf("Deleting cycle %d...\n", *cycleID)
 
 					// Delete cycle
-					err = registry.PressCycles.Delete(*cycleID)
+					err = r.PressCycles.Delete(*cycleID)
 					if err != nil {
 						return fmt.Errorf("failed to delete cycle: %v", err)
 					}

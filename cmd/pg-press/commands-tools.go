@@ -7,9 +7,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -41,9 +41,9 @@ func listToolsCommand() cli.Command {
 				cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get all tools from database
-					tools, err := registry.Tools.List()
+					tools, err := r.Tools.List()
 					if err != nil {
 						return fmt.Errorf("failed to retrieve tools: %v", err)
 					}
@@ -114,9 +114,9 @@ func listToolsCommand() cli.Command {
 }
 
 func listDeadToolsCommand() cli.Command {
-	return createSimpleCommand("list-dead", "List all dead tools from the database", func(registry *services.Registry) error {
+	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *services.Registry) error {
 		// Get all dead tools from database
-		tools, err := registry.Tools.ListDeadTools()
+		tools, err := r.Tools.ListDeadTools()
 		if err != nil {
 			return fmt.Errorf("failed to retrieve dead tools: %v", err)
 		}
@@ -174,9 +174,9 @@ func markDeadCommand() cli.Command {
 			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get tool first to check if it exists
-					tool, err := registry.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
 					}
@@ -193,7 +193,7 @@ func markDeadCommand() cli.Command {
 					}
 
 					// Mark tool as dead
-					err = registry.Tools.MarkAsDead(*toolID, user)
+					err = r.Tools.MarkAsDead(*toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to mark tool as dead: %v", err)
 					}
@@ -215,9 +215,9 @@ func reviveDeadToolCommand() cli.Command {
 			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get tool first to check if it exists
-					tool, err := registry.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
 					}
@@ -234,7 +234,7 @@ func reviveDeadToolCommand() cli.Command {
 					}
 
 					// Revive tool (mark as alive)
-					err = registry.Tools.ReviveTool(*toolID, user)
+					err = r.Tools.ReviveTool(*toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to revive tool: %v", err)
 					}
@@ -256,9 +256,9 @@ func deleteToolCommand() cli.Command {
 			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get tool first to check if it exists and show info
-					tool, err := registry.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
 					}
@@ -272,7 +272,7 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, err := registry.ToolRegenerations.GetRegenerationHistory(*toolID)
+					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to get regenerations for tool: %v", err)
 					}
@@ -280,14 +280,14 @@ func deleteToolCommand() cli.Command {
 					if len(regenerations) > 0 {
 						fmt.Printf("Deleting %d regeneration(s)...\n", len(regenerations))
 						for _, regen := range regenerations {
-							if err := registry.ToolRegenerations.Delete(regen.ID); err != nil {
+							if err := r.ToolRegenerations.Delete(regen.ID); err != nil {
 								return fmt.Errorf("failed to delete regeneration %d: %v", regen.ID, err)
 							}
 						}
 					}
 
 					// 2. Delete all cycles for this tool
-					cycles, err := registry.PressCycles.GetPressCyclesForTool(*toolID)
+					cycles, err := r.PressCycles.GetPressCyclesForTool(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to get cycles for tool: %v", err)
 					}
@@ -295,14 +295,14 @@ func deleteToolCommand() cli.Command {
 					if len(cycles) > 0 {
 						fmt.Printf("Deleting %d cycle(s)...\n", len(cycles))
 						for _, cycle := range cycles {
-							if err := registry.PressCycles.Delete(cycle.ID); err != nil {
+							if err := r.PressCycles.Delete(cycle.ID); err != nil {
 								return fmt.Errorf("failed to delete cycle %d: %v", cycle.ID, err)
 							}
 						}
 					}
 
 					// 3. Finally, delete the tool itself
-					err = registry.Tools.Delete(*toolID, user)
+					err = r.Tools.Delete(*toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to delete tool: %v", err)
 					}
@@ -325,9 +325,9 @@ func listCyclesCommand() cli.Command {
 			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get tool first to check if it exists and show info
-					tool, err := registry.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
 					}
@@ -336,7 +336,7 @@ func listCyclesCommand() cli.Command {
 						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get cycles for this tool
-					cycles, err := registry.PressCycles.GetPressCyclesForTool(*toolID)
+					cycles, err := r.PressCycles.GetPressCyclesForTool(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to retrieve cycles: %v", err)
 					}
@@ -356,7 +356,7 @@ func listCyclesCommand() cli.Command {
 								cycle.PressNumber,
 								cycle.ToolPosition.GermanString(),
 								cycle.TotalCycles,
-								cycle.Date.Format(constants.DateTimeFormat),
+								cycle.Date.Format(env.DateTimeFormat),
 								cycle.PerformedBy,
 							)
 						}
@@ -470,9 +470,9 @@ func listRegenerationsCommand() cli.Command {
 			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(registry *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get tool first to check if it exists and show info
-					tool, err := registry.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
 					}
@@ -481,7 +481,7 @@ func listRegenerationsCommand() cli.Command {
 						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get regenerations for this tool
-					regenerations, err := registry.ToolRegenerations.GetRegenerationHistory(*toolID)
+					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(*toolID)
 					if err != nil {
 						return fmt.Errorf("failed to retrieve regenerations: %v", err)
 					}

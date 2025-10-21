@@ -6,12 +6,11 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
-	"github.com/knackwurstking/pgpress/internal/web"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/errors"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
@@ -47,7 +46,7 @@ func serverCommand() cli.Command {
 					}
 				}
 
-				db, err := openDB(*customDBPath)
+				r, err := openDB(*customDBPath)
 				if err != nil {
 					log().Error("Failed to open database: %v", err)
 					return err
@@ -60,9 +59,9 @@ func serverCommand() cli.Command {
 				e.Use(middlewareLogger())
 				e.Use(conditionalCacheMiddleware())
 				e.Use(staticCacheMiddleware())
-				e.Use(middlewareKeyAuth(db))
+				e.Use(middlewareKeyAuth(r))
 
-				web.Serve(e, db)
+				Serve(e, r)
 
 				log().Info("Starting HTTP server on %s", *addr)
 				if err := e.Start(*addr); err != nil {
@@ -92,7 +91,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 			log().Error("HTTP error handler received nil error - " +
 				"this indicates a bug in the application")
 
-			err = errors.New("unexpected nil error")
+			err = fmt.Errorf("unexpected nil error")
 		}
 
 		// Extract error details
@@ -110,7 +109,7 @@ func createHTTPErrorHandler() echo.HTTPErrorHandler {
 				message = http.StatusText(code)
 			}
 		} else {
-			code = utils.GetHTTPStatusCode(err)
+			code = errors.GetHTTPStatusCode(err)
 			message = err.Error()
 		}
 

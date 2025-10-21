@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 	"github.com/labstack/gommon/color"
 
 	"github.com/SuperPaintman/nice/cli"
 )
 
 func listUserCommand() cli.Command {
-	return createSimpleCommand("list", "List all users", func(db *services.Registry) error {
-		users, err := db.Users.List()
+	return createSimpleCommand("list", "List all users", func(r *services.Registry) error {
+		users, err := r.Users.List()
 		if err != nil {
 			return err
 		}
@@ -38,8 +38,8 @@ func showUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
-					user, err := db.Users.Get(*telegramID)
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					user, err := r.Users.Get(*telegramID)
 					if err != nil {
 						handleNotFoundError(err)
 						handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", *telegramID))
@@ -55,7 +55,7 @@ func showUserCommand() cli.Command {
 					fmt.Printf("%-15s %-20s %s\n", "-----------", "---------", "-------")
 					fmt.Printf("%-15d %-20s %s\n", user.TelegramID, user.Name, user.ApiKey)
 
-					if cookies, err := db.Cookies.ListApiKey(user.ApiKey); err != nil {
+					if cookies, err := r.Cookies.ListApiKey(user.ApiKey); err != nil {
 						fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
 					} else {
 						if len(cookies) > 0 {
@@ -84,9 +84,9 @@ func addUserCommand() cli.Command {
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					user := models.NewUser(*telegramID, *userName, *apiKey)
-					if _, err := db.Users.Add(user); utils.IsAlreadyExistsError(err) {
+					if _, err := r.Users.Add(user); errors.IsAlreadyExistsError(err) {
 						return fmt.Errorf("user already exists: %d (%s)", *telegramID, *userName)
 					} else {
 						return err
@@ -105,8 +105,8 @@ func removeUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
-					return db.Users.Delete(*telegramID)
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					return r.Users.Delete(*telegramID)
 				})
 			}
 		}),
@@ -123,8 +123,8 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
-					user, err := db.Users.Get(*telegramID)
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					user, err := r.Users.Get(*telegramID)
 					if err != nil {
 						return err
 					}
@@ -137,7 +137,7 @@ func modUserCommand() cli.Command {
 						user.ApiKey = *apiKey
 					}
 
-					return db.Users.Update(user)
+					return r.Users.Update(user)
 				})
 			}
 		}),

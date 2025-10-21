@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -25,12 +25,12 @@ func removeCookiesCommand() cli.Command {
 				cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					var err error
 					if *useApiKey {
-						err = db.Cookies.RemoveApiKey(*value)
+						err = r.Cookies.RemoveApiKey(*value)
 					} else {
-						err = db.Cookies.Remove(*value)
+						err = r.Cookies.Remove(*value)
 					}
 
 					if err != nil {
@@ -55,28 +55,28 @@ func autoCleanCookiesCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
-					t := time.Now().Add(0 - constants.CookieExpirationDuration).UnixMilli()
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					t := time.Now().Add(0 - env.CookieExpirationDuration).UnixMilli()
 					isExpired := func(cookie *models.Cookie) bool {
 						return t >= cookie.LastLogin
 					}
 
 					// Clean up cookies for a specific telegram user
 					if *telegramID != 0 {
-						u, err := db.Users.Get(*telegramID)
+						u, err := r.Users.Get(*telegramID)
 						if err != nil {
 							handleNotFoundError(err)
 							handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", *telegramID))
 						}
 
-						cookies, err := db.Cookies.ListApiKey(u.ApiKey)
+						cookies, err := r.Cookies.ListApiKey(u.ApiKey)
 						if err != nil {
 							handleGenericError(err, fmt.Sprintf("List cookies for user \"%d\" failed", *telegramID))
 						}
 
 						for _, cookie := range cookies {
 							if isExpired(cookie) {
-								if err = db.Cookies.Remove(cookie.Value); err != nil {
+								if err = r.Cookies.Remove(cookie.Value); err != nil {
 									// Print out error and continue
 									fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s\n", cookie.Value, err.Error())
 								}
@@ -87,14 +87,14 @@ func autoCleanCookiesCommand() cli.Command {
 					}
 
 					// Clean up all cookies
-					cookies, err := db.Cookies.List()
+					cookies, err := r.Cookies.List()
 					if err != nil {
 						handleGenericError(err, "List cookies from database failed")
 					}
 
 					for _, cookie := range cookies {
 						if isExpired(cookie) {
-							if err = db.Cookies.Remove(cookie.Value); err != nil {
+							if err = r.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
 								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\" failed: %s\n", cookie.Value, err.Error())
 							}

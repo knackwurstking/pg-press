@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -54,18 +54,18 @@ func listFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					var feeds []*models.Feed
 
 					var err error
 					// Get feeds based on parameters
 					if *limit > 0 {
-						feeds, err = db.Feeds.ListRange(*offset, *limit)
+						feeds, err = r.Feeds.ListRange(*offset, *limit)
 						if err != nil {
 							return err
 						}
 					} else {
-						feeds, err = db.Feeds.List()
+						feeds, err = r.Feeds.List()
 						if err != nil {
 							return err
 						}
@@ -146,7 +146,7 @@ func removeFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Remove by IDs
 					if *idsStr != "" {
 						ids := strings.Split(*idsStr, ",")
@@ -154,17 +154,17 @@ func removeFeedsCommand() cli.Command {
 						for i, id := range ids {
 							ids[i] = strings.TrimSpace(id)
 						}
-						return removeFeedsByIDs(db, ids)
+						return removeFeedsByIDs(r, ids)
 					}
 
 					// Remove by duration
 					if *olderThan != "" {
-						return removeFeedsByDuration(db, *olderThan)
+						return removeFeedsByDuration(r, *olderThan)
 					}
 
 					// Remove by date
 					if *before != "" {
-						return removeFeedsByDate(db, *before)
+						return removeFeedsByDate(r, *before)
 					}
 
 					return fmt.Errorf("must specify either feed IDs, --older-than, or --before")
@@ -232,7 +232,7 @@ func formatAge(duration time.Duration) string {
 // This function is no longer needed with the simplified feed structure
 // Content is now directly accessible as feed.Content
 
-func removeFeedsByIDs(db *services.Registry, ids []string) error {
+func removeFeedsByIDs(r *services.Registry, ids []string) error {
 	var failed []string
 	var removed int
 
@@ -243,9 +243,9 @@ func removeFeedsByIDs(db *services.Registry, ids []string) error {
 			continue
 		}
 
-		err = db.Feeds.Delete(int64(id))
+		err = r.Feeds.Delete(int64(id))
 		if err != nil {
-			if utils.IsNotFoundError(err) {
+			if errors.IsNotFoundError(err) {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
 			} else {
 				failed = append(failed, fmt.Sprintf("failed to remove feed ID %d: %s", id, err))
@@ -273,7 +273,7 @@ func removeFeedsByIDs(db *services.Registry, ids []string) error {
 	return nil
 }
 
-func removeFeedsByDuration(db *services.Registry, durationStr string) error {
+func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
 		// Try parsing as days if direct parsing fails
@@ -291,7 +291,7 @@ func removeFeedsByDuration(db *services.Registry, durationStr string) error {
 	cutoffTime := time.Now().Add(-duration)
 	timestamp := cutoffTime.UnixMilli()
 
-	rowsAffected, err := db.Feeds.DeleteBefore(timestamp)
+	rowsAffected, err := r.Feeds.DeleteBefore(timestamp)
 	if err != nil {
 		return fmt.Errorf("failed to remove feeds: %s", err)
 	}
@@ -302,7 +302,7 @@ func removeFeedsByDuration(db *services.Registry, durationStr string) error {
 	return nil
 }
 
-func removeFeedsByDate(db *services.Registry, dateStr string) error {
+func removeFeedsByDate(r *services.Registry, dateStr string) error {
 	cutoffTime, err := parseDateTime(dateStr)
 	if err != nil {
 		return fmt.Errorf("invalid date format: %s (use format '2006-01-02' or '2006-01-02 15:04:05')", dateStr)
@@ -310,7 +310,7 @@ func removeFeedsByDate(db *services.Registry, dateStr string) error {
 
 	timestamp := cutoffTime.UnixMilli()
 
-	rowsAffected, err := db.Feeds.DeleteBefore(timestamp)
+	rowsAffected, err := r.Feeds.DeleteBefore(timestamp)
 	if err != nil {
 		return fmt.Errorf("failed to remove feeds: %s", err)
 	}

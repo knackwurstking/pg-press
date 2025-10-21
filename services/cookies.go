@@ -1,13 +1,9 @@
-package cookies
+package services
 
 import (
 	"database/sql"
 
-	"github.com/knackwurstking/pgpress/internal/services/base"
-	"github.com/knackwurstking/pgpress/internal/services/shared/scanner"
-	"github.com/knackwurstking/pgpress/internal/services/shared/validation"
-	"github.com/knackwurstking/pgpress/pkg/models"
-	"github.com/knackwurstking/pgpress/pkg/utils"
+	"github.com/knackwurstking/pgpress/models"
 )
 
 type Service struct {

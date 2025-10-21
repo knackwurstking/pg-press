@@ -1,0 +1,44 @@
+package main
+
+import (
+	"github.com/knackwurstking/pgpress"
+	"github.com/knackwurstking/pgpress/handlers"
+	"github.com/knackwurstking/pgpress/services"
+	"github.com/labstack/echo/v4"
+)
+
+func Serve(e *echo.Echo, r *services.Registry) {
+	// Static File Server
+	e.StaticFS(serverPathPrefix+"/", pgpress.GetAssets())
+
+	// WebSocket Handlers
+	//wsFeedHandler := startWsFeedHandler(db)
+
+	//auth.NewRoutes(db).RegisterRoutes(e)
+	//editor.NewRoutes(db).RegisterRoutes(e)
+	//feed.NewRoutes(db).RegisterRoutes(e)
+	//help.NewRoutes(db).RegisterRoutes(e)
+	handlers.NewHome(r).RegisterRoutes(e)
+	//profile.NewRoutes(db).RegisterRoutes(e)
+	//tools.NewRoutes(db).RegisterRoutes(e)
+	//tool.NewRoutes(db).RegisterRoutes(e)
+	//press.NewRoutes(db).RegisterRoutes(e)
+	//umbau.NewRoutes(db).RegisterRoutes(e)
+	//troublereports.NewRoutes(db).RegisterRoutes(e)
+	//nav.NewRoutes(db, wsFeedHandler).RegisterRoutes(e)
+	//notes.NewRoutes(db).RegisterRoutes(e)
+	//metalsheets.NewRoutes(db).RegisterRoutes(e)
+}
+
+//func startWsFeedHandler(db *services.Registry) *wshandlers.FeedHandler {
+//	wsfh := wshandlers.NewFeedHandler(db)
+//
+//	// Start the feed notification manager in a goroutine
+//	ctx := context.Background()
+//	go wsfh.Start(ctx)
+//
+//	// Set the notifier on the feeds for real-time updates
+//	db.Feeds.SetBroadcaster(wsfh)
+//
+//	return wsfh
+//}
