@@ -29,6 +29,15 @@ func (b *Base) CreateTable(query string, tableName string) error {
 	return nil
 }
 
+func (b *Base) QueryCount(query string, args ...any) (int, error) {
+	var count int
+	err := b.DB.QueryRow(query, args...).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (b *Base) GetSelectError(err error) error {
 	return fmt.Errorf("database select failed: %v", err)
 }

@@ -20,7 +20,7 @@ func NewCookies(registry *Registry) *Cookies {
 	base := NewBase(registry, logger.NewComponentLogger("Service: Cookies"))
 
 	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS cookies (
+		CREATE TABLE IF NOT EXISTS %s (
 			user_agent TEXT NOT NULL,
 			value TEXT NOT NULL,
 			api_key TEXT NOT NULL,
@@ -105,13 +105,12 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 	}
 
 	// Check if cookie already exists
-	exists, err := c.CheckExistence(`SELECT COUNT(*) FROM cookies WHERE value = ?`, cookie.Value)
+	count, err := c.QueryCount(`SELECT COUNT(*) FROM cookies WHERE value = ?`, cookie.Value)
 	if err != nil {
 		return c.GetSelectError(err)
 	}
-
-	if exists {
-		return errors.NewAlreadyExistsError("cookie")
+	if count > 0 {
+		return errors.NewAlreadyExistsError(TableNameCookies)
 	}
 
 	query := `INSERT INTO cookies (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
@@ -135,13 +134,9 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 	}
 
 	query := `UPDATE cookies SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
-	result, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
+	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
 		return c.GetUpdateError(err)
-	}
-
-	if err := c.CheckRowsAffected(result, "cookie", value); err != nil {
-		return err
 	}
 
 	return nil
@@ -155,13 +150,9 @@ func (c *Cookies) Remove(value string) error {
 	}
 
 	query := `DELETE FROM cookies WHERE value = ?`
-	result, err := c.DB.Exec(query, value)
+	_, err := c.DB.Exec(query, value)
 	if err != nil {
 		return c.GetDeleteError(err)
-	}
-
-	if err := c.CheckRowsAffected(result, "cookie", value); err != nil {
-		return err
 	}
 
 	return nil
@@ -175,36 +166,24 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 	}
 
 	query := `DELETE FROM cookies WHERE api_key = ?`
-	result, err := c.DB.Exec(query, apiKey)
+	_, err := c.DB.Exec(query, apiKey)
 	if err != nil {
 		return c.GetDeleteError(err)
 	}
 
-	rowsAffected, err := c.GetRowsAffected(result, "remove cookies by API key")
-	if err != nil {
-		return err
-	}
-
-	c.Log.Debug("Successfully removed cookies for API key: count: %d", rowsAffected)
-
 	return nil
 }
 
-func (c *Cookies) RemoveExpired(beforeTimestamp int64) (int64, error) {
+func (c *Cookies) RemoveExpired(beforeTimestamp int64) error {
 	c.Log.Debug("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
 	query := `DELETE FROM cookies WHERE last_login < ?`
-	result, err := c.DB.Exec(query, beforeTimestamp)
+	_, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {
-		return 0, c.GetDeleteError(err)
+		return c.GetDeleteError(err)
 	}
 
-	rowsAffected, err := c.GetRowsAffected(result, "remove expired cookies")
-	if err != nil {
-		return 0, err
-	}
-
-	return rowsAffected, nil
+	return nil
 }
 
 func scanCookie(scanner Scannable) (*models.Cookie, error) {
