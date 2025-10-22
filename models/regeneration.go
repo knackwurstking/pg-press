@@ -1,5 +1,7 @@
 package models
 
+import "github.com/knackwurstking/pgpress/errors"
+
 // Regeneration represents a tool regeneration event
 type Regeneration struct {
 	ID          int64  `json:"id"`
@@ -16,6 +18,18 @@ func NewRegeneration(toolID int64, cycleID int64, reason string, performedBy *in
 		Reason:      reason,
 		PerformedBy: performedBy,
 	}
+}
+
+func (r *Regeneration) Validate() error {
+	if r.ToolID <= 0 {
+		return errors.NewValidationError("tool_id")
+	}
+
+	if r.CycleID <= 0 {
+		return errors.NewValidationError("cycle_id")
+	}
+
+	return nil
 }
 
 type ResolvedRegeneration struct {
