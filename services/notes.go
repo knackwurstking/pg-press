@@ -18,23 +18,21 @@ type Notes struct {
 func NewNotes(r *Registry) *Notes {
 	base := NewBase(r, logger.NewComponentLogger("Service: Notes"))
 
-	if err := base.CreateTable(
-		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
+	query := fmt.Sprintf(`
+		CREATE TABLE IF NOT EXISTS %s (
 			id INTEGER NOT NULL,
 			level INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			linked TEXT,
 			PRIMARY KEY("id" AUTOINCREMENT)
-		);`, TableNameNotes),
-		TableNameNotes,
-	); err != nil {
+		);`, TableNameNotes)
+
+	if err := base.CreateTable(query, TableNameNotes); err != nil {
 		panic(err)
 	}
 
-	return &Notes{
-		Base: base,
-	}
+	return &Notes{Base: base}
 }
 
 func (n *Notes) List() ([]*models.Note, error) {
@@ -117,26 +115,15 @@ func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
 
 func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
 	n.Log.Debug("Getting notes for press: %d", press)
-
-	query := fmt.Sprintf(
-		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
-		FROM %s
-		WHERE linked = $1;`,
-		TableNameNotes,
-	)
-
-	rows, err := n.DB.Query(query, fmt.Sprintf("press_%d", press))
-	if err != nil {
-		return nil, n.GetSelectError(err)
-	}
-	defer rows.Close()
-
-	return ScanRows(rows, scanNote)
+	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
 func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
 	n.Log.Debug("Getting notes for tool: %d", toolID)
+	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
+}
 
+func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -144,7 +131,7 @@ func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
 		TableNameNotes,
 	)
 
-	rows, err := n.DB.Query(query, fmt.Sprintf("tool_%d", toolID))
+	rows, err := n.DB.Query(query, linked)
 	if err != nil {
 		return nil, n.GetSelectError(err)
 	}
@@ -170,12 +157,7 @@ func (n *Notes) Add(note *models.Note) (int64, error) {
 		return 0, n.GetInsertError(err)
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, n.GetInsertError(err)
-	}
-
-	return id, nil
+	return result.LastInsertId()
 }
 
 func (n *Notes) Update(note *models.Note) error {
@@ -191,11 +173,7 @@ func (n *Notes) Update(note *models.Note) error {
 	)
 
 	_, err := n.DB.Exec(query, note.Level, note.Content, note.Linked, note.ID)
-	if err != nil {
-		return n.GetUpdateError(err)
-	}
-
-	return nil
+	return n.GetUpdateError(err)
 }
 
 func (n *Notes) Delete(id int64) error {
@@ -203,11 +181,7 @@ func (n *Notes) Delete(id int64) error {
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)
-	if err != nil {
-		return n.GetDeleteError(err)
-	}
-
-	return nil
+	return n.GetDeleteError(err)
 }
 
 func scanNote(scanner Scannable) (*models.Note, error) {

@@ -204,8 +204,9 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 
 	query := fmt.Sprintf(`
 		SELECT %s
-		FROM %s WHERE regenerating = 0 AND is_dead = 0 AND press = ?
-	`, ToolQuerySelect, TableNameTools)
+		FROM %s
+		WHERE regenerating = 0 AND is_dead = 0 AND press = ?`,
+		ToolQuerySelect, TableNameTools)
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
@@ -234,8 +235,9 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, err
 
 	query := fmt.Sprintf(`
 		SELECT %s
-		FROM %s WHERE press = ? AND regenerating = 0 AND is_dead = 0
-	`, ToolQuerySelect, TableNameTools)
+		FROM %s
+		WHERE press = ? AND regenerating = 0 AND is_dead = 0`,
+		ToolQuerySelect, TableNameTools)
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
@@ -243,21 +245,15 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, err
 	}
 	defer rows.Close()
 
-	tools, err := ScanRows(rows, scanTool)
-	if err != nil {
-		return nil, err
-	}
-
-	return tools, nil
+	return ScanRows(rows, scanTool)
 }
 
 func (t *Tools) GetPressUtilization() ([]models.PressUtilization, error) {
 	t.Log.Debug("Getting press utilization")
 
-	var utilization []models.PressUtilization
-
 	// Valid press numbers: 0, 2, 3, 4, 5
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
+	utilization := make([]models.PressUtilization, 0, len(validPresses))
 
 	for _, pressNum := range validPresses {
 		tools := t.GetActiveToolsForPress(pressNum)
@@ -278,14 +274,11 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
 	t.Log.Debug("Listing active tools")
 
 	query := fmt.Sprintf(`
-		SELECT
-			%s
-		FROM
-			%s
-		WHERE
-			is_dead = 0
-		ORDER BY format ASC, code ASC
-	`, ToolQuerySelect, TableNameTools)
+		SELECT %s
+		FROM %s
+		WHERE is_dead = 0
+		ORDER BY format ASC, code ASC`,
+		ToolQuerySelect, TableNameTools)
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
@@ -293,26 +286,18 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
 	}
 	defer rows.Close()
 
-	tools, err := ScanRows(rows, scanTool)
-	if err != nil {
-		return nil, err
-	}
-
-	return tools, nil
+	return ScanRows(rows, scanTool)
 }
 
 func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
 	t.Log.Debug("Listing dead tools")
 
 	query := fmt.Sprintf(`
-		SELECT
-			%s
-		FROM
-			%s
-		WHERE
-			is_dead = 1
-		ORDER BY format ASC, code ASC
-	`, ToolQuerySelect, TableNameTools)
+		SELECT %s
+		FROM %s
+		WHERE is_dead = 1
+		ORDER BY format ASC, code ASC`,
+		ToolQuerySelect, TableNameTools)
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
@@ -320,17 +305,13 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
 	}
 	defer rows.Close()
 
-	tools, err := ScanRows(rows, scanTool)
-	if err != nil {
-		return nil, err
-	}
-
-	return tools, nil
+	return ScanRows(rows, scanTool)
 }
 
 func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user *models.User) error {
-	t.Log.Debug("Updating tool press by %s: toolID: %d, pressNumber: %v",
-		user.String(), toolID, pressNumber)
+	if err := user.Validate(); err != nil {
+		return err
+	}
 
 	if !models.IsValidPressNumber(pressNumber) {
 		return errors.NewValidationError(
@@ -338,27 +319,23 @@ func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user 
 		)
 	}
 
-	if err := user.Validate(); err != nil {
-		return err
-	}
+	t.Log.Debug("Updating tool press by %s: toolID: %d, pressNumber: %v",
+		user.String(), toolID, pressNumber)
 
 	tool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for press update: %v", err)
+		return fmt.Errorf("failed to get tool for press update: %w", err)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET press = ? WHERE id = ?`, TableNameTools)
-	_, err = t.DB.Exec(query, pressNumber, toolID)
-	if err != nil {
+	if _, err = t.DB.Exec(query, pressNumber, toolID); err != nil {
 		return t.GetUpdateError(err)
 	}
 
-	// Handle binding
+	// Handle binding - update press for bound tool
 	if tool.Binding != nil {
-		// Update press for bound tool
-		query = `UPDATE tools SET press = ? WHERE id = ?`
-		_, err = t.DB.Exec(query, pressNumber, *tool.Binding)
-		if err != nil {
+		query = fmt.Sprintf(`UPDATE %s SET press = ? WHERE id = ?`, TableNameTools)
+		if _, err = t.DB.Exec(query, pressNumber, *tool.Binding); err != nil {
 			return t.GetUpdateError(err)
 		}
 	}
@@ -367,17 +344,17 @@ func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user 
 }
 
 func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
-	t.Log.Debug("Updating tool regenerating status by %s: toolID: %d, regenerating: %t",
-		user.String(), toolID, regenerating)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
 
+	t.Log.Debug("Updating tool regenerating status by %s: toolID: %d, regenerating: %t",
+		user.String(), toolID, regenerating)
+
 	// Get the current tool to check if the regeneration status is actually changing
 	currentTool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get current tool state: %v", err)
+		return fmt.Errorf("failed to get current tool state: %w", err)
 	}
 
 	if currentTool.Regenerating == regenerating {
@@ -385,8 +362,7 @@ func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET regenerating = ? WHERE id = ?`, TableNameTools)
-	_, err = t.DB.Exec(query, regenerating, toolID)
-	if err != nil {
+	if _, err = t.DB.Exec(query, regenerating, toolID); err != nil {
 		return t.GetUpdateError(err)
 	}
 
@@ -394,16 +370,14 @@ func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models
 }
 
 func (t *Tools) MarkAsDead(toolID int64, user *models.User) error {
-	t.Log.Debug("Marking tool as dead by %s: id: %d", user.String(), toolID)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
 
-	// Mark as dead and clear press assignment
+	t.Log.Debug("Marking tool as dead by %s: id: %d", user.String(), toolID)
+
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 1, press = NULL WHERE id = ?`, TableNameTools)
-	_, err := t.DB.Exec(query, toolID)
-	if err != nil {
+	if _, err := t.DB.Exec(query, toolID); err != nil {
 		return t.GetUpdateError(err)
 	}
 
@@ -411,95 +385,85 @@ func (t *Tools) MarkAsDead(toolID int64, user *models.User) error {
 }
 
 func (t *Tools) ReviveTool(toolID int64, user *models.User) error {
-	t.Log.Debug("Reviving dead tool by %s: id: %d", user.String(), toolID)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
 
-	// Mark as alive (not dead)
+	t.Log.Debug("Reviving dead tool by %s: id: %d", user.String(), toolID)
+
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 0 WHERE id = ?`, TableNameTools)
-	_, err := t.DB.Exec(query, toolID)
-	if err != nil {
+	if _, err := t.DB.Exec(query, toolID); err != nil {
 		return t.GetUpdateError(err)
 	}
 
 	return nil
 }
 
-func (s *Tools) Bind(cassette, target int64) error {
-	if err := s.validateBindingTools(cassette, target); err != nil {
+func (t *Tools) Bind(cassetteID, targetID int64) error {
+	if err := t.validateBindingTools(cassetteID, targetID); err != nil {
 		return err
 	}
 
 	// Get press from the target tool
-	var press *models.PressNumber
-	if t, err := s.Get(target); err != nil {
+	targetTool, err := t.Get(targetID)
+	if err != nil {
 		return err
-	} else {
-		press = t.Press
 	}
 
-	// Now the actual binding logic
+	// Execute binding operations
 	queries := []string{
-		// Bindings
-		fmt.Sprintf(`UPDATE %s SET binding = :target WHERE id = :cassette;`, TableNameTools),
-		fmt.Sprintf(`UPDATE %s SET binding = :cassette WHERE id = :target;`, TableNameTools),
-		// Unbind press
-		fmt.Sprintf(`UPDATE %s SET press = NULL WHERE press = :press AND position = "cassette top";`, TableNameTools),
-		// Bind press from target to cassette
-		fmt.Sprintf(`UPDATE %s SET press = :press WHERE id = :cassette;`, TableNameTools),
+		// Set bindings
+		fmt.Sprintf(`UPDATE %s SET binding = :target WHERE id = :cassette`, TableNameTools),
+		fmt.Sprintf(`UPDATE %s SET binding = :cassette WHERE id = :target`, TableNameTools),
+		// Clear press from other cassettes at the same press
+		fmt.Sprintf(`UPDATE %s SET press = NULL WHERE press = :press AND position = "cassette top"`, TableNameTools),
+		// Assign press to cassette
+		fmt.Sprintf(`UPDATE %s SET press = :press WHERE id = :cassette`, TableNameTools),
 	}
 
 	for _, query := range queries {
-		if _, err := s.DB.Exec(query,
-			sql.Named("target", target),
-			sql.Named("cassette", cassette),
-			sql.Named("press", press),
+		if _, err := t.DB.Exec(query,
+			sql.Named("target", targetID),
+			sql.Named("cassette", cassetteID),
+			sql.Named("press", targetTool.Press),
 		); err != nil {
-			return s.GetUpdateError(err)
+			return t.GetUpdateError(err)
 		}
 	}
 
 	return nil
 }
 
-func (s *Tools) UnBind(toolID int64) error {
-	// Get the tool to find its binding
-	tool, err := s.Get(toolID)
+func (t *Tools) UnBind(toolID int64) error {
+	tool, err := t.Get(toolID)
 	if err != nil {
 		return err
 	}
 
-	// If no binding exists, nothing to unbind
 	if tool.Binding == nil {
 		return nil
 	}
 
-	// Clear the binding by setting binding to NULL for both tools
 	query := fmt.Sprintf(`
-		UPDATE
-			%s
-		SET
-			binding = NULL
-		WHERE
-			id = :toolID OR id = :binding;
-	`, TableNameTools)
+		UPDATE %s
+		SET binding = NULL
+		WHERE id = :toolID OR id = :binding`,
+		TableNameTools)
 
-	if _, err := s.DB.Exec(query,
+	if _, err := t.DB.Exec(query,
 		sql.Named("toolID", toolID),
 		sql.Named("binding", *tool.Binding),
 	); err != nil {
-		return s.GetUpdateError(err)
+		return t.GetUpdateError(err)
 	}
 
 	return nil
 }
 
 func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
-	formatBytes, err := json.Marshal(tool.Format)
+	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return fmt.Errorf("failed to marshal tool format: %w", err)
+		return err
 	}
 
 	query := fmt.Sprintf(`
@@ -528,33 +492,31 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error
 // - The target tool is a top position tool
 // - Neither tool is already bound to another tool (prevents multiple bindings)
 func (t *Tools) validateBindingTools(cassetteID, targetID int64) error {
-	// Validate cassete tool, has to be a top cassette position tool
 	cassetteTool, err := t.Get(cassetteID)
 	if err != nil {
 		return err
 	}
+
 	if cassetteTool.Position != models.PositionTopCassette {
 		return errors.NewValidationError(
 			fmt.Sprintf("tool %d is not a top cassette", cassetteID))
 	}
 
-	// Check if cassette tool is already bound
 	if cassetteTool.Binding != nil {
 		return errors.NewValidationError(
 			fmt.Sprintf("cassette tool %d is already bound to tool %d", cassetteID, *cassetteTool.Binding))
 	}
 
-	// Validate target tools position, has to be a top position tool
 	targetTool, err := t.Get(targetID)
 	if err != nil {
 		return err
 	}
+
 	if targetTool.Position != models.PositionTop {
 		return errors.NewValidationError(
 			fmt.Sprintf("tool %d is not a top tool", targetID))
 	}
 
-	// Check if target tool is already bound
 	if targetTool.Binding != nil {
 		return errors.NewValidationError(
 			fmt.Sprintf("target tool %d is already bound to tool %d", targetID, *targetTool.Binding))
@@ -589,22 +551,4 @@ func scanTool(scannable Scannable) (*models.Tool, error) {
 	}
 
 	return tool, nil
-}
-
-func ScanToolsIntoMap(rows *sql.Rows) (map[int64]*models.Tool, error) {
-	resultMap := make(map[int64]*models.Tool)
-
-	for rows.Next() {
-		tool, err := scanTool(rows)
-		if err != nil {
-			return nil, err
-		}
-		resultMap[tool.ID] = tool
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
-	}
-
-	return resultMap, nil
 }

@@ -40,34 +40,35 @@ func NewAttachments(r *Registry) *Attachments {
 func (a *Attachments) List() ([]*models.Attachment, error) {
 	a.Log.Debug("Listing attachments")
 
-	rows, err := a.DB.Query(fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`, TableNameAttachments,
-	))
+	query := fmt.Sprintf(
+		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
+		TableNameAttachments,
+	)
+
+	rows, err := a.DB.Query(query)
 	if err != nil {
 		return nil, a.GetSelectError(err)
 	}
 	defer rows.Close()
 
-	attachments, err := ScanRows(rows, scanAttachment)
-	if err != nil {
-		return nil, err
-	}
-
-	return attachments, nil
+	return ScanRows(rows, scanAttachment)
 }
 
 func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	a.Log.Debug("Getting attachment for ID: %d", id)
 
-	row := a.DB.QueryRow(fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s WHERE id = ?`, TableNameAttachments),
-		id,
+	query := fmt.Sprintf(
+		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
+		TableNameAttachments,
 	)
+
+	row := a.DB.QueryRow(query, id)
 	attachment, err := ScanSingleRow(row, scanAttachment)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf(
-				"attachment with ID %d not found", id))
+			return nil, errors.NewNotFoundError(
+				fmt.Sprintf("attachment with ID %d not found", id),
+			)
 		}
 		return nil, a.GetSelectError(err)
 	}
@@ -91,18 +92,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	}
 
 	query := fmt.Sprintf(
-		`
-			SELECT
-				*
-			FROM
-				%s
-			WHERE
-				id
-			IN
-				(%s)
-			ORDER BY
-				id ASC
-		`,
+		`SELECT id, mime_type, data FROM %s WHERE id IN (%s) ORDER BY id ASC`,
 		TableNameAttachments,
 		strings.Join(placeholders, ","),
 	)
@@ -120,7 +110,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	}
 
 	// Return attachments in the order of the requested IDs
-	var attachments []*models.Attachment
+	attachments := make([]*models.Attachment, 0, len(ids))
 	for _, id := range ids {
 		if attachment, exists := attachmentMap[id]; exists {
 			attachments = append(attachments, attachment)
@@ -138,8 +128,11 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 		return 0, err
 	}
 
-	query := fmt.Sprintf(`INSERT INTO %s (mime_type, data) VALUES (?, ?)`,
-		TableNameAttachments)
+	query := fmt.Sprintf(
+		`INSERT INTO %s (mime_type, data) VALUES (?, ?)`,
+		TableNameAttachments,
+	)
+
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
 		return 0, a.GetInsertError(err)
@@ -160,10 +153,12 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 		return err
 	}
 
-	// Convert string ID to int64
 	id := attachment.GetID()
-	query := fmt.Sprintf(`UPDATE %s SET mime_type = ?, data = ? WHERE id = ?`,
-		TableNameAttachments)
+	query := fmt.Sprintf(
+		`UPDATE %s SET mime_type = ?, data = ? WHERE id = ?`,
+		TableNameAttachments,
+	)
+
 	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
 		return a.GetUpdateError(err)
@@ -185,18 +180,17 @@ func (a *Attachments) Delete(id int64) error {
 }
 
 func scanAttachment(scanner Scannable) (*models.Attachment, error) {
-	attachment := &models.Attachment{}
 	var id int64
+	attachment := &models.Attachment{}
 
 	err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan attachment: %v", err)
+		return nil, fmt.Errorf("failed to scan attachment: %w", err)
 	}
 
-	// Set the ID using string conversion to maintain compatibility
 	attachment.ID = fmt.Sprintf("%d", id)
 	return attachment, nil
 }
@@ -210,13 +204,12 @@ func scanAttachmentsIntoMap(rows *sql.Rows) (map[int64]*models.Attachment, error
 			return nil, err
 		}
 
-		// Convert string ID back to int64 for map key
 		id := attachment.GetID()
 		resultMap[id] = attachment
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
+		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
 
 	return resultMap, nil

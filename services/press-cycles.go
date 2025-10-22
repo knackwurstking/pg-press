@@ -45,6 +45,142 @@ func NewPressCycles(r *Registry) *PressCycles {
 	return &PressCycles{Base: base}
 }
 
+// CRUD Operations
+
+// Get retrieves a press cycle by ID
+func (s *PressCycles) Get(id int64) (*models.Cycle, error) {
+	s.Log.Debug("Getting press cycle: %d", id)
+
+	query := fmt.Sprintf(`
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM %s
+		WHERE id = ?
+	`, TableNamePressCycles)
+
+	row := s.DB.QueryRow(query, id)
+	cycle, err := ScanSingleRow(row, scanCycle)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
+		}
+		return nil, err
+	}
+
+	cycle.PartialCycles = s.GetPartialCycles(cycle)
+	return cycle, nil
+}
+
+// List retrieves all press cycles
+func (s *PressCycles) List() ([]*models.Cycle, error) {
+	s.Log.Debug("Listing press cycles")
+
+	query := fmt.Sprintf(`
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM %s
+		ORDER BY total_cycles DESC
+	`, TableNamePressCycles)
+
+	rows, err := s.DB.Query(query)
+	if err != nil {
+		return nil, s.GetSelectError(err)
+	}
+	defer rows.Close()
+
+	return ScanRows(rows, scanCycle)
+}
+
+// Add creates a new press cycle
+func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
+	s.Log.Debug(
+		"Adding press cycle by %s: tool: %d, position: %s, press: %d, cycles: %d",
+		user.String(), cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
+	)
+
+	if err := cycle.Validate(); err != nil {
+		return 0, err
+	}
+
+	if err := user.Validate(); err != nil {
+		return 0, err
+	}
+
+	if cycle.Date.IsZero() {
+		cycle.Date = time.Now()
+	}
+
+	query := fmt.Sprintf(`
+		INSERT INTO %s (press_number, tool_id, tool_position, total_cycles, date, performed_by)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`, TableNamePressCycles)
+
+	result, err := s.DB.Exec(query,
+		cycle.PressNumber,
+		cycle.ToolID,
+		cycle.ToolPosition,
+		cycle.TotalCycles,
+		cycle.Date,
+		user.TelegramID,
+	)
+	if err != nil {
+		return 0, s.GetInsertError(err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, s.GetInsertError(err)
+	}
+
+	cycle.ID = id
+	return id, nil
+}
+
+// Update modifies an existing press cycle
+func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
+	s.Log.Debug("Updating press cycle by %s: id: %d", user.String(), cycle.ID)
+
+	if err := cycle.Validate(); err != nil {
+		return err
+	}
+
+	if err := user.Validate(); err != nil {
+		return err
+	}
+
+	if cycle.Date.IsZero() {
+		cycle.Date = time.Now()
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE %s
+		SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
+		WHERE id = ?
+	`, TableNamePressCycles)
+
+	_, err := s.DB.Exec(query,
+		cycle.TotalCycles,
+		cycle.ToolID,
+		cycle.ToolPosition,
+		user.TelegramID,
+		cycle.PressNumber,
+		cycle.Date,
+		cycle.ID,
+	)
+
+	return s.GetUpdateError(err)
+}
+
+// Delete removes a press cycle from the database
+func (s *PressCycles) Delete(id int64) error {
+	s.Log.Debug("Deleting press cycle: %d", id)
+
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
+	_, err := s.DB.Exec(query, id)
+
+	return s.GetDeleteError(err)
+}
+
+// Cycle Calculations
+
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
@@ -83,8 +219,8 @@ func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
 	return fmt.Sprintf(baseQuery, TableNamePressCycles, condition)
 }
 
-func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []interface{} {
-	args := []interface{}{cycle.PressNumber}
+func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
+	args := []any{cycle.PressNumber}
 
 	if cycle.ToolPosition == models.PositionTopCassette {
 		args = append(args, models.PositionTopCassette, models.PositionTop)
@@ -96,137 +232,7 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []interface{} 
 	return args
 }
 
-// Get retrieves a press cycle by ID
-func (p *PressCycles) Get(id int64) (*models.Cycle, error) {
-	p.Log.Debug("Getting press cycle: %d", id)
-
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE id = ?
-	`, TableNamePressCycles)
-
-	row := p.DB.QueryRow(query, id)
-	cycle, err := ScanSingleRow(row, scanCycle)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
-		}
-		return nil, err
-	}
-
-	cycle.PartialCycles = p.GetPartialCycles(cycle)
-	return cycle, nil
-}
-
-// List retrieves all press cycles
-func (p *PressCycles) List() ([]*models.Cycle, error) {
-	p.Log.Debug("Listing press cycles")
-
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		ORDER BY total_cycles DESC
-	`, TableNamePressCycles)
-
-	rows, err := p.DB.Query(query)
-	if err != nil {
-		return nil, p.GetSelectError(err)
-	}
-	defer rows.Close()
-
-	return ScanRows(rows, scanCycle)
-}
-
-// Add creates a new press cycle
-func (p *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
-	p.Log.Debug(
-		"Adding press cycle by %s: tool: %d, position: %s, press: %d, cycles: %d",
-		user.String(), cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
-	)
-
-	if err := cycle.Validate(); err != nil {
-		return 0, err
-	}
-
-	if err := user.Validate(); err != nil {
-		return 0, err
-	}
-
-	if cycle.Date.IsZero() {
-		cycle.Date = time.Now()
-	}
-
-	query := fmt.Sprintf(`
-		INSERT INTO %s (press_number, tool_id, tool_position, total_cycles, date, performed_by)
-		VALUES (?, ?, ?, ?, ?, ?)
-	`, TableNamePressCycles)
-
-	result, err := p.DB.Exec(query,
-		cycle.PressNumber,
-		cycle.ToolID,
-		cycle.ToolPosition,
-		cycle.TotalCycles,
-		cycle.Date,
-		user.TelegramID,
-	)
-	if err != nil {
-		return 0, p.GetInsertError(err)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, p.GetInsertError(err)
-	}
-
-	cycle.ID = id
-	return id, nil
-}
-
-// Update modifies an existing press cycle
-func (p *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
-	p.Log.Debug("Updating press cycle by %s: id: %d", user.String(), cycle.ID)
-
-	if err := cycle.Validate(); err != nil {
-		return err
-	}
-
-	if err := user.Validate(); err != nil {
-		return err
-	}
-
-	if cycle.Date.IsZero() {
-		cycle.Date = time.Now()
-	}
-
-	query := fmt.Sprintf(`
-		UPDATE %s
-		SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
-		WHERE id = ?
-	`, TableNamePressCycles)
-
-	_, err := p.DB.Exec(query,
-		cycle.TotalCycles,
-		cycle.ToolID,
-		cycle.ToolPosition,
-		user.TelegramID,
-		cycle.PressNumber,
-		cycle.Date,
-		cycle.ID,
-	)
-
-	return p.GetUpdateError(err)
-}
-
-// Delete removes a press cycle from the database
-func (p *PressCycles) Delete(id int64) error {
-	p.Log.Debug("Deleting press cycle: %d", id)
-
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
-	_, err := p.DB.Exec(query, id)
-
-	return p.GetDeleteError(err)
-}
+// Query Methods
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
 func (s *PressCycles) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
@@ -283,7 +289,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 		ORDER BY total_cycles DESC
 	`, TableNamePressCycles)
 
-	args := []interface{}{pressNumber}
+	args := []any{pressNumber}
 	query = s.addPaginationToQuery(query, limit, offset, &args)
 
 	rows, err := s.DB.Query(query, args...)
@@ -295,7 +301,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 	return ScanRows(rows, scanCycle)
 }
 
-func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int, args *[]interface{}) string {
+func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int, args *[]any) string {
 	if limit != nil {
 		query += " LIMIT ?"
 		*args = append(*args, *limit)
@@ -309,6 +315,8 @@ func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int
 	}
 	return query
 }
+
+// Summary Data
 
 // GetCycleSummaryData retrieves complete cycle summary data for a press
 func (s *PressCycles) GetCycleSummaryData(
@@ -367,6 +375,8 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 
 	return totalCycles, totalPartialCycles, int64(len(activeTools)), int64(len(cycles))
 }
+
+// Tool Summaries
 
 // GetToolSummaries creates consolidated tool summaries with start/end dates
 func (s *PressCycles) GetToolSummaries(
@@ -531,6 +541,8 @@ func (s *PressCycles) getPositionOrder(position models.Position) int {
 		return 999
 	}
 }
+
+// Overlapping Tools Detection
 
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
 func (s *PressCycles) GetOverlappingTools() ([]*models.OverlappingTool, error) {
@@ -747,6 +759,8 @@ func (s *PressCycles) containsInstance(instances []*models.OverlappingToolInstan
 	}
 	return false
 }
+
+// Scan Functions
 
 func scanCycle(scannable Scannable) (*models.Cycle, error) {
 	cycle := &models.Cycle{}

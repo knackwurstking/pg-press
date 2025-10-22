@@ -33,9 +33,7 @@ func NewCookies(registry *Registry) *Cookies {
 		panic(err)
 	}
 
-	return &Cookies{
-		Base: base,
-	}
+	return &Cookies{Base: base}
 }
 
 func (c *Cookies) List() ([]*models.Cookie, error) {
@@ -48,12 +46,7 @@ func (c *Cookies) List() ([]*models.Cookie, error) {
 	}
 	defer rows.Close()
 
-	cookies, err := ScanRows(rows, scanCookie)
-	if err != nil {
-		return nil, fmt.Errorf("failed to scan cookies: %v", err)
-	}
-
-	return cookies, nil
+	return ScanRows(rows, scanCookie)
 }
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
@@ -73,12 +66,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 	}
 	defer rows.Close()
 
-	cookies, err := ScanRows(rows, scanCookie)
-	if err != nil {
-		return nil, fmt.Errorf("failed to scan cookies: %v", err)
-	}
-
-	return cookies, nil
+	return ScanRows(rows, scanCookie)
 }
 
 func (c *Cookies) Get(value string) (*models.Cookie, error) {
@@ -88,10 +76,9 @@ func (c *Cookies) Get(value string) (*models.Cookie, error) {
 		return nil, errors.NewValidationError("value cannot be empty")
 	}
 
-	row := c.DB.QueryRow(
-		fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies),
-		value,
-	)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies)
+	row := c.DB.QueryRow(query, value)
+
 	cookie, err := ScanSingleRow(row, scanCookie)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -111,10 +98,8 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 	}
 
 	// Check if cookie already exists
-	count, err := c.QueryCount(
-		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE value = ?`, TableNameCookies),
-		cookie.Value,
-	)
+	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE value = ?`, TableNameCookies)
+	count, err := c.QueryCount(query, cookie.Value)
 	if err != nil {
 		return c.GetSelectError(err)
 	}
@@ -122,7 +107,7 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 		return errors.NewAlreadyExistsError(TableNameCookies)
 	}
 
-	query := fmt.Sprintf(
+	query = fmt.Sprintf(
 		`INSERT INTO %s (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`,
 		TableNameCookies,
 	)
@@ -205,10 +190,7 @@ func scanCookie(scanner Scannable) (*models.Cookie, error) {
 	cookie := &models.Cookie{}
 	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to scan cookie: %v", err)
+		return nil, err
 	}
 	return cookie, nil
 }

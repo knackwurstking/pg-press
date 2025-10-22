@@ -59,12 +59,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	sheets, err := ScanRows(rows, scanMetalSheet)
-	if err != nil {
-		return nil, err
-	}
-
-	return sheets, nil
+	return ScanRows(rows, scanMetalSheet)
 }
 
 func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
@@ -84,7 +79,6 @@ func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
 			return nil, errors.NewNotFoundError(
 				fmt.Sprintf("metal sheet with ID %d", id))
 		}
-
 		return nil, err
 	}
 
@@ -107,12 +101,7 @@ func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
 	}
 	defer rows.Close()
 
-	sheets, err := ScanRows(rows, scanMetalSheet)
-	if err != nil {
-		return nil, err
-	}
-
-	return sheets, nil
+	return ScanRows(rows, scanMetalSheet)
 }
 
 func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*models.MetalSheet, error) {
@@ -136,23 +125,16 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 	}
 	defer rows.Close()
 
-	sheets, err := ScanRows(rows, scanMetalSheet)
-	if err != nil {
-		return nil, err
-	}
-
-	return sheets, nil
+	return ScanRows(rows, scanMetalSheet)
 }
 
 func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[int64]*models.Tool) ([]*models.MetalSheet, error) {
 	s.Log.Debug("Getting metal sheets for press: %d, tools: %d", pressNumber, len(toolsMap))
 
-	// Get the expected machine type for this press
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
 	s.Log.Debug("Press machine type determined: press: %d, type: %s",
 		pressNumber, expectedMachineType)
 
-	// Get metal sheets for all tools on this press
 	var allSheets models.MetalSheetList
 	for toolID := range toolsMap {
 		sheets, err := s.GetByToolID(toolID)
@@ -164,24 +146,11 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[i
 		allSheets = append(allSheets, sheets...)
 	}
 
-	// Filter by machine type and count by type
 	var filteredSheets models.MetalSheetList
-	var sacmiCount, sitiCount, otherCount int
-
 	for _, sheet := range allSheets {
-		switch sheet.Identifier {
-		case models.MachineTypeSACMI:
-			sacmiCount++
-			if sheet.Identifier == expectedMachineType {
-				filteredSheets = append(filteredSheets, sheet)
-			}
-		case models.MachineTypeSITI:
-			sitiCount++
-			if sheet.Identifier == expectedMachineType {
-				filteredSheets = append(filteredSheets, sheet)
-			}
-		default:
-			otherCount++
+		if sheet.Identifier == expectedMachineType {
+			filteredSheets = append(filteredSheets, sheet)
+		} else if sheet.Identifier != models.MachineTypeSACMI && sheet.Identifier != models.MachineTypeSITI {
 			s.Log.Warn("Found metal sheet %d with unexpected identifier: %s", sheet.ID, sheet.Identifier)
 		}
 	}
@@ -193,7 +162,6 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 	s.Log.Debug("Adding metal sheet: tool_id: %d, identifier: %s",
 		sheet.ToolID, sheet.Identifier)
 
-	// Validate the metal sheet before adding
 	if err := sheet.Validate(); err != nil {
 		return 0, err
 	}
@@ -222,16 +190,13 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 		return 0, s.GetInsertError(err)
 	}
 
-	// Set sheet ID for return
 	sheet.ID = id
-
 	return id, nil
 }
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 	s.Log.Debug("Updating metal sheet: %d", sheet.ID)
 
-	// Validate the metal sheet before updating
 	if err := sheet.Validate(); err != nil {
 		return err
 	}
@@ -256,25 +221,21 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
 	s.Log.Debug("Assigning tool to metal sheet: sheet_id: %d, tool_id: %d", sheetID, toolID)
 
-	// Validate tool ID
 	if toolID <= 0 {
 		return errors.NewValidationError("tool_id: must be positive")
 	}
 
-	// Get current sheet to verify it exists
-	_, err := s.Get(sheetID)
-	if err != nil {
-		return fmt.Errorf("failed to get sheet for tool assignment: %v", err)
+	if _, err := s.Get(sheetID); err != nil {
+		return fmt.Errorf("failed to get sheet for tool assignment: %w", err)
 	}
 
-	// Update the tool assignment
-	_, err = s.DB.Exec(
-		fmt.Sprintf(`UPDATE %s
+	query := fmt.Sprintf(`
+		UPDATE %s
 		SET tool_id = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2`, TableNameMetalSheets),
-		toolID, sheetID,
-	)
-	if err != nil {
+		WHERE id = $2;
+	`, TableNameMetalSheets)
+
+	if _, err := s.DB.Exec(query, toolID, sheetID); err != nil {
 		return s.GetUpdateError(err)
 	}
 
@@ -285,8 +246,7 @@ func (s *MetalSheets) Delete(id int64) error {
 	s.Log.Debug("Deleting metal sheet: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
-	_, err := s.DB.Exec(query, id)
-	if err != nil {
+	if _, err := s.DB.Exec(query, id); err != nil {
 		return s.GetDeleteError(err)
 	}
 
@@ -296,20 +256,16 @@ func (s *MetalSheets) Delete(id int64) error {
 func scanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 	sheet := &models.MetalSheet{}
 	var identifierStr string
-	var toolID int64
 
 	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
-		&sheet.STF, &sheet.STFMax, &identifierStr, &toolID)
+		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
+		return nil, fmt.Errorf("failed to scan metal sheet: %w", err)
 	}
 
-	// Convert string identifier to MachineType
 	sheet.Identifier = models.MachineType(identifierStr)
-	sheet.ToolID = toolID
-
 	return sheet, nil
 }

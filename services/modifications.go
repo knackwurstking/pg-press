@@ -51,14 +51,11 @@ func NewModifications(r *Registry) *Modifications {
 		panic(err)
 	}
 
-	return &Modifications{
-		Base: base,
-	}
+	return &Modifications{Base: base}
 }
 
 func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user int64) (int64, error) {
-	s.Log.Debug("Adding modification: mt: %s, id: %d, user: %d",
-		mt, mtID, user)
+	s.Log.Debug("Adding modification: mt: %s, id: %d, user: %d", mt, mtID, user)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return 0, err
@@ -74,17 +71,11 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 	}
 
 	query := fmt.Sprintf(`
-		INSERT INTO
-			%s (user_id, entity_type, entity_id, data, created_at)
-		VALUES
-			(?, ?, ?, ?, ?)
+		INSERT INTO %s (user_id, entity_type, entity_id, data, created_at)
+		VALUES (?, ?, ?, ?, ?)
 	`, TableNameModifications)
 
-	createdAt := time.Now()
-	result, err := s.DB.Exec(
-		query,
-		user, mt, mtID, jsonData, createdAt,
-	)
+	result, err := s.DB.Exec(query, user, mt, mtID, jsonData, time.Now())
 	if err != nil {
 		return 0, s.GetInsertError(err)
 	}
@@ -107,7 +98,6 @@ func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, id)
-
 	mod, err := ScanSingleRow(row, scanModification)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -120,8 +110,7 @@ func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
 }
 
 func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offset int) ([]*models.Modification[any], error) {
-	s.Log.Debug("Listing modifications: mt: %s, mtID: %d, limit: %d, offset: %d",
-		mt, mtID, limit, offset)
+	s.Log.Debug("Listing modifications: mt: %s, mtID: %d, limit: %d, offset: %d", mt, mtID, limit, offset)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
@@ -141,12 +130,7 @@ func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offs
 	}
 	defer rows.Close()
 
-	modifications, err := ScanRows(rows, scanModification)
-	if err != nil {
-		return nil, err
-	}
-
-	return modifications, nil
+	return ScanRows(rows, scanModification)
 }
 
 func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*models.Modification[any], error) {
@@ -191,13 +175,7 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
-
-	mod, err := ScanSingleRow(row, scanModification)
-	if err != nil {
-		return nil, err
-	}
-
-	return mod, nil
+	return ScanSingleRow(row, scanModification)
 }
 
 func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
@@ -214,13 +192,9 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 		ORDER BY created_at ASC
 		LIMIT 1
 	`, TableNameModifications)
-	row := s.DB.QueryRow(query, mt, mtID)
-	mod, err := ScanSingleRow(row, scanModification)
-	if err != nil {
-		return nil, err
-	}
 
-	return mod, nil
+	row := s.DB.QueryRow(query, mt, mtID)
+	return ScanSingleRow(row, scanModification)
 }
 
 func (s *Modifications) Delete(id int64) error {
@@ -252,8 +226,7 @@ func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error 
 }
 
 func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modification[any], error) {
-	s.Log.Debug("Getting modifications by user: user: %d, limit: %d, offset: %d",
-		user, limit, offset)
+	s.Log.Debug("Getting modifications by user: user: %d, limit: %d, offset: %d", user, limit, offset)
 
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
@@ -269,19 +242,12 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 	}
 	defer rows.Close()
 
-	modifications, err := ScanRows(rows, scanModification)
-	if err != nil {
-		return nil, err
-	}
-
-	return modifications, nil
+	return ScanRows(rows, scanModification)
 }
 
 func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, from, to time.Time) ([]*models.Modification[any], error) {
-	s.Log.Debug(
-		"Getting modifications by date range: mt: %s, mtID: %d, from: %s, to: %s",
-		mt, mtID, from.Format(time.RFC3339), to.Format(time.RFC3339),
-	)
+	s.Log.Debug("Getting modifications by date range: mt: %s, mtID: %d, from: %s, to: %s",
+		mt, mtID, from.Format(time.RFC3339), to.Format(time.RFC3339))
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
@@ -304,19 +270,12 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 	}
 	defer rows.Close()
 
-	modifications, err := ScanRows(rows, scanModification)
-	if err != nil {
-		return nil, err
-	}
-
-	return modifications, nil
+	return ScanRows(rows, scanModification)
 }
 
-func (m *Modifications) validateModificationType(mt models.ModificationType, mtID int64) error {
+func (s *Modifications) validateModificationType(mt models.ModificationType, mtID int64) error {
 	if !slices.Contains(ModificationTypes, mt) {
-		return errors.NewValidationError(
-			fmt.Sprintf("modification type %s is not supported", mt),
-		)
+		return errors.NewValidationError(fmt.Sprintf("modification type %s is not supported", mt))
 	}
 
 	if mtID <= 0 {

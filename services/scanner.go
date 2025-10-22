@@ -13,22 +13,16 @@ func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T
 		if err != nil {
 			return nil, err
 		}
-
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
+		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
 
 	return results, nil
 }
 
 func ScanSingleRow[T any](row *sql.Row, scanFunc func(Scannable) (*T, error)) (*T, error) {
-	result, err := scanFunc(row)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return scanFunc(row)
 }

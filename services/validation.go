@@ -14,8 +14,7 @@ func ValidateAPIKey(apiKey string) error {
 
 	if len(apiKey) < env.MinAPIKeyLength {
 		return errors.NewValidationError(
-			fmt.Sprintf("api key must be at least %d characters",
-				env.MinAPIKeyLength),
+			fmt.Sprintf("api key must be at least %d characters", env.MinAPIKeyLength),
 		)
 	}
 

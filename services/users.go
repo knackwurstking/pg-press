@@ -33,9 +33,7 @@ func NewUsers(r *Registry) *Users {
 		panic(err)
 	}
 
-	return &Users{
-		Base: base,
-	}
+	return &Users{Base: base}
 }
 
 func (u *Users) List() ([]*models.User, error) {
@@ -50,7 +48,7 @@ func (u *Users) List() ([]*models.User, error) {
 
 	users, err := ScanRows(rows, scanUser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan users: %v", err)
+		return nil, fmt.Errorf("failed to scan users: %w", err)
 	}
 
 	return users, nil
@@ -66,8 +64,7 @@ func (u *Users) Get(telegramID int64) (*models.User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError(
-				fmt.Sprintf("user with Telegram ID %d not found",
-					telegramID),
+				fmt.Sprintf("user with Telegram ID %d not found", telegramID),
 			)
 		}
 		return nil, u.GetSelectError(err)
@@ -84,22 +81,19 @@ func (u *Users) Add(user *models.User) (int64, error) {
 	}
 
 	// Check if user already exists
-	count, err := u.QueryCount(
-		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE telegram_id = ?`, TableNameUsers),
-		user.TelegramID,
-	)
+	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE telegram_id = ?`, TableNameUsers)
+	count, err := u.QueryCount(query, user.TelegramID)
 	if err != nil {
 		return 0, u.GetSelectError(err)
 	}
 	if count > 0 {
 		return 0, errors.NewAlreadyExistsError(
-			fmt.Sprintf("User with Telegram ID %d already exists",
-				user.TelegramID),
+			fmt.Sprintf("User with Telegram ID %d already exists", user.TelegramID),
 		)
 	}
 
 	// Insert the new user
-	query := fmt.Sprintf(`INSERT INTO %s (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`, TableNameUsers)
+	query = fmt.Sprintf(`INSERT INTO %s (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`, TableNameUsers)
 	_, err = u.DB.Exec(query, user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
 		return 0, u.GetInsertError(err)
@@ -115,7 +109,6 @@ func (u *Users) Delete(telegramID int64) error {
 		if errors.IsNotFoundError(err) {
 			return err
 		}
-
 		u.Log.Error("Failed to get user before deletion (ID: %d): %v", telegramID, err)
 	}
 
@@ -135,11 +128,8 @@ func (u *Users) Update(user *models.User) error {
 		return err
 	}
 
-	telegramID := user.TelegramID
-
-	// Update the user
 	query := fmt.Sprintf(`UPDATE %s SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`, TableNameUsers)
-	_, err := u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, telegramID)
+	_, err := u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, user.TelegramID)
 	if err != nil {
 		return u.GetUpdateError(err)
 	}
@@ -162,7 +152,7 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError("apiKey: " + utils.MaskString(apiKey))
 		}
-		return nil, fmt.Errorf("failed to get user from API key: %v", err)
+		return nil, fmt.Errorf("failed to get user from API key: %w", err)
 	}
 
 	return user, nil
@@ -175,7 +165,7 @@ func scanUser(scanner Scannable) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan user: %v", err)
+		return nil, fmt.Errorf("failed to scan user: %w", err)
 	}
 
 	return user, nil
