@@ -1,137 +1,158 @@
-package metalsheets
+package handlers
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/internal/web/features/metalsheets/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/base"
-	"github.com/knackwurstking/pgpress/pkg/logger"
-	"github.com/knackwurstking/pgpress/pkg/models"
-
+	"github.com/knackwurstking/pgpress/components"
+	"github.com/knackwurstking/pgpress/logger"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
+	"github.com/knackwurstking/pgpress/utils"
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	*base.Handler
+type MetalSheets struct {
+	*Base
 }
 
-func NewHandler(db *services.Registry) *Handler {
-	return &Handler{
-		Handler: base.NewHandler(
-			db,
-			logger.NewComponentLogger("Metal Sheets"),
-		),
+func NewMetalSheets(db *services.Registry) *MetalSheets {
+	return &MetalSheets{
+		Base: NewBase(db, logger.NewComponentLogger("MetalSheets")),
 	}
 }
 
+func (h *MetalSheets) RegisterRoutes(e *echo.Echo) {
+	utils.RegisterEchoRoutes(
+		e,
+		[]*utils.EchoRoute{
+			// HTMX
+			// GET route for displaying the edit dialog
+			utils.NewEchoRoute(http.MethodGet, "/htmx/metal-sheets/edit",
+				h.HTMXGetEditMetalSheetDialog),
+
+			// POST route for creating a new metal sheet
+			utils.NewEchoRoute(http.MethodPost, "/htmx/metal-sheets/edit",
+				h.HTMXPostEditMetalSheetDialog),
+
+			// PUT route for updating an existing metal sheet
+			utils.NewEchoRoute(http.MethodPut, "/htmx/metal-sheets/edit",
+				h.HTMXPutEditMetalSheetDialog),
+
+			// DELETE route for removing a metal sheet
+			utils.NewEchoRoute(http.MethodDelete, "/htmx/metal-sheets/delete",
+				h.HTMXDeleteMetalSheet),
+		},
+	)
+}
+
 // GetEditDialog renders the edit/create dialog for metal sheets
-func (h *Handler) HTMXGetEditMetalSheetDialog(c echo.Context) error {
-	renderProps := &templates.DialogEditMetalSheetProps{}
+func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
+	renderProps := &components.DialogEditMetalSheetProps{}
 	var toolID int64
 	var err error
 
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	if metalSheetID, _ := h.ParseInt64Query(c, "id"); metalSheetID > 0 {
+	if metalSheetID, _ := ParseQueryInt64(c, "id"); metalSheetID > 0 {
 		// Fetch existing metal sheet for editing
-		if renderProps.MetalSheet, err = h.DB.MetalSheets.Get(metalSheetID); err != nil {
-			return h.HandleError(c, err, "failed to fetch metal sheet from database")
+		if renderProps.MetalSheet, err = h.Registry.MetalSheets.Get(metalSheetID); err != nil {
+			return HandleError(err, "failed to fetch metal sheet from database")
 		}
 		toolID = renderProps.MetalSheet.ToolID
 	} else {
 		// Creating new metal sheet, get tool_id from query
-		if toolID, err = h.ParseInt64Query(c, "tool_id"); err != nil {
-			return h.HandleError(c, err, "failed to get the tool id from query")
+		if toolID, err = ParseQueryInt64(c, "tool_id"); err != nil {
+			return HandleError(err, "failed to get the tool id from query")
 		}
 	}
 
 	// Fetch the associated tool for the dialog
-	if renderProps.Tool, err = h.DB.Tools.Get(toolID); err != nil {
-		return h.HandleError(c, err, "failed to get tool from database")
+	if renderProps.Tool, err = h.Registry.Tools.Get(toolID); err != nil {
+		return HandleError(err, "failed to get tool from database")
 	}
 
 	// Render the edit dialog template
-	d := templates.DialogEditMetalSheet(renderProps)
+	d := components.DialogEditMetalSheet(renderProps)
 	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c,
-			"failed to render edit metal sheet dialog: "+err.Error())
+		return HandleError(err, "failed to render edit metal sheet dialog")
 	}
 
 	return nil
 }
 
 // PostCreateMetalSheet handles the creation of a new metal sheet
-func (h *Handler) HTMXPostEditMetalSheetDialog(c echo.Context) error {
+func (h *MetalSheets) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := h.GetUserFromContext(c)
+	user, err := GetUserFromContext(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
+		return HandleBadRequest(err, "failed to get user from context")
 	}
 
 	// Extract tool ID from query parameters
-	toolID, err := h.ParseInt64Query(c, "tool_id")
+	toolID, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool_id from query")
+		return HandleError(err, "failed to get tool_id from query")
 	}
 
 	// Fetch the associated tool
-	tool, err := h.DB.Tools.Get(toolID)
+	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool from database")
+		return HandleError(err, "failed to get tool from database")
 	}
 
 	// Parse form data into metal sheet model
 	metalSheet, err := h.parseMetalSheetForm(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to parse metal sheet form data")
+		return HandleError(err, "failed to parse metal sheet form data")
 	}
 
 	// Associate metal sheet with the tool
 	metalSheet.ToolID = toolID
 
 	// Save new metal sheet to database
-	if _, err := h.DB.MetalSheets.Add(metalSheet); err != nil {
-		return h.HandleError(c, err, "failed to create metal sheet in database")
+	if _, err := h.Registry.MetalSheets.Add(metalSheet); err != nil {
+		return HandleError(err, "failed to create metal sheet in database")
 	}
 
 	// Create feed entry for the new metal sheet
 	h.createFeed(user, tool, metalSheet, "Blech erstellt")
 
-	h.SetHXTrigger(c)
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+
 	return nil
 }
 
 // PutUpdateMetalSheet handles updates to existing metal sheets
-func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
+func (h *MetalSheets) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := h.GetUserFromContext(c)
+	user, err := GetUserFromContext(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
+		return HandleBadRequest(err, "failed to get user from context")
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetID, err := h.ParseInt64Query(c, "id")
+	metalSheetID, err := ParseQueryInt64(c, "id")
 	if err != nil {
-		return h.HandleError(c, err, "failed to get id from query")
+		return HandleBadRequest(err, "failed to get id from query")
 	}
 
 	// Fetch the existing metal sheet to preserve ID and tool association
-	existingSheet, err := h.DB.MetalSheets.Get(metalSheetID)
+	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get existing metal sheet from database")
+		return HandleError(err, "failed to get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, err := h.DB.Tools.Get(existingSheet.ToolID)
+	tool, err := h.Registry.Tools.Get(existingSheet.ToolID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool from database")
+		return HandleError(err, "failed to get tool from database")
 	}
 
 	// Parse updated form data
 	metalSheet, err := h.parseMetalSheetForm(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to parse metal sheet form data")
+		return HandleError(err, "failed to parse metal sheet form data")
 	}
 
 	// Preserve the original ID and tool association
@@ -139,57 +160,58 @@ func (h *Handler) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	metalSheet.ToolID = existingSheet.ToolID
 
 	// Update the metal sheet in database
-	if err := h.DB.MetalSheets.Update(metalSheet); err != nil {
-		return h.HandleError(c, err, "failed to update metal sheet in database")
+	if err := h.Registry.MetalSheets.Update(metalSheet); err != nil {
+		return HandleError(err, "failed to update metal sheet in database")
 	}
 
 	// Create feed entry for the updated metal sheet showing changes
 	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
 
-	h.SetHXTrigger(c)
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+
 	return nil
 }
 
 // DeleteMetalSheet handles the deletion of metal sheets
-func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
+func (h *MetalSheets) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := h.GetUserFromContext(c)
+	user, err := GetUserFromContext(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
+		return HandleBadRequest(err, "failed to get user from context")
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetID, err := h.ParseInt64Query(c, "id")
+	metalSheetID, err := ParseQueryInt64(c, "id")
 	if err != nil {
-		return h.HandleError(c, err, "failed to get id from query")
+		return HandleBadRequest(err, "failed to get id from query")
 	}
 
 	// Fetch the existing metal sheet before deletion for feed creation
-	existingSheet, err := h.DB.MetalSheets.Get(metalSheetID)
+	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get existing metal sheet from database")
+		return HandleError(err, "failed to get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, err := h.DB.Tools.Get(existingSheet.ToolID)
+	tool, err := h.Registry.Tools.Get(existingSheet.ToolID)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get tool from database")
+		return HandleError(err, "failed to get tool from database")
 	}
 
 	// Delete the metal sheet from database
-	if err := h.DB.MetalSheets.Delete(metalSheetID); err != nil {
-		return h.HandleError(c, err, "failed to delete metal sheet from database")
+	if err := h.Registry.MetalSheets.Delete(metalSheetID); err != nil {
+		return HandleError(err, "failed to delete metal sheet from database")
 	}
 
 	// Create feed entry for the deleted metal sheet
 	h.createFeed(user, tool, existingSheet, "Blech gelöscht")
 
-	h.SetHXTrigger(c)
+	c.Response().Header().Set("HX-Trigger", "pageLoaded")
 	return nil
 }
 
 // createFeed creates a feed entry for metal sheet operations
-func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
+func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet, title string) {
 	// Build base feed content with tool and metal sheet info
 	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm\nTyp: %s",
 		tool.String(), metalSheet.TileHeight, metalSheet.Value, metalSheet.Identifier.String())
@@ -202,13 +224,13 @@ func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *m
 
 	// Create and save the feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.DB.Feeds.Add(feed); err != nil {
+	if err := h.Registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed: %v", err)
 	}
 }
 
 // createUpdateFeed creates a feed entry for metal sheet updates showing old vs new values
-func (h *Handler) createUpdateFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
+func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
 	content := fmt.Sprintf("Werkzeug: %s", tool.String())
 
 	// Check for changes in TileHeight
@@ -258,13 +280,13 @@ func (h *Handler) createUpdateFeed(user *models.User, tool *models.Tool, oldShee
 
 	// Create and save the feed entry
 	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
-	if err := h.DB.Feeds.Add(feed); err != nil {
+	if err := h.Registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create update feed: %v", err)
 	}
 }
 
 // parseMetalSheetForm extracts metal sheet data from form submission
-func (h *Handler) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error) {
+func (h *MetalSheets) parseMetalSheetForm(c echo.Context) (*models.MetalSheet, error) {
 	metalSheet := &models.MetalSheet{}
 
 	// Parse required tile height field
