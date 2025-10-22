@@ -168,16 +168,21 @@ func (f *Feeds) Delete(id int64) error {
 	return nil
 }
 
-func (f *Feeds) DeleteBefore(timestamp int64) error {
+func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
 	f.Log.Debug("Deleting feeds before timestamp %d", timestamp)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
-	_, err := f.DB.Exec(query, timestamp)
+	result, err := f.DB.Exec(query, timestamp)
 	if err != nil {
-		return f.GetDeleteError(err)
+		return 0, f.GetDeleteError(err)
 	}
 
-	return nil
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, f.GetDeleteError(err)
+	}
+
+	return int(rowsAffected), nil
 }
 
 func (f *Feeds) Count() (int, error) {

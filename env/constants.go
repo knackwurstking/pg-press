@@ -11,4 +11,6 @@ const (
 	DateFormat     = "02.01.2006"
 	TimeFormat     = "15:04"
 	DateTimeFormat = DateFormat + " " + TimeFormat
+
+	MaxFeedsPerPage = 50
 )

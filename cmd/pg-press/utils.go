@@ -8,23 +8,14 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pgpress/errors"
-	"github.com/knackwurstking/pgpress/logger"
 	"github.com/knackwurstking/pgpress/services"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func log() *logger.Logger {
-	return logger.GetComponentLogger("Server")
-}
-
-func clog(component string) *logger.Logger {
-	return logger.GetComponentLogger(component)
-}
-
 func openDB(customPath string) (*services.Registry, error) {
 	path := filepath.Join(configPath, databaseFile)
-	log().Debug("Database path: %s", path)
+	log.Debug("Database path: %s", path)
 
 	if customPath != "" {
 		var err error

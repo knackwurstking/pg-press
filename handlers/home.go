@@ -22,19 +22,15 @@ func NewHome(r *services.Registry) *Home {
 }
 
 func (h *Home) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
-		e,
-		[]*utils.EchoRoute{
-			// Pages
-			utils.NewEchoRoute(http.MethodGet, "", h.GetHomePage),
-		},
-	)
+	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+		utils.NewEchoRoute(http.MethodGet, "", h.GetHomePage),
+	})
 }
 
 func (h *Home) GetHomePage(c echo.Context) error {
 	page := components.PageHome()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return GetInternelServerError(err, "failed to render home page")
+		return GetInternalServerError(err, "failed to render home page")
 	}
 	return nil
 }

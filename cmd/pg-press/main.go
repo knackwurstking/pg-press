@@ -23,6 +23,7 @@ var (
 	configPath       string
 	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
 	serverAddress    = os.Getenv("SERVER_ADDR")
+	log              = logger.NewComponentLogger("Server")
 )
 
 func init() {

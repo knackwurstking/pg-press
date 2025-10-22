@@ -291,13 +291,13 @@ func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 	cutoffTime := time.Now().Add(-duration)
 	timestamp := cutoffTime.UnixMilli()
 
-	rowsAffected, err := r.Feeds.DeleteBefore(timestamp)
+	deletionCount, err := r.Feeds.DeleteBefore(timestamp)
 	if err != nil {
 		return fmt.Errorf("failed to remove feeds: %s", err)
 	}
 
 	fmt.Printf("Removed %d feed(s) older than %s (before %s)\n",
-		rowsAffected, durationStr, cutoffTime.Format("2006-01-02 15:04:05"))
+		deletionCount, durationStr, cutoffTime.Format("2006-01-02 15:04:05"))
 
 	return nil
 }

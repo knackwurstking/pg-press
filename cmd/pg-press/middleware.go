@@ -103,37 +103,37 @@ func middlewareLogger() echo.MiddlewareFunc {
 				userInfo = " " + user.String()
 				// Log critical admin actions
 				if user.IsAdmin() && (method == "DELETE" || (method == "POST" && status < 400)) {
-					log().Info("Admin %s: %s %s", user.Name, method, uri)
+					log.Info("Admin %s: %s %s", user.Name, method, uri)
 				}
 			} else {
 				// Log unauthorized modification attempts
 				if method != "GET" && !keyAuthSkipper(c) && status >= 400 {
-					log().Warn("Unauthorized %s to %s from %s (HTTP %d)", method, uri, remoteIP, status)
+					log.Warn("Unauthorized %s to %s from %s (HTTP %d)", method, uri, remoteIP, status)
 				}
 			}
 
 			// Log slow requests for performance monitoring
 			if latency > 2*time.Second {
-				log().Warn("Slow request: %s %s took %v from %s", method, uri, latency, remoteIP)
+				log.Warn("Slow request: %s %s took %v from %s", method, uri, latency, remoteIP)
 			}
 
 			// Log unusually large request bodies
 			if contentLength > 50*1024*1024 { // 50MB
-				log().Info("Large upload: %s %s (%.1fMB) from %s", method, uri, float64(contentLength)/1024/1024, remoteIP)
+				log.Info("Large upload: %s %s (%.1fMB) from %s", method, uri, float64(contentLength)/1024/1024, remoteIP)
 			}
 
 			// Log HTTP request with status-appropriate level
 			if status >= 500 {
 				// Server errors are already logged in error handler with more context
-				log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+				log.HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 			} else if status >= 400 {
 				// Only log client errors for non-routine cases
 				if status != 404 || method != "GET" {
-					log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+					log.HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 				}
 			} else {
 				// Success cases - use debug level for routine requests
-				log().HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
+				log.HTTPRequest(status, method, uri, remoteIP, latency, userInfo)
 			}
 
 			return err
@@ -152,7 +152,7 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
 			remoteIP := c.RealIP()
-			clog("Middleware: Auth").Info("Authentication required for %s %s from %s",
+			log.Info("Authentication required for %s %s from %s",
 				c.Request().Method, c.Request().URL.Path, remoteIP)
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
@@ -169,16 +169,15 @@ func keyAuthSkipper(ctx echo.Context) bool {
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (bool, error) {
-	l := clog("Middleware: Auth Validator")
 	remoteIP := ctx.RealIP()
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			l.Info("Authentication failed from %s", remoteIP)
+			log.Info("Authentication failed from %s", remoteIP)
 			return false, echo.NewHTTPError(errors.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
 		}
-		l.Debug("API key auth successful for user %s from %s", user.Name, remoteIP)
+		log.Debug("API key auth successful for user %s from %s", user.Name, remoteIP)
 	}
 
 	ctx.Set("user", user)
@@ -186,8 +185,6 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 }
 
 func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.User, error) {
-	l := clog("Middleware: Cookie Validation")
-
 	remoteIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
@@ -216,9 +213,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	if cookie.UserAgent != requestUserAgent {
 		// Only log if the change seems significant (different browser/version, not just PWA vs browser mode)
 		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
-			l.Info("Significant user agent change for %s from %s", user.Name, remoteIP)
+			log.Info("Significant user agent change for %s from %s", user.Name, remoteIP)
 		} else {
-			l.Debug("Minor user agent variation for %s from %s (likely PWA)", user.Name, remoteIP)
+			log.Debug("Minor user agent variation for %s from %s (likely PWA)", user.Name, remoteIP)
 		}
 	}
 
@@ -237,13 +234,13 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(env.CookieExpirationDuration)
 
-		l.Info("Updating cookie for page visit by user %s from %s: path=%s",
+		log.Info("Updating cookie for page visit by user %s from %s: path=%s",
 			user.Name, remoteIP, ctx.Request().URL.Path)
 
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
-			l.Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
+			log.Error("Failed to update cookie for user %s from %s: %v", user.Name, remoteIP, err)
 		} else {
-			l.Debug("Cookie successfully updated for user %s from %s", user.Name, remoteIP)
+			log.Debug("Cookie successfully updated for user %s from %s", user.Name, remoteIP)
 		}
 	}
 

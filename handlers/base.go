@@ -18,17 +18,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 }
 
 // TODO: Just create functions in ./utils.go instead
-//func (b *BaseHandler) GetUserFromContext(c echo.Context) (*models.User, error) {
-//	user, ok := c.Get("user").(*models.User)
-//	if !ok {
-//		return nil, fmt.Errorf("missing user context")
-//	}
-//	if user == nil {
-//		return nil, fmt.Errorf("invalid user session")
-//	}
-//	return user, nil
-//}
-//
 //func (b *BaseHandler) RenderError(c echo.Context, statusCode int, message string) error {
 //	return echo.NewHTTPError(statusCode, message)
 //}
