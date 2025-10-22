@@ -19,14 +19,14 @@ type Attachments struct {
 func NewAttachments(r *Registry) *Attachments {
 	base := NewBase(r, logger.NewComponentLogger("Service: Attachments"))
 
-	query := `
+	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id INTEGER NOT NULL,
 			mime_type TEXT NOT NULL,
 			data BLOB NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-	`
+	`, TableNameAttachments)
 
 	if err := base.CreateTable(query, TableNameAttachments); err != nil {
 		panic(err)
