@@ -30,13 +30,13 @@ func NewPressCycles(r *Registry) *PressCycles {
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			date DATETIME NOT NULL,
 			performed_by INTEGER NOT NULL,
-			FOREIGN KEY (tool_id) REFERENCES tools(id),
-			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL
+			FOREIGN KEY (tool_id) REFERENCES %[2]s(id),
+			FOREIGN KEY (performed_by) REFERENCES %[3]s(telegram_id) ON DELETE SET NULL
 		);
 		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_id ON %[1]s(tool_id);
 		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_position ON %[1]s(tool_position);
 		CREATE INDEX IF NOT EXISTS idx_%[1]s_press_number ON %[1]s(press_number);
-	`, TableNamePressCycles)
+	`, TableNamePressCycles, TableNameTools, TableNameUsers)
 
 	if err := base.CreateTable(query, TableNamePressCycles); err != nil {
 		panic(err)

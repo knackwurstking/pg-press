@@ -104,6 +104,18 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 	}
 }
 
+func (t *Tool) Validate() error {
+	if t.Position == "" {
+		return fmt.Errorf("position cannot be empty")
+	}
+
+	if t.Code == "" {
+		return fmt.Errorf("code cannot be empty")
+	}
+
+	return nil
+}
+
 func (t *Tool) Status() Status {
 	if t.IsDead {
 		return StatusDead
