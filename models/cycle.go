@@ -15,18 +15,18 @@ type Cycle struct {
 	PerformedBy   int64       `json:"performed_by"`
 }
 
-func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycles, user int64) *Cycle {
+func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64) *Cycle {
 	return &Cycle{
 		PressNumber:  press,
 		ToolID:       toolID,
 		ToolPosition: toolPosition,
 		Date:         time.Now(),
 		TotalCycles:  totalCycles,
-		PerformedBy:  user,
+		PerformedBy:  userID,
 	}
 }
 
-func NewPressCycleWithID(id int64, press PressNumber, toolID int64, toolPosition Position, totalCycles, user int64, date time.Time) *Cycle {
+func NewCycleWithID(id int64, press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
 	return &Cycle{
 		ID:           id,
 		PressNumber:  press,
@@ -34,18 +34,21 @@ func NewPressCycleWithID(id int64, press PressNumber, toolID int64, toolPosition
 		ToolPosition: toolPosition,
 		Date:         date,
 		TotalCycles:  totalCycles,
-		PerformedBy:  user,
+		PerformedBy:  userID,
 	}
 }
 
 func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {
-	var filteredCycles []*Cycle
-
+	filteredCycles := make([]*Cycle, 0, len(cycles))
 	for _, cycle := range cycles {
 		if cycle.ToolPosition == toolPosition {
 			filteredCycles = append(filteredCycles, cycle)
 		}
 	}
-
 	return filteredCycles
+}
+
+func (c *Cycle) Validate() error {
+	// TODO: Validate press number, position, TotalCycles and ToolID
+	return nil
 }

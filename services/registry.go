@@ -12,7 +12,7 @@ type Registry struct {
 	Modifications *Modifications
 	MetalSheets   *MetalSheets
 	Notes         *Notes
-	//PressCycles       *presscycles.Service
+	PressCycles   *PressCycles
 	//Tools             *tools.Service
 	//ToolRegenerations *toolregenerations.Service
 	//TroubleReports    *troublereports.Service
@@ -30,6 +30,7 @@ func NewRegistry(db *sql.DB) *Registry {
 	registry.Modifications = NewModifications(registry)
 	registry.MetalSheets = NewMetalSheets(registry)
 	registry.Notes = NewNotes(registry)
+	registry.PressCycles = NewPressCycles(registry)
 
 	return registry
 }
