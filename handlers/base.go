@@ -97,21 +97,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return id, nil
 //}
 //
-//// ParseInt64Query parses an int64 parameter from the query string
-//func (b *BaseHandler) ParseInt64Query(c echo.Context, paramName string) (int64, error) {
-//	idStr := c.QueryParam(paramName)
-//	if idStr == "" {
-//		return 0, fmt.Errorf("missing %s query parameter", paramName)
-//	}
-//
-//	id, err := strconv.ParseInt(idStr, 10, 64)
-//	if err != nil {
-//		return 0, fmt.Errorf("invalid %s query parameter: must be a number", paramName)
-//	}
-//
-//	return id, nil
-//}
-//
 //// ParseBoolQuery parses a boolean parameter from the query string
 //func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
 //	value := c.QueryParam(paramName)

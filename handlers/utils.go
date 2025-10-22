@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/knackwurstking/pgpress/errors"
 	"github.com/knackwurstking/pgpress/models"
@@ -53,4 +54,18 @@ func ParseQueryString(c echo.Context, paramName string) (string, error) {
 	}
 
 	return s, nil
+}
+
+func ParseQueryInt64(c echo.Context, paramName string) (int64, error) {
+	idStr := c.QueryParam(paramName)
+	if idStr == "" {
+		return 0, fmt.Errorf("missing %s query parameter", paramName)
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s query parameter: must be a number", paramName)
+	}
+
+	return id, nil
 }

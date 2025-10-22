@@ -1,10 +1,10 @@
-package dialogs
+package components
 
 const (
 	DialogContentID = "dialog-content"
 )
 
-type BaseProps struct {
+type BaseDialogProps struct {
 	ID string
 
 	Type             string // Type like "POST", "PUT"
@@ -16,7 +16,7 @@ type BaseProps struct {
 	ReloadOnSubmit bool
 }
 
-templ Base(props BaseProps) {
+templ BaseDialog(props BaseDialogProps) {
 	{{
 		onclose := templ.ComponentScript{
 			Call: `this.remove();`,
