@@ -1,0 +1,170 @@
+package components
+
+templ MarkdownContent(content string, useMarkdown bool) {
+	if useMarkdown {
+		<div class="markdown-content" data-markdown-content={ content }>
+			@Spinner()
+		</div>
+	} else {
+		<pre>{ content }</pre>
+	}
+}
+
+templ MarkdownStyles() {
+	<style>
+		.markdown-content {
+			line-height: 1.6;
+			color: var(--ui-text);
+		}
+
+		.markdown-content h1,
+		.markdown-content h2,
+		.markdown-content h3,
+		.markdown-content h4,
+		.markdown-content h5,
+		.markdown-content h6 {
+			margin: 0.8em 0 0.4em 0;
+			font-weight: bold;
+			line-height: 1.3;
+		}
+
+		.markdown-content h1 { font-size: 1.4em; }
+		.markdown-content h2 { font-size: 1.2em; }
+		.markdown-content h3 { font-size: 1.1em; }
+
+		.markdown-content p {
+			margin: 0.5em 0 1em 0;
+		}
+
+		.markdown-content ul,
+		.markdown-content ol {
+			margin: 0.5em 0;
+			padding-left: 1.5em;
+			list-style: inherit;
+		}
+
+		.markdown-content ul {
+			list-style-type: disc;
+		}
+
+		.markdown-content ol {
+			list-style-type: decimal;
+		}
+
+		.markdown-content li {
+			margin: 0.25em 0;
+			display: list-item;
+		}
+
+		.markdown-content code {
+			font-size: 0.85em;
+			padding: 0.125em 0.25em;
+			border-radius: 2px;
+		}
+
+		.markdown-content pre {
+			margin: 1em 0;
+			padding: 1em;
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+
+		.markdown-content strong {
+			font-weight: 600;
+		}
+
+		.markdown-content em {
+			font-style: italic;
+		}
+
+		.markdown-content u {
+			text-decoration: underline;
+		}
+
+		.markdown-content blockquote {
+			margin: 1em 0;
+			padding: 0.5em 1em;
+		}
+	</style>
+}
+
+script MarkdownScript() {
+	function renderMarkdownToHTML(content) {
+		if (!content || content.trim() === '') {
+			return '';
+		}
+
+		var processed = content
+			.replace(/### (.*$)/gm, '<h3>$1</h3>')
+			.replace(/## (.*$)/gm, '<h2>$1</h2>')
+			.replace(/# (.*$)/gm, '<h1>$1</h1>')
+			.replace(/__(.*?)__/g, '<u>$1</u>')
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+			.replace(/\*(.*?)\*/g, '<em>$1</em>')
+			.replace(/`(.*?)`/g, '<code>$1</code>')
+			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
+			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
+			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
+			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/class="[uo]l-item"/g, '')
+			.replace(/<bq-line>/g, '')
+			.replace(/<\/bq-line>/g, '\n');
+
+		var paragraphs = processed.split(/\n\s*\n/);
+
+		return paragraphs.map(function(paragraph) {
+			paragraph = paragraph.trim();
+			if (!paragraph) return '';
+
+			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
+				return paragraph;
+			}
+
+			var withLineBreaks = paragraph.replace(/\n/g, '<br>');
+			return '<p>' + withLineBreaks + '</p>';
+		}).join('\n\n');
+	}
+
+	function processMarkdownContent() {
+		var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
+		containers.forEach(function(container) {
+			var content = container.getAttribute('data-markdown-content');
+			if (content) {
+				var html = renderMarkdownToHTML(content);
+				if (html) {
+					container.innerHTML = html;
+				} else {
+					container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+				}
+			}
+		});
+	}
+
+	window.updateMarkdownPreview = function(textareaId, previewId) {
+		var textarea = document.getElementById(textareaId);
+		var previewContent = document.getElementById(previewId);
+
+		if (!textarea || !previewContent) return;
+
+		var html = '';
+		if (textarea.value) {
+			html = renderMarkdownToHTML(textarea.value);
+		}
+
+		previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
+	};
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(processMarkdownContent, 10);
+		});
+	} else {
+		setTimeout(processMarkdownContent, 10);
+	}
+
+	document.addEventListener('htmx:afterSwap', function(event) {
+		setTimeout(processMarkdownContent, 50);
+	});
+}

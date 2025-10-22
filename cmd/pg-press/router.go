@@ -20,10 +20,10 @@ func Serve(e *echo.Echo, r *services.Registry) {
 	handlers.NewHome(r).RegisterRoutes(e)
 	handlers.NewAuth(r).RegisterRoutes(e)
 	handlers.NewFeed(r).RegisterRoutes(e)
+	handlers.NewHelp(r).RegisterRoutes(e)
+	handlers.NewEditor(r).RegisterRoutes(e)
 
-	//editor.NewRoutes(db).RegisterRoutes(e)
-	//help.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
-	//profile.NewRoutes(db).RegisterRoutes(e)
+	//profile.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
 	//tools.NewRoutes(db).RegisterRoutes(e)
 	//tool.NewRoutes(db).RegisterRoutes(e)
 	//press.NewRoutes(db).RegisterRoutes(e)

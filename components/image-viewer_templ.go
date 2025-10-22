@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func templateImageViewer() templ.Component {
+func ImageViewerTemplate() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,6 +35,53 @@ func templateImageViewer() templ.Component {
 		}
 		return nil
 	})
+}
+
+func OpenImageViewer(attachmentID int64) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_OpenImageViewer_cd7e`,
+		Function: `function __templ_OpenImageViewer_cd7e(attachmentID){// Close any existing image viewer
+	var existingDialog = document.querySelector('dialog[name="image-viewer"]');
+	if (existingDialog) {
+		existingDialog.close();
+	}
+
+	// Create new dialog from template
+	var imageURL = ` + "`" + `./trouble-reports/attachment?attachment_id=${attachmentID}` + "`" + `;
+	var template = document.querySelector('template[name="image-viewer"]');
+	var dialog = template.content.cloneNode(true).querySelector('dialog');
+	var img = dialog.querySelector('img.attachment');
+	var closeButton = dialog.querySelector('button.close');
+
+	console.debug(` + "`" + `Opening image viewer with image ${imageURL}` + "`" + `);
+
+	// Setup image
+	img.src = imageURL;
+	img.onclick = function(event) {
+		event.stopPropagation();
+	};
+
+	// Setup dialog click handlers
+	dialog.onclick = function() {
+		dialog.close();
+	};
+
+	closeButton.onclick = function() {
+		dialog.close();
+	};
+
+	// Cleanup on close
+	dialog.onclose = function() {
+		document.body.removeChild(dialog);
+	};
+
+	// Show dialog
+	document.body.appendChild(dialog);
+	dialog.showModal();
+}`,
+		Call:       templ.SafeScript(`__templ_OpenImageViewer_cd7e`, attachmentID),
+		CallInline: templ.SafeScriptInline(`__templ_OpenImageViewer_cd7e`, attachmentID),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

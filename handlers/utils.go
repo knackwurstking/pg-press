@@ -9,6 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func HandleBadRequest(err error, message string) error {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, message)
+	}
+
+	return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s: %v", message, err))
+}
+
 // HandleError creates an HTTP error with the appropriate status code
 func HandleError(err error, context string) error {
 	statusCode := errors.GetHTTPStatusCode(err)

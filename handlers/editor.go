@@ -1,4 +1,4 @@
-package editor
+package handlers
 
 import (
 	"fmt"
@@ -7,34 +7,39 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/internal/services"
-	"github.com/knackwurstking/pgpress/internal/web/features/editor/templates"
-	"github.com/knackwurstking/pgpress/internal/web/shared/base"
-	"github.com/knackwurstking/pgpress/pkg/logger"
-	"github.com/knackwurstking/pgpress/pkg/models"
-
+	"github.com/knackwurstking/pgpress/components"
+	"github.com/knackwurstking/pgpress/logger"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/services"
+	"github.com/knackwurstking/pgpress/utils"
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	*base.Handler
+type Editor struct {
+	*Base
 }
 
-func NewHandler(db *services.Registry) *Handler {
-	return &Handler{
-		Handler: base.NewHandler(db, logger.NewComponentLogger("Editor")),
+func NewEditor(db *services.Registry) *Editor {
+	return &Editor{
+		Base: NewBase(db, logger.NewComponentLogger("Editor")),
 	}
 }
 
-// GetEditorPage renders the editor page
-func (h *Handler) GetEditorPage(c echo.Context) error {
+func (h *Editor) RegisterRoutes(e *echo.Echo) {
+	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+		utils.NewEchoRoute(http.MethodGet, "/editor", h.GetEditorPage),
+		utils.NewEchoRoute(http.MethodPost, "/editor/save", h.PostSaveContent),
+	})
+}
+
+func (h *Editor) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
 	editorType := c.QueryParam("type")
 	idParam := c.QueryParam("id")
 	returnURL := c.QueryParam("return_url")
 
 	if editorType == "" {
-		return h.RenderBadRequest(c, "editor type is required")
+		return HandleBadRequest(nil, "editor type is required")
 	}
 
 	var id int64
@@ -42,11 +47,11 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	if idParam != "" {
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return h.RenderBadRequest(c, "invalid ID parameter")
+			return HandleBadRequest(err, "invalid ID parameter")
 		}
 	}
 
-	options := &templates.EditorOptions{
+	options := &components.PageEditorOptions{
 		Type:      editorType,
 		ID:        id,
 		ReturnURL: returnURL,
@@ -56,25 +61,24 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	if id > 0 {
 		err := h.loadExistingContent(options)
 		if err != nil {
-			return h.HandleError(c, err, "failed to load existing content")
+			return HandleError(err, "failed to load existing content")
 		}
 	}
 
 	// Render the editor page
-	page := templates.EditorPage(options)
+	page := components.PageEditor(options)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return h.RenderInternalError(c, "failed to render editor page: "+err.Error())
+		return HandleError(err, "failed to render editor page")
 	}
 
 	return nil
 }
 
-// PostSaveContent handles saving content from the editor
-func (h *Handler) PostSaveContent(c echo.Context) error {
+func (h *Editor) PostSaveContent(c echo.Context) error {
 	// Get user from context
-	user, err := h.GetUserFromContext(c)
+	user, err := GetUserFromContext(c)
 	if err != nil {
-		return h.HandleError(c, err, "failed to get user from context")
+		return HandleError(err, "failed to get user from context")
 	}
 
 	// Parse form data
@@ -86,11 +90,11 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	returnURL := c.FormValue("return_url")
 
 	if editorType == "" {
-		return h.RenderBadRequest(c, "editor type is required")
+		return HandleBadRequest(nil, "editor type is required")
 	}
 
 	if title == "" || content == "" {
-		return h.RenderBadRequest(c, "title and content are required")
+		return HandleBadRequest(nil, "title and content are required")
 	}
 
 	useMarkdown := useMarkdownStr == "on"
@@ -99,20 +103,20 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	if idParam != "" {
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return h.RenderBadRequest(c, "invalid ID parameter")
+			return HandleBadRequest(err, "invalid ID parameter")
 		}
 	}
 
 	// Handle attachments
 	attachments, err := h.processAttachments(c)
 	if err != nil {
-		return h.RenderBadRequest(c, "failed to process attachments: "+err.Error())
+		return HandleBadRequest(err, "failed to process attachments")
 	}
 
 	// Save content based on type
 	err = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
 	if err != nil {
-		return h.HandleError(c, err, "failed to save content")
+		return HandleError(err, "failed to save content")
 	}
 
 	// Redirect back to return URL or appropriate page
@@ -130,10 +134,10 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 }
 
 // loadExistingContent loads existing content based on type and ID
-func (h *Handler) loadExistingContent(options *templates.EditorOptions) error {
+func (h *Editor) loadExistingContent(options *components.PageEditorOptions) error {
 	switch options.Type {
 	case "troublereport":
-		tr, err := h.DB.TroubleReports.Get(options.ID)
+		tr, err := h.Registry.TroubleReports.Get(options.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get trouble report: %w", err)
 		}
@@ -142,7 +146,7 @@ func (h *Handler) loadExistingContent(options *templates.EditorOptions) error {
 		options.UseMarkdown = tr.UseMarkdown
 
 		// Load attachments
-		loadedAttachments, err := h.DB.TroubleReports.LoadAttachments(tr)
+		loadedAttachments, err := h.Registry.TroubleReports.LoadAttachments(tr)
 		if err == nil {
 			options.Attachments = loadedAttachments
 		} else {
@@ -160,12 +164,12 @@ func (h *Handler) loadExistingContent(options *templates.EditorOptions) error {
 }
 
 // saveContent saves content based on type
-func (h *Handler) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) error {
+func (h *Editor) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) error {
 	switch editorType {
 	case "troublereport":
 		if id > 0 {
 			// Update existing trouble report
-			tr, err := h.DB.TroubleReports.Get(id)
+			tr, err := h.Registry.TroubleReports.Get(id)
 			if err != nil {
 				return fmt.Errorf("failed to get trouble report: %w", err)
 			}
@@ -186,7 +190,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			tr.UseMarkdown = useMarkdown
 			tr.LinkedAttachments = existingAttachmentIDs
 
-			err = h.DB.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
+			err = h.Registry.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 			if err != nil {
 				return fmt.Errorf("failed to update trouble report: %w", err)
 			}
@@ -199,7 +203,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 				feedContent += fmt.Sprintf("\nAnhänge: %d", totalAttachments)
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.DB.Feeds.Add(feed); err != nil {
+			if err := h.Registry.Feeds.Add(feed); err != nil {
 				h.Log.Error("Failed to create feed for trouble report update: %v", err)
 			}
 
@@ -208,7 +212,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			tr := models.NewTroubleReport(title, content)
 			tr.UseMarkdown = useMarkdown
 
-			err := h.DB.TroubleReports.AddWithAttachments(tr, user, attachments...)
+			err := h.Registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
 			if err != nil {
 				return fmt.Errorf("failed to add trouble report: %w", err)
 			}
@@ -220,7 +224,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.DB.Feeds.Add(feed); err != nil {
+			if err := h.Registry.Feeds.Add(feed); err != nil {
 				h.Log.Error("Failed to create feed for trouble report creation: %v", err)
 			}
 		}
@@ -235,7 +239,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 }
 
 // processAttachments handles file uploads and existing attachments
-func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, error) {
+func (h *Editor) processAttachments(c echo.Context) ([]*models.Attachment, error) {
 	var attachments []*models.Attachment
 
 	// Handle existing attachments (for updates)
@@ -277,7 +281,7 @@ func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, erro
 }
 
 // processFileUpload processes a single file upload
-func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
+func (h *Editor) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %w", err)
@@ -304,7 +308,7 @@ func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.A
 }
 
 // getMimeTypeFromFilename determines MIME type from filename
-func (h *Handler) getMimeTypeFromFilename(filename string) string {
+func (h *Editor) getMimeTypeFromFilename(filename string) string {
 	lower := strings.ToLower(filename)
 	switch {
 	case strings.HasSuffix(lower, ".jpg") || strings.HasSuffix(lower, ".jpeg"):
