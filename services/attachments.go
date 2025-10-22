@@ -40,7 +40,9 @@ func NewAttachments(r *Registry) *Attachments {
 func (a *Attachments) List() ([]*models.Attachment, error) {
 	a.Log.Debug("Listing attachments")
 
-	rows, err := a.DB.Query(`SELECT id, mime_type, data FROM attachments ORDER BY id ASC`)
+	rows, err := a.DB.Query(fmt.Sprintf(
+		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`, TableNameAttachments,
+	))
 	if err != nil {
 		return nil, a.GetSelectError(err)
 	}
@@ -57,7 +59,9 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	a.Log.Debug("Getting attachment for ID: %d", id)
 
-	row := a.DB.QueryRow(`SELECT id, mime_type, data FROM attachments WHERE id = ?`, id)
+	row := a.DB.QueryRow(fmt.Sprintf(
+		`SELECT id, mime_type, data FROM %s WHERE id = ?`, TableNameAttachments, id),
+	)
 	attachment, err := ScanSingleRow(row, scanAttachment)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -90,7 +94,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 			SELECT
 				*
 			FROM
-				attachments
+				%s
 			WHERE
 				id
 			IN
@@ -98,6 +102,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 			ORDER BY
 				id ASC
 		`,
+		TableNameAttachments,
 		strings.Join(placeholders, ","),
 	)
 
@@ -132,7 +137,8 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 		return 0, err
 	}
 
-	query := `INSERT INTO attachments (mime_type, data) VALUES (?, ?)`
+	query := fmt.Sprintf(`INSERT INTO %s (mime_type, data) VALUES (?, ?)`,
+		TableNameAttachments)
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
 		return 0, a.GetInsertError(err)
@@ -155,7 +161,8 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 
 	// Convert string ID to int64
 	id := attachment.GetID()
-	query := `UPDATE attachments SET mime_type = ?, data = ? WHERE id = ?`
+	query := fmt.Sprintf(`UPDATE %s SET mime_type = ?, data = ? WHERE id = ?`,
+		TableNameAttachments)
 	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
 		return a.GetUpdateError(err)
@@ -167,7 +174,7 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 func (a *Attachments) Delete(id int64) error {
 	a.Log.Debug("Deleting attachment: %d", id)
 
-	query := `DELETE FROM attachments WHERE id = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)
 	if err != nil {
 		return a.GetDeleteError(err)

@@ -12,7 +12,7 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
-const TableNameModifications = "attachments"
+const TableNameModifications = "modifications"
 
 var ModificationTypes = []models.ModificationType{
 	models.ModificationTypeTroubleReport,
@@ -73,12 +73,12 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 		return 0, fmt.Errorf("failed to marshal modification data: %v", err)
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		INSERT INTO
-			modifications (user_id, entity_type, entity_id, data, created_at)
+			%s (user_id, entity_type, entity_id, data, created_at)
 		VALUES
 			(?, ?, ?, ?, ?)
-	`
+	`, TableNameModifications)
 
 	createdAt := time.Now()
 	result, err := s.DB.Exec(
@@ -127,13 +127,13 @@ func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offs
 		return nil, err
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
-		FROM modifications
+		FROM %s
 		WHERE entity_type = ? AND entity_id = ?
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
-	`
+	`, TableNameModifications)
 
 	rows, err := s.DB.Query(query, mt, mtID, limit, offset)
 	if err != nil {
@@ -160,11 +160,11 @@ func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, er
 		return 0, err
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT COUNT(*)
-		FROM modifications
+		FROM %s
 		WHERE entity_type = ? AND entity_id = ?
-	`
+	`, TableNameModifications)
 
 	var count int64
 	err := s.DB.QueryRow(query, mt, mtID).Scan(&count)
@@ -182,13 +182,13 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 		return nil, err
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
-		FROM modifications
+		FROM %s
 		WHERE entity_type = ? AND entity_id = ?
 		ORDER BY created_at DESC
 		LIMIT 1
-	`
+	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
 
@@ -207,13 +207,13 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 		return nil, err
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
-		FROM modifications
+		FROM %s
 		WHERE entity_type = ? AND entity_id = ?
 		ORDER BY created_at ASC
 		LIMIT 1
-	`
+	`, TableNameModifications)
 	row := s.DB.QueryRow(query, mt, mtID)
 	mod, err := ScanSingleRow(row, scanModification)
 	if err != nil {
@@ -226,7 +226,7 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 func (s *Modifications) Delete(id int64) error {
 	s.Log.Debug("Deleting modification: %v", id)
 
-	query := `DELETE FROM modifications WHERE id = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
 		return s.GetDeleteError(err)
@@ -242,7 +242,7 @@ func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error 
 		return err
 	}
 
-	query := `DELETE FROM modifications WHERE entity_type = ? AND entity_id = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE entity_type = ? AND entity_id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, mt, mtID)
 	if err != nil {
 		return s.GetDeleteError(err)
@@ -255,13 +255,13 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 	s.Log.Debug("Getting modifications by user: user: %d, limit: %d, offset: %d",
 		user, limit, offset)
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
-		FROM modifications
+		FROM %s
 		WHERE user_id = ?
 		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?
-	`
+	`, TableNameModifications)
 
 	rows, err := s.DB.Query(query, user, limit, offset)
 	if err != nil {
@@ -291,12 +291,12 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 		return nil, errors.NewValidationError("from date must be before to date")
 	}
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
-		FROM modifications
+		FROM %s
 		WHERE entity_type = ? AND entity_id = ? AND created_at BETWEEN ? AND ?
 		ORDER BY created_at DESC
-	`
+	`, TableNameModifications)
 
 	rows, err := s.DB.Query(query, mt, mtID, from, to)
 	if err != nil {

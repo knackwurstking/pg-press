@@ -33,7 +33,7 @@ func NewFeeds(r *Registry) *Feeds {
 		CREATE INDEX IF NOT EXISTS idx_%[1]s_user_id ON %[1]s(user_id);
 	`, TableNameFeeds)
 
-	if err := base.CreateTable(query, "feeds"); err != nil {
+	if err := base.CreateTable(query, TableNameFeeds); err != nil {
 		panic(err)
 	}
 
@@ -50,7 +50,10 @@ func (f *Feeds) SetBroadcaster(broadcaster Broadcaster) {
 func (f *Feeds) List() ([]*models.Feed, error) {
 	f.Log.Debug("Listing feeds")
 
-	query := `SELECT id, title, content, user_id, created_at FROM feeds ORDER BY created_at DESC`
+	query := fmt.Sprintf(
+		`SELECT id, title, content, user_id, created_at FROM %s ORDER BY created_at DESC`,
+		TableNameFeeds,
+	)
 	rows, err := f.DB.Query(query)
 	if err != nil {
 		return nil, f.GetSelectError(err)
@@ -68,15 +71,16 @@ func (f *Feeds) List() ([]*models.Feed, error) {
 func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 	f.Log.Debug("Listing feeds with pagination: offset: %d, limit: %d", offset, limit)
 
-	query := `
-		SELECT
+	query := fmt.Sprintf(
+		`SELECT
 			id, title, content, user_id, created_at
 		FROM
-			feeds
+			%s
 		ORDER BY
 			created_at DESC
-		LIMIT ? OFFSET ?
-	`
+		LIMIT ? OFFSET ?`,
+		TableNameFeeds,
+	)
 	rows, err := f.DB.Query(query, limit, offset)
 	if err != nil {
 		return nil, f.GetSelectError(err)
@@ -95,17 +99,18 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 	f.Log.Debug("Listing feeds by user: userID: %d, offset: %d, limit: %d",
 		userID, offset, limit)
 
-	query := `
-		SELECT
+	query := fmt.Sprintf(
+		`SELECT
 			id, title, content, user_id, created_at
 		FROM
-			feeds
+			%s
 		WHERE
 			user_id = ?
 		ORDER BY
 			created_at DESC
-		LIMIT ? OFFSET ?
-	`
+		LIMIT ? OFFSET ?`,
+		TableNameFeeds,
+	)
 	rows, err := f.DB.Query(query, userID, limit, offset)
 	if err != nil {
 		return nil, f.GetSelectError(err)
@@ -127,7 +132,10 @@ func (f *Feeds) Add(feed *models.Feed) error {
 		return err
 	}
 
-	query := `INSERT INTO feeds (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT INTO %s (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`,
+		TableNameFeeds,
+	)
 	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
 		return f.GetInsertError(err)
@@ -151,7 +159,7 @@ func (f *Feeds) Add(feed *models.Feed) error {
 func (f *Feeds) Count() (int, error) {
 	f.Log.Debug("Counting feeds")
 
-	count, err := f.QueryCount(`SELECT COUNT(*) FROM feeds`)
+	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
 	if err != nil {
 		return 0, f.GetSelectError(err)
 	}
@@ -162,7 +170,10 @@ func (f *Feeds) Count() (int, error) {
 func (f *Feeds) CountByUser(userID int64) (int, error) {
 	f.Log.Debug("Counting feeds by user: %d", userID)
 
-	count, err := f.QueryCount(`SELECT COUNT(*) FROM feeds WHERE user_id = ?`, userID)
+	count, err := f.QueryCount(
+		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE user_id = ?`, TableNameFeeds),
+		userID,
+	)
 	if err != nil {
 		return 0, f.GetSelectError(err)
 	}
@@ -173,7 +184,7 @@ func (f *Feeds) CountByUser(userID int64) (int, error) {
 func (f *Feeds) DeleteBefore(timestamp int64) error {
 	f.Log.Debug("Deleting feeds before timestamp %d", timestamp)
 
-	query := `DELETE FROM feeds WHERE created_at < ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
 	_, err := f.DB.Exec(query, timestamp)
 	if err != nil {
 		return f.GetDeleteError(err)
@@ -185,7 +196,10 @@ func (f *Feeds) DeleteBefore(timestamp int64) error {
 func (f *Feeds) Get(id int64) (*models.Feed, error) {
 	f.Log.Debug("Getting feed: %d", id)
 
-	query := `SELECT id, title, content, user_id, created_at FROM feeds WHERE id = ?`
+	query := fmt.Sprintf(
+		`SELECT id, title, content, user_id, created_at FROM %s WHERE id = ?`,
+		TableNameFeeds,
+	)
 	row := f.DB.QueryRow(query, id)
 
 	feed, err := ScanSingleRow(row, scanFeed)
@@ -204,7 +218,7 @@ func (f *Feeds) Get(id int64) (*models.Feed, error) {
 func (f *Feeds) Delete(id int64) error {
 	f.Log.Debug("Deleting feed: %d", id)
 
-	query := `DELETE FROM feeds WHERE id = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
 	_, err := f.DB.Exec(query, id)
 	if err != nil {
 		return f.GetDeleteError(err)

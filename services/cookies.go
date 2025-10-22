@@ -41,7 +41,7 @@ func NewCookies(registry *Registry) *Cookies {
 func (c *Cookies) List() ([]*models.Cookie, error) {
 	c.Log.Debug("Listing cookies")
 
-	query := `SELECT * FROM cookies ORDER BY last_login DESC`
+	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
 	rows, err := c.DB.Query(query)
 	if err != nil {
 		return nil, c.GetSelectError(err)
@@ -63,7 +63,10 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 		return nil, err
 	}
 
-	query := `SELECT * FROM cookies WHERE api_key = ? ORDER BY last_login DESC`
+	query := fmt.Sprintf(
+		`SELECT * FROM %s WHERE api_key = ? ORDER BY last_login DESC`,
+		TableNameCookies,
+	)
 	rows, err := c.DB.Query(query, apiKey)
 	if err != nil {
 		return nil, c.GetSelectError(err)
@@ -85,7 +88,10 @@ func (c *Cookies) Get(value string) (*models.Cookie, error) {
 		return nil, errors.NewValidationError("value cannot be empty")
 	}
 
-	row := c.DB.QueryRow(`SELECT * FROM cookies WHERE value = ?`, value)
+	row := c.DB.QueryRow(
+		fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies),
+		value,
+	)
 	cookie, err := ScanSingleRow(row, scanCookie)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -105,7 +111,10 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 	}
 
 	// Check if cookie already exists
-	count, err := c.QueryCount(`SELECT COUNT(*) FROM cookies WHERE value = ?`, cookie.Value)
+	count, err := c.QueryCount(
+		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE value = ?`, TableNameCookies),
+		cookie.Value,
+	)
 	if err != nil {
 		return c.GetSelectError(err)
 	}
@@ -113,7 +122,10 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 		return errors.NewAlreadyExistsError(TableNameCookies)
 	}
 
-	query := `INSERT INTO cookies (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`
+	query := fmt.Sprintf(
+		`INSERT INTO %s (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`,
+		TableNameCookies,
+	)
 	_, err = c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
 		return c.GetInsertError(err)
@@ -133,7 +145,10 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 		return err
 	}
 
-	query := `UPDATE cookies SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`
+	query := fmt.Sprintf(
+		`UPDATE %s SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`,
+		TableNameCookies,
+	)
 	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
 	if err != nil {
 		return c.GetUpdateError(err)
@@ -149,7 +164,7 @@ func (c *Cookies) Remove(value string) error {
 		return errors.NewValidationError("value cannot be empty")
 	}
 
-	query := `DELETE FROM cookies WHERE value = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE value = ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, value)
 	if err != nil {
 		return c.GetDeleteError(err)
@@ -165,7 +180,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 		return err
 	}
 
-	query := `DELETE FROM cookies WHERE api_key = ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE api_key = ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, apiKey)
 	if err != nil {
 		return c.GetDeleteError(err)
@@ -177,7 +192,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) error {
 	c.Log.Debug("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
 
-	query := `DELETE FROM cookies WHERE last_login < ?`
+	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {
 		return c.GetDeleteError(err)
