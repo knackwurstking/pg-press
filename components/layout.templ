@@ -16,30 +16,25 @@ templ Layout(options LayoutOptions) {
 	<!DOCTYPE html>
 	<html lang="de">
 		<head>
-			@mainLayoutMetaTags()
-			@mainLayoutLinks()
-			@mainLayoutScripts()
+			@metaTags()
+			@links()
+			@scripts()
 			<title>{ options.PageTitle }</title>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
 			}
 		</head>
 		<body hx-ext="ws">
-			@mainLayoutAppBar(options.AppBarTitle, options.NavContent)
+			@appBar(options.AppBarTitle, options.NavContent)
 			{ children... }
 			@templateImageViewer()
 		</body>
 	</html>
 }
 
-templ mainLayoutMetaTags() {
+templ metaTags() {
 	<meta charset="utf-8"/>
-	<!-- Viewport and responsive design -->
-	<meta
-		name="viewport"
-		content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover"
-	/>
-	<!-- PWA and mobile optimization -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes, viewport-fit=cover"/>
 	<meta name="mobile-web-app-capable" content="yes"/>
 	<meta name="apple-mobile-web-app-capable" content="yes"/>
 	<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -49,47 +44,24 @@ templ mainLayoutMetaTags() {
 	<meta name="theme-color" content="#f9f5d7" id="theme-color-meta"/>
 }
 
-templ mainLayoutLinks() {
-	<!-- Icons and manifest -->
+templ links() {
 	<link rel="icon" href={ utils.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
 	<link rel="icon" href={ utils.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
-	<link
-		rel="apple-touch-icon"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }
-	/>
-	<link
-		rel="mask-icon"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/icon.png") }
-		color="#b8bb26"
-	/>
-	<!-- PWA Manifest -->
-	<link
-		rel="manifest"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/manifest.json") }
-	/>
-	<!-- Stylesheets -->
-	<link
-		rel="stylesheet"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }
-	/>
-	<link
-		rel="stylesheet"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }
-	/>
-	<link
-		rel="stylesheet"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/css/main-layout.css") }
-	/>
+	<link rel="apple-touch-icon" href={ utils.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
+	<link rel="mask-icon" href={ utils.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#b8bb26"/>
+	<link rel="manifest" href={ utils.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
+	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
+	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
+	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/main-layout.css") }/>
 }
 
-templ mainLayoutScripts() {
-	<!-- HTMX for dynamic content -->
+templ scripts() {
 	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
 	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/main-layout.js") }></script>
 }
 
-templ mainLayoutAppBar(title string, navContent templ.Component) {
+templ appBar(title string, navContent templ.Component) {
 	<header class="app-bar top fixed shadow-sm">
 		<div class="app-bar-left">
 			<h5>{ title }</h5>

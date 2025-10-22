@@ -9,7 +9,7 @@ templ NavProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ env.ServerPathPrefix + "/profile" }
+		href={ templ.SafeURL(env.ServerPathPrefix + "/profile") }
 		title="Profil"
 	>
 		<i class="bi bi-person-circle"></i>
@@ -20,7 +20,7 @@ templ NavHomeButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ env.ServerPathPrefix + "/" }
+		href={ templ.SafeURL(env.ServerPathPrefix + "/") }
 		title="Startseite"
 	>
 		<i class="bi bi-house"></i>
@@ -31,7 +31,7 @@ templ NavFeedButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ env.ServerPathPrefix + "/feed" }
+		href={ templ.SafeURL(env.ServerPathPrefix + "/feed") }
 		hx-ws={ utils.HXWsConnectNavFeedCounter() }
 		hx-target="#feed-counter"
 		hx-swap="outerHTML"

@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-
 	"github.com/knackwurstking/pgpress/env"
 )
 
@@ -11,7 +10,7 @@ templ PageHome() {
 		LayoutOptions{
 			PageTitle:   "PG Presse",
 			AppBarTitle: "Home",
-			NavContent:  pageHomeNavContent("./"),
+			NavContent:  pageHomeNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -39,7 +38,7 @@ templ PageHome() {
 	}
 }
 
-templ pageHomeNavContent(relPath string) {
+templ pageHomeNavContent() {
 	@NavFeedButton()
 	@NavProfileButton()
 	@NavHomeButton()
@@ -59,9 +58,9 @@ templ pageHomeAnchorButton(props pageHomeAnchorButtonProps) {
 		style="width: 90%; margin: 0 auto;"
 		href={ props.Href }
 	>
-		<span style="width: 100%;" class="flex flex-row gap items-center">
+		<span class="flex flex-row gap items-center" style="width: 100%;">
 			if props.Icon != "" {
-				<i style="margin: var(--ui-spacing);" class={ fmt.Sprintf("bi bi-%s", props.Icon) }></i>
+				<i class={ fmt.Sprintf("bi bi-%s", props.Icon) } style="margin: var(--ui-spacing);"></i>
 			}
 			<span class="flex flex-col">
 				<strong>{ props.Title }</strong>

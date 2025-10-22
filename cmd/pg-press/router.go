@@ -18,10 +18,10 @@ func Serve(e *echo.Echo, r *services.Registry) {
 
 	handlers.NewNav(r, wsFeedHandler).RegisterRoutes(e)
 	handlers.NewHome(r).RegisterRoutes(e)
+	handlers.NewAuth(r).RegisterRoutes(e)
 
-	//auth.NewRoutes(db).RegisterRoutes(e)
 	//editor.NewRoutes(db).RegisterRoutes(e)
-	//feed.NewRoutes(db).RegisterRoutes(e)
+	//feed.NewRoutes(db).RegisterRoutes(e) // TODO: Continuer here
 	//help.NewRoutes(db).RegisterRoutes(e)
 	//profile.NewRoutes(db).RegisterRoutes(e)
 	//tools.NewRoutes(db).RegisterRoutes(e)

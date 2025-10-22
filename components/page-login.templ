@@ -1,0 +1,44 @@
+package components
+
+templ PageLogin(apiKey string, invalidApiKey bool) {
+	@Layout(LayoutOptions{
+		PageTitle:   "PG Presse | Login",
+		AppBarTitle: "Login",
+		NavContent:  pageLoginNavContent(),
+	}) {
+		<main class="container">
+			@loginDialog(apiKey, invalidApiKey)
+			<script>
+				document.querySelector("#login-dialog").showModal();
+			</script>
+		</main>
+	}
+}
+
+templ loginDialog(apiKey string, invalidApiKey bool) {
+	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
+		<form>
+			<label class="flex flex-col">
+				API-Schlüssel
+				<input
+					name="api-key"
+					type="text"
+					placeholder="API-Schlüssel"
+					value={ apiKey }
+					if invalidApiKey {
+						aria-invalid="true"
+					}
+					required
+				/>
+			</label>
+			<footer class="flex">
+				<button class="flex-1" type="submit">Anmelden</button>
+			</footer>
+		</form>
+	</dialog>
+}
+
+templ pageLoginNavContent() {
+	@NavProfileButton()
+	@NavHomeButton()
+}

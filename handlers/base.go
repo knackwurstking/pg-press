@@ -37,21 +37,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return echo.NewHTTPError(http.StatusNotFound, message)
 //}
 //
-//// HandleError processes errors and returns appropriate HTTP responses
-//func (b *BaseHandler) HandleError(c echo.Context, err error, context string) error {
-//	statusCode := errors.GetHTTPStatusCode(err)
-//	if statusCode == 0 {
-//		statusCode = http.StatusInternalServerError
-//	}
-//
-//	return b.RenderError(c, statusCode, fmt.Sprintf("%s: %v", context, err))
-//}
-//
-//// RedirectTo redirects the user to a specific path
-//func (b *BaseHandler) RedirectTo(c echo.Context, path string) error {
-//	return c.Redirect(http.StatusSeeOther, path)
-//}
-//
 //// getSanitizedFormValue retrieves and sanitizes form input
 //func (b *BaseHandler) GetSanitizedFormValue(c echo.Context, fieldName string) string {
 //	formParams, _ := c.FormParams()
