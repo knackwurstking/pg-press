@@ -22,24 +22,28 @@ templ PageNotes(props *PageNotesProps) {
 		},
 	) {
 		<main class="container fluid">
-			<!-- Filter Section -->
 			<section class="filter-section mb">
 				<div class="flex gap-sm justify-center items-center w-full flex-wrap">
 					<button class="filter-btn active small" data-filter="all">
 						Alle ({ fmt.Sprintf("%d", len(props.Notes)) })
 					</button>
-					{{ brokenCount := 0 }}
-					{{ attentionCount := 0 }}
-					{{ infoCount := 0 }}
 					{{
-						outer:
+						brokenCount := 0
+						attentionCount := 0
+						infoCount := 0
+
 						for _, note := range props.Notes {
 							l := note.GetLinked()
 							if l.Name == "tool" {
+								skip := false
 								for _, t := range props.Tools {
 									if t.ID == l.ID && t.IsDead {
-										continue outer
+										skip = true
+										break
 									}
+								}
+								if skip {
+									continue
 								}
 							}
 
@@ -54,11 +58,11 @@ templ PageNotes(props *PageNotesProps) {
 						}
 					}}
 					<button class="filter-btn small destructive flex gap-sm" data-filter="broken">
-						<i class="bi bi-x-circle text-danger"></i>
+						<i class="bi bi-x-circle"></i>
 						Defekt ({ fmt.Sprintf("%d", brokenCount) })
 					</button>
 					<button class="filter-btn small warning flex gap-sm" data-filter="attention">
-						<i class="bi bi-exclamation-triangle text-warning"></i>
+						<i class="bi bi-exclamation-triangle"></i>
 						Achtung ({ fmt.Sprintf("%d", attentionCount) })
 					</button>
 					<button class="filter-btn small info flex gap-sm" data-filter="info">
@@ -67,7 +71,6 @@ templ PageNotes(props *PageNotesProps) {
 					</button>
 				</div>
 			</section>
-			<!-- Notes List -->
 			<section class="notes-grid max-w-full" style="margin: 0 auto;">
 				@NotesGrid(props.Notes, props.Tools)
 			</section>
@@ -90,11 +93,9 @@ script pageNotesScript() {
 			button.addEventListener('click', function() {
 				const filter = this.dataset.filter;
 
-				// Update active button
 				filterButtons.forEach(btn => btn.classList.remove('active'));
 				this.classList.add('active');
 
-				// Show/hide cards based on filter
 				noteCards.forEach(card => {
 					const level = card.dataset.noteLevel;
 					const shouldShow = filter === 'all' ||
@@ -102,11 +103,7 @@ script pageNotesScript() {
 						(filter === 'attention' && level === '1') ||
 						(filter === 'info' && level === '0');
 
-					if (shouldShow) {
-						card.style.display = 'block';
-					} else {
-						card.style.display = 'none';
-					}
+					card.style.display = shouldShow ? 'block' : 'none';
 				});
 			});
 		});
@@ -118,16 +115,17 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 		<div class="notes-list grid gap-lg p" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
 			for _, note := range notes {
 				{{
-					// Remove notes from dead tools
 					skip := false
 					l := note.GetLinked()
-					for _, t := range tools {
-						if t.ID == l.ID && t.IsDead {
-							skip = true
+					if l.Name == "tool" {
+						for _, t := range tools {
+							if t.ID == l.ID && t.IsDead {
+								skip = true
+								break
+							}
 						}
 					}
 
-					// Set card color based on the note level
 					filterClass := ""
 					switch note.Level {
 					case models.INFO:
@@ -138,7 +136,6 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 						filterClass = "destructive outline"
 					}
 				}}
-				// Render note only for tools not dead
 				if !skip {
 					@NotesCard(note, filterClass, tools)
 				}
@@ -209,7 +206,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 							for _, tool := range tools {
 								if tool.ID == linked.ID {
 									<a
-										href={ fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID) }
+										href={ templ.SafeURL(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID)) }
 										class="tool-link"
 									>
 										{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }
@@ -221,8 +218,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 							}
 						case "press":
 							<a
-								href={ fmt.Sprintf("%s/tools/press/%d",
-									env.ServerPathPrefix, linked.ID) }
+								href={ templ.SafeURL(fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, linked.ID)) }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }

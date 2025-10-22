@@ -2,20 +2,19 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/utils"
 	"strings"
 	"time"
+
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
 )
 
 templ PageFeed() {
-	@Layout(
-		LayoutOptions{
-			PageTitle:   "PG Presse | Feed",
-			AppBarTitle: "Feed",
-			NavContent:  pageFeedNavContent(),
-		},
-	) {
+	@Layout(LayoutOptions{
+		PageTitle:   "PG Presse | Feed",
+		AppBarTitle: "Feed",
+		NavContent:  pageFeedNavContent(),
+	}) {
 		<main class="container fluid">
 			<span
 				id="data"
@@ -65,11 +64,7 @@ templ Feed(feed *models.Feed, userMap map[int64]*models.User) {
 				{ feed.Title }
 			</h5>
 			<div class="feed-content" style="margin-bottom: 0.5rem;">
-				@templ.Raw(
-					strings.ReplaceAll(
-						templ.EscapeString(feed.Content), "\n", "<br/>",
-					),
-				)
+				@templ.Raw(strings.ReplaceAll(templ.EscapeString(feed.Content), "\n", "<br/>"))
 			</div>
 			<small class="feed-user" style="color: var(--ui-text-muted);">
 				if user, ok := userMap[feed.UserID]; ok {

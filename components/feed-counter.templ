@@ -10,7 +10,7 @@ templ FeedCounter(count int) {
 			style="position: absolute; top: 0; right: 0; width: 1rem; height: 1rem; font-size: 0.75rem; border-radius: 50%;"
 		>
 			if count > 99 {
-				{ "99+" }
+				99+
 			} else {
 				{ fmt.Sprint(count) }
 			}

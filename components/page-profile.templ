@@ -17,84 +17,88 @@ templ PageProfile(user *models.User) {
 			AdditionalHead: pageProfileAdditionalHead(),
 		},
 	) {
-		<main style="max-width: 42rem; margin: 0 auto;" class="container fluid">
-			<div class="profile-header border">
-				<div
-					style="margin-bottom: var(--ui-spacing);"
-					class="flex flex-row justify-between items-center"
-				>
-					<h1 style="margin: 0; color: var(--ui-text); font-size: 2.25rem;">
-						{ user.Name }
-					</h1>
-					<button
-						class="secondary icon"
-						onclick='document.querySelector("#edit-user-name-dialog").showModal();'
-						title="Benutzername bearbeiten"
-					>
-						<i class="bi bi-pen"></i>
-					</button>
-				</div>
-				<div class="flex flex-row gap flex-wrap justify-between items-center">
-					<div class="telegram-id">
-						<i class="bi bi-telegram"></i>
-						Telegram ID: { user.TelegramID }
-					</div>
-					<a
-						role="button"
-						href={ env.ServerPathPrefix + "/logout" }
-						class="ghost destructive flex flex-row gap"
-					>
-						<i class="bi bi-box-arrow-right"></i>
-						Abmelden
-					</a>
-				</div>
-			</div>
-			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
-				<span
-					id="cookies"
-					hx-get={ utils.HXGetCookies() }
-					hx-trigger="load"
-					hx-swap="outerHTML"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				></span>
-			</div>
-			<dialog
-				id="edit-user-name-dialog"
-				class="profile-dialog border clean"
-				oncancel="event.preventDefault()"
-			>
-				<form action={ templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)) }>
-					<label class="flex flex-col">
-						<strong>Benutzername ändern</strong>
-						<input
-							name="user-name"
-							type="text"
-							value={ user.Name }
-							placeholder="Neuer Benutzername"
-							required
-						/>
-					</label>
-					<footer
-						style="margin-top: calc(var(--ui-spacing) * 2);"
-						class="flex flex-row gap justify-end"
-					>
-						<a
-							role="button"
-							href={ env.ServerPathPrefix + "/profile" }
-							class="secondary flex flex-row gap"
-						>
-							<i class="bi bi-x-circle"></i>
-							Schließen
-						</a>
-						<button type="submit" class="primary flex flex-row gap">
-							<i class="bi bi-check-circle"></i>
-							Ändern
-						</button>
-					</footer>
-				</form>
-			</dialog>
+		<main class="container fluid" style="max-width: 42rem; margin: 0 auto;">
+			@profileHeader(user)
+			@cookiesSection()
+			@editUserDialog(user)
 		</main>
 	}
+}
+
+templ profileHeader(user *models.User) {
+	<div class="profile-header border">
+		<div class="flex justify-between items-center mb">
+			<h1>{ user.Name }</h1>
+			<button
+				class="secondary icon"
+				onclick='document.querySelector("#edit-user-name-dialog").showModal();'
+				title="Benutzername bearbeiten"
+			>
+				<i class="bi bi-pen"></i>
+			</button>
+		</div>
+		<div class="flex gap flex-wrap justify-between items-center">
+			<div class="telegram-id">
+				<i class="bi bi-telegram"></i>
+				Telegram ID: { user.TelegramID }
+			</div>
+			<a
+				role="button"
+				href={ templ.SafeURL(env.ServerPathPrefix + "/logout") }
+				class="ghost destructive flex gap"
+			>
+				<i class="bi bi-box-arrow-right"></i>
+				Abmelden
+			</a>
+		</div>
+	</div>
+}
+
+templ cookiesSection() {
+	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
+		<span
+			id="cookies"
+			hx-get={ utils.HXGetCookies() }
+			hx-trigger="load"
+			hx-swap="outerHTML"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+		></span>
+	</div>
+}
+
+templ editUserDialog(user *models.User) {
+	<dialog
+		id="edit-user-name-dialog"
+		class="profile-dialog border clean"
+		oncancel="event.preventDefault()"
+	>
+		<form action={ templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)) }>
+			<label class="flex flex-col">
+				<strong>Benutzername ändern</strong>
+				<input
+					name="user-name"
+					type="text"
+					value={ user.Name }
+					placeholder="Neuer Benutzername"
+					required
+				/>
+			</label>
+			<footer class="flex gap justify-end mt-lg">
+				<a
+					role="button"
+					href={ templ.SafeURL(env.ServerPathPrefix + "/profile") }
+					class="secondary flex gap"
+				>
+					<i class="bi bi-x-circle"></i>
+					Schließen
+				</a>
+				<button type="submit" class="primary flex gap">
+					<i class="bi bi-check-circle"></i>
+					Ändern
+				</button>
+			</footer>
+		</form>
+	</dialog>
 }
 
 templ pageProfileNavContent() {
@@ -109,6 +113,12 @@ templ pageProfileAdditionalHead() {
 			background: var(--ui-color-100);
 			padding: calc(var(--ui-spacing) * 2);
 			margin-bottom: calc(var(--ui-spacing) * 2);
+		}
+
+		.profile-header h1 {
+			margin: 0;
+			color: var(--ui-text);
+			font-size: 2.25rem;
 		}
 
 		.telegram-id {
@@ -152,7 +162,7 @@ templ CookiesDetails(cookies []*models.Cookie) {
 		<details id="cookies" class="cookies-details" open>
 			<summary class="cookies-summary">
 				<i class="bi bi-cookie"></i>
-				Aktive Sitzungen { len(cookies) }
+				Aktive Sitzungen { fmt.Sprintf("%d", len(cookies)) }
 			</summary>
 			<figure class="overflow-auto">
 				<table class="cookies-table borderless">

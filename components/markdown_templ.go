@@ -109,12 +109,13 @@ func MarkdownStyles() templ.Component {
 
 func MarkdownScript() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_MarkdownScript_5e9b`,
-		Function: `function __templ_MarkdownScript_5e9b(){function renderMarkdownToHTML(content) {
+		Name: `__templ_MarkdownScript_f4d6`,
+		Function: `function __templ_MarkdownScript_f4d6(){function renderMarkdownToHTML(content) {
 		if (!content || content.trim() === '') {
 			return '';
 		}
 
+		// Apply markdown transformations
 		var processed = content
 			.replace(/### (.*$)/gm, '<h3>$1</h3>')
 			.replace(/## (.*$)/gm, '<h2>$1</h2>')
@@ -125,20 +126,27 @@ func MarkdownScript() templ.ComponentScript {
 			.replace(/` + "`" + `(.*?)` + "`" + `/g, '<code>$1</code>')
 			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
 			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
-			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>')
+			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>');
+
+		// Group list items and blockquotes
+		processed = processed
 			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
 			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
-			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>')
+			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>');
+
+		// Clean up temporary classes and tags
+		processed = processed
 			.replace(/class="[uo]l-item"/g, '')
 			.replace(/<bq-line>/g, '')
 			.replace(/<\/bq-line>/g, '\n');
 
+		// Process paragraphs
 		var paragraphs = processed.split(/\n\s*\n/);
-
 		return paragraphs.map(function(paragraph) {
 			paragraph = paragraph.trim();
 			if (!paragraph) return '';
 
+			// Don't wrap block elements in paragraphs
 			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
 				return paragraph;
 			}
@@ -154,11 +162,7 @@ func MarkdownScript() templ.ComponentScript {
 			var content = container.getAttribute('data-markdown-content');
 			if (content) {
 				var html = renderMarkdownToHTML(content);
-				if (html) {
-					container.innerHTML = html;
-				} else {
-					container.innerHTML = '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
-				}
+				container.innerHTML = html || '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
 			}
 		});
 	}
@@ -169,28 +173,28 @@ func MarkdownScript() templ.ComponentScript {
 
 		if (!textarea || !previewContent) return;
 
-		var html = '';
-		if (textarea.value) {
-			html = renderMarkdownToHTML(textarea.value);
-		}
-
+		var html = textarea.value ? renderMarkdownToHTML(textarea.value) : '';
 		previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
 	};
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', function() {
-			setTimeout(processMarkdownContent, 10);
-		});
-	} else {
+	// Initialize on DOM ready
+	function initializeMarkdown() {
 		setTimeout(processMarkdownContent, 10);
 	}
 
-	document.addEventListener('htmx:afterSwap', function(event) {
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initializeMarkdown);
+	} else {
+		initializeMarkdown();
+	}
+
+	// Re-process after HTMX swaps
+	document.addEventListener('htmx:afterSwap', function() {
 		setTimeout(processMarkdownContent, 50);
 	});
 }`,
-		Call:       templ.SafeScript(`__templ_MarkdownScript_5e9b`),
-		CallInline: templ.SafeScriptInline(`__templ_MarkdownScript_5e9b`),
+		Call:       templ.SafeScript(`__templ_MarkdownScript_f4d6`),
+		CallInline: templ.SafeScriptInline(`__templ_MarkdownScript_f4d6`),
 	}
 }
 

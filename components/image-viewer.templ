@@ -28,9 +28,6 @@ script OpenImageViewer(attachmentID int64) {
 	var template = document.querySelector('template[name="image-viewer"]');
 	var dialog = template.content.cloneNode(true).querySelector('dialog');
 	var img = dialog.querySelector('img.attachment');
-	var closeButton = dialog.querySelector('button.close');
-
-	console.debug(`Opening image viewer with image ${imageURL}`);
 
 	// Setup image
 	img.src = imageURL;
@@ -38,12 +35,8 @@ script OpenImageViewer(attachmentID int64) {
 		event.stopPropagation();
 	};
 
-	// Setup dialog click handlers
+	// Setup dialog click handler
 	dialog.onclick = function() {
-		dialog.close();
-	};
-
-	closeButton.onclick = function() {
 		dialog.close();
 	};
 

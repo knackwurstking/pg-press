@@ -29,7 +29,6 @@ templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
 	}) {
-		// NOTE: For now there are two types based on tool position top and bottom, top cassette is ignored for now
 		switch props.Tool.Position {
 			case models.PositionTop:
 				@DialogEditMetalSheetContentPositionTop(props)
@@ -172,7 +171,6 @@ templ DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps
 				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SACMI" {
 					selected
 				}
-				else
 			>SACMI</option>
 			<option
 				value="SITI"

@@ -71,10 +71,6 @@ func PageHelpMarkdown() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = MarkdownScript().Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			return nil
 		})
 		templ_7745c5c3_Err = Layout(LayoutOptions{
@@ -118,7 +114,7 @@ func pageHelpMarkdownNavContent() templ.Component {
 		var templ_7745c5c3_Var4 templ.SafeURL
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(env.ServerPathPrefix + "/"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 37, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 36, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -153,11 +149,7 @@ func pageHelpMarkdownAdditionalHead() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = MarkdownStyles().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<style>\n\t\t.demo-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.demo-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\n\t\t.example-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\talign-items: start;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.example-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\t</style><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tvar textarea = document.getElementById('demo-textarea');\n\n\t\t\tfunction updatePreview() {\n\t\t\t\tif (window.updateMarkdownPreview) {\n\t\t\t\t\twindow.updateMarkdownPreview('demo-textarea', 'demo-preview');\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (textarea) {\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\t\t\t\tsetTimeout(updatePreview, 100);\n\t\t\t}\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<style>\n\t\t.demo-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.demo-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\n\t\t.example-grid {\n\t\t\tdisplay: grid;\n\t\t\tgrid-template-columns: 1fr 1fr;\n\t\t\talign-items: start;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t.example-grid {\n\t\t\t\tgrid-template-columns: 1fr;\n\t\t\t}\n\t\t}\n\t</style><script>\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tvar textarea = document.getElementById('demo-textarea');\n\n\t\t\tfunction updatePreview() {\n\t\t\t\tvar previewContent = document.getElementById('demo-preview');\n\t\t\t\tif (textarea && previewContent) {\n\t\t\t\t\tvar content = textarea.value;\n\t\t\t\t\t// Simple markdown rendering for demo\n\t\t\t\t\tvar html = content\n\t\t\t\t\t\t.replace(/### (.*$)/gm, '<h3>$1</h3>')\n\t\t\t\t\t\t.replace(/## (.*$)/gm, '<h2>$1</h2>')\n\t\t\t\t\t\t.replace(/# (.*$)/gm, '<h1>$1</h1>')\n\t\t\t\t\t\t.replace(/__(.*?)__/g, '<u>$1</u>')\n\t\t\t\t\t\t.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n\t\t\t\t\t\t.replace(/\\*(.*?)\\*/g, '<em>$1</em>')\n\t\t\t\t\t\t.replace(/`(.*?)`/g, '<code>$1</code>')\n\t\t\t\t\t\t.replace(/^- (.*$)/gm, '<li>$1</li>')\n\t\t\t\t\t\t.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')\n\t\t\t\t\t\t.replace(/\\n/g, '<br>');\n\n\t\t\t\t\tpreviewContent.innerHTML = html;\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (textarea) {\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\t\t\t\tsetTimeout(updatePreview, 100);\n\t\t\t}\n\t\t});\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,23 +182,23 @@ func quickReferenceSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickReferenceItem("**Fett**", "Fett").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = quickReferenceItem("**Fett**", "Fett", "strong").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickReferenceItem("*Kursiv*", "Kursiv").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = quickReferenceItem("*Kursiv*", "Kursiv", "em").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickReferenceItem("__Unterstrichen__", "Unterstrichen").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = quickReferenceItem("__Unterstrichen__", "Unterstrichen", "u").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickReferenceItem("`Code`", "Code").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = quickReferenceItem("`Code`", "Code", "code").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickReferenceItem("# Überschrift 1", "Überschrift 1").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = quickReferenceItem("# Überschrift 1", "Überschrift 1", "h1").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -218,7 +210,7 @@ func quickReferenceSection() templ.Component {
 	})
 }
 
-func quickReferenceItem(syntax, result string) templ.Component {
+func quickReferenceItem(syntax, result, tagType string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -246,7 +238,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(syntax)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 105, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 118, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -256,7 +248,8 @@ func quickReferenceItem(syntax, result string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if syntax == "**Fett**" {
+		switch tagType {
+		case "strong":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<strong>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -264,7 +257,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(result)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 109, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 123, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -274,7 +267,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if syntax == "*Kursiv*" {
+		case "em":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<em>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -282,7 +275,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(result)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 111, Col: 16}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 125, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -292,7 +285,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if syntax == "__Unterstrichen__" {
+		case "u":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<u>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -300,7 +293,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(result)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 113, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 127, Col: 16}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -310,7 +303,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if syntax == "`Code`" {
+		case "code":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<code class=\"muted px-xs rounded\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -318,7 +311,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(result)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 115, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 129, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -328,7 +321,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if syntax == "# Überschrift 1" {
+		case "h1":
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<strong class=\"text-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -336,7 +329,7 @@ func quickReferenceItem(syntax, result string) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(result)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 117, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 131, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -376,7 +369,7 @@ func interactiveDemoSection() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<section class=\"card p-lg\"><h2 class=\"text-xl text-bold flex items-center ghost success gap\"><i class=\"bi bi-play-circle\"></i> Interaktive Vorschau</h2><p class=\"muted border\">Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:</p><div class=\"demo-grid gap-lg\"><div class=\"flex flex-col\"><label for=\"demo-textarea\" class=\"text-sm text-medium\">Markdown eingeben:</label> <textarea id=\"demo-textarea\" class=\"w-full h-full border rounded p-sm text-sm resize-y\" placeholder=\"Hier können Sie Markdown ausprobieren...\"></textarea><script>\n\t\t\t\t\tdocument.querySelector(\"textarea#demo-textarea\").value =\n`# Willkommen bei Markdown!\n\nDies ist ein **Beispieltext** mit verschiedenen Formatierungen:\n\n- *Kursiver Text*\n- **Fetter Text**\n- __Unterstrichener Text__\n- \\`Inline-Code\\`\n\n> Ein Blockzitat für wichtige Informationen.\n\nUnd natürlich mehr Beispiele für die Vorschau!`;\n\t\t\t\t</script></div><div><label class=\"text-sm text-medium block\">Vorschau:</label><div id=\"demo-preview\" class=\"border rounded p-sm overflow-y-auto markdown-content\" style=\"min-height: 200px; max-height: 300px;\"></div></div></div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<section class=\"card p-lg\"><h2 class=\"text-xl text-bold flex items-center ghost success gap\"><i class=\"bi bi-play-circle\"></i> Interaktive Vorschau</h2><p class=\"muted border\">Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:</p><div class=\"demo-grid gap-lg\"><div class=\"flex flex-col\"><label for=\"demo-textarea\" class=\"text-sm text-medium\">Markdown eingeben:</label> <textarea id=\"demo-textarea\" class=\"w-full h-full border rounded p-sm text-sm resize-y\" placeholder=\"Hier können Sie Markdown ausprobieren...\" style=\"min-height: 200px;\"># Willkommen bei Markdown! Dies ist ein **Beispieltext** mit verschiedenen Formatierungen: - *Kursiver Text* - **Fetter Text** - __Unterstrichener Text__ - `Inline-Code` > Ein Blockzitat für wichtige Informationen. Und natürlich mehr Beispiele für die Vorschau!</textarea></div><div><label class=\"text-sm text-medium block\">Vorschau:</label><div id=\"demo-preview\" class=\"border rounded p-sm overflow-y-auto\" style=\"min-height: 200px; max-height: 300px;\"></div></div></div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -409,7 +402,7 @@ func textFormattingSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = formattingExample("Fetter Text", "**Dies ist fetter Text**", "Dies ist fetter Text", "strong", "Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = formattingExample("Fetter Text", "**Dies ist fetter Text**", "strong", "Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -417,7 +410,7 @@ func textFormattingSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = formattingExample("Kursiver Text", "*Dies ist kursiver Text*", "Dies ist kursiver Text", "em", "Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = formattingExample("Kursiver Text", "*Dies ist kursiver Text*", "em", "Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -425,7 +418,7 @@ func textFormattingSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = formattingExample("Unterstrichener Text", "__Dies ist unterstrichener Text__", "Dies ist unterstrichener Text", "u", "Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = formattingExample("Unterstrichener Text", "__Dies ist unterstrichener Text__", "u", "Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -433,7 +426,7 @@ func textFormattingSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = formattingExample("Inline-Code", "Dies ist Code: `print(\"Hallo\")`", "Dies ist Code: print(\"Hallo\")", "code", "Verwenden Sie Backticks (`) um Inline-Code zu markieren.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = formattingExample("Inline-Code", "Dies ist Code: `print(\"Hallo\")`", "code", "Verwenden Sie Backticks (`) um Inline-Code zu markieren.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -453,7 +446,7 @@ func textFormattingSection() templ.Component {
 	})
 }
 
-func formattingExample(title, syntax, content, tagType, description string) templ.Component {
+func formattingExample(title, syntax, tagType, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -481,7 +474,7 @@ func formattingExample(title, syntax, content, tagType, description string) temp
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 186, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 195, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -494,90 +487,52 @@ func formattingExample(title, syntax, content, tagType, description string) temp
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(syntax)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 189, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 198, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</code></div><div class=\"border rounded p-sm markdown-content\"><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</code></div><div class=\"border rounded p-sm\"><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tagType == "strong" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<strong>")
+		switch tagType {
+		case "strong":
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<strong>Dies ist fetter Text</strong>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 194, Col: 23}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		case "em":
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<em>Dies ist kursiver Text</em>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</strong>")
+		case "u":
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<u>Dies ist unterstrichener Text</u>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if tagType == "em" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<em>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 196, Col: 19}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</em>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else if tagType == "u" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<u>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(content)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 198, Col: 18}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</u>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else if tagType == "code" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "Dies ist Code: <code>print(\"Hallo\")</code>")
+		case "code":
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "Dies ist Code: <code>print(\"Hallo\")</code>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</p></div></div><p class=\"text-sm muted border\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</p></div></div><p class=\"text-sm muted border\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(description)
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 205, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 215, Col: 47}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -601,12 +556,12 @@ func listExample() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var23 == nil {
-			templ_7745c5c3_Var23 = templ.NopComponent
+		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var20 == nil {
+			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Listen</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">- Erstes Element<br>- Zweites Element<br>- Drittes Element</code></div><div class=\"border rounded p-sm markdown-content\"><ul><li>Erstes Element</li><li>Zweites Element</li><li>Drittes Element</li></ul></div></div><p class=\"text-sm muted border\">Verwenden Sie Bindestriche (-) für ungeordnete Listen.</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"flex flex-col gap\"><h3 class=\"text-lg text-medium\">Listen</h3><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">- Erstes Element<br>- Zweites Element<br>- Drittes Element</code></div><div class=\"border rounded p-sm\"><ul><li>Erstes Element</li><li>Zweites Element</li><li>Drittes Element</li></ul></div></div><p class=\"text-sm muted border\">Verwenden Sie Bindestriche (-) für ungeordnete Listen.</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -630,12 +585,12 @@ func blockquoteSection() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var24 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var24 == nil {
-			templ_7745c5c3_Var24 = templ.NopComponent
+		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var21 == nil {
+			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<section class=\"card p-lg flex flex-col gap\"><h2 class=\"text-xl text-bold flex items-center ghost secondary gap\"><i class=\"bi bi-quote mr\"></i> Zitate</h2><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">> Dies ist ein wichtiges Zitat<br>> mit mehreren Zeilen</code></div><div class=\"border rounded p-sm markdown-content\"><blockquote><p>Dies ist ein wichtiges Zitat<br>mit mehreren Zeilen</p></blockquote></div></div><p class=\"text-sm muted border\">Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.</p></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<section class=\"card p-lg flex flex-col gap\"><h2 class=\"text-xl text-bold flex items-center ghost secondary gap\"><i class=\"bi bi-quote\"></i> Zitate</h2><div class=\"example-grid gap\"><div class=\"muted outline rounded p-sm\"><code class=\"text-sm\">> Dies ist ein wichtiges Zitat<br>> mit mehreren Zeilen</code></div><div class=\"border rounded p-sm\"><blockquote><p>Dies ist ein wichtiges Zitat<br>mit mehreren Zeilen</p></blockquote></div></div><p class=\"text-sm muted border\">Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.</p></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -659,12 +614,12 @@ func tipsSection() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var25 == nil {
-			templ_7745c5c3_Var25 = templ.NopComponent
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<section class=\"card success outline p-lg\"><h2 class=\"text-xl text-bold mb flex items-center ghost success gap\"><i class=\"bi bi-lightbulb\"></i> Tipps & Häufige Fehler</h2><div class=\"my-lg\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<section class=\"card success outline p-lg\"><h2 class=\"text-xl text-bold mb flex items-center ghost success gap\"><i class=\"bi bi-lightbulb\"></i> Tipps & Häufige Fehler</h2><div class=\"my-lg\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -676,7 +631,7 @@ func tipsSection() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -700,38 +655,38 @@ func tipItem(title, description string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var26 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var26 == nil {
-			templ_7745c5c3_Var26 = templ.NopComponent
+		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var23 == nil {
+			templ_7745c5c3_Var23 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<div class=\"flex items-start gap pb\"><i class=\"bi bi-check-circle-fill success ghost text-lg mt\"></i><div><strong class=\"text-medium\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"flex items-start gap pb\"><i class=\"bi bi-check-circle-fill success ghost text-lg mt\"></i><div><strong class=\"text-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var27 string
-		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 269, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 279, Col: 38}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</strong> <span class=\"text-sm muted block\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var28 string
-		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(description)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 270, Col: 50}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</strong> <span class=\"text-sm muted block\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</span></div></div>")
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(description)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-help-markdown.templ`, Line: 280, Col: 50}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -10,10 +10,11 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/utils"
 	"strings"
 	"time"
+
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
 )
 
 func PageFeed() templ.Component {
@@ -56,7 +57,7 @@ func PageFeed() templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetFeedList())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 22, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 21, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -68,13 +69,11 @@ func PageFeed() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Layout(
-			LayoutOptions{
-				PageTitle:   "PG Presse | Feed",
-				AppBarTitle: "Feed",
-				NavContent:  pageFeedNavContent(),
-			},
-		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Layout(LayoutOptions{
+			PageTitle:   "PG Presse | Feed",
+			AppBarTitle: "Feed",
+			NavContent:  pageFeedNavContent(),
+		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -207,7 +206,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("feed-%d", feed.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 58, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 57, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -220,7 +219,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", feed.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 60, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 59, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -233,7 +232,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", feed.CreatedAt))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 61, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 60, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -246,7 +245,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(feed.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 65, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 64, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -256,11 +255,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(
-			strings.ReplaceAll(
-				templ.EscapeString(feed.Content), "\n", "<br/>",
-			),
-		).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(strings.ReplaceAll(templ.EscapeString(feed.Content), "\n", "<br/>")).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -276,7 +271,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 76, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 71, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -290,7 +285,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", feed.UserID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 78, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 73, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -304,7 +299,7 @@ func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(time.UnixMilli(feed.CreatedAt).Format("2006-01-02 15:04:05"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 84, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-feed.templ`, Line: 79, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {

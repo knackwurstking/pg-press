@@ -20,18 +20,15 @@ type PageEditorOptions struct {
 
 templ PageEditor(options *PageEditorOptions) {
 	{{
-		var pageTitle string
-		if options.ID > 0 {
-			pageTitle = fmt.Sprintf("Bearbeiten - %s", getTypeName(options.Type))
-		} else {
-			pageTitle = fmt.Sprintf("Erstellen - %s", getTypeName(options.Type))
-		}
+		var pageTitle, editorTitle string
+		typeName := getTypeName(options.Type)
 
-		var editorTitle string
 		if options.ID > 0 {
-			editorTitle = fmt.Sprintf("%s bearbeiten", getTypeName(options.Type))
+			pageTitle = fmt.Sprintf("Bearbeiten - %s", typeName)
+			editorTitle = fmt.Sprintf("%s bearbeiten", typeName)
 		} else {
-			editorTitle = fmt.Sprintf("Neues %s erstellen", getTypeName(options.Type))
+			pageTitle = fmt.Sprintf("Erstellen - %s", typeName)
+			editorTitle = fmt.Sprintf("Neues %s erstellen", typeName)
 		}
 	}}
 	@Layout(LayoutOptions{
@@ -363,13 +360,8 @@ templ pageEditorAdditionalHead() {
 			list-style: inherit;
 		}
 
-		.markdown-content ul {
-			list-style-type: disc;
-		}
-
-		.markdown-content ol {
-			list-style-type: decimal;
-		}
+		.markdown-content ul { list-style-type: disc; }
+		.markdown-content ol { list-style-type: decimal; }
 
 		.markdown-content li {
 			margin: 0.25em 0;
@@ -382,57 +374,32 @@ templ pageEditorAdditionalHead() {
 			border-radius: 2px;
 		}
 
-		.markdown-content strong {
-			font-weight: 600;
-		}
-
-		.markdown-content em {
-			font-style: italic;
-		}
+		.markdown-content strong { font-weight: 600; }
+		.markdown-content em { font-style: italic; }
 
 		@media (max-width: 768px) {
-			#markdown-preview {
-				min-height: 200px;
-			}
-
-			.flex-wrap {
-				justify-content: center;
-			}
+			#markdown-preview { min-height: 200px; }
+			.flex-wrap { justify-content: center; }
 		}
 
-		.transition-all:hover {
-			border-color: var(--ui-primary);
-		}
-
+		.transition-all:hover { border-color: var(--ui-primary); }
 		.border-2:hover {
 			border-color: var(--ui-primary);
 			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		}
 
-		.file-upload-area:hover {
-			border-color: var(--ui-primary);
-		}
+		.file-upload-area:hover,
+		.file-upload-area.drag-over { border-color: var(--ui-primary); }
 
-		.file-upload-area.drag-over {
-			border-color: var(--ui-primary);
-		}
-
-		.preview-fullscreen textarea {
-			display: none;
-		}
-
-		.preview-fullscreen #markdown-preview {
-			min-height: 600px;
-		}
+		.preview-fullscreen textarea { display: none; }
+		.preview-fullscreen #markdown-preview { min-height: 600px; }
 	</style>
 	<script>
 		var selectedFiles = [];
 		var existingAttachmentsRemoval = [];
 		var isPreviewFullscreen = false;
 
-		document.addEventListener('DOMContentLoaded', function() {
-			initializeMarkdownFeatures();
-		});
+		document.addEventListener('DOMContentLoaded', initializeMarkdownFeatures);
 
 		function initializeMarkdownFeatures() {
 			var checkbox = document.getElementById('use_markdown');
@@ -468,7 +435,7 @@ templ pageEditorAdditionalHead() {
 		function togglePreviewMode() {
 			var container = document.querySelector('.editor-container');
 			var toggleText = document.getElementById('preview-toggle-text');
-			var toggleIcon = document.querySelector('.preview-toggle i');
+			var toggleIcon = document.querySelector('#markdown-preview button i');
 
 			isPreviewFullscreen = !isPreviewFullscreen;
 
@@ -494,10 +461,7 @@ templ pageEditorAdditionalHead() {
 
 			textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
 
-			var newPos = start + before.length + selectedText.length + after.length;
-			if (selectedText === '') {
-				newPos = start + before.length;
-			}
+			var newPos = selectedText === '' ? start + before.length : start + before.length + selectedText.length + after.length;
 
 			textarea.focus();
 			textarea.setSelectionRange(newPos, newPos);
@@ -601,9 +565,7 @@ templ pageEditorAdditionalHead() {
 				return;
 			}
 
-			var attachmentItem = document.querySelector(
-				'#existing-attachments [data-id="' + attachmentId + '"]'
-			);
+			var attachmentItem = document.querySelector('#existing-attachments [data-id="' + attachmentId + '"]');
 
 			if (attachmentItem) {
 				attachmentItem.remove();
@@ -632,12 +594,7 @@ func getTypeName(editorType string) string {
 }
 
 func supportsAttachments(editorType string) bool {
-	switch editorType {
-	case "troublereport":
-		return true
-	default:
-		return false
-	}
+	return editorType == "troublereport"
 }
 
 script deleteAttachment(attachmentId int64) {

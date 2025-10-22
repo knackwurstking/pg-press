@@ -39,8 +39,8 @@ func ImageViewerTemplate() templ.Component {
 
 func OpenImageViewer(attachmentID int64) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_OpenImageViewer_cd7e`,
-		Function: `function __templ_OpenImageViewer_cd7e(attachmentID){// Close any existing image viewer
+		Name: `__templ_OpenImageViewer_85a2`,
+		Function: `function __templ_OpenImageViewer_85a2(attachmentID){// Close any existing image viewer
 	var existingDialog = document.querySelector('dialog[name="image-viewer"]');
 	if (existingDialog) {
 		existingDialog.close();
@@ -51,9 +51,6 @@ func OpenImageViewer(attachmentID int64) templ.ComponentScript {
 	var template = document.querySelector('template[name="image-viewer"]');
 	var dialog = template.content.cloneNode(true).querySelector('dialog');
 	var img = dialog.querySelector('img.attachment');
-	var closeButton = dialog.querySelector('button.close');
-
-	console.debug(` + "`" + `Opening image viewer with image ${imageURL}` + "`" + `);
 
 	// Setup image
 	img.src = imageURL;
@@ -61,12 +58,8 @@ func OpenImageViewer(attachmentID int64) templ.ComponentScript {
 		event.stopPropagation();
 	};
 
-	// Setup dialog click handlers
+	// Setup dialog click handler
 	dialog.onclick = function() {
-		dialog.close();
-	};
-
-	closeButton.onclick = function() {
 		dialog.close();
 	};
 
@@ -79,8 +72,8 @@ func OpenImageViewer(attachmentID int64) templ.ComponentScript {
 	document.body.appendChild(dialog);
 	dialog.showModal();
 }`,
-		Call:       templ.SafeScript(`__templ_OpenImageViewer_cd7e`, attachmentID),
-		CallInline: templ.SafeScriptInline(`__templ_OpenImageViewer_cd7e`, attachmentID),
+		Call:       templ.SafeScript(`__templ_OpenImageViewer_85a2`, attachmentID),
+		CallInline: templ.SafeScriptInline(`__templ_OpenImageViewer_85a2`, attachmentID),
 	}
 }
 

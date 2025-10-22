@@ -5,15 +5,12 @@ const (
 )
 
 type BaseDialogProps struct {
-	ID string
-
+	ID               string
 	Type             string // Type like "POST", "PUT"
 	Href             templ.SafeURL
 	SubmitButtonText string
-
-	Error string
-
-	ReloadOnSubmit bool
+	Error            string
+	ReloadOnSubmit   bool
 }
 
 templ BaseDialog(props BaseDialogProps) {
@@ -54,10 +51,9 @@ templ BaseDialog(props BaseDialogProps) {
 					</div>
 				</div>
 			}
-			// Content
 			<div
 				name="dialog-content"
-				class="flex flex-col gap overflow-y-scroll scroll-smoth no-scrollbar p h-full"
+				class="flex flex-col gap overflow-y-scroll scroll-smooth no-scrollbar p h-full"
 			>
 				{ children... }
 			</div>

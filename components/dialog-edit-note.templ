@@ -29,31 +29,20 @@ templ DialogEditNote(props DialogEditNoteProps) {
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: submitButtonText,
 	}) {
-		<!-- Level Selection -->
 		<label for="level" class="flex flex-col">
 			Priorität
 			<select id="level" name="level" required>
-				<option
-					value="0"
-					selected?={ props.Note.Level == 0 }
-				>
+				<option value="0" selected?={ props.Note.Level == 0 }>
 					Info
 				</option>
-				<option
-					value="1"
-					selected?={ props.Note.Level == 1 }
-				>
+				<option value="1" selected?={ props.Note.Level == 1 }>
 					Achtung
 				</option>
-				<option
-					value="2"
-					selected?={ props.Note.Level == 2 }
-				>
+				<option value="2" selected?={ props.Note.Level == 2 }>
 					Defekt
 				</option>
 			</select>
 		</label>
-		<!-- Content Field -->
 		<label for="content" class="flex flex-col">
 			Inhalt
 			<textarea
@@ -64,7 +53,6 @@ templ DialogEditNote(props DialogEditNoteProps) {
 				required
 			>{ props.Note.Content }</textarea>
 		</label>
-		<!-- Linked Tables Selector -->
 		if len(props.LinkToTables) > 0 {
 			<div
 				class="flex flex-col gap"

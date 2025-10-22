@@ -48,18 +48,15 @@ func PageEditor(options *PageEditorOptions) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		var pageTitle string
-		if options.ID > 0 {
-			pageTitle = fmt.Sprintf("Bearbeiten - %s", getTypeName(options.Type))
-		} else {
-			pageTitle = fmt.Sprintf("Erstellen - %s", getTypeName(options.Type))
-		}
+		var pageTitle, editorTitle string
+		typeName := getTypeName(options.Type)
 
-		var editorTitle string
 		if options.ID > 0 {
-			editorTitle = fmt.Sprintf("%s bearbeiten", getTypeName(options.Type))
+			pageTitle = fmt.Sprintf("Bearbeiten - %s", typeName)
+			editorTitle = fmt.Sprintf("%s bearbeiten", typeName)
 		} else {
-			editorTitle = fmt.Sprintf("Neues %s erstellen", getTypeName(options.Type))
+			pageTitle = fmt.Sprintf("Erstellen - %s", typeName)
+			editorTitle = fmt.Sprintf("Neues %s erstellen", typeName)
 		}
 		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -80,7 +77,7 @@ func PageEditor(options *PageEditorOptions) templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/editor/save", env.ServerPathPrefix)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 48, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 45, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -179,7 +176,7 @@ func hiddenFields(options *PageEditorOptions) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(options.Type)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 70, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 67, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -192,7 +189,7 @@ func hiddenFields(options *PageEditorOptions) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.FormatInt(options.ID, 10))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 71, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 68, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -205,7 +202,7 @@ func hiddenFields(options *PageEditorOptions) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(options.ReturnURL)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 72, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 69, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -247,7 +244,7 @@ func titleInput(title string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 85, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 82, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -299,7 +296,7 @@ func markdownToggle(useMarkdown bool) templ.Component {
 		var templ_7745c5c3_Var11 templ.SafeURL
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(env.ServerPathPrefix + "/help/markdown"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 108, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 105, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -419,7 +416,7 @@ func markdownToolButton(before, after, title, iconClass string) templ.Component 
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 146, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 143, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -483,7 +480,7 @@ func contentTextarea(content string) templ.Component {
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 163, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 160, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -663,7 +660,7 @@ func existingAttachments(attachments []*models.Attachment) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(len(attachments))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 216, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 213, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -715,7 +712,7 @@ func existingAttachmentItem(attachment *models.Attachment, index int) templ.Comp
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", attachment.GetID()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 229, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 226, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -728,7 +725,7 @@ func existingAttachmentItem(attachment *models.Attachment, index int) templ.Comp
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(index)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 233, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 230, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -741,7 +738,7 @@ func existingAttachmentItem(attachment *models.Attachment, index int) templ.Comp
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(attachment.GetMimeType())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 234, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 231, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -880,7 +877,7 @@ func formActions(options *PageEditorOptions) templ.Component {
 			var templ_7745c5c3_Var35 templ.SafeURL
 			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 309, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 306, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 			if templ_7745c5c3_Err != nil {
@@ -943,7 +940,7 @@ func pageEditorNavContent(options *PageEditorOptions) templ.Component {
 			var templ_7745c5c3_Var37 templ.SafeURL
 			templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(options.ReturnURL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 330, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-editor.templ`, Line: 327, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 			if templ_7745c5c3_Err != nil {
@@ -983,7 +980,7 @@ func pageEditorAdditionalHead() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<style>\n\t\t.markdown-content h1,\n\t\t.markdown-content h2,\n\t\t.markdown-content h3,\n\t\t.markdown-content h4,\n\t\t.markdown-content h5,\n\t\t.markdown-content h6 {\n\t\t\tmargin: 0.8em 0 0.4em 0;\n\t\t\tfont-weight: bold;\n\t\t\tline-height: 1.3;\n\t\t}\n\n\t\t.markdown-content h1 { font-size: 1.4em; }\n\t\t.markdown-content h2 { font-size: 1.2em; }\n\t\t.markdown-content h3 { font-size: 1.1em; }\n\n\t\t.markdown-content p {\n\t\t\tmargin: 0.5em 0 1em 0;\n\t\t}\n\n\t\t.markdown-content ul,\n\t\t.markdown-content ol {\n\t\t\tmargin: 0.5em 0;\n\t\t\tpadding-left: 1.5em;\n\t\t\tlist-style: inherit;\n\t\t}\n\n\t\t.markdown-content ul {\n\t\t\tlist-style-type: disc;\n\t\t}\n\n\t\t.markdown-content ol {\n\t\t\tlist-style-type: decimal;\n\t\t}\n\n\t\t.markdown-content li {\n\t\t\tmargin: 0.25em 0;\n\t\t\tdisplay: list-item;\n\t\t}\n\n\t\t.markdown-content code {\n\t\t\tfont-size: 0.85em;\n\t\t\tpadding: 0.125em 0.25em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\n\t\t.markdown-content strong {\n\t\t\tfont-weight: 600;\n\t\t}\n\n\t\t.markdown-content em {\n\t\t\tfont-style: italic;\n\t\t}\n\n\t\t@media (max-width: 768px) {\n\t\t\t#markdown-preview {\n\t\t\t\tmin-height: 200px;\n\t\t\t}\n\n\t\t\t.flex-wrap {\n\t\t\t\tjustify-content: center;\n\t\t\t}\n\t\t}\n\n\t\t.transition-all:hover {\n\t\t\tborder-color: var(--ui-primary);\n\t\t}\n\n\t\t.border-2:hover {\n\t\t\tborder-color: var(--ui-primary);\n\t\t\tbox-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n\t\t}\n\n\t\t.file-upload-area:hover {\n\t\t\tborder-color: var(--ui-primary);\n\t\t}\n\n\t\t.file-upload-area.drag-over {\n\t\t\tborder-color: var(--ui-primary);\n\t\t}\n\n\t\t.preview-fullscreen textarea {\n\t\t\tdisplay: none;\n\t\t}\n\n\t\t.preview-fullscreen #markdown-preview {\n\t\t\tmin-height: 600px;\n\t\t}\n\t</style><script>\n\t\tvar selectedFiles = [];\n\t\tvar existingAttachmentsRemoval = [];\n\t\tvar isPreviewFullscreen = false;\n\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tinitializeMarkdownFeatures();\n\t\t});\n\n\t\tfunction initializeMarkdownFeatures() {\n\t\t\tvar checkbox = document.getElementById('use_markdown');\n\t\t\tif (checkbox) {\n\t\t\t\ttoggleMarkdownFeatures();\n\t\t\t}\n\t\t}\n\n\t\tfunction toggleMarkdownFeatures() {\n\t\t\tvar checkbox = document.getElementById('use_markdown');\n\t\t\tvar tools = document.getElementById('markdown-tools');\n\t\t\tvar previewContainer = document.getElementById('markdown-preview-container');\n\t\t\tvar textarea = document.getElementById('content');\n\n\t\t\tif (checkbox.checked) {\n\t\t\t\ttools.style.display = 'block';\n\t\t\t\tpreviewContainer.style.display = 'block';\n\t\t\t\ttextarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');\n\t\t\t\tupdatePreview();\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\t\t\t} else {\n\t\t\t\ttools.style.display = 'none';\n\t\t\t\tpreviewContainer.style.display = 'none';\n\t\t\t\ttextarea.removeEventListener('input', updatePreview);\n\t\t\t\ttextarea.setAttribute('placeholder', 'Inhalt');\n\t\t\t}\n\t\t}\n\n\t\tfunction updatePreview() {\n\t\t\twindow.updateMarkdownPreview('content', 'preview-content');\n\t\t}\n\n\t\tfunction togglePreviewMode() {\n\t\t\tvar container = document.querySelector('.editor-container');\n\t\t\tvar toggleText = document.getElementById('preview-toggle-text');\n\t\t\tvar toggleIcon = document.querySelector('.preview-toggle i');\n\n\t\t\tisPreviewFullscreen = !isPreviewFullscreen;\n\n\t\t\tif (isPreviewFullscreen) {\n\t\t\t\tcontainer.classList.add('preview-fullscreen');\n\t\t\t\ttoggleText.textContent = 'Split';\n\t\t\t\ttoggleIcon.className = 'bi bi-arrows-angle-contract';\n\t\t\t} else {\n\t\t\t\tcontainer.classList.remove('preview-fullscreen');\n\t\t\t\ttoggleText.textContent = 'Vollbild';\n\t\t\t\ttoggleIcon.className = 'bi bi-arrows-angle-expand';\n\t\t\t}\n\t\t}\n\n\t\tfunction insertMarkdown(before, after) {\n\t\t\tvar textarea = document.getElementById('content');\n\t\t\tif (!textarea) return;\n\n\t\t\tvar start = textarea.selectionStart;\n\t\t\tvar end = textarea.selectionEnd;\n\t\t\tvar selectedText = textarea.value.substring(start, end);\n\t\t\tvar newText = before + selectedText + after;\n\n\t\t\ttextarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);\n\n\t\t\tvar newPos = start + before.length + selectedText.length + after.length;\n\t\t\tif (selectedText === '') {\n\t\t\t\tnewPos = start + before.length;\n\t\t\t}\n\n\t\t\ttextarea.focus();\n\t\t\ttextarea.setSelectionRange(newPos, newPos);\n\t\t\tupdatePreview();\n\t\t}\n\n\t\tfunction updateExistingAttachmentsRemoval() {\n\t\t\tvar input = document.getElementById('existing-attachments-removal');\n\t\t\tif (input) {\n\t\t\t\tinput.value = existingAttachmentsRemoval.join(',');\n\t\t\t}\n\t\t}\n\n\t\tfunction formatFileSize(bytes) {\n\t\t\tif (bytes === 0) return \"0 Bytes\";\n\t\t\tvar k = 1024;\n\t\t\tvar sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n\t\t\tvar i = Math.floor(Math.log(bytes) / Math.log(k));\n\t\t\treturn parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n\t\t}\n\n\t\tfunction onAttachments(event) {\n\t\t\tselectedFiles = Array.from(event.target.files);\n\t\t\tvar previewArea = document.getElementById(\"file-preview\");\n\t\t\tvar container = document.getElementById(\"new-attachments\");\n\n\t\t\tif (!previewArea || !container) return;\n\n\t\t\tcontainer.innerHTML = \"\";\n\n\t\t\tif (selectedFiles.length > 0) {\n\t\t\t\tpreviewArea.style.display = \"block\";\n\n\t\t\t\tselectedFiles.forEach((file, index) => {\n\t\t\t\t\tvar sizeClass = file.size > 10 * 1024 * 1024 ? \"attachment-error text-red\" : \"muted text-sm\";\n\t\t\t\t\tvar sizeText = file.size > 10 * 1024 * 1024 ? \"ZU GROSS!\" : formatFileSize(file.size);\n\n\t\t\t\t\tvar template = previewArea.querySelector('template[name=\"attachment-item\"]');\n\t\t\t\t\tif (!template) return;\n\n\t\t\t\t\tvar item = template.content.cloneNode(true);\n\n\t\t\t\t\tvar nameElement = item.querySelector('.name');\n\t\t\t\t\tif (nameElement) nameElement.textContent = file.name;\n\n\t\t\t\t\tvar sizeElement = item.querySelector('.size-text');\n\t\t\t\t\tif (sizeElement) {\n\t\t\t\t\t\tsizeElement.textContent = sizeText;\n\t\t\t\t\t\tsizeElement.className += ' ' + sizeClass;\n\t\t\t\t\t}\n\n\t\t\t\t\tvar deleteBtn = item.querySelector('button.delete');\n\t\t\t\t\tif (deleteBtn) {\n\t\t\t\t\t\tdeleteBtn.onclick = () => {\n\t\t\t\t\t\t\tselectedFiles.splice(index, 1);\n\t\t\t\t\t\t\tvar fileInput = document.getElementById(\"attachments\");\n\t\t\t\t\t\t\tvar dt = new DataTransfer();\n\t\t\t\t\t\t\tselectedFiles.forEach((file) => dt.items.add(file));\n\t\t\t\t\t\t\tfileInput.files = dt.files;\n\t\t\t\t\t\t\tonAttachments(event);\n\t\t\t\t\t\t};\n\t\t\t\t\t}\n\n\t\t\t\t\tcontainer.appendChild(item);\n\t\t\t\t});\n\n\t\t\t\tsetTimeout(() => {\n\t\t\t\t\tpreviewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t}, 100);\n\t\t\t} else {\n\t\t\t\tpreviewArea.style.display = \"none\";\n\t\t\t}\n\t\t}\n\n\t\tfunction handleDragOver(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.add('drag-over');\n\t\t}\n\n\t\tfunction handleDragLeave(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.remove('drag-over');\n\t\t}\n\n\t\tfunction handleFileDrop(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.remove('drag-over');\n\n\t\t\tvar files = event.dataTransfer.files;\n\t\t\tif (files.length > 0) {\n\t\t\t\tvar fileInput = document.getElementById('attachments');\n\t\t\t\tif (fileInput) {\n\t\t\t\t\tfileInput.files = files;\n\t\t\t\t\tonAttachments({ target: fileInput });\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tfunction deleteAttachment(attachmentId) {\n\t\t\tif (!confirm(\"Sind Sie sicher, dass Sie diesen Anhang löschen möchten?\")) {\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\tvar attachmentItem = document.querySelector(\n\t\t\t\t'#existing-attachments [data-id=\"' + attachmentId + '\"]'\n\t\t\t);\n\n\t\t\tif (attachmentItem) {\n\t\t\t\tattachmentItem.remove();\n\t\t\t\texistingAttachmentsRemoval.push(attachmentId);\n\t\t\t\tupdateExistingAttachmentsRemoval();\n\n\t\t\t\tvar existingAttachments = document.getElementById('existing-attachments');\n\t\t\t\tif (existingAttachments && existingAttachments.children.length === 0) {\n\t\t\t\t\tvar detailsSection = existingAttachments.closest('details');\n\t\t\t\t\tif (detailsSection) {\n\t\t\t\t\t\tdetailsSection.style.display = 'none';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<style>\n\t\t.markdown-content h1,\n\t\t.markdown-content h2,\n\t\t.markdown-content h3,\n\t\t.markdown-content h4,\n\t\t.markdown-content h5,\n\t\t.markdown-content h6 {\n\t\t\tmargin: 0.8em 0 0.4em 0;\n\t\t\tfont-weight: bold;\n\t\t\tline-height: 1.3;\n\t\t}\n\n\t\t.markdown-content h1 { font-size: 1.4em; }\n\t\t.markdown-content h2 { font-size: 1.2em; }\n\t\t.markdown-content h3 { font-size: 1.1em; }\n\n\t\t.markdown-content p {\n\t\t\tmargin: 0.5em 0 1em 0;\n\t\t}\n\n\t\t.markdown-content ul,\n\t\t.markdown-content ol {\n\t\t\tmargin: 0.5em 0;\n\t\t\tpadding-left: 1.5em;\n\t\t\tlist-style: inherit;\n\t\t}\n\n\t\t.markdown-content ul { list-style-type: disc; }\n\t\t.markdown-content ol { list-style-type: decimal; }\n\n\t\t.markdown-content li {\n\t\t\tmargin: 0.25em 0;\n\t\t\tdisplay: list-item;\n\t\t}\n\n\t\t.markdown-content code {\n\t\t\tfont-size: 0.85em;\n\t\t\tpadding: 0.125em 0.25em;\n\t\t\tborder-radius: 2px;\n\t\t}\n\n\t\t.markdown-content strong { font-weight: 600; }\n\t\t.markdown-content em { font-style: italic; }\n\n\t\t@media (max-width: 768px) {\n\t\t\t#markdown-preview { min-height: 200px; }\n\t\t\t.flex-wrap { justify-content: center; }\n\t\t}\n\n\t\t.transition-all:hover { border-color: var(--ui-primary); }\n\t\t.border-2:hover {\n\t\t\tborder-color: var(--ui-primary);\n\t\t\tbox-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);\n\t\t}\n\n\t\t.file-upload-area:hover,\n\t\t.file-upload-area.drag-over { border-color: var(--ui-primary); }\n\n\t\t.preview-fullscreen textarea { display: none; }\n\t\t.preview-fullscreen #markdown-preview { min-height: 600px; }\n\t</style><script>\n\t\tvar selectedFiles = [];\n\t\tvar existingAttachmentsRemoval = [];\n\t\tvar isPreviewFullscreen = false;\n\n\t\tdocument.addEventListener('DOMContentLoaded', initializeMarkdownFeatures);\n\n\t\tfunction initializeMarkdownFeatures() {\n\t\t\tvar checkbox = document.getElementById('use_markdown');\n\t\t\tif (checkbox) {\n\t\t\t\ttoggleMarkdownFeatures();\n\t\t\t}\n\t\t}\n\n\t\tfunction toggleMarkdownFeatures() {\n\t\t\tvar checkbox = document.getElementById('use_markdown');\n\t\t\tvar tools = document.getElementById('markdown-tools');\n\t\t\tvar previewContainer = document.getElementById('markdown-preview-container');\n\t\t\tvar textarea = document.getElementById('content');\n\n\t\t\tif (checkbox.checked) {\n\t\t\t\ttools.style.display = 'block';\n\t\t\t\tpreviewContainer.style.display = 'block';\n\t\t\t\ttextarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');\n\t\t\t\tupdatePreview();\n\t\t\t\ttextarea.addEventListener('input', updatePreview);\n\t\t\t} else {\n\t\t\t\ttools.style.display = 'none';\n\t\t\t\tpreviewContainer.style.display = 'none';\n\t\t\t\ttextarea.removeEventListener('input', updatePreview);\n\t\t\t\ttextarea.setAttribute('placeholder', 'Inhalt');\n\t\t\t}\n\t\t}\n\n\t\tfunction updatePreview() {\n\t\t\twindow.updateMarkdownPreview('content', 'preview-content');\n\t\t}\n\n\t\tfunction togglePreviewMode() {\n\t\t\tvar container = document.querySelector('.editor-container');\n\t\t\tvar toggleText = document.getElementById('preview-toggle-text');\n\t\t\tvar toggleIcon = document.querySelector('#markdown-preview button i');\n\n\t\t\tisPreviewFullscreen = !isPreviewFullscreen;\n\n\t\t\tif (isPreviewFullscreen) {\n\t\t\t\tcontainer.classList.add('preview-fullscreen');\n\t\t\t\ttoggleText.textContent = 'Split';\n\t\t\t\ttoggleIcon.className = 'bi bi-arrows-angle-contract';\n\t\t\t} else {\n\t\t\t\tcontainer.classList.remove('preview-fullscreen');\n\t\t\t\ttoggleText.textContent = 'Vollbild';\n\t\t\t\ttoggleIcon.className = 'bi bi-arrows-angle-expand';\n\t\t\t}\n\t\t}\n\n\t\tfunction insertMarkdown(before, after) {\n\t\t\tvar textarea = document.getElementById('content');\n\t\t\tif (!textarea) return;\n\n\t\t\tvar start = textarea.selectionStart;\n\t\t\tvar end = textarea.selectionEnd;\n\t\t\tvar selectedText = textarea.value.substring(start, end);\n\t\t\tvar newText = before + selectedText + after;\n\n\t\t\ttextarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);\n\n\t\t\tvar newPos = selectedText === '' ? start + before.length : start + before.length + selectedText.length + after.length;\n\n\t\t\ttextarea.focus();\n\t\t\ttextarea.setSelectionRange(newPos, newPos);\n\t\t\tupdatePreview();\n\t\t}\n\n\t\tfunction updateExistingAttachmentsRemoval() {\n\t\t\tvar input = document.getElementById('existing-attachments-removal');\n\t\t\tif (input) {\n\t\t\t\tinput.value = existingAttachmentsRemoval.join(',');\n\t\t\t}\n\t\t}\n\n\t\tfunction formatFileSize(bytes) {\n\t\t\tif (bytes === 0) return \"0 Bytes\";\n\t\t\tvar k = 1024;\n\t\t\tvar sizes = [\"Bytes\", \"KB\", \"MB\", \"GB\"];\n\t\t\tvar i = Math.floor(Math.log(bytes) / Math.log(k));\n\t\t\treturn parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + \" \" + sizes[i];\n\t\t}\n\n\t\tfunction onAttachments(event) {\n\t\t\tselectedFiles = Array.from(event.target.files);\n\t\t\tvar previewArea = document.getElementById(\"file-preview\");\n\t\t\tvar container = document.getElementById(\"new-attachments\");\n\n\t\t\tif (!previewArea || !container) return;\n\n\t\t\tcontainer.innerHTML = \"\";\n\n\t\t\tif (selectedFiles.length > 0) {\n\t\t\t\tpreviewArea.style.display = \"block\";\n\n\t\t\t\tselectedFiles.forEach((file, index) => {\n\t\t\t\t\tvar sizeClass = file.size > 10 * 1024 * 1024 ? \"attachment-error text-red\" : \"muted text-sm\";\n\t\t\t\t\tvar sizeText = file.size > 10 * 1024 * 1024 ? \"ZU GROSS!\" : formatFileSize(file.size);\n\n\t\t\t\t\tvar template = previewArea.querySelector('template[name=\"attachment-item\"]');\n\t\t\t\t\tif (!template) return;\n\n\t\t\t\t\tvar item = template.content.cloneNode(true);\n\n\t\t\t\t\tvar nameElement = item.querySelector('.name');\n\t\t\t\t\tif (nameElement) nameElement.textContent = file.name;\n\n\t\t\t\t\tvar sizeElement = item.querySelector('.size-text');\n\t\t\t\t\tif (sizeElement) {\n\t\t\t\t\t\tsizeElement.textContent = sizeText;\n\t\t\t\t\t\tsizeElement.className += ' ' + sizeClass;\n\t\t\t\t\t}\n\n\t\t\t\t\tvar deleteBtn = item.querySelector('button.delete');\n\t\t\t\t\tif (deleteBtn) {\n\t\t\t\t\t\tdeleteBtn.onclick = () => {\n\t\t\t\t\t\t\tselectedFiles.splice(index, 1);\n\t\t\t\t\t\t\tvar fileInput = document.getElementById(\"attachments\");\n\t\t\t\t\t\t\tvar dt = new DataTransfer();\n\t\t\t\t\t\t\tselectedFiles.forEach((file) => dt.items.add(file));\n\t\t\t\t\t\t\tfileInput.files = dt.files;\n\t\t\t\t\t\t\tonAttachments(event);\n\t\t\t\t\t\t};\n\t\t\t\t\t}\n\n\t\t\t\t\tcontainer.appendChild(item);\n\t\t\t\t});\n\n\t\t\t\tsetTimeout(() => {\n\t\t\t\t\tpreviewArea.scrollIntoView({behavior: \"smooth\", block: \"start\"});\n\t\t\t\t}, 100);\n\t\t\t} else {\n\t\t\t\tpreviewArea.style.display = \"none\";\n\t\t\t}\n\t\t}\n\n\t\tfunction handleDragOver(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.add('drag-over');\n\t\t}\n\n\t\tfunction handleDragLeave(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.remove('drag-over');\n\t\t}\n\n\t\tfunction handleFileDrop(event) {\n\t\t\tevent.preventDefault();\n\t\t\tevent.currentTarget.classList.remove('drag-over');\n\n\t\t\tvar files = event.dataTransfer.files;\n\t\t\tif (files.length > 0) {\n\t\t\t\tvar fileInput = document.getElementById('attachments');\n\t\t\t\tif (fileInput) {\n\t\t\t\t\tfileInput.files = files;\n\t\t\t\t\tonAttachments({ target: fileInput });\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tfunction deleteAttachment(attachmentId) {\n\t\t\tif (!confirm(\"Sind Sie sicher, dass Sie diesen Anhang löschen möchten?\")) {\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\tvar attachmentItem = document.querySelector('#existing-attachments [data-id=\"' + attachmentId + '\"]');\n\n\t\t\tif (attachmentItem) {\n\t\t\t\tattachmentItem.remove();\n\t\t\t\texistingAttachmentsRemoval.push(attachmentId);\n\t\t\t\tupdateExistingAttachmentsRemoval();\n\n\t\t\t\tvar existingAttachments = document.getElementById('existing-attachments');\n\t\t\t\tif (existingAttachments && existingAttachments.children.length === 0) {\n\t\t\t\t\tvar detailsSection = existingAttachments.closest('details');\n\t\t\t\t\tif (detailsSection) {\n\t\t\t\t\t\tdetailsSection.style.display = 'none';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1001,12 +998,7 @@ func getTypeName(editorType string) string {
 }
 
 func supportsAttachments(editorType string) bool {
-	switch editorType {
-	case "troublereport":
-		return true
-	default:
-		return false
-	}
+	return editorType == "troublereport"
 }
 
 func deleteAttachment(attachmentId int64) templ.ComponentScript {
