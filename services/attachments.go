@@ -60,7 +60,8 @@ func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	a.Log.Debug("Getting attachment for ID: %d", id)
 
 	row := a.DB.QueryRow(fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s WHERE id = ?`, TableNameAttachments, id),
+		`SELECT id, mime_type, data FROM %s WHERE id = ?`, TableNameAttachments),
+		id,
 	)
 	attachment, err := ScanSingleRow(row, scanAttachment)
 	if err != nil {
