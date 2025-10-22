@@ -22,14 +22,13 @@ func Serve(e *echo.Echo, r *services.Registry) {
 	handlers.NewFeed(r).RegisterRoutes(e)
 	handlers.NewHelp(r).RegisterRoutes(e)
 	handlers.NewEditor(r).RegisterRoutes(e)
+	handlers.NewProfile(r).RegisterRoutes(e)
 
-	//profile.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
-	//tools.NewRoutes(db).RegisterRoutes(e)
+	//tools.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
 	//tool.NewRoutes(db).RegisterRoutes(e)
 	//press.NewRoutes(db).RegisterRoutes(e)
 	//umbau.NewRoutes(db).RegisterRoutes(e)
 	//troublereports.NewRoutes(db).RegisterRoutes(e)
-	//nav.NewRoutes(db, wsFeedHandler).RegisterRoutes(e)
 	//notes.NewRoutes(db).RegisterRoutes(e)
 	//metalsheets.NewRoutes(db).RegisterRoutes(e)
 }

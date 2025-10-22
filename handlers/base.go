@@ -112,16 +112,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return id, nil
 //}
 //
-//// ParseStringQuery parses a string parameter from the query string
-//func (b *BaseHandler) ParseStringQuery(c echo.Context, paramName string) (string, error) {
-//	s := c.QueryParam(paramName)
-//	if s == "" {
-//		return "", fmt.Errorf("missing %s query parameter", paramName)
-//	}
-//
-//	return s, nil
-//}
-//
 //// ParseBoolQuery parses a boolean parameter from the query string
 //func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
 //	value := c.QueryParam(paramName)

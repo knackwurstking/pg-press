@@ -1,26 +1,24 @@
-package templates
+package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
-	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
-	"github.com/knackwurstking/pgpress/pkg/models"
+
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
 )
 
-templ ProfilePage(user *models.User) {
-	@layouts.Main(
-		layouts.MainOptions{
-			PageTitle:   "PG Presse | Profil",
-			AppBarTitle: "Profil",
-			NavContent:  navContent(),
+templ PageProfile(user *models.User) {
+	@Layout(
+		LayoutOptions{
+			PageTitle:      "PG Presse | Profil",
+			AppBarTitle:    "Profil",
+			NavContent:     pageProfileNavContent(),
+			AdditionalHead: pageProfileAdditionalHead(),
 		},
 	) {
-		@profilePageStyles()
 		<main style="max-width: 42rem; margin: 0 auto;" class="container fluid">
 			<div class="profile-header border">
-				<!-- Profile user name with an edit button to the right -->
 				<div
 					style="margin-bottom: var(--ui-spacing);"
 					class="flex flex-row justify-between items-center"
@@ -28,7 +26,6 @@ templ ProfilePage(user *models.User) {
 					<h1 style="margin: 0; color: var(--ui-text); font-size: 2.25rem;">
 						{ user.Name }
 					</h1>
-					<!-- Edit user namne button, open the dialog -->
 					<button
 						class="secondary icon"
 						onclick='document.querySelector("#edit-user-name-dialog").showModal();'
@@ -37,7 +34,6 @@ templ ProfilePage(user *models.User) {
 						<i class="bi bi-pen"></i>
 					</button>
 				</div>
-				<!-- Profile Telegram ID and a Logout button -->
 				<div class="flex flex-row gap flex-wrap justify-between items-center">
 					<div class="telegram-id">
 						<i class="bi bi-telegram"></i>
@@ -53,24 +49,21 @@ templ ProfilePage(user *models.User) {
 					</a>
 				</div>
 			</div>
-			<!-- User cookies table, requested via HTMX -->
 			<div style="overflow: hidden; background: var(--ui-color-50);" class="border">
 				<span
 					id="cookies"
-					hx-get={ helpers.HXGetCookies() }
+					hx-get={ utils.HXGetCookies() }
 					hx-trigger="load"
 					hx-swap="outerHTML"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				></span>
 			</div>
-			<!-- Dialog for changing the user name -->
 			<dialog
 				id="edit-user-name-dialog"
 				class="profile-dialog border clean"
 				oncancel="event.preventDefault()"
 			>
 				<form action={ templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)) }>
-					<!-- User name -->
 					<label class="flex flex-col">
 						<strong>Benutzername ändern</strong>
 						<input
@@ -85,7 +78,6 @@ templ ProfilePage(user *models.User) {
 						style="margin-top: calc(var(--ui-spacing) * 2);"
 						class="flex flex-row gap justify-end"
 					>
-						<!-- Cancel button -->
 						<a
 							role="button"
 							href={ env.ServerPathPrefix + "/profile" }
@@ -94,7 +86,6 @@ templ ProfilePage(user *models.User) {
 							<i class="bi bi-x-circle"></i>
 							Schließen
 						</a>
-						<!-- Submit button -->
 						<button type="submit" class="primary flex flex-row gap">
 							<i class="bi bi-check-circle"></i>
 							Ändern
@@ -106,13 +97,13 @@ templ ProfilePage(user *models.User) {
 	}
 }
 
-templ navContent() {
-	@components.NavFeedButton()
-	@components.NavProfileButton()
-	@components.NavHomeButton()
+templ pageProfileNavContent() {
+	@NavFeedButton()
+	@NavProfileButton()
+	@NavHomeButton()
 }
 
-templ profilePageStyles() {
+templ pageProfileAdditionalHead() {
 	<style>
 		.profile-header {
 			background: var(--ui-color-100);
@@ -126,8 +117,7 @@ templ profilePageStyles() {
 			background: var(--ui-color-200);
 			padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
 			border-radius: var(--ui-radius);
-			border: var(--ui-border-width) var(--ui-border-style)
-				var(--ui-color-300);
+			border: var(--ui-border-width) var(--ui-border-style) var(--ui-color-300);
 		}
 
 		.profile-dialog {
@@ -145,5 +135,64 @@ templ profilePageStyles() {
 			margin-top: calc(var(--ui-spacing) / 2);
 			font-size: 1rem;
 		}
+
+		.no-cookies {
+			text-align: center;
+			color: var(--ui-color-600);
+			padding: calc(var(--ui-spacing) * 2);
+			background: var(--ui-color-100);
+			border-radius: var(--ui-radius);
+			font-style: italic;
+		}
 	</style>
+}
+
+templ CookiesDetails(cookies []*models.Cookie) {
+	if len(cookies) > 0 {
+		<details id="cookies" class="cookies-details" open>
+			<summary class="cookies-summary">
+				<i class="bi bi-cookie"></i>
+				Aktive Sitzungen { len(cookies) }
+			</summary>
+			<figure class="overflow-auto">
+				<table class="cookies-table borderless">
+					<thead>
+						<tr>
+							<th style="width: fit-content;">Letzte Anmeldung</th>
+							<th style="width: 100%;" class="left">Benutzeragent</th>
+							<th style="width: fit-content;"></th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, cookie := range cookies {
+							<tr>
+								<td class="time-cell">{ cookie.TimeString() }</td>
+								<td class="left user-agent-cell">{ cookie.UserAgent }</td>
+								<td class="right select-none">
+									<a
+										hx-delete={ utils.HXDeleteCookies(cookie.Value) }
+										hx-trigger="click"
+										hx-target="#cookies"
+										hx-swap="outerHTML"
+										hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
+										hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+										role="button"
+										class="ghost destructive icon"
+										title="Sitzung beenden"
+									>
+										<i class="bi bi-trash"></i>
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</figure>
+		</details>
+	} else {
+		<div id="cookies" class="no-cookies">
+			<i class="bi bi-info-circle"></i>
+			Keine aktiven Sitzungen gefunden
+		</div>
+	}
 }

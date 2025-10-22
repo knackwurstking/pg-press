@@ -13,4 +13,7 @@ const (
 	DateTimeFormat = DateFormat + " " + TimeFormat
 
 	MaxFeedsPerPage = 50
+
+	UserNameMinLength = 1
+	UserNameMaxLength = 100
 )

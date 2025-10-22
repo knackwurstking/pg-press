@@ -45,3 +45,12 @@ func GetUserFromContext(c echo.Context) (*models.User, error) {
 func RedirectTo(c echo.Context, path string) error {
 	return c.Redirect(http.StatusSeeOther, path)
 }
+
+func ParseQueryString(c echo.Context, paramName string) (string, error) {
+	s := c.QueryParam(paramName)
+	if s == "" {
+		return "", fmt.Errorf("missing %s query parameter", paramName)
+	}
+
+	return s, nil
+}
