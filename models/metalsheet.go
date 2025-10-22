@@ -4,6 +4,8 @@ package models
 import (
 	"fmt"
 	"sort"
+
+	"github.com/knackwurstking/pgpress/errors"
 )
 
 // MachineType represents the type of machine (SACMI or SITI)
@@ -154,19 +156,49 @@ func (ms *MetalSheet) String() string {
 		ms.ID, ms.Identifier, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
 }
 
-// IsValidIdentifier checks if the identifier is a valid machine type
-func (ms *MetalSheet) IsValidIdentifier() bool {
-	return ms.Identifier.IsValid()
-}
+func (ms *MetalSheet) Validate() error {
+	// Validate machine type identifier
+	if !ms.Identifier.IsValid() {
+		return errors.NewValidationError(
+			fmt.Sprintf("identifier: invalid machine type: %s", ms.Identifier))
+	}
 
-// IsSACMI returns true if the metal sheet is from a SACMI machine
-func (ms *MetalSheet) IsSACMI() bool {
-	return ms.Identifier.IsSACMI()
-}
+	// Validate tool ID (foreign key reference)
+	if ms.ToolID <= 0 {
+		return errors.NewValidationError("tool_id: must be positive")
+	}
 
-// IsSITI returns true if the metal sheet is from a SITI machine
-func (ms *MetalSheet) IsSITI() bool {
-	return ms.Identifier.IsSITI()
+	// Validate tile height
+	if ms.TileHeight < 0 {
+		return errors.NewValidationError("tile_height: cannot be negative")
+	}
+
+	// Validate value
+	if ms.Value < 0 {
+		return errors.NewValidationError("value: cannot be negative")
+	}
+
+	// Validate marke height
+	if ms.MarkeHeight < 0 {
+		return errors.NewValidationError("marke_height: cannot be negative")
+	}
+
+	// Validate STF
+	if ms.STF < 0 {
+		return errors.NewValidationError("stf: cannot be negative")
+	}
+
+	// Validate STF Max
+	if ms.STFMax < 0 {
+		return errors.NewValidationError("stf_max: cannot be negative")
+	}
+
+	// Validate STF relationship - STFMax should be >= STF
+	if ms.STFMax < ms.STF {
+		return errors.NewValidationError("stf_max: must be greater than or equal to stf")
+	}
+
+	return nil
 }
 
 // SetMachineType sets the machine type identifier with validation
@@ -204,11 +236,4 @@ func IsSACMIPress(pressNumber PressNumber) bool {
 // All presses except 0 and 5 use SITI machines
 func IsSITIPress(pressNumber PressNumber) bool {
 	return !IsSACMIPress(pressNumber)
-}
-
-// MetalSheetWithNotes represents a metal sheet with its related notes loaded
-type MetalSheetWithNotes struct {
-	*MetalSheet
-	LoadedNotes []*Note `json:"loaded_notes"`
-	Tool        *Tool   `json:"tool,omitempty"` // The tool currently using this sheet
 }
