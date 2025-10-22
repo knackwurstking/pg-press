@@ -5,52 +5,48 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
 )
 
 func HXGetNotesEditDialog(noteID *int64, linkToTables ...string) templ.SafeURL {
-	var params []string
+	params := make(map[string]string)
 
 	if noteID != nil {
-		params = append(params, fmt.Sprintf("id=%d", *noteID))
+		params["id"] = fmt.Sprintf("%d", *noteID)
 	}
 
 	if len(linkToTables) > 0 {
-		params = append(params, fmt.Sprintf(
-			"link_to_tables=%s", strings.Join(linkToTables, ","),
-		))
+		params["link_to_tables"] = strings.Join(linkToTables, ",")
 	}
 
-	url := fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix)
-	if len(params) > 0 {
-		url += "?" + strings.Join(params, "&")
-	}
-
-	return templ.SafeURL(url)
+	return buildURL("/htmx/notes/edit", params)
 }
 
 func HXPostNotesEditDialog(linkToTables ...string) templ.SafeURL {
-	if len(linkToTables) == 0 {
-		return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/edit", env.ServerPathPrefix))
+	params := make(map[string]string)
+
+	if len(linkToTables) > 0 {
+		params["link_to_tables"] = strings.Join(linkToTables, ",")
 	}
 
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/notes/edit?link_to_tables=%s",
-		env.ServerPathPrefix, strings.Join(linkToTables, ","),
-	))
+	return buildURL("/htmx/notes/edit", params)
 }
 
 func HXPutNotesEditDialog(noteID int64, linkToTables ...string) templ.SafeURL {
-	if len(linkToTables) == 0 {
-		return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/edit?id=%d", env.ServerPathPrefix, noteID))
+	params := map[string]string{
+		"id": fmt.Sprintf("%d", noteID),
 	}
 
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/notes/edit?id=%d&link_to_tables=%s",
-		env.ServerPathPrefix, noteID, strings.Join(linkToTables, ","),
-	))
+	if len(linkToTables) > 0 {
+		params["link_to_tables"] = strings.Join(linkToTables, ",")
+	}
+
+	return buildURL("/htmx/notes/edit", params)
 }
 
 func HXDeleteNote(noteID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf("%s/htmx/notes/delete?id=%d", env.ServerPathPrefix, noteID))
+	params := map[string]string{
+		"id": fmt.Sprintf("%d", noteID),
+	}
+
+	return buildURL("/htmx/notes/delete", params)
 }

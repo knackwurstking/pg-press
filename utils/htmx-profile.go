@@ -1,22 +1,13 @@
 package utils
 
-import (
-	"fmt"
-
-	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
-)
+import "github.com/a-h/templ"
 
 func HXGetCookies() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/profile/cookies",
-		env.ServerPathPrefix,
-	))
+	return buildURL("/htmx/profile/cookies", nil)
 }
 
 func HXDeleteCookies(value string) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/profile/cookies?value=%s",
-		env.ServerPathPrefix, value,
-	))
+	return buildURL("/htmx/profile/cookies", map[string]string{
+		"value": value,
+	})
 }

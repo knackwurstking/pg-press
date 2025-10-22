@@ -4,48 +4,37 @@ import (
 	"fmt"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
 )
 
 func HXGetMetalSheetEditDialog(metalSheetID *int64, toolID *int64) templ.SafeURL {
-	if metalSheetID == nil && toolID != nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit?tool_id=%d",
-			env.ServerPathPrefix, *toolID,
-		))
-	}
+	params := make(map[string]string)
 
 	if metalSheetID != nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/metal-sheets/edit?id=%d",
-			env.ServerPathPrefix, *metalSheetID,
-		))
+		params["id"] = fmt.Sprintf("%d", *metalSheetID)
+	} else if toolID != nil {
+		params["tool_id"] = fmt.Sprintf("%d", *toolID)
 	}
 
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit",
-		env.ServerPathPrefix,
-	))
-
+	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
 func HXPostMetalSheetEditDialog(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit?tool_id=%d",
-		env.ServerPathPrefix, toolID,
-	))
+	params := map[string]string{
+		"tool_id": fmt.Sprintf("%d", toolID),
+	}
+	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
 func HXPutMetalSheetEditDialog(metalSheetID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/edit?id=%d",
-		env.ServerPathPrefix, metalSheetID,
-	))
+	params := map[string]string{
+		"id": fmt.Sprintf("%d", metalSheetID),
+	}
+	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
 func HXDeleteMetalSheet(metalSheetID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/metal-sheets/delete?id=%d",
-		env.ServerPathPrefix, metalSheetID,
-	))
+	params := map[string]string{
+		"id": fmt.Sprintf("%d", metalSheetID),
+	}
+	return buildURL("/htmx/metal-sheets/delete", params)
 }

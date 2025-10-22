@@ -1,36 +1,29 @@
 package utils
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
 )
 
 func HXGetTroubleReportsData() templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/data",
-		env.ServerPathPrefix,
-	))
+	return buildURL("/htmx/trouble-reports/data", nil)
 }
 
 func HXDeleteTroubleReportsData(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/data?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
+	return buildURL("/htmx/trouble-reports/data", map[string]string{
+		"id": strconv.FormatInt(troubleReportID, 10),
+	})
 }
 
 func HXGetTroubleReportsAttachmentsPreview(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/attachments-preview?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
+	return buildURL("/htmx/trouble-reports/attachments-preview", map[string]string{
+		"id": strconv.FormatInt(troubleReportID, 10),
+	})
 }
 
 func HXPostTroubleReportsRollback(troubleReportID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/trouble-reports/rollback?id=%d",
-		env.ServerPathPrefix, troubleReportID,
-	))
+	return buildURL("/htmx/trouble-reports/rollback", map[string]string{
+		"id": strconv.FormatInt(troubleReportID, 10),
+	})
 }

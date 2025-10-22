@@ -1,0 +1,88 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+	"strings"
+	"time"
+)
+
+templ PageFeed() {
+	@Layout(
+		LayoutOptions{
+			PageTitle:   "PG Presse | Feed",
+			AppBarTitle: "Feed",
+			NavContent:  pageFeedNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<span
+				id="data"
+				hx-get={ utils.HXGetFeedList() }
+				hx-trigger="load"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			></span>
+		</main>
+	}
+}
+
+templ pageFeedNavContent() {
+	@NavFeedButton()
+	@NavProfileButton()
+	@NavHomeButton()
+}
+
+templ FeedsList(feeds []*models.Feed, lastFeedID int64, userMap map[int64]*models.User) {
+	if len(feeds) > 0 {
+		<ul id="data">
+			for _, feed := range feeds {
+				<section style="position: relative;">
+					if feed.ID > lastFeedID {
+						<div style="position: absolute; top: 8px; right: 8px; z-index: 10;">
+							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
+						</div>
+					}
+					@Feed(feed, userMap)
+				</section>
+			}
+		</ul>
+	} else {
+		<span id="data"></span>
+	}
+}
+
+templ Feed(feed *models.Feed, userMap map[int64]*models.User) {
+	<article
+		id={ fmt.Sprintf("feed-%d", feed.ID) }
+		class="card"
+		data-id={ fmt.Sprintf("%d", feed.ID) }
+		data-time={ fmt.Sprintf("%d", feed.CreatedAt) }
+	>
+		<div class="card-body" style="margin-bottom: var(--ui-spacing);">
+			<h5 class="feed-title" style="margin-bottom: 0.5rem; font-weight: bold;">
+				{ feed.Title }
+			</h5>
+			<div class="feed-content" style="margin-bottom: 0.5rem;">
+				@templ.Raw(
+					strings.ReplaceAll(
+						templ.EscapeString(feed.Content), "\n", "<br/>",
+					),
+				)
+			</div>
+			<small class="feed-user" style="color: var(--ui-text-muted);">
+				if user, ok := userMap[feed.UserID]; ok {
+					Von Benutzer: { user.Name }
+				} else {
+					Von Benutzer ID: { fmt.Sprintf("%d", feed.UserID) }
+				}
+			</small>
+		</div>
+		<div class="card-footer">
+			<small style="float: right;">
+				{ time.UnixMilli(feed.CreatedAt).Format("2006-01-02 15:04:05") }
+			</small>
+		</div>
+	</article>
+}

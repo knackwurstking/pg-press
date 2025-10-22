@@ -2,49 +2,46 @@ package utils
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
 )
 
 func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeURL {
+	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
+
 	if regenerationID == nil {
-		return templ.SafeURL(fmt.Sprintf(
-			"%s/htmx/tools/tool/%d/edit-regeneration",
-			env.ServerPathPrefix, toolID,
-		))
+		return buildURL(path, nil)
 	}
 
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, *regenerationID,
-	))
+	params := map[string]string{
+		"id": strconv.FormatInt(*regenerationID, 10),
+	}
+	return buildURL(path, params)
 }
 
 func HXPutToolRegenerationEdit(toolID int64, regenerationID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/edit-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, regenerationID,
-	))
+	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
+	params := map[string]string{
+		"id": strconv.FormatInt(regenerationID, 10),
+	}
+	return buildURL(path, params)
 }
 
 func HXDeleteToolRegeneration(toolID int64, regenerationID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/delete-regeneration?id=%d",
-		env.ServerPathPrefix, toolID, regenerationID,
-	))
+	path := fmt.Sprintf("/htmx/tools/tool/%d/delete-regeneration", toolID)
+	params := map[string]string{
+		"id": strconv.FormatInt(regenerationID, 10),
+	}
+	return buildURL(path, params)
 }
 
 func HXPatchToolBind(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/bind",
-		env.ServerPathPrefix, toolID,
-	))
+	path := fmt.Sprintf("/htmx/tools/tool/%d/bind", toolID)
+	return buildURL(path, nil)
 }
 
 func HXPatchToolUnbind(toolID int64) templ.SafeURL {
-	return templ.SafeURL(fmt.Sprintf(
-		"%s/htmx/tools/tool/%d/unbind",
-		env.ServerPathPrefix, toolID,
-	))
+	path := fmt.Sprintf("/htmx/tools/tool/%d/unbind", toolID)
+	return buildURL(path, nil)
 }
