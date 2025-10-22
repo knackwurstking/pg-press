@@ -4,11 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/knackwurstking/pgpress/errors"
 	"github.com/knackwurstking/pgpress/models"
 	"github.com/labstack/echo/v4"
 )
+
+func HandleNotFound(err error, message string) error {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusNotFound, message)
+	}
+
+	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s: %v", message, err))
+}
 
 func HandleBadRequest(err error, message string) error {
 	if err == nil {
@@ -20,6 +29,10 @@ func HandleBadRequest(err error, message string) error {
 
 // HandleError creates an HTTP error with the appropriate status code
 func HandleError(err error, context string) error {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, context)
+	}
+
 	statusCode := errors.GetHTTPStatusCode(err)
 	if statusCode == 0 {
 		statusCode = http.StatusInternalServerError
@@ -70,6 +83,19 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, error) {
 	return id, nil
 }
 
+func ParseParamInt64(c echo.Context, paramName string) (int64, error) {
+	idStr := c.Param(paramName)
+	if idStr == "" {
+		return 0, fmt.Errorf("missing %s parameter", paramName)
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
+	}
+	return id, nil
+}
+
 func ParseParamInt8(c echo.Context, paramName string) (int8, error) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
@@ -81,4 +107,29 @@ func ParseParamInt8(c echo.Context, paramName string) (int8, error) {
 		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
 	}
 	return int8(id), nil
+}
+
+func SanitizeFilename(filename string) string {
+	if idx := strings.LastIndex(filename, "."); idx > 0 {
+		filename = filename[:idx]
+	}
+
+	filename = strings.ReplaceAll(filename, " ", "_")
+	filename = strings.ReplaceAll(filename, "-", "_")
+	filename = strings.ReplaceAll(filename, "(", "_")
+	filename = strings.ReplaceAll(filename, ")", "_")
+	filename = strings.ReplaceAll(filename, "[", "_")
+	filename = strings.ReplaceAll(filename, "]", "_")
+
+	for strings.Contains(filename, "__") {
+		filename = strings.ReplaceAll(filename, "__", "_")
+	}
+
+	filename = strings.Trim(filename, "_")
+
+	if filename == "" {
+		filename = "attachment"
+	}
+
+	return filename
 }

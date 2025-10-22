@@ -1,0 +1,48 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+)
+
+const (
+	AttachmentPathTroubleReports = "trouble-reports"
+)
+
+type AttachmentPath string
+
+templ AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) {
+	if len(attachments) > 0 {
+		<div class="attachments-preview-container">
+			<div class="attachments-preview-label flex gap items-center select-none">
+				<i class="bi bi-paperclip"></i>
+				Bilder ({ len(attachments) })
+			</div>
+			<div class="attachments-preview-scroll flex gap">
+				for _, attachment := range attachments {
+					@attachmentPreviewItem(attachment, path)
+				}
+			</div>
+		</div>
+	}
+}
+
+templ attachmentPreviewItem(attachment *models.Attachment, path AttachmentPath) {
+	<div
+		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
+		onclick={ OpenImageViewer(attachment.GetID()) }
+		tabindex="0"
+		role="button"
+		aria-label={ fmt.Sprintf("Bild %s anzeigen", attachment.ID) }
+	>
+		<div class="attachment-preview-image">
+			<img
+				loading="lazy"
+				src={ fmt.Sprintf("%s/%s/attachment?attachment_id=%s", env.ServerPathPrefix, path, attachment.ID) }
+				alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
+				class="preview-thumbnail select-none"
+			/>
+		</div>
+	</div>
+}

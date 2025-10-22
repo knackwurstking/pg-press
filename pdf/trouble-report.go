@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/pkg/models"
+	"github.com/knackwurstking/pgpress/models"
 
 	"github.com/jung-kurt/gofpdf/v2"
 )

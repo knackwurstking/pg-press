@@ -45,45 +45,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return sanitized
 //}
 //
-//func (b *BaseHandler) SanitizeFilename(filename string) string {
-//	if idx := strings.LastIndex(filename, "."); idx > 0 {
-//		filename = filename[:idx]
-//	}
-//
-//	filename = strings.ReplaceAll(filename, " ", "_")
-//	filename = strings.ReplaceAll(filename, "-", "_")
-//	filename = strings.ReplaceAll(filename, "(", "_")
-//	filename = strings.ReplaceAll(filename, ")", "_")
-//	filename = strings.ReplaceAll(filename, "[", "_")
-//	filename = strings.ReplaceAll(filename, "]", "_")
-//
-//	for strings.Contains(filename, "__") {
-//		filename = strings.ReplaceAll(filename, "__", "_")
-//	}
-//
-//	filename = strings.Trim(filename, "_")
-//
-//	if filename == "" {
-//		filename = "attachment"
-//	}
-//
-//	return filename
-//}
-//
-//// ParseInt64Param parses an int64 parameter from the URL path
-//func (b *BaseHandler) ParseInt64Param(c echo.Context, paramName string) (int64, error) {
-//	idStr := c.Param(paramName)
-//	if idStr == "" {
-//		return 0, fmt.Errorf("missing %s parameter", paramName)
-//	}
-//
-//	id, err := strconv.ParseInt(idStr, 10, 64)
-//	if err != nil {
-//		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
-//	}
-//	return id, nil
-//}
-//
 //// ParseBoolQuery parses a boolean parameter from the query string
 //func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
 //	value := c.QueryParam(paramName)

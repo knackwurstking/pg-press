@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+
 	"github.com/jung-kurt/gofpdf/v2"
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/pkg/models"
 )
 
 // cycleSummaryOptions contains options for cycle summary PDF generation
@@ -294,13 +295,13 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		if summary.isFirstAppearance {
 			startDateStr = ""
 		} else {
-			startDateStr = summary.startDate.Format(constants.DateFormat)
+			startDateStr = summary.startDate.Format(env.DateFormat)
 		}
 
 		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
 		// End date
-		endDateStr := summary.endDate.Format(constants.DateFormat)
+		endDateStr := summary.endDate.Format(env.DateFormat)
 		o.PDF.CellFormat(colWidths[3], 6, endDateStr, "1", 0, "C", fill, 0, "")
 
 		// Max cycles

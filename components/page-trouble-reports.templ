@@ -1,0 +1,325 @@
+package components
+
+import (
+	"context"
+	"fmt"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+	"io"
+)
+
+templ PageTroubleReports() {
+	@Layout(
+		LayoutOptions{
+			PageTitle:      "PG Presse | Problemberichte",
+			AppBarTitle:    "Problemberichte",
+			AdditionalHead: pageTrAdditionalHead(),
+			NavContent:     pageTrNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<!-- Search Bar -->
+			<section style="margin-top: 0" class="flex flex-row gap justify-between">
+				<input
+					style="margin: auto 0; width: 100%"
+					type="search"
+					name="search"
+					placeholder="Suche"
+					aria-label="Suche"
+					oninput="window.search(event)"
+				/>
+			</section>
+			<!-- Page Actions: Create -->
+			<section style="margin-top: 0" class="flex flex-row gap justify-end">
+				<a
+					href={ templ.URL(fmt.Sprintf("%s/editor?type=troublereport&return_url=%s/trouble-reports", env.ServerPathPrefix, env.ServerPathPrefix)) }
+					class="flex flex-row gap justify-between items-center"
+					role="button"
+				>
+					<i class="bi bi-plus-lg"></i>
+					Erstellen
+				</a>
+			</section>
+			<!-- Trouble Reports Entries -->
+			<section
+				hx-get={ utils.HXGetTroubleReportsData() }
+				hx-trigger="load, pageLoaded from:body"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				id="data"
+			></section>
+		</main>
+	}
+}
+
+templ pageTrNavContent() {
+	@NavFeedButton()
+	@NavProfileButton()
+	@NavHomeButton()
+}
+
+templ pageTrAdditionalHead() {
+	<link
+		rel="stylesheet"
+		href={ utils.AssetURL(env.ServerPathPrefix, "/css/trouble-reports/data.css") }
+	/>
+	<script>
+		var searchTimer;
+
+		function search(event) {
+			var searchValue = event.target.value.toLowerCase().trim();
+
+			clearTimeout(searchTimer);
+
+			searchTimer = setTimeout(function() {
+				var url = new URL(window.location);
+				if (searchValue) {
+					url.searchParams.set('search', searchValue);
+				} else {
+					url.searchParams.delete('search');
+				}
+				history.replaceState(null, '', url);
+
+				var searchTerms = searchValue.split(/\s+/).filter(function(term) {
+					return term.length > 0;
+				});
+
+				var troubleReports = document.querySelectorAll('span.trouble-report');
+
+				for (var i = 0; i < troubleReports.length; i++) {
+					var report = troubleReports[i];
+					if (searchTerms.length === 0) {
+						report.style.display = '';
+					} else {
+						var summary = report.querySelector('summary');
+						var content = report.querySelector('pre');
+
+						var summaryText = summary ? summary.textContent.toLowerCase() : '';
+						var contentText = content ? content.textContent.toLowerCase() : '';
+						var combinedText = summaryText + ' ' + contentText;
+
+						var allTermsFound = true;
+						for (var j = 0; j < searchTerms.length; j++) {
+							if (!combinedText.includes(searchTerms[j])) {
+								allTermsFound = false;
+								break;
+							}
+						}
+
+						report.style.display = allTermsFound ? '' : 'none';
+					}
+				}
+			}, 300);
+		}
+
+		window.addEventListener('beforeunload', function() {
+			clearTimeout(searchTimer);
+		});
+
+		window.search = search;
+
+		document.addEventListener('DOMContentLoaded', function() {
+			var urlParams = new URLSearchParams(window.location.search);
+			var searchParam = urlParams.get('search');
+			if (searchParam) {
+				var searchInput = document.querySelector('input[name="search"]');
+				if (searchInput) {
+					searchInput.value = searchParam;
+					var inputEvent = new Event('input', { bubbles: true });
+					searchInput.dispatchEvent(inputEvent);
+				}
+			}
+		});
+	</script>
+}
+
+templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
+	for _, tr := range troubleReports {
+		<span class="trouble-report">
+			<details
+				id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
+				ontoggle={ updateURLHash(templ.JSExpression("event")) }
+			>
+				<summary>{ tr.Title }</summary>
+				@MarkdownContent(tr.Content, tr.UseMarkdown)
+				<!-- Attachments Preview Container -->
+				if len(tr.LoadedAttachments) > 0 {
+					<br/>
+					<div
+						class="attachments-preview-placeholder"
+						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
+						hx-get={ utils.HXGetTroubleReportsAttachmentsPreview(tr.ID) }
+						hx-trigger="click"
+						hx-swap="outerHTML"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					>
+						<div class="attachments-preview-label">
+							<i class="bi bi-paperclip"></i>
+							Anhänge ({ len(tr.LoadedAttachments) }) - Klicken Sie hier, um zu laden...
+						</div>
+					</div>
+				}
+			</details>
+			<div class="actions flex gap justify-end items-center">
+				// GoTo: Modifications
+				<a
+					role="button"
+					class="ghost secondary icon"
+					href={ fmt.Sprintf(
+						"%s/trouble-reports/modifications/%d",
+						env.ServerPathPrefix, tr.ID,
+					) }
+				>
+					<i class="bi bi-clock-history"></i>
+				</a>
+				// Edit Report
+				<a
+					href={ templ.URL(fmt.Sprintf(
+						"%s/editor?type=troublereport&id=%d&return_url=%s/trouble-reports",
+						env.ServerPathPrefix, tr.ID, env.ServerPathPrefix,
+					)) }
+					class="ghost icon"
+					role="button"
+				>
+					<i class="bi bi-pen"></i>
+				</a>
+				// Share Report (PDF)
+				<button
+					role="button"
+					class="info ghost icon"
+					title="Als PDF teilen"
+					onclick={ DownloadTroubleReportPDF(
+						fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+							env.ServerPathPrefix, tr.ID)) }
+				>
+					<i class="bi bi-share"></i>
+				</button>
+				// Admin only: Delete Report
+				<button
+					hx-delete={ utils.HXDeleteTroubleReportsData(tr.ID) }
+					hx-trigger="click"
+					hx-target="#data"
+					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					class="ghost destructive icon"
+					if !user.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</div>
+			<hr/>
+		</span>
+	}
+	@MarkdownScript()
+	@MarkdownStyles()
+	@listReportsScript()
+}
+
+script updateURLHash(event templ.JSExpression) {
+	var details = event.target;
+	if (details.open) {
+		// Update URL hash when details is opened
+		history.replaceState(null, '', '#' + details.id);
+	} else {
+		// Clear hash when details is closed
+		history.replaceState(null, '', window.location.pathname + window.location.search);
+	}
+}
+
+script listReportsScript() {
+	if (location.hash === "") {
+		return;
+	}
+
+	var details = document.querySelector(location.hash);
+	console.debug(location.hash, details)
+	if (details) {
+		details.open = true;
+		setTimeout(() =>
+			details.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+		100);
+	}
+}
+
+templ TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) {
+	<div class="card seamless p mb">
+		<div class="flex flex-col gap mb">
+			<div class="flex gap-sm justify-between items-center">
+				<span class="text-semibold">Modified by { mod.GetUserName() }</span>
+				<span class="badge info text-xs">v{ fmt.Sprintf("%d", mod.Time) }</span>
+			</div>
+			<div class="flex gap-sm justify-between items-center">
+				<span class="text-sm muted">{ mod.GetTimeString() }</span>
+				if canRollback {
+					@TroubleReportRollbackButton(reportID, mod.Time)
+				}
+			</div>
+		</div>
+		<div class="card muted p">
+			<div class="flex flex-col gap">
+				<div>
+					<label class="block text-semibold mb-sm">Title:</label>
+					<div class="card p-sm">{ mod.Data.Title }</div>
+				</div>
+				<div>
+					<label class="block text-semibold mb-sm">Content:</label>
+					<div class="card p-sm whitespace-pre-wrap max-h-40 overflow-y-auto">{ mod.Data.Content }</div>
+				</div>
+				<div>
+					<label class="block text-semibold mb-sm">Attachments:</label>
+					<div class="flex items-center">
+						<span>{ fmt.Sprintf("%d", len(mod.Data.LinkedAttachments)) } attachment(s)</span>
+						<svg width="16" height="16" style="margin-left: var(--ui-spacing);" class="muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ TroubleReportRollbackButton(reportID int64, modificationTime int64) {
+	<form
+		hx-post={ utils.HXPostTroubleReportsRollback(reportID) }
+		hx-swap="none"
+		hx-on:htmx:after-request="
+			if (event.detail.successful) {
+				window.location.reload();
+			}
+		"
+		class="inline"
+	>
+		<input type="hidden" name="modification_time" value={ fmt.Sprintf("%d", modificationTime) }/>
+		<button
+			type="submit"
+			class="primary small"
+			onclick="return confirm('Are you sure you want to rollback to this version? This will overwrite the current trouble report.')"
+		>
+			Rollback
+		</button>
+	</form>
+}
+
+func TroubleReportCreateModificationRenderer(
+	reportID int64, isAdmin bool,
+) func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+
+	return func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+
+		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+			canRollback := isAdmin
+
+			if isCurrent {
+				canRollback = false
+			}
+
+			// Render the modification entry
+			entry := TroubleReportModificationEntry(mod, reportID, canRollback)
+
+			return entry.Render(ctx, w)
+		})
+	}
+}

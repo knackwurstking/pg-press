@@ -1,0 +1,87 @@
+package components
+
+// DownloadPDF provides a reusable script function to download PDFs
+
+script DownloadPDF(url, defaultFilename, loadingContent, resetContent string) {
+	async function downloadPDF() {
+		const button = event.target.closest('button') || event.target;
+		const originalContent = button.innerHTML || button.textContent;
+
+		try {
+			// Show loading state
+			if (loadingContent) {
+				if (button.innerHTML !== button.textContent) {
+					button.innerHTML = loadingContent;
+				} else {
+					button.textContent = loadingContent;
+				}
+			}
+			button.disabled = true;
+
+			// Fetch the PDF
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('PDF konnte nicht geladen werden');
+			}
+
+			// Get the blob and create download
+			const blob = await response.blob();
+			const downloadUrl = window.URL.createObjectURL(blob);
+			const a = document.createElement('a');
+
+			// Extract filename from headers or use default
+			const contentDisposition = response.headers.get('Content-Disposition');
+			const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+			const filename = filenameMatch?.[1] || defaultFilename;
+
+			// Configure and trigger download
+			Object.assign(a, {
+				style: { display: 'none' },
+				href: downloadUrl,
+				download: filename
+			});
+
+			document.body.appendChild(a);
+			a.click();
+
+			// Cleanup
+			window.URL.revokeObjectURL(downloadUrl);
+			document.body.removeChild(a);
+
+			// Reset button
+			if (button.innerHTML !== button.textContent) {
+				button.innerHTML = originalContent;
+			} else {
+				button.textContent = originalContent;
+			}
+			button.disabled = false;
+
+		} catch (error) {
+			console.error('Download failed:', error);
+			alert('Fehler beim Download: ' + error.message);
+
+			// Reset button with fallback content
+			const fallbackContent = resetContent || originalContent;
+			if (button.innerHTML !== button.textContent) {
+				button.innerHTML = fallbackContent;
+			} else {
+				button.textContent = fallbackContent;
+			}
+			button.disabled = false;
+		}
+	}
+
+	downloadPDF();
+}
+
+// DownloadCycleSummaryPDF provides a script function to download cycle summary PDFs
+
+script DownloadCycleSummaryPDF(url templ.SafeURL) {
+	DownloadPDF(url, 'cycle_summary.pdf', 'Lädt...', 'Zusammenfassung (PDF)');
+}
+
+// DownloadTroubleReportPDF provides a script function to download trouble report PDFs
+
+script DownloadTroubleReportPDF(url string) {
+	DownloadPDF(url, 'trouble_report.pdf', '<i class="bi bi-hourglass-split"></i>', '<i class="bi bi-share"></i>');
+}
