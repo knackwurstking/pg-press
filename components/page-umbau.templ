@@ -1,30 +1,29 @@
-package templates
+package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/internal/env"
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
-	"github.com/knackwurstking/pgpress/internal/web/shared/layouts"
-	"github.com/knackwurstking/pgpress/pkg/models"
+
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
 )
 
-type PageProps struct {
+type PageUmbauDataListOption struct {
+	ToolID int64
+	Label  string
+}
+
+type PageUmbauProps struct {
 	PressNumber models.PressNumber
 	User        *models.User
 	Tools       []*models.Tool
 }
 
-type DataListOption struct {
-	ToolID int64
-	Label  string
-}
-
-func (pp *PageProps) GetDataListOptions(position models.Position) []DataListOption {
-	var options []DataListOption
+func (pp *PageUmbauProps) GetDataListOptions(position models.Position) []PageUmbauDataListOption {
+	var options []PageUmbauDataListOption
 
 	for _, tool := range pp.Tools {
 		if tool.Position == position {
-			options = append(options, DataListOption{
+			options = append(options, PageUmbauDataListOption{
 				ToolID: tool.ID,
 				Label:  tool.String(),
 			})
@@ -34,7 +33,7 @@ func (pp *PageProps) GetDataListOptions(position models.Position) []DataListOpti
 	return options
 }
 
-func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
+func (pp *PageUmbauProps) GetSlotsMap() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
 		models.PositionTop:    nil,
 		models.PositionBottom: nil,
@@ -49,37 +48,36 @@ func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	return slots
 }
 
-templ Page(props *PageProps) {
-	@layouts.Main(
-		layouts.MainOptions{
+templ PageUmbau(props *PageUmbauProps) {
+	@Layout(
+		LayoutOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
 			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.PressNumber),
-			NavContent:  navContent(),
+			NavContent:  PageUmbauNavContent(),
 		},
 	) {
 		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
-			@toolsDataLists(props)
+			@pageUmbauToolsDataLists(props)
 			<form
-				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau",
-					env.ServerPathPrefix, props.PressNumber) }
+				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau", env.ServerPathPrefix, props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
-				@cyclesSection()
+				@pageUmbauCyclesSection()
 				<hr/>
-				@sectionTop(slots[models.PositionTop])
+				@pageUmbauSectionTop(slots[models.PositionTop])
 				<hr/>
-				@sectionBottom(slots[models.PositionBottom])
+				@pageUmbauSectionBottom(slots[models.PositionBottom])
 				<hr/>
-				@formActions(props.User)
+				@pageUmbauFormActions(props.User)
 			</form>
 		</main>
 	}
 }
 
-templ toolsDataLists(props *PageProps) {
+templ pageUmbauToolsDataLists(props *PageUmbauProps) {
 	<datalist id="tools-list-top">
 		for _, o := range props.GetDataListOptions(models.PositionTop) {
 			<option value={ o.Label }></option>
@@ -92,7 +90,7 @@ templ toolsDataLists(props *PageProps) {
 	</datalist>
 }
 
-templ cyclesSection() {
+templ pageUmbauCyclesSection() {
 	<section>
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
@@ -107,7 +105,7 @@ templ cyclesSection() {
 	</section>
 }
 
-templ sectionTop(tool *models.Tool) {
+templ pageUmbauSectionTop(tool *models.Tool) {
 	<section>
 		<h3>{ models.PositionTop.GermanString() }</h3>
 		if tool != nil {
@@ -129,7 +127,7 @@ templ sectionTop(tool *models.Tool) {
 	</section>
 }
 
-templ sectionBottom(tool *models.Tool) {
+templ pageUmbauSectionBottom(tool *models.Tool) {
 	<section>
 		<h3>{ models.PositionBottom.GermanString() }</h3>
 		if tool != nil {
@@ -151,7 +149,7 @@ templ sectionBottom(tool *models.Tool) {
 	</section>
 }
 
-templ formActions(user *models.User) {
+templ pageUmbauFormActions(user *models.User) {
 	<footer class="flex justify-end items-center">
 		<button
 			type="submit"
@@ -160,8 +158,8 @@ templ formActions(user *models.User) {
 	</footer>
 }
 
-templ navContent() {
-	@components.NavFeedButton()
-	@components.NavProfileButton()
-	@components.NavHomeButton()
+templ PageUmbauNavContent() {
+	@NavFeedButton()
+	@NavProfileButton()
+	@NavHomeButton()
 }

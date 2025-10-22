@@ -70,19 +70,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return filename
 //}
 //
-//func (b *BaseHandler) ParseInt8Param(c echo.Context, paramName string) (int8, error) {
-//	idStr := c.Param(paramName)
-//	if idStr == "" {
-//		return 0, fmt.Errorf("missing %s parameter", paramName)
-//	}
-//
-//	id, err := strconv.ParseInt(idStr, 10, 8)
-//	if err != nil {
-//		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
-//	}
-//	return int8(id), nil
-//}
-//
 //// ParseInt64Param parses an int64 parameter from the URL path
 //func (b *BaseHandler) ParseInt64Param(c echo.Context, paramName string) (int64, error) {
 //	idStr := c.Param(paramName)

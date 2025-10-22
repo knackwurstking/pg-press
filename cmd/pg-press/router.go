@@ -25,12 +25,12 @@ func Serve(e *echo.Echo, r *services.Registry) {
 	handlers.NewProfile(r).RegisterRoutes(e)
 	handlers.NewNotes(r).RegisterRoutes(e)
 	handlers.NewMetalSheets(r).RegisterRoutes(e)
+	handlers.NewUmbau(r).RegisterRoutes(e)
 
 	//tools.NewRoutes(db).RegisterRoutes(e)
 	//tool.NewRoutes(db).RegisterRoutes(e)
 	//press.NewRoutes(db).RegisterRoutes(e)
-	//umbau.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
-	//troublereports.NewRoutes(db).RegisterRoutes(e)
+	//troublereports.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
 }
 
 func startWsFeedHandler(r *services.Registry) *handlers.FeedHandler {

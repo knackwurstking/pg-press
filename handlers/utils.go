@@ -69,3 +69,16 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, error) {
 
 	return id, nil
 }
+
+func ParseParamInt8(c echo.Context, paramName string) (int8, error) {
+	idStr := c.Param(paramName)
+	if idStr == "" {
+		return 0, fmt.Errorf("missing %s parameter", paramName)
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 8)
+	if err != nil {
+		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
+	}
+	return int8(id), nil
+}
