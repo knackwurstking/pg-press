@@ -40,3 +40,15 @@ templ NavFeedButton() {
 		<span id="feed-counter"></span>
 	</a>
 }
+
+// Common navigation patterns to reduce duplication
+templ StandardNavContent() {
+	@NavFeedButton()
+	@NavProfileButton()
+	@NavHomeButton()
+}
+
+templ BasicNavContent() {
+	@NavProfileButton()
+	@NavHomeButton()
+}

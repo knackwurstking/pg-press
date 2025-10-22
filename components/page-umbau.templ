@@ -53,7 +53,7 @@ templ PageUmbau(props *PageUmbauProps) {
 		LayoutOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
 			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.PressNumber),
-			NavContent:  PageUmbauNavContent(),
+			NavContent:  StandardNavContent(),
 		},
 	) {
 		{{ slots := props.GetSlotsMap() }}
@@ -156,10 +156,4 @@ templ pageUmbauFormActions(user *models.User) {
 			disabled?={ !user.IsAdmin() }
 		>Umbau speichern</button>
 	</footer>
-}
-
-templ PageUmbauNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }

@@ -10,7 +10,7 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 		LayoutOptions{
 			PageTitle:   "PG Presse | Modifications History",
 			AppBarTitle: "Modifications History",
-			NavContent:  pageModificationsNavContent(),
+			NavContent:  StandardNavContent(),
 		},
 	) {
 		<div class="h-screen">
@@ -90,10 +90,4 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 			</div>
 		</div>
 	}
-}
-
-templ pageModificationsNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }

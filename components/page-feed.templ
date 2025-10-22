@@ -13,7 +13,7 @@ templ PageFeed() {
 	@Layout(LayoutOptions{
 		PageTitle:   "PG Presse | Feed",
 		AppBarTitle: "Feed",
-		NavContent:  pageFeedNavContent(),
+		NavContent:  StandardNavContent(),
 	}) {
 		<main class="container fluid">
 			<span
@@ -25,12 +25,6 @@ templ PageFeed() {
 			></span>
 		</main>
 	}
-}
-
-templ pageFeedNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }
 
 templ FeedsList(feeds []*models.Feed, lastFeedID int64, userMap map[int64]*models.User) {

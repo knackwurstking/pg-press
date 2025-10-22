@@ -15,7 +15,7 @@ templ PageTroubleReports() {
 			PageTitle:      "PG Presse | Problemberichte",
 			AppBarTitle:    "Problemberichte",
 			AdditionalHead: pageTrAdditionalHead(),
-			NavContent:     pageTrNavContent(),
+			NavContent:     StandardNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -50,12 +50,6 @@ templ PageTroubleReports() {
 			></section>
 		</main>
 	}
-}
-
-templ pageTrNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }
 
 templ pageTrAdditionalHead() {

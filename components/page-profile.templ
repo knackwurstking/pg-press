@@ -13,7 +13,7 @@ templ PageProfile(user *models.User) {
 		LayoutOptions{
 			PageTitle:      "PG Presse | Profil",
 			AppBarTitle:    "Profil",
-			NavContent:     pageProfileNavContent(),
+			NavContent:     StandardNavContent(),
 			AdditionalHead: pageProfileAdditionalHead(),
 		},
 	) {
@@ -99,12 +99,6 @@ templ editUserDialog(user *models.User) {
 			</footer>
 		</form>
 	</dialog>
-}
-
-templ pageProfileNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }
 
 templ pageProfileAdditionalHead() {

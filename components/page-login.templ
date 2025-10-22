@@ -4,7 +4,7 @@ templ PageLogin(apiKey string, invalidApiKey bool) {
 	@Layout(LayoutOptions{
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
-		NavContent:  pageLoginNavContent(),
+		NavContent:  BasicNavContent(),
 	}) {
 		<main class="container">
 			@loginDialog(apiKey, invalidApiKey)
@@ -36,9 +36,4 @@ templ loginDialog(apiKey string, invalidApiKey bool) {
 			</footer>
 		</form>
 	</dialog>
-}
-
-templ pageLoginNavContent() {
-	@NavProfileButton()
-	@NavHomeButton()
 }

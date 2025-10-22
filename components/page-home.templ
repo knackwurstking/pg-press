@@ -10,7 +10,7 @@ templ PageHome() {
 		LayoutOptions{
 			PageTitle:   "PG Presse",
 			AppBarTitle: "Home",
-			NavContent:  pageHomeNavContent(),
+			NavContent:  StandardNavContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -36,12 +36,6 @@ templ PageHome() {
 			</nav>
 		</main>
 	}
-}
-
-templ pageHomeNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }
 
 type pageHomeAnchorButtonProps struct {

@@ -75,7 +75,7 @@ func PageProfile(user *models.User) templ.Component {
 			LayoutOptions{
 				PageTitle:      "PG Presse | Profil",
 				AppBarTitle:    "Profil",
-				NavContent:     pageProfileNavContent(),
+				NavContent:     StandardNavContent(),
 				AdditionalHead: pageProfileAdditionalHead(),
 			},
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
@@ -264,7 +264,7 @@ func editUserDialog(user *models.User) templ.Component {
 	})
 }
 
-func pageProfileNavContent() templ.Component {
+func pageProfileAdditionalHead() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -283,43 +283,6 @@ func pageProfileNavContent() templ.Component {
 		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
 		if templ_7745c5c3_Var13 == nil {
 			templ_7745c5c3_Var13 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = NavFeedButton().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = NavProfileButton().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = NavHomeButton().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-func pageProfileAdditionalHead() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<style>\n\t\t.profile-header {\n\t\t\tbackground: var(--ui-color-100);\n\t\t\tpadding: calc(var(--ui-spacing) * 2);\n\t\t\tmargin-bottom: calc(var(--ui-spacing) * 2);\n\t\t}\n\n\t\t.profile-header h1 {\n\t\t\tmargin: 0;\n\t\t\tcolor: var(--ui-text);\n\t\t\tfont-size: 2.25rem;\n\t\t}\n\n\t\t.telegram-id {\n\t\t\tcolor: var(--ui-color-600);\n\t\t\tfont-size: 0.95rem;\n\t\t\tbackground: var(--ui-color-200);\n\t\t\tpadding: calc(var(--ui-spacing) / 2) var(--ui-spacing);\n\t\t\tborder-radius: var(--ui-radius);\n\t\t\tborder: var(--ui-border-width) var(--ui-border-style) var(--ui-color-300);\n\t\t}\n\n\t\t.profile-dialog {\n\t\t\tbackground: var(--ui-bg);\n\t\t\tborder-radius: calc(var(--ui-radius) * 2);\n\t\t\tpadding: calc(var(--ui-spacing) * 2);\n\t\t\tbox-shadow: 0 10px 25px var(--ui-backdrop-color);\n\t\t}\n\n\t\t.profile-dialog label {\n\t\t\tmargin-bottom: var(--ui-spacing);\n\t\t}\n\n\t\t.profile-dialog input {\n\t\t\tmargin-top: calc(var(--ui-spacing) / 2);\n\t\t\tfont-size: 1rem;\n\t\t}\n\n\t\t.no-cookies {\n\t\t\ttext-align: center;\n\t\t\tcolor: var(--ui-color-600);\n\t\t\tpadding: calc(var(--ui-spacing) * 2);\n\t\t\tbackground: var(--ui-color-100);\n\t\t\tborder-radius: var(--ui-radius);\n\t\t\tfont-style: italic;\n\t\t}\n\t</style>")
@@ -346,9 +309,9 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(cookies) > 0 {
@@ -356,12 +319,12 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var16 string
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(cookies)))
+			var templ_7745c5c3_Var15 string
+			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(cookies)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 165, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 159, Col: 54}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -374,12 +337,12 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var17 string
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.TimeString())
+				var templ_7745c5c3_Var16 string
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.TimeString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 179, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 173, Col: 51}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -387,12 +350,12 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var18 string
-				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.UserAgent)
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(cookie.UserAgent)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 180, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 174, Col: 59}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -400,12 +363,12 @@ func CookiesDetails(cookies []*models.Cookie) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var19 string
-				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXDeleteCookies(cookie.Value))
+				var templ_7745c5c3_Var18 string
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXDeleteCookies(cookie.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 183, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-profile.templ`, Line: 177, Col: 57}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

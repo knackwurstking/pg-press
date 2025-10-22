@@ -17,7 +17,7 @@ templ PageNotes(props *PageNotesProps) {
 		LayoutOptions{
 			PageTitle:      "PG Presse | Notizen Verwaltung",
 			AppBarTitle:    "Notizen Verwaltung",
-			NavContent:     pageNotesNavContent(),
+			NavContent:     StandardNavContent(),
 			AdditionalHead: pageNotesScript(),
 		},
 	) {
@@ -76,12 +76,6 @@ templ PageNotes(props *PageNotesProps) {
 			</section>
 		</main>
 	}
-}
-
-templ pageNotesNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
 }
 
 script pageNotesScript() {
