@@ -87,9 +87,7 @@ templ PagePress(props PagePressProps) {
 					<button
 						role="button"
 						class="info"
-						onclick={ DownloadCycleSummaryPDF(
-							utils.HXGetPressCycleSummaryPDF(props.Press),
-						) }
+						onclick={ DownloadCycleSummaryPDF(props.Press) }
 					>Zusammenfassung (PDF)</button>
 				</div>
 				<div

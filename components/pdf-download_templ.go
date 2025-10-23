@@ -8,8 +8,15 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+)
+
 // DownloadPDF provides a reusable script function to download PDFs
-func DownloadPDF(url, defaultFilename, loadingContent, resetContent string) templ.ComponentScript {
+func DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetContent string) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_DownloadPDF_4965`,
 		Function: `function __templ_DownloadPDF_4965(url, defaultFilename, loadingContent, resetContent){async function downloadPDF() {
@@ -87,26 +94,23 @@ func DownloadPDF(url, defaultFilename, loadingContent, resetContent string) temp
 	}
 }
 
-// DownloadCycleSummaryPDF provides a script function to download cycle summary PDFs
-func DownloadCycleSummaryPDF(url templ.SafeURL) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_DownloadCycleSummaryPDF_7940`,
-		Function: `function __templ_DownloadCycleSummaryPDF_7940(url){DownloadPDF(url, 'cycle_summary.pdf', 'Lädt...', 'Zusammenfassung (PDF)');
-}`,
-		Call:       templ.SafeScript(`__templ_DownloadCycleSummaryPDF_7940`, url),
-		CallInline: templ.SafeScriptInline(`__templ_DownloadCycleSummaryPDF_7940`, url),
-	}
+func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
+	return DownloadPDF(
+		utils.HXGetPressCycleSummaryPDF(press),
+		"cycle_summary.pdf",
+		"Lädt...",
+		"Zusammenfassung (PDF)",
+	)
 }
 
-// DownloadTroubleReportPDF provides a script function to download trouble report PDFs
-func DownloadTroubleReportPDF(url string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_DownloadTroubleReportPDF_56e5`,
-		Function: `function __templ_DownloadTroubleReportPDF_56e5(url){DownloadPDF(url, 'trouble_report.pdf', '<i class="bi bi-hourglass-split"></i>', '<i class="bi bi-share"></i>');
-}`,
-		Call:       templ.SafeScript(`__templ_DownloadTroubleReportPDF_56e5`, url),
-		CallInline: templ.SafeScriptInline(`__templ_DownloadTroubleReportPDF_56e5`, url),
-	}
+func DownloadTroubleReportPDF(troubleReportID int64) templ.ComponentScript {
+	return DownloadPDF(
+		templ.SafeURL(fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+			env.ServerPathPrefix, troubleReportID)),
+		"trouble_report.pdf",
+		`<i class="bi bi-hourglass-split"></i>`,
+		`<i class="bi bi-share"></i>`,
+	)
 }
 
 var _ = templruntime.GeneratedTemplate

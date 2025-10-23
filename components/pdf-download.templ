@@ -1,8 +1,15 @@
 package components
 
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+)
+
 // DownloadPDF provides a reusable script function to download PDFs
 
-script DownloadPDF(url, defaultFilename, loadingContent, resetContent string) {
+script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetContent string) {
 	async function downloadPDF() {
 		const button = event.target.closest('button') || event.target;
 		const originalContent = button.innerHTML || button.textContent;
@@ -74,14 +81,21 @@ script DownloadPDF(url, defaultFilename, loadingContent, resetContent string) {
 	downloadPDF();
 }
 
-// DownloadCycleSummaryPDF provides a script function to download cycle summary PDFs
-
-script DownloadCycleSummaryPDF(url templ.SafeURL) {
-	DownloadPDF(url, 'cycle_summary.pdf', 'Lädt...', 'Zusammenfassung (PDF)');
+func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
+	return DownloadPDF(
+		utils.HXGetPressCycleSummaryPDF(press),
+		"cycle_summary.pdf",
+		"Lädt...",
+		"Zusammenfassung (PDF)",
+	)
 }
 
-// DownloadTroubleReportPDF provides a script function to download trouble report PDFs
-
-script DownloadTroubleReportPDF(url string) {
-	DownloadPDF(url, 'trouble_report.pdf', '<i class="bi bi-hourglass-split"></i>', '<i class="bi bi-share"></i>');
+func DownloadTroubleReportPDF(troubleReportID int64) templ.ComponentScript {
+	return DownloadPDF(
+		templ.SafeURL(fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
+			env.ServerPathPrefix, troubleReportID)),
+		"trouble_report.pdf",
+		`<i class="bi bi-hourglass-split"></i>`,
+		`<i class="bi bi-share"></i>`,
+	)
 }
