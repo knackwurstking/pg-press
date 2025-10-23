@@ -84,6 +84,20 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, error) {
 	return id, nil
 }
 
+func ParseQueryBool(c echo.Context, paramName string) bool {
+	value := c.QueryParam(paramName)
+	if value == "" {
+		return false
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		return false
+	}
+
+	return boolValue
+}
+
 func ParseParamInt64(c echo.Context, paramName string) (int64, error) {
 	idStr := c.Param(paramName)
 	if idStr == "" {

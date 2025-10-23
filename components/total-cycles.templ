@@ -1,0 +1,36 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/models"
+)
+
+// TotalCycles renders an input field displaying the total cycles since last regeneration
+templ TotalCycles(totalCycles int64, input bool) {
+	{{
+		var colorClass = "contrast ghost"
+
+		if totalCycles > models.ToolCycleWarning {
+			colorClass = "warning ghost"
+		}
+
+		if totalCycles > models.ToolCycleError {
+			colorClass = "destructive ghost"
+		}
+	}}
+	if input {
+		<input
+			class={ colorClass }
+			type="number"
+			value={ fmt.Sprintf("%d", totalCycles) }
+			readonly
+			title="Gesamtzyklen seit der letzten Regenerierung"
+		/>
+	} else {
+		<span class={ fmt.Sprintf("card compact flat %s", colorClass) }>
+			<span class="card-body">
+				{ totalCycles }
+			</span>
+		</span>
+	}
+}

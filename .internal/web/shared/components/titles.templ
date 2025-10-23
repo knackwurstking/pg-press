@@ -1,24 +1,2 @@
 package components
 
-const (
-	TitleLevelMain TitleLevel = 4
-	TitleLevelSub  TitleLevel = 5
-)
-
-type TitleLevel int8
-
-templ SectionTitle(level TitleLevel, text string) {
-	<div class="flex justify-between items-center my">
-		switch level {
-			case TitleLevelMain:
-				<h4>{ text }</h4>
-			case TitleLevelSub:
-				<h5>{ text }</h5>
-			default:
-				{ text }
-		}
-		<span>
-			{ children... }
-		</span>
-	</div>
-}

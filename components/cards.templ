@@ -1,0 +1,64 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+)
+
+templ NoteCard(note *models.Note) {
+	{{
+		filterClass := ""
+		switch note.Level {
+		case models.INFO:
+			filterClass = "outline"
+		case models.ATTENTION:
+			filterClass = "warning outline"
+		case models.BROKEN:
+			filterClass = "destructive outline"
+		}
+	}}
+	<div class={ fmt.Sprintf("card compact elevation-2 %s", filterClass) }>
+		<div class="card-header flex gap-sm justify-between items-center">
+			<span class="note-importance flex gap">
+				switch note.Level {
+					case models.INFO:
+						<i class="bi bi-info-circle"></i>
+					case models.ATTENTION:
+						<i class="bi bi-exclamation-triangle"></i>
+					case models.BROKEN:
+						<i class="bi bi-x-circle"></i>
+				}
+				<span class="note-date">
+					{ note.CreatedAt.Format("2006-01-02 15:04") }
+				</span>
+			</span>
+			<span class="flex gap">
+				<button
+					class="icon secondary small"
+					hx-get={ utils.HXGetNotesEditDialog(&note.ID, note.Linked) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Notiz bearbeiten"
+				>
+					<i class="bi bi-pencil"></i>
+				</button>
+				<button
+					class="icon small destructive"
+					hx-delete={ utils.HXDeleteNote(note.ID) }
+					hx-trigger="click"
+					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					title="Notiz löschen"
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</span>
+		</div>
+		<div class="card-body">
+			{ note.Content }
+		</div>
+	</div>
+}

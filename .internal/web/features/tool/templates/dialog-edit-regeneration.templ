@@ -1,38 +1,3 @@
 package templates
 
-import (
-	"github.com/knackwurstking/pgpress/internal/constants"
-	"github.com/knackwurstking/pgpress/internal/web/shared/dialogs"
-	"github.com/knackwurstking/pgpress/internal/web/shared/helpers"
-	"github.com/knackwurstking/pgpress/pkg/models"
-)
-
-templ DialogEditRegeneration(r *models.ResolvedRegeneration) {
-	{{
-		var (
-			baseType         = "PUT"
-			submitButtonText = "Aktualisieren"
-			baseHref         = helpers.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID)
-		)
-	}}
-	@dialogs.Base(dialogs.BaseProps{
-		Type:             baseType,
-		Href:             baseHref,
-		ID:               "regeneration-edit-dialog",
-		SubmitButtonText: submitButtonText,
-	}) {
-		<section>
-			<p>Tool: { r.GetTool().String() } </p>
-			<p>Regeneriert am: { r.GetCycle().Date.Format(constants.DateFormat) }</p>
-		</section>
-		<label class="flex flex-col gap-0">
-			Grund
-			<input
-				id="reason"
-				name="reason"
-				type="text"
-				value={ r.Reason }
-			/>
-		</label>
-	}
-}
+import "github.com/knackwurstking/pgpress/internal/web/shared/dialogs"

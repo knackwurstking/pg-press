@@ -45,20 +45,6 @@ func NewBase(r *services.Registry, l *logger.Logger) *Base {
 //	return sanitized
 //}
 //
-//// ParseBoolQuery parses a boolean parameter from the query string
-//func (b *BaseHandler) ParseBoolQuery(c echo.Context, paramName string) bool {
-//	value := c.QueryParam(paramName)
-//	if value == "" {
-//		return false
-//	}
-//
-//	boolValue, err := strconv.ParseBool(value)
-//	if err != nil {
-//		return false
-//	}
-//	return boolValue
-//}
-//
 //func (b *BaseHandler) SetHXTrigger(c echo.Context) {
 //	c.Response().Header().Set("HX-Trigger", "pageLoaded")
 //}
