@@ -42,112 +42,54 @@ func NewTool(db *services.Registry) *Tool {
 
 func (h *Tool) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		// HTML
-		utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id",
-			h.GetToolPage),
-
-		// HTMX
+		// Main Page
+		utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.GetToolPage),
 
 		// Regnerations Table
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/tool/:id/edit-regeneration",
-			h.HTMXGetEditRegeneration,
-		),
-		utils.NewEchoRoute(
-			http.MethodPut,
-			"/htmx/tools/tool/:id/edit-regeneration",
-			h.HTMXPutEditRegeneration,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodDelete,
-			"/htmx/tools/tool/:id/delete-regeneration",
-			h.HTMXDeleteRegeneration,
-		),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/tool/:id/edit-regeneration", h.HTMXGetEditRegeneration),
+		utils.NewEchoRoute(http.MethodPut,
+			"/htmx/tools/tool/:id/edit-regeneration", h.HTMXPutEditRegeneration),
+		utils.NewEchoRoute(http.MethodDelete,
+			"/htmx/tools/tool/:id/delete-regeneration", h.HTMXDeleteRegeneration),
 
 		// Tool status and regenerations management
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/status-edit",
-			h.HTMXGetStatusEdit,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/status-display",
-			h.HTMXGetStatusDisplay,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodPut,
-			"/htmx/tools/status",
-			h.HTMXUpdateToolStatus,
-		),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/status-edit", h.HTMXGetStatusEdit),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/status-display", h.HTMXGetStatusDisplay),
+		utils.NewEchoRoute(http.MethodPut,
+			"/htmx/tools/status", h.HTMXUpdateToolStatus),
 
 		// Section loading
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/notes",
-			h.HTMXGetToolNotes,
-		),
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/metal-sheets",
-			h.HTMXGetToolMetalSheets,
-		),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/notes", h.HTMXGetToolNotes),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/metal-sheets", h.HTMXGetToolMetalSheets),
 
 		// Cycles table rows
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/cycles",
-			h.HTMXGetCycles,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/total-cycles",
-			h.HTMXGetToolTotalCycles,
-		),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/cycles", h.HTMXGetCycles),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/total-cycles", h.HTMXGetToolTotalCycles),
 
 		// Get, add or edit a cycles table entry
-		utils.NewEchoRoute(
-			http.MethodGet,
-			"/htmx/tools/cycle/edit",
-			h.HTMXGetToolCycleEditDialog,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodPost,
-			"/htmx/tools/cycle/edit",
-			h.HTMXPostToolCycleEditDialog,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodPut,
-			"/htmx/tools/cycle/edit",
-			h.HTMXPutToolCycleEditDialog,
-		),
+		utils.NewEchoRoute(http.MethodGet,
+			"/htmx/tools/cycle/edit", h.HTMXGetToolCycleEditDialog),
+		utils.NewEchoRoute(http.MethodPost,
+			"/htmx/tools/cycle/edit", h.HTMXPostToolCycleEditDialog),
+		utils.NewEchoRoute(http.MethodPut,
+			"/htmx/tools/cycle/edit", h.HTMXPutToolCycleEditDialog),
 
 		// Delete a cycle table entry
-		utils.NewEchoRoute(
-			http.MethodDelete,
-			"/htmx/tools/cycle/delete",
-			h.HTMXDeleteToolCycle,
-		),
+		utils.NewEchoRoute(http.MethodDelete,
+			"/htmx/tools/cycle/delete", h.HTMXDeleteToolCycle),
 
 		// Update tools binding data
-		utils.NewEchoRoute(
-			http.MethodPatch,
-			"/htmx/tools/tool/:id/bind",
-			h.HTMXPatchToolBinding,
-		),
-
-		utils.NewEchoRoute(
-			http.MethodPatch,
-			"/htmx/tools/tool/:id/unbind",
-			h.HTMXPatchToolUnBinding,
-		),
+		utils.NewEchoRoute(http.MethodPatch,
+			"/htmx/tools/tool/:id/bind", h.HTMXPatchToolBinding),
+		utils.NewEchoRoute(http.MethodPatch,
+			"/htmx/tools/tool/:id/unbind", h.HTMXPatchToolUnBinding),
 	})
 }
 
@@ -541,11 +483,7 @@ func (h *Tool) HTMXPostToolCycleEditDialog(c echo.Context) error {
 	if form.Regenerating {
 		content += "\nRegenerierung gestartet"
 	}
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for cycle creation: %v", err)
-	}
+	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -620,7 +558,6 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	// Create feed entry
 	var title string
 	var content string
-
 	if form.ToolID != nil {
 		// Tool change occurred
 		title = "Zyklus aktualisiert mit Werkzeugwechsel"
@@ -632,15 +569,10 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
 			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
 	}
-
 	if form.Regenerating {
 		content += "\nRegenerierung abgeschlossen"
 	}
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for cycle update: %v", err)
-	}
+	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -687,11 +619,7 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 	title := fmt.Sprintf("Zyklus gelöscht für %s", tool.String())
 	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
 		cycle.PressNumber, tool.String(), cycle.TotalCycles, cycle.Date.Format("2006-01-02 15:04:05"))
-
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for cycle deletion: %v", err)
-	}
+	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -941,10 +869,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		// Create feed entry
 		title := "Werkzeug Regenerierung gestartet"
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		feed := models.NewFeed(title, content, user.TelegramID)
-		if err := h.Registry.Feeds.Add(feed); err != nil {
-			h.Log.Error("Failed to create feed for regeneration start: %v", err)
-		}
+		h.createFeed(title, content, user.TelegramID)
 
 	case "active":
 		if err := h.Registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
@@ -954,10 +879,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		// Create feed entry
 		title := "Werkzeug Regenerierung beendet"
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		feed := models.NewFeed(title, content, user.TelegramID)
-		if err := h.Registry.Feeds.Add(feed); err != nil {
-			h.Log.Error("Failed to create feed for regeneration stop: %v", err)
-		}
+		h.createFeed(title, content, user.TelegramID)
 
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
@@ -968,10 +890,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		// Create feed entry
 		title := "Werkzeug Regenerierung abgebrochen"
 		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		feed := models.NewFeed(title, content, user.TelegramID)
-		if err := h.Registry.Feeds.Add(feed); err != nil {
-			h.Log.Error("Failed to create feed for regeneration abort: %v", err)
-		}
+		h.createFeed(title, content, user.TelegramID)
 
 	default:
 		return HandleBadRequest(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
@@ -1141,4 +1060,11 @@ func (h *Tool) renderStatusComponent(tool *models.Tool, editable bool, user *mod
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
 	})
+}
+
+func (h *Tool) createFeed(title, content string, userID int64) {
+	feed := models.NewFeed(title, content, userID)
+	if err := h.Registry.Feeds.Add(feed); err != nil {
+		h.Log.Error("Failed to create feed for cycle creation: %v", err)
+	}
 }
