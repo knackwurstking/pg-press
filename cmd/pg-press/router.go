@@ -29,8 +29,7 @@ func Serve(e *echo.Echo, r *services.Registry) {
 	handlers.NewTroubleReports(r).RegisterRoutes(e)
 	handlers.NewTools(r).RegisterRoutes(e)
 	handlers.NewTool(r).RegisterRoutes(e)
-
-	//press.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
+	handlers.NewPress(r).RegisterRoutes(e)
 }
 
 func startWsFeedHandler(r *services.Registry) *handlers.FeedHandler {
