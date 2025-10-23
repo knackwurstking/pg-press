@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pgpress/components"
+	"github.com/knackwurstking/pgpress/env"
 	"github.com/knackwurstking/pgpress/logger"
 	"github.com/knackwurstking/pgpress/models"
 	"github.com/knackwurstking/pgpress/services"
@@ -118,7 +119,7 @@ func (h *MetalSheets) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the new metal sheet
 	h.createFeed(user, tool, metalSheet, "Blech erstellt")
 
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -167,7 +168,7 @@ func (h *MetalSheets) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	// Create feed entry for the updated metal sheet showing changes
 	h.createUpdateFeed(user, tool, existingSheet, metalSheet)
 
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -206,7 +207,8 @@ func (h *MetalSheets) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Create feed entry for the deleted metal sheet
 	h.createFeed(user, tool, existingSheet, "Blech gelöscht")
 
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	SetHXTrigger(c, env.HXGlobalTrigger)
+
 	return nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pgpress/components"
+	"github.com/knackwurstking/pgpress/env"
 	"github.com/knackwurstking/pgpress/logger"
 	"github.com/knackwurstking/pgpress/models"
 	"github.com/knackwurstking/pgpress/services"
@@ -167,7 +168,7 @@ func (h *Notes) HTMXPostEditNoteDialog(c echo.Context) error {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -216,7 +217,7 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "notesReload")
+	SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -247,7 +248,7 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	c.Response().Header().Set("HX-Trigger", "pageLoaded")
+	SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }

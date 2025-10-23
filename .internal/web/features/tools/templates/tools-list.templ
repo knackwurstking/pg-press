@@ -1,27 +1,3 @@
 package templates
 
-import (
-	"fmt"
-
-	"github.com/knackwurstking/pgpress/internal/web/shared/components"
-
-	"github.com/knackwurstking/pgpress/pkg/models"
-)
-
-templ ToolsList(tools []*models.ResolvedTool) {
-	for _, t := range tools {
-		if t.Position != models.PositionTopCassette || !t.IsBound() {
-			@toolListItem(t.ID, t)
-		}
-	}
-}
-
-templ toolListItem(id int64, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf("tool-%d", id) }>
-		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
-			EnableStatusBadge:  true,
-			EnableBindingBadge: true,
-			EnableTotalCycles:  true,
-		})
-	</li>
-}
+import "github.com/knackwurstking/pgpress/internal/web/shared/components"

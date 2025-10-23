@@ -16,4 +16,6 @@ const (
 
 	UserNameMinLength = 1
 	UserNameMaxLength = 100
+
+	HXGlobalTrigger = "pageLoaded"
 )

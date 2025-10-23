@@ -1,0 +1,45 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pgpress/models"
+)
+
+templ PositionBadge(position models.Position, classNames string) {
+	switch position {
+		case models.PositionTop:
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
+				{ models.PositionTop.GermanString() }
+			</small>
+		case models.PositionTopCassette:
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
+				{ models.PositionTopCassette.GermanString() }
+			</small>
+		case models.PositionBottom:
+			<small class={ fmt.Sprintf("badge badge-sm %s", classNames) }>
+				{ models.PositionBottom.GermanString() }
+			</small>
+	}
+}
+
+templ ToolStatusBadge(tool *models.Tool) {
+	switch tool.Status() {
+		case models.StatusActive:
+			<span class="badge badge-sm primary">
+				<span class="flex flex-col gap-0 justify-center items-center">
+					<span class="text-bold">Eingebaut</span>
+					<span>Presse { *tool.Press }</span>
+				</span>
+			</span>
+		case models.StatusAvailable:
+			if tool.Position != models.PositionTopCassette || !tool.IsBound() {
+				<span class="badge badge-sm info">
+					Verfügbar
+				</span>
+			}
+		case models.StatusRegenerating:
+			<span class="badge badge-sm warning">
+				Regenerierung
+			</span>
+	}
+}

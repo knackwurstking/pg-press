@@ -1,0 +1,148 @@
+package components
+
+import (
+	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pgpress/utils"
+)
+
+type DialogEditToolProps struct {
+	Tool                *models.Tool
+	InputPosition       string
+	InputWidth          int
+	InputHeight         int
+	InputType           string
+	InputCode           string
+	InputPressSelection *models.PressNumber
+}
+
+templ DialogEditTool(props *DialogEditToolProps) {
+	{{
+		baseType := "POST"
+		baseHref := utils.HXPostToolEditDialog()
+		submitButtonText := "Erstellen"
+
+		if props.Tool != nil && props.Tool.ID > 0 {
+			baseType = "PUT"
+			baseHref = utils.HXPutToolEditDialog(props.Tool.ID)
+			submitButtonText = "Aktualisieren"
+		}
+	}}
+	@BaseDialog(BaseDialogProps{
+		Type:             baseType,
+		Href:             baseHref,
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: submitButtonText,
+	}) {
+		<div class="flex flex-row gap flex-wrap justify-between items-center">
+			<div class="flex flex-col gap-0">
+				<label for="position">Position</label>
+				<select id="position" name="position" required>
+					<option value="" if props.InputPosition == "" {
+	selected
+}>
+						Position auswählen
+					</option>
+					<option value={ models.PositionTop } if models.Position(props.InputPosition) == models.PositionTop {
+	selected
+}>
+						Oberteil
+					</option>
+					<option value={ models.PositionBottom } if models.Position(props.InputPosition) == models.PositionBottom {
+	selected
+}>
+						Unterteil
+					</option>
+					<option value={ models.PositionTopCassette } if models.Position(props.InputPosition) == models.PositionTopCassette {
+	selected
+}>
+						Kassette
+					</option>
+				</select>
+			</div>
+			<div class="flex flex-col gap-0 w-fit">
+				<label for="pressSelection">Presse</label>
+				<select id="pressSelection" name="press-selection">
+					<option value="" if !models.IsValidPressNumber(props.InputPressSelection) {
+	selected
+}>
+						Nicht Eingebaut
+					</option>
+					<option value="0" if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 0 {
+	selected
+}>
+						Presse 0
+					</option>
+					<option value="2" if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 2 {
+	selected
+}>
+						Presse 2
+					</option>
+					<option value="3" if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 3 {
+	selected
+}>
+						Presse 3
+					</option>
+					<option value="4" if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 4 {
+	selected
+}>
+						Presse 4
+					</option>
+					<option value="5" if models.IsValidPressNumber(props.InputPressSelection) && *props.InputPressSelection == 5 {
+	selected
+}>
+						Presse 5
+					</option>
+				</select>
+			</div>
+		</div>
+		<div class="flex flex-col gap-0">
+			<label>Format</label>
+			<div class="flex gap-sm">
+				<input
+					type="number"
+					id="width"
+					name="width"
+					class="w-full"
+					placeholder="z.B. 120"
+					if props.InputWidth != 0 {
+						value={ props.InputWidth }
+					}
+					required
+				/>
+				<span class="text-xl" style="margin: auto 0;">x</span>
+				<input
+					type="number"
+					id="height"
+					name="height"
+					class="w-full"
+					placeholder="z.B. 60"
+					if props.InputHeight != 0 {
+						value={ props.InputHeight }
+					}
+					required
+				/>
+			</div>
+		</div>
+		<div class="flex flex-col gap-0">
+			<label for="type">Typ</label>
+			<input
+				type="text"
+				id="type"
+				name="type"
+				placeholder="z.B. MASS, FC, GTC"
+				value={ props.InputType }
+			/>
+		</div>
+		<div class="flex flex-col gap-0">
+			<label for="code">Code</label>
+			<input
+				type="text"
+				id="code"
+				name="code"
+				placeholder="z.B. G01, G02, XXL01, 3573"
+				value={ props.InputCode }
+				required
+			/>
+		</div>
+	}
+}

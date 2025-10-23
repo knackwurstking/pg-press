@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pgpress/env"
 	"github.com/knackwurstking/pgpress/errors"
 	"github.com/knackwurstking/pgpress/models"
 	"github.com/labstack/echo/v4"
@@ -132,4 +133,12 @@ func SanitizeFilename(filename string) string {
 	}
 
 	return filename
+}
+
+func SetHXTrigger(c echo.Context, events ...string) {
+	c.Response().Header().Set("HX-Trigger", strings.Join(events, ", "))
+}
+
+func SetHXRedirect(c echo.Context, path string) {
+	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+path)
 }

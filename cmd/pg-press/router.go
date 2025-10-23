@@ -27,9 +27,9 @@ func Serve(e *echo.Echo, r *services.Registry) {
 	handlers.NewMetalSheets(r).RegisterRoutes(e)
 	handlers.NewUmbau(r).RegisterRoutes(e)
 	handlers.NewTroubleReports(r).RegisterRoutes(e)
+	handlers.NewTools(r).RegisterRoutes(e)
 
-	//tools.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
-	//tool.NewRoutes(db).RegisterRoutes(e)
+	//tool.NewRoutes(db).RegisterRoutes(e) // TODO: Continue here
 	//press.NewRoutes(db).RegisterRoutes(e)
 }
 
