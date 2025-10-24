@@ -70,6 +70,189 @@ func (s *PressCycles) Get(id int64) (*models.Cycle, error) {
 	return cycle, nil
 }
 
+// Cycle Calculations
+
+// GetPartialCycles calculates the partial cycles for a given cycle
+func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
+	if err := cycle.Validate(); err != nil {
+		s.Log.Error("Invalid cycle for partial calculation: %v", err)
+		return cycle.TotalCycles
+	}
+
+	query := s.buildPartialCyclesQuery(cycle.ToolPosition)
+	args := s.buildPartialCyclesArgs(cycle)
+
+	var previousTotalCycles int64
+	if err := s.DB.QueryRow(query, args...).Scan(&previousTotalCycles); err != nil {
+		if err != sql.ErrNoRows {
+			s.Log.Error("Failed to get previous total cycles: %v", err)
+		}
+		return cycle.TotalCycles
+	}
+
+	return cycle.TotalCycles - previousTotalCycles
+}
+
+// Query Methods
+
+// GetLastToolCycle retrieves the most recent cycle for a specific tool
+func (s *PressCycles) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
+	s.Log.Debug("Getting last press cycle for tool: %d", toolID)
+
+	query := fmt.Sprintf(`
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM %s
+		WHERE tool_id = ?
+		ORDER BY date DESC
+		LIMIT 1
+	`, TableNamePressCycles)
+
+	row := s.DB.QueryRow(query, toolID)
+	cycle, err := ScanSingleRow(row, scanCycle)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError(fmt.Sprintf("No cycles found for tool %d", toolID))
+		}
+		return nil, err
+	}
+
+	return cycle, nil
+}
+
+// GetPressCyclesForTool retrieves all cycles for a specific tool
+func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
+	s.Log.Debug("Getting press cycles for tool: %d", toolID)
+
+	query := fmt.Sprintf(`
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM %s
+		WHERE tool_id = ?
+		ORDER BY date DESC
+	`, TableNamePressCycles)
+
+	rows, err := s.DB.Query(query, toolID)
+	if err != nil {
+		return nil, s.GetSelectError(err)
+	}
+	defer rows.Close()
+
+	cycles, err := ScanRows(rows, scanCycle)
+	if err != nil {
+		return nil, err
+	}
+
+	cycles = s.injectPartialCycles(cycles)
+
+	return cycles, nil
+}
+
+// GetPressCycles retrieves cycles for a specific press with optional pagination
+func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
+	s.Log.Debug("Getting press cycles for press: %d, limit: %v, offset: %v", pressNumber, limit, offset)
+
+	query := fmt.Sprintf(`
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM %s
+		WHERE press_number = ?
+		ORDER BY total_cycles DESC
+	`, TableNamePressCycles)
+
+	args := []any{pressNumber}
+	query = s.addPaginationToQuery(query, limit, offset, &args)
+
+	rows, err := s.DB.Query(query, args...)
+	if err != nil {
+		return nil, s.GetSelectError(err)
+	}
+	defer rows.Close()
+
+	cycles, err := ScanRows(rows, scanCycle)
+	if err != nil {
+		return nil, err
+	}
+
+	cycles = s.injectPartialCycles(cycles)
+
+	return cycles, nil
+}
+
+// Summary Data
+
+// GetCycleSummaryData retrieves complete cycle summary data for a press
+func (s *PressCycles) GetCycleSummaryData(
+	pressNumber models.PressNumber,
+) ([]*models.Cycle, map[int64]*models.Tool, map[int64]*models.User, error) {
+	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
+
+	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to get cycles for press %d: %w", pressNumber, err)
+	}
+
+	tools, err := s.Registry.Tools.List()
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to get tools: %w", err)
+	}
+
+	toolsMap := make(map[int64]*models.Tool, len(tools))
+	for _, tool := range tools {
+		toolsMap[tool.ID] = tool
+	}
+
+	users, err := s.Registry.Users.List()
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to get users: %w", err)
+	}
+
+	usersMap := make(map[int64]*models.User, len(users))
+	for _, u := range users {
+		usersMap[u.TelegramID] = u
+	}
+
+	return cycles, toolsMap, usersMap, nil
+}
+
+// GetCycleSummaryStats calculates statistics from cycles data
+func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
+	totalCycles, totalPartialCycles, activeToolsCount, entriesCount int64,
+) {
+	s.Log.Debug("Calculating cycle summary stats")
+
+	if cycles == nil {
+		s.Log.Error("Cannot calculate stats from nil cycles data")
+		return 0, 0, 0, 0
+	}
+
+	activeTools := make(map[int64]bool)
+
+	for _, cycle := range cycles {
+		if cycle.TotalCycles > totalCycles {
+			totalCycles = cycle.TotalCycles
+		}
+		totalPartialCycles += cycle.PartialCycles
+		activeTools[cycle.ToolID] = true
+	}
+
+	return totalCycles, totalPartialCycles, int64(len(activeTools)), int64(len(cycles))
+}
+
+// Tool Summaries
+
+// GetToolSummaries creates consolidated tool summaries with start/end dates
+func (s *PressCycles) GetToolSummaries(
+	cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
+) ([]*models.ToolSummary, error) {
+	s.Log.Debug("Creating tool summaries from cycles data")
+
+	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
+	s.sortToolSummariesChronologically(toolSummaries)
+	consolidatedSummaries := s.consolidateToolSummaries(toolSummaries)
+	s.fixToolSummaryStartDates(consolidatedSummaries)
+	s.sortToolSummariesByCycles(consolidatedSummaries)
+
+	return consolidatedSummaries, nil
+}
+
 // List retrieves all press cycles
 func (s *PressCycles) List() ([]*models.Cycle, error) {
 	s.Log.Debug("Listing press cycles")
@@ -185,29 +368,6 @@ func (s *PressCycles) Delete(id int64) error {
 	return s.GetDeleteError(err)
 }
 
-// Cycle Calculations
-
-// GetPartialCycles calculates the partial cycles for a given cycle
-func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
-	if err := cycle.Validate(); err != nil {
-		s.Log.Error("Invalid cycle for partial calculation: %v", err)
-		return cycle.TotalCycles
-	}
-
-	query := s.buildPartialCyclesQuery(cycle.ToolPosition)
-	args := s.buildPartialCyclesArgs(cycle)
-
-	var previousTotalCycles int64
-	if err := s.DB.QueryRow(query, args...).Scan(&previousTotalCycles); err != nil {
-		if err != sql.ErrNoRows {
-			s.Log.Error("Failed to get previous total cycles: %v", err)
-		}
-		return cycle.TotalCycles
-	}
-
-	return cycle.TotalCycles - previousTotalCycles
-}
-
 func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
 	baseQuery := `
 		SELECT total_cycles
@@ -238,82 +398,6 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
 	return args
 }
 
-// Query Methods
-
-// GetLastToolCycle retrieves the most recent cycle for a specific tool
-func (s *PressCycles) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
-	s.Log.Debug("Getting last press cycle for tool: %d", toolID)
-
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE tool_id = ?
-		ORDER BY date DESC
-		LIMIT 1
-	`, TableNamePressCycles)
-
-	row := s.DB.QueryRow(query, toolID)
-	cycle, err := ScanSingleRow(row, scanCycle)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("No cycles found for tool %d", toolID))
-		}
-		return nil, err
-	}
-
-	return cycle, nil
-}
-
-// GetPressCyclesForTool retrieves all cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
-	s.Log.Debug("Getting press cycles for tool: %d", toolID)
-
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE tool_id = ?
-		ORDER BY date DESC
-	`, TableNamePressCycles)
-
-	rows, err := s.DB.Query(query, toolID)
-	if err != nil {
-		return nil, s.GetSelectError(err)
-	}
-	defer rows.Close()
-
-	cycles, err := ScanRows(rows, scanCycle)
-	if err != nil {
-		return nil, err
-	}
-
-	cycles = s.injectPartialCycles(cycles)
-
-	return cycles, nil
-}
-
-// GetPressCycles retrieves cycles for a specific press with optional pagination
-func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
-	s.Log.Debug("Getting press cycles for press: %d, limit: %v, offset: %v", pressNumber, limit, offset)
-
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE press_number = ?
-		ORDER BY total_cycles DESC
-	`, TableNamePressCycles)
-
-	args := []any{pressNumber}
-	query = s.addPaginationToQuery(query, limit, offset, &args)
-
-	rows, err := s.DB.Query(query, args...)
-	if err != nil {
-		return nil, s.GetSelectError(err)
-	}
-	defer rows.Close()
-
-	return ScanRows(rows, scanCycle)
-}
-
 func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int, args *[]any) string {
 	if limit != nil {
 		query += " LIMIT ?"
@@ -327,83 +411,6 @@ func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int
 		*args = append(*args, *offset)
 	}
 	return query
-}
-
-// Summary Data
-
-// GetCycleSummaryData retrieves complete cycle summary data for a press
-func (s *PressCycles) GetCycleSummaryData(
-	pressNumber models.PressNumber,
-) ([]*models.Cycle, map[int64]*models.Tool, map[int64]*models.User, error) {
-	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
-
-	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get cycles for press %d: %w", pressNumber, err)
-	}
-
-	tools, err := s.Registry.Tools.List()
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get tools: %w", err)
-	}
-
-	toolsMap := make(map[int64]*models.Tool, len(tools))
-	for _, tool := range tools {
-		toolsMap[tool.ID] = tool
-	}
-
-	users, err := s.Registry.Users.List()
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get users: %w", err)
-	}
-
-	usersMap := make(map[int64]*models.User, len(users))
-	for _, u := range users {
-		usersMap[u.TelegramID] = u
-	}
-
-	return cycles, toolsMap, usersMap, nil
-}
-
-// GetCycleSummaryStats calculates statistics from cycles data
-func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
-	totalCycles, totalPartialCycles, activeToolsCount, entriesCount int64,
-) {
-	s.Log.Debug("Calculating cycle summary stats")
-
-	if cycles == nil {
-		s.Log.Error("Cannot calculate stats from nil cycles data")
-		return 0, 0, 0, 0
-	}
-
-	activeTools := make(map[int64]bool)
-
-	for _, cycle := range cycles {
-		if cycle.TotalCycles > totalCycles {
-			totalCycles = cycle.TotalCycles
-		}
-		totalPartialCycles += cycle.PartialCycles
-		activeTools[cycle.ToolID] = true
-	}
-
-	return totalCycles, totalPartialCycles, int64(len(activeTools)), int64(len(cycles))
-}
-
-// Tool Summaries
-
-// GetToolSummaries creates consolidated tool summaries with start/end dates
-func (s *PressCycles) GetToolSummaries(
-	cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
-) ([]*models.ToolSummary, error) {
-	s.Log.Debug("Creating tool summaries from cycles data")
-
-	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
-	s.sortToolSummariesChronologically(toolSummaries)
-	consolidatedSummaries := s.consolidateToolSummaries(toolSummaries)
-	s.fixToolSummaryStartDates(consolidatedSummaries)
-	s.sortToolSummariesByCycles(consolidatedSummaries)
-
-	return consolidatedSummaries, nil
 }
 
 func (s *PressCycles) createInitialSummaries(cycles []*models.Cycle, toolsMap map[int64]*models.Tool) []*models.ToolSummary {
