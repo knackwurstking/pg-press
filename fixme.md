@@ -4,3 +4,4 @@
 - [x] Fix: `failed to delete note: database delete failed: %!w(<nil>)` after try to delete a note
 - [x] Fix: `failed to update press cycle: database update failed: %!w(<nil>)` after edit an existing cycle via the tool page
 - [x] Fix: Partial Cycles in the pdf summary is still zero
+- [ ] Fix: When try to delete a tool cycle, the server seems to check the wrong tool for regenerations
