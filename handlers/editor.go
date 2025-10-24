@@ -139,7 +139,7 @@ func (h *Editor) loadExistingContent(options *components.PageEditorOptions) erro
 	case "troublereport":
 		tr, err := h.Registry.TroubleReports.Get(options.ID)
 		if err != nil {
-			return fmt.Errorf("failed to get trouble report: %w", err)
+			return fmt.Errorf("failed to get trouble report: %v", err)
 		}
 		options.Title = tr.Title
 		options.Content = tr.Content
@@ -171,7 +171,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			// Update existing trouble report
 			tr, err := h.Registry.TroubleReports.Get(id)
 			if err != nil {
-				return fmt.Errorf("failed to get trouble report: %w", err)
+				return fmt.Errorf("failed to get trouble report: %v", err)
 			}
 
 			// Filter out existing and new attachments
@@ -192,7 +192,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 
 			err = h.Registry.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
 			if err != nil {
-				return fmt.Errorf("failed to update trouble report: %w", err)
+				return fmt.Errorf("failed to update trouble report: %v", err)
 			}
 
 			// Create feed entry
@@ -214,7 +214,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 
 			err := h.Registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
 			if err != nil {
-				return fmt.Errorf("failed to add trouble report: %w", err)
+				return fmt.Errorf("failed to add trouble report: %v", err)
 			}
 
 			// Create feed entry
@@ -271,7 +271,7 @@ func (h *Editor) processAttachments(c echo.Context) ([]*models.Attachment, error
 
 		attachment, err := h.processFileUpload(fileHeader)
 		if err != nil {
-			return nil, fmt.Errorf("failed to process file %s: %w", fileHeader.Filename, err)
+			return nil, fmt.Errorf("failed to process file %s: %v", fileHeader.Filename, err)
 		}
 
 		attachments = append(attachments, attachment)
@@ -284,7 +284,7 @@ func (h *Editor) processAttachments(c echo.Context) ([]*models.Attachment, error
 func (h *Editor) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
+		return nil, fmt.Errorf("failed to open file: %v", err)
 	}
 	defer file.Close()
 
@@ -292,7 +292,7 @@ func (h *Editor) processFileUpload(fileHeader *multipart.FileHeader) (*models.At
 	data := make([]byte, fileHeader.Size)
 	_, err = file.Read(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
+		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
 
 	// Get MIME type

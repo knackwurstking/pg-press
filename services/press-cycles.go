@@ -86,7 +86,13 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanCycle)
+	cycles, err := ScanRows(rows, scanCycle)
+	if err != nil {
+		return nil, err
+	}
+
+	cycles = s.injectPartialCycles(cycles)
+	return cycles, nil
 }
 
 // Add creates a new press cycle
@@ -275,7 +281,14 @@ func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, erro
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanCycle)
+	cycles, err := ScanRows(rows, scanCycle)
+	if err != nil {
+		return nil, err
+	}
+
+	cycles = s.injectPartialCycles(cycles)
+
+	return cycles, nil
 }
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
@@ -758,6 +771,14 @@ func (s *PressCycles) containsInstance(instances []*models.OverlappingToolInstan
 		}
 	}
 	return false
+}
+
+func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) []*models.Cycle {
+	for _, cycle := range cycles {
+		cycle.PartialCycles = s.GetPartialCycles(cycle)
+	}
+
+	return cycles
 }
 
 // Scan Functions

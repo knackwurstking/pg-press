@@ -1,4 +1,5 @@
 - [ ] Fix: After tool edit (put) the page does not reload (tool page) - ex.: page title not changing
-- [ ] Fix: Partial cycles seams to be messed up (not working at all, always zero)
-- [ ] Fix: `failed to update note: database update failed: %!w(<nil>)` after try to change a notes content
-- [ ] Fix: `failed to delete note: database delete failed: %!w(<nil>)` after try to delete a note
+- [x] Fix: Partial cycles seams to be messed up (not working at all, always zero)
+- [x] Fix: `failed to update note: database update failed: %!w(<nil>)` after try to change a notes content
+- [x] Fix: `failed to delete note: database delete failed: %!w(<nil>)` after try to delete a note
+- [x] Fix: `failed to update press cycle: database update failed: %!w(<nil>)` after edit an existing cycle via the tool page

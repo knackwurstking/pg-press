@@ -187,7 +187,7 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 	tool.Binding = &targetID
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(c, tool)
+	toolsForBinding, err := h.getToolsForBinding(tool)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func (h *Tool) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(c, tool)
+	toolsForBinding, err := h.getToolsForBinding(tool)
 	if err != nil {
 		return err
 	}
@@ -307,7 +307,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	)
 
 	// Only get tools for binding if the tool has no binding
-	toolsForBinding, err := h.getToolsForBinding(c, tool)
+	toolsForBinding, err := h.getToolsForBinding(tool)
 	if err != nil {
 		return err
 	}
@@ -626,26 +626,6 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 	return nil
 }
 
-func (h *Tool) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
-	// Get regeneration for this tool
-	var startCycleID int64
-	if r, err := h.Registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
-		startCycleID = r.CycleID
-	}
-
-	var totalCycles int64
-
-	for _, cycle := range cycles {
-		if cycle.ID <= startCycleID {
-			continue
-		}
-
-		totalCycles += cycle.PartialCycles
-	}
-
-	return totalCycles
-}
-
 func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 	user, err := GetUserFromContext(c)
 	if err != nil {
@@ -917,7 +897,27 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-func (h *Tool) getToolsForBinding(c echo.Context, tool *models.Tool) ([]*models.Tool, error) {
+func (h *Tool) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
+	// Get regeneration for this tool
+	var startCycleID int64
+	if r, err := h.Registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
+		startCycleID = r.CycleID
+	}
+
+	var totalCycles int64
+
+	for _, cycle := range cycles {
+		if cycle.ID <= startCycleID {
+			continue
+		}
+
+		totalCycles += cycle.PartialCycles
+	}
+
+	return totalCycles
+}
+
+func (h *Tool) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) {
 	var filteredToolsForBinding []*models.Tool
 
 	if tool.Position != models.PositionTopCassette && tool.Position != models.PositionTop {

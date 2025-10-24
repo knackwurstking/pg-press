@@ -188,7 +188,7 @@ func scanAttachment(scanner Scannable) (*models.Attachment, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan attachment: %w", err)
+		return nil, fmt.Errorf("failed to scan attachment: %v", err)
 	}
 
 	attachment.ID = fmt.Sprintf("%d", id)
@@ -209,7 +209,7 @@ func scanAttachmentsIntoMap(rows *sql.Rows) (map[int64]*models.Attachment, error
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
+		return nil, fmt.Errorf("row iteration error: %v", err)
 	}
 
 	return resultMap, nil

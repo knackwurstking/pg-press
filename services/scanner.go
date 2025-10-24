@@ -17,7 +17,7 @@ func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %w", err)
+		return nil, fmt.Errorf("row iteration error: %v", err)
 	}
 
 	return results, nil
