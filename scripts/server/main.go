@@ -1,6 +1,6 @@
 package main
 
-// HowTo:
+// HowTo: (this will only work if the server is prefixed to "pg-press")
 //
 // First create a server log file from the journalctl command
 // `journalctl --user -u pg-press --output cat --no-tail > scripts/server/server.log`
