@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -114,9 +115,18 @@ func printReport(report map[string]int) {
 	// Header
 	fmt.Printf("\033[4mUser_Name%s => Count\033[0m\n", strings.Repeat(" ", maxSpacing-len("User_Name")))
 
+	// Convert map to string sorted via count
+	var users []string
+	for user := range report {
+		users = append(users, user)
+	}
+	sort.Slice(users, func(i, j int) bool {
+		return report[users[i]] > report[users[j]]
+	})
+
 	// Body
-	for user, count := range report {
-		fmt.Printf("%s%s => %d\n", user, strings.Repeat(" ", maxSpacing-len(user)), count)
+	for _, user := range users {
+		fmt.Printf("%s%s => %d\n", user, strings.Repeat(" ", maxSpacing-len(user)), report[user])
 	}
 }
 
@@ -126,19 +136,13 @@ func parseLogLine(text string) (*ParsedLogLine, error) {
 	// `2025/10/24 13:29:37 [Server] \x1b[42m\x1b[1m200\x1b[0m \x1b[34m\x1b[1mGET    \x1b[0m \x1b[4m\x1b[36m/pg-press/htmx/nav/feed-counter\x1b[0m (\x1b[37m61.8.145.9\x1b[0m) \x1b[1m\x1b[35m17.204537118s\x1b[0m User{ID: 284727649, Name: Celle [has API key`
 
 	// Find the server logs
-	regex, err := regexp.Compile(`\[Server\]\s.*[1-5][0-9][0-9].*`)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check with the regex the text content if it contains the server keyword
-	if !regex.MatchString(text) {
+	if !matchString(`\[Server\]\s.*[1-5][0-9][0-9].*`, text) {
 		return nil, nil
 	}
 
 	// Find the server path from this line with the server path prefix "pg-press"
 	// TODO: the hardcoded server path prefix is a problem, but for now it will do the job
-	regex, err = regexp.Compile(`\/pg-press\/[0-9a-zA-Z\/\-\.]+`)
+	regex, err := regexp.Compile(`\/pg-press\/[0-9a-zA-Z\/\-\.]+`)
 	if err != nil {
 		return nil, err
 	}
@@ -152,12 +156,7 @@ func parseLogLine(text string) (*ParsedLogLine, error) {
 	serverPath := matches[0]
 
 	// Filter out /htmx paths and paths containing dots
-	regex, err = regexp.Compile(`\/htmx|\.`)
-	if err != nil {
-		return nil, err
-	}
-
-	if regex.MatchString(serverPath) {
+	if matchString(`\/htmx|\.`, serverPath) {
 		return nil, nil
 	}
 
@@ -224,4 +223,14 @@ func parseUserFromLogLine(logLine string) (*User, error) {
 		TelegramID: telegramID,
 		Name:       userName,
 	}, nil
+}
+
+func matchString(regex, text string) bool {
+	r, err := regexp.Compile(regex)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+	}
+
+	// Check with the regex the text content if it contains the server keyword
+	return r.MatchString(text)
 }
