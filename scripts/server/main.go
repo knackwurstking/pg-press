@@ -1,5 +1,13 @@
 package main
 
+// HowTo:
+//
+// First create a server log file from the journalctl command
+// `journalctl --user -u pg-press --output cat --no-tail > scripts/server/server.log`
+//
+// Second run that thing
+// `go run scripts/server/main.go -log scripts/server/server.log`
+
 import (
 	"bufio"
 	"flag"
