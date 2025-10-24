@@ -1,0 +1,2 @@
+- [ ] Replace the datalist input elements with select elements for the "umbau" page
+- [ ] Also add some input handling for the "umbau" page select elements which will disable tools not possible to change, ex: if top tool is from format 100x100, bottom tool must be from format 100x100 too
