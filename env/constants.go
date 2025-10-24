@@ -17,5 +17,6 @@ const (
 	UserNameMinLength = 1
 	UserNameMaxLength = 100
 
-	HXGlobalTrigger = "pageLoaded"
+	HXGlobalTrigger        = "pageLoaded"
+	HXPageTool_ToolUpdated = "toolUpdated"
 )

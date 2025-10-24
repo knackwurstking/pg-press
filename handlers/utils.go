@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -155,4 +156,10 @@ func SetHXTrigger(c echo.Context, events ...string) {
 
 func SetHXRedirect(c echo.Context, path string) {
 	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+path)
+}
+
+// SetHXAfterSettle will set data passed to it as (json) data, which can be used to trigger client-side events after the response is settled.
+func SetHXAfterSettle(c echo.Context, data map[string]any) {
+	triggerDataJSON, _ := json.Marshal(data)
+	c.Response().Header().Set("HX-Trigger-After-Settle", string(triggerDataJSON))
 }

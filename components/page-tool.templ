@@ -15,16 +15,32 @@ type PageToolProps struct {
 }
 
 templ PageTool(props *PageToolProps) {
+	{{
+		pageTitle := fmt.Sprintf("PG Presse | %s %s",
+			props.ToolString, props.Position.GermanString())
+		appBarTitle := fmt.Sprintf("%s %s",
+			props.ToolString, props.Position.GermanString())
+	}}
 	@Layout(
 		LayoutOptions{
-			PageTitle: fmt.Sprintf("PG Presse | %s %s",
-				props.ToolString, props.Position.GermanString()),
-			AppBarTitle: fmt.Sprintf("%s %s",
-				props.ToolString, props.Position.GermanString()),
-			NavContent: pageTool_navContent(),
+			PageTitle:   pageTitle,
+			AppBarTitle: appBarTitle,
+			NavContent:  pageTool_navContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
+			<script>
+				var hxToolUpdated = '{{ env.HXPageTool_ToolUpdated }}'
+
+				// This will be called after submitting a tool change via the edit tool dialog on this page
+				htmx.on(hxToolUpdated, function(event) {
+					console.debug(`Got an hmtx:on event named "${hxToolUpdated}"`);
+
+					// Update the page title
+					document.querySelector("#page-title").textContent = event.detail.pageTitle;
+					document.querySelector("#app-bar-title").textContent = event.detail.appBarTitle;
+				});
+			</script>
 			@pageTool_sectionActions(props.User, props.ToolID)
 			<section
 				id="notes-section"

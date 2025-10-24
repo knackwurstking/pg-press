@@ -147,6 +147,16 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 	h.createToolFeed(user, tool, "Werkzeug aktualisiert")
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
+
+	SetHXAfterSettle(c, map[string]interface{}{
+		"toolUpdated": map[string]string{
+			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
+				tool.String(), tool.Position.GermanString()),
+			"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
+				tool.Position.GermanString()),
+		},
+	})
+
 	return nil
 }
 
