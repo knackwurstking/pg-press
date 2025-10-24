@@ -3,3 +3,4 @@
 - [x] Fix: `failed to update note: database update failed: %!w(<nil>)` after try to change a notes content
 - [x] Fix: `failed to delete note: database delete failed: %!w(<nil>)` after try to delete a note
 - [x] Fix: `failed to update press cycle: database update failed: %!w(<nil>)` after edit an existing cycle via the tool page
+- [ ] Fix: Partial Cycles in the pdf summary is still zero
