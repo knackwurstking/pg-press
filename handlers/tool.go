@@ -367,14 +367,14 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 	toolChangeMode := ParseQueryBool(c, "tool_change_mode")
 
 	if c.QueryParam("id") != "" {
-		cycleID, err := ParseQueryInt64(c, "id")
+		cycleIDQuery, err := ParseQueryInt64(c, "id")
 		if err != nil {
 			return HandleBadRequest(err, "failed to parse cycle ID")
 		}
-		props.CycleID = cycleID
+		props.CycleID = models.CycleID(cycleIDQuery)
 
 		// Get cycle data from the database
-		cycle, err := h.Registry.PressCycles.Get(cycleID)
+		cycle, err := h.Registry.PressCycles.Get(props.CycleID)
 		if err != nil {
 			return HandleError(err, "failed to load cycle data")
 		}
@@ -496,10 +496,11 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	cycleID, err := ParseQueryInt64(c, "id")
+	cycleIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse ID from query")
 	}
+	cycleID := models.CycleID(cycleIDQuery)
 
 	cycle, err := h.Registry.PressCycles.Get(cycleID)
 	if err != nil {
@@ -585,10 +586,11 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	cycleID, err := ParseQueryInt64(c, "id")
+	cycleIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse ID query")
 	}
+	cycleID := models.CycleID(cycleIDQuery)
 
 	// Get cycle data before deletion for the feed
 	cycle, err := h.Registry.PressCycles.Get(cycleID)
@@ -899,7 +901,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 
 func (h *Tool) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
 	// Get regeneration for this tool
-	var startCycleID int64
+	var startCycleID models.CycleID
 	if r, err := h.Registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
 		startCycleID = r.CycleID
 	}

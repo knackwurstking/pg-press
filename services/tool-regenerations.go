@@ -56,7 +56,7 @@ func (s *ToolRegenerations) Get(id int64) (*models.Regeneration, error) {
 	return regeneration, nil
 }
 
-func (s *ToolRegenerations) Add(toolID, cycleID int64, reason string, user *models.User) (int64, error) {
+func (s *ToolRegenerations) Add(toolID int64, cycleID models.CycleID, reason string, user *models.User) (int64, error) {
 	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, toolID, cycleID, reason)
 
@@ -233,7 +233,7 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.Regenerat
 	return regen, nil
 }
 
-func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID int64) (bool, error) {
+func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, error) {
 	s.Log.Debug("Checking if cycle has regenerations: %d", cycleID)
 
 	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableNameToolRegenerations)

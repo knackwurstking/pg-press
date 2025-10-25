@@ -48,7 +48,7 @@ func NewPressCycles(r *Registry) *PressCycles {
 // CRUD Operations
 
 // Get retrieves a press cycle by ID
-func (s *PressCycles) Get(id int64) (*models.Cycle, error) {
+func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
 	s.Log.Debug("Getting press cycle: %d", id)
 
 	query := fmt.Sprintf(`
@@ -279,7 +279,7 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 }
 
 // Add creates a new press cycle
-func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error) {
+func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, error) {
 	s.Log.Debug(
 		"Adding press cycle by %s: tool: %d, position: %s, press: %d, cycles: %d",
 		user.String(), cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
@@ -319,8 +319,8 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (int64, error)
 		return 0, s.GetInsertError(err)
 	}
 
-	cycle.ID = id
-	return id, nil
+	cycle.ID = models.CycleID(id)
+	return cycle.ID, nil
 }
 
 // Update modifies an existing press cycle
@@ -359,7 +359,7 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 }
 
 // Delete removes a press cycle from the database
-func (s *PressCycles) Delete(id int64) error {
+func (s *PressCycles) Delete(id models.CycleID) error {
 	s.Log.Debug("Deleting press cycle: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)

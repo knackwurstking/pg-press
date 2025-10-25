@@ -4,9 +4,10 @@ import (
 	"time"
 )
 
-// TODO: Implement a custom Cycle ID type [WIP], tool ids will follow at a later stage
+type CycleID int64
+
 type Cycle struct {
-	ID            int64       `json:"id"`
+	ID            CycleID     `json:"id"`
 	PressNumber   PressNumber `json:"press_number"`
 	ToolID        int64       `json:"tool_id"`
 	ToolPosition  Position    `json:"tool_position"`
@@ -27,7 +28,7 @@ func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycle
 	}
 }
 
-func NewCycleWithID(id int64, press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
+func NewCycleWithID(id CycleID, press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
 	return &Cycle{
 		ID:           id,
 		PressNumber:  press,

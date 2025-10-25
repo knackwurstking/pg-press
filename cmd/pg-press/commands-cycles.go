@@ -96,29 +96,31 @@ func deleteCycleCommand() cli.Command {
 		Usage: cli.Usage("Delete a cycle by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			cycleID := cli.Int64Arg(cmd, "cycle-id", cli.Required)
+			cycleIDArg := cli.Int64Arg(cmd, "cycle-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					cycleID := models.CycleID(*cycleIDArg)
+
 					// First check if there are any regenerations that reference this cycle
-					hasRegenerations, err := r.ToolRegenerations.HasRegenerationsForCycle(*cycleID)
+					hasRegenerations, err := r.ToolRegenerations.HasRegenerationsForCycle(cycleID)
 					if err != nil {
 						return fmt.Errorf("failed to check for regenerations: %v", err)
 					}
 
 					if hasRegenerations {
-						return fmt.Errorf("cannot delete cycle %d: there are regenerations that reference this cycle. Delete the regenerations first", *cycleID)
+						return fmt.Errorf("cannot delete cycle %d: there are regenerations that reference this cycle. Delete the regenerations first", cycleID)
 					}
 
-					fmt.Printf("Deleting cycle %d...\n", *cycleID)
+					fmt.Printf("Deleting cycle %d...\n", cycleID)
 
 					// Delete cycle
-					err = r.PressCycles.Delete(*cycleID)
+					err = r.PressCycles.Delete(cycleID)
 					if err != nil {
 						return fmt.Errorf("failed to delete cycle: %v", err)
 					}
 
-					fmt.Printf("Successfully deleted cycle %d.\n", *cycleID)
+					fmt.Printf("Successfully deleted cycle %d.\n", cycleID)
 					return nil
 				})
 			}

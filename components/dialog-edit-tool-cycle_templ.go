@@ -19,7 +19,7 @@ import (
 
 type DialogEditToolCycleProps struct {
 	Tool             *models.Tool
-	CycleID          int64
+	CycleID          models.CycleID
 	InputTotalCycles int64
 	InputPressNumber *models.PressNumber
 	OriginalDate     *time.Time
