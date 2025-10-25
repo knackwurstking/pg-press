@@ -4,3 +4,4 @@
 - [ ] Try to keep the details open state while refreshing somehow.
 - [ ] When the filter input is in focus, try to use `scrollIntoView` on each input change.
 - [ ] Improve the notes flex grid, (grow, shrink settings)
+- [ ] Create helpers for resolved data types (tool, regeneration, ...)

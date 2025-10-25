@@ -222,7 +222,7 @@ templ pagePress_toolNotesSection(notes []*models.Note, tools []*models.Tool) {
 	</section>
 }
 
-templ PagePress_ActiveToolsSection(tools []*models.Tool, press models.PressNumber) {
+templ PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.PressNumber) {
 	<div class="flex flex-col gap">
 		if len(tools) == 0 {
 			<div class="text-center text-muted">
@@ -230,7 +230,7 @@ templ PagePress_ActiveToolsSection(tools []*models.Tool, press models.PressNumbe
 			</div>
 		} else {
 			for _, t := range tools {
-				@ToolAnchor(models.NewResolvedTool(t, nil, nil), nil)
+				@ToolAnchor(t, nil)
 			}
 		}
 	</div>

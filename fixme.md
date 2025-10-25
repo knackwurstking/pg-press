@@ -6,4 +6,4 @@
 - [x] Partial Cycles in the PDF summary remain at zero.
 - [x] When submitting an "umbau", I receive the error `failed to unassign tool 1: validation error: invalid press number: 0`. The tool remains unchanged, but a new entry is added to the cycles.
 - [x] Feeds counter seems to be missing.
-- [ ] Fix the "Ooops, There Is No Binding Tool" message on the press page.
+- [x] Fix the "Ooops, There Is No Binding Tool" message on the press page.

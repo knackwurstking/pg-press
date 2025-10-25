@@ -71,12 +71,22 @@ func (h *Press) HTMXGetPressActiveTools(c echo.Context) error {
 	}
 
 	// Get ordered tools for this press with validation
-	sortedTools, _, err := h.getOrderedToolsForPress(press)
+	tools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
 		return HandleError(err, "failed to get tools for press")
 	}
 
-	activeToolsSection := components.PagePress_ActiveToolsSection(sortedTools, press)
+	// Resolve tools, notes not needed, only the binding tool
+	resolvedTools := make([]*models.ResolvedTool, 0, len(tools))
+	for _, tool := range tools {
+		var bindingTool *models.Tool
+		if tool.Binding != nil {
+			bindingTool, _ = h.Registry.Tools.Get(*tool.Binding)
+		}
+		resolvedTools = append(resolvedTools, models.NewResolvedTool(tool, bindingTool, nil))
+	}
+
+	activeToolsSection := components.PagePress_ActiveToolsSection(resolvedTools, press)
 	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return HandleError(err, "failed to render active tools section")
 	}
