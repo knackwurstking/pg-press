@@ -2,3 +2,4 @@
 - [ ] Also add some input handling for the "umbau" page select elements which will disable tools not possible to change, ex: if top tool is from format 100x100, bottom tool must be from format 100x100 too
 - [ ] Make the notes page reload content after editing or deleting a note
 - [ ] Try keep the details open state while refreshing somehow
+- [ ] When the filter input is in focus, try to use scroll into view on each input change
