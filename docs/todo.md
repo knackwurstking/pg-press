@@ -7,6 +7,7 @@
   - Feed IDs
   - Metal Sheet IDs
   - Modification IDs
+  - Note IDs
 
 - [ ] Make the notes page reload content after editing or deleting a note.
 - [ ] Try to keep the details open state while refreshing somehow.

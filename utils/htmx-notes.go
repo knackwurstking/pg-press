@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pgpress/models"
 )
 
-func HXGetNotesEditDialog(noteID *int64, linkToTables ...string) templ.SafeURL {
+func HXGetNotesEditDialog(noteID *models.NoteID, linkToTables ...string) templ.SafeURL {
 	params := make(map[string]string)
 
 	if noteID != nil {
@@ -31,7 +32,7 @@ func HXPostNotesEditDialog(linkToTables ...string) templ.SafeURL {
 	return buildURL("/htmx/notes/edit", params)
 }
 
-func HXPutNotesEditDialog(noteID int64, linkToTables ...string) templ.SafeURL {
+func HXPutNotesEditDialog(noteID models.NoteID, linkToTables ...string) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", noteID),
 	}
@@ -43,7 +44,7 @@ func HXPutNotesEditDialog(noteID int64, linkToTables ...string) templ.SafeURL {
 	return buildURL("/htmx/notes/edit", params)
 }
 
-func HXDeleteNote(noteID int64) templ.SafeURL {
+func HXDeleteNote(noteID models.NoteID) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", noteID),
 	}

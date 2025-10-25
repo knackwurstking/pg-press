@@ -15,6 +15,8 @@ const (
 	BROKEN
 )
 
+type NoteID int64
+
 type Level int
 
 type Linked struct {
@@ -23,7 +25,7 @@ type Linked struct {
 }
 
 type Note struct {
-	ID        int64     `json:"id"`
+	ID        NoteID    `json:"id"`
 	Level     Level     `json:"level"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`

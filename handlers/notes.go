@@ -112,7 +112,9 @@ func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
 	}
 
 	// Check if we're editing an existing note
-	if noteID, _ := ParseQueryInt64(c, "id"); noteID > 0 {
+	if idq, _ := ParseQueryInt64(c, "id"); idq > 0 {
+		noteID := models.NoteID(idq)
+
 		h.Log.Debug("Opening edit dialog for note %d", noteID)
 
 		note, err := h.Registry.Notes.Get(noteID)
@@ -180,10 +182,11 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	noteID, err := ParseQueryInt64(c, "id")
+	idq, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse note ID")
 	}
+	noteID := models.NoteID(idq)
 
 	h.Log.Debug("User %s updating note %d", user.Name, noteID)
 
@@ -229,10 +232,11 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	noteID, err := ParseQueryInt64(c, "id")
+	idq, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse note ID")
 	}
+	noteID := models.NoteID(idq)
 
 	// Delete the note
 	if err := h.Registry.Notes.Delete(noteID); err != nil {

@@ -53,7 +53,7 @@ func (n *Notes) List() ([]*models.Note, error) {
 	return ScanRows(rows, scanNote)
 }
 
-func (n *Notes) Get(id int64) (*models.Note, error) {
+func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
 	n.Log.Debug("Getting note with ID %d", id)
 
 	query := fmt.Sprintf(
@@ -67,7 +67,7 @@ func (n *Notes) Get(id int64) (*models.Note, error) {
 	return ScanSingleRow(row, scanNote)
 }
 
-func (n *Notes) GetByIDs(ids []int64) ([]*models.Note, error) {
+func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
 	n.Log.Debug("Getting notes by IDs (%d): %#v", len(ids), ids)
 
 	if len(ids) == 0 {
@@ -140,7 +140,7 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
 	return ScanRows(rows, scanNote)
 }
 
-func (n *Notes) Add(note *models.Note) (int64, error) {
+func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
 	n.Log.Debug("Adding note: level: %d", note.Level)
 
 	if err := note.Validate(); err != nil {
@@ -157,7 +157,12 @@ func (n *Notes) Add(note *models.Note) (int64, error) {
 		return 0, n.GetInsertError(err)
 	}
 
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, n.GetInsertError(err)
+	}
+
+	return models.NoteID(id), nil
 }
 
 func (n *Notes) Update(note *models.Note) error {
@@ -176,7 +181,7 @@ func (n *Notes) Update(note *models.Note) error {
 	return n.GetUpdateError(err)
 }
 
-func (n *Notes) Delete(id int64) error {
+func (n *Notes) Delete(id models.NoteID) error {
 	n.Log.Debug("Deleting note for ID: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
@@ -196,8 +201,8 @@ func scanNote(scanner Scannable) (*models.Note, error) {
 	return note, nil
 }
 
-func scanNotesIntoMap(rows *sql.Rows) (map[int64]*models.Note, error) {
-	resultMap := make(map[int64]*models.Note)
+func scanNotesIntoMap(rows *sql.Rows) (map[models.NoteID]*models.Note, error) {
+	resultMap := make(map[models.NoteID]*models.Note)
 
 	for rows.Next() {
 		note, err := scanNote(rows)
