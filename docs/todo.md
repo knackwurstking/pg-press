@@ -8,7 +8,9 @@
   - Metal Sheet IDs
   - Modification IDs
   - Note IDs
+  - Regeneration IDs
 
+- [ ] Create a new feed entry after a regeneration gets removed
 - [ ] Make the notes page reload content after editing or deleting a note.
 - [ ] Try to keep the details open state while refreshing somehow.
 - [ ] When the filter input is in focus, try to use `scrollIntoView` on each input change.
