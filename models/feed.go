@@ -8,9 +8,11 @@ import (
 	"github.com/knackwurstking/pgpress/errors"
 )
 
+type FeedID int64
+
 // Feed represents a simple feed entry with just title, content, and user info.
 type Feed struct {
-	ID        int64  `json:"id"`
+	ID        FeedID `json:"id"`
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	UserID    int64  `json:"user_id"`

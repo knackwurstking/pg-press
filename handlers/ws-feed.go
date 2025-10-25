@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pgpress/components"
 	"github.com/knackwurstking/pgpress/env"
 	"github.com/knackwurstking/pgpress/logger"
+	"github.com/knackwurstking/pgpress/models"
 	"github.com/knackwurstking/pgpress/services"
 
 	"golang.org/x/net/websocket"
@@ -75,7 +76,7 @@ func (fh *FeedHandler) Start(ctx context.Context) {
 }
 
 // RegisterConnection adds a new WebSocket connection to the manager
-func (fh *FeedHandler) RegisterConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
+func (fh *FeedHandler) RegisterConnection(userID int64, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
 	fh.log.Info("Registering new connection for user ID %d", userID)
 	feedConn := NewFeedConnection(userID, lastFeed, conn)
 	fh.register <- feedConn
@@ -156,7 +157,7 @@ func (fh *FeedHandler) sendUpdate(conn *FeedConnection) {
 	}
 }
 
-func (fh *FeedHandler) renderFeedCounter(userLastFeed int64) ([]byte, error) {
+func (fh *FeedHandler) renderFeedCounter(userLastFeed models.FeedID) ([]byte, error) {
 	feeds, err := fh.db.Feeds.ListRange(0, env.MaxFeedsPerPage)
 	if err != nil {
 		return nil, err
@@ -195,7 +196,7 @@ func (fh *FeedHandler) closeAllConnections() {
 // FeedConnection represents a WebSocket connection for feed updates
 type FeedConnection struct {
 	UserID   int64
-	LastFeed int64
+	LastFeed models.FeedID
 	conn     *websocket.Conn
 	send     chan []byte
 	done     chan struct{}
@@ -203,7 +204,7 @@ type FeedConnection struct {
 }
 
 // NewFeedConnection creates a new feed connection
-func NewFeedConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
+func NewFeedConnection(userID int64, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
 	return &FeedConnection{
 		UserID:   userID,
 		LastFeed: lastFeed,

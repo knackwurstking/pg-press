@@ -23,7 +23,7 @@ type User struct {
 	TelegramID int64  `json:"telegram_id"`
 	Name       string `json:"user_name"`
 	ApiKey     string `json:"api_key"`
-	LastFeed   int64  `json:"last_feed"`
+	LastFeed   FeedID `json:"last_feed"`
 }
 
 // NewUser creates a new user with the provided details
@@ -41,7 +41,7 @@ func NewUserFromInterfaceMap(modified map[string]any) *User {
 		TelegramID: int64(modified["telegram_id"].(float64)),
 		Name:       modified["user_name"].(string),
 		ApiKey:     modified["api_key"].(string),
-		LastFeed:   int64(modified["last_feed"].(float64)),
+		LastFeed:   FeedID(modified["last_feed"].(float64)),
 	}
 
 	return user

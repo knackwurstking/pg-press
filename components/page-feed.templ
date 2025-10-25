@@ -27,7 +27,7 @@ templ PageFeed() {
 	}
 }
 
-templ FeedsList(feeds []*models.Feed, lastFeedID int64, userMap map[int64]*models.User) {
+templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[int64]*models.User) {
 	if len(feeds) > 0 {
 		<ul id="data">
 			for _, feed := range feeds {

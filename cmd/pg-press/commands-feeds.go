@@ -237,13 +237,13 @@ func removeFeedsByIDs(r *services.Registry, ids []string) error {
 	var removed int
 
 	for _, idStr := range ids {
-		id, err := strconv.Atoi(idStr)
+		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
 			failed = append(failed, fmt.Sprintf("invalid ID '%s': %s", idStr, err))
 			continue
 		}
 
-		err = r.Feeds.Delete(int64(id))
+		err = r.Feeds.Delete(models.FeedID(id))
 		if err != nil {
 			if errors.IsNotFoundError(err) {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))

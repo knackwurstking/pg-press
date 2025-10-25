@@ -106,7 +106,7 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 	return ScanRows(rows, scanFeed)
 }
 
-func (f *Feeds) Get(id int64) (*models.Feed, error) {
+func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
 	f.Log.Debug("Getting feed: %d", id)
 
 	query := fmt.Sprintf(
@@ -147,7 +147,7 @@ func (f *Feeds) Add(feed *models.Feed) error {
 	if err != nil {
 		return f.GetInsertError(err)
 	}
-	feed.ID = id
+	feed.ID = models.FeedID(id)
 
 	if f.broadcaster != nil {
 		f.broadcaster.Broadcast()
@@ -156,7 +156,7 @@ func (f *Feeds) Add(feed *models.Feed) error {
 	return nil
 }
 
-func (f *Feeds) Delete(id int64) error {
+func (f *Feeds) Delete(id models.FeedID) error {
 	f.Log.Debug("Deleting feed: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
