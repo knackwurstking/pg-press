@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pgpress/models"
 )
 
-func HXGetMetalSheetEditDialog(metalSheetID *int64, toolID *int64) templ.SafeURL {
+func HXGetMetalSheetEditDialog(metalSheetID *models.MetalSheetID, toolID *int64) templ.SafeURL {
 	params := make(map[string]string)
 
 	if metalSheetID != nil {
@@ -25,14 +26,14 @@ func HXPostMetalSheetEditDialog(toolID int64) templ.SafeURL {
 	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
-func HXPutMetalSheetEditDialog(metalSheetID int64) templ.SafeURL {
+func HXPutMetalSheetEditDialog(metalSheetID models.MetalSheetID) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", metalSheetID),
 	}
 	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
-func HXDeleteMetalSheet(metalSheetID int64) templ.SafeURL {
+func HXDeleteMetalSheet(metalSheetID models.MetalSheetID) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", metalSheetID),
 	}

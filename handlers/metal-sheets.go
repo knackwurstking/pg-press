@@ -55,7 +55,9 @@ func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 	var err error
 
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	if metalSheetID, _ := ParseQueryInt64(c, "id"); metalSheetID > 0 {
+	if metalSheetIDQuery, _ := ParseQueryInt64(c, "id"); metalSheetIDQuery > 0 {
+		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
+
 		// Fetch existing metal sheet for editing
 		if renderProps.MetalSheet, err = h.Registry.MetalSheets.Get(metalSheetID); err != nil {
 			return HandleError(err, "failed to fetch metal sheet from database")
@@ -133,10 +135,11 @@ func (h *MetalSheets) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetID, err := ParseQueryInt64(c, "id")
+	metalSheetIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to get id from query")
 	}
+	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet to preserve ID and tool association
 	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)
@@ -182,10 +185,11 @@ func (h *MetalSheets) HTMXDeleteMetalSheet(c echo.Context) error {
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetID, err := ParseQueryInt64(c, "id")
+	metalSheetIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to get id from query")
 	}
+	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet before deletion for feed creation
 	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)

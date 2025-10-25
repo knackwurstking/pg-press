@@ -62,7 +62,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 	return ScanRows(rows, scanMetalSheet)
 }
 
-func (s *MetalSheets) Get(id int64) (*models.MetalSheet, error) {
+func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
 	s.Log.Debug("Getting metal sheet: %d", id)
 
 	query := fmt.Sprintf(`
@@ -158,7 +158,7 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[i
 	return filteredSheets, nil
 }
 
-func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
+func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error) {
 	s.Log.Debug("Adding metal sheet: tool_id: %d, identifier: %s",
 		sheet.ToolID, sheet.Identifier)
 
@@ -190,8 +190,8 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (int64, error) {
 		return 0, s.GetInsertError(err)
 	}
 
-	sheet.ID = id
-	return id, nil
+	sheet.ID = models.MetalSheetID(id)
+	return sheet.ID, nil
 }
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
@@ -218,7 +218,7 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 	return nil
 }
 
-func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
+func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) error {
 	s.Log.Debug("Assigning tool to metal sheet: sheet_id: %d, tool_id: %d", sheetID, toolID)
 
 	if toolID <= 0 {
@@ -242,7 +242,7 @@ func (s *MetalSheets) AssignTool(sheetID int64, toolID int64) error {
 	return nil
 }
 
-func (s *MetalSheets) Delete(id int64) error {
+func (s *MetalSheets) Delete(id models.MetalSheetID) error {
 	s.Log.Debug("Deleting metal sheet: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)

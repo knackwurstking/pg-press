@@ -8,6 +8,8 @@ import (
 	"github.com/knackwurstking/pgpress/errors"
 )
 
+type MetalSheetID int64
+
 // MachineType represents the type of machine (SACMI or SITI)
 type MachineType string
 
@@ -124,14 +126,14 @@ func (msl *MetalSheetList) Sort() MetalSheetList {
 
 // MetalSheet represents a metal sheet in the database
 type MetalSheet struct {
-	ID          int64       `json:"id"`
-	TileHeight  float64     `json:"tile_height"`  // Tile height in mm
-	Value       float64     `json:"value"`        // Value
-	MarkeHeight int         `json:"marke_height"` // Marke height
-	STF         float64     `json:"stf"`          // STF value
-	STFMax      float64     `json:"stf_max"`      // STF max value
-	Identifier  MachineType `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
-	ToolID      int64       `json:"tool_id"`      // Currently assigned tool
+	ID          MetalSheetID `json:"id"`
+	TileHeight  float64      `json:"tile_height"`  // Tile height in mm
+	Value       float64      `json:"value"`        // Value
+	MarkeHeight int          `json:"marke_height"` // Marke height
+	STF         float64      `json:"stf"`          // STF value
+	STFMax      float64      `json:"stf_max"`      // STF max value
+	Identifier  MachineType  `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
+	ToolID      int64        `json:"tool_id"`      // Currently assigned tool
 
 }
 
