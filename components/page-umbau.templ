@@ -160,8 +160,6 @@ script pageUmbauOnToolChange(event templ.JSExpression) {
 
 		// Check tool ID (value)
 		if (!!option.value && option.value == toolID) option.disabled = true;
-
-		console.debug({ format, includes: option.textContent.includes(format), option: option.textContent }); // TODO: Remove
 	};
 
 	// Loop through all options
