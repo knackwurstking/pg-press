@@ -93,13 +93,13 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		return HandleBadRequest(err, "invalid total cycles")
 	}
 
-	topToolStr := c.FormValue("top")
-	if topToolStr == "" {
+	topToolID, err := strconv.ParseInt(c.FormValue("top"), 10, 64)
+	if err != nil {
 		return HandleBadRequest(nil, "missing top tool")
 	}
 
-	bottomToolStr := c.FormValue("bottom")
-	if bottomToolStr == "" {
+	bottomToolID, err := strconv.ParseInt(c.FormValue("bottom"), 10, 64)
+	if err != nil {
 		return HandleBadRequest(nil, "missing bottom tool")
 	}
 
@@ -108,12 +108,12 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		return HandleError(err, "failed to get tools")
 	}
 
-	topTool, err := h.findToolByString(tools, topToolStr, models.PositionTop)
+	topTool, err := h.findToolByID(tools, topToolID)
 	if err != nil {
 		return HandleBadRequest(err, "invalid top tool")
 	}
 
-	bottomTool, err := h.findToolByString(tools, bottomToolStr, models.PositionBottom)
+	bottomTool, err := h.findToolByID(tools, bottomToolID)
 	if err != nil {
 		return HandleBadRequest(err, "invalid bottom tool")
 	}
@@ -163,11 +163,11 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Umbau) findToolByString(tools []*models.Tool, toolStr string, position models.Position) (*models.Tool, error) {
+func (h *Umbau) findToolByID(tools []*models.Tool, toolID int64) (*models.Tool, error) {
 	for _, tool := range tools {
-		if tool.Position == position && tool.String() == toolStr {
+		if tool.ID == toolID {
 			return tool, nil
 		}
 	}
-	return nil, fmt.Errorf("tool not found: %s", toolStr)
+	return nil, fmt.Errorf("tool not found: %d", toolID)
 }

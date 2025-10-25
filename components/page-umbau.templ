@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
-type PageUmbauDataListOption struct {
+type PageUmbauOption struct {
 	ToolID int64
 	Label  string
 }
@@ -18,12 +18,12 @@ type PageUmbauProps struct {
 	Tools       []*models.Tool
 }
 
-func (pp *PageUmbauProps) GetDataListOptions(position models.Position) []PageUmbauDataListOption {
-	var options []PageUmbauDataListOption
+func (pp *PageUmbauProps) GetOptions(position models.Position) []PageUmbauOption {
+	var options []PageUmbauOption
 
 	for _, tool := range pp.Tools {
 		if tool.Position == position {
-			options = append(options, PageUmbauDataListOption{
+			options = append(options, PageUmbauOption{
 				ToolID: tool.ID,
 				Label:  tool.String(),
 			})
@@ -59,38 +59,50 @@ templ PageUmbau(props *PageUmbauProps) {
 		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
-			@pageUmbauToolsDataLists(props)
 			<form
 				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau", env.ServerPathPrefix, props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
-				@pageUmbauCyclesSection()
+				@pageUmbau_cyclesSection()
 				<hr/>
-				@pageUmbauSectionTop(slots[models.PositionTop])
+				for _, position := range []models.Position{models.PositionTop, models.PositionBottom} {
+					{{ currentTool := slots[position] }}
+					<section>
+						<h3>{ models.PositionBottom.GermanString() }</h3>
+						if currentTool != nil {
+							<p>Aktuelles Werkzeug: { currentTool.String() }</p>
+						} else {
+							<p>Aktuelles Werkzeug: -</p>
+						}
+						<span class="flex flex-col">
+							{{
+								var id string
+								switch position {
+								case models.PositionTop:
+									id = "top"
+								case models.PositionBottom:
+									id = "bottom"
+								}
+							}}
+							<label for={ id }>Neues Werkzeug:</label>
+							<select id={ id } name={ id }>
+								<option value="" disabled selected>{ position.GermanString() } wählen</option>
+								for _, o := range props.GetOptions(position) {
+									<option value={ o.ToolID }>{ o.Label }</option>
+								}
+							</select>
+						</span>
+					</section>
+				}
 				<hr/>
-				@pageUmbauSectionBottom(slots[models.PositionBottom])
-				<hr/>
-				@pageUmbauFormActions(props.User)
+				@pageUmbau_formActions(props.User)
 			</form>
 		</main>
 	}
 }
 
-templ pageUmbauToolsDataLists(props *PageUmbauProps) {
-	<datalist id="tools-list-top">
-		for _, o := range props.GetDataListOptions(models.PositionTop) {
-			<option value={ o.Label }></option>
-		}
-	</datalist>
-	<datalist id="tools-list-bottom">
-		for _, o := range props.GetDataListOptions(models.PositionBottom) {
-			<option value={ o.Label }></option>
-		}
-	</datalist>
-}
-
-templ pageUmbauCyclesSection() {
+templ pageUmbau_cyclesSection() {
 	<section>
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
@@ -105,51 +117,7 @@ templ pageUmbauCyclesSection() {
 	</section>
 }
 
-templ pageUmbauSectionTop(tool *models.Tool) {
-	<section>
-		<h3>{ models.PositionTop.GermanString() }</h3>
-		if tool != nil {
-			<p>Aktuelles Werkzeug: { tool.String() }</p>
-		} else {
-			<p>Aktuelles Werkzeug: -</p>
-		}
-		<span class="flex flex-col">
-			<label for="top">Neues Werkzeug:</label>
-			<input
-				type="text"
-				id="top"
-				name="top"
-				placeholder="Werkzeug"
-				list="tools-list-top"
-				required
-			/>
-		</span>
-	</section>
-}
-
-templ pageUmbauSectionBottom(tool *models.Tool) {
-	<section>
-		<h3>{ models.PositionBottom.GermanString() }</h3>
-		if tool != nil {
-			<p>Aktuelles Werkzeug: { tool.String() }</p>
-		} else {
-			<p>Aktuelles Werkzeug: -</p>
-		}
-		<span class="flex flex-col">
-			<label for="bottom">Neues Werkzeug:</label>
-			<input
-				type="text"
-				id="bottom"
-				name="bottom"
-				list="tools-list-bottom"
-				placeholder="Werkzeug"
-				required
-			/>
-		</span>
-	</section>
-}
-
-templ pageUmbauFormActions(user *models.User) {
+templ pageUmbau_formActions(user *models.User) {
 	<footer class="flex justify-end items-center">
 		<button
 			type="submit"
