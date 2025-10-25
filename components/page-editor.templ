@@ -597,6 +597,6 @@ func supportsAttachments(editorType string) bool {
 	return editorType == "troublereport"
 }
 
-script deleteAttachment(attachmentId int64) {
+script deleteAttachment(attachmentId models.AttachmentID) {
 	deleteAttachment(attachmentId);
 }

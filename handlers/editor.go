@@ -175,7 +175,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			}
 
 			// Filter out existing and new attachments
-			var existingAttachmentIDs []int64
+			var existingAttachmentIDs []models.AttachmentID
 			var newAttachments []*models.Attachment
 			for _, a := range attachments {
 				if a.GetID() > 0 {

@@ -54,7 +54,7 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 	return ScanRows(rows, scanAttachment)
 }
 
-func (a *Attachments) Get(id int64) (*models.Attachment, error) {
+func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
 	a.Log.Debug("Getting attachment for ID: %d", id)
 
 	query := fmt.Sprintf(
@@ -76,7 +76,7 @@ func (a *Attachments) Get(id int64) (*models.Attachment, error) {
 	return attachment, nil
 }
 
-func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
+func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, error) {
 	a.Log.Debug("Getting attachments by IDs: count: %d", len(ids))
 
 	if len(ids) == 0 {
@@ -120,7 +120,7 @@ func (a *Attachments) GetByIDs(ids []int64) ([]*models.Attachment, error) {
 	return attachments, nil
 }
 
-func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
+func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, error) {
 	a.Log.Debug("Adding attachment: mime_type: %s, size: %d bytes",
 		attachment.MimeType, len(attachment.Data))
 
@@ -143,7 +143,7 @@ func (a *Attachments) Add(attachment *models.Attachment) (int64, error) {
 		return 0, a.GetInsertError(err)
 	}
 
-	return id, nil
+	return models.AttachmentID(id), nil
 }
 
 func (a *Attachments) Update(attachment *models.Attachment) error {
@@ -167,7 +167,7 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 	return nil
 }
 
-func (a *Attachments) Delete(id int64) error {
+func (a *Attachments) Delete(id models.AttachmentID) error {
 	a.Log.Debug("Deleting attachment: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
@@ -195,8 +195,8 @@ func scanAttachment(scanner Scannable) (*models.Attachment, error) {
 	return attachment, nil
 }
 
-func scanAttachmentsIntoMap(rows *sql.Rows) (map[int64]*models.Attachment, error) {
-	resultMap := make(map[int64]*models.Attachment)
+func scanAttachmentsIntoMap(rows *sql.Rows) (map[models.AttachmentID]*models.Attachment, error) {
+	resultMap := make(map[models.AttachmentID]*models.Attachment)
 
 	for rows.Next() {
 		attachment, err := scanAttachment(rows)

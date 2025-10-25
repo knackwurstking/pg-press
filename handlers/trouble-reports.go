@@ -71,10 +71,11 @@ func (h *TroubleReports) GetSharePDF(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetAttachment(c echo.Context) error {
-	attachmentID, err := ParseQueryInt64(c, "attachment_id")
+	attachmentIDParam, err := ParseQueryInt64(c, "attachment_id")
 	if err != nil {
 		return HandleBadRequest(err, "invalid attachment ID")
 	}
+	attachmentID := models.AttachmentID(attachmentIDParam)
 
 	attachment, err := h.Registry.Attachments.Get(attachmentID)
 	if err != nil {

@@ -1001,7 +1001,7 @@ func supportsAttachments(editorType string) bool {
 	return editorType == "troublereport"
 }
 
-func deleteAttachment(attachmentId int64) templ.ComponentScript {
+func deleteAttachment(attachmentId models.AttachmentID) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_deleteAttachment_126d`,
 		Function: `function __templ_deleteAttachment_126d(attachmentId){deleteAttachment(attachmentId);

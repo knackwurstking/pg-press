@@ -27,9 +27,11 @@ var (
 	}
 )
 
+type AttachmentID int64
+
 // Attachment represents a file attachment with its data and metadata.
 type Attachment struct {
-	ID       string `json:"id"`
+	ID       string `json:"id"` // TODO: Migrate this to a numeric ID, also need to update the database table for this
 	MimeType string `json:"mime_type"`
 	Data     []byte `json:"data"`
 }
@@ -76,10 +78,10 @@ func (a *Attachment) GetMimeType() string {
 }
 
 // GetID returns the numeric ID of the attachment.
-func (a *Attachment) GetID() int64 {
+func (a *Attachment) GetID() AttachmentID {
 	// Try to parse the string ID as int64
 	if id, err := strconv.ParseInt(a.ID, 10, 64); err == nil {
-		return id
+		return AttachmentID(id)
 	}
 	return 0 // Return 0 for invalid IDs
 }

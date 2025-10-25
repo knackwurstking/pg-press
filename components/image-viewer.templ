@@ -1,5 +1,7 @@
 package components
 
+import "github.com/knackwurstking/pgpress/models"
+
 templ ImageViewerTemplate() {
 	<template name="image-viewer">
 		<dialog name="image-viewer" class="image-viewer fullscreen clean flex justify-center items-center">
@@ -16,7 +18,7 @@ templ ImageViewerTemplate() {
 	</template>
 }
 
-script OpenImageViewer(attachmentID int64) {
+script OpenImageViewer(attachmentID models.AttachmentID) {
 	// Close any existing image viewer
 	var existingDialog = document.querySelector('dialog[name="image-viewer"]');
 	if (existingDialog) {

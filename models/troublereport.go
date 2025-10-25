@@ -17,15 +17,15 @@ const (
 
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64   `json:"id"`
-	Title             string  `json:"title"`
-	Content           string  `json:"content"`
-	LinkedAttachments []int64 `json:"linked_attachments"`
-	UseMarkdown       bool    `json:"use_markdown"`
+	ID                int64          `json:"id"`
+	Title             string         `json:"title"`
+	Content           string         `json:"content"`
+	LinkedAttachments []AttachmentID `json:"linked_attachments"`
+	UseMarkdown       bool           `json:"use_markdown"`
 }
 
 // New creates a new trouble report with the provided details.
-func NewTroubleReport(title, content string, linkedAttachments ...int64) *TroubleReport {
+func NewTroubleReport(title, content string, linkedAttachments ...AttachmentID) *TroubleReport {
 	return &TroubleReport{
 		Title:             strings.TrimSpace(title),
 		Content:           strings.TrimSpace(content),
@@ -82,12 +82,12 @@ func (tr *TroubleReport) validateAttachments() error {
 }
 
 // AddAttachment adds a new attachment ID to the trouble report.
-func (tr *TroubleReport) AddAttachment(attachmentID int64) error {
+func (tr *TroubleReport) AddAttachment(attachmentID AttachmentID) error {
 	if attachmentID <= 0 {
 		return errors.NewValidationError("linked_attachments: attachment ID must be positive")
 	}
 	if tr.LinkedAttachments == nil {
-		tr.LinkedAttachments = make([]int64, 0)
+		tr.LinkedAttachments = make([]AttachmentID, 0)
 	}
 	tr.LinkedAttachments = append(tr.LinkedAttachments, attachmentID)
 	return nil

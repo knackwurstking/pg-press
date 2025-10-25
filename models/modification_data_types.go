@@ -5,10 +5,10 @@ import "time"
 
 // TroubleReportModData represents the data structure for trouble report modifications
 type TroubleReportModData struct {
-	Title             string  `json:"title"`
-	Content           string  `json:"content"`
-	LinkedAttachments []int64 `json:"linked_attachments"`
-	UseMarkdown       bool    `json:"use_markdown"`
+	Title             string         `json:"title"`
+	Content           string         `json:"content"`
+	LinkedAttachments []AttachmentID `json:"linked_attachments"`
+	UseMarkdown       bool           `json:"use_markdown"`
 }
 
 func NewTroubleReportModData(tr *TroubleReport) *TroubleReportModData {

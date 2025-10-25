@@ -8,6 +8,8 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/knackwurstking/pgpress/models"
+
 func ImageViewerTemplate() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -37,7 +39,7 @@ func ImageViewerTemplate() templ.Component {
 	})
 }
 
-func OpenImageViewer(attachmentID int64) templ.ComponentScript {
+func OpenImageViewer(attachmentID models.AttachmentID) templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_OpenImageViewer_85a2`,
 		Function: `function __templ_OpenImageViewer_85a2(attachmentID){// Close any existing image viewer

@@ -218,7 +218,7 @@ func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport,
 		return err
 	}
 
-	var attachmentIDs []int64
+	var attachmentIDs []models.AttachmentID
 	for i, attachment := range attachments {
 		if attachment == nil {
 			continue
@@ -261,7 +261,7 @@ func (s *TroubleReports) UpdateWithAttachments(id int64, tr *models.TroubleRepor
 		return err
 	}
 
-	var newAttachmentIDs []int64
+	var newAttachmentIDs []models.AttachmentID
 	for i, attachment := range newAttachments {
 		if attachment == nil {
 			s.Log.Debug("Skipping nil attachment: index: %d", i+1)
@@ -353,7 +353,7 @@ func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) ([]*model
 	return attachments, nil
 }
 
-func (s *TroubleReports) cleanupAttachments(attachmentIDs []int64) {
+func (s *TroubleReports) cleanupAttachments(attachmentIDs []models.AttachmentID) {
 	for _, id := range attachmentIDs {
 		if err := s.Registry.Attachments.Delete(id); err != nil {
 			s.Log.Error("Failed to cleanup attachment %d: %v", id, err)
