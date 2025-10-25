@@ -695,10 +695,11 @@ func (h *Tool) HTMXGetToolNotes(c echo.Context) error {
 }
 
 func (h *Tool) HTMXGetEditRegeneration(c echo.Context) error {
-	regenerationID, err := ParseQueryInt64(c, "id")
+	rid, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse regeneration id")
 	}
+	regenerationID := models.RegenerationID(rid)
 
 	regeneration, err := h.Registry.ToolRegenerations.Get(regenerationID)
 	if err != nil {
@@ -725,10 +726,11 @@ func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	regenerationID, err := ParseQueryInt64(c, "id")
+	rid, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to get the regeneration id from url query")
 	}
+	regenerationID := models.RegenerationID(rid)
 
 	formData := h.parseRegenerationEditFormData(c)
 
@@ -749,10 +751,11 @@ func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
 }
 
 func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
-	regenerationID, err := ParseQueryInt64(c, "id")
+	rid, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to get the regeneration id from url query")
 	}
+	regenerationID := models.RegenerationID(rid)
 
 	if err := h.Registry.ToolRegenerations.Delete(regenerationID); err != nil {
 		return HandleError(err, "failed to delete regeneration")

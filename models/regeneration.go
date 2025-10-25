@@ -2,13 +2,15 @@ package models
 
 import "github.com/knackwurstking/pgpress/errors"
 
+type RegenerationID int64
+
 // Regeneration represents a tool regeneration event
 type Regeneration struct {
-	ID          int64   `json:"id"`
-	ToolID      int64   `json:"tool_id"`
-	CycleID     CycleID `json:"cycle_id"`
-	Reason      string  `json:"reason"`
-	PerformedBy *int64  `json:"performed_by"`
+	ID          RegenerationID `json:"id"`
+	ToolID      int64          `json:"tool_id"`
+	CycleID     CycleID        `json:"cycle_id"`
+	Reason      string         `json:"reason"`
+	PerformedBy *int64         `json:"performed_by"`
 }
 
 func NewRegeneration(toolID int64, cycleID CycleID, reason string, performedBy *int64) *Regeneration {

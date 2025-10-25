@@ -42,7 +42,7 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 	}
 }
 
-func (s *ToolRegenerations) Get(id int64) (*models.Regeneration, error) {
+func (s *ToolRegenerations) Get(id models.RegenerationID) (*models.Regeneration, error) {
 	s.Log.Debug("Getting tool regeneration by ID: %d", id)
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameToolRegenerations)
@@ -56,7 +56,7 @@ func (s *ToolRegenerations) Get(id int64) (*models.Regeneration, error) {
 	return regeneration, nil
 }
 
-func (s *ToolRegenerations) Add(toolID int64, cycleID models.CycleID, reason string, user *models.User) (int64, error) {
+func (s *ToolRegenerations) Add(toolID int64, cycleID models.CycleID, reason string, user *models.User) (models.RegenerationID, error) {
 	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, toolID, cycleID, reason)
 
@@ -84,7 +84,7 @@ func (s *ToolRegenerations) Add(toolID int64, cycleID models.CycleID, reason str
 		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
 	}
 
-	return id, nil
+	return models.RegenerationID(id), nil
 }
 
 func (s *ToolRegenerations) Update(r *models.Regeneration, user *models.User) error {
@@ -113,7 +113,7 @@ func (s *ToolRegenerations) Update(r *models.Regeneration, user *models.User) er
 	return nil
 }
 
-func (s *ToolRegenerations) Delete(id int64) error {
+func (s *ToolRegenerations) Delete(id models.RegenerationID) error {
 	s.Log.Debug("Deleting tool regeneration: %d", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameToolRegenerations)
@@ -125,7 +125,7 @@ func (s *ToolRegenerations) Delete(id int64) error {
 	return nil
 }
 
-func (s *ToolRegenerations) StartToolRegeneration(toolID int64, reason string, user *models.User) (int64, error) {
+func (s *ToolRegenerations) StartToolRegeneration(toolID int64, reason string, user *models.User) (models.RegenerationID, error) {
 	s.Log.Debug("Starting tool regeneration by %s (%d): tool: %d",
 		user.Name, user.TelegramID, toolID)
 

@@ -2,12 +2,12 @@ package utils
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pgpress/models"
 )
 
-func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeURL {
+func HXGetToolRegenerationEdit(toolID int64, regenerationID *models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
 
 	if regenerationID == nil {
@@ -15,23 +15,23 @@ func HXGetToolRegenerationEdit(toolID int64, regenerationID *int64) templ.SafeUR
 	}
 
 	params := map[string]string{
-		"id": strconv.FormatInt(*regenerationID, 10),
+		"id": fmt.Sprintf("%d", *regenerationID),
 	}
 	return buildURL(path, params)
 }
 
-func HXPutToolRegenerationEdit(toolID int64, regenerationID int64) templ.SafeURL {
+func HXPutToolRegenerationEdit(toolID int64, regenerationID models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
 	params := map[string]string{
-		"id": strconv.FormatInt(regenerationID, 10),
+		"id": fmt.Sprintf("%d", regenerationID),
 	}
 	return buildURL(path, params)
 }
 
-func HXDeleteToolRegeneration(toolID int64, regenerationID int64) templ.SafeURL {
+func HXDeleteToolRegeneration(toolID int64, regenerationID models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/delete-regeneration", toolID)
 	params := map[string]string{
-		"id": strconv.FormatInt(regenerationID, 10),
+		"id": fmt.Sprintf("%d", regenerationID),
 	}
 	return buildURL(path, params)
 }
