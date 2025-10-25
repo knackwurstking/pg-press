@@ -7,11 +7,6 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
-type PageUmbauOption struct {
-	ToolID int64
-	Label  string
-}
-
 type PageUmbauProps struct {
 	PressNumber models.PressNumber
 	User        *models.User
@@ -26,6 +21,7 @@ func (pp *PageUmbauProps) GetOptions(position models.Position) []PageUmbauOption
 			options = append(options, PageUmbauOption{
 				ToolID: tool.ID,
 				Label:  tool.String(),
+				Format: tool.Format.String(),
 			})
 		}
 	}
@@ -46,6 +42,12 @@ func (pp *PageUmbauProps) GetSlotsMap() map[models.Position]*models.Tool {
 	}
 
 	return slots
+}
+
+type PageUmbauOption struct {
+	ToolID int64
+	Label  string
+	Format string
 }
 
 templ PageUmbau(props *PageUmbauProps) {
@@ -86,10 +88,14 @@ templ PageUmbau(props *PageUmbauProps) {
 								}
 							}}
 							<label for={ id }>Neues Werkzeug:</label>
-							<select id={ id } name={ id }>
-								<option value="" disabled selected>{ position.GermanString() } wählen</option>
+							<select
+								id={ id }
+								name={ id }
+								onchange={ pageUmbauOnToolChange(templ.JSExpression("event")) }
+							>
+								<option value="" selected>{ position.GermanString() } wählen</option>
 								for _, o := range props.GetOptions(position) {
-									<option value={ o.ToolID }>{ o.Label }</option>
+									<option value={ o.ToolID } data-format={ o.Format }>{ o.Label }</option>
 								}
 							</select>
 						</span>
@@ -124,4 +130,40 @@ templ pageUmbau_formActions(user *models.User) {
 			disabled?={ !user.IsAdmin() }
 		>Umbau speichern</button>
 	</footer>
+}
+
+script pageUmbauOnToolChange(event templ.JSExpression) {
+	var target = event.currentTarget;
+
+	// Get the tool id from the target element
+	var toolID = target.value;
+
+	// Get the format from the current selected option
+	var format = "";
+	var selectedOption = target.children[target.selectedIndex];
+	if (selectedOption) {
+		format = selectedOption.getAttribute("data-format");
+	}
+
+	// Get all the options, besides the first one for each select element (#top, #bottom)
+	options = [
+		...[...document.querySelectorAll("select#bottom > option")].slice(1),
+		...[...document.querySelectorAll("select#top > option")].slice(1),
+	]
+
+	// Disable all options that are not compatible with the selected format
+	var optionsLoopHandler = function(option) {
+		option.disabled = false; // Just resetting
+
+		// Check format (data-format)
+		if (!!format && !option.textContent.includes(format)) option.disabled = true;
+
+		// Check tool ID (value)
+		if (!!option.value && option.value == toolID) option.disabled = true;
+
+		console.debug({ format, includes: option.textContent.includes(format), option: option.textContent }); // TODO: Remove
+	};
+
+	// Loop through all options
+	options.forEach(optionsLoopHandler);
 }

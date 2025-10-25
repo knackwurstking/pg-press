@@ -49,6 +49,8 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
+	h.Log.Info("Rendering the umbau page for user %s", user.String())
+
 	tools, err := h.Registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to list tools")
@@ -68,56 +70,74 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 }
 
 func (h *Umbau) PostUmbauPage(c echo.Context) error {
+	// Get the user from the request context
 	user, err := GetUserFromContext(c)
 	if err != nil {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
+	// Get the press number from the request context
 	pressNumberParam, err := ParseParamInt8(c, "press")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse press number")
 	}
 
+	// Validate the press number
 	pressNumber := models.PressNumber(pressNumberParam)
 	if !models.IsValidPressNumber(&pressNumber) {
 		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
+	h.Log.Info("Handle a active tool change for the press %d by user %s", pressNumber, user.String())
+
+	// Get form value for the press cycles
 	totalCyclesStr := c.FormValue("press-total-cycles")
 	if totalCyclesStr == "" {
 		return HandleBadRequest(nil, "missing total cycles")
 	}
 
+	// Parse this press cycles to int64
 	totalCycles, err := strconv.ParseInt(totalCyclesStr, 10, 64)
 	if err != nil {
 		return HandleBadRequest(err, "invalid total cycles")
 	}
 
+	// Get form value for the top tool
 	topToolID, err := strconv.ParseInt(c.FormValue("top"), 10, 64)
 	if err != nil {
 		return HandleBadRequest(nil, "missing top tool")
 	}
 
+	// Get form value for the bottom tool
 	bottomToolID, err := strconv.ParseInt(c.FormValue("bottom"), 10, 64)
 	if err != nil {
 		return HandleBadRequest(nil, "missing bottom tool")
 	}
 
+	// Get a list with all tools
 	tools, err := h.Registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to get tools")
 	}
 
+	// Get the top tool
 	topTool, err := h.findToolByID(tools, topToolID)
 	if err != nil {
 		return HandleBadRequest(err, "invalid top tool")
 	}
 
+	// Get the bottom tool
 	bottomTool, err := h.findToolByID(tools, bottomToolID)
 	if err != nil {
 		return HandleBadRequest(err, "invalid bottom tool")
 	}
 
+	// Check if the tools are compatible with each other
+	if topTool.Format.String() != bottomTool.Format.String() {
+		return HandleBadRequest(nil, "tools are not compatible")
+	}
+
+	// Get current tools for press
 	currentTools, err := h.Registry.Tools.GetByPress(&pressNumber)
 	if err != nil {
 		return HandleError(err, "failed to get current tools for press")
@@ -153,12 +173,11 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		pressNumber, topTool.String(), bottomTool.String(), totalCycles,
 	)
 
+	// Create feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.Registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for press %d: %v", pressNumber, err)
 	}
-
-	h.Log.Info("Successfully completed tool change for press %d", pressNumber)
 
 	return c.NoContent(http.StatusOK)
 }
