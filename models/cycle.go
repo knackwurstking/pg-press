@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// TODO: Implement a custom Cycle ID type [WIP], tool ids will follow at a later stage
 type Cycle struct {
 	ID            int64       `json:"id"`
 	PressNumber   PressNumber `json:"press_number"`
