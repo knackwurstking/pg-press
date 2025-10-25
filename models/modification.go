@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type ModificationID int64
+
 // ModificationType represents the type of entity being modified
 type ModificationType string
 
@@ -22,10 +24,10 @@ const (
 
 // Modification represents a modification in the database
 type Modification[T any] struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"user_id"`
-	Data      []byte    `json:"data"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        ModificationID `json:"id"`
+	UserID    int64          `json:"user_id"`
+	Data      []byte         `json:"data"`
+	CreatedAt time.Time      `json:"created_at"`
 }
 
 // UnmarshalData unmarshals the data into the provided value

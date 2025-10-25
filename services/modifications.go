@@ -54,7 +54,7 @@ func NewModifications(r *Registry) *Modifications {
 	return &Modifications{Base: base}
 }
 
-func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user int64) (int64, error) {
+func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user int64) (models.ModificationID, error) {
 	s.Log.Debug("Adding modification: mt: %s, id: %d, user: %d", mt, mtID, user)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
@@ -85,10 +85,10 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 		return 0, s.GetInsertError(err)
 	}
 
-	return id, nil
+	return models.ModificationID(id), nil
 }
 
-func (s *Modifications) Get(id int64) (*models.Modification[any], error) {
+func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any], error) {
 	s.Log.Debug("Getting modification: %v", id)
 
 	query := fmt.Sprintf(`
@@ -197,7 +197,7 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 	return ScanSingleRow(row, scanModification)
 }
 
-func (s *Modifications) Delete(id int64) error {
+func (s *Modifications) Delete(id models.ModificationID) error {
 	s.Log.Debug("Deleting modification: %v", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
