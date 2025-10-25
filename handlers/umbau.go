@@ -39,14 +39,14 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	pns, err := ParseParamInt8(c, "press")
+	pressNumberParam, err := ParseParamInt8(c, "press")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse press number")
 	}
 
-	pn := models.PressNumber(pns)
-	if !models.IsValidPressNumber(&pn) {
-		return HandleBadRequest(fmt.Errorf("invalid press number: %d", pn), "invalid press number")
+	pressNumber := models.PressNumber(pressNumberParam)
+	if !models.IsValidPressNumber(&pressNumber) {
+		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
 	tools, err := h.Registry.Tools.List()
@@ -55,7 +55,7 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 	}
 
 	umbaupage := components.PageUmbau(&components.PageUmbauProps{
-		PressNumber: pn,
+		PressNumber: pressNumber,
 		User:        user,
 		Tools:       tools,
 	})
@@ -73,19 +73,19 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	pns, err := ParseParamInt8(c, "press")
+	pressNumberParam, err := ParseParamInt8(c, "press")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse press number")
 	}
 
-	pn := models.PressNumber(pns)
-	if !models.IsValidPressNumber(&pn) {
-		return HandleBadRequest(fmt.Errorf("invalid press number: %d", pn), "invalid press number")
+	pressNumber := models.PressNumber(pressNumberParam)
+	if !models.IsValidPressNumber(&pressNumber) {
+		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
 	totalCyclesStr := c.FormValue("press-total-cycles")
 	if totalCyclesStr == "" {
-		return HandleBadRequest(fmt.Errorf("missing total cycles"), "missing total cycles")
+		return HandleBadRequest(nil, "missing total cycles")
 	}
 
 	totalCycles, err := strconv.ParseInt(totalCyclesStr, 10, 64)
@@ -95,12 +95,12 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 
 	topToolStr := c.FormValue("top")
 	if topToolStr == "" {
-		return HandleBadRequest(fmt.Errorf("missing top tool"), "missing top tool")
+		return HandleBadRequest(nil, "missing top tool")
 	}
 
 	bottomToolStr := c.FormValue("bottom")
 	if bottomToolStr == "" {
-		return HandleBadRequest(fmt.Errorf("missing bottom tool"), "missing bottom tool")
+		return HandleBadRequest(nil, "missing bottom tool")
 	}
 
 	tools, err := h.Registry.Tools.List()
@@ -118,14 +118,14 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		return HandleBadRequest(err, "invalid bottom tool")
 	}
 
-	currentTools, err := h.Registry.Tools.GetByPress(&pn)
+	currentTools, err := h.Registry.Tools.GetByPress(&pressNumber)
 	if err != nil {
 		return HandleError(err, "failed to get current tools for press")
 	}
 
 	// Create final cycle entries for current tools with total cycles
 	for _, tool := range currentTools {
-		cycle := models.NewCycle(pn, tool.ID, tool.Position, totalCycles, user.TelegramID)
+		cycle := models.NewCycle(pressNumber, tool.ID, tool.Position, totalCycles, user.TelegramID)
 		if _, err := h.Registry.PressCycles.Add(cycle, user); err != nil {
 			return HandleError(err, fmt.Sprintf("failed to create final cycle for tool %d", tool.ID))
 		}
@@ -141,24 +141,24 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Assign new tools to press
 	newTools := []*models.Tool{topTool, bottomTool}
 	for _, tool := range newTools {
-		if err := h.Registry.Tools.UpdatePress(tool.ID, &pn, user); err != nil {
+		if err := h.Registry.Tools.UpdatePress(tool.ID, &pressNumber, user); err != nil {
 			return HandleError(err, fmt.Sprintf("failed to assign tool %d to press", tool.ID))
 		}
 	}
 
 	// Create feed entry
-	title := fmt.Sprintf("Werkzeugwechsel Presse %d", pn)
+	title := fmt.Sprintf("Werkzeugwechsel Presse %d", pressNumber)
 	content := fmt.Sprintf(
 		"Umbau abgeschlossen für Presse %d.\nEingebautes Oberteil: %s\nEingebautes Unterteil: %s\nGesamtzyklen: %d",
-		pn, topTool.String(), bottomTool.String(), totalCycles,
+		pressNumber, topTool.String(), bottomTool.String(), totalCycles,
 	)
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.Registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for press %d: %v", pn, err)
+		h.Log.Error("Failed to create feed for press %d: %v", pressNumber, err)
 	}
 
-	h.Log.Info("Successfully completed tool change for press %d", pn)
+	h.Log.Info("Successfully completed tool change for press %d", pressNumber)
 
 	return c.NoContent(http.StatusOK)
 }

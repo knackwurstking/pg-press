@@ -313,7 +313,7 @@ func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user 
 		return err
 	}
 
-	if !models.IsValidPressNumber(pressNumber) {
+	if !models.IsValidPressNumber(pressNumber) && pressNumber != nil {
 		return errors.NewValidationError(
 			fmt.Sprintf("invalid press number: %d", pressNumber),
 		)
