@@ -5,5 +5,5 @@
 - [x] Failed to update press cycle: database update failed: %!w(<nil>) after editing an existing cycle via the tool page.
 - [x] Partial Cycles in the PDF summary remain at zero.
 - [x] When submitting an "umbau", I receive the error `failed to unassign tool 1: validation error: invalid press number: 0`. The tool remains unchanged, but a new entry is added to the cycles.
-- [ ] Feeds counter seems to be missing.
+- [x] Feeds counter seems to be missing.
 - [ ] Fix the "Ooops, There Is No Binding Tool" message on the press page.

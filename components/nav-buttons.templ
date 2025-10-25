@@ -32,7 +32,7 @@ templ NavFeedButton() {
 		role="button"
 		class="ghost contrast icon"
 		href={ templ.SafeURL(env.ServerPathPrefix + "/feed") }
-		hx-ws={ utils.HXWsConnectNavFeedCounter() }
+		ws-connect={ utils.HXWsConnectNavFeedCounter() }
 		hx-target="#feed-counter"
 		hx-swap="outerHTML"
 	>

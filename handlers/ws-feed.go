@@ -76,6 +76,7 @@ func (fh *FeedHandler) Start(ctx context.Context) {
 
 // RegisterConnection adds a new WebSocket connection to the manager
 func (fh *FeedHandler) RegisterConnection(userID, lastFeed int64, conn *websocket.Conn) *FeedConnection {
+	fh.log.Info("Registering new connection for user ID %d", userID)
 	feedConn := NewFeedConnection(userID, lastFeed, conn)
 	fh.register <- feedConn
 	return feedConn
@@ -83,6 +84,7 @@ func (fh *FeedHandler) RegisterConnection(userID, lastFeed int64, conn *websocke
 
 // UnregisterConnection removes a WebSocket connection from the manager
 func (fh *FeedHandler) UnregisterConnection(conn *FeedConnection) {
+	fh.log.Info("Unregistering connection for user ID %d", conn.UserID)
 	fh.unregister <- conn
 }
 
@@ -108,7 +110,6 @@ func (fh *FeedHandler) registerConnection(conn *FeedConnection) {
 	fh.connections[conn] = true
 	fh.mu.Unlock()
 
-	fh.log.Info("Registered new connection for user ID %d", conn.UserID)
 	go fh.sendUpdate(conn)
 }
 
@@ -120,8 +121,6 @@ func (fh *FeedHandler) unregisterConnection(conn *FeedConnection) {
 		close(conn.done)
 	}
 	fh.mu.Unlock()
-
-	fh.log.Info("Unregistered connection for user ID %d", conn.UserID)
 }
 
 func (fh *FeedHandler) broadcastToAllConnections() {
