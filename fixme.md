@@ -5,4 +5,3 @@
 - [x] `failed to update press cycle: database update failed: %!w(<nil>)` after edit an existing cycle via the tool page
 - [x] Partial Cycles in the pdf summary is still zero
 - [ ] Fix the "Ooops, There Is No Binding Tool" message on the press page
-- [ ] Try keep the details open state while refreshing somehow
