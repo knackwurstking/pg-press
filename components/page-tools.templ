@@ -185,17 +185,7 @@ templ PageTools_SectionTools(tools []*models.ResolvedTool) {
 			@PageTools_ToolsList(tools)
 		</ul>
 	</div>
-	<script>
-		setTimeout(function () {
-			var params = new URLSearchParams(window.location.search);
-
-			const input = document.querySelector(`input#${IDToolsFilter}`);
-			if (input) {
-				input.value = params.get("tools_filter");
-				filterToolsList();
-			}
-		}, 100);
-	</script>
+	@pageToolsInitializeFilterInput()
 }
 
 templ pageTools_sectionToolsFilter(tools []*models.ResolvedTool) {
@@ -337,4 +327,16 @@ templ pageTools_additionalHead() {
 			min-height: 100vh;
 		}
 	</style>
+}
+
+script pageToolsInitializeFilterInput() {
+	setTimeout(function () {
+		var params = new URLSearchParams(window.location.search);
+
+		const input = document.querySelector(`input#${IDToolsFilter}`);
+		if (input) {
+			input.value = params.get("tools_filter");
+			filterToolsList();
+		}
+	}, 100);
 }

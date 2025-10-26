@@ -490,7 +490,11 @@ func PageTools_SectionTools(tools []*models.ResolvedTool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</ul></div><script>\n\t\tsetTimeout(function () {\n\t\t\tvar params = new URLSearchParams(window.location.search);\n\n\t\t\tconst input = document.querySelector(`input#${IDToolsFilter}`);\n\t\t\tif (input) {\n\t\t\t\tinput.value = params.get(\"tools_filter\");\n\t\t\t\tfilterToolsList();\n\t\t\t}\n\t\t}, 100);\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</ul></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = pageToolsInitializeFilterInput().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -526,7 +530,7 @@ func pageTools_sectionToolsFilter(tools []*models.ResolvedTool) templ.Component 
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(PageTools_IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 207, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 197, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -601,7 +605,7 @@ func pageTools_toolListItem(id models.ToolID, tool *models.ResolvedTool) templ.C
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tool-%d", id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 227, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 217, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -655,7 +659,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolOverlappingTools())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 238, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 228, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -678,7 +682,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 267, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 257, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -696,7 +700,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(tool.ToolCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 276, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 266, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -728,7 +732,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 					var templ_7745c5c3_Var27 string
 					templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", instance.PressNumber))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 295, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 285, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 					if templ_7745c5c3_Err != nil {
@@ -822,7 +826,7 @@ func pageTools_additionalHead() templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 334, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-tools.templ`, Line: 324, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -834,6 +838,24 @@ func pageTools_additionalHead() templ.Component {
 		}
 		return nil
 	})
+}
+
+func pageToolsInitializeFilterInput() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_pageToolsInitializeFilterInput_0173`,
+		Function: `function __templ_pageToolsInitializeFilterInput_0173(){setTimeout(function () {
+		var params = new URLSearchParams(window.location.search);
+
+		const input = document.querySelector(` + "`" + `input#${IDToolsFilter}` + "`" + `);
+		if (input) {
+			input.value = params.get("tools_filter");
+			filterToolsList();
+		}
+	}, 100);
+}`,
+		Call:       templ.SafeScript(`__templ_pageToolsInitializeFilterInput_0173`),
+		CallInline: templ.SafeScriptInline(`__templ_pageToolsInitializeFilterInput_0173`),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate
