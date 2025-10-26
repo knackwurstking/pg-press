@@ -23,3 +23,5 @@
 - [ ] Try to keep the details open state while refreshing somehow.
 - [ ] When the filter input is in focus, try to use `scrollIntoView` on each input change.
 - [ ] Improve the notes flex grid, (grow, shrink settings)
+- [ ] Create a new page: "Probleme Checklist" (votings, attachments)
+- [ ] Create a new page: "Daten Sammlung", this is a place where stuff like dryer temperatures can be stored (markdown editor support)
