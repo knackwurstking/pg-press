@@ -1,7 +1,7 @@
 - [x] Replace the `datalist` input elements with `select` elements for the "umbau" page.
 - [x] Also add some input handling for the "umbau" page select elements, which will disable tools not possible to change. For example, if the top tool is from a 100x100 format, the bottom tool must also be from a 100x100 format.
 
-- [ ] Improve model types for ID's [WIP]
+- [x] Improve model types for ID's
   - Attachment IDs
   - Cycle IDs
   - Feed IDs
