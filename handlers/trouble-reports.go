@@ -52,13 +52,14 @@ func (h *TroubleReports) GetPage(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetSharePDF(c echo.Context) error {
-	idQuery, err := ParseQueryInt64(c, "id")
-	if err != nil {
+	var troubleReportID models.TroubleReportID
+	if id, err := ParseQueryInt64(c, "id"); err != nil {
 		return HandleBadRequest(err, "missing id query parameter")
+	} else {
+		troubleReportID = models.TroubleReportID(id)
 	}
-	id := models.TroubleReportID(idQuery)
 
-	tr, err := h.Registry.TroubleReports.GetWithAttachments(id)
+	tr, err := h.Registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to retrieve trouble report")
 	}
@@ -72,11 +73,12 @@ func (h *TroubleReports) GetSharePDF(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetAttachment(c echo.Context) error {
-	attachmentIDParam, err := ParseQueryInt64(c, "attachment_id")
-	if err != nil {
+	var attachmentID models.AttachmentID
+	if id, err := ParseQueryInt64(c, "attachment_id"); err != nil {
 		return HandleBadRequest(err, "invalid attachment ID")
+	} else {
+		attachmentID = models.AttachmentID(id)
 	}
-	attachmentID := models.AttachmentID(attachmentIDParam)
 
 	attachment, err := h.Registry.Attachments.Get(attachmentID)
 	if err != nil {
@@ -167,18 +169,19 @@ func (h *TroubleReports) HTMXGetData(c echo.Context) error {
 }
 
 func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
-	idQuery, err := ParseQueryInt64(c, "id")
-	if err != nil {
+	var troubleReportID models.TroubleReportID
+	if id, err := ParseQueryInt64(c, "id"); err != nil {
 		return HandleBadRequest(err, "failed to parse trouble report ID")
+	} else {
+		troubleReportID = models.TroubleReportID(id)
 	}
-	id := models.TroubleReportID(idQuery)
 
 	user, err := GetUserFromContext(c)
 	if err != nil {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	removedReport, err := h.Registry.TroubleReports.RemoveWithAttachments(id, user)
+	removedReport, err := h.Registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
 	if err != nil {
 		return HandleError(err, "failed to delete trouble report")
 	}
@@ -195,13 +198,14 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 }
 
 func (h *TroubleReports) HTMXGetAttachmentsPreview(c echo.Context) error {
-	idQuery, err := ParseQueryInt64(c, "id")
-	if err != nil {
+	var troubleReportID models.TroubleReportID
+	if id, err := ParseQueryInt64(c, "id"); err != nil {
 		return HandleBadRequest(err, "failed to parse ID from query")
+	} else {
+		troubleReportID = models.TroubleReportID(id)
 	}
-	id := models.TroubleReportID(idQuery)
 
-	tr, err := h.Registry.TroubleReports.GetWithAttachments(id)
+	tr, err := h.Registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to load trouble report")
 	}
@@ -224,11 +228,11 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	trIDQuery, err := ParseQueryInt64(c, "id")
+	id, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse ID query")
 	}
-	trID := models.TroubleReportID(trIDQuery)
+	troubleReportID := models.TroubleReportID(id)
 
 	modTimeStr := c.FormValue("modification_time")
 	if modTimeStr == "" {
@@ -242,7 +246,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 
 	modifications, err := h.Registry.Modifications.ListAll(
 		models.ModificationTypeTroubleReport,
-		int64(trID),
+		id,
 	)
 	if err != nil {
 		return HandleError(err, "failed to retrieve modifications")
@@ -265,7 +269,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		return HandleError(err, "failed to parse modification data")
 	}
 
-	tr, err := h.Registry.TroubleReports.Get(trID)
+	tr, err := h.Registry.TroubleReports.Get(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to retrieve trouble report")
 	}
