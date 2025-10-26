@@ -493,14 +493,17 @@ func (h *Tool) HTMXPostToolCycleEditDialog(c echo.Context) error {
 		}
 	}
 
-	// Create feed entry
-	title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
-	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-	if form.Regenerating {
-		content += "\nRegenerierung gestartet"
+	{ // Create Feed
+		title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
+		content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+
+		if form.Regenerating {
+			content += "\nRegenerierung gestartet"
+		}
+
+		h.createFeed(title, content, user.TelegramID)
 	}
-	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -573,24 +576,27 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		}
 	}
 
-	// Create feed entry
-	var title string
-	var content string
-	if form.ToolID != nil {
-		// Tool change occurred
-		title = "Zyklus aktualisiert mit Werkzeugwechsel"
-		content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-			*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-	} else {
-		// Regular cycle update
-		title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
-		content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	{ // Create Feed
+		var title string
+		var content string
+		if form.ToolID != nil {
+			// Tool change occurred
+			title = "Zyklus aktualisiert mit Werkzeugwechsel"
+			content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+				*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+		} else {
+			// Regular cycle update
+			title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
+			content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+				*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+		}
+
+		if form.Regenerating {
+			content += "\nRegenerierung abgeschlossen"
+		}
+
+		h.createFeed(title, content, user.TelegramID)
 	}
-	if form.Regenerating {
-		content += "\nRegenerierung abgeschlossen"
-	}
-	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -634,11 +640,13 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 		return HandleError(err, "failed to delete press cycle")
 	}
 
-	// Create feed entry
-	title := fmt.Sprintf("Zyklus gelöscht für %s", tool.String())
-	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-		cycle.PressNumber, tool.String(), cycle.TotalCycles, cycle.Date.Format("2006-01-02 15:04:05"))
-	h.createFeed(title, content, user.TelegramID)
+	{ // Create Feed
+		title := fmt.Sprintf("Zyklus gelöscht für %s", tool.String())
+		content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			cycle.PressNumber, tool.String(), cycle.TotalCycles, cycle.Date.Format("2006-01-02 15:04:05"))
+
+		h.createFeed(title, content, user.TelegramID)
+	}
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -745,23 +753,42 @@ func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	rid, err := ParseQueryInt64(c, "id")
-	if err != nil {
+	var regenerationID models.RegenerationID
+	if id, err := ParseQueryInt64(c, "id"); err != nil {
 		return HandleBadRequest(err, "failed to get the regeneration id from url query")
+	} else {
+		regenerationID = models.RegenerationID(id)
 	}
-	regenerationID := models.RegenerationID(rid)
 
-	formData := h.parseRegenerationEditFormData(c)
+	var regeneration *models.ResolvedRegeneration
+	if r, err := h.Registry.ToolRegenerations.Get(regenerationID); err != nil {
+		return HandleError(err, "failed to get regeneration before deleting")
+	} else {
+		regeneration, err = services.ResolveRegeneration(h.Registry, r)
 
-	regeneration, err := h.Registry.ToolRegenerations.Get(regenerationID)
-	if err != nil {
-		return HandleError(err, "failed to get regeneration")
+		formData := h.parseRegenerationEditFormData(c)
+		regeneration.Reason = formData.Reason
 	}
-	regeneration.Reason = formData.Reason
 
-	err = h.Registry.ToolRegenerations.Update(regeneration, user)
+	err = h.Registry.ToolRegenerations.Update(regeneration.Regeneration, user)
 	if err != nil {
 		return HandleError(err, "failed to update regeneration")
+	}
+
+	{ // Create Feed
+		title := "Werkzeug Regenerierung aktualisiert"
+		content := fmt.Sprintf(
+			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+			regeneration.GetTool().String(),
+			regeneration.GetCycle().Date.Format(env.DateFormat),
+			regeneration.GetCycle().PartialCycles,
+		)
+
+		if regeneration.Reason != "" {
+			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+		}
+
+		h.createFeed(title, content, user.TelegramID)
 	}
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
@@ -795,24 +822,26 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 		return HandleError(err, "failed to delete regeneration")
 	}
 
-	title := "Werkzeug Regenerierung entfernt"
-	content := fmt.Sprintf(
-		"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-		regeneration.GetTool().String(),
-		regeneration.GetCycle().Date.Format(env.DateFormat),
-		regeneration.GetCycle().PartialCycles,
-	)
+	{ // Create Feed
+		title := "Werkzeug Regenerierung entfernt"
+		content := fmt.Sprintf(
+			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+			regeneration.GetTool().String(),
+			regeneration.GetCycle().Date.Format(env.DateFormat),
+			regeneration.GetCycle().PartialCycles,
+		)
 
-	if regeneration.Reason != "" {
-		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+		if regeneration.Reason != "" {
+			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+		}
+
+		if regeneration.PerformedBy != nil {
+			user, err = h.Registry.Users.Get(*regeneration.PerformedBy)
+			content += fmt.Sprintf("\nPerformed by: %s", user.Name)
+		}
+
+		h.createFeed(title, content, user.TelegramID)
 	}
-
-	if regeneration.PerformedBy != nil {
-		user, err = h.Registry.Users.Get(*regeneration.PerformedBy)
-		content += fmt.Sprintf("\nPerformed by: %s", user.Name)
-	}
-
-	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -907,20 +936,23 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 			return HandleError(err, "failed to start tool regeneration")
 		}
 
-		// Create feed entry
-		title := "Werkzeug Regenerierung gestartet"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		h.createFeed(title, content, user.TelegramID)
+		{ // Create Feed
+			title := "Werkzeug Regenerierung gestartet"
+			content := fmt.Sprintf("Werkzeug: %s", tool.String())
+			h.createFeed(title, content, user.TelegramID)
+		}
 
 	case "active":
 		if err := h.Registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
 			return HandleError(err, "failed to stop tool regeneration")
 		}
 
-		// Create feed entry
-		title := "Werkzeug Regenerierung beendet"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		h.createFeed(title, content, user.TelegramID)
+		{ // Create Feed
+			title := "Werkzeug Regenerierung beendet"
+			content := fmt.Sprintf("Werkzeug: %s", tool.String())
+
+			h.createFeed(title, content, user.TelegramID)
+		}
 
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
@@ -928,10 +960,12 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 			return HandleError(err, "failed to abort tool regeneration")
 		}
 
-		// Create feed entry
-		title := "Werkzeug Regenerierung abgebrochen"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		h.createFeed(title, content, user.TelegramID)
+		{ // Create Feed
+			title := "Werkzeug Regenerierung abgebrochen"
+			content := fmt.Sprintf("Werkzeug: %s", tool.String())
+
+			h.createFeed(title, content, user.TelegramID)
+		}
 
 	default:
 		return HandleBadRequest(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
