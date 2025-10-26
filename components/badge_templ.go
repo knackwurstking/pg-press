@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 func PositionBadge(position models.Position, classNames string) templ.Component {

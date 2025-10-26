@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/components"
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/services"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
 

@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 func ResolveRegeneration(registry *Registry, regeneration *models.Regeneration) (*models.ResolvedRegeneration, error) {

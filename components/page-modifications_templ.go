@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 func PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *models.Mod[T], isCurrent bool) templ.Component) templ.Component {

@@ -10,9 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 	"time"
 )
 

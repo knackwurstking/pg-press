@@ -1,6 +1,6 @@
 package models
 
-import "github.com/knackwurstking/pgpress/errors"
+import "github.com/knackwurstking/pg-press/errors"
 
 type RegenerationID int64
 

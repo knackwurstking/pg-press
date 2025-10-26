@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pg-press/env"
 
 	"github.com/labstack/echo/v4"
 )

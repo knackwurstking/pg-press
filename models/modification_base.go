@@ -20,7 +20,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type Mods[T any] []*Mod[T]

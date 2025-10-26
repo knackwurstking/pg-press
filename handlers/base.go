@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/services"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/services"
 )
 
 type Base struct {

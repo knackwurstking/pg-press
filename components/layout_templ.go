@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 type LayoutOptions struct {

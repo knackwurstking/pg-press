@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pgpress/errors"
-	"github.com/knackwurstking/pgpress/services"
+	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/services"
 
 	_ "github.com/mattn/go-sqlite3"
 )

@@ -3,10 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/components"
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/services"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
 

@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 func PageFeed() templ.Component {

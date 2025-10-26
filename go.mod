@@ -1,4 +1,4 @@
-module github.com/knackwurstking/pgpress
+module github.com/knackwurstking/pg-press
 
 go 1.25.0
 

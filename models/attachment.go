@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (

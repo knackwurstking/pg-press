@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 func HXGetMetalSheetEditDialog(metalSheetID *models.MetalSheetID, toolID *models.ToolID) templ.SafeURL {

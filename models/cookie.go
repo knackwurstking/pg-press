@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (

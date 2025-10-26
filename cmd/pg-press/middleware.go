@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/errors"
-	"github.com/knackwurstking/pgpress/models"
-	"github.com/knackwurstking/pgpress/services"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/services"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

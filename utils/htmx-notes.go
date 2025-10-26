@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 func HXGetNotesGrid() templ.SafeURL {

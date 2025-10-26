@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/knackwurstking/pgpress/models"
+import "github.com/knackwurstking/pg-press/models"
 
 type TableActionsOptions struct {
 	EditHref        templ.SafeURL

@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pg-press/env"
 )
 
 // buildURL constructs a URL with the given path and query parameters

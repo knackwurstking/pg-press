@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/env"
-	"github.com/knackwurstking/pgpress/errors"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
 

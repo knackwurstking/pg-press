@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/knackwurstking/pgpress/errors"
+	"github.com/knackwurstking/pg-press/errors"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"

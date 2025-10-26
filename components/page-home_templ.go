@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pgpress/env"
+	"github.com/knackwurstking/pg-press/env"
 )
 
 func PageHome() templ.Component {

@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/services"
-	"github.com/knackwurstking/pgpress/utils"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/utils"
 	"golang.org/x/net/websocket"
 
 	"github.com/labstack/echo/v4"

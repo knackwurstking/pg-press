@@ -7,9 +7,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pgpress/errors"
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 const TableNameModifications = "modifications"

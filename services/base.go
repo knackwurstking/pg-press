@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/knackwurstking/pgpress/logger"
+	"github.com/knackwurstking/pg-press/logger"
 )
 
 type Base struct {

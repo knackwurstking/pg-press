@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/knackwurstking/pgpress/logger"
-	"github.com/knackwurstking/pgpress/models"
+	"github.com/knackwurstking/pg-press/logger"
+	"github.com/knackwurstking/pg-press/models"
 )
 
 const TableNameNotes = "notes"

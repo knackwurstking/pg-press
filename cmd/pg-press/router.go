@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/knackwurstking/pgpress"
-	"github.com/knackwurstking/pgpress/handlers"
-	"github.com/knackwurstking/pgpress/services"
+	pgpress "github.com/knackwurstking/pg-press"
+	"github.com/knackwurstking/pg-press/handlers"
+	"github.com/knackwurstking/pg-press/services"
 	"github.com/labstack/echo/v4"
 )
 

@@ -23,6 +23,6 @@
 - [x] Make the notes page reload content after editing or deleting a note.
 - [x] When the filter input is in focus, try to use `scrollIntoView` on each input change.
 - [x] Improve the notes flex grid, (grow, shrink settings)
-- [ ] Rename this module from `/pgpress` to `/pg-press`
+- [x] Rename this module from `/pgpress` to `/pg-press`
 - [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments)
 - [ ] Create a new page: "Daten Sammlung", this is a place where stuff like dryer temperatures can be stored (markdown editor support)
