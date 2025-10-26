@@ -26,3 +26,21 @@ func ResolveRegeneration(registry *Registry, regeneration *models.Regeneration) 
 
 	return models.NewResolvedRegeneration(regeneration, tool, cycle, user), nil
 }
+
+func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, error) {
+	var bindingTool *models.Tool
+	if tool.IsBound() {
+		var err error
+		bindingTool, err = registry.Tools.Get(*tool.Binding)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	notes, err := registry.Notes.GetByTool(tool.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return models.NewResolvedTool(tool, bindingTool, notes), nil
+}

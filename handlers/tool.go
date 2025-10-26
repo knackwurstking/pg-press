@@ -142,9 +142,14 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, err := h.Registry.Tools.Get(toolID)
-	if err != nil {
+	var tool *models.ResolvedTool
+	if t, err := h.Registry.Tools.Get(toolID); err != nil {
 		return HandleError(err, "failed to get tool")
+	} else {
+		tool, err = services.ResolveTool(h.Registry, t)
+		if err != nil {
+			return HandleError(err, "failed to resolve tool")
+		}
 	}
 
 	var targetID models.ToolID
@@ -189,16 +194,14 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 	tool.Binding = &targetID
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(tool)
+	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
 	if err != nil {
 		return err
 	}
 
 	// Render the template
 	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
-		Tool: models.NewResolvedTool(
-			tool, h.getBindingTool(tool), nil,
-		),
+		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         isAdmin,
 	})
@@ -232,22 +235,25 @@ func (h *Tool) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Get tools for rendering the template
-	tool, err := h.Registry.Tools.Get(toolID)
-	if err != nil {
+	var tool *models.ResolvedTool
+	if t, err := h.Registry.Tools.Get(toolID); err != nil {
 		return HandleBadRequest(err, "failed to get tool")
+	} else {
+		tool, err = services.ResolveTool(h.Registry, t)
+		if err != nil {
+			return HandleError(err, "failed to resolve tool")
+		}
 	}
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(tool)
+	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
 	if err != nil {
 		return err
 	}
 
 	// Render the template
 	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
-		Tool: models.NewResolvedTool(
-			tool, h.getBindingTool(tool), nil,
-		),
+		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         isAdmin,
 	})
@@ -271,9 +277,14 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDParam)
 
-	tool, err := h.Registry.Tools.Get(toolID)
-	if err != nil {
+	var tool *models.ResolvedTool
+	if t, err := h.Registry.Tools.Get(toolID); err != nil {
 		return HandleError(err, "failed to get tool")
+	} else {
+		tool, err = services.ResolveTool(h.Registry, t)
+		if err != nil {
+			return HandleError(err, "failed to resolve tool")
+		}
 	}
 
 	var filteredCycles []*models.Cycle
@@ -311,7 +322,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	)
 
 	// Only get tools for binding if the tool has no binding
-	toolsForBinding, err := h.getToolsForBinding(tool)
+	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
 	if err != nil {
 		return err
 	}
@@ -319,7 +330,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	// Render the template
 	cyclesSection := components.PageTool_Cycles(components.PageTool_CyclesProps{
 		User:            user,
-		Tool:            models.NewResolvedTool(tool, h.getBindingTool(tool), nil),
+		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
 		TotalCycles:     totalCycles,
 		Cycles:          filteredCycles,
@@ -1000,19 +1011,6 @@ func (h *Tool) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) {
 	}
 
 	return filteredToolsForBinding, nil
-}
-
-func (h *Tool) getBindingTool(tool *models.Tool) *models.Tool {
-	if tool.IsBound() {
-		bindingTool, err := h.Registry.Tools.Get(*tool.Binding)
-		if err != nil {
-			h.Log.Error("Failed to get binding tool: %#v", err)
-		}
-
-		return bindingTool
-	}
-
-	return nil
 }
 
 func (h *Tool) getCycleFormData(c echo.Context) (*ToolCycleEditDialogFormData, error) {
