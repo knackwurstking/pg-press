@@ -14,7 +14,10 @@
   - User IDs
 
 - [x] Create a new feed entry after a regeneration gets removed
-- [ ] Create helpers for resolved data types (tool, regeneration, ...)
+
+- [ ] Create helpers for resolved data types (tool, regeneration, ...) [WIP]
+  - ResolveRegeneration
+
 - [ ] Create a new feed entry after editing a regeneration (reason)
 - [ ] Make the notes page reload content after editing or deleting a note.
 - [ ] Try to keep the details open state while refreshing somehow.

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"sort"
@@ -297,7 +296,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 
 		// Resolve regenerations
 		for _, r := range regenerations {
-			rr, err := h.resolveRegeneration(r)
+			rr, err := services.ResolveRegeneration(h.Registry, r)
 			if err != nil {
 				return err
 			}
@@ -715,7 +714,7 @@ func (h *Tool) HTMXGetEditRegeneration(c echo.Context) error {
 		return HandleError(err, "get regeneration failed")
 	}
 
-	resolvedRegeneration, err := h.resolveRegeneration(regeneration)
+	resolvedRegeneration, err := services.ResolveRegeneration(h.Registry, regeneration)
 	if err != nil {
 		return err
 	}
@@ -726,7 +725,7 @@ func (h *Tool) HTMXGetEditRegeneration(c echo.Context) error {
 		return HandleError(err, "render dialog failed")
 	}
 
-	return errors.New("under construction")
+	return nil
 }
 
 func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
@@ -774,21 +773,11 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 
 	h.Log.Info("Deleting the regeneration with the ID %d (User: %s)", regenerationID, user.Name)
 
-	regeneration, err := h.Registry.ToolRegenerations.Get(regenerationID)
-	if err != nil {
+	var regeneration *models.ResolvedRegeneration
+	if r, err := h.Registry.ToolRegenerations.Get(regenerationID); err != nil {
 		return HandleError(err, "failed to get regeneration before deleting")
-	}
-
-	// TODO: Could use a resolved regeneration type here, but need a helper for this first
-	cycle, err := h.Registry.PressCycles.Get(regeneration.CycleID)
-	if err != nil {
-		return HandleError(err, "failed to get cycle")
-	}
-
-	// TODO: Could use a resolved regeneration type here, but need a helper for this first
-	tool, err := h.Registry.Tools.Get(regeneration.ToolID)
-	if err != nil {
-		return HandleError(err, "failed to get tool")
+	} else {
+		regeneration, err = services.ResolveRegeneration(h.Registry, r)
 	}
 
 	if err := h.Registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
@@ -796,15 +785,22 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 	}
 
 	title := "Werkzeug Regenerierung entfernt"
-	content := fmt.Sprintf("Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-		tool.String(), cycle.Date.Format(env.DateFormat), cycle.PartialCycles)
+	content := fmt.Sprintf(
+		"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+		regeneration.GetTool().String(),
+		regeneration.GetCycle().Date.Format(env.DateFormat),
+		regeneration.GetCycle().PartialCycles,
+	)
+
 	if regeneration.Reason != "" {
 		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
 	}
+
 	if regeneration.PerformedBy != nil {
 		user, err = h.Registry.Users.Get(*regeneration.PerformedBy)
 		content += fmt.Sprintf("\nPerformed by: %s", user.Name)
 	}
+
 	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
@@ -1086,28 +1082,6 @@ func (h *Tool) parseRegenerationEditFormData(c echo.Context) *ToolRegenerationEd
 	return &ToolRegenerationEditDialogFormData{
 		Reason: c.FormValue("reason"),
 	}
-}
-
-func (h *Tool) resolveRegeneration(r *models.Regeneration) (*models.ResolvedRegeneration, error) {
-	tool, err := h.Registry.Tools.Get(r.ToolID)
-	if err != nil {
-		return nil, HandleError(err, fmt.Sprintf(
-			"failed to get tool %d for regeneration %d", r.ToolID, r.ID))
-	}
-
-	cycle, err := h.Registry.PressCycles.Get(r.CycleID)
-	if err != nil {
-		return nil, HandleError(err, fmt.Sprintf(
-			"failed to get press cycle %d for regeneration %d", r.CycleID, r.ID))
-	}
-
-	user, err := h.Registry.Users.Get(*r.PerformedBy)
-	if err != nil {
-		return nil, HandleError(err, fmt.Sprintf("failed to get user %d for regeneration %d",
-			*r.PerformedBy, r.ID))
-	}
-
-	return models.NewResolvedRegeneration(r, tool, cycle, user), nil
 }
 
 func (h *Tool) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
