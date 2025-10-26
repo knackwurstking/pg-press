@@ -26,27 +26,27 @@ func NewNotes(db *services.Registry) *Notes {
 }
 
 func (h *Notes) RegisterRoutes(e *echo.Echo) {
-	utils.RegisterEchoRoutes(
-		e,
-		[]*utils.EchoRoute{
-			// Notes page
-			utils.NewEchoRoute(http.MethodGet, "/notes",
-				h.GetNotesPage),
+	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+		// Notes page
+		utils.NewEchoRoute(http.MethodGet, "/notes",
+			h.GetNotesPage),
 
-			// HTMX routes for notes dialog editing
-			utils.NewEchoRoute(http.MethodGet, "/htmx/notes/edit",
-				h.HTMXGetEditNoteDialog),
+		// HTMX routes for notes dialog editing
+		utils.NewEchoRoute(http.MethodGet, "/htmx/notes/edit",
+			h.HTMXGetEditNoteDialog),
+		utils.NewEchoRoute(http.MethodPost, "/htmx/notes/edit",
+			h.HTMXPostEditNoteDialog),
+		utils.NewEchoRoute(http.MethodPut, "/htmx/notes/edit",
+			h.HTMXPutEditNoteDialog),
 
-			utils.NewEchoRoute(http.MethodPost, "/htmx/notes/edit",
-				h.HTMXPostEditNoteDialog),
+		// HTMX routes for notes deletion
+		utils.NewEchoRoute(http.MethodDelete, "/htmx/notes/delete",
+			h.HTMXDeleteNote),
 
-			utils.NewEchoRoute(http.MethodPut, "/htmx/notes/edit",
-				h.HTMXPutEditNoteDialog),
-
-			utils.NewEchoRoute(http.MethodDelete, "/htmx/notes/delete",
-				h.HTMXDeleteNote),
-		},
-	)
+		// Render Notes Grid
+		utils.NewEchoRoute(http.MethodGet, "/htmx/notes/grid",
+			h.HTMXGetNotesGrid),
+	})
 }
 
 // GetNotesPage serves the main notes page
@@ -254,6 +254,24 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 	// Trigger reload of notes sections
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
+	return nil
+}
+
+func (h *Notes) HTMXGetNotesGrid(c echo.Context) error {
+	notes, err := h.Registry.Notes.List()
+	if err != nil {
+		return HandleError(err, "failed to list notes")
+	}
+
+	tools, err := h.Registry.Tools.List()
+	if err != nil {
+		return HandleError(err, "failed to list tools")
+	}
+
+	ng := components.PageNotes_NotesGrid(notes, tools)
+	if err := ng.Render(c.Request().Context(), c.Response()); err != nil {
+		return HandleError(err, "failed to render notes grid")
+	}
 	return nil
 }
 

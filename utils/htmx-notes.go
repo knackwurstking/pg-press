@@ -8,6 +8,10 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
+func HXGetNotesGrid() templ.SafeURL {
+	return buildURL("/htmx/notes/grid", nil)
+}
+
 func HXGetNotesEditDialog(noteID *models.NoteID, linkToTables ...string) templ.SafeURL {
 	params := make(map[string]string)
 

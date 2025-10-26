@@ -71,8 +71,13 @@ templ PageNotes(props *PageNotesProps) {
 					</button>
 				</div>
 			</section>
-			<section class="notes-grid max-w-full" style="margin: 0 auto;">
-				@NotesGrid(props.Notes, props.Tools)
+			<section
+				class="notes-grid max-w-full"
+				style="margin: 0 auto;"
+				hx-get={ utils.HXGetNotesGrid() }
+				hx-trigger="pageLoaded from:body"
+			>
+				@PageNotes_NotesGrid(props.Notes, props.Tools)
 			</section>
 		</main>
 	}
@@ -104,7 +109,7 @@ script pageNotesScript() {
 	});
 }
 
-templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
+templ PageNotes_NotesGrid(notes []*models.Note, tools []*models.Tool) {
 	if len(notes) > 0 {
 		<div class="notes-list grid gap-lg p" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
 			for _, note := range notes {
