@@ -50,7 +50,7 @@ func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
 	return ScanRows(rows, scanTroubleReport)
 }
 
-func (s *TroubleReports) Get(id int64) (*models.TroubleReport, error) {
+func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, error) {
 	s.Log.Debug("Getting trouble report: %d", id)
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameTroubleReports)
@@ -96,7 +96,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 	if err != nil {
 		return 0, s.GetInsertError(err)
 	}
-	tr.ID = id
+	tr.ID = models.TroubleReportID(id)
 
 	if _, err := s.Registry.Modifications.Add(
 		models.ModificationTypeTroubleReport,
@@ -137,7 +137,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 
 	if _, err := s.Registry.Modifications.Add(
 		models.ModificationTypeTroubleReport,
-		tr.ID,
+		int64(tr.ID),
 		models.NewTroubleReportModData(tr),
 		u.TelegramID,
 	); err != nil {
@@ -147,7 +147,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 	return nil
 }
 
-func (s *TroubleReports) Delete(id int64, user *models.User) error {
+func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) error {
 	s.Log.Debug("Deleting trouble report by %s: id: %d", user.String(), id)
 
 	if err := user.Validate(); err != nil {
@@ -167,7 +167,7 @@ func (s *TroubleReports) Delete(id int64, user *models.User) error {
 	return nil
 }
 
-func (s *TroubleReports) GetWithAttachments(id int64) (*models.TroubleReportWithAttachments, error) {
+func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.TroubleReportWithAttachments, error) {
 	s.Log.Debug("Getting trouble report with attachments: %d", id)
 
 	tr, err := s.Get(id)
@@ -245,11 +245,11 @@ func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport,
 		return err
 	}
 
-	troubleReport.ID = id
+	troubleReport.ID = models.TroubleReportID(id)
 	return nil
 }
 
-func (s *TroubleReports) UpdateWithAttachments(id int64, tr *models.TroubleReport, user *models.User, newAttachments ...*models.Attachment) error {
+func (s *TroubleReports) UpdateWithAttachments(id models.TroubleReportID, tr *models.TroubleReport, user *models.User, newAttachments ...*models.Attachment) error {
 	s.Log.Debug("Updating trouble report with attachments by %s: id: %d, title: %s, new_attachments: %d",
 		user.String(), id, tr.Title, len(newAttachments))
 
@@ -299,7 +299,7 @@ func (s *TroubleReports) UpdateWithAttachments(id int64, tr *models.TroubleRepor
 	return nil
 }
 
-func (s *TroubleReports) RemoveWithAttachments(id int64, user *models.User) (*models.TroubleReport, error) {
+func (s *TroubleReports) RemoveWithAttachments(id models.TroubleReportID, user *models.User) (*models.TroubleReport, error) {
 	s.Log.Debug("Removing trouble report with attachments by %s: id: %d", user.String(), id)
 
 	if err := user.Validate(); err != nil {

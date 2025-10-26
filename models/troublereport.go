@@ -15,13 +15,15 @@ const (
 	MaxContentLength = 50000
 )
 
+type TroubleReportID int64
+
 // TroubleReport represents a trouble report in the system.
 type TroubleReport struct {
-	ID                int64          `json:"id"`
-	Title             string         `json:"title"`
-	Content           string         `json:"content"`
-	LinkedAttachments []AttachmentID `json:"linked_attachments"`
-	UseMarkdown       bool           `json:"use_markdown"`
+	ID                TroubleReportID `json:"id"`
+	Title             string          `json:"title"`
+	Content           string          `json:"content"`
+	LinkedAttachments []AttachmentID  `json:"linked_attachments"`
+	UseMarkdown       bool            `json:"use_markdown"`
 }
 
 // New creates a new trouble report with the provided details.

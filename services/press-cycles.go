@@ -181,7 +181,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 // GetCycleSummaryData retrieves complete cycle summary data for a press
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
-) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[int64]*models.User, error) {
+) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, error) {
 	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
 
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
@@ -204,7 +204,7 @@ func (s *PressCycles) GetCycleSummaryData(
 		return nil, nil, nil, fmt.Errorf("failed to get users: %w", err)
 	}
 
-	usersMap := make(map[int64]*models.User, len(users))
+	usersMap := make(map[models.TelegramID]*models.User, len(users))
 	for _, u := range users {
 		usersMap[u.TelegramID] = u
 	}
@@ -808,7 +808,7 @@ func scanCycle(scannable Scannable) (*models.Cycle, error) {
 	}
 
 	if performedBy.Valid {
-		cycle.PerformedBy = performedBy.Int64
+		cycle.PerformedBy = models.TelegramID(performedBy.Int64)
 	}
 
 	return cycle, nil

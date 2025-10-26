@@ -10,6 +10,8 @@
   - Note IDs
   - Regeneration IDs
   - Tool IDs
+  - Trouble Report IDs
+  - User IDs
 
 - [ ] Create a new feed entry after a regeneration gets removed
 - [ ] Make the notes page reload content after editing or deleting a note.

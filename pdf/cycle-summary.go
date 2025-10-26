@@ -17,7 +17,7 @@ type cycleSummaryOptions struct {
 	Press    models.PressNumber
 	Cycles   []*models.Cycle
 	ToolsMap map[models.ToolID]*models.Tool
-	UsersMap map[int64]*models.User
+	UsersMap map[models.TelegramID]*models.User
 }
 
 // GenerateCycleSummaryPDF creates a PDF with cycle summary data for a press
@@ -25,7 +25,7 @@ func GenerateCycleSummaryPDF(
 	press models.PressNumber,
 	cycles []*models.Cycle,
 	toolsMap map[models.ToolID]*models.Tool,
-	usersMap map[int64]*models.User,
+	usersMap map[models.TelegramID]*models.User,
 ) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetAutoPageBreak(true, 25)

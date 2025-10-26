@@ -49,29 +49,28 @@ func autoCleanCookiesCommand() cli.Command {
 		Name: "auto-clean",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			telegramID := cli.Int64(cmd, "user",
-				cli.WithShort("u"),
-				cli.Optional,
-			)
+			telegramIDArg := cli.Int64(cmd, "user", cli.WithShort("u"), cli.Optional)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					telegramID := models.TelegramID(*telegramIDArg)
+
 					t := time.Now().Add(0 - env.CookieExpirationDuration).UnixMilli()
 					isExpired := func(cookie *models.Cookie) bool {
 						return t >= cookie.LastLogin
 					}
 
 					// Clean up cookies for a specific telegram user
-					if *telegramID != 0 {
-						u, err := r.Users.Get(*telegramID)
+					if telegramID != 0 {
+						u, err := r.Users.Get(telegramID)
 						if err != nil {
 							handleNotFoundError(err)
-							handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", *telegramID))
+							handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", telegramID))
 						}
 
 						cookies, err := r.Cookies.ListApiKey(u.ApiKey)
 						if err != nil {
-							handleGenericError(err, fmt.Sprintf("List cookies for user \"%d\" failed", *telegramID))
+							handleGenericError(err, fmt.Sprintf("List cookies for user \"%d\" failed", telegramID))
 						}
 
 						for _, cookie := range cookies {

@@ -27,7 +27,7 @@ templ PageFeed() {
 	}
 }
 
-templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[int64]*models.User) {
+templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[models.TelegramID]*models.User) {
 	if len(feeds) > 0 {
 		<ul id="data">
 			for _, feed := range feeds {
@@ -46,7 +46,7 @@ templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[int6
 	}
 }
 
-templ Feed(feed *models.Feed, userMap map[int64]*models.User) {
+templ Feed(feed *models.Feed, userMap map[models.TelegramID]*models.User) {
 	<article
 		id={ fmt.Sprintf("feed-%d", feed.ID) }
 		class="card"

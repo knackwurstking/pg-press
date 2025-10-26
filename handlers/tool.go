@@ -1081,7 +1081,7 @@ func (h *Tool) renderStatusComponent(tool *models.Tool, editable bool, user *mod
 	})
 }
 
-func (h *Tool) createFeed(title, content string, userID int64) {
+func (h *Tool) createFeed(title, content string, userID models.TelegramID) {
 	feed := models.NewFeed(title, content, userID)
 	if err := h.Registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)

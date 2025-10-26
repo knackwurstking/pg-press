@@ -25,7 +25,7 @@ const (
 // Modification represents a modification in the database
 type Modification[T any] struct {
 	ID        ModificationID `json:"id"`
-	UserID    int64          `json:"user_id"`
+	UserID    TelegramID     `json:"user_id"`
 	Data      []byte         `json:"data"`
 	CreatedAt time.Time      `json:"created_at"`
 }

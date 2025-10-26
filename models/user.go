@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/knackwurstking/pgpress/env"
@@ -18,16 +17,18 @@ const (
 	MaxNameLength = 100
 )
 
+type TelegramID int64
+
 // User represents a system user with Telegram integration
 type User struct {
-	TelegramID int64  `json:"telegram_id"`
-	Name       string `json:"user_name"`
-	ApiKey     string `json:"api_key"`
-	LastFeed   FeedID `json:"last_feed"`
+	TelegramID TelegramID `json:"telegram_id"`
+	Name       string     `json:"user_name"`
+	ApiKey     string     `json:"api_key"`
+	LastFeed   FeedID     `json:"last_feed"`
 }
 
 // NewUser creates a new user with the provided details
-func NewUser(telegramID int64, userName, apiKey string) *User {
+func NewUser(telegramID TelegramID, userName, apiKey string) *User {
 	return &User{
 		TelegramID: telegramID,
 		Name:       strings.TrimSpace(userName),
@@ -38,7 +39,7 @@ func NewUser(telegramID int64, userName, apiKey string) *User {
 
 func NewUserFromInterfaceMap(modified map[string]any) *User {
 	user := &User{
-		TelegramID: int64(modified["telegram_id"].(float64)),
+		TelegramID: TelegramID(modified["telegram_id"].(float64)),
 		Name:       modified["user_name"].(string),
 		ApiKey:     modified["api_key"].(string),
 		LastFeed:   FeedID(modified["last_feed"].(float64)),
@@ -90,7 +91,7 @@ func (u *User) IsAdmin() bool {
 	}
 
 	adminIDs := strings.Split(adminsEnv, ",")
-	userIDStr := strconv.FormatInt(u.TelegramID, 10)
+	userIDStr := fmt.Sprintf("%d", u.TelegramID)
 
 	return slices.Contains(adminIDs, userIDStr)
 }

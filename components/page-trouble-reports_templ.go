@@ -392,7 +392,7 @@ func listReportsScript() templ.ComponentScript {
 	}
 }
 
-func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID int64, canRollback bool) templ.Component {
+func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID models.TroubleReportID, canRollback bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -509,7 +509,7 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 	})
 }
 
-func TroubleReportRollbackButton(reportID int64, modificationTime int64) templ.Component {
+func TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTime int64) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -565,7 +565,7 @@ func TroubleReportRollbackButton(reportID int64, modificationTime int64) templ.C
 }
 
 func TroubleReportCreateModificationRenderer(
-	reportID int64, isAdmin bool,
+	reportID models.TroubleReportID, isAdmin bool,
 ) func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
 
 	return func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {

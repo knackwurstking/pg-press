@@ -48,7 +48,7 @@ func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	userMap := make(map[int64]*models.User)
+	userMap := make(map[models.TelegramID]*models.User)
 	for _, feed := range feeds {
 		feedUser, err := h.Registry.Users.Get(feed.UserID)
 		if err != nil {

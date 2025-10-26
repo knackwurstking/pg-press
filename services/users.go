@@ -54,7 +54,7 @@ func (u *Users) List() ([]*models.User, error) {
 	return users, nil
 }
 
-func (u *Users) Get(telegramID int64) (*models.User, error) {
+func (u *Users) Get(telegramID models.TelegramID) (*models.User, error) {
 	u.Log.Debug("Getting user: Telegram ID: %d", telegramID)
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE telegram_id = ?`, TableNameUsers)
@@ -73,7 +73,7 @@ func (u *Users) Get(telegramID int64) (*models.User, error) {
 	return user, nil
 }
 
-func (u *Users) Add(user *models.User) (int64, error) {
+func (u *Users) Add(user *models.User) (models.TelegramID, error) {
 	u.Log.Debug("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
 
 	if err := user.Validate(); err != nil {
@@ -102,7 +102,7 @@ func (u *Users) Add(user *models.User) (int64, error) {
 	return user.TelegramID, nil
 }
 
-func (u *Users) Delete(telegramID int64) error {
+func (u *Users) Delete(telegramID models.TelegramID) error {
 	u.Log.Debug("Removing user %d", telegramID)
 
 	if _, err := u.Get(telegramID); err != nil {

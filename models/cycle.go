@@ -14,10 +14,10 @@ type Cycle struct {
 	Date          time.Time   `json:"date"`
 	TotalCycles   int64       `json:"total_cycles"`
 	PartialCycles int64       `json:"partial_cycles"`
-	PerformedBy   int64       `json:"performed_by"`
+	PerformedBy   TelegramID  `json:"performed_by"`
 }
 
-func NewCycle(press PressNumber, toolID ToolID, toolPosition Position, totalCycles, userID int64) *Cycle {
+func NewCycle(press PressNumber, toolID ToolID, toolPosition Position, totalCycles int64, userID TelegramID) *Cycle {
 	return &Cycle{
 		PressNumber:  press,
 		ToolID:       toolID,
@@ -28,7 +28,7 @@ func NewCycle(press PressNumber, toolID ToolID, toolPosition Position, totalCycl
 	}
 }
 
-func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
+func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition Position, totalCycles int64, userID TelegramID, date time.Time) *Cycle {
 	return &Cycle{
 		ID:           id,
 		PressNumber:  press,

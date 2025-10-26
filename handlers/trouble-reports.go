@@ -52,10 +52,11 @@ func (h *TroubleReports) GetPage(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetSharePDF(c echo.Context) error {
-	id, err := ParseQueryInt64(c, "id")
+	idQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "missing id query parameter")
 	}
+	id := models.TroubleReportID(idQuery)
 
 	tr, err := h.Registry.TroubleReports.GetWithAttachments(id)
 	if err != nil {
@@ -136,7 +137,7 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
 
-	itemRenderFunc := components.TroubleReportCreateModificationRenderer(id, isAdmin)
+	itemRenderFunc := components.TroubleReportCreateModificationRenderer(models.TroubleReportID(id), isAdmin)
 
 	page := components.PageModifications(m, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -166,10 +167,11 @@ func (h *TroubleReports) HTMXGetData(c echo.Context) error {
 }
 
 func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
-	id, err := ParseQueryInt64(c, "id")
+	idQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse trouble report ID")
 	}
+	id := models.TroubleReportID(idQuery)
 
 	user, err := GetUserFromContext(c)
 	if err != nil {
@@ -193,10 +195,11 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 }
 
 func (h *TroubleReports) HTMXGetAttachmentsPreview(c echo.Context) error {
-	id, err := ParseQueryInt64(c, "id")
+	idQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse ID from query")
 	}
+	id := models.TroubleReportID(idQuery)
 
 	tr, err := h.Registry.TroubleReports.GetWithAttachments(id)
 	if err != nil {
@@ -221,10 +224,11 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	trID, err := ParseQueryInt64(c, "id")
+	trIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse ID query")
 	}
+	trID := models.TroubleReportID(trIDQuery)
 
 	modTimeStr := c.FormValue("modification_time")
 	if modTimeStr == "" {
@@ -238,7 +242,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 
 	modifications, err := h.Registry.Modifications.ListAll(
 		models.ModificationTypeTroubleReport,
-		trID,
+		int64(trID),
 	)
 	if err != nil {
 		return HandleError(err, "failed to retrieve modifications")

@@ -81,7 +81,7 @@ func PageFeed() templ.Component {
 	})
 }
 
-func FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[int64]*models.User) templ.Component {
+func FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[models.TelegramID]*models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -141,7 +141,7 @@ func FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[int64
 	})
 }
 
-func Feed(feed *models.Feed, userMap map[int64]*models.User) templ.Component {
+func Feed(feed *models.Feed, userMap map[models.TelegramID]*models.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

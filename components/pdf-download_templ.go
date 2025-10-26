@@ -103,7 +103,7 @@ func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
 	)
 }
 
-func DownloadTroubleReportPDF(troubleReportID int64) templ.ComponentScript {
+func DownloadTroubleReportPDF(troubleReportID models.TroubleReportID) templ.ComponentScript {
 	return DownloadPDF(
 		templ.SafeURL(fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
 			env.ServerPathPrefix, troubleReportID)),

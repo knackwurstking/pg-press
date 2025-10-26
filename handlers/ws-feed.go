@@ -76,7 +76,7 @@ func (fh *FeedHandler) Start(ctx context.Context) {
 }
 
 // RegisterConnection adds a new WebSocket connection to the manager
-func (fh *FeedHandler) RegisterConnection(userID int64, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
+func (fh *FeedHandler) RegisterConnection(userID models.TelegramID, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
 	fh.log.Info("Registering new connection for user ID %d", userID)
 	feedConn := NewFeedConnection(userID, lastFeed, conn)
 	fh.register <- feedConn
@@ -195,7 +195,7 @@ func (fh *FeedHandler) closeAllConnections() {
 
 // FeedConnection represents a WebSocket connection for feed updates
 type FeedConnection struct {
-	UserID   int64
+	UserID   models.TelegramID
 	LastFeed models.FeedID
 	conn     *websocket.Conn
 	send     chan []byte
@@ -204,7 +204,7 @@ type FeedConnection struct {
 }
 
 // NewFeedConnection creates a new feed connection
-func NewFeedConnection(userID int64, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
+func NewFeedConnection(userID models.TelegramID, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
 	return &FeedConnection{
 		UserID:   userID,
 		LastFeed: lastFeed,

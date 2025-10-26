@@ -290,7 +290,8 @@ func scanToolRegeneration(scannable Scannable) (*models.Regeneration, error) {
 	}
 
 	if performedBy.Valid {
-		regen.PerformedBy = &performedBy.Int64
+		performedBy := models.TelegramID(performedBy.Int64)
+		regen.PerformedBy = &performedBy
 	}
 
 	return regen, nil

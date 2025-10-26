@@ -35,14 +35,16 @@ func showUserCommand() cli.Command {
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
 			flagApiKey := cli.Bool(cmd, "api-key", cli.Optional)
-			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					user, err := r.Users.Get(*telegramID)
+					telegramID := models.TelegramID(*telegramIDArg)
+
+					user, err := r.Users.Get(telegramID)
 					if err != nil {
 						handleNotFoundError(err)
-						handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", *telegramID))
+						handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", telegramID))
 						return err
 					}
 
@@ -79,15 +81,17 @@ func addUserCommand() cli.Command {
 		Name: "add",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 			userName := cli.StringArg(cmd, "user-name", cli.Required)
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					user := models.NewUser(*telegramID, *userName, *apiKey)
+					telegramID := models.TelegramID(*telegramIDArg)
+
+					user := models.NewUser(telegramID, *userName, *apiKey)
 					if _, err := r.Users.Add(user); errors.IsAlreadyExistsError(err) {
-						return fmt.Errorf("user already exists: %d (%s)", *telegramID, *userName)
+						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					} else {
 						return err
 					}
@@ -102,11 +106,11 @@ func removeUserCommand() cli.Command {
 		Name: "remove",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
+			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					return r.Users.Delete(*telegramID)
+					return r.Users.Delete(models.TelegramID(*telegramIDArg))
 				})
 			}
 		}),
@@ -124,7 +128,7 @@ func modUserCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					user, err := r.Users.Get(*telegramID)
+					user, err := r.Users.Get(models.TelegramID(*telegramID))
 					if err != nil {
 						return err
 					}

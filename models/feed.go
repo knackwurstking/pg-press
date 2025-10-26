@@ -12,15 +12,15 @@ type FeedID int64
 
 // Feed represents a simple feed entry with just title, content, and user info.
 type Feed struct {
-	ID        FeedID `json:"id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	UserID    int64  `json:"user_id"`
-	CreatedAt int64  `json:"created_at"`
+	ID        FeedID     `json:"id"`
+	Title     string     `json:"title"`
+	Content   string     `json:"content"`
+	UserID    TelegramID `json:"user_id"`
+	CreatedAt int64      `json:"created_at"`
 }
 
 // New creates a new feed entry with the current timestamp.
-func NewFeed(title, content string, userID int64) *Feed {
+func NewFeed(title, content string, userID TelegramID) *Feed {
 	return &Feed{
 		Title:     title,
 		Content:   content,

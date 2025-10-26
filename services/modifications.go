@@ -54,7 +54,7 @@ func NewModifications(r *Registry) *Modifications {
 	return &Modifications{Base: base}
 }
 
-func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user int64) (models.ModificationID, error) {
+func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user models.TelegramID) (models.ModificationID, error) {
 	s.Log.Debug("Adding modification: mt: %s, id: %d, user: %d", mt, mtID, user)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {

@@ -43,8 +43,8 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 	}
 
 	var id int64
-	var err error
 	if idParam != "" {
+		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
 			return HandleBadRequest(err, "invalid ID parameter")
@@ -53,7 +53,7 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 
 	options := &components.PageEditorOptions{
 		Type:      editorType,
-		ID:        id,
+		ID:        int64(id),
 		ReturnURL: returnURL,
 	}
 
@@ -101,6 +101,7 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 
 	var id int64
 	if idParam != "" {
+		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
 			return HandleBadRequest(err, "invalid ID parameter")
@@ -137,7 +138,7 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 func (h *Editor) loadExistingContent(options *components.PageEditorOptions) error {
 	switch options.Type {
 	case "troublereport":
-		tr, err := h.Registry.TroubleReports.Get(options.ID)
+		tr, err := h.Registry.TroubleReports.Get(models.TroubleReportID(options.ID))
 		if err != nil {
 			return fmt.Errorf("failed to get trouble report: %v", err)
 		}
@@ -168,8 +169,10 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 	switch editorType {
 	case "troublereport":
 		if id > 0 {
+			trID := models.TroubleReportID(id)
+
 			// Update existing trouble report
-			tr, err := h.Registry.TroubleReports.Get(id)
+			tr, err := h.Registry.TroubleReports.Get(trID)
 			if err != nil {
 				return fmt.Errorf("failed to get trouble report: %v", err)
 			}
@@ -190,7 +193,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			tr.UseMarkdown = useMarkdown
 			tr.LinkedAttachments = existingAttachmentIDs
 
-			err = h.Registry.TroubleReports.UpdateWithAttachments(id, tr, user, newAttachments...)
+			err = h.Registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
 			if err != nil {
 				return fmt.Errorf("failed to update trouble report: %v", err)
 			}
