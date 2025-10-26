@@ -760,15 +760,52 @@ func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
 }
 
 func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
-	rid, err := ParseQueryInt64(c, "id")
+	user, err := GetUserFromContext(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to get the regeneration id from url query")
+		return HandleBadRequest(err, "failed to get user from context")
 	}
-	regenerationID := models.RegenerationID(rid)
 
-	if err := h.Registry.ToolRegenerations.Delete(regenerationID); err != nil {
+	var regenerationID models.RegenerationID
+	if id, err := ParseQueryInt64(c, "id"); err != nil {
+		return HandleBadRequest(err, "failed to get the regeneration id from url query")
+	} else {
+		regenerationID = models.RegenerationID(id)
+	}
+
+	h.Log.Info("Deleting the regeneration with the ID %d (User: %s)", regenerationID, user.Name)
+
+	regeneration, err := h.Registry.ToolRegenerations.Get(regenerationID)
+	if err != nil {
+		return HandleError(err, "failed to get regeneration before deleting")
+	}
+
+	// TODO: Could use a resolved regeneration type here, but need a helper for this first
+	cycle, err := h.Registry.PressCycles.Get(regeneration.CycleID)
+	if err != nil {
+		return HandleError(err, "failed to get cycle")
+	}
+
+	// TODO: Could use a resolved regeneration type here, but need a helper for this first
+	tool, err := h.Registry.Tools.Get(regeneration.ToolID)
+	if err != nil {
+		return HandleError(err, "failed to get tool")
+	}
+
+	if err := h.Registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
 		return HandleError(err, "failed to delete regeneration")
 	}
+
+	title := "Werkzeug Regenerierung entfernt"
+	content := fmt.Sprintf("Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+		tool.String(), cycle.Date.Format(env.DateFormat), cycle.PartialCycles)
+	if regeneration.Reason != "" {
+		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+	}
+	if regeneration.PerformedBy != nil {
+		user, err = h.Registry.Users.Get(*regeneration.PerformedBy)
+		content += fmt.Sprintf("\nPerformed by: %s", user.Name)
+	}
+	h.createFeed(title, content, user.TelegramID)
 
 	SetHXTrigger(c, env.HXGlobalTrigger)
 
