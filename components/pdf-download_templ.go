@@ -18,10 +18,10 @@ import (
 // DownloadPDF provides a reusable script function to download PDFs
 func DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetContent string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_DownloadPDF_4965`,
-		Function: `function __templ_DownloadPDF_4965(url, defaultFilename, loadingContent, resetContent){async function downloadPDF() {
-		const button = event.target.closest('button') || event.target;
-		const originalContent = button.innerHTML || button.textContent;
+		Name: `__templ_DownloadPDF_7120`,
+		Function: `function __templ_DownloadPDF_7120(url, defaultFilename, loadingContent, resetContent){async function downloadPDF() {
+		var button = event.target.closest('button') || event.target;
+		var originalContent = button.innerHTML || button.textContent;
 
 		try {
 			// Show loading state
@@ -35,20 +35,20 @@ func DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetConten
 			button.disabled = true;
 
 			// Fetch the PDF
-			const response = await fetch(url);
+			var response = await fetch(url);
 			if (!response.ok) {
 				throw new Error('PDF konnte nicht geladen werden');
 			}
 
 			// Get the blob and create download
-			const blob = await response.blob();
-			const downloadUrl = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
+			var blob = await response.blob();
+			var downloadUrl = window.URL.createObjectURL(blob);
+			var a = document.createElement('a');
 
 			// Extract filename from headers or use default
-			const contentDisposition = response.headers.get('Content-Disposition');
-			const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-			const filename = filenameMatch?.[1] || defaultFilename;
+			var contentDisposition = response.headers.get('Content-Disposition');
+			var filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+			var filename = filenameMatch?.[1] || defaultFilename;
 
 			// Configure and trigger download
 			Object.assign(a, {
@@ -77,7 +77,7 @@ func DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetConten
 			alert('Fehler beim Download: ' + error.message);
 
 			// Reset button with fallback content
-			const fallbackContent = resetContent || originalContent;
+			var fallbackContent = resetContent || originalContent;
 			if (button.innerHTML !== button.textContent) {
 				button.innerHTML = fallbackContent;
 			} else {
@@ -89,8 +89,8 @@ func DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetConten
 
 	downloadPDF();
 }`,
-		Call:       templ.SafeScript(`__templ_DownloadPDF_4965`, url, defaultFilename, loadingContent, resetContent),
-		CallInline: templ.SafeScriptInline(`__templ_DownloadPDF_4965`, url, defaultFilename, loadingContent, resetContent),
+		Call:       templ.SafeScript(`__templ_DownloadPDF_7120`, url, defaultFilename, loadingContent, resetContent),
+		CallInline: templ.SafeScriptInline(`__templ_DownloadPDF_7120`, url, defaultFilename, loadingContent, resetContent),
 	}
 }
 

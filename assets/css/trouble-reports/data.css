@@ -9,17 +9,17 @@
 
 /* Pre-formatted text styling */
 pre {
-    text-wrap: wrap;
+	text-wrap: wrap;
 }
 
 /* Details element styling */
 details[id^="trouble-report-"] {
-    margin: var(--ui-spacing) auto;
+	margin: var(--ui-spacing) auto;
 }
 
 /* Vote button styling */
 #vote-for-delete {
-    transform: scale(0.75);
+	transform: scale(0.75);
 }
 
 /* =================================================================
@@ -28,81 +28,81 @@ details[id^="trouble-report-"] {
 
 /* Attachment Preview Container */
 .attachments-preview-container {
-    margin: var(--ui-spacing) 0;
-    border: 1px solid var(--ui-border-color);
-    border-radius: 4px;
-    padding: 12px;
+	margin: var(--ui-spacing) 0;
+	border: 1px solid var(--ui-border-color);
+	border-radius: 4px;
+	padding: 12px;
 }
 
 .attachments-preview-label {
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
 
 .attachments-preview-placeholder {
-    background-color: var(--ui-info);
-    border-radius: var(--ui-radius);
-    color: var(--ui-info-text);
-    cursor: pointer;
-    padding: var(--ui-spacing);
+	background-color: var(--ui-info);
+	border-radius: var(--ui-radius);
+	color: var(--ui-info-text);
+	cursor: pointer;
+	padding: var(--ui-spacing);
 }
 
 .attachments-preview-scroll {
-    padding: var(--ui-spacing);
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ui-border-color) transparent;
+	padding: var(--ui-spacing);
+	display: flex;
+	gap: 12px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--ui-border-color) transparent;
 }
 
 .attachments-preview-scroll::-webkit-scrollbar {
-    height: 6px;
+	height: 6px;
 }
 
 .attachments-preview-scroll::-webkit-scrollbar-track {
-    background: transparent;
+	background: transparent;
 }
 
 .attachments-preview-scroll::-webkit-scrollbar-thumb {
-    background: var(--ui-border-color);
-    border-radius: 3px;
+	background: var(--ui-border-color);
+	border-radius: 3px;
 }
 
 .attachments-preview-scroll::-webkit-scrollbar-thumb:hover {
-    background: var(--ui-muted-text);
+	background: var(--ui-muted-text);
 }
 
 /* Attachment Preview Items */
 .attachment-preview-item {
-    flex-shrink: 0;
-    border-radius: var(--ui-radius);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--ui-spacing);
+	flex-shrink: 0;
+	border-radius: var(--ui-radius);
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--ui-spacing);
 }
 
 .attachment-preview-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .attachment-preview-icon {
-    width: 96px;
-    height: 96px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    color: var(--ui-info);
-    border-radius: var(--ui-radius);
-    border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+	width: 96px;
+	height: 96px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 48px;
+	color: var(--ui-info);
+	border-radius: var(--ui-radius);
+	border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
 }
 
 /* =================================================================
@@ -111,22 +111,22 @@ details[id^="trouble-report-"] {
 
 /* Image Preview Styles */
 .attachment-preview-image {
-    width: 96px;
-    height: 96px;
-    overflow: hidden;
-    border-radius: var(--ui-radius);
-    border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
+	width: 96px;
+	height: 96px;
+	overflow: hidden;
+	border-radius: var(--ui-radius);
+	border: var(--ui-border-width) var(--ui-border-style) var(--ui-border-color);
 }
 
 .preview-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.2s ease;
 }
 
 .attachment-preview-item:hover .preview-thumbnail {
-    transform: scale(1.05);
+	transform: scale(1.05);
 }
 
 /* =================================================================
@@ -135,63 +135,63 @@ details[id^="trouble-report-"] {
 
 /* Share Button Styles */
 .actions button[title="Als PDF teilen"] {
-    color: #0066cc !important;
+	color: #0066cc !important;
 }
 
 .actions button[title="Als PDF teilen"]:hover {
-    background-color: rgba(0, 102, 204, 0.1);
-    transform: scale(1.05);
+	background-color: rgba(0, 102, 204, 0.1);
+	transform: scale(1.05);
 }
 
 .actions button[title="Als PDF teilen"] i {
-    font-size: 16px;
+	font-size: 16px;
 }
 
 /* Share Button Loading State */
 .actions button[title="Als PDF teilen"]:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none !important;
 }
 
 .actions button[title="Als PDF teilen"]:disabled:hover {
-    background-color: transparent;
-    transform: none !important;
+	background-color: transparent;
+	transform: none !important;
 }
 
 .actions button[title="Als PDF teilen"] .bi-hourglass-split {
-    animation: spin 1s linear infinite;
+	animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* Share Button Success States */
 .actions button[title="Als PDF teilen"] .bi-check-circle {
-    color: #28a745 !important;
-    animation: scaleIn 0.3s ease;
+	color: #28a745 !important;
+	animation: scaleIn 0.3s ease;
 }
 
 .actions button[title="Als PDF teilen"] .bi-download {
-    color: #28a745 !important;
-    animation: scaleIn 0.3s ease;
+	color: #28a745 !important;
+	animation: scaleIn 0.3s ease;
 }
 
 @keyframes scaleIn {
-    from {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+	from {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
 
 /* =================================================================
@@ -201,22 +201,22 @@ details[id^="trouble-report-"] {
 
 /* Spin animation - used for loading states */
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* Scale-in animation - used for success feedback */
 @keyframes scaleIn {
-    from {
-        transform: scale(0.5);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+	from {
+		transform: scale(0.5);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
 }

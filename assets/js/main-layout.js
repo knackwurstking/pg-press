@@ -4,21 +4,13 @@ const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");
 	if (matchMedia("(prefers-color-scheme: dark)").matches) {
-		document.querySelector("html").setAttribute(
-			"data-theme",
-			"dark",
-		);
+		document.querySelector("html").setAttribute("data-theme", "dark");
 		// Dark theme background color
-		if (themeColorMeta)
-			themeColorMeta.setAttribute("content", "#1d2021");
+		if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
 	} else {
-		document.querySelector("html").setAttribute(
-			"data-theme",
-			"light",
-		);
+		document.querySelector("html").setAttribute("data-theme", "light");
 		// Light theme background color
-		if (themeColorMeta)
-			themeColorMeta.setAttribute("content", "#f9f5d7");
+		if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
 	}
 }
 
@@ -48,12 +40,8 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Debounced reload function
 	const debouncedReload = debounce(function () {
 		if (document.visibilityState === "visible") {
-			console.log(
-				"Page became visible - reloading HTMX sections",
-			);
-			document.body.dispatchEvent(
-				new CustomEvent("pageLoaded"),
-			);
+			console.log("Page became visible - reloading HTMX sections");
+			document.body.dispatchEvent(new CustomEvent("pageLoaded"));
 		}
 	}, 500);
 

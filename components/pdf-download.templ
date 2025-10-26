@@ -11,8 +11,8 @@ import (
 
 script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetContent string) {
 	async function downloadPDF() {
-		const button = event.target.closest('button') || event.target;
-		const originalContent = button.innerHTML || button.textContent;
+		var button = event.target.closest('button') || event.target;
+		var originalContent = button.innerHTML || button.textContent;
 
 		try {
 			// Show loading state
@@ -26,20 +26,20 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 			button.disabled = true;
 
 			// Fetch the PDF
-			const response = await fetch(url);
+			var response = await fetch(url);
 			if (!response.ok) {
 				throw new Error('PDF konnte nicht geladen werden');
 			}
 
 			// Get the blob and create download
-			const blob = await response.blob();
-			const downloadUrl = window.URL.createObjectURL(blob);
-			const a = document.createElement('a');
+			var blob = await response.blob();
+			var downloadUrl = window.URL.createObjectURL(blob);
+			var a = document.createElement('a');
 
 			// Extract filename from headers or use default
-			const contentDisposition = response.headers.get('Content-Disposition');
-			const filenameMatch = contentDisposition?.match(/filename="(.+)"/);
-			const filename = filenameMatch?.[1] || defaultFilename;
+			var contentDisposition = response.headers.get('Content-Disposition');
+			var filenameMatch = contentDisposition?.match(/filename="(.+)"/);
+			var filename = filenameMatch?.[1] || defaultFilename;
 
 			// Configure and trigger download
 			Object.assign(a, {
@@ -68,7 +68,7 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 			alert('Fehler beim Download: ' + error.message);
 
 			// Reset button with fallback content
-			const fallbackContent = resetContent || originalContent;
+			var fallbackContent = resetContent || originalContent;
 			if (button.innerHTML !== button.textContent) {
 				button.innerHTML = fallbackContent;
 			} else {
