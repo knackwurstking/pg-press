@@ -13,6 +13,14 @@ const (
 	PageTools_IDSectionToolsList = "section-tools-list"
 )
 
+type pageTools_SectionPress_ListItemProps struct {
+	Title       string
+	Top         string
+	TopCassette string
+	Bottom      string
+	Href        string
+}
+
 templ PageTools() {
 	@Layout(
 		LayoutOptions{
@@ -47,180 +55,13 @@ templ PageTools() {
 	}
 }
 
-templ PageTools_SectionPress(pressUtilization []models.PressUtilization) {
-	<span
-		hx-get={ utils.HXGetToolsPagePressSectionContent() }
-		hx-trigger="pageLoaded from:body"
-		hx-target="#section-press"
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-	></span>
-	<summary>
-		<h4>
-			<i class="bi bi-gear-fill mr"></i>
-			Eingebaute Werkzeuge
-		</h4>
-	</summary>
-	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
-		for _, u := range pressUtilization {
-			{{
-				var (
-					top         string
-					topCassette string
-					bottom      string
-				)
-
-				for _, t := range u.Tools {
-					switch t.Position {
-					case models.PositionTop:
-						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					case models.PositionTopCassette:
-						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					case models.PositionBottom:
-						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					}
-				}
-			}}
-			@pageTools_SectionPress_ListItem(pageTools_SectionPress_ListItemProps{
-				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
-				Top:         top,
-				TopCassette: topCassette,
-				Bottom:      bottom,
-				Href:        fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
-			})
+templ pageTools_additionalHead() {
+	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
+	<style>
+		#section-tools-list {
+			min-height: 100vh;
 		}
-	</ul>
-}
-
-type pageTools_SectionPress_ListItemProps struct {
-	Title       string
-	Top         string
-	TopCassette string
-	Bottom      string
-	Href        string
-}
-
-templ pageTools_SectionPress_ListItem(props pageTools_SectionPress_ListItemProps) {
-	<li title={ props.Title }>
-		<a
-			role="button"
-			href={ props.Href }
-			class="outline contrast flex justify-between items-center"
-		>
-			<span class="flex flex-col gap-lg w-full">
-				<h5>{ props.Title }</h5>
-				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
-					if props.Top != "" || props.TopCassette != "" {
-						@pageTools_RenderTopTools(props.Top, props.TopCassette)
-					}
-					if props.Bottom != "" {
-						@pageTools_RenderBottomTools(props.Bottom)
-					}
-				</span>
-			</span>
-			<i class="bi bi-chevron-right"></i>
-		</a>
-	</li>
-}
-
-templ pageTools_RenderTopTools(top, cassette string) {
-	<!-- Upper Tool -->
-	<span class="flex flex-col gap-sm">
-		if top != "" {
-			<span class="flex flex-col gap-0 justify-center items-start gap-sm">
-				@PositionBadge(
-					models.PositionTop, "primary text-bold",
-				)
-				<small class="text-sm">{ top }</small>
-			</span>
-		}
-		if cassette != "" {
-			<span class="flex flex-col gap-0 justify-center items-start gap-sm">
-				@PositionBadge(
-					models.PositionTopCassette, "primary text-bold",
-				)
-				<small class="text-sm">{ cassette }</small>
-			</span>
-		}
-	</span>
-}
-
-templ pageTools_RenderBottomTools(bottom string) {
-	<!-- Lower Tool -->
-	<span class="flex flex-col justify-center items-start gap-sm">
-		@PositionBadge(models.PositionBottom, "primary text-bold")
-		<small class="text-sm">{ bottom }</small>
-	</span>
-}
-
-templ PageTools_SectionTools(tools []*models.ResolvedTool) {
-	<span
-		hx-get={ utils.HXGetToolsPageAllToolsSectionContent() }
-		hx-trigger="pageLoaded from:body"
-		hx-target={ fmt.Sprintf("#%s", PageTools_IDSectionToolsList) }
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-	></span>
-	<summary>
-		<h4>
-			<i class="bi bi-archive mr"></i>
-			Alle Werkzeuge
-		</h4>
-	</summary>
-	@pageTools_sectionToolsFilter(tools)
-	<div class="all-tools p">
-		<div class="actions-bar flex gap justify-end items-center">
-			<button
-				type="button"
-				class="primary flex gap"
-				hx-get={ utils.HXGetToolEditDialog(nil) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			>
-				<i class="bi bi-plus-lg"></i>
-				<span>Erstellen</span>
-			</button>
-		</div>
-		<ul id="tools-list" class="flex flex-col gap m-t p-0" style="list-style: none;">
-			@PageTools_ToolsList(tools)
-		</ul>
-	</div>
-	@pageToolsInitializeFilterInput()
-}
-
-templ pageTools_sectionToolsFilter(tools []*models.ResolvedTool) {
-	<div class="flex gap-sm flex-wrap justify-evenly">
-		<!-- Filter for Tool Format -->
-		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
-			Suche (Lazy)
-			<input
-				id={ PageTools_IDToolsFilter }
-				type="search"
-				oninput="scrollFilterInputIntoView(event); filterToolsList(event);"
-				onblur="unscrollFilterInputIntoView(event);"
-				placeholder="z.B.: kassette 120x60 mass"
-				hx-preserve="true"
-			/>
-		</label>
-	</div>
-}
-
-templ PageTools_ToolsList(tools []*models.ResolvedTool) {
-	for _, t := range tools {
-		if t.Position != models.PositionTopCassette || !t.IsBound() {
-			@pageTools_toolListItem(t.ID, t)
-		}
-	}
-}
-
-templ pageTools_toolListItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf("tool-%d", id) }>
-		@ToolAnchor(tool, &ToolAnchorOptions{
-			EnableStatusBadge:  true,
-			EnableBindingBadge: true,
-			EnableTotalCycles:  true,
-		})
-	</li>
+	</style>
 }
 
 templ PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.OverlappingTool) {
@@ -306,27 +147,154 @@ templ PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.O
 	</div>
 }
 
-func pageTools_formatDuration(d time.Duration) string {
-	days := int(d.Hours() / 24)
-	hours := int(d.Hours()) % 24
+templ PageTools_SectionPress(pressUtilization []models.PressUtilization) {
+	<span
+		hx-get={ utils.HXGetToolsPagePressSectionContent() }
+		hx-trigger="pageLoaded from:body"
+		hx-target="#section-press"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary>
+		<h4>
+			<i class="bi bi-gear-fill mr"></i>
+			Eingebaute Werkzeuge
+		</h4>
+	</summary>
+	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
+		for _, u := range pressUtilization {
+			{{
+				var (
+					top         string
+					topCassette string
+					bottom      string
+				)
 
-	if days > 0 {
-		return fmt.Sprintf("%d Tage, %d Stunden", days, hours)
-	} else if hours > 0 {
-		return fmt.Sprintf("%d Stunden", hours)
-	} else {
-		minutes := int(d.Minutes())
-		return fmt.Sprintf("%d Minuten", minutes)
-	}
+				for _, t := range u.Tools {
+					switch t.Position {
+					case models.PositionTop:
+						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					case models.PositionTopCassette:
+						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					case models.PositionBottom:
+						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					}
+				}
+			}}
+			@pageTools_sectionPress_listItem(pageTools_SectionPress_ListItemProps{
+				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
+				Top:         top,
+				TopCassette: topCassette,
+				Bottom:      bottom,
+				Href:        fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
+			})
+		}
+	</ul>
 }
 
-templ pageTools_additionalHead() {
-	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
-	<style>
-		#section-tools-list {
-			min-height: 100vh;
+templ pageTools_sectionPress_listItem(props pageTools_SectionPress_ListItemProps) {
+	<li title={ props.Title }>
+		<a
+			role="button"
+			href={ props.Href }
+			class="outline contrast flex justify-between items-center"
+		>
+			<span class="flex flex-col gap-lg w-full">
+				<h5>{ props.Title }</h5>
+				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
+					if props.Top != "" || props.TopCassette != "" {
+						@pageTools_sectionPress_renderTopTools(props.Top, props.TopCassette)
+					}
+					if props.Bottom != "" {
+						@pageTools_sectionPress_renderBottomTools(props.Bottom)
+					}
+				</span>
+			</span>
+			<i class="bi bi-chevron-right"></i>
+		</a>
+	</li>
+}
+
+templ pageTools_sectionPress_renderTopTools(top, cassette string) {
+	<!-- Upper Tool -->
+	<span class="flex flex-col gap-sm">
+		if top != "" {
+			<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+				@PositionBadge(
+					models.PositionTop, "primary text-bold",
+				)
+				<small class="text-sm">{ top }</small>
+			</span>
 		}
-	</style>
+		if cassette != "" {
+			<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+				@PositionBadge(
+					models.PositionTopCassette, "primary text-bold",
+				)
+				<small class="text-sm">{ cassette }</small>
+			</span>
+		}
+	</span>
+}
+
+templ pageTools_sectionPress_renderBottomTools(bottom string) {
+	<!-- Lower Tool -->
+	<span class="flex flex-col justify-center items-start gap-sm">
+		@PositionBadge(models.PositionBottom, "primary text-bold")
+		<small class="text-sm">{ bottom }</small>
+	</span>
+}
+
+templ PageTools_SectionTools(tools []*models.ResolvedTool) {
+	<span
+		hx-get={ utils.HXGetToolsPageAllToolsSectionContent() }
+		hx-trigger="pageLoaded from:body"
+		hx-target={ fmt.Sprintf("#%s", PageTools_IDSectionToolsList) }
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary>
+		<h4>
+			<i class="bi bi-archive mr"></i>
+			Alle Werkzeuge
+		</h4>
+	</summary>
+	@pageTools_sectionTools_Filter(tools)
+	<div class="all-tools p">
+		<div class="actions-bar flex gap justify-end items-center">
+			<button
+				type="button"
+				class="primary flex gap"
+				hx-get={ utils.HXGetToolEditDialog(nil) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			>
+				<i class="bi bi-plus-lg"></i>
+				<span>Erstellen</span>
+			</button>
+		</div>
+		<ul id="tools-list" class="flex flex-col gap m-t p-0" style="list-style: none;">
+			@PageTools_ToolsList(tools)
+		</ul>
+	</div>
+	@pageToolsInitializeFilterInput()
+}
+
+templ pageTools_sectionTools_Filter(tools []*models.ResolvedTool) {
+	<div class="flex gap-sm flex-wrap justify-evenly">
+		<!-- Filter for Tool Format -->
+		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
+			Suche (Lazy)
+			<input
+				id={ PageTools_IDToolsFilter }
+				type="search"
+				oninput="scrollFilterInputIntoView(event); filterToolsList(event);"
+				onblur="unscrollFilterInputIntoView(event);"
+				placeholder="z.B.: kassette 120x60 mass"
+				hx-preserve="true"
+			/>
+		</label>
+	</div>
 }
 
 script pageToolsInitializeFilterInput() {
@@ -339,4 +307,36 @@ script pageToolsInitializeFilterInput() {
 			filterToolsList();
 		}
 	}, 100);
+}
+
+templ PageTools_ToolsList(tools []*models.ResolvedTool) {
+	for _, t := range tools {
+		if t.Position != models.PositionTopCassette || !t.IsBound() {
+			@pageTools_toolsList_listItem(t.ID, t)
+		}
+	}
+}
+
+templ pageTools_toolsList_listItem(id models.ToolID, tool *models.ResolvedTool) {
+	<li id={ fmt.Sprintf("tool-%d", id) }>
+		@ToolAnchor(tool, &ToolAnchorOptions{
+			EnableStatusBadge:  true,
+			EnableBindingBadge: true,
+			EnableTotalCycles:  true,
+		})
+	</li>
+}
+
+func pageTools_formatDuration(d time.Duration) string {
+	days := int(d.Hours() / 24)
+	hours := int(d.Hours()) % 24
+
+	if days > 0 {
+		return fmt.Sprintf("%d Tage, %d Stunden", days, hours)
+	} else if hours > 0 {
+		return fmt.Sprintf("%d Stunden", hours)
+	} else {
+		minutes := int(d.Minutes())
+		return fmt.Sprintf("%d Minuten", minutes)
+	}
 }
