@@ -15,6 +15,8 @@ const (
 	ToolCycleError   int64 = 1000000 // Red
 )
 
+type ToolID int64
+
 type Status string
 
 const (
@@ -82,7 +84,7 @@ func (f Format) String() string {
 // Tool represents a tool in the database.
 // Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
 type Tool struct {
-	ID           int64        `json:"id"`
+	ID           ToolID       `json:"id"`
 	Position     Position     `json:"position"`
 	Format       Format       `json:"format"`
 	Type         string       `json:"type"` // Ex: FC, GTC, MASS
@@ -90,7 +92,7 @@ type Tool struct {
 	Regenerating bool         `json:"regenerating"`
 	IsDead       bool         `json:"is_dead"`
 	Press        *PressNumber `json:"press"` // Press number (0-5) when status is active
-	Binding      *int64       `json:"binding"`
+	Binding      *ToolID      `json:"binding"`
 }
 
 func NewTool(position Position, format Format, code string, _type string) *Tool {
@@ -241,7 +243,7 @@ func SortToolsByPosition(tools []*Tool) []*Tool {
 // ValidateUniquePositions checks that there's only one tool per position
 // Returns an error if duplicates are found
 func ValidateUniquePositions(tools []*Tool) error {
-	positionCount := make(map[Position][]int64)
+	positionCount := make(map[Position][]ToolID)
 
 	for _, tool := range tools {
 		positionCount[tool.Position] = append(positionCount[tool.Position], tool.ID)
@@ -272,7 +274,7 @@ type OverlappingToolInstance struct {
 
 // OverlappingTool represents a tool that appears on multiple presses simultaneously
 type OverlappingTool struct {
-	ToolID    int64                      `json:"tool_id"`
+	ToolID    ToolID                     `json:"tool_id"`
 	ToolCode  string                     `json:"tool_code"`
 	Overlaps  []*OverlappingToolInstance `json:"overlaps"`
 	StartDate time.Time                  `json:"start_date"`

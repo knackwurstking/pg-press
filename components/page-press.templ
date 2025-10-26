@@ -186,7 +186,7 @@ templ pagePress_toolNotesSection(notes []*models.Note, tools []*models.Tool) {
 					sID, _ := strings.CutPrefix(n.Linked, "tool_")
 					id, _ := strconv.ParseInt(sID, 10, 64)
 					for _, t := range tools {
-						if t.ID != id {
+						if t.ID != models.ToolID(id) {
 							continue
 						}
 
@@ -238,7 +238,7 @@ templ PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.Pr
 
 type PagePress_MetalSheetSectionProps struct {
 	MetalSheets []*models.MetalSheet
-	ToolsMap    map[int64]*models.Tool
+	ToolsMap    map[models.ToolID]*models.Tool
 	Press       models.PressNumber
 }
 
@@ -257,7 +257,7 @@ templ PagePress_MetalSheetsSection(props PagePress_MetalSheetSectionProps) {
 
 type PagePress_CyclesSectionProps struct {
 	Cycles   []*models.Cycle
-	ToolsMap map[int64]*models.Tool
+	ToolsMap map[models.ToolID]*models.Tool
 	User     *models.User
 	Press    models.PressNumber
 }
@@ -343,13 +343,13 @@ templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesS
 	</tr>
 }
 
-templ PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
+templ PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
 	@PagePress_MetalSheetTableTopCollapsible(metalSheets, toolsMap)
 	<br/>
 	@PagePress_MetalSheetTableBottomCollapsible(metalSheets, toolsMap)
 }
 
-templ PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
+templ PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
 	{{
 		topSheets := pagePress_filterMetalSheetsByPosition(
 			metalSheets,
@@ -400,7 +400,7 @@ templ PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, 
 	</details>
 }
 
-templ PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) {
+templ PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
 	{{ bottomSheets := pagePress_filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionBottom}) }}
 	<details
 		class="mb"
@@ -467,7 +467,7 @@ templ PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalShee
 }
 
 func pagePress_filterMetalSheetsByPosition(
-	metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, positions []models.Position,
+	metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool, positions []models.Position,
 ) []*models.MetalSheet {
 	var filtered models.MetalSheetList
 	for _, sheet := range metalSheets {

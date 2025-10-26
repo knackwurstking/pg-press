@@ -382,7 +382,7 @@ func pagePress_toolNotesSection(notes []*models.Note, tools []*models.Tool) temp
 			sID, _ := strings.CutPrefix(n.Linked, "tool_")
 			id, _ := strconv.ParseInt(sID, 10, 64)
 			for _, t := range tools {
-				if t.ID != id {
+				if t.ID != models.ToolID(id) {
 					continue
 				}
 
@@ -527,7 +527,7 @@ func PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.Pre
 
 type PagePress_MetalSheetSectionProps struct {
 	MetalSheets []*models.MetalSheet
-	ToolsMap    map[int64]*models.Tool
+	ToolsMap    map[models.ToolID]*models.Tool
 	Press       models.PressNumber
 }
 
@@ -597,7 +597,7 @@ func PagePress_MetalSheetsSection(props PagePress_MetalSheetSectionProps) templ.
 
 type PagePress_CyclesSectionProps struct {
 	Cycles   []*models.Cycle
-	ToolsMap map[int64]*models.Tool
+	ToolsMap map[models.ToolID]*models.Tool
 	User     *models.User
 	Press    models.PressNumber
 }
@@ -815,7 +815,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 	})
 }
 
-func PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
+func PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -852,7 +852,7 @@ func PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, too
 	})
 }
 
-func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
+func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -956,7 +956,7 @@ func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, t
 	})
 }
 
-func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool) templ.Component {
+func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -1113,7 +1113,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 }
 
 func pagePress_filterMetalSheetsByPosition(
-	metalSheets []*models.MetalSheet, toolsMap map[int64]*models.Tool, positions []models.Position,
+	metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool, positions []models.Position,
 ) []*models.MetalSheet {
 	var filtered models.MetalSheetList
 	for _, sheet := range metalSheets {

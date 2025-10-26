@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
-func HXGetMetalSheetEditDialog(metalSheetID *models.MetalSheetID, toolID *int64) templ.SafeURL {
+func HXGetMetalSheetEditDialog(metalSheetID *models.MetalSheetID, toolID *models.ToolID) templ.SafeURL {
 	params := make(map[string]string)
 
 	if metalSheetID != nil {
@@ -19,7 +19,7 @@ func HXGetMetalSheetEditDialog(metalSheetID *models.MetalSheetID, toolID *int64)
 	return buildURL("/htmx/metal-sheets/edit", params)
 }
 
-func HXPostMetalSheetEditDialog(toolID int64) templ.SafeURL {
+func HXPostMetalSheetEditDialog(toolID models.ToolID) templ.SafeURL {
 	params := map[string]string{
 		"tool_id": fmt.Sprintf("%d", toolID),
 	}

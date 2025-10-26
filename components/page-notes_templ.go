@@ -80,7 +80,7 @@ func PageNotes(props *PageNotesProps) templ.Component {
 				if l.Name == "tool" {
 					skip := false
 					for _, t := range props.Tools {
-						if t.ID == l.ID && t.IsDead {
+						if t.ID == models.ToolID(l.ID) && t.IsDead {
 							skip = true
 							break
 						}
@@ -231,7 +231,7 @@ func NotesGrid(notes []*models.Note, tools []*models.Tool) templ.Component {
 				l := note.GetLinked()
 				if l.Name == "tool" {
 					for _, t := range tools {
-						if t.ID == l.ID && t.IsDead {
+						if t.ID == models.ToolID(l.ID) && t.IsDead {
 							skip = true
 							break
 						}
@@ -406,7 +406,7 @@ func NotesCard(note *models.Note, filterClass string, tools []*models.Tool) temp
 			switch linked.Name {
 			case "tool":
 				for _, tool := range tools {
-					if tool.ID == linked.ID {
+					if tool.ID == models.ToolID(linked.ID) {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<a href=\"")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err

@@ -10,7 +10,7 @@ import (
 type PageToolProps struct {
 	User       *models.User
 	ToolString string
-	ToolID     int64
+	ToolID     models.ToolID
 	Position   models.Position
 }
 
@@ -67,7 +67,7 @@ templ PageTool(props *PageToolProps) {
 	}
 }
 
-templ PageTool_CyclesSection(toolID int64, oob bool) {
+templ PageTool_CyclesSection(toolID models.ToolID, oob bool) {
 	<section
 		id="cycles-section"
 		hx-get={ utils.HXGetToolCyclesSectionContent(toolID) }
@@ -82,7 +82,7 @@ templ PageTool_CyclesSection(toolID int64, oob bool) {
 	</section>
 }
 
-templ pageTool_sectionActions(user *models.User, toolID int64) {
+templ pageTool_sectionActions(user *models.User, toolID models.ToolID) {
 	<section class="action-bar flex gap justify-end items-center">
 		<button
 			class="primary flex gap"

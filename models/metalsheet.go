@@ -133,12 +133,12 @@ type MetalSheet struct {
 	STF         float64      `json:"stf"`          // STF value
 	STFMax      float64      `json:"stf_max"`      // STF max value
 	Identifier  MachineType  `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
-	ToolID      int64        `json:"tool_id"`      // Currently assigned tool
+	ToolID      ToolID       `json:"tool_id"`      // Currently assigned tool
 
 }
 
 // New creates a new MetalSheet with default values
-func NewMetalSheet(u *User, toolID int64) *MetalSheet {
+func NewMetalSheet(u *User, toolID ToolID) *MetalSheet {
 	sheet := &MetalSheet{
 		TileHeight:  0,
 		Value:       0,

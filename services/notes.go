@@ -118,7 +118,7 @@ func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
 	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
-func (n *Notes) GetByTool(toolID int64) ([]*models.Note, error) {
+func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, error) {
 	n.Log.Debug("Getting notes for tool: %d", toolID)
 	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
 }

@@ -85,7 +85,7 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
 	return sheet, nil
 }
 
-func (s *MetalSheets) GetByToolID(toolID int64) ([]*models.MetalSheet, error) {
+func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, error) {
 	s.Log.Debug("Getting metal sheets for tool: %d", toolID)
 
 	query := fmt.Sprintf(`
@@ -128,7 +128,7 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 	return ScanRows(rows, scanMetalSheet)
 }
 
-func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[int64]*models.Tool) ([]*models.MetalSheet, error) {
+func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, error) {
 	s.Log.Debug("Getting metal sheets for press: %d, tools: %d", pressNumber, len(toolsMap))
 
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)

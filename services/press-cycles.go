@@ -96,7 +96,7 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 // Query Methods
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
-func (s *PressCycles) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
+func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, error) {
 	s.Log.Debug("Getting last press cycle for tool: %d", toolID)
 
 	query := fmt.Sprintf(`
@@ -120,7 +120,7 @@ func (s *PressCycles) GetLastToolCycle(toolID int64) (*models.Cycle, error) {
 }
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID int64) ([]*models.Cycle, error) {
+func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, error) {
 	s.Log.Debug("Getting press cycles for tool: %d", toolID)
 
 	query := fmt.Sprintf(`
@@ -181,7 +181,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 // GetCycleSummaryData retrieves complete cycle summary data for a press
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
-) ([]*models.Cycle, map[int64]*models.Tool, map[int64]*models.User, error) {
+) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[int64]*models.User, error) {
 	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
 
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
@@ -194,7 +194,7 @@ func (s *PressCycles) GetCycleSummaryData(
 		return nil, nil, nil, fmt.Errorf("failed to get tools: %w", err)
 	}
 
-	toolsMap := make(map[int64]*models.Tool, len(tools))
+	toolsMap := make(map[models.ToolID]*models.Tool, len(tools))
 	for _, tool := range tools {
 		toolsMap[tool.ID] = tool
 	}
@@ -223,7 +223,7 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 		return 0, 0, 0, 0
 	}
 
-	activeTools := make(map[int64]bool)
+	activeTools := make(map[models.ToolID]bool)
 
 	for _, cycle := range cycles {
 		if cycle.TotalCycles > totalCycles {
@@ -240,7 +240,7 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 
 // GetToolSummaries creates consolidated tool summaries with start/end dates
 func (s *PressCycles) GetToolSummaries(
-	cycles []*models.Cycle, toolsMap map[int64]*models.Tool,
+	cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool,
 ) ([]*models.ToolSummary, error) {
 	s.Log.Debug("Creating tool summaries from cycles data")
 
@@ -413,7 +413,7 @@ func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int
 	return query
 }
 
-func (s *PressCycles) createInitialSummaries(cycles []*models.Cycle, toolsMap map[int64]*models.Tool) []*models.ToolSummary {
+func (s *PressCycles) createInitialSummaries(cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool) []*models.ToolSummary {
 	summaries := make([]*models.ToolSummary, 0, len(cycles))
 
 	for _, cycle := range cycles {
@@ -434,7 +434,7 @@ func (s *PressCycles) createInitialSummaries(cycles []*models.Cycle, toolsMap ma
 	return summaries
 }
 
-func (s *PressCycles) formatToolCode(toolID int64, toolsMap map[int64]*models.Tool) string {
+func (s *PressCycles) formatToolCode(toolID models.ToolID, toolsMap map[models.ToolID]*models.Tool) string {
 	if tool, exists := toolsMap[toolID]; exists && tool != nil {
 		return fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
 	}
@@ -463,7 +463,7 @@ func (s *PressCycles) consolidateToolSummaries(summaries []*models.ToolSummary) 
 	}
 
 	consolidated := make([]*models.ToolSummary, 0)
-	lastToolByPosition := make(map[models.Position]int64)
+	lastToolByPosition := make(map[models.Position]models.ToolID)
 	positionIndexMap := make(map[models.Position]int)
 
 	for _, summary := range summaries {
@@ -597,8 +597,8 @@ func (s *PressCycles) collectAllPressSummaries(presses []models.PressNumber) map
 	return allSummaries
 }
 
-func (s *PressCycles) groupSummariesByToolID(allSummaries map[models.PressNumber][]*models.ToolSummary) map[int64]map[models.PressNumber][]*models.ToolSummary {
-	toolGroups := make(map[int64]map[models.PressNumber][]*models.ToolSummary)
+func (s *PressCycles) groupSummariesByToolID(allSummaries map[models.PressNumber][]*models.ToolSummary) map[models.ToolID]map[models.PressNumber][]*models.ToolSummary {
+	toolGroups := make(map[models.ToolID]map[models.PressNumber][]*models.ToolSummary)
 
 	for press, summaries := range allSummaries {
 		for _, summary := range summaries {
@@ -612,7 +612,7 @@ func (s *PressCycles) groupSummariesByToolID(allSummaries map[models.PressNumber
 	return toolGroups
 }
 
-func (s *PressCycles) findOverlappingTools(toolGroups map[int64]map[models.PressNumber][]*models.ToolSummary) []*models.OverlappingTool {
+func (s *PressCycles) findOverlappingTools(toolGroups map[models.ToolID]map[models.PressNumber][]*models.ToolSummary) []*models.OverlappingTool {
 	var overlappingTools []*models.OverlappingTool
 
 	for toolID, pressSummaries := range toolGroups {
@@ -628,7 +628,7 @@ func (s *PressCycles) findOverlappingTools(toolGroups map[int64]map[models.Press
 	return overlappingTools
 }
 
-func (s *PressCycles) checkForOverlaps(toolID int64, pressSummaries map[models.PressNumber][]*models.ToolSummary) *models.OverlappingTool {
+func (s *PressCycles) checkForOverlaps(toolID models.ToolID, pressSummaries map[models.PressNumber][]*models.ToolSummary) *models.OverlappingTool {
 	presses := s.extractPresses(pressSummaries)
 	overlaps, toolCode, startDate, endDate := s.findAllOverlaps(presses, pressSummaries, toolID)
 
@@ -658,7 +658,7 @@ func (s *PressCycles) extractPresses(pressSummaries map[models.PressNumber][]*mo
 func (s *PressCycles) findAllOverlaps(
 	presses []models.PressNumber,
 	pressSummaries map[models.PressNumber][]*models.ToolSummary,
-	toolID int64,
+	toolID models.ToolID,
 ) ([]*models.OverlappingToolInstance, string, time.Time, time.Time) {
 	var overlaps []*models.OverlappingToolInstance
 	var overallStartDate, overallEndDate time.Time
@@ -679,7 +679,7 @@ func (s *PressCycles) findAllOverlaps(
 	return overlaps, toolCode, overallStartDate, overallEndDate
 }
 
-func (s *PressCycles) updateToolCode(current, candidate string, toolID int64) string {
+func (s *PressCycles) updateToolCode(current, candidate string, toolID models.ToolID) string {
 	defaultCode := fmt.Sprintf("Tool ID %d", toolID)
 	if candidate != "" && candidate != defaultCode {
 		return candidate

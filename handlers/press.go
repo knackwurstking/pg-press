@@ -151,7 +151,7 @@ func (h *Press) HTMXGetPressCycles(c echo.Context) error {
 		return HandleError(err, "failed to get tools from database")
 	}
 
-	toolsMap := make(map[int64]*models.Tool)
+	toolsMap := make(map[models.ToolID]*models.Tool)
 	for _, t := range tools {
 		tool := t
 		toolsMap[tool.ID] = tool
@@ -264,7 +264,7 @@ func (h *Press) getPressNumberFromParam(c echo.Context) (models.PressNumber, err
 	return press, nil
 }
 
-func (h *Press) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[int64]*models.Tool, error) {
+func (h *Press) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[models.ToolID]*models.Tool, error) {
 	// Get tools from database
 	tools, err := h.Registry.Tools.List()
 	if err != nil {
@@ -289,7 +289,7 @@ func (h *Press) getOrderedToolsForPress(press models.PressNumber) ([]*models.Too
 	sortedTools := models.SortToolsByPosition(pressTools)
 
 	// Create toolsMap for lookup purposes
-	toolsMap := make(map[int64]*models.Tool)
+	toolsMap := make(map[models.ToolID]*models.Tool)
 	for _, tool := range sortedTools {
 		toolsMap[tool.ID] = tool
 	}

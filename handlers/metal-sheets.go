@@ -51,7 +51,7 @@ func (h *MetalSheets) RegisterRoutes(e *echo.Echo) {
 // GetEditDialog renders the edit/create dialog for metal sheets
 func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 	renderProps := &components.DialogEditMetalSheetProps{}
-	var toolID int64
+	var toolID models.ToolID
 	var err error
 
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
@@ -65,9 +65,11 @@ func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 		toolID = renderProps.MetalSheet.ToolID
 	} else {
 		// Creating new metal sheet, get tool_id from query
-		if toolID, err = ParseQueryInt64(c, "tool_id"); err != nil {
+		toolIDQuery, err := ParseQueryInt64(c, "tool_id")
+		if err != nil {
 			return HandleError(err, "failed to get the tool id from query")
 		}
+		toolID = models.ToolID(toolIDQuery)
 	}
 
 	// Fetch the associated tool for the dialog
@@ -93,10 +95,11 @@ func (h *MetalSheets) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	}
 
 	// Extract tool ID from query parameters
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return HandleError(err, "failed to get tool_id from query")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	// Fetch the associated tool
 	tool, err := h.Registry.Tools.Get(toolID)

@@ -7,13 +7,13 @@ type RegenerationID int64
 // Regeneration represents a tool regeneration event
 type Regeneration struct {
 	ID          RegenerationID `json:"id"`
-	ToolID      int64          `json:"tool_id"`
+	ToolID      ToolID         `json:"tool_id"`
 	CycleID     CycleID        `json:"cycle_id"`
 	Reason      string         `json:"reason"`
 	PerformedBy *int64         `json:"performed_by"`
 }
 
-func NewRegeneration(toolID int64, cycleID CycleID, reason string, performedBy *int64) *Regeneration {
+func NewRegeneration(toolID ToolID, cycleID CycleID, reason string, performedBy *int64) *Regeneration {
 	return &Regeneration{
 		ToolID:      toolID,
 		CycleID:     cycleID,

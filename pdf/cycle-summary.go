@@ -16,7 +16,7 @@ type cycleSummaryOptions struct {
 	*imageOptions
 	Press    models.PressNumber
 	Cycles   []*models.Cycle
-	ToolsMap map[int64]*models.Tool
+	ToolsMap map[models.ToolID]*models.Tool
 	UsersMap map[int64]*models.User
 }
 
@@ -24,7 +24,7 @@ type cycleSummaryOptions struct {
 func GenerateCycleSummaryPDF(
 	press models.PressNumber,
 	cycles []*models.Cycle,
-	toolsMap map[int64]*models.Tool,
+	toolsMap map[models.ToolID]*models.Tool,
 	usersMap map[int64]*models.User,
 ) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -81,7 +81,7 @@ func addCycleSummaryStats(o *cycleSummaryOptions) {
 	// Calculate statistics
 	totalCycles := int64(0)
 	totalPartialCycles := int64(0)
-	activeTools := make(map[int64]bool)
+	activeTools := make(map[models.ToolID]bool)
 
 	for _, cycle := range o.Cycles {
 		if cycle.TotalCycles > totalCycles {
@@ -110,7 +110,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 
 	// Create individual cycle summaries without combining by ToolID
 	type toolSummary struct {
-		toolID            int64
+		toolID            models.ToolID
 		toolCode          string
 		position          models.Position
 		startDate         time.Time
@@ -167,7 +167,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 
 	// Consolidate consecutive entries for the same tool in the same position
 	var consolidatedSummaries []*toolSummary
-	lastToolByPosition := make(map[models.Position]int64)
+	lastToolByPosition := make(map[models.Position]models.ToolID)
 	positionIndexMap := make(map[models.Position]int)
 
 	for _, summary := range toolSummaries {

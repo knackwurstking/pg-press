@@ -9,7 +9,7 @@ type CycleID int64
 type Cycle struct {
 	ID            CycleID     `json:"id"`
 	PressNumber   PressNumber `json:"press_number"`
-	ToolID        int64       `json:"tool_id"`
+	ToolID        ToolID      `json:"tool_id"`
 	ToolPosition  Position    `json:"tool_position"`
 	Date          time.Time   `json:"date"`
 	TotalCycles   int64       `json:"total_cycles"`
@@ -17,7 +17,7 @@ type Cycle struct {
 	PerformedBy   int64       `json:"performed_by"`
 }
 
-func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64) *Cycle {
+func NewCycle(press PressNumber, toolID ToolID, toolPosition Position, totalCycles, userID int64) *Cycle {
 	return &Cycle{
 		PressNumber:  press,
 		ToolID:       toolID,
@@ -28,7 +28,7 @@ func NewCycle(press PressNumber, toolID int64, toolPosition Position, totalCycle
 	}
 }
 
-func NewCycleWithID(id CycleID, press PressNumber, toolID int64, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
+func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition Position, totalCycles, userID int64, date time.Time) *Cycle {
 	return &Cycle{
 		ID:           id,
 		PressNumber:  press,

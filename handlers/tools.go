@@ -59,9 +59,9 @@ func (h *Tools) GetToolsPage(c echo.Context) error {
 func (h *Tools) HTMXGetEditToolDialog(c echo.Context) error {
 	props := &components.DialogEditToolProps{}
 
-	toolID, _ := ParseQueryInt64(c, "id")
-	if toolID > 0 {
-		tool, err := h.Registry.Tools.Get(toolID)
+	toolIDQuery, _ := ParseQueryInt64(c, "id")
+	if toolIDQuery > 0 {
+		tool, err := h.Registry.Tools.Get(models.ToolID(toolIDQuery))
 		if err != nil {
 			return HandleError(err, "failed to get tool from database")
 		}
@@ -116,10 +116,11 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	toolID, err := ParseQueryInt64(c, "id")
+	toolIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool ID")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	formData, err := h.getEditToolFormData(c)
 	if err != nil {
@@ -161,10 +162,11 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 }
 
 func (h *Tools) HTMXDeleteTool(c echo.Context) error {
-	toolID, err := ParseQueryInt64(c, "id")
+	toolIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "invalid or missing id parameter")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	user, err := GetUserFromContext(c)
 	if err != nil {
@@ -190,10 +192,11 @@ func (h *Tools) HTMXDeleteTool(c echo.Context) error {
 }
 
 func (h *Tools) HTMXMarkToolAsDead(c echo.Context) error {
-	toolID, err := ParseQueryInt64(c, "id")
+	toolIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "invalid or missing id parameter")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	user, err := GetUserFromContext(c)
 	if err != nil {

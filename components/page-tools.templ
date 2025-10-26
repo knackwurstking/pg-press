@@ -274,7 +274,7 @@ templ PageTools_ToolsList(tools []*models.ResolvedTool) {
 	}
 }
 
-templ pageTools_toolListItem(id int64, tool *models.ResolvedTool) {
+templ pageTools_toolListItem(id models.ToolID, tool *models.ResolvedTool) {
 	<li id={ fmt.Sprintf("tool-%d", id) }>
 		@ToolAnchor(tool, &ToolAnchorOptions{
 			EnableStatusBadge:  true,

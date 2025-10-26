@@ -48,7 +48,7 @@ func NewTools(r *Registry) *Tools {
 	return t
 }
 
-func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
+func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error) {
 	if err := tool.Validate(); err != nil {
 		return 0, err
 	}
@@ -92,7 +92,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (int64, error) {
 		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
 	}
 
-	return id, nil
+	return models.ToolID(id), nil
 }
 
 func (t *Tools) Update(tool *models.Tool, user *models.User) error {
@@ -138,7 +138,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) Get(id int64) (*models.Tool, error) {
+func (t *Tools) Get(id models.ToolID) (*models.Tool, error) {
 	t.Log.Debug("Getting tool: %d", id)
 
 	query := fmt.Sprintf(`
@@ -178,7 +178,7 @@ func (t *Tools) List() ([]*models.Tool, error) {
 	return ScanRows(rows, scanTool)
 }
 
-func (t *Tools) Delete(id int64, user *models.User) error {
+func (t *Tools) Delete(id models.ToolID, user *models.User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
 	return ScanRows(rows, scanTool)
 }
 
-func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user *models.User) error {
+func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumber, user *models.User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -343,7 +343,7 @@ func (t *Tools) UpdatePress(toolID int64, pressNumber *models.PressNumber, user 
 	return nil
 }
 
-func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models.User) error {
+func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user *models.User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -369,7 +369,7 @@ func (t *Tools) UpdateRegenerating(toolID int64, regenerating bool, user *models
 	return nil
 }
 
-func (t *Tools) MarkAsDead(toolID int64, user *models.User) error {
+func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -384,7 +384,7 @@ func (t *Tools) MarkAsDead(toolID int64, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) ReviveTool(toolID int64, user *models.User) error {
+func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) error {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -399,7 +399,7 @@ func (t *Tools) ReviveTool(toolID int64, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) Bind(cassetteID, targetID int64) error {
+func (t *Tools) Bind(cassetteID, targetID models.ToolID) error {
 	if err := t.validateBindingTools(cassetteID, targetID); err != nil {
 		return err
 	}
@@ -434,7 +434,7 @@ func (t *Tools) Bind(cassetteID, targetID int64) error {
 	return nil
 }
 
-func (t *Tools) UnBind(toolID int64) error {
+func (t *Tools) UnBind(toolID models.ToolID) error {
 	tool, err := t.Get(toolID)
 	if err != nil {
 		return err
@@ -460,7 +460,7 @@ func (t *Tools) UnBind(toolID int64) error {
 	return nil
 }
 
-func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error {
+func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolID) error {
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
 		return err
@@ -491,7 +491,7 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID int64) error
 // - The cassette tool is a top cassette position tool
 // - The target tool is a top position tool
 // - Neither tool is already bound to another tool (prevents multiple bindings)
-func (t *Tools) validateBindingTools(cassetteID, targetID int64) error {
+func (t *Tools) validateBindingTools(cassetteID, targetID models.ToolID) error {
 	cassetteTool, err := t.Get(cassetteID)
 	if err != nil {
 		return err

@@ -171,14 +171,16 @@ func markDeadCommand() cli.Command {
 		Usage: cli.Usage("Mark a tool as dead by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					toolID := models.ToolID(*toolIDArg)
+
 					// Get tool first to check if it exists
-					tool, err := r.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
+						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
 					}
 
 					if tool.IsDead {
@@ -193,7 +195,7 @@ func markDeadCommand() cli.Command {
 					}
 
 					// Mark tool as dead
-					err = r.Tools.MarkAsDead(*toolID, user)
+					err = r.Tools.MarkAsDead(toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to mark tool as dead: %v", err)
 					}
@@ -212,14 +214,16 @@ func reviveDeadToolCommand() cli.Command {
 		Usage: cli.Usage("Revive a dead tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					toolID := models.ToolID(*toolIDArg)
+
 					// Get tool first to check if it exists
-					tool, err := r.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
+						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
 					}
 
 					if !tool.IsDead {
@@ -234,7 +238,7 @@ func reviveDeadToolCommand() cli.Command {
 					}
 
 					// Revive tool (mark as alive)
-					err = r.Tools.ReviveTool(*toolID, user)
+					err = r.Tools.ReviveTool(toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to revive tool: %v", err)
 					}
@@ -253,14 +257,16 @@ func deleteToolCommand() cli.Command {
 		Usage: cli.Usage("Delete a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					toolID := models.ToolID(*toolIDArg)
+
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
+						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Deleting tool %d (%s %s) and all related data...\n", tool.ID, tool.Format.String(), tool.Code)
@@ -272,7 +278,7 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(*toolID)
+					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
 					if err != nil {
 						return fmt.Errorf("failed to get regenerations for tool: %v", err)
 					}
@@ -287,7 +293,7 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 2. Delete all cycles for this tool
-					cycles, err := r.PressCycles.GetPressCyclesForTool(*toolID)
+					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("failed to get cycles for tool: %v", err)
 					}
@@ -302,7 +308,7 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 3. Finally, delete the tool itself
-					err = r.Tools.Delete(*toolID, user)
+					err = r.Tools.Delete(toolID, user)
 					if err != nil {
 						return fmt.Errorf("failed to delete tool: %v", err)
 					}
@@ -322,21 +328,23 @@ func listCyclesCommand() cli.Command {
 		Usage: cli.Usage("List press cycles for a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					toolID := models.ToolID(*toolIDArg)
+
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
+						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
 						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get cycles for this tool
-					cycles, err := r.PressCycles.GetPressCyclesForTool(*toolID)
+					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("failed to retrieve cycles: %v", err)
 					}
@@ -373,7 +381,7 @@ func listCyclesCommand() cli.Command {
 
 // filterToolsByIDs filters tools based on ID range or comma-separated list
 func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, error) {
-	var targetIDs []int64
+	var targetIDs []models.ToolID
 	var err error
 
 	// Check if it's a range (contains "..")
@@ -391,7 +399,7 @@ func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, erro
 	}
 
 	// Create a set for efficient lookup
-	idSet := make(map[int64]bool)
+	idSet := make(map[models.ToolID]bool)
 	for _, id := range targetIDs {
 		idSet[id] = true
 	}
@@ -408,7 +416,7 @@ func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, erro
 }
 
 // parseIDRange parses range like "5..8" into slice of IDs
-func parseIDRange(rangeSpec string) ([]int64, error) {
+func parseIDRange(rangeSpec string) ([]models.ToolID, error) {
 	parts := strings.Split(rangeSpec, "..")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid range format '%s', expected format: 'start..end'", rangeSpec)
@@ -428,18 +436,18 @@ func parseIDRange(rangeSpec string) ([]int64, error) {
 		return nil, fmt.Errorf("start ID %d cannot be greater than end ID %d", start, end)
 	}
 
-	var ids []int64
+	var ids []models.ToolID
 	for i := start; i <= end; i++ {
-		ids = append(ids, i)
+		ids = append(ids, models.ToolID(i))
 	}
 
 	return ids, nil
 }
 
 // parseIDList parses comma-separated list like "5,7,9" into slice of IDs
-func parseIDList(listSpec string) ([]int64, error) {
+func parseIDList(listSpec string) ([]models.ToolID, error) {
 	parts := strings.Split(listSpec, ",")
-	var ids []int64
+	var ids []models.ToolID
 
 	for _, part := range parts {
 		trimmed := strings.TrimSpace(part)
@@ -451,7 +459,7 @@ func parseIDList(listSpec string) ([]int64, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid ID '%s': %v", trimmed, err)
 		}
-		ids = append(ids, id)
+		ids = append(ids, models.ToolID(id))
 	}
 
 	if len(ids) == 0 {
@@ -467,21 +475,23 @@ func listRegenerationsCommand() cli.Command {
 		Usage: cli.Usage("List regenerations for a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "")
-			toolID := cli.Int64Arg(cmd, "tool-id", cli.Required)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
+					toolID := models.ToolID(*toolIDArg)
+
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(*toolID)
+					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", *toolID, err)
+						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
 						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get regenerations for this tool
-					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(*toolID)
+					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
 					if err != nil {
 						return fmt.Errorf("failed to retrieve regenerations: %v", err)
 					}

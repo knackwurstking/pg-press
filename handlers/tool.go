@@ -23,7 +23,7 @@ type ToolCycleEditDialogFormData struct {
 	PressNumber  *models.PressNumber
 	Date         time.Time // OriginalDate form field name "original_date"
 	Regenerating bool
-	ToolID       *int64 // ToolID form field name "tool_id" (for tool change mode)
+	ToolID       *models.ToolID // ToolID form field name "tool_id" (for tool change mode)
 }
 
 type ToolRegenerationEditDialogFormData struct {
@@ -99,10 +99,11 @@ func (h *Tool) GetToolPage(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	id, err := ParseParamInt64(c, "id")
+	idQuery, err := ParseParamInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse id from query parameter")
 	}
+	id := models.ToolID(idQuery)
 
 	h.Log.Debug("Fetching tool %d with notes", id)
 
@@ -136,17 +137,18 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 	}
 
 	// Get tool from param "/:id"
-	toolID, err := ParseParamInt64(c, "id")
+	toolIDQuery, err := ParseParamInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool_id")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
 
-	var targetID int64
+	var targetID models.ToolID
 	{ // Get target_id from form value
 		targetIDString := c.FormValue("target_id")
 		if targetIDString == "" {
@@ -154,10 +156,11 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 				"failed to parse target_id: %+v", targetIDString))
 		}
 
-		targetID, err = strconv.ParseInt(targetIDString, 10, 64)
+		targetIDParsed, err := strconv.ParseInt(targetIDString, 10, 64)
 		if err != nil {
 			return HandleBadRequest(err, "invalid target_id")
 		}
+		targetID = models.ToolID(targetIDParsed)
 	}
 
 	h.Log.Info("Updating tool binding: tool %d -> target %d",
@@ -165,8 +168,8 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 
 	{ // Make sure to check for position first (target == top && toolID == cassette)
 		var (
-			cassette int64
-			target   int64 // top position
+			cassette models.ToolID
+			target   models.ToolID // top position
 		)
 
 		if tool.Position == models.PositionTopCassette {
@@ -219,10 +222,11 @@ func (h *Tool) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Get tool from param "/:id"
-	toolID, err := ParseParamInt64(c, "id")
+	toolIDParam, err := ParseParamInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool_id")
 	}
+	toolID := models.ToolID(toolIDParam)
 
 	if err := h.Registry.Tools.UnBind(toolID); err != nil {
 		return HandleError(err, "failed to unbind tool")
@@ -262,10 +266,11 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDParam, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool_id")
 	}
+	toolID := models.ToolID(toolIDParam)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
@@ -334,10 +339,11 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 
 func (h *Tool) HTMXGetToolTotalCycles(c echo.Context) error {
 	// Get tool and position parameters
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool ID")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
@@ -410,10 +416,11 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
-		toolID, err := ParseQueryInt64(c, "tool_id")
+		toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 		if err != nil {
 			return HandleBadRequest(err, "failed to parse tool ID")
 		}
+		toolID := models.ToolID(toolIDQuery)
 
 		if props.Tool, err = h.Registry.Tools.Get(toolID); err != nil {
 			return HandleError(err, "failed to load tool data")
@@ -634,10 +641,11 @@ func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool_id")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	h.Log.Debug("Fetching metal sheets for tool %d", toolID)
 
@@ -664,10 +672,11 @@ func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 }
 
 func (h *Tool) HTMXGetToolNotes(c echo.Context) error {
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool_id")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	h.Log.Debug("Fetching notes for tool %d", toolID)
 
@@ -772,10 +781,11 @@ func (h *Tool) HTMXGetStatusEdit(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	toolID, err := ParseQueryInt64(c, "id")
+	toolIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool ID")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
@@ -796,10 +806,11 @@ func (h *Tool) HTMXGetStatusDisplay(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	toolID, err := ParseQueryInt64(c, "id")
+	toolIDQuery, err := ParseQueryInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse tool ID")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {
@@ -825,10 +836,11 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		return HandleBadRequest(nil, "tool_id is required")
 	}
 
-	toolID, err := strconv.ParseInt(toolIDStr, 10, 64)
+	toolIDQuery, err := strconv.ParseInt(toolIDStr, 10, 64)
 	if err != nil {
 		return HandleBadRequest(nil, "invalid tool_id")
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	statusStr := c.FormValue("status")
 	if statusStr == "" {
@@ -902,7 +914,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-func (h *Tool) getTotalCycles(toolID int64, cycles ...*models.Cycle) int64 {
+func (h *Tool) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
 	if r, err := h.Registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
@@ -1007,10 +1019,11 @@ func (h *Tool) getCycleFormData(c echo.Context) (*ToolCycleEditDialogFormData, e
 
 	// Parse tool_id if present (for tool change mode)
 	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
-		toolID, err := strconv.ParseInt(toolIDString, 10, 64)
+		toolIDParsed, err := strconv.ParseInt(toolIDString, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("invalid tool_id: %v", err)
 		}
+		toolID := models.ToolID(toolIDParsed)
 		form.ToolID = &toolID
 	}
 
@@ -1018,10 +1031,11 @@ func (h *Tool) getCycleFormData(c echo.Context) (*ToolCycleEditDialogFormData, e
 }
 
 func (h *Tool) getToolFromQuery(c echo.Context) (*models.Tool, error) {
-	toolID, err := ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return nil, err
 	}
+	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.Registry.Tools.Get(toolID)
 	if err != nil {

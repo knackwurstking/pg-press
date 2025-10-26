@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pgpress/models"
 )
 
-func HXGetToolRegenerationEdit(toolID int64, regenerationID *models.RegenerationID) templ.SafeURL {
+func HXGetToolRegenerationEdit(toolID models.ToolID, regenerationID *models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
 
 	if regenerationID == nil {
@@ -20,7 +20,7 @@ func HXGetToolRegenerationEdit(toolID int64, regenerationID *models.Regeneration
 	return buildURL(path, params)
 }
 
-func HXPutToolRegenerationEdit(toolID int64, regenerationID models.RegenerationID) templ.SafeURL {
+func HXPutToolRegenerationEdit(toolID models.ToolID, regenerationID models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", regenerationID),
@@ -28,7 +28,7 @@ func HXPutToolRegenerationEdit(toolID int64, regenerationID models.RegenerationI
 	return buildURL(path, params)
 }
 
-func HXDeleteToolRegeneration(toolID int64, regenerationID models.RegenerationID) templ.SafeURL {
+func HXDeleteToolRegeneration(toolID models.ToolID, regenerationID models.RegenerationID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/delete-regeneration", toolID)
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", regenerationID),
@@ -36,12 +36,12 @@ func HXDeleteToolRegeneration(toolID int64, regenerationID models.RegenerationID
 	return buildURL(path, params)
 }
 
-func HXPatchToolBind(toolID int64) templ.SafeURL {
+func HXPatchToolBind(toolID models.ToolID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/bind", toolID)
 	return buildURL(path, nil)
 }
 
-func HXPatchToolUnbind(toolID int64) templ.SafeURL {
+func HXPatchToolUnbind(toolID models.ToolID) templ.SafeURL {
 	path := fmt.Sprintf("/htmx/tools/tool/%d/unbind", toolID)
 	return buildURL(path, nil)
 }

@@ -103,15 +103,19 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	}
 
 	// Get form value for the top tool
-	topToolID, err := strconv.ParseInt(c.FormValue("top"), 10, 64)
-	if err != nil {
+	var topToolID models.ToolID
+	if id, err := strconv.ParseInt(c.FormValue("top"), 10, 64); err != nil {
 		return HandleBadRequest(nil, "missing top tool")
+	} else {
+		topToolID = models.ToolID(id)
 	}
 
 	// Get form value for the bottom tool
-	bottomToolID, err := strconv.ParseInt(c.FormValue("bottom"), 10, 64)
-	if err != nil {
+	var bottomToolID models.ToolID
+	if id, err := strconv.ParseInt(c.FormValue("bottom"), 10, 64); err != nil {
 		return HandleBadRequest(nil, "missing bottom tool")
+	} else {
+		bottomToolID = models.ToolID(id)
 	}
 
 	// Get a list with all tools
@@ -182,7 +186,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *Umbau) findToolByID(tools []*models.Tool, toolID int64) (*models.Tool, error) {
+func (h *Umbau) findToolByID(tools []*models.Tool, toolID models.ToolID) (*models.Tool, error) {
 	for _, tool := range tools {
 		if tool.ID == toolID {
 			return tool, nil

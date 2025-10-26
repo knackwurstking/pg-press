@@ -56,7 +56,7 @@ func (s *ToolRegenerations) Get(id models.RegenerationID) (*models.Regeneration,
 	return regeneration, nil
 }
 
-func (s *ToolRegenerations) Add(toolID int64, cycleID models.CycleID, reason string, user *models.User) (models.RegenerationID, error) {
+func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User) (models.RegenerationID, error) {
 	s.Log.Debug("Adding tool regeneration by %s (%d): tool: %d, cycle: %d, reason: %s",
 		user.Name, user.TelegramID, toolID, cycleID, reason)
 
@@ -125,7 +125,7 @@ func (s *ToolRegenerations) Delete(id models.RegenerationID) error {
 	return nil
 }
 
-func (s *ToolRegenerations) StartToolRegeneration(toolID int64, reason string, user *models.User) (models.RegenerationID, error) {
+func (s *ToolRegenerations) StartToolRegeneration(toolID models.ToolID, reason string, user *models.User) (models.RegenerationID, error) {
 	s.Log.Debug("Starting tool regeneration by %s (%d): tool: %d",
 		user.Name, user.TelegramID, toolID)
 
@@ -156,7 +156,7 @@ func (s *ToolRegenerations) StartToolRegeneration(toolID int64, reason string, u
 	return regenerationID, nil
 }
 
-func (s *ToolRegenerations) StopToolRegeneration(toolID int64, user *models.User) error {
+func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) error {
 	s.Log.Debug("Stopping tool regeneration by %s (%d): tool: %d",
 		user.Name, user.TelegramID, toolID)
 
@@ -171,7 +171,7 @@ func (s *ToolRegenerations) StopToolRegeneration(toolID int64, user *models.User
 	return nil
 }
 
-func (s *ToolRegenerations) AbortToolRegeneration(toolID int64, user *models.User) error {
+func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) error {
 	s.Log.Debug("Aborting tool regeneration by %s (%d): tool: %d",
 		user.Name, user.TelegramID, toolID)
 
@@ -208,7 +208,7 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID int64, user *models.Use
 	return nil
 }
 
-func (s *ToolRegenerations) GetLastRegeneration(toolID int64) (*models.Regeneration, error) {
+func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.Regeneration, error) {
 	s.Log.Debug("Getting last regeneration for tool: %d", toolID)
 
 	query := fmt.Sprintf(`
@@ -247,7 +247,7 @@ func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bo
 	return count > 0, nil
 }
 
-func (s *ToolRegenerations) GetRegenerationHistory(toolID int64) ([]*models.Regeneration, error) {
+func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) ([]*models.Regeneration, error) {
 	s.Log.Debug("Getting regeneration history for tool: %d", toolID)
 
 	query := fmt.Sprintf(`
