@@ -9,15 +9,17 @@ import (
 )
 
 const (
-	PageTools_IDToolsFilter = "tools-filter"
+	PageTools_IDToolsFilter      = "tools-filter"
+	PageTools_IDSectionToolsList = "section-tools-list"
 )
 
 templ PageTools() {
 	@Layout(
 		LayoutOptions{
-			PageTitle:   "PG Presse | Werkzeuge",
-			AppBarTitle: "Werkzeuge",
-			NavContent:  StandardNavContent(),
+			PageTitle:      "PG Presse | Werkzeuge",
+			AppBarTitle:    "Werkzeuge",
+			NavContent:     StandardNavContent(),
+			AdditionalHead: pageTools_additionalHead(),
 		},
 	) {
 		<main class="container fluid">
@@ -36,23 +38,11 @@ templ PageTools() {
 				)
 				@HXDetails(
 					utils.HXGetToolsPageAllToolsSectionContent(),
-					"section-tools-list",
+					PageTools_IDSectionToolsList,
 					"bi-archive",
 					"Alle Werkzeuge",
 				)
 			</div>
-			<script>
-				document.addEventListener('DOMContentLoaded', function() {
-					const params = new URLSearchParams(window.location.search);
-					if (params.toString()) {
-						const toolsSection = document.getElementById('section-tools-list');
-						if (toolsSection) {
-							toolsSection.open = true;
-							htmx.trigger(toolsSection, 'toggle');
-						}
-					}
-				});
-			</script>
 		</main>
 	}
 }
@@ -166,7 +156,7 @@ templ PageTools_SectionTools(tools []*models.ResolvedTool) {
 	<span
 		hx-get={ utils.HXGetToolsPageAllToolsSectionContent() }
 		hx-trigger="pageLoaded from:body"
-		hx-target="#section-tools-list"
+		hx-target={ fmt.Sprintf("#%s", PageTools_IDSectionToolsList) }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary>
@@ -191,11 +181,21 @@ templ PageTools_SectionTools(tools []*models.ResolvedTool) {
 				<span>Erstellen</span>
 			</button>
 		</div>
-		<ul class="flex flex-col gap m-t p-0" style="list-style: none;">
+		<ul id="tools-list" class="flex flex-col gap m-t p-0" style="list-style: none;">
 			@PageTools_ToolsList(tools)
 		</ul>
 	</div>
-	@pageTools_sectionToolsFilterScript()
+	<script>
+		setTimeout(function () {
+			var params = new URLSearchParams(window.location.search);
+
+			const input = document.querySelector(`input#${IDToolsFilter}`);
+			if (input) {
+				input.value = params.get("tools_filter");
+				filterToolsList();
+			}
+		}, 100);
+	</script>
 }
 
 templ pageTools_sectionToolsFilter(tools []*models.ResolvedTool) {
@@ -206,64 +206,13 @@ templ pageTools_sectionToolsFilter(tools []*models.ResolvedTool) {
 			<input
 				id={ PageTools_IDToolsFilter }
 				type="search"
-				oninput="filterToolsList();"
+				oninput="scrollFilterInputIntoView(event); filterToolsList(event);"
+				onblur="unscrollFilterInputIntoView(event);"
 				placeholder="z.B.: kassette 120x60 mass"
 				hx-preserve="true"
 			/>
 		</label>
 	</div>
-}
-
-templ pageTools_sectionToolsFilterScript() {
-	<script>
-		function filter(value) {
-			for (var el of document.querySelectorAll(`.all-tools ul > *`)) {
-				// Get the text content of the element
-				var textContent = el.textContent.toLowerCase();
-
-				// Generate special regexp from search
-				var valueSplit = document.querySelector("input#{{ PageTools_IDToolsFilter }}").value.toLowerCase().split(' ');
-
-				// Check and Set "block" or "none"
-				let shouldNotHide = true;
-				for (var char of valueSplit) {
-					if (char === "") continue;
-
-					if (!textContent.includes(char)) {
-						shouldNotHide = false;
-						break;
-					}
-				}
-
-				el.style.display = shouldNotHide ? "block" : "none";
-			}
-		}
-
-		function filterToolsList() {
-			var params = new URLSearchParams(location.search);
-
-			var inputValue = document.querySelector("input#{{ PageTools_IDToolsFilter }}").value;
-
-			if (inputValue !== "") {
-				params.set("tools_filter", inputValue);
-			} else {
-				params.delete("tools_filter");
-			}
-
-			filter(inputValue);
-
-
-			// Update browser history to include filter parameters
-			var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-			window.history.replaceState({}, '', newUrl);
-		}
-
-		setTimeout(function() {
-			var params = new URLSearchParams(window.location.search);
-			document.querySelector("input#{{ PageTools_IDToolsFilter }}").value = params.get("tools_filter");
-			filterToolsList();
-		}, 100);
-	</script>
 }
 
 templ PageTools_ToolsList(tools []*models.ResolvedTool) {
@@ -379,4 +328,13 @@ func pageTools_formatDuration(d time.Duration) string {
 		minutes := int(d.Minutes())
 		return fmt.Sprintf("%d Minuten", minutes)
 	}
+}
+
+templ pageTools_additionalHead() {
+	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
+	<style>
+		#section-tools-list {
+			min-height: 100vh;
+		}
+	</style>
 }
