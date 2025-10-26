@@ -15,8 +15,9 @@
 
 - [x] Create a new feed entry after a regeneration gets removed
 
-- [ ] Create helpers for resolved data types (tool, regeneration, ...) [WIP]
+- [ ] Create helpers for resolved data types (tool, regeneration, ...)
   - ResolveRegeneration
+  - ResolveTool [WIP]
 
 - [ ] Create a new feed entry after editing a regeneration (reason)
 - [ ] Make the notes page reload content after editing or deleting a note.
