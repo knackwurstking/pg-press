@@ -111,7 +111,7 @@ script pageNotesScript() {
 
 templ PageNotes_NotesGrid(notes []*models.Note, tools []*models.Tool) {
 	if len(notes) > 0 {
-		<div class="notes-list grid gap-lg p" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+		<div class="flex flex-wrap gap grow">
 			for _, note := range notes {
 				{{
 					skip := false
@@ -151,7 +151,7 @@ templ PageNotes_NotesGrid(notes []*models.Note, tools []*models.Tool) {
 
 templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 	<div
-		class={ fmt.Sprintf("note-card card compact elevation-2 %s", filterClass) }
+		class={ fmt.Sprintf("note-card flex-1 min-w-fit card compact elevation-2 %s", filterClass) }
 		data-note-level={ fmt.Sprintf("%d", note.Level) }
 	>
 		<div class="card-header flex gap-sm justify-between items-center">
