@@ -1,5 +1,7 @@
 // Package logger provides structured logging functionality for the pgpress application.
 // It supports different log levels, colored output, and component-specific loggers.
+//
+// TODO: Remove? Just use slog, see the picow-led project
 package logger
 
 import (

@@ -21,6 +21,7 @@ func serverCommand() cli.Command {
 	return cli.Command{
 		Name:  "server",
 		Usage: cli.Usage("Start the HTTP server for the pgpress web application."),
+		// TODO: Add flags: -d/--debug, -log-text/--log-text (defaults to json)
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "Custom database file path (defaults to standard location)")
 
@@ -56,6 +57,7 @@ func serverCommand() cli.Command {
 				e.HideBanner = true
 				e.HTTPErrorHandler = createHTTPErrorHandler()
 
+				// TODO: Remove? Just use echo middleware here, see the picow-led project
 				e.Use(middlewareLogger())
 				e.Use(conditionalCacheMiddleware())
 				e.Use(staticCacheMiddleware())
