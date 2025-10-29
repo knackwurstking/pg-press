@@ -26,3 +26,6 @@
 - [x] Rename this module from `/pgpress` to `/pg-press`
 - [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments)
 - [ ] Create a new page: "Daten Sammlung", this is a place where stuff like dryer temperatures can be stored (markdown editor support)
+
+- [ ] Remove logging package and use logger just like i dit in the picow-led project
+- [ ] Improve error handling, see picow-led project
