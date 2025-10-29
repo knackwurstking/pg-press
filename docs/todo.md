@@ -29,3 +29,4 @@
 
 - [ ] Remove logging package and use logger just like i dit in the picow-led project
 - [ ] Improve error handling, see picow-led project
+- [ ] Change the base dialogs error handling, see picow-led project
