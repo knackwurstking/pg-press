@@ -30,6 +30,19 @@ type Modification[T any] struct {
 	CreatedAt time.Time      `json:"created_at"`
 }
 
+func NewModification[T any](data T, telegramID TelegramID) *Modification[T] {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return nil
+	}
+
+	return &Modification[T]{
+		UserID:    telegramID,
+		Data:      jsonData,
+		CreatedAt: time.Now(),
+	}
+}
+
 // UnmarshalData unmarshals the data into the provided value
 func (m *Modification[T]) UnmarshalData(v *T) error {
 	if v == nil {

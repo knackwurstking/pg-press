@@ -173,28 +173,6 @@ func (t *Tool) IsBindable() bool {
 	return t.Position == PositionTop || t.Position == PositionTopCassette
 }
 
-type ResolvedTool struct {
-	*Tool
-	bindingTool *Tool
-	notes       []*Note
-}
-
-func NewResolvedTool(tool *Tool, bindingTool *Tool, notes []*Note) *ResolvedTool {
-	return &ResolvedTool{
-		Tool:        tool,
-		bindingTool: bindingTool,
-		notes:       notes,
-	}
-}
-
-func (rt *ResolvedTool) GetBindingTool() *Tool {
-	return rt.bindingTool
-}
-
-func (rt *ResolvedTool) GetNotes() []*Note {
-	return rt.notes
-}
-
 // GetPositionOrder returns the sort order for a position (lower number = higher priority)
 func GetPositionOrder(position Position) int {
 	switch position {

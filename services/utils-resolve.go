@@ -1,6 +1,8 @@
 package services
 
 import (
+	"encoding/json"
+
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -43,4 +45,22 @@ func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, e
 	}
 
 	return models.NewResolvedTool(tool, bindingTool, notes), nil
+}
+
+func ResolveModification[T any](registry *Registry, modification *models.Modification[any]) (*models.ResolvedModification[T], error) {
+	user, err := registry.Users.Get(modification.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	var data T
+	if err := json.Unmarshal(modification.Data, &data); err != nil {
+		return nil, err
+	}
+
+	m := models.NewModification(data, user.TelegramID)
+	m.ID = modification.ID
+	m.CreatedAt = modification.CreatedAt
+
+	return models.NewResolvedModification(m, user), nil
 }

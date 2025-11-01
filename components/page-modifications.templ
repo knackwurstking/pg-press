@@ -5,7 +5,10 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *models.Mod[T], isCurrent bool) templ.Component) {
+templ PageModifications[T any](
+	modifications []*models.ResolvedModification[T],
+	itemRenderFunc func(modification *models.ResolvedModification[T], isCurrent bool) templ.Component,
+) {
 	@Layout(
 		LayoutOptions{
 			PageTitle:   "PG Presse | Modifications History",
@@ -36,7 +39,7 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 						</div>
 						<div class="flex items-center gap">
 							<span class="badge info">
-								{ fmt.Sprintf("%d versions", len(mods)) }
+								{ fmt.Sprintf("%d versions", len(modifications)) }
 							</span>
 							<a href="javascript:history.back()" role="button" class="secondary">
 								← Back
@@ -45,7 +48,7 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 					</div>
 				</div>
 				<div class="flex flex-col gap">
-					if len(mods) == 0 {
+					if len(modifications) == 0 {
 						<div class="card text-center">
 							<div class="card-body">
 								<div class="muted mb">
@@ -58,12 +61,18 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 							</div>
 						</div>
 					} else {
+						{{
+							var currentModification *models.ResolvedModification[T]
+							if len(modifications) > 0 {
+								currentModification = modifications[0]
+							}
+						}}
 						<div class="card compact">
 							<div class="card-body">
 								<div class="flex items-center mb">
 									<span class="badge primary shadow">Current Version</span>
 								</div>
-								@itemRenderFunc(mods.Current(), true)
+								@itemRenderFunc(currentModification, true)
 							</div>
 						</div>
 						<div class="card">
@@ -72,16 +81,18 @@ templ PageModifications[T any](mods models.Mods[T], itemRenderFunc func(mod *mod
 								<p class="text-sm muted">Click "Rollback" to restore a previous version</p>
 							</div>
 							<div class="card-body">
-								for _, mod := range mods {
-									{{ isCurrent := mods.Current().Time == mod.Time }}
-									<div
-										class="p mb"
-										if isCurrent {
-											disabled
-										}
-									>
-										@itemRenderFunc(mod, isCurrent)
-									</div>
+								for _, m := range modifications {
+									{{ isCurrent := currentModification.CreatedAt.Equal(m.CreatedAt) }}
+									if !isCurrent {
+										<div
+											class="p mb"
+											if isCurrent {
+												disabled
+											}
+										>
+											@itemRenderFunc(m, isCurrent)
+										</div>
+									}
 								}
 							</div>
 						</div>

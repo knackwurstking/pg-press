@@ -11,12 +11,6 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
-// TODO: Maybe move to env/constants.go
-const (
-	MinNameLength = 1
-	MaxNameLength = 100
-)
-
 type TelegramID int64
 
 // User represents a system user with Telegram integration
@@ -57,10 +51,10 @@ func (u *User) Validate() error {
 	if u.Name == "" {
 		return errors.NewValidationError("user_name: cannot be empty")
 	}
-	if len(u.Name) < MinNameLength {
+	if len(u.Name) < env.UserNameMinLength {
 		return errors.NewValidationError("user_name: too short")
 	}
-	if len(u.Name) > MaxNameLength {
+	if len(u.Name) > env.UserNameMaxLength {
 		return errors.NewValidationError("user_name: too long")
 	}
 

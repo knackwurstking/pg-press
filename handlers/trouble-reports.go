@@ -114,34 +114,24 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 	}
 
 	// Convert to the format expected by the modifications page
-	var m models.Mods[models.TroubleReportModData]
-	for _, mod := range modifications {
-		var data models.TroubleReportModData
-		if err := json.Unmarshal(mod.Data, &data); err != nil {
-			h.Log.Error("Failed to unmarshal modification data: %v", err)
-			continue
-		}
-
-		user, err := h.Registry.Users.Get(mod.UserID)
+	var resolvedModifications []*models.ResolvedModification[models.TroubleReportModData]
+	for _, m := range modifications {
+		resolvedModification, err := services.ResolveModification[models.TroubleReportModData](h.Registry, m)
 		if err != nil {
-			h.Log.Error("Failed to retrieve user for modification %d: %v", mod.ID, err)
+			h.Log.Error("Failed to resolve modification %d: %v", m.ID, err)
 			continue
 		}
-
-		modEntry := models.NewMod(user, data)
-		modEntry.Time = mod.CreatedAt.UnixMilli()
-		m = append(m, modEntry)
+		resolvedModifications = append(resolvedModifications, resolvedModification)
 	}
 
+	// Render the page
 	currentUser, err := GetUserFromContext(c)
 	if err != nil {
 		return HandleError(err, "failed to retrieve user from context")
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
-
 	itemRenderFunc := components.TroubleReportCreateModificationRenderer(models.TroubleReportID(id), isAdmin)
-
-	page := components.PageModifications(m, itemRenderFunc)
+	page := components.PageModifications[models.TroubleReportModData](resolvedModifications, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return HandleError(err, "failed to render page")
 	}

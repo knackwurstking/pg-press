@@ -392,7 +392,11 @@ func listReportsScript() templ.ComponentScript {
 	}
 }
 
-func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData], reportID models.TroubleReportID, canRollback bool) templ.Component {
+func TroubleReportModificationEntry(
+	modification *models.ResolvedModification[models.TroubleReportModData],
+	reportID models.TroubleReportID,
+	canRollback bool,
+) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -413,14 +417,17 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			templ_7745c5c3_Var18 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+
+		time := modification.CreatedAt.UnixMilli()
+		data, _ := modification.GetData()
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"card seamless p mb\"><div class=\"flex flex-col gap mb\"><div class=\"flex gap-sm justify-between items-center\"><span class=\"text-semibold\">Modified by ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetUserName())
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(modification.GetUser().Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 242, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 250, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -431,9 +438,9 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", mod.Time))
+		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", time))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 243, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 251, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -444,9 +451,9 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(mod.GetTimeString())
+		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(modification.CreatedAt.Format(env.DateTimeFormat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 246, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 254, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -457,7 +464,7 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		if canRollback {
-			templ_7745c5c3_Err = TroubleReportRollbackButton(reportID, mod.Time).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = TroubleReportRollbackButton(reportID, time).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -467,9 +474,9 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Title)
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 256, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 264, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -480,9 +487,9 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
-		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(mod.Data.Content)
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(data.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 260, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 268, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -493,9 +500,9 @@ func TroubleReportModificationEntry(mod *models.Mod[models.TroubleReportModData]
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(mod.Data.LinkedAttachments)))
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(data.LinkedAttachments)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 265, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 273, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -537,7 +544,7 @@ func TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTi
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXPostTroubleReportsRollback(reportID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 278, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 286, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -550,7 +557,7 @@ func TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTi
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", modificationTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 287, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/page-trouble-reports.templ`, Line: 295, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
@@ -566,9 +573,9 @@ func TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTi
 
 func TroubleReportCreateModificationRenderer(
 	reportID models.TroubleReportID, isAdmin bool,
-) func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+) func(modification *models.ResolvedModification[models.TroubleReportModData], isCurrent bool) templ.Component {
 
-	return func(mod *models.Mod[models.TroubleReportModData], isCurrent bool) templ.Component {
+	return func(mod *models.ResolvedModification[models.TroubleReportModData], isCurrent bool) templ.Component {
 
 		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 			canRollback := isAdmin
