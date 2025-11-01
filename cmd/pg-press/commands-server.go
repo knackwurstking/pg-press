@@ -30,7 +30,7 @@ func serverCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				initializeLogging()
 
-				r, err := openDB(*customDBPath)
+				r, err := openDB(*customDBPath, true)
 				if err != nil {
 					slog.Error("Failed to open database", "error", err)
 					return err

@@ -44,8 +44,11 @@ func initializeLogging() {
 	slog.SetDefault(slog.New(handler))
 }
 
-func openDB(customPath string) (*services.Registry, error) {
+func openDB(customPath string, logging bool) (*services.Registry, error) {
 	path := filepath.Join(configPath, databaseFile)
+	if logging {
+		slog.Info("Database opened", "path", path)
+	}
 
 	if customPath != "" {
 		var err error
@@ -90,7 +93,7 @@ func createDBPathOption(cmd *cli.Command, usage string) *string {
 
 // withDBOperation is a helper that handles common database operations
 func withDBOperation(customDBPath *string, operation func(*services.Registry) error) error {
-	r, err := openDB(*customDBPath)
+	r, err := openDB(*customDBPath, false)
 	if err != nil {
 		return err
 	}
