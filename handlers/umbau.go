@@ -56,19 +56,20 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 		return HandleError(err, "failed to list tools")
 	}
 
-	umbaupage := components.PageUmbau(&components.PageUmbauProps{
+	umbauPage := components.PageUmbau(&components.PageUmbauProps{
 		PressNumber: pressNumber,
 		User:        user,
 		Tools:       tools,
 	})
 
-	if err := umbaupage.Render(c.Request().Context(), c.Response()); err != nil {
+	if err := umbauPage.Render(c.Request().Context(), c.Response()); err != nil {
 		return HandleError(err, "failed to render press umbau page")
 	}
 
 	return nil
 }
 
+// FIXME: Missing bottom tool error on submit
 func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Get the user from the request context
 	user, err := GetUserFromContext(c)
