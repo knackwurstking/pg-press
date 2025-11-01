@@ -110,9 +110,6 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		topToolID = models.ToolID(id)
 	}
 
-	h.Log.Debug("Top Tool: %s", c.FormValue("top"))
-	h.Log.Debug("Bottom Tool: %s", c.FormValue("bottom"))
-
 	// Get form value for the bottom tool
 	var bottomToolID models.ToolID
 	if id, err := strconv.ParseInt(c.FormValue("bottom"), 10, 64); err != nil {
