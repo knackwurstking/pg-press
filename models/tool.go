@@ -88,7 +88,7 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 }
 
 func (t *Tool) Validate() error {
-	if IsValidPosition(&t.Position) {
+	if !IsValidPosition(&t.Position) {
 		return fmt.Errorf("position cannot be empty")
 	}
 

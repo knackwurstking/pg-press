@@ -54,13 +54,13 @@ func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycl
 }
 
 func (c *Cycle) Validate() error {
-	if IsValidPressNumber(&c.PressNumber) {
+	if !IsValidPressNumber(&c.PressNumber) {
 		return errors.NewValidationError("invalid press number")
 	}
 	if c.ToolID <= 0 {
 		return errors.NewValidationError(fmt.Sprintf("invalid tool ID: %d", c.ToolID))
 	}
-	if IsValidPosition(&c.ToolPosition) {
+	if !IsValidPosition(&c.ToolPosition) {
 		return errors.NewValidationError("invalid tool position")
 	}
 	if c.TotalCycles < 0 {
