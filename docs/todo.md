@@ -1,7 +1,7 @@
-- [x] Replace the `datalist` input elements with `select` elements for the "umbau" page.
-- [x] Also add some input handling for the "umbau" page select elements, which will disable tools not possible to change. For example, if the top tool is from a 100x100 format, the bottom tool must also be from a 100x100 format.
+- [x] Replace `datalist` input elements with `select` elements for the "umbau" page.
+  - Add input handling to disable tools not possible to change. For example, if the top tool is from a 100x100 format, the bottom tool must also be from a 100x100 format.
 
-- [x] Improve model types for ID's
+- [x] Improve model types for IDs
   - Attachment IDs
   - Cycle IDs
   - Feed IDs
@@ -13,20 +13,28 @@
   - Trouble Report IDs
   - User IDs
 
-- [x] Create a new feed entry after a regeneration gets removed
+- [x] Create a new feed entry after a regeneration is removed.
 
 - [x] Create helpers for resolved data types (tool, regeneration, ...)
-  - ResolveRegeneration
-  - ResolveTool
+  - `ResolveRegeneration`
+  - `ResolveTool`
 
-- [x] Create a new feed entry after editing a regeneration (reason)
+- [x] Create a new feed entry after editing a regeneration (reason).
+
 - [x] Make the notes page reload content after editing or deleting a note.
-- [x] When the filter input is in focus, try to use `scrollIntoView` on each input change.
-- [x] Improve the notes flex grid, (grow, shrink settings)
-- [x] Rename this module from `/pgpress` to `/pg-press`
-- [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments)
-- [ ] Create a new page: "Daten Sammlung", this is a place where stuff like dryer temperatures can be stored (markdown editor support)
 
-- [ ] Remove logging package and use logger just like i dit in the picow-led project
-- [ ] Improve error handling, see picow-led project
-- [ ] Change the base dialogs error handling, see picow-led project
+- [x] When the filter input is in focus, use `scrollIntoView` on each input change.
+
+- [x] Improve the notes flex grid settings (grow, shrink).
+
+- [x] Rename this module from `/pgpress` to `/pg-press`.
+
+- [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments).
+
+- [ ] Create a new page: "Daten Sammlung", for storing stuff like dryer temperatures (markdown editor support).
+
+- [ ] Remove the logging package and use logger just like in the picow-led project. [WIP]
+
+- [ ] Improve error handling, see picow-led project.
+
+- [ ] Change the base dialogs' error handling, see picow-led project.
