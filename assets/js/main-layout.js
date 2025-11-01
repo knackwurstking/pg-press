@@ -1,6 +1,3 @@
-// TODO: Remove?
-const serverPathPrefix = "{{ env.ServerPathPrefix }}"; // Inject the constant
-
 // For the ui.min.css i need to set the data-theme to light/dark
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");

@@ -1,9 +1,3 @@
-/* TODO: Remove? */
-:root {
-	--pwa-theme-color: var(--ui-primary);
-	--pwa-background-color: var(--ui-bg);
-}
-
 html:has(dialog[open]),
 body:has(dialog[open]) {
 	overflow: hidden;
@@ -37,20 +31,4 @@ details[open] summary::after {
 .image-viewer img {
 	max-width: 100%;
 	max-height: 100%;
-}
-
-/* HTMX Loading Animation */
-/* TODO: Remove? */
-
-.animate-spin {
-	animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
 }

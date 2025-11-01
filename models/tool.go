@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -26,28 +25,10 @@ const (
 	StatusDead         = Status("dead")
 )
 
-type PressNumber int8
-
-func IsEqualPressNumbers(a, b *PressNumber) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-	return *a == *b
-}
-
-// IsValid checks if the press number is within the valid range (0-5)
-func IsValidPressNumber(n *PressNumber) bool {
-	if n == nil {
-		return false
-	}
-
-	return slices.Contains([]PressNumber{0, 2, 3, 4, 5}, *n)
-}
-
-type Position string
+type (
+	PressNumber int8
+	Position    string
+)
 
 const (
 	PositionTop         = Position("top")
@@ -107,7 +88,7 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 }
 
 func (t *Tool) Validate() error {
-	if t.Position == "" {
+	if IsValidPosition(&t.Position) {
 		return fmt.Errorf("position cannot be empty")
 	}
 
