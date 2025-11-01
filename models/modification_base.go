@@ -1,18 +1,4 @@
-// TODO: Remove useless stuff
-//
-// Data:
-//   - id (int64)
-
-//   - type (string) Modification type, for example: (in short the database table names)
-//	   	- "trouble_reports"
-//	   	- "tool_regenerations"
-//	   	- "users"
-//	   	- "tools"
-//	   	- "press_cycles"
-
-// - data (any)
-// - created at (time.Time)
-// - user id (int64)
+// TODO: Get rid of this stuff, maybe just create a resolved type for the user here
 package models
 
 import (
