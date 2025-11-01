@@ -3,12 +3,12 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 
@@ -37,7 +37,6 @@ type FeedHandler struct {
 	broadcast   chan struct{}
 	db          *services.Registry
 	mu          sync.RWMutex
-	log         *logger.Logger
 }
 
 // NewFeedHandler creates a new feed notification manager
@@ -48,18 +47,17 @@ func NewFeedHandler(db *services.Registry) *FeedHandler {
 		unregister:  make(chan *FeedConnection),
 		broadcast:   make(chan struct{}, 100),
 		db:          db,
-		log:         logger.NewComponentLogger("WS: Feed"),
 	}
 }
 
 // Start begins the notification manager's main loop
 func (fh *FeedHandler) Start(ctx context.Context) {
-	fh.log.Info("Starting feed notification manager")
+	slog.Info("Starting feed notification manager")
 
 	for {
 		select {
 		case <-ctx.Done():
-			fh.log.Info("Shutting down feed notification manager")
+			slog.Info("Shutting down feed notification manager")
 			fh.closeAllConnections()
 			return
 
@@ -77,7 +75,7 @@ func (fh *FeedHandler) Start(ctx context.Context) {
 
 // RegisterConnection adds a new WebSocket connection to the manager
 func (fh *FeedHandler) RegisterConnection(userID models.TelegramID, lastFeed models.FeedID, conn *websocket.Conn) *FeedConnection {
-	fh.log.Info("Registering new connection for user ID %d", userID)
+	slog.Info("Registering new connection", "telegram_id", userID)
 	feedConn := NewFeedConnection(userID, lastFeed, conn)
 	fh.register <- feedConn
 	return feedConn
@@ -85,7 +83,7 @@ func (fh *FeedHandler) RegisterConnection(userID models.TelegramID, lastFeed mod
 
 // UnregisterConnection removes a WebSocket connection from the manager
 func (fh *FeedHandler) UnregisterConnection(conn *FeedConnection) {
-	fh.log.Info("Unregistering connection for user ID %d", conn.UserID)
+	slog.Info("Unregistering connection", "telegram_id", conn.UserID)
 	fh.unregister <- conn
 }
 
@@ -93,9 +91,9 @@ func (fh *FeedHandler) UnregisterConnection(conn *FeedConnection) {
 func (fh *FeedHandler) Broadcast() {
 	select {
 	case fh.broadcast <- struct{}{}:
-		fh.log.Debug("Feed update notification queued")
+		slog.Debug("Feed update notification queued")
 	default:
-		fh.log.Warn("Broadcast channel full, skipping notification")
+		slog.Warn("Broadcast channel full, skipping notification")
 	}
 }
 
@@ -132,7 +130,7 @@ func (fh *FeedHandler) broadcastToAllConnections() {
 	}
 	fh.mu.RUnlock()
 
-	fh.log.Debug("Broadcasting feed counter update to %d connections", len(connections))
+	slog.Debug("Broadcasting feed counter update to connections", "connections", len(connections))
 
 	for _, conn := range connections {
 		go fh.sendUpdate(conn)
@@ -142,7 +140,7 @@ func (fh *FeedHandler) broadcastToAllConnections() {
 func (fh *FeedHandler) sendUpdate(conn *FeedConnection) {
 	html, err := fh.renderFeedCounter(conn.LastFeed)
 	if err != nil {
-		fh.log.Error("Error rendering feed counter for user %d: %v", conn.UserID, err)
+		slog.Error("Error rendering feed counter", "telegram_id", conn.UserID, "error", err)
 		return
 	}
 
@@ -153,7 +151,7 @@ func (fh *FeedHandler) sendUpdate(conn *FeedConnection) {
 		// Connection closed
 		fh.UnregisterConnection(conn)
 	case <-time.After(writeTimeout):
-		fh.log.Warn("Timeout sending feed counter to user %d", conn.UserID)
+		slog.Warn("Timeout sending feed counter", "telegram_id", conn.UserID)
 	}
 }
 
@@ -190,7 +188,7 @@ func (fh *FeedHandler) closeAllConnections() {
 		delete(fh.connections, conn)
 	}
 
-	fh.log.Info("Closed all WebSocket connections")
+	slog.Info("Closed all WebSocket connections")
 }
 
 // FeedConnection represents a WebSocket connection for feed updates
@@ -200,7 +198,6 @@ type FeedConnection struct {
 	conn     *websocket.Conn
 	send     chan []byte
 	done     chan struct{}
-	log      *logger.Logger
 }
 
 // NewFeedConnection creates a new feed connection
@@ -211,7 +208,6 @@ func NewFeedConnection(userID models.TelegramID, lastFeed models.FeedID, conn *w
 		conn:     conn,
 		send:     make(chan []byte, 256),
 		done:     make(chan struct{}),
-		log:      logger.NewComponentLogger("WS: Connection"),
 	}
 }
 
@@ -231,13 +227,13 @@ func (fc *FeedConnection) WritePump() {
 			}
 
 			if err := fc.writeMessage(string(message)); err != nil {
-				fc.log.Error("Error writing message to user %d: %v", fc.UserID, err)
+				slog.Error("Error writing message", "telegram_id", fc.UserID, "error", err)
 				return
 			}
 
 		case <-ticker.C:
 			if err := fc.writeMessage("ping"); err != nil {
-				fc.log.Error("Error sending ping to user %d: %v", fc.UserID, err)
+				slog.Error("Error sending ping", "telegram_id", fc.UserID, "error", err)
 				return
 			}
 
@@ -257,14 +253,14 @@ func (fc *FeedConnection) ReadPump(handler *FeedHandler) {
 	for {
 		var message string
 		if err := websocket.Message.Receive(fc.conn, &message); err != nil {
-			fc.log.Debug("Read error for user %d: %v", fc.UserID, err)
+			slog.Debug("Read error", "telegram_id", fc.UserID, "error", err)
 			break
 		}
 
 		// Handle ping/pong
 		if message == "ping" {
 			if err := fc.writeMessage("pong"); err != nil {
-				fc.log.Error("Error sending pong to user %d: %v", fc.UserID, err)
+				slog.Error("Error sending pong", "telegram_id", fc.UserID, "error", err)
 				break
 			}
 		}

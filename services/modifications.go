@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"slices"
 	"time"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -29,7 +30,7 @@ type Modifications struct {
 }
 
 func NewModifications(r *Registry) *Modifications {
-	base := NewBase(r, logger.NewComponentLogger("Service: Modifications"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %[1]s (
@@ -55,7 +56,7 @@ func NewModifications(r *Registry) *Modifications {
 }
 
 func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user models.TelegramID) (models.ModificationID, error) {
-	s.Log.Debug("Adding modification: mt: %s, id: %d, user: %d", mt, mtID, user)
+	slog.Debug("Adding modification", "modification_type", mt, "modification_type_id", mtID, "telegram_id", user)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return 0, err
@@ -89,7 +90,7 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 }
 
 func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any], error) {
-	s.Log.Debug("Getting modification: %v", id)
+	slog.Debug("Getting modification", "modification", id)
 
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
@@ -110,7 +111,7 @@ func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any]
 }
 
 func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offset int) ([]*models.Modification[any], error) {
-	s.Log.Debug("Listing modifications: mt: %s, mtID: %d, limit: %d, offset: %d", mt, mtID, limit, offset)
+	slog.Debug("Listing modifications", "modification_type", mt, "modification_type_id", mtID, "limit", limit, "offset", offset)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
@@ -138,7 +139,7 @@ func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*mode
 }
 
 func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, error) {
-	s.Log.Debug("Counting modifications: mt: %s, mtID: %d", mt, mtID)
+	slog.Debug("Counting modifications", "modification_type", mt, "modification_type_id", mtID)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return 0, err
@@ -160,7 +161,7 @@ func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, er
 }
 
 func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
-	s.Log.Debug("Getting latest modification: mt: %s, mtID: %d", mt, mtID)
+	slog.Debug("Getting latest modification", "modification_type", mt, "modification_type_id", mtID)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
@@ -179,7 +180,7 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 }
 
 func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
-	s.Log.Debug("Getting oldest modification: mt: %s, mtID: %d", mt, mtID)
+	slog.Debug("Getting oldest modification", "modification_type", mt, "modification_type_id", mtID)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
@@ -198,7 +199,7 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 }
 
 func (s *Modifications) Delete(id models.ModificationID) error {
-	s.Log.Debug("Deleting modification: %v", id)
+	slog.Debug("Deleting modification", "modification_id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, id)
@@ -210,7 +211,7 @@ func (s *Modifications) Delete(id models.ModificationID) error {
 }
 
 func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error {
-	s.Log.Debug("Deleting all modifications: mt=%s, mtID=%d", mt, mtID)
+	slog.Debug("Deleting all modifications", "modification_type", mt, "modification_type_id", mtID)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return err
@@ -226,7 +227,7 @@ func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error 
 }
 
 func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modification[any], error) {
-	s.Log.Debug("Getting modifications by user: user: %d, limit: %d, offset: %d", user, limit, offset)
+	slog.Debug("Getting modifications by user", "telegram_id", user, "limit", limit, "offset", offset)
 
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
@@ -246,8 +247,13 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 }
 
 func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, from, to time.Time) ([]*models.Modification[any], error) {
-	s.Log.Debug("Getting modifications by date range: mt: %s, mtID: %d, from: %s, to: %s",
-		mt, mtID, from.Format(time.RFC3339), to.Format(time.RFC3339))
+	slog.Debug(
+		"Getting modifications by date range",
+		"modification_type", mt,
+		"modification_id", mtID,
+		"from", from.Format(env.DateTimeFormat),
+		"to", to.Format(env.DateTimeFormat),
+	)
 
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -226,7 +227,7 @@ func (h *Press) HTMXGetCycleSummaryPDF(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	h.Log.Info("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
+	slog.Info("Generating cycle summary PDF for press", "press", press, "user_name", user.Name)
 
 	// Get cycle summary data using service
 	cycles, toolsMap, usersMap, err := h.registry.PressCycles.GetCycleSummaryData(press)

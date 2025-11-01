@@ -82,8 +82,8 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 			slog.Info(
 				"Authentication required",
 				"method", c.Request().Method,
-				"url-path", c.Request().URL.Path,
-				"real-ip", c.RealIP(),
+				"url_path", c.Request().URL.Path,
+				"real_ip", c.RealIP(),
 			)
 			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
 		},
@@ -105,10 +105,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			slog.Info("Authentication failed", "real-ip", realIP)
+			slog.Info("Authentication failed", "real_ip", realIP)
 			return false, echo.NewHTTPError(errors.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
 		}
-		slog.Debug("API key auth successful", "user", user.Name, "real-ip", realIP)
+		slog.Debug("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	}
 
 	ctx.Set("user", user)
@@ -144,9 +144,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	if cookie.UserAgent != requestUserAgent {
 		// Only log if the change seems significant (different browser/version, not just PWA vs browser mode)
 		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
-			slog.Info("Significant user agent change", "user", user.Name, "real-ip", realIP)
+			slog.Info("Significant user agent change", "user_name", user.Name, "real_ip", realIP)
 		} else {
-			slog.Debug("Minor user agent variation (likely PWA)", "user", user.Name, "real-ip", realIP)
+			slog.Debug("Minor user agent variation (likely PWA)", "user_name", user.Name, "real_ip", realIP)
 		}
 	}
 
@@ -165,12 +165,12 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		cookie.LastLogin = now.UnixMilli()
 		httpCookie.Expires = now.Add(env.CookieExpirationDuration)
 
-		slog.Info("Updating cookie", "user", user.Name, "real-ip", realIP, "url-path", ctx.Request().URL.Path)
+		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
 
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
-			slog.Error("Failed to update cookie", "user", user.Name, "real-ip", realIP, "error", err)
+			slog.Error("Failed to update cookie", "user_name", user.Name, "real_ip", realIP, "error", err)
 		} else {
-			slog.Debug("Cookie successfully updated", "user", user.Name, "real-ip", realIP)
+			slog.Debug("Cookie successfully updated", "user_name", user.Name, "real_ip", realIP)
 		}
 	}
 

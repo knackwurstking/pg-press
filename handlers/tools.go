@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -100,7 +101,7 @@ func (h *Tools) HTMXPostEditToolDialog(c echo.Context) error {
 		return HandleError(err, "failed to add tool")
 	}
 
-	h.Log.Info("Created tool ID %d (Type=%s, Code=%s) by user %s", id, tool.Type, tool.Code, user.Name)
+	slog.Info("Created tool", "id", id, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
 
 	// Create feed entry
 	h.createToolFeed(user, tool, "Neues Werkzeug erstellt")
@@ -141,7 +142,7 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 		return HandleError(err, "failed to update tool")
 	}
 
-	h.Log.Info("Updated tool %d (Type=%s, Code=%s) by user %s", tool.ID, tool.Type, tool.Code, user.Name)
+	slog.Info("Updated tool", "id", tool.ID, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
 
 	// Create feed entry
 	h.createToolFeed(user, tool, "Werkzeug aktualisiert")
@@ -181,7 +182,7 @@ func (h *Tools) HTMXDeleteTool(c echo.Context) error {
 		return HandleError(err, "failed to delete tool")
 	}
 
-	h.Log.Info("User %s deleted tool %d", user.Name, toolID)
+	slog.Info("Tool deleted", "id", toolID, "user_name", user.Name)
 
 	// Create feed entry
 	h.createToolFeed(user, tool, "Werkzeug gelöscht")
@@ -215,7 +216,7 @@ func (h *Tools) HTMXMarkToolAsDead(c echo.Context) error {
 		return HandleError(err, "failed to mark tool as dead")
 	}
 
-	h.Log.Info("User %s marked tool %d as dead", user.Name, toolID)
+	slog.Info("Tool marked as dead", "id", toolID, "user_name", user.Name)
 
 	// Create feed entry
 	h.createToolFeed(user, tool, "Werkzeug als Tot markiert")
@@ -278,7 +279,7 @@ func (h *Tools) HTMXGetAdminOverlappingTools(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	h.Log.Info("User %s requested overlapping tools analysis", user.Name)
+	slog.Info("User requested overlapping tools analysis", "user_name", user.Name)
 
 	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
 	if err != nil {
@@ -301,7 +302,7 @@ func (h *Tools) createToolFeed(user *models.User, tool *models.Tool, title strin
 
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed: %v", err)
+		slog.Error("Failed to create feed", "error", err)
 	}
 }
 
@@ -358,11 +359,11 @@ func (h *Tools) getEditToolFormData(c echo.Context) (*ToolsDialogEditForm, error
 			return nil, errors.NewValidationError(fmt.Sprintf("invalid press number: %v", err))
 		}
 
-		pn := models.PressNumber(press)
-		if !models.IsValidPressNumber(&pn) {
+		pressNumber := models.PressNumber(press)
+		if !models.IsValidPressNumber(&pressNumber) {
 			return nil, errors.NewValidationError("invalid press number: must be 0, 2, 3, 4, or 5")
 		}
-		data.Press = &pn
+		data.Press = &pressNumber
 	}
 
 	return data, nil

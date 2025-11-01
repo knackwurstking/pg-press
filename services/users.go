@@ -3,9 +3,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -17,7 +17,7 @@ type Users struct {
 }
 
 func NewUsers(r *Registry) *Users {
-	base := NewBase(r, logger.NewComponentLogger("Service: Users"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
@@ -37,7 +37,7 @@ func NewUsers(r *Registry) *Users {
 }
 
 func (u *Users) List() ([]*models.User, error) {
-	u.Log.Debug("Listing users")
+	slog.Debug("Listing users")
 
 	query := fmt.Sprintf(`SELECT * FROM %s`, TableNameUsers)
 	rows, err := u.DB.Query(query)
@@ -55,7 +55,7 @@ func (u *Users) List() ([]*models.User, error) {
 }
 
 func (u *Users) Get(telegramID models.TelegramID) (*models.User, error) {
-	u.Log.Debug("Getting user: Telegram ID: %d", telegramID)
+	slog.Debug("Getting user", "telegram_id", telegramID)
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE telegram_id = ?`, TableNameUsers)
 	row := u.DB.QueryRow(query, telegramID)
@@ -74,7 +74,7 @@ func (u *Users) Get(telegramID models.TelegramID) (*models.User, error) {
 }
 
 func (u *Users) Add(user *models.User) (models.TelegramID, error) {
-	u.Log.Debug("Adding user %s (Telegram ID: %d)", user.Name, user.TelegramID)
+	slog.Debug("Adding user", "user_name", user.Name, "telegram_id", user.TelegramID)
 
 	if err := user.Validate(); err != nil {
 		return 0, err
@@ -103,13 +103,13 @@ func (u *Users) Add(user *models.User) (models.TelegramID, error) {
 }
 
 func (u *Users) Delete(telegramID models.TelegramID) error {
-	u.Log.Debug("Removing user %d", telegramID)
+	slog.Debug("Removing user", "telegram_id", telegramID)
 
 	if _, err := u.Get(telegramID); err != nil {
 		if errors.IsNotFoundError(err) {
 			return err
 		}
-		u.Log.Error("Failed to get user before deletion (ID: %d): %v", telegramID, err)
+		slog.Error("Failed to get user before deletion", "telegram_id", telegramID, "error", err)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE telegram_id = ?`, TableNameUsers)
@@ -122,7 +122,7 @@ func (u *Users) Delete(telegramID models.TelegramID) error {
 }
 
 func (u *Users) Update(user *models.User) error {
-	u.Log.Debug("Updating user %d: user=%#v", user.TelegramID, user)
+	slog.Debug("Updating user", "telegram_id", user.TelegramID, "user", user)
 
 	if err := user.Validate(); err != nil {
 		return err
@@ -138,7 +138,7 @@ func (u *Users) Update(user *models.User) error {
 }
 
 func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
-	u.Log.Debug("Getting user by API key: %s", utils.MaskString(apiKey))
+	slog.Debug("Getting user by API key", "api_key", utils.MaskString(apiKey))
 
 	if err := ValidateAPIKey(apiKey); err != nil {
 		return nil, err

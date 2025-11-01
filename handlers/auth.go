@@ -36,10 +36,10 @@ func (h *Auth) GetLoginPage(c echo.Context) error {
 	apiKey := c.FormValue("api-key")
 	if apiKey != "" {
 		if h.processApiKeyLogin(apiKey, c) {
-			slog.Info("Successful login", "real-ip", c.RealIP())
+			slog.Info("Successful login", "real_ip", c.RealIP())
 			return RedirectTo(c, "./profile")
 		}
-		slog.Info("Failed login attempt", "real-ip", c.RealIP())
+		slog.Info("Failed login attempt", "real_ip", c.RealIP())
 	}
 
 	page := components.PageLogin(apiKey, apiKey != "")
@@ -58,7 +58,7 @@ func (h *Auth) GetLogout(c echo.Context) error {
 
 	if cookie, err := c.Cookie(env.CookieName); err == nil {
 		if err := h.registry.Cookies.Remove(cookie.Value); err != nil {
-			slog.Error("Failed to remove cookie", "user", user.Name, "error", err)
+			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", err)
 		}
 	}
 
@@ -67,7 +67,7 @@ func (h *Auth) GetLogout(c echo.Context) error {
 
 func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if len(apiKey) < 16 {
-		slog.Debug("API key too short", "real-ip", ctx.RealIP())
+		slog.Debug("API key too short", "real_ip", ctx.RealIP())
 		return false
 	}
 
@@ -76,7 +76,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 		if !errors.IsNotFoundError(err) {
 			slog.Error("Database error during authentication", "error", err)
 		} else {
-			slog.Debug("Invalid API key", "real-ip", ctx.RealIP())
+			slog.Debug("Invalid API key", "real_ip", ctx.RealIP())
 		}
 		return false
 	}
@@ -86,12 +86,12 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	if err := h.createSession(ctx, apiKey, user); err != nil {
-		slog.Error("Failed to create session", "user", user.Name, "error", err)
+		slog.Error("Failed to create session", "user_name", user.Name, "error", err)
 		return false
 	}
 
 	if user.IsAdmin() {
-		slog.Info("Administrator logged in", "user", user.Name, "real-ip", ctx.RealIP())
+		slog.Info("Administrator logged in", "user_name", user.Name, "real_ip", ctx.RealIP())
 	}
 
 	return true

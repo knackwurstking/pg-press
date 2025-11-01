@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -233,7 +234,7 @@ func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalShee
 	// Create and save the feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed: %v", err)
+		slog.Error("Failed to create feed", "error", err)
 	}
 }
 
@@ -289,7 +290,7 @@ func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, old
 	// Create and save the feed entry
 	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create update feed: %v", err)
+		slog.Error("Failed to create update feed", "error", err)
 	}
 }
 

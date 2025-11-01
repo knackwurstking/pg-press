@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -24,7 +24,7 @@ type Tools struct {
 
 func NewTools(r *Registry) *Tools {
 	t := &Tools{
-		Base: NewBase(r, logger.NewComponentLogger("Service: Tools")),
+		Base: NewBase(r),
 	}
 
 	query := fmt.Sprintf(`
@@ -57,8 +57,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 		return 0, err
 	}
 
-	t.Log.Debug("Adding tool by %s: position: %s, type: %s, code: %s",
-		user.String(), tool.Position, tool.Type, tool.Code)
+	slog.Debug("Adding tool", "user_name", user.Name, "position", tool.Position, "type", tool.Type, "code", tool.Code)
 
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
 		return 0, err
@@ -104,7 +103,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 		return err
 	}
 
-	t.Log.Debug("Updating tool by %s: id: %d", user.String(), tool.ID)
+	slog.Debug("Updating tool", "user_name", user.Name, "tool_id", tool.ID)
 
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
 		return err
@@ -139,7 +138,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 }
 
 func (t *Tools) Get(id models.ToolID) (*models.Tool, error) {
-	t.Log.Debug("Getting tool: %d", id)
+	slog.Debug("Getting tool", "tool", id)
 
 	query := fmt.Sprintf(`
 		SELECT %s
@@ -161,7 +160,7 @@ func (t *Tools) Get(id models.ToolID) (*models.Tool, error) {
 }
 
 func (t *Tools) List() ([]*models.Tool, error) {
-	t.Log.Debug("Listing tools")
+	slog.Debug("Listing tools")
 
 	query := fmt.Sprintf(`
 		SELECT %s
@@ -183,7 +182,7 @@ func (t *Tools) Delete(id models.ToolID, user *models.User) error {
 		return err
 	}
 
-	t.Log.Debug("Deleting tool by %s: id: %d", user.String(), id)
+	slog.Debug("Deleting tool", "user_name", user.Name, "tool_id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTools)
 	_, err := t.DB.Exec(query, id)
@@ -195,10 +194,10 @@ func (t *Tools) Delete(id models.ToolID, user *models.User) error {
 }
 
 func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
-	t.Log.Debug("Getting active tools for press: %d", pressNumber)
+	slog.Debug("Getting active tools for press", "press", pressNumber)
 
 	if !models.IsValidPressNumber(&pressNumber) {
-		t.Log.Error("Invalid press number: %d (must be 0-5)", pressNumber)
+		slog.Error("Invalid press number (must be 0-5)", "press", pressNumber)
 		return nil
 	}
 
@@ -210,14 +209,14 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		t.Log.Error("Failed to query active tools: %v", err)
+		slog.Error("Failed to query active tools", "error", err)
 		return nil
 	}
 	defer rows.Close()
 
 	tools, err := ScanRows(rows, scanTool)
 	if err != nil {
-		t.Log.Error("Failed to scan active tools: %v", err)
+		slog.Error("Failed to scan active tools", "error", err)
 		return nil
 	}
 
@@ -225,7 +224,7 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 }
 
 func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
-	t.Log.Debug("Getting tools by press: %v", pressNumber)
+	slog.Debug("Getting tools by press", "press", pressNumber)
 
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
 		return nil, errors.NewValidationError(
@@ -249,7 +248,7 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, err
 }
 
 func (t *Tools) GetPressUtilization() ([]models.PressUtilization, error) {
-	t.Log.Debug("Getting press utilization")
+	slog.Debug("Getting press utilization")
 
 	// Valid press numbers: 0, 2, 3, 4, 5
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
@@ -271,7 +270,7 @@ func (t *Tools) GetPressUtilization() ([]models.PressUtilization, error) {
 }
 
 func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
-	t.Log.Debug("Listing active tools")
+	slog.Debug("Listing active tools")
 
 	query := fmt.Sprintf(`
 		SELECT %s
@@ -290,7 +289,7 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
 }
 
 func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
-	t.Log.Debug("Listing dead tools")
+	slog.Debug("Listing dead tools")
 
 	query := fmt.Sprintf(`
 		SELECT %s
@@ -319,8 +318,7 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 		)
 	}
 
-	t.Log.Debug("Updating tool press by %s: toolID: %d, pressNumber: %v",
-		user.String(), toolID, pressNumber)
+	slog.Debug("Updating tool press", "user_name", user.Name, "tool_id", toolID, "press", pressNumber)
 
 	tool, err := t.Get(toolID)
 	if err != nil {
@@ -348,8 +346,7 @@ func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user
 		return err
 	}
 
-	t.Log.Debug("Updating tool regenerating status by %s: toolID: %d, regenerating: %t",
-		user.String(), toolID, regenerating)
+	slog.Debug("Updating tool regenerating status", "user_name", user.Name, "tool_id", toolID, "regenerating", regenerating)
 
 	// Get the current tool to check if the regeneration status is actually changing
 	currentTool, err := t.Get(toolID)
@@ -374,7 +371,7 @@ func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) error {
 		return err
 	}
 
-	t.Log.Debug("Marking tool as dead by %s: id: %d", user.String(), toolID)
+	slog.Debug("Marking tool as dead", "user_name", user.Name, "tool_id", toolID)
 
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 1, press = NULL WHERE id = ?`, TableNameTools)
 	if _, err := t.DB.Exec(query, toolID); err != nil {
@@ -389,7 +386,7 @@ func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) error {
 		return err
 	}
 
-	t.Log.Debug("Reviving dead tool by %s: id: %d", user.String(), toolID)
+	slog.Debug("Reviving dead tool", "user_name", user.Name, "tool_id", toolID)
 
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 0 WHERE id = ?`, TableNameTools)
 	if _, err := t.DB.Exec(query, toolID); err != nil {

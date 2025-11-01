@@ -3,12 +3,12 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -19,7 +19,7 @@ type PressCycles struct {
 }
 
 func NewPressCycles(r *Registry) *PressCycles {
-	base := NewBase(r, logger.NewComponentLogger("Service: PressCycles"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %[1]s (
@@ -49,7 +49,7 @@ func NewPressCycles(r *Registry) *PressCycles {
 
 // Get retrieves a press cycle by ID
 func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
-	s.Log.Debug("Getting press cycle: %d", id)
+	slog.Debug("Getting press cycle", "id", id)
 
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -75,7 +75,7 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
 // GetPartialCycles calculates the partial cycles for a given cycle
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
-		s.Log.Error("Invalid cycle for partial calculation: %v", err)
+		slog.Error("Invalid cycle for partial calculation", "error", err)
 		return cycle.TotalCycles
 	}
 
@@ -85,7 +85,7 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	var previousTotalCycles int64
 	if err := s.DB.QueryRow(query, args...).Scan(&previousTotalCycles); err != nil {
 		if err != sql.ErrNoRows {
-			s.Log.Error("Failed to get previous total cycles: %v", err)
+			slog.Error("Failed to get previous total cycles", "error", err)
 		}
 		return cycle.TotalCycles
 	}
@@ -97,7 +97,7 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
 func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, error) {
-	s.Log.Debug("Getting last press cycle for tool: %d", toolID)
+	slog.Debug("Getting last press cycle for tool", "tool", toolID)
 
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -121,7 +121,7 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, err
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
 func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, error) {
-	s.Log.Debug("Getting press cycles for tool: %d", toolID)
+	slog.Debug("Getting press cycles for tool", "tool", toolID)
 
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -148,7 +148,8 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
 func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
-	s.Log.Debug("Getting press cycles for press: %d, limit: %v, offset: %v", pressNumber, limit, offset)
+	slog.Debug("Getting press cycles for press",
+		"press", pressNumber, "limit", limit, "offset", offset)
 
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -182,7 +183,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
 ) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, error) {
-	s.Log.Debug("Getting cycle summary data for press: %d", pressNumber)
+	slog.Debug("Getting cycle summary data for press", "press", pressNumber)
 
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
 	if err != nil {
@@ -216,10 +217,10 @@ func (s *PressCycles) GetCycleSummaryData(
 func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 	totalCycles, totalPartialCycles, activeToolsCount, entriesCount int64,
 ) {
-	s.Log.Debug("Calculating cycle summary stats")
+	slog.Debug("Calculating cycle summary stats")
 
 	if cycles == nil {
-		s.Log.Error("Cannot calculate stats from nil cycles data")
+		slog.Error("Cannot calculate stats from nil cycles data")
 		return 0, 0, 0, 0
 	}
 
@@ -242,7 +243,7 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 func (s *PressCycles) GetToolSummaries(
 	cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool,
 ) ([]*models.ToolSummary, error) {
-	s.Log.Debug("Creating tool summaries from cycles data")
+	slog.Debug("Creating tool summaries from cycles data")
 
 	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
 	s.sortToolSummariesChronologically(toolSummaries)
@@ -255,7 +256,7 @@ func (s *PressCycles) GetToolSummaries(
 
 // List retrieves all press cycles
 func (s *PressCycles) List() ([]*models.Cycle, error) {
-	s.Log.Debug("Listing press cycles")
+	slog.Debug("Listing press cycles")
 
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
@@ -280,9 +281,12 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 
 // Add creates a new press cycle
 func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, error) {
-	s.Log.Debug(
-		"Adding press cycle by %s: tool: %d, position: %s, press: %d, cycles: %d",
-		user.String(), cycle.ToolID, cycle.ToolPosition, cycle.PressNumber, cycle.TotalCycles,
+	slog.Debug(
+		"Adding press cycle",
+		"user_name", user.Name,
+		"tool_id", cycle.ToolID,
+		"cycle.ToolPosition", cycle.ToolPosition,
+		"cycle.TotalCycles", cycle.TotalCycles,
 	)
 
 	if err := cycle.Validate(); err != nil {
@@ -325,7 +329,7 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 
 // Update modifies an existing press cycle
 func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
-	s.Log.Debug("Updating press cycle by %s: id: %d", user.String(), cycle.ID)
+	slog.Debug("Updating press cycle", "user_name", user.Name, "cycle.ID", cycle.ID)
 
 	if err := cycle.Validate(); err != nil {
 		return err
@@ -360,7 +364,7 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 
 // Delete removes a press cycle from the database
 func (s *PressCycles) Delete(id models.CycleID) error {
-	s.Log.Debug("Deleting press cycle: %d", id)
+	slog.Debug("Deleting press cycle", "cycle", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
 	_, err := s.DB.Exec(query, id)
@@ -566,7 +570,7 @@ func (s *PressCycles) getPositionOrder(position models.Position) int {
 
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
 func (s *PressCycles) GetOverlappingTools() ([]*models.OverlappingTool, error) {
-	s.Log.Debug("Detecting overlapping tools across all presses")
+	slog.Debug("Detecting overlapping tools across all presses")
 
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	allToolSummaries := s.collectAllPressSummaries(validPresses)
@@ -581,13 +585,13 @@ func (s *PressCycles) collectAllPressSummaries(presses []models.PressNumber) map
 	for _, press := range presses {
 		cycles, toolsMap, _, err := s.GetCycleSummaryData(press)
 		if err != nil {
-			s.Log.Error("Failed to get cycle summary data for press %d: %v", press, err)
+			slog.Error("Failed to get cycle summary data for press", "press", press, "error", err)
 			continue
 		}
 
 		summaries, err := s.GetToolSummaries(cycles, toolsMap)
 		if err != nil {
-			s.Log.Error("Failed to get tool summaries for press %d: %v", press, err)
+			slog.Error("Failed to get tool summaries for press", "press", press, "error", err)
 			continue
 		}
 

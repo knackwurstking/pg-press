@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
@@ -97,15 +98,15 @@ func (h *Tool) GetToolPage(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	idQuery, err := ParseParamInt64(c, "id")
+	idParam, err := ParseParamInt64(c, "id")
 	if err != nil {
 		return HandleBadRequest(err, "failed to parse id from query parameter")
 	}
-	id := models.ToolID(idQuery)
+	toolID := models.ToolID(idParam)
 
-	h.Log.Debug("Fetching tool %d with notes", id)
+	slog.Debug("Fetching tool with notes", "tool", toolID)
 
-	tool, err := h.registry.Tools.Get(id)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
@@ -166,8 +167,7 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 		targetID = models.ToolID(targetIDParsed)
 	}
 
-	h.Log.Info("Updating tool binding: tool %d -> target %d",
-		toolID, targetID)
+	slog.Info("Updating tool binding", "tool", toolID, "target", targetID)
 
 	{ // Make sure to check for position first (target == top && toolID == cassette)
 		var (
@@ -301,7 +301,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	{ // Get (resolved) regeneration history for this tool
 		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
 		if err != nil {
-			h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
+			slog.Error("Failed to get tool regenerations", "tool", toolID, "error", err)
 		}
 
 		// Resolve regenerations
@@ -315,11 +315,6 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 		}
 	}
 
-	totalCycles := h.getTotalCycles(
-		toolID,
-		filteredCycles...,
-	)
-
 	// Only get tools for binding if the tool has no binding
 	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
 	if err != nil {
@@ -331,15 +326,12 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 		User:            user,
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
-		TotalCycles:     totalCycles,
+		TotalCycles:     h.getTotalCycles(toolID, filteredCycles...),
 		Cycles:          filteredCycles,
 		Regenerations:   resolvedRegenerations,
 	})
 
-	if err := cyclesSection.Render(
-		c.Request().Context(),
-		c.Response(),
-	); err != nil {
+	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		HandleError(err, "failed to render tool cycles")
 	}
 
@@ -484,11 +476,10 @@ func (h *Tool) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		h.Log.Info("Starting regeneration for tool %d", tool.ID)
+		slog.Info("Starting regeneration", "tool", tool.ID, "user_name", user.Name)
 		_, err := h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
 		if err != nil {
-			h.Log.Error("Failed to start regeneration for tool %d: %v",
-				tool.ID, err)
+			slog.Error("Failed to start regeneration", "tool", tool.ID, "user_name", user.Name, "error", err)
 		}
 	}
 
@@ -571,7 +562,7 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	// Handle regeneration if requested
 	if form.Regenerating {
 		if _, err := h.registry.ToolRegenerations.Add(tool.ID, pressCycle.ID, "", user); err != nil {
-			h.Log.Error("Failed to add tool regeneration: %v", err)
+			slog.Error("Failed to add tool regeneration", "error", err)
 		}
 	}
 
@@ -664,7 +655,7 @@ func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	h.Log.Debug("Fetching metal sheets for tool %d", toolID)
+	slog.Debug("Fetching metal sheets", "tool", toolID, "user_name", user.Name)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
@@ -675,7 +666,7 @@ func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 	metalSheets, err := h.registry.MetalSheets.GetByToolID(toolID)
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
-		h.Log.Error("Failed to fetch metal sheets: %v", err)
+		slog.Error("Failed to fetch metal sheets", "error", err, "user_name", user.Name)
 		metalSheets = []*models.MetalSheet{}
 	}
 
@@ -695,7 +686,7 @@ func (h *Tool) HTMXGetToolNotes(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	h.Log.Debug("Fetching notes for tool %d", toolID)
+	slog.Debug("Fetching notes for tool", "tool", toolID)
 
 	// Get the tool
 	tool, err := h.registry.Tools.Get(toolID)
@@ -808,7 +799,7 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 		regenerationID = models.RegenerationID(id)
 	}
 
-	h.Log.Info("Deleting the regeneration with the ID %d (User: %s)", regenerationID, user.Name)
+	slog.Info("Deleting the regeneration", "regeneration", regenerationID, "user_name", user.Name)
 
 	var regeneration *models.ResolvedRegeneration
 	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
@@ -924,7 +915,13 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		return HandleError(err, "failed to get tool from database")
 	}
 
-	h.Log.Info("User %s updating status for tool %d from %s to %s", user.Name, toolID, tool.Status(), statusStr)
+	slog.Info(
+		"Updating tool status",
+		"user_name", user.Name,
+		"tool_id", toolID,
+		"status-from", tool.Status(),
+		"status-to", statusStr,
+	)
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
@@ -985,7 +982,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 	// Render out-of-band swap for cycles section to trigger reload
 	oobCyclesReload := components.PageTool_CyclesSection(toolID, true)
 	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
-		h.Log.Error("Failed to render out-of-band cycles reload: %v", err)
+		slog.Error("Failed to render out-of-band cycles reload", "error", err)
 	}
 
 	return nil
@@ -1126,6 +1123,6 @@ func (h *Tool) renderStatusComponent(tool *models.Tool, editable bool, user *mod
 func (h *Tool) createFeed(title, content string, userID models.TelegramID) {
 	feed := models.NewFeed(title, content, userID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for cycle creation: %v", err)
+		slog.Error("Failed to create feed for cycle creation", "error", err)
 	}
 }

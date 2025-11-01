@@ -4,9 +4,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -17,7 +17,7 @@ type MetalSheets struct {
 }
 
 func NewMetalSheets(r *Registry) *MetalSheets {
-	base := NewBase(r, logger.NewComponentLogger("Service: MetalSheets"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
@@ -45,7 +45,7 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 }
 
 func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
-	s.Log.Debug("Listing metal sheets")
+	slog.Debug("Listing metal sheets")
 
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
@@ -63,7 +63,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 }
 
 func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
-	s.Log.Debug("Getting metal sheet: %d", id)
+	slog.Debug("Getting metal sheet", "id", id)
 
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
@@ -86,7 +86,7 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
 }
 
 func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, error) {
-	s.Log.Debug("Getting metal sheets for tool: %d", toolID)
+	slog.Debug("Getting metal sheets for tool", "tool", toolID)
 
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
@@ -105,7 +105,7 @@ func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, e
 }
 
 func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*models.MetalSheet, error) {
-	s.Log.Debug("Getting metal sheets for machine type: %s", string(machineType))
+	slog.Debug("Getting metal sheets for machine type", "machine_type", machineType)
 
 	if !machineType.IsValid() {
 		return nil, errors.NewValidationError(
@@ -129,20 +129,20 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 }
 
 func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, error) {
-	s.Log.Debug("Getting metal sheets for press: %d, tools: %d", pressNumber, len(toolsMap))
+	slog.Debug("Getting metal sheets for press", "press", pressNumber, "tools", len(toolsMap))
 
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
-	s.Log.Debug("Press machine type determined: press: %d, type: %s",
-		pressNumber, expectedMachineType)
+	slog.Debug("Press machine type determined",
+		"press", pressNumber, "machine-type", expectedMachineType)
 
 	var allSheets models.MetalSheetList
 	for toolID := range toolsMap {
 		sheets, err := s.GetByToolID(toolID)
 		if err != nil {
-			s.Log.Error("Failed to get metal sheets for tool %d: %v", toolID, err)
+			slog.Error("Failed to get metal sheets for tool", "tool", toolID, "error", err)
 			continue
 		}
-		s.Log.Debug("Retrieved sheets for tool: tool: %d, count: %d", toolID, len(sheets))
+		slog.Debug("Retrieved sheets for tool", "tool", toolID, "sheets", len(sheets))
 		allSheets = append(allSheets, sheets...)
 	}
 
@@ -151,7 +151,7 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[m
 		if sheet.Identifier == expectedMachineType {
 			filteredSheets = append(filteredSheets, sheet)
 		} else if sheet.Identifier != models.MachineTypeSACMI && sheet.Identifier != models.MachineTypeSITI {
-			s.Log.Warn("Found metal sheet %d with unexpected identifier: %s", sheet.ID, sheet.Identifier)
+			slog.Warn("Found metal sheet with unexpected identifier", "sheet", sheet.ID, "identifier", sheet.Identifier)
 		}
 	}
 
@@ -159,8 +159,7 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[m
 }
 
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error) {
-	s.Log.Debug("Adding metal sheet: tool_id: %d, identifier: %s",
-		sheet.ToolID, sheet.Identifier)
+	slog.Debug("Adding metal sheet", "tool", sheet.ToolID, "identifier", sheet.Identifier)
 
 	if err := sheet.Validate(); err != nil {
 		return 0, err
@@ -195,7 +194,7 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error)
 }
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
-	s.Log.Debug("Updating metal sheet: %d", sheet.ID)
+	slog.Debug("Updating metal sheet", "sheet", sheet.ID)
 
 	if err := sheet.Validate(); err != nil {
 		return err
@@ -219,7 +218,7 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 }
 
 func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) error {
-	s.Log.Debug("Assigning tool to metal sheet: sheet_id: %d, tool_id: %d", sheetID, toolID)
+	slog.Debug("Assigning tool to metal sheet", "sheet", sheetID, "tool", toolID)
 
 	if toolID <= 0 {
 		return errors.NewValidationError("tool_id: must be positive")
@@ -243,7 +242,7 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) erro
 }
 
 func (s *MetalSheets) Delete(id models.MetalSheetID) error {
-	s.Log.Debug("Deleting metal sheet: %d", id)
+	slog.Debug("Deleting metal sheet", "id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
 	if _, err := s.DB.Exec(query, id); err != nil {

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/services"
@@ -29,26 +30,26 @@ func (h *Nav) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Nav) GetFeedCounter(c echo.Context) error {
-	remoteIP := c.RealIP()
+	realIP := c.RealIP()
 
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 		user, err := GetUserFromContext(c)
 		if err != nil {
-			h.Log.Error("WebSocket authentication failed from %s: %v", remoteIP, err)
+			slog.Error("WebSocket authentication failed", "real_ip", realIP, "error", err)
 			ws.Close()
 			return
 		}
 
-		h.Log.Info("WebSocket connection established for user %s from %s", user.Name, remoteIP)
+		slog.Info("WebSocket connection established", "real_ip", realIP, "user_name", user.Name)
 
 		feedConn := h.feedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
-			h.Log.Error("Failed to register WebSocket connection for user %s from %s", user.Name, remoteIP)
+			slog.Error("Failed to register WebSocket connection", "real_ip", realIP, "user_name", user.Name)
 			ws.Close()
 			return
 		}
 
-		defer h.Log.Info("WebSocket connection closed for user %s from %s", user.Name, remoteIP)
+		defer slog.Info("WebSocket connection closed", "real_ip", realIP, "user_name", user.Name)
 
 		go feedConn.WritePump()
 		feedConn.ReadPump(h.feedHandler)

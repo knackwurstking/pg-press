@@ -3,9 +3,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -17,7 +17,7 @@ type Cookies struct {
 }
 
 func NewCookies(registry *Registry) *Cookies {
-	base := NewBase(registry, logger.NewComponentLogger("Service: Cookies"))
+	base := NewBase(registry)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
@@ -37,7 +37,7 @@ func NewCookies(registry *Registry) *Cookies {
 }
 
 func (c *Cookies) List() ([]*models.Cookie, error) {
-	c.Log.Debug("Listing cookies")
+	slog.Debug("Listing cookies")
 
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
 	rows, err := c.DB.Query(query)
@@ -50,7 +50,7 @@ func (c *Cookies) List() ([]*models.Cookie, error) {
 }
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
-	c.Log.Debug("Listing cookies by API key")
+	slog.Debug("Listing cookies by API key")
 
 	if err := ValidateAPIKey(apiKey); err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 }
 
 func (c *Cookies) Get(value string) (*models.Cookie, error) {
-	c.Log.Debug("Getting cookie by value")
+	slog.Debug("Getting cookie by value")
 
 	if value == "" {
 		return nil, errors.NewValidationError("value cannot be empty")
@@ -91,7 +91,7 @@ func (c *Cookies) Get(value string) (*models.Cookie, error) {
 }
 
 func (c *Cookies) Add(cookie *models.Cookie) error {
-	c.Log.Debug("Add new cookie")
+	slog.Debug("Add new cookie")
 
 	if err := cookie.Validate(); err != nil {
 		return err
@@ -120,7 +120,7 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 }
 
 func (c *Cookies) Update(value string, cookie *models.Cookie) error {
-	c.Log.Debug("Updating a cookie")
+	slog.Debug("Updating a cookie")
 
 	if value == "" {
 		return errors.NewValidationError("current_value cannot be empty")
@@ -143,7 +143,7 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 }
 
 func (c *Cookies) Remove(value string) error {
-	c.Log.Debug("Removing cookie with value: %s", utils.MaskString(value))
+	slog.Debug("Removing cookie", "value", utils.MaskString(value))
 
 	if value == "" {
 		return errors.NewValidationError("value cannot be empty")
@@ -159,7 +159,7 @@ func (c *Cookies) Remove(value string) error {
 }
 
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	c.Log.Debug("Removing cookies by API key: %s", utils.MaskString(apiKey))
+	slog.Debug("Removing cookies by API key", "api_key", utils.MaskString(apiKey))
 
 	if err := ValidateAPIKey(apiKey); err != nil {
 		return err
@@ -175,7 +175,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 }
 
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) error {
-	c.Log.Debug("Removing expired cookies, before_timestamp: %d", beforeTimestamp)
+	slog.Debug("Removing expired cookies", "before_timestamp", beforeTimestamp)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, beforeTimestamp)

@@ -152,7 +152,7 @@ func (h *Editor) loadExistingContent(options *components.PageEditorOptions) erro
 			options.Attachments = loadedAttachments
 		} else {
 			slog.Error("Failed to load attachments for trouble report",
-				"TroubleReportID", options.ID, "error", err)
+				"trouble_report_id", options.ID, "error", err)
 		}
 
 	// Note: Notes are not supported in the editor as they have a different structure

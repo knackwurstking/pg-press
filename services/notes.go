@@ -3,9 +3,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -16,7 +16,7 @@ type Notes struct {
 }
 
 func NewNotes(r *Registry) *Notes {
-	base := NewBase(r, logger.NewComponentLogger("Service: Notes"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
@@ -36,7 +36,7 @@ func NewNotes(r *Registry) *Notes {
 }
 
 func (n *Notes) List() ([]*models.Note, error) {
-	n.Log.Debug("Listing notes")
+	slog.Debug("Listing notes")
 
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
@@ -54,7 +54,7 @@ func (n *Notes) List() ([]*models.Note, error) {
 }
 
 func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
-	n.Log.Debug("Getting note with ID %d", id)
+	slog.Debug("Getting note with ID", "id", id)
 
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
@@ -68,7 +68,7 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
 }
 
 func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
-	n.Log.Debug("Getting notes by IDs (%d): %#v", len(ids), ids)
+	slog.Debug("Getting notes by IDs", "ids", len(ids))
 
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
@@ -114,12 +114,12 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
 }
 
 func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
-	n.Log.Debug("Getting notes for press: %d", press)
+	slog.Debug("Getting notes for press", "press", press)
 	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
 func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, error) {
-	n.Log.Debug("Getting notes for tool: %d", toolID)
+	slog.Debug("Getting notes for tool", "tool", toolID)
 	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
 }
 
@@ -141,7 +141,7 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
 }
 
 func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
-	n.Log.Debug("Adding note: level: %d", note.Level)
+	slog.Debug("Adding note: level", "level", note.Level)
 
 	if err := note.Validate(); err != nil {
 		return 0, err
@@ -166,7 +166,7 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
 }
 
 func (n *Notes) Update(note *models.Note) error {
-	n.Log.Debug("Updating note: id: %d, level: %d", note.ID, note.Level)
+	slog.Debug("Updating note: id", "id", note.ID, "level", note.Level)
 
 	if err := note.Validate(); err != nil {
 		return err
@@ -182,7 +182,7 @@ func (n *Notes) Update(note *models.Note) error {
 }
 
 func (n *Notes) Delete(id models.NoteID) error {
-	n.Log.Debug("Deleting note for ID: %d", id)
+	slog.Debug("Deleting note for ID", "id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)

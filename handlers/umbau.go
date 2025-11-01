@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -48,7 +49,7 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
-	h.Log.Info("Rendering the umbau page for user %s", user.String())
+	slog.Info("Rendering the umbau page", "user_name", user.Name)
 
 	tools, err := h.registry.Tools.List()
 	if err != nil {
@@ -87,7 +88,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 		return HandleBadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
-	h.Log.Info("Handle a active tool change for the press %d by user %s", pressNumber, user.String())
+	slog.Info("Handle a active tool change", "press", pressNumber, "user_name", user.Name)
 
 	// Get form value for the press cycles
 	totalCyclesStr := c.FormValue("press-total-cycles")
@@ -179,7 +180,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Create feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for press %d: %v", pressNumber, err)
+		slog.Error("Failed to create feed", "press", pressNumber, "error", err)
 	}
 
 	return c.NoContent(http.StatusOK)

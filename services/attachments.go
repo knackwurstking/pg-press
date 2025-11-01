@@ -3,10 +3,10 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -17,7 +17,7 @@ type Attachments struct {
 }
 
 func NewAttachments(r *Registry) *Attachments {
-	base := NewBase(r, logger.NewComponentLogger("Service: Attachments"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
@@ -38,7 +38,7 @@ func NewAttachments(r *Registry) *Attachments {
 }
 
 func (a *Attachments) List() ([]*models.Attachment, error) {
-	a.Log.Debug("Listing attachments")
+	slog.Debug("Listing attachments")
 
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
@@ -55,7 +55,7 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 }
 
 func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
-	a.Log.Debug("Getting attachment for ID: %d", id)
+	slog.Debug("Getting attachment for ID", "id", id)
 
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
@@ -77,7 +77,7 @@ func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
 }
 
 func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, error) {
-	a.Log.Debug("Getting attachments by IDs: count: %d", len(ids))
+	slog.Debug("Getting attachments by IDs", "ids", len(ids))
 
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
@@ -121,8 +121,7 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 }
 
 func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, error) {
-	a.Log.Debug("Adding attachment: mime_type: %s, size: %d bytes",
-		attachment.MimeType, len(attachment.Data))
+	slog.Debug("Adding attachment", "mime_type", attachment.MimeType, "size", len(attachment.Data))
 
 	if err := attachment.Validate(); err != nil {
 		return 0, err
@@ -147,7 +146,7 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, e
 }
 
 func (a *Attachments) Update(attachment *models.Attachment) error {
-	a.Log.Debug("Updating attachment: id: %s", attachment.ID)
+	slog.Debug("Updating attachment", "attachment", attachment.ID)
 
 	if err := attachment.Validate(); err != nil {
 		return err
@@ -168,7 +167,7 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 }
 
 func (a *Attachments) Delete(id models.AttachmentID) error {
-	a.Log.Debug("Deleting attachment: %d", id)
+	slog.Debug("Deleting attachment", "id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -117,7 +118,7 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 	for _, m := range modifications {
 		resolvedModification, err := services.ResolveModification[models.TroubleReportModData](h.registry, m)
 		if err != nil {
-			h.Log.Error("Failed to resolve modification %d: %v", m.ID, err)
+			slog.Error("Failed to resolve modification", "id", m.ID, "error", err)
 			continue
 		}
 		resolvedModifications = append(resolvedModifications, resolvedModification)
@@ -180,7 +181,7 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 	feedContent := fmt.Sprintf("Titel: %s", removedReport.Title)
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for trouble report deletion: %v", err)
+		slog.Error("Failed to create feed for trouble report deletion", "error", err)
 	}
 
 	return h.HTMXGetData(c)
@@ -274,7 +275,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		h.Log.Error("Failed to create feed for trouble report rollback: %v", err)
+		slog.Error("Failed to create feed for trouble report rollback", "error", err)
 	}
 
 	return nil

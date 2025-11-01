@@ -9,6 +9,7 @@ require (
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/labstack/gommon v0.4.2
+	github.com/lmittmann/tint v1.1.2
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/stretchr/testify v1.11.1
 	github.com/williepotgieter/keymaker v1.0.0
@@ -17,7 +18,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/lmittmann/tint v1.1.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

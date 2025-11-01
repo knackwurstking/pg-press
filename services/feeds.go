@@ -3,9 +3,9 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -17,7 +17,7 @@ type Feeds struct {
 }
 
 func NewFeeds(r *Registry) *Feeds {
-	base := NewBase(r, logger.NewComponentLogger("Service: Feeds"))
+	base := NewBase(r)
 
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %[1]s (
@@ -43,12 +43,12 @@ func NewFeeds(r *Registry) *Feeds {
 }
 
 func (f *Feeds) SetBroadcaster(broadcaster Broadcaster) {
-	f.Log.Debug("Setting broadcaster for real-time updates")
+	slog.Debug("Setting broadcaster for real-time updates")
 	f.broadcaster = broadcaster
 }
 
 func (f *Feeds) List() ([]*models.Feed, error) {
-	f.Log.Debug("Listing feeds")
+	slog.Debug("Listing feeds")
 
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s ORDER BY created_at DESC`,
@@ -65,7 +65,7 @@ func (f *Feeds) List() ([]*models.Feed, error) {
 }
 
 func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
-	f.Log.Debug("Listing feeds with pagination: offset: %d, limit: %d", offset, limit)
+	slog.Debug("Listing feeds with pagination", "offset", offset, "limit", limit)
 
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
@@ -85,8 +85,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 }
 
 func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
-	f.Log.Debug("Listing feeds by user: userID: %d, offset: %d, limit: %d",
-		userID, offset, limit)
+	slog.Debug("Listing feeds for user", "telegram_id", userID, "offset", offset, "limit", limit)
 
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
@@ -107,7 +106,7 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 }
 
 func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
-	f.Log.Debug("Getting feed: %d", id)
+	slog.Debug("Getting feed", "id", id)
 
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s WHERE id = ?`,
@@ -127,7 +126,7 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
 }
 
 func (f *Feeds) Add(feed *models.Feed) error {
-	f.Log.Debug("Adding feed: %#v", feed)
+	slog.Debug("Adding feed", "feed", feed)
 
 	if err := feed.Validate(); err != nil {
 		return err
@@ -157,7 +156,7 @@ func (f *Feeds) Add(feed *models.Feed) error {
 }
 
 func (f *Feeds) Delete(id models.FeedID) error {
-	f.Log.Debug("Deleting feed: %d", id)
+	slog.Debug("Deleting feed", "id", id)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
 	_, err := f.DB.Exec(query, id)
@@ -169,7 +168,7 @@ func (f *Feeds) Delete(id models.FeedID) error {
 }
 
 func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
-	f.Log.Debug("Deleting feeds before timestamp %d", timestamp)
+	slog.Debug("Deleting feeds before timestamp", "timestamp", timestamp)
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
 	result, err := f.DB.Exec(query, timestamp)
@@ -186,7 +185,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
 }
 
 func (f *Feeds) Count() (int, error) {
-	f.Log.Debug("Counting feeds")
+	slog.Debug("Counting feeds")
 
 	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
 	if err != nil {
@@ -197,7 +196,7 @@ func (f *Feeds) Count() (int, error) {
 }
 
 func (f *Feeds) CountByUser(userID int64) (int, error) {
-	f.Log.Debug("Counting feeds by user: %d", userID)
+	slog.Debug("Counting feeds by user", "telegram_id", userID)
 
 	count, err := f.QueryCount(
 		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE user_id = ?`, TableNameFeeds),

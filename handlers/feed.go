@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/components"
@@ -51,7 +52,7 @@ func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
 	for _, feed := range feeds {
 		feedUser, err := h.registry.Users.Get(feed.UserID)
 		if err != nil {
-			h.Log.Error("failed to get user: %v", err)
+			slog.Error("failed to get user", "error", err)
 			continue
 		}
 		userMap[feed.UserID] = feedUser
@@ -65,8 +66,8 @@ func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
 	if len(feeds) > 0 && feeds[0].ID != user.LastFeed {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
-		h.Log.Info("Updating user %s last feed from %d to %d",
-			user.Name, oldLastFeed, user.LastFeed)
+		slog.Info("Updating users last feed",
+			"user_name", user.Name, "last_feed_from", oldLastFeed, "last_feed_to", user.LastFeed)
 
 		if err := h.registry.Users.Update(user); err != nil {
 			return HandleError(err, "failed to update user's last feed")

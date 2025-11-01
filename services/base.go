@@ -3,21 +3,17 @@ package services
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/knackwurstking/pg-press/logger"
 )
 
 type Base struct {
 	Registry *Registry
 	DB       *sql.DB
-	Log      *logger.Logger
 }
 
-func NewBase(r *Registry, l *logger.Logger) *Base {
+func NewBase(r *Registry) *Base {
 	return &Base{
 		Registry: r,
 		DB:       r.DB,
-		Log:      l,
 	}
 }
 
