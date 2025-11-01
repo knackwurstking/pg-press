@@ -406,8 +406,8 @@ func pageUmbau_formActions(user *models.User) templ.Component {
 
 func pageUmbauOnToolChange(event templ.JSExpression) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_pageUmbauOnToolChange_0b55`,
-		Function: `function __templ_pageUmbauOnToolChange_0b55(event){var target = event.currentTarget;
+		Name: `__templ_pageUmbauOnToolChange_67ef`,
+		Function: `function __templ_pageUmbauOnToolChange_67ef(event){var target = event.currentTarget;
 
 	// Get the tool id from the target element
 	var toolID = target.value;
@@ -431,16 +431,13 @@ func pageUmbauOnToolChange(event templ.JSExpression) templ.ComponentScript {
 
 		// Check format (data-format)
 		if (!!format && !option.textContent.includes(format)) option.disabled = true;
-
-		// Check tool ID (value)
-		if (!!option.value && option.value == toolID) option.disabled = true;
 	};
 
 	// Loop through all options
 	options.forEach(optionsLoopHandler);
 }`,
-		Call:       templ.SafeScript(`__templ_pageUmbauOnToolChange_0b55`, event),
-		CallInline: templ.SafeScriptInline(`__templ_pageUmbauOnToolChange_0b55`, event),
+		Call:       templ.SafeScript(`__templ_pageUmbauOnToolChange_67ef`, event),
+		CallInline: templ.SafeScriptInline(`__templ_pageUmbauOnToolChange_67ef`, event),
 	}
 }
 

@@ -157,9 +157,6 @@ script pageUmbauOnToolChange(event templ.JSExpression) {
 
 		// Check format (data-format)
 		if (!!format && !option.textContent.includes(format)) option.disabled = true;
-
-		// Check tool ID (value)
-		if (!!option.value && option.value == toolID) option.disabled = true;
 	};
 
 	// Loop through all options

@@ -69,7 +69,6 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 	return nil
 }
 
-// FIXME: Missing bottom tool error on submit
 func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Get the user from the request context
 	user, err := GetUserFromContext(c)
@@ -110,6 +109,9 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	} else {
 		topToolID = models.ToolID(id)
 	}
+
+	h.Log.Debug("Top Tool: %s", c.FormValue("top"))
+	h.Log.Debug("Bottom Tool: %s", c.FormValue("bottom"))
 
 	// Get form value for the bottom tool
 	var bottomToolID models.ToolID
