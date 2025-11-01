@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"golang.org/x/net/websocket"
@@ -12,13 +11,13 @@ import (
 )
 
 type Nav struct {
-	*Base
+	registry    *services.Registry
 	feedHandler *FeedHandler
 }
 
-func NewNav(db *services.Registry, fh *FeedHandler) *Nav {
+func NewNav(r *services.Registry, fh *FeedHandler) *Nav {
 	return &Nav{
-		Base:        NewBase(db, logger.NewComponentLogger("Nav")),
+		registry:    r,
 		feedHandler: fh,
 	}
 }

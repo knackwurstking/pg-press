@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -16,12 +16,12 @@ import (
 )
 
 type Editor struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewEditor(db *services.Registry) *Editor {
+func NewEditor(r *services.Registry) *Editor {
 	return &Editor{
-		Base: NewBase(db, logger.NewComponentLogger("Editor")),
+		registry: r,
 	}
 }
 
@@ -138,7 +138,7 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 func (h *Editor) loadExistingContent(options *components.PageEditorOptions) error {
 	switch options.Type {
 	case "troublereport":
-		tr, err := h.Registry.TroubleReports.Get(models.TroubleReportID(options.ID))
+		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(options.ID))
 		if err != nil {
 			return fmt.Errorf("failed to get trouble report: %v", err)
 		}
@@ -147,11 +147,12 @@ func (h *Editor) loadExistingContent(options *components.PageEditorOptions) erro
 		options.UseMarkdown = tr.UseMarkdown
 
 		// Load attachments
-		loadedAttachments, err := h.Registry.TroubleReports.LoadAttachments(tr)
+		loadedAttachments, err := h.registry.TroubleReports.LoadAttachments(tr)
 		if err == nil {
 			options.Attachments = loadedAttachments
 		} else {
-			h.Log.Error("Failed to load attachments for trouble report %d: %v", options.ID, err)
+			slog.Error("Failed to load attachments for trouble report",
+				"TroubleReportID", options.ID, "error", err)
 		}
 
 	// Note: Notes are not supported in the editor as they have a different structure
@@ -172,7 +173,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			trID := models.TroubleReportID(id)
 
 			// Update existing trouble report
-			tr, err := h.Registry.TroubleReports.Get(trID)
+			tr, err := h.registry.TroubleReports.Get(trID)
 			if err != nil {
 				return fmt.Errorf("failed to get trouble report: %v", err)
 			}
@@ -193,7 +194,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			tr.UseMarkdown = useMarkdown
 			tr.LinkedAttachments = existingAttachmentIDs
 
-			err = h.Registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
+			err = h.registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
 			if err != nil {
 				return fmt.Errorf("failed to update trouble report: %v", err)
 			}
@@ -206,8 +207,8 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 				feedContent += fmt.Sprintf("\nAnhänge: %d", totalAttachments)
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.Registry.Feeds.Add(feed); err != nil {
-				h.Log.Error("Failed to create feed for trouble report update: %v", err)
+			if err := h.registry.Feeds.Add(feed); err != nil {
+				slog.Error("Failed to create feed for trouble report update", "error", err)
 			}
 
 		} else {
@@ -215,7 +216,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 			tr := models.NewTroubleReport(title, content)
 			tr.UseMarkdown = useMarkdown
 
-			err := h.Registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
+			err := h.registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
 			if err != nil {
 				return fmt.Errorf("failed to add trouble report: %v", err)
 			}
@@ -227,8 +228,8 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
 			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.Registry.Feeds.Add(feed); err != nil {
-				h.Log.Error("Failed to create feed for trouble report creation: %v", err)
+			if err := h.registry.Feeds.Add(feed); err != nil {
+				slog.Error("Failed to create feed for trouble report creation", "error", err)
 			}
 		}
 

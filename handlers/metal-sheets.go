@@ -7,7 +7,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -15,12 +14,12 @@ import (
 )
 
 type MetalSheets struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewMetalSheets(db *services.Registry) *MetalSheets {
+func NewMetalSheets(r *services.Registry) *MetalSheets {
 	return &MetalSheets{
-		Base: NewBase(db, logger.NewComponentLogger("MetalSheets")),
+		registry: r,
 	}
 }
 
@@ -59,7 +58,7 @@ func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 		// Fetch existing metal sheet for editing
-		if renderProps.MetalSheet, err = h.Registry.MetalSheets.Get(metalSheetID); err != nil {
+		if renderProps.MetalSheet, err = h.registry.MetalSheets.Get(metalSheetID); err != nil {
 			return HandleError(err, "failed to fetch metal sheet from database")
 		}
 		toolID = renderProps.MetalSheet.ToolID
@@ -73,7 +72,7 @@ func (h *MetalSheets) HTMXGetEditMetalSheetDialog(c echo.Context) error {
 	}
 
 	// Fetch the associated tool for the dialog
-	if renderProps.Tool, err = h.Registry.Tools.Get(toolID); err != nil {
+	if renderProps.Tool, err = h.registry.Tools.Get(toolID); err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
 
@@ -102,7 +101,7 @@ func (h *MetalSheets) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	toolID := models.ToolID(toolIDQuery)
 
 	// Fetch the associated tool
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
@@ -117,7 +116,7 @@ func (h *MetalSheets) HTMXPostEditMetalSheetDialog(c echo.Context) error {
 	metalSheet.ToolID = toolID
 
 	// Save new metal sheet to database
-	if _, err := h.Registry.MetalSheets.Add(metalSheet); err != nil {
+	if _, err := h.registry.MetalSheets.Add(metalSheet); err != nil {
 		return HandleError(err, "failed to create metal sheet in database")
 	}
 
@@ -145,13 +144,13 @@ func (h *MetalSheets) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet to preserve ID and tool association
-	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)
+	existingSheet, err := h.registry.MetalSheets.Get(metalSheetID)
 	if err != nil {
 		return HandleError(err, "failed to get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, err := h.Registry.Tools.Get(existingSheet.ToolID)
+	tool, err := h.registry.Tools.Get(existingSheet.ToolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
@@ -167,7 +166,7 @@ func (h *MetalSheets) HTMXPutEditMetalSheetDialog(c echo.Context) error {
 	metalSheet.ToolID = existingSheet.ToolID
 
 	// Update the metal sheet in database
-	if err := h.Registry.MetalSheets.Update(metalSheet); err != nil {
+	if err := h.registry.MetalSheets.Update(metalSheet); err != nil {
 		return HandleError(err, "failed to update metal sheet in database")
 	}
 
@@ -195,19 +194,19 @@ func (h *MetalSheets) HTMXDeleteMetalSheet(c echo.Context) error {
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet before deletion for feed creation
-	existingSheet, err := h.Registry.MetalSheets.Get(metalSheetID)
+	existingSheet, err := h.registry.MetalSheets.Get(metalSheetID)
 	if err != nil {
 		return HandleError(err, "failed to get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, err := h.Registry.Tools.Get(existingSheet.ToolID)
+	tool, err := h.registry.Tools.Get(existingSheet.ToolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
 
 	// Delete the metal sheet from database
-	if err := h.Registry.MetalSheets.Delete(metalSheetID); err != nil {
+	if err := h.registry.MetalSheets.Delete(metalSheetID); err != nil {
 		return HandleError(err, "failed to delete metal sheet from database")
 	}
 
@@ -233,7 +232,7 @@ func (h *MetalSheets) createFeed(user *models.User, tool *models.Tool, metalShee
 
 	// Create and save the feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed: %v", err)
 	}
 }
@@ -289,7 +288,7 @@ func (h *MetalSheets) createUpdateFeed(user *models.User, tool *models.Tool, old
 
 	// Create and save the feed entry
 	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create update feed: %v", err)
 	}
 }

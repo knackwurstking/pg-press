@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
@@ -15,12 +14,12 @@ import (
 )
 
 type Press struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewPress(db *services.Registry) *Press {
+func NewPress(r *services.Registry) *Press {
 	return &Press{
-		Base: NewBase(db, logger.NewComponentLogger("Press")),
+		registry: r,
 	}
 }
 
@@ -81,7 +80,7 @@ func (h *Press) HTMXGetPressActiveTools(c echo.Context) error {
 	for _, tool := range tools {
 		var bindingTool *models.Tool
 		if tool.Binding != nil {
-			bindingTool, _ = h.Registry.Tools.Get(*tool.Binding)
+			bindingTool, _ = h.registry.Tools.Get(*tool.Binding)
 		}
 		resolvedTools = append(resolvedTools, models.NewResolvedTool(tool, bindingTool, nil))
 	}
@@ -108,7 +107,7 @@ func (h *Press) HTMXGetPressMetalSheets(c echo.Context) error {
 
 	// Get metal sheets for tools on this press with automatic machine type filtering
 	// Press 0 and 5 use SACMI machines, all others use SITI machines
-	metalSheets, err := h.Registry.MetalSheets.GetForPress(press, toolsMap)
+	metalSheets, err := h.registry.MetalSheets.GetForPress(press, toolsMap)
 	if err != nil {
 		return HandleError(err, "failed to get metal sheets for press")
 	}
@@ -140,13 +139,13 @@ func (h *Press) HTMXGetPressCycles(c echo.Context) error {
 	}
 
 	// Get cycles for this press
-	cycles, err := h.Registry.PressCycles.GetPressCycles(press, nil, nil)
+	cycles, err := h.registry.PressCycles.GetPressCycles(press, nil, nil)
 	if err != nil {
 		return HandleError(err, "failed to get cycles from database")
 	}
 
 	// Get tools for this press to create toolsMap
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to get tools from database")
 	}
@@ -180,7 +179,7 @@ func (h *Press) HTMXGetPressNotes(c echo.Context) error {
 	}
 
 	// Get notes directly linked to this press
-	notes, err := h.Registry.Notes.GetByPress(press)
+	notes, err := h.registry.Notes.GetByPress(press)
 	if err != nil {
 		return HandleError(err, "failed to get notes for press")
 	}
@@ -193,7 +192,7 @@ func (h *Press) HTMXGetPressNotes(c echo.Context) error {
 
 	// Get notes for tools
 	for _, t := range sortedTools {
-		n, err := h.Registry.Notes.GetByTool(t.ID)
+		n, err := h.registry.Notes.GetByTool(t.ID)
 		if err != nil {
 			return HandleError(err, fmt.Sprintf("failed to get notes for tool %d", t.ID))
 		}
@@ -230,7 +229,7 @@ func (h *Press) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	h.Log.Info("Generating cycle summary PDF for press %d requested by user %s", press, user.Name)
 
 	// Get cycle summary data using service
-	cycles, toolsMap, usersMap, err := h.Registry.PressCycles.GetCycleSummaryData(press)
+	cycles, toolsMap, usersMap, err := h.registry.PressCycles.GetCycleSummaryData(press)
 	if err != nil {
 		return HandleError(err, "failed to get cycle summary data")
 	}
@@ -266,7 +265,7 @@ func (h *Press) getPressNumberFromParam(c echo.Context) (models.PressNumber, err
 
 func (h *Press) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[models.ToolID]*models.Tool, error) {
 	// Get tools from database
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return nil, nil, err
 	}

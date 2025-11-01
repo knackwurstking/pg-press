@@ -4,8 +4,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knackwurstking/pg-press/logger"
-
 	"github.com/SuperPaintman/nice/cli"
 )
 
@@ -23,7 +21,6 @@ var (
 	configPath       string
 	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
 	serverAddress    = os.Getenv("SERVER_ADDR")
-	log              = logger.NewComponentLogger("Server")
 )
 
 func init() {
@@ -38,9 +35,6 @@ func init() {
 }
 
 func main() {
-	// Initialize colored logger
-	logger.Initialize()
-
 	a := cli.App{
 		Name: appName,
 		Usage: cli.Usage(`Exit Codes:

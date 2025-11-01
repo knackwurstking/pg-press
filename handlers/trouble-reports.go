@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
@@ -18,12 +17,12 @@ import (
 )
 
 type TroubleReports struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewTroubleReports(db *services.Registry) *TroubleReports {
+func NewTroubleReports(r *services.Registry) *TroubleReports {
 	return &TroubleReports{
-		Base: NewBase(db, logger.NewComponentLogger("TroubleReports")),
+		registry: r,
 	}
 }
 
@@ -59,7 +58,7 @@ func (h *TroubleReports) GetSharePDF(c echo.Context) error {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
-	tr, err := h.Registry.TroubleReports.GetWithAttachments(troubleReportID)
+	tr, err := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to retrieve trouble report")
 	}
@@ -80,7 +79,7 @@ func (h *TroubleReports) GetAttachment(c echo.Context) error {
 		attachmentID = models.AttachmentID(id)
 	}
 
-	attachment, err := h.Registry.Attachments.Get(attachmentID)
+	attachment, err := h.registry.Attachments.Get(attachmentID)
 	if err != nil {
 		return HandleError(err, "failed to get attachment")
 	}
@@ -105,7 +104,7 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 		return HandleBadRequest(err, "invalid id in request")
 	}
 
-	modifications, err := h.Registry.Modifications.List(
+	modifications, err := h.registry.Modifications.List(
 		models.ModificationTypeTroubleReport,
 		id, 100, 0,
 	)
@@ -116,7 +115,7 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 	// Convert to the format expected by the modifications page
 	var resolvedModifications []*models.ResolvedModification[models.TroubleReportModData]
 	for _, m := range modifications {
-		resolvedModification, err := services.ResolveModification[models.TroubleReportModData](h.Registry, m)
+		resolvedModification, err := services.ResolveModification[models.TroubleReportModData](h.registry, m)
 		if err != nil {
 			h.Log.Error("Failed to resolve modification %d: %v", m.ID, err)
 			continue
@@ -145,7 +144,7 @@ func (h *TroubleReports) HTMXGetData(c echo.Context) error {
 		return HandleError(err, "failed to get user from context")
 	}
 
-	trs, err := h.Registry.TroubleReports.ListWithAttachments()
+	trs, err := h.registry.TroubleReports.ListWithAttachments()
 	if err != nil {
 		return HandleError(err, "failed to load trouble reports")
 	}
@@ -171,7 +170,7 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	removedReport, err := h.Registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
+	removedReport, err := h.registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
 	if err != nil {
 		return HandleError(err, "failed to delete trouble report")
 	}
@@ -180,7 +179,7 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 	feedTitle := "Problembericht gelöscht"
 	feedContent := fmt.Sprintf("Titel: %s", removedReport.Title)
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for trouble report deletion: %v", err)
 	}
 
@@ -195,7 +194,7 @@ func (h *TroubleReports) HTMXGetAttachmentsPreview(c echo.Context) error {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
-	tr, err := h.Registry.TroubleReports.GetWithAttachments(troubleReportID)
+	tr, err := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to load trouble report")
 	}
@@ -234,7 +233,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		return HandleBadRequest(err, "invalid modification_time format")
 	}
 
-	modifications, err := h.Registry.Modifications.ListAll(
+	modifications, err := h.registry.Modifications.ListAll(
 		models.ModificationTypeTroubleReport,
 		id,
 	)
@@ -259,12 +258,12 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		return HandleError(err, "failed to parse modification data")
 	}
 
-	tr, err := h.Registry.TroubleReports.Get(troubleReportID)
+	tr, err := h.registry.TroubleReports.Get(troubleReportID)
 	if err != nil {
 		return HandleError(err, "failed to retrieve trouble report")
 	}
 
-	if err := h.Registry.TroubleReports.Update(modData.CopyTo(tr), user); err != nil {
+	if err := h.registry.TroubleReports.Update(modData.CopyTo(tr), user); err != nil {
 		return HandleError(err, "failed to rollback trouble report")
 	}
 
@@ -274,7 +273,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
 
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for trouble report rollback: %v", err)
 	}
 

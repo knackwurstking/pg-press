@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -25,12 +24,12 @@ type ToolsDialogEditForm struct {
 }
 
 type Tools struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewTools(db *services.Registry) *Tools {
+func NewTools(r *services.Registry) *Tools {
 	return &Tools{
-		Base: NewBase(db, logger.NewComponentLogger("Tools")),
+		registry: r,
 	}
 }
 
@@ -61,7 +60,7 @@ func (h *Tools) HTMXGetEditToolDialog(c echo.Context) error {
 
 	toolIDQuery, _ := ParseQueryInt64(c, "id")
 	if toolIDQuery > 0 {
-		tool, err := h.Registry.Tools.Get(models.ToolID(toolIDQuery))
+		tool, err := h.registry.Tools.Get(models.ToolID(toolIDQuery))
 		if err != nil {
 			return HandleError(err, "failed to get tool from database")
 		}
@@ -96,7 +95,7 @@ func (h *Tools) HTMXPostEditToolDialog(c echo.Context) error {
 	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
 	tool.SetPress(formData.Press)
 
-	id, err := h.Registry.Tools.Add(tool, user)
+	id, err := h.registry.Tools.Add(tool, user)
 	if err != nil {
 		return HandleError(err, "failed to add tool")
 	}
@@ -127,7 +126,7 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get tool form data")
 	}
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
@@ -138,7 +137,7 @@ func (h *Tools) HTMXPutEditToolDialog(c echo.Context) error {
 	tool.Code = formData.Code
 	tool.Type = formData.Type
 
-	if err := h.Registry.Tools.Update(tool, user); err != nil {
+	if err := h.registry.Tools.Update(tool, user); err != nil {
 		return HandleError(err, "failed to update tool")
 	}
 
@@ -173,12 +172,12 @@ func (h *Tools) HTMXDeleteTool(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool for deletion")
 	}
 
-	if err := h.Registry.Tools.Delete(toolID, user); err != nil {
+	if err := h.registry.Tools.Delete(toolID, user); err != nil {
 		return HandleError(err, "failed to delete tool")
 	}
 
@@ -203,7 +202,7 @@ func (h *Tools) HTMXMarkToolAsDead(c echo.Context) error {
 		return HandleBadRequest(err, "failed to get user from context")
 	}
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool for marking as dead")
 	}
@@ -212,7 +211,7 @@ func (h *Tools) HTMXMarkToolAsDead(c echo.Context) error {
 		return HandleBadRequest(nil, "tool is already marked as dead")
 	}
 
-	if err := h.Registry.Tools.MarkAsDead(toolID, user); err != nil {
+	if err := h.registry.Tools.MarkAsDead(toolID, user); err != nil {
 		return HandleError(err, "failed to mark tool as dead")
 	}
 
@@ -226,7 +225,7 @@ func (h *Tools) HTMXMarkToolAsDead(c echo.Context) error {
 }
 
 func (h *Tools) HTMXGetSectionPress(c echo.Context) error {
-	pressUtilization, err := h.Registry.Tools.GetPressUtilization()
+	pressUtilization, err := h.registry.Tools.GetPressUtilization()
 	if err != nil {
 		return HandleError(err, "failed to get press utilization")
 	}
@@ -239,7 +238,7 @@ func (h *Tools) HTMXGetSectionPress(c echo.Context) error {
 }
 
 func (h *Tools) HTMXGetSectionTools(c echo.Context) error {
-	allTools, err := h.Registry.Tools.List()
+	allTools, err := h.registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to get tools from database")
 	}
@@ -252,13 +251,13 @@ func (h *Tools) HTMXGetSectionTools(c echo.Context) error {
 
 		var bindingTool *models.Tool
 		if t.IsBound() {
-			bindingTool, err = h.Registry.Tools.Get(*t.Binding)
+			bindingTool, err = h.registry.Tools.Get(*t.Binding)
 			if err != nil {
 				return HandleError(err, "failed to get binding tool")
 			}
 		}
 
-		notes, err := h.Registry.Notes.GetByTool(t.ID)
+		notes, err := h.registry.Notes.GetByTool(t.ID)
 		if err != nil {
 			return HandleError(err, "failed to get notes for tool")
 		}
@@ -281,7 +280,7 @@ func (h *Tools) HTMXGetAdminOverlappingTools(c echo.Context) error {
 
 	h.Log.Info("User %s requested overlapping tools analysis", user.Name)
 
-	overlappingTools, err := h.Registry.PressCycles.GetOverlappingTools()
+	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
 	if err != nil {
 		return HandleError(err, "failed to get overlapping tools")
 	}
@@ -301,7 +300,7 @@ func (h *Tools) createToolFeed(user *models.User, tool *models.Tool, title strin
 	}
 
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed: %v", err)
 	}
 }

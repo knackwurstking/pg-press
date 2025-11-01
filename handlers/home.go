@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 
@@ -12,12 +11,12 @@ import (
 )
 
 type Home struct {
-	*Base
+	registry *services.Registry
 }
 
 func NewHome(r *services.Registry) *Home {
 	return &Home{
-		Base: NewBase(r, logger.NewComponentLogger("Home")),
+		registry: r,
 	}
 }
 

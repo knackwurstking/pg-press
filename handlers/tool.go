@@ -10,7 +10,6 @@ import (
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -30,12 +29,12 @@ type ToolRegenerationEditDialogFormData struct {
 }
 
 type Tool struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewTool(db *services.Registry) *Tool {
+func NewTool(r *services.Registry) *Tool {
 	return &Tool{
-		Base: NewBase(db, logger.NewComponentLogger("Tool")),
+		registry: r,
 	}
 }
 
@@ -106,7 +105,7 @@ func (h *Tool) GetToolPage(c echo.Context) error {
 
 	h.Log.Debug("Fetching tool %d with notes", id)
 
-	tool, err := h.Registry.Tools.Get(id)
+	tool, err := h.registry.Tools.Get(id)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
@@ -143,10 +142,10 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 	toolID := models.ToolID(toolIDQuery)
 
 	var tool *models.ResolvedTool
-	if t, err := h.Registry.Tools.Get(toolID); err != nil {
+	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return HandleError(err, "failed to get tool")
 	} else {
-		tool, err = services.ResolveTool(h.Registry, t)
+		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
 			return HandleError(err, "failed to resolve tool")
 		}
@@ -185,7 +184,7 @@ func (h *Tool) HTMXPatchToolBinding(c echo.Context) error {
 		}
 
 		// Bind tool to target, this will get an error if target already has a binding
-		if err = h.Registry.Tools.Bind(cassette, target); err != nil {
+		if err = h.registry.Tools.Bind(cassette, target); err != nil {
 			return HandleError(err, "failed to bind tool")
 		}
 	}
@@ -230,16 +229,16 @@ func (h *Tool) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDParam)
 
-	if err := h.Registry.Tools.UnBind(toolID); err != nil {
+	if err := h.registry.Tools.UnBind(toolID); err != nil {
 		return HandleError(err, "failed to unbind tool")
 	}
 
 	// Get tools for rendering the template
 	var tool *models.ResolvedTool
-	if t, err := h.Registry.Tools.Get(toolID); err != nil {
+	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return HandleBadRequest(err, "failed to get tool")
 	} else {
-		tool, err = services.ResolveTool(h.Registry, t)
+		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
 			return HandleError(err, "failed to resolve tool")
 		}
@@ -278,10 +277,10 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 	toolID := models.ToolID(toolIDParam)
 
 	var tool *models.ResolvedTool
-	if t, err := h.Registry.Tools.Get(toolID); err != nil {
+	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return HandleError(err, "failed to get tool")
 	} else {
-		tool, err = services.ResolveTool(h.Registry, t)
+		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
 			return HandleError(err, "failed to resolve tool")
 		}
@@ -289,7 +288,7 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 
 	var filteredCycles []*models.Cycle
 	{
-		cycles, err := h.Registry.PressCycles.GetPressCyclesForTool(toolID)
+		cycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
 		if err != nil {
 			return HandleError(err, "failed to get press cycles")
 		}
@@ -300,14 +299,14 @@ func (h *Tool) HTMXGetCycles(c echo.Context) error {
 
 	var resolvedRegenerations []*models.ResolvedRegeneration
 	{ // Get (resolved) regeneration history for this tool
-		regenerations, err := h.Registry.ToolRegenerations.GetRegenerationHistory(toolID)
+		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
 		if err != nil {
 			h.Log.Error("Failed to get regenerations for tool %d: %v", toolID, err)
 		}
 
 		// Resolve regenerations
 		for _, r := range regenerations {
-			rr, err := services.ResolveRegeneration(h.Registry, r)
+			rr, err := services.ResolveRegeneration(h.registry, r)
 			if err != nil {
 				return err
 			}
@@ -355,13 +354,13 @@ func (h *Tool) HTMXGetToolTotalCycles(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
 
 	// Get cycles for this specific tool
-	toolCycles, err := h.Registry.PressCycles.GetPressCyclesForTool(toolID)
+	toolCycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get press cycles")
 	}
@@ -390,7 +389,7 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 		props.CycleID = models.CycleID(cycleIDQuery)
 
 		// Get cycle data from the database
-		cycle, err := h.Registry.PressCycles.Get(props.CycleID)
+		cycle, err := h.registry.PressCycles.Get(props.CycleID)
 		if err != nil {
 			return HandleError(err, "failed to load cycle data")
 		}
@@ -399,7 +398,7 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 		props.OriginalDate = &cycle.Date
 
 		// Set the cycles (original) tool to props
-		if props.Tool, err = h.Registry.Tools.Get(cycle.ToolID); err != nil {
+		if props.Tool, err = h.registry.Tools.Get(cycle.ToolID); err != nil {
 			return HandleError(err, "failed to load tool data")
 		}
 
@@ -408,7 +407,7 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 			props.AllowToolChange = true
 
 			// Get all tools
-			allTools, err := h.Registry.Tools.List()
+			allTools, err := h.registry.Tools.List()
 			if err != nil {
 				return HandleError(err, "failed to load available tools")
 			}
@@ -432,7 +431,7 @@ func (h *Tool) HTMXGetToolCycleEditDialog(c echo.Context) error {
 		}
 		toolID := models.ToolID(toolIDQuery)
 
-		if props.Tool, err = h.Registry.Tools.Get(toolID); err != nil {
+		if props.Tool, err = h.registry.Tools.Get(toolID); err != nil {
 			return HandleError(err, "failed to load tool data")
 		}
 	} else {
@@ -478,7 +477,7 @@ func (h *Tool) HTMXPostToolCycleEditDialog(c echo.Context) error {
 
 	pressCycle.Date = form.Date
 
-	_, err = h.Registry.PressCycles.Add(pressCycle, user)
+	_, err = h.registry.PressCycles.Add(pressCycle, user)
 	if err != nil {
 		return HandleError(err, "failed to add cycle")
 	}
@@ -486,7 +485,7 @@ func (h *Tool) HTMXPostToolCycleEditDialog(c echo.Context) error {
 	// Handle regeneration if requested
 	if form.Regenerating {
 		h.Log.Info("Starting regeneration for tool %d", tool.ID)
-		_, err := h.Registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
+		_, err := h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
 		if err != nil {
 			h.Log.Error("Failed to start regeneration for tool %d: %v",
 				tool.ID, err)
@@ -522,13 +521,13 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	}
 	cycleID := models.CycleID(cycleIDQuery)
 
-	cycle, err := h.Registry.PressCycles.Get(cycleID)
+	cycle, err := h.registry.PressCycles.Get(cycleID)
 	if err != nil {
 		return HandleError(err, "failed to get cycle")
 	}
 
 	// Get original tool
-	originalTool, err := h.Registry.Tools.Get(cycle.ToolID)
+	originalTool, err := h.registry.Tools.Get(cycle.ToolID)
 	if err != nil {
 		return HandleError(err, "failed to get original tool")
 	}
@@ -546,7 +545,7 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 	var tool *models.Tool
 	if form.ToolID != nil {
 		// Tool change requested - get the new tool
-		newTool, err := h.Registry.Tools.Get(*form.ToolID)
+		newTool, err := h.registry.Tools.Get(*form.ToolID)
 		if err != nil {
 			return HandleError(err, "failed to get new tool")
 		}
@@ -565,13 +564,13 @@ func (h *Tool) HTMXPutToolCycleEditDialog(c echo.Context) error {
 		form.Date,
 	)
 
-	if err := h.Registry.PressCycles.Update(pressCycle, user); err != nil {
+	if err := h.registry.PressCycles.Update(pressCycle, user); err != nil {
 		return HandleError(err, "failed to update press cycle")
 	}
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		if _, err := h.Registry.ToolRegenerations.Add(tool.ID, pressCycle.ID, "", user); err != nil {
+		if _, err := h.registry.ToolRegenerations.Add(tool.ID, pressCycle.ID, "", user); err != nil {
 			h.Log.Error("Failed to add tool regeneration: %v", err)
 		}
 	}
@@ -616,18 +615,18 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 	cycleID := models.CycleID(cycleIDQuery)
 
 	// Get cycle data before deletion for the feed
-	cycle, err := h.Registry.PressCycles.Get(cycleID)
+	cycle, err := h.registry.PressCycles.Get(cycleID)
 	if err != nil {
 		return HandleError(err, "failed to get cycle for deletion")
 	}
 
-	tool, err := h.Registry.Tools.Get(cycle.ToolID)
+	tool, err := h.registry.Tools.Get(cycle.ToolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool for deletion")
 	}
 
 	// Check if there are any regenerations associated with this cycle
-	hasRegenerations, err := h.Registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
+	hasRegenerations, err := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
 	if err != nil {
 		return HandleError(err, "failed to check for regenerations")
 	}
@@ -636,7 +635,7 @@ func (h *Tool) HTMXDeleteToolCycle(c echo.Context) error {
 		return HandleBadRequest(nil, "Cannot delete cycle: it has associated regenerations. Please remove regenerations first.")
 	}
 
-	if err := h.Registry.PressCycles.Delete(cycleID); err != nil {
+	if err := h.registry.PressCycles.Delete(cycleID); err != nil {
 		return HandleError(err, "failed to delete press cycle")
 	}
 
@@ -667,13 +666,13 @@ func (h *Tool) HTMXGetToolMetalSheets(c echo.Context) error {
 
 	h.Log.Debug("Fetching metal sheets for tool %d", toolID)
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
 
 	// Fetch metal sheets assigned to this tool
-	metalSheets, err := h.Registry.MetalSheets.GetByToolID(toolID)
+	metalSheets, err := h.registry.MetalSheets.GetByToolID(toolID)
 	if err != nil {
 		// Log error but don't fail - metal sheets are supplementary data
 		h.Log.Error("Failed to fetch metal sheets: %v", err)
@@ -699,13 +698,13 @@ func (h *Tool) HTMXGetToolNotes(c echo.Context) error {
 	h.Log.Debug("Fetching notes for tool %d", toolID)
 
 	// Get the tool
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool")
 	}
 
 	// Get notes for this tool
-	notes, err := h.Registry.Notes.GetByTool(toolID)
+	notes, err := h.registry.Notes.GetByTool(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get notes for tool")
 	}
@@ -728,12 +727,12 @@ func (h *Tool) HTMXGetEditRegeneration(c echo.Context) error {
 	}
 	regenerationID := models.RegenerationID(rid)
 
-	regeneration, err := h.Registry.ToolRegenerations.Get(regenerationID)
+	regeneration, err := h.registry.ToolRegenerations.Get(regenerationID)
 	if err != nil {
 		return HandleError(err, "get regeneration failed")
 	}
 
-	resolvedRegeneration, err := services.ResolveRegeneration(h.Registry, regeneration)
+	resolvedRegeneration, err := services.ResolveRegeneration(h.registry, regeneration)
 	if err != nil {
 		return err
 	}
@@ -761,16 +760,16 @@ func (h *Tool) HTMXPutEditRegeneration(c echo.Context) error {
 	}
 
 	var regeneration *models.ResolvedRegeneration
-	if r, err := h.Registry.ToolRegenerations.Get(regenerationID); err != nil {
+	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
 		return HandleError(err, "failed to get regeneration before deleting")
 	} else {
-		regeneration, err = services.ResolveRegeneration(h.Registry, r)
+		regeneration, err = services.ResolveRegeneration(h.registry, r)
 
 		formData := h.parseRegenerationEditFormData(c)
 		regeneration.Reason = formData.Reason
 	}
 
-	err = h.Registry.ToolRegenerations.Update(regeneration.Regeneration, user)
+	err = h.registry.ToolRegenerations.Update(regeneration.Regeneration, user)
 	if err != nil {
 		return HandleError(err, "failed to update regeneration")
 	}
@@ -812,13 +811,13 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 	h.Log.Info("Deleting the regeneration with the ID %d (User: %s)", regenerationID, user.Name)
 
 	var regeneration *models.ResolvedRegeneration
-	if r, err := h.Registry.ToolRegenerations.Get(regenerationID); err != nil {
+	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
 		return HandleError(err, "failed to get regeneration before deleting")
 	} else {
-		regeneration, err = services.ResolveRegeneration(h.Registry, r)
+		regeneration, err = services.ResolveRegeneration(h.registry, r)
 	}
 
-	if err := h.Registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
+	if err := h.registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
 		return HandleError(err, "failed to delete regeneration")
 	}
 
@@ -836,7 +835,7 @@ func (h *Tool) HTMXDeleteRegeneration(c echo.Context) error {
 		}
 
 		if regeneration.PerformedBy != nil {
-			user, err = h.Registry.Users.Get(*regeneration.PerformedBy)
+			user, err = h.registry.Users.Get(*regeneration.PerformedBy)
 			content += fmt.Sprintf("\nPerformed by: %s", user.Name)
 		}
 
@@ -860,7 +859,7 @@ func (h *Tool) HTMXGetStatusEdit(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
@@ -885,7 +884,7 @@ func (h *Tool) HTMXGetStatusDisplay(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
@@ -920,7 +919,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		return HandleBadRequest(nil, "status is required")
 	}
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get tool from database")
 	}
@@ -931,7 +930,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 	switch statusStr {
 	case "regenerating":
 		// Start regeneration
-		_, err := h.Registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
+		_, err := h.registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
 		if err != nil {
 			return HandleError(err, "failed to start tool regeneration")
 		}
@@ -943,7 +942,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 		}
 
 	case "active":
-		if err := h.Registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
+		if err := h.registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
 			return HandleError(err, "failed to stop tool regeneration")
 		}
 
@@ -956,7 +955,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
-		if err := h.Registry.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
+		if err := h.registry.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
 			return HandleError(err, "failed to abort tool regeneration")
 		}
 
@@ -972,7 +971,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 	}
 
 	// Get updated tool and render status display
-	updatedTool, err := h.Registry.Tools.Get(toolID)
+	updatedTool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return HandleError(err, "failed to get updated tool from database")
 	}
@@ -995,7 +994,7 @@ func (h *Tool) HTMXUpdateToolStatus(c echo.Context) error {
 func (h *Tool) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
-	if r, err := h.Registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
+	if r, err := h.registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
 		startCycleID = r.CycleID
 	}
 
@@ -1020,7 +1019,7 @@ func (h *Tool) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) {
 	}
 
 	// Get all tools
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return nil, HandleError(err, "failed to get tools")
 	}
@@ -1102,7 +1101,7 @@ func (h *Tool) getToolFromQuery(c echo.Context) (*models.Tool, error) {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, err := h.Registry.Tools.Get(toolID)
+	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return nil, err
 	}
@@ -1126,7 +1125,7 @@ func (h *Tool) renderStatusComponent(tool *models.Tool, editable bool, user *mod
 
 func (h *Tool) createFeed(title, content string, userID models.TelegramID) {
 	feed := models.NewFeed(title, content, userID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 }

@@ -3,19 +3,49 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/services"
+	"github.com/lmittmann/tint"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func initializeLogging() {
+	var level slog.Leveler
+	if env.Debug {
+		level = slog.LevelDebug
+	} else {
+		level = slog.LevelInfo
+	}
+
+	var handler slog.Handler
+	if env.LogFormat == "text" {
+		handler = tint.NewHandler(os.Stderr, &tint.Options{
+			AddSource:  true,
+			Level:      level,
+			TimeFormat: time.DateTime,
+		})
+	} else {
+		handler = slog.NewJSONHandler(
+			os.Stderr, &slog.HandlerOptions{
+				AddSource: true,
+				Level:     level,
+			},
+		)
+	}
+
+	slog.SetDefault(slog.New(handler))
+}
+
 func openDB(customPath string) (*services.Registry, error) {
 	path := filepath.Join(configPath, databaseFile)
-	log.Debug("Database path: %s", path)
 
 	if customPath != "" {
 		var err error

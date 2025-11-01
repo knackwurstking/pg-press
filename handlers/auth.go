@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -16,12 +16,12 @@ import (
 )
 
 type Auth struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewAuth(db *services.Registry) *Auth {
+func NewAuth(r *services.Registry) *Auth {
 	return &Auth{
-		Base: NewBase(db, logger.NewComponentLogger("Auth")),
+		registry: r,
 	}
 }
 
@@ -36,10 +36,10 @@ func (h *Auth) GetLoginPage(c echo.Context) error {
 	apiKey := c.FormValue("api-key")
 	if apiKey != "" {
 		if h.processApiKeyLogin(apiKey, c) {
-			h.Log.Info("Successful login from %s", c.RealIP())
+			slog.Info("Successful login", "real-ip", c.RealIP())
 			return RedirectTo(c, "./profile")
 		}
-		h.Log.Info("Failed login attempt from %s", c.RealIP())
+		slog.Info("Failed login attempt", "real-ip", c.RealIP())
 	}
 
 	page := components.PageLogin(apiKey, apiKey != "")
@@ -57,8 +57,8 @@ func (h *Auth) GetLogout(c echo.Context) error {
 	}
 
 	if cookie, err := c.Cookie(env.CookieName); err == nil {
-		if err := h.Registry.Cookies.Remove(cookie.Value); err != nil {
-			h.Log.Error("Failed to remove cookie for user %s: %v", user.Name, err)
+		if err := h.registry.Cookies.Remove(cookie.Value); err != nil {
+			slog.Error("Failed to remove cookie", "user", user.Name, "error", err)
 		}
 	}
 
@@ -67,31 +67,31 @@ func (h *Auth) GetLogout(c echo.Context) error {
 
 func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if len(apiKey) < 16 {
-		h.Log.Debug("API key too short from %s", ctx.RealIP())
+		slog.Debug("API key too short", "real-ip", ctx.RealIP())
 		return false
 	}
 
-	user, err := h.Registry.Users.GetUserFromApiKey(apiKey)
+	user, err := h.registry.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
 		if !errors.IsNotFoundError(err) {
-			h.Log.Error("Database error during authentication: %v", err)
+			slog.Error("Database error during authentication", "error", err)
 		} else {
-			h.Log.Debug("Invalid API key from %s", ctx.RealIP())
+			slog.Debug("Invalid API key", "real-ip", ctx.RealIP())
 		}
 		return false
 	}
 
 	if err := h.clearExistingSession(ctx, user.Name); err != nil {
-		h.Log.Error("Failed to clear existing session: %v", err)
+		slog.Error("Failed to clear existing session", "error", err)
 	}
 
 	if err := h.createSession(ctx, apiKey, user); err != nil {
-		h.Log.Error("Failed to create session for user %s: %v", user.Name, err)
+		slog.Error("Failed to create session", "user", user.Name, "error", err)
 		return false
 	}
 
 	if user.IsAdmin() {
-		h.Log.Info("Administrator %s logged in from %s", user.Name, ctx.RealIP())
+		slog.Info("Administrator logged in", "user", user.Name, "real-ip", ctx.RealIP())
 	}
 
 	return true
@@ -103,7 +103,7 @@ func (h *Auth) clearExistingSession(ctx echo.Context, username string) error {
 		return nil
 	}
 
-	if err := h.Registry.Cookies.Remove(cookie.Value); err != nil {
+	if err := h.registry.Cookies.Remove(cookie.Value); err != nil {
 		return err
 	}
 
@@ -131,5 +131,5 @@ func (h *Auth) createSession(ctx echo.Context, apiKey string, user *models.User)
 	ctx.SetCookie(cookie)
 
 	sessionCookie := models.NewCookie(ctx.Request().UserAgent(), cookieValue, apiKey)
-	return h.Registry.Cookies.Add(sessionCookie)
+	return h.registry.Cookies.Add(sessionCookie)
 }

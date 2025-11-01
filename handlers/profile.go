@@ -7,7 +7,6 @@ import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -15,12 +14,12 @@ import (
 )
 
 type Profile struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewProfile(db *services.Registry) *Profile {
+func NewProfile(r *services.Registry) *Profile {
 	return &Profile{
-		Base: NewBase(db, logger.NewComponentLogger("Profile")),
+		registry: r,
 	}
 }
 
@@ -64,7 +63,7 @@ func (h *Profile) HTMXGetCookies(c echo.Context) error {
 
 	h.Log.Debug("Fetching cookies for user %s", user.Name)
 
-	cookies, err := h.Registry.Cookies.ListApiKey(user.ApiKey)
+	cookies, err := h.registry.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		return HandleError(err, "failed to list cookies")
 	}
@@ -88,7 +87,7 @@ func (h *Profile) HTMXDeleteCookies(c echo.Context) error {
 
 	h.Log.Info("Deleting cookie with value: %s", value)
 
-	if err := h.Registry.Cookies.Remove(value); err != nil {
+	if err := h.registry.Cookies.Remove(value); err != nil {
 		return HandleError(err, "failed to delete cookie")
 	}
 
@@ -112,7 +111,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
-	if err := h.Registry.Users.Update(updatedUser); err != nil {
+	if err := h.registry.Users.Update(updatedUser); err != nil {
 		return err
 	}
 
@@ -120,7 +119,7 @@ func (h *Profile) handleUserNameChange(c echo.Context, user *models.User) error 
 	feedTitle := "Benutzername geändert"
 	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
 	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for username change: %v", err)
 	}
 

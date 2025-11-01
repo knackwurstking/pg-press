@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -14,12 +13,12 @@ import (
 )
 
 type Umbau struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewUmbau(db *services.Registry) *Umbau {
+func NewUmbau(r *services.Registry) *Umbau {
 	return &Umbau{
-		Base: NewBase(db, logger.NewComponentLogger("Umbau")),
+		registry: r,
 	}
 }
 
@@ -51,7 +50,7 @@ func (h *Umbau) GetUmbauPage(c echo.Context) error {
 
 	h.Log.Info("Rendering the umbau page for user %s", user.String())
 
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to list tools")
 	}
@@ -119,7 +118,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	}
 
 	// Get a list with all tools
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to get tools")
 	}
@@ -142,7 +141,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	}
 
 	// Get current tools for press
-	currentTools, err := h.Registry.Tools.GetByPress(&pressNumber)
+	currentTools, err := h.registry.Tools.GetByPress(&pressNumber)
 	if err != nil {
 		return HandleError(err, "failed to get current tools for press")
 	}
@@ -150,14 +149,14 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Create final cycle entries for current tools with total cycles
 	for _, tool := range currentTools {
 		cycle := models.NewCycle(pressNumber, tool.ID, tool.Position, totalCycles, user.TelegramID)
-		if _, err := h.Registry.PressCycles.Add(cycle, user); err != nil {
+		if _, err := h.registry.PressCycles.Add(cycle, user); err != nil {
 			return HandleError(err, fmt.Sprintf("failed to create final cycle for tool %d", tool.ID))
 		}
 	}
 
 	// Unassign current tools from press
 	for _, tool := range currentTools {
-		if err := h.Registry.Tools.UpdatePress(tool.ID, nil, user); err != nil {
+		if err := h.registry.Tools.UpdatePress(tool.ID, nil, user); err != nil {
 			return HandleError(err, fmt.Sprintf("failed to unassign tool %d", tool.ID))
 		}
 	}
@@ -165,7 +164,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 	// Assign new tools to press
 	newTools := []*models.Tool{topTool, bottomTool}
 	for _, tool := range newTools {
-		if err := h.Registry.Tools.UpdatePress(tool.ID, &pressNumber, user); err != nil {
+		if err := h.registry.Tools.UpdatePress(tool.ID, &pressNumber, user); err != nil {
 			return HandleError(err, fmt.Sprintf("failed to assign tool %d to press", tool.ID))
 		}
 	}
@@ -179,7 +178,7 @@ func (h *Umbau) PostUmbauPage(c echo.Context) error {
 
 	// Create feed entry
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for press %d: %v", pressNumber, err)
 	}
 

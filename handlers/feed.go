@@ -5,7 +5,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -13,12 +12,12 @@ import (
 )
 
 type Feed struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewFeed(db *services.Registry) *Feed {
+func NewFeed(r *services.Registry) *Feed {
 	return &Feed{
-		Base: NewBase(db, logger.NewComponentLogger("Feed")),
+		registry: r,
 	}
 }
 
@@ -38,7 +37,7 @@ func (h *Feed) GetFeedPage(c echo.Context) error {
 }
 
 func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
-	feeds, err := h.Registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
+	feeds, err := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
 	if err != nil {
 		return HandleError(err, "failed to get feeds")
 	}
@@ -50,7 +49,7 @@ func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
 
 	userMap := make(map[models.TelegramID]*models.User)
 	for _, feed := range feeds {
-		feedUser, err := h.Registry.Users.Get(feed.UserID)
+		feedUser, err := h.registry.Users.Get(feed.UserID)
 		if err != nil {
 			h.Log.Error("failed to get user: %v", err)
 			continue
@@ -69,7 +68,7 @@ func (h *Feed) HTMXGetFeedsList(c echo.Context) error {
 		h.Log.Info("Updating user %s last feed from %d to %d",
 			user.Name, oldLastFeed, user.LastFeed)
 
-		if err := h.Registry.Users.Update(user); err != nil {
+		if err := h.registry.Users.Update(user); err != nil {
 			return HandleError(err, "failed to update user's last feed")
 		}
 	}

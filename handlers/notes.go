@@ -8,7 +8,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -16,12 +15,12 @@ import (
 )
 
 type Notes struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewNotes(db *services.Registry) *Notes {
+func NewNotes(r *services.Registry) *Notes {
 	return &Notes{
-		Base: NewBase(db, logger.NewComponentLogger("Notes")),
+		registry: r,
 	}
 }
 
@@ -52,7 +51,7 @@ func (h *Notes) RegisterRoutes(e *echo.Echo) {
 // GetNotesPage serves the main notes page
 func (h *Notes) GetNotesPage(c echo.Context) error {
 	// Get all notes with defensive error handling
-	notes, err := h.Registry.Notes.List()
+	notes, err := h.registry.Notes.List()
 	if err != nil {
 		h.Log.Error("Failed to retrieve notes from database: %v", err)
 		return HandleError(err, "failed to get notes from database")
@@ -67,7 +66,7 @@ func (h *Notes) GetNotesPage(c echo.Context) error {
 	h.Log.Debug("Retrieved %d notes from database", len(notes))
 
 	// Get all tools to show relationships
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		h.Log.Error("Failed to retrieve tools from database: %v", err)
 		return HandleError(err, "failed to get tools from database")
@@ -117,7 +116,7 @@ func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
 
 		h.Log.Debug("Opening edit dialog for note %d", noteID)
 
-		note, err := h.Registry.Notes.Get(noteID)
+		note, err := h.registry.Notes.Get(noteID)
 		if err != nil {
 			return HandleError(err, "failed to get note from database")
 		}
@@ -149,7 +148,7 @@ func (h *Notes) HTMXPostEditNoteDialog(c echo.Context) error {
 	}
 
 	// Create the note
-	noteID, err := h.Registry.Notes.Add(note)
+	noteID, err := h.registry.Notes.Add(note)
 	if err != nil {
 		return HandleError(err, "failed to create note")
 	}
@@ -166,7 +165,7 @@ func (h *Notes) HTMXPostEditNoteDialog(c echo.Context) error {
 	}
 
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
@@ -199,7 +198,7 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 	note.ID = noteID
 
 	// Update the note
-	if err := h.Registry.Notes.Update(note); err != nil {
+	if err := h.registry.Notes.Update(note); err != nil {
 		return HandleError(err, "failed to update note")
 	}
 
@@ -215,7 +214,7 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 	}
 
 	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for cycle creation: %v", err)
 	}
 
@@ -239,7 +238,7 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 	noteID := models.NoteID(idq)
 
 	// Delete the note
-	if err := h.Registry.Notes.Delete(noteID); err != nil {
+	if err := h.registry.Notes.Delete(noteID); err != nil {
 		return HandleError(err, "failed to delete note")
 	}
 
@@ -247,7 +246,7 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 
 	// Create feed entry
 	feed := models.NewFeed("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
-	if err := h.Registry.Feeds.Add(feed); err != nil {
+	if err := h.registry.Feeds.Add(feed); err != nil {
 		h.Log.Error("Failed to create feed for note deletion: %v", err)
 	}
 
@@ -258,12 +257,12 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 }
 
 func (h *Notes) HTMXGetNotesGrid(c echo.Context) error {
-	notes, err := h.Registry.Notes.List()
+	notes, err := h.registry.Notes.List()
 	if err != nil {
 		return HandleError(err, "failed to list notes")
 	}
 
-	tools, err := h.Registry.Tools.List()
+	tools, err := h.registry.Tools.List()
 	if err != nil {
 		return HandleError(err, "failed to list tools")
 	}

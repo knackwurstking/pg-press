@@ -4,19 +4,18 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/logger"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
 
 type Help struct {
-	*Base
+	registry *services.Registry
 }
 
-func NewHelp(db *services.Registry) *Help {
+func NewHelp(r *services.Registry) *Help {
 	return &Help{
-		Base: NewBase(db, logger.NewComponentLogger("Help")),
+		registry: r,
 	}
 }
 

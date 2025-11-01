@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Environment="DEBUG=true"
+Environment="LOG_FORMAT=text"
 Environment="ADMINS="
-Environment="CLICOLOR_FORCE=1"
 Environment="SERVER_ADDR=:9020"
 Environment="SERVER_PATH_PREFIX=/pg-press"
 ExecStart=pg-press server
