@@ -1,9 +1,0 @@
-- [x] After editing a tool, the page does not reload (tool page), resulting in issues such as an unchanged page title.
-- [x] Partial cycles seem to be inconsistent (not working at all, always zero).
-- [x] Failed to update note: database update failed: %!w(<nil>) when attempting to change a note's content.
-- [x] Failed to delete note: database delete failed: %!w(<nil>) when trying to delete a note.
-- [x] Failed to update press cycle: database update failed: %!w(<nil>) after editing an existing cycle via the tool page.
-- [x] Partial Cycles in the PDF summary remain at zero.
-- [x] When submitting an "umbau", I receive the error `failed to unassign tool 1: validation error: invalid press number: 0`. The tool remains unchanged, but a new entry is added to the cycles.
-- [x] Feeds counter seems to be missing.
-- [x] Fix the "Ooops, There Is No Binding Tool" message on the press page.
