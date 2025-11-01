@@ -28,6 +28,8 @@ func serverCommand() cli.Command {
 			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
+				initializeLogging()
+
 				r, err := openDB(*customDBPath)
 				if err != nil {
 					slog.Error("Failed to open database", "error", err)
