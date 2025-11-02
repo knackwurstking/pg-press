@@ -3,7 +3,7 @@ Description=PG Press Server
 After=network.target
 
 [Service]
-Environment="DEBUG=true"
+Environment="LOG_LEVEL=info"
 Environment="LOG_FORMAT=text"
 Environment="ADMINS="
 Environment="SERVER_ADDR=:9020"

@@ -4,6 +4,6 @@ import "os"
 
 var (
 	ServerPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
-	Debug            = os.Getenv("DEBUG") == "true"
-	LogFormat        = os.Getenv("LOG_FORMAT")
+	LogLevel         = os.Getenv("LOG_LEVEL")  // LogLevel would be "debug", "info", "warn", "error", or "fatal" (case-insensitive)
+	LogFormat        = os.Getenv("LOG_FORMAT") // LogFormat would be "json" or "text"
 )

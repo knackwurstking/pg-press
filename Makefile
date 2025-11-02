@@ -28,7 +28,7 @@ dev:
 			echo 'gow is not installed, install with: `go install github.com/mitranim/gow@latest`' && \
 			exit 1 \
 		)
-	export DEBUG=true && \
+	export LOG_LEVEL=debug && \
 	export LOG_FORMAT=text && \
 	export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
 	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}

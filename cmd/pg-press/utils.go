@@ -18,11 +18,17 @@ import (
 )
 
 func initializeLogging() {
-	var level slog.Leveler
-	if env.Debug {
+	level := slog.LevelWarn
+
+	switch env.LogLevel {
+	case "DEBUG", "debug":
 		level = slog.LevelDebug
-	} else {
+	case "INFO", "info":
 		level = slog.LevelInfo
+	case "WARN", "warn":
+		level = slog.LevelWarn
+	case "ERROR", "error":
+		level = slog.LevelError
 	}
 
 	var handler slog.Handler

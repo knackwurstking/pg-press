@@ -35,7 +35,7 @@
 
 - [x] Remove the logging package and use logger just like in the picow-led project.
 
-- [ ] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag.
+- [ ] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag. [WIP]
 
 - [ ] Improve/Simplify error handling(?), see picow-led project.
 
