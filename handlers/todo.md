@@ -2,7 +2,7 @@
 
 - [x] auth
 - [x] editor
-- [ ] feed
+- [x] feed
 - [ ] help
 - [ ] home
 - [ ] metalsheet

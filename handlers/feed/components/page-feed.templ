@@ -2,18 +2,18 @@ package components
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"strings"
+	"time"
 )
 
 templ PageFeed() {
-	@Layout(LayoutOptions{
+	@components.Layout(components.LayoutOptions{
 		PageTitle:   "PG Presse | Feed",
 		AppBarTitle: "Feed",
-		NavContent:  StandardNavContent(),
+		NavContent:  components.StandardNavContent(),
 	}) {
 		<main class="container fluid">
 			<span
