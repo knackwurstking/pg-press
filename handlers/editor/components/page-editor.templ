@@ -2,10 +2,10 @@ package components
 
 import (
 	"fmt"
-	"strconv"
-
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
+	"strconv"
 )
 
 type PageEditorOptions struct {
@@ -31,7 +31,7 @@ templ PageEditor(options *PageEditorOptions) {
 			editorTitle = fmt.Sprintf("Neues %s erstellen", typeName)
 		}
 	}}
-	@Layout(LayoutOptions{
+	@components.Layout(components.LayoutOptions{
 		PageTitle:      pageTitle,
 		AppBarTitle:    editorTitle,
 		AdditionalHead: pageEditorAdditionalHead(),
@@ -59,7 +59,7 @@ templ PageEditor(options *PageEditorOptions) {
 				</form>
 			</div>
 		</main>
-		@MarkdownScript()
+		@components.MarkdownScript()
 	}
 }
 
@@ -234,7 +234,7 @@ templ existingAttachmentItem(attachment *models.Attachment, index int) {
 			<button
 				type="button"
 				class="secondary small"
-				onclick={ OpenImageViewer(attachment.GetID()) }
+				onclick={ components.OpenImageViewer(attachment.GetID()) }
 			>
 				<i class="bi bi-eye"></i>
 				Anzeigen
@@ -332,7 +332,7 @@ templ pageEditorNavContent(options *PageEditorOptions) {
 }
 
 templ pageEditorAdditionalHead() {
-	@MarkdownStyles()
+	@components.MarkdownStyles()
 	<style>
 		.markdown-content h1,
 		.markdown-content h2,

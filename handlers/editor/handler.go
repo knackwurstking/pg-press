@@ -1,4 +1,4 @@
-package handlers
+package editor
 
 import (
 	"fmt"
@@ -8,31 +8,31 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/handlers/editor/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
 
-type Editor struct {
+type Handler struct {
 	registry *services.Registry
 }
 
-func NewEditor(r *services.Registry) *Editor {
-	return &Editor{
+func NewHandler(r *services.Registry) *Handler {
+	return &Handler{
 		registry: r,
 	}
 }
 
-func (h *Editor) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		utils.NewEchoRoute(http.MethodGet, "/editor", h.GetEditorPage),
 		utils.NewEchoRoute(http.MethodPost, "/editor/save", h.PostSaveContent),
 	})
 }
 
-func (h *Editor) GetEditorPage(c echo.Context) error {
+func (h *Handler) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
 	editorType := c.QueryParam("type")
 	idParam := c.QueryParam("id")
@@ -74,7 +74,7 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Editor) PostSaveContent(c echo.Context) error {
+func (h *Handler) PostSaveContent(c echo.Context) error {
 	// Get user from context
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
@@ -135,7 +135,7 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 }
 
 // loadExistingContent loads existing content based on type and ID
-func (h *Editor) loadExistingContent(options *components.PageEditorOptions) error {
+func (h *Handler) loadExistingContent(options *components.PageEditorOptions) error {
 	switch options.Type {
 	case "troublereport":
 		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(options.ID))
@@ -166,7 +166,7 @@ func (h *Editor) loadExistingContent(options *components.PageEditorOptions) erro
 }
 
 // saveContent saves content based on type
-func (h *Editor) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) error {
+func (h *Handler) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) error {
 	switch editorType {
 	case "troublereport":
 		if id > 0 {
@@ -243,7 +243,7 @@ func (h *Editor) saveContent(editorType string, id int64, title, content string,
 }
 
 // processAttachments handles file uploads and existing attachments
-func (h *Editor) processAttachments(c echo.Context) ([]*models.Attachment, error) {
+func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, error) {
 	var attachments []*models.Attachment
 
 	// Handle existing attachments (for updates)
@@ -285,7 +285,7 @@ func (h *Editor) processAttachments(c echo.Context) ([]*models.Attachment, error
 }
 
 // processFileUpload processes a single file upload
-func (h *Editor) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
+func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v", err)
@@ -312,7 +312,7 @@ func (h *Editor) processFileUpload(fileHeader *multipart.FileHeader) (*models.At
 }
 
 // getMimeTypeFromFilename determines MIME type from filename
-func (h *Editor) getMimeTypeFromFilename(filename string) string {
+func (h *Handler) getMimeTypeFromFilename(filename string) string {
 	lower := strings.ToLower(filename)
 	switch {
 	case strings.HasSuffix(lower, ".jpg") || strings.HasSuffix(lower, ".jpeg"):
