@@ -1,0 +1,184 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+type DialogEditMetalSheetProps struct {
+	MetalSheet *models.MetalSheet // MetalSheet can be nullable
+	Tool       *models.Tool
+}
+
+templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
+	{{
+		baseType := "POST"
+		baseHref := utils.HXPostMetalSheetEditDialog(props.Tool.ID)
+		submitButtonText := "Erstellen"
+
+		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
+			baseType = "PUT"
+			baseHref = utils.HXPutMetalSheetEditDialog(props.MetalSheet.ID)
+			submitButtonText = "Aktualisieren"
+		}
+	}}
+	@components.BaseDialog(components.BaseDialogProps{
+		ID:               "metal-sheet-edit-dialog",
+		Type:             baseType,
+		Href:             baseHref,
+		SubmitButtonText: submitButtonText,
+	}) {
+		switch props.Tool.Position {
+			case models.PositionTop:
+				@DialogEditMetalSheetContentPositionTop(props)
+			case models.PositionBottom:
+				@DialogEditMetalSheetContentPositionBottom(props)
+		}
+	}
+}
+
+templ DialogEditMetalSheetContentPositionTop(props *DialogEditMetalSheetProps) {
+	<div class="flex flex-col">
+		<label for="tile-height">Stärke (mm)</label>
+		<input
+			type="number"
+			id="tile-height"
+			name="tile_height"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.TileHeight) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="value">Blech (mm)</label>
+		<input
+			type="number"
+			id="value"
+			name="value"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.Value) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="identifier">Maschinentyp</label>
+		<select
+			id="identifier"
+			name="identifier"
+			required
+		>
+			if props.MetalSheet == nil {
+				<option value="" disabled selected>Pressen Typ</option>
+			}
+			<option
+				value="SACMI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SACMI" {
+					selected
+				}
+			>SACMI</option>
+			<option
+				value="SITI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SITI" {
+					selected
+				}
+			>SITI</option>
+		</select>
+	</div>
+}
+
+templ DialogEditMetalSheetContentPositionBottom(props *DialogEditMetalSheetProps) {
+	<div class="flex flex-col">
+		<label for="tile-height">Stärke (mm)</label>
+		<input
+			type="number"
+			id="tile-height"
+			name="tile_height"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.TileHeight) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="value">Blech (mm)</label>
+		<input
+			type="number"
+			id="value"
+			name="value"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.Value) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="marke-height">Marke (mm)</label>
+		<input
+			type="number"
+			id="marke-height"
+			name="marke_height"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%d", props.MetalSheet.MarkeHeight) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="stf">Stf.</label>
+		<input
+			type="number"
+			id="stf"
+			name="stf"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.STF) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="stf-max">Hubende</label>
+		<input
+			type="number"
+			id="stf-max"
+			name="stf_max"
+			step="0.1"
+			required
+			if props.MetalSheet != nil {
+				value={ fmt.Sprintf("%.1f", props.MetalSheet.STFMax) }
+			}
+		/>
+	</div>
+	<div class="flex flex-col">
+		<label for="identifier">Maschinentyp</label>
+		<select
+			id="identifier"
+			name="identifier"
+			required
+		>
+			if props.MetalSheet == nil {
+				<option value="" disabled selected>Pressen Typ</option>
+			}
+			<option
+				value="SACMI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SACMI" {
+					selected
+				}
+			>SACMI</option>
+			<option
+				value="SITI"
+				if props.MetalSheet != nil && props.MetalSheet.Identifier.String() == "SITI" {
+					selected
+				}
+			>SITI</option>
+		</select>
+	</div>
+}

@@ -1,0 +1,105 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+)
+
+templ PageModifications[T any](
+	modifications []*models.ResolvedModification[T],
+	itemRenderFunc func(modification *models.ResolvedModification[T], isCurrent bool) templ.Component,
+) {
+	@components.Layout(
+		components.LayoutOptions{
+			PageTitle:   "PG Presse | Modifications History",
+			AppBarTitle: "Modifications History",
+			NavContent:  components.StandardNavContent(),
+		},
+	) {
+		<div class="h-screen">
+			<div class="card info compact m" style="margin-top: calc(var(--ui-spacing) * 2);">
+				<div class="card-header flex gap items-center">
+					<i class="bi bi-info-circle"></i>
+					<h3 class="text-sm text-semibold">About Rollbacks</h3>
+				</div>
+				<div class="card-body">
+					<p class="text-sm">
+						Rolling back will restore the selected version and create a new
+						modification entry. The current version will be preserved in
+						the history.
+					</p>
+				</div>
+			</div>
+			<div class="container">
+				<div class="card mb">
+					<div class="card-body flex flex-wrap gap items-center justify-between">
+						<div>
+							<h1 class="text-2xl text-bold">Modifications History</h1>
+							<p class="text-sm muted mt">View and rollback to previous versions</p>
+						</div>
+						<div class="flex items-center gap">
+							<span class="badge info">
+								{ fmt.Sprintf("%d versions", len(modifications)) }
+							</span>
+							<a href="javascript:history.back()" role="button" class="secondary">
+								← Back
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="flex flex-col gap">
+					if len(modifications) == 0 {
+						<div class="card text-center">
+							<div class="card-body">
+								<div class="muted mb">
+									<svg width="48" height="48" style="margin: 0 auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+									</svg>
+								</div>
+								<h3 class="text-lg text-semibold mb">No Modifications Found</h3>
+								<p class="muted">This item has no modification history yet.</p>
+							</div>
+						</div>
+					} else {
+						{{
+							var currentModification *models.ResolvedModification[T]
+							if len(modifications) > 0 {
+								currentModification = modifications[0]
+							}
+						}}
+						<div class="card compact">
+							<div class="card-body">
+								<div class="flex items-center mb">
+									<span class="badge primary shadow">Current Version</span>
+								</div>
+								@itemRenderFunc(currentModification, true)
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-header">
+								<h2 class="text-lg text-semibold">Previous Versions</h2>
+								<p class="text-sm muted">Click "Rollback" to restore a previous version</p>
+							</div>
+							<div class="card-body">
+								for _, m := range modifications {
+									{{ isCurrent := currentModification.CreatedAt.Equal(m.CreatedAt) }}
+									if !isCurrent {
+										<div
+											class="p mb"
+											if isCurrent {
+												disabled
+											}
+										>
+											@itemRenderFunc(m, isCurrent)
+										</div>
+									}
+								}
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}
