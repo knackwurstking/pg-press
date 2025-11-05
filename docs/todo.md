@@ -37,6 +37,4 @@
 
 - [x] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag.
 
-- [ ] Improve/Simplify error handling(?), see picow-led project.
-
 - [ ] Change the base dialogs' error handling, see picow-led project.
