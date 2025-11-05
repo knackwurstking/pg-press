@@ -1,7 +1,7 @@
 ## Restructure this package, including components
 
 - [x] auth
-- [ ] editor
+- [x] editor
 - [ ] feed
 - [ ] help
 - [ ] home
