@@ -6,6 +6,10 @@
     "HTMX",
     "SACMI",
     "AUTOINCREMENT",
-    "SITI"
+    "SITI",
+    "metalsheet",
+    "troublereports",
+    "wsfeed",
+    "picow"
   ]
 }
