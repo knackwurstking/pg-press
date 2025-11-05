@@ -1,3 +1,4 @@
+// TODO: Move all javascript to /assets/js/page-trouble-reports.js
 package components
 
 import (
@@ -15,7 +16,7 @@ templ PageTroubleReports() {
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Problemberichte",
 			AppBarTitle:    "Problemberichte",
-			AdditionalHead: pageTrAdditionalHead(),
+			AdditionalHead: additionalHeadTroubleReportsPage(),
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
@@ -53,10 +54,10 @@ templ PageTroubleReports() {
 	}
 }
 
-templ pageTrAdditionalHead() {
+templ additionalHeadTroubleReportsPage() {
 	<link
 		rel="stylesheet"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/css/trouble-reports/data.css") }
+		href={ utils.AssetURL(env.ServerPathPrefix, "/css/page-trouble-reports.css") }
 	/>
 	<script>
 		var searchTimer;
