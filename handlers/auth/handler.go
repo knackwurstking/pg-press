@@ -1,4 +1,4 @@
-package handlers
+package auth
 
 import (
 	"log/slog"
@@ -6,54 +6,54 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/handlers/auth/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
 
-type Auth struct {
+type Handler struct {
 	registry *services.Registry
 }
 
-func NewAuth(r *services.Registry) *Auth {
-	return &Auth{
+func NewHandler(r *services.Registry) *Handler {
+	return &Handler{
 		registry: r,
 	}
 }
 
-func (h *Auth) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		utils.NewEchoRoute(http.MethodGet, "/login", h.GetLoginPage),
 		utils.NewEchoRoute(http.MethodGet, "/logout", h.GetLogout),
 	})
 }
 
-func (h *Auth) GetLoginPage(c echo.Context) error {
+func (h *Handler) GetLoginPage(c echo.Context) error {
 	apiKey := c.FormValue("api-key")
 	if apiKey != "" {
 		if h.processApiKeyLogin(apiKey, c) {
 			slog.Info("Successful login", "real_ip", c.RealIP())
-			return RedirectTo(c, "./profile")
+			return utils.RedirectTo(c, "./profile")
 		}
 		slog.Info("Failed login attempt", "real_ip", c.RealIP())
 	}
 
 	page := components.PageLogin(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render login page")
+		return utils.HandleError(err, "failed to render login page")
 	}
 
 	return nil
 }
 
-func (h *Auth) GetLogout(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+func (h *Handler) GetLogout(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
 	if cookie, err := c.Cookie(env.CookieName); err == nil {
@@ -62,10 +62,10 @@ func (h *Auth) GetLogout(c echo.Context) error {
 		}
 	}
 
-	return RedirectTo(c, "./login")
+	return utils.RedirectTo(c, "./login")
 }
 
-func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
+func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	if len(apiKey) < 16 {
 		slog.Debug("API key too short", "real_ip", ctx.RealIP())
 		return false
@@ -97,7 +97,7 @@ func (h *Auth) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	return true
 }
 
-func (h *Auth) clearExistingSession(ctx echo.Context, username string) error {
+func (h *Handler) clearExistingSession(ctx echo.Context, username string) error {
 	cookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
 		return nil
@@ -110,7 +110,7 @@ func (h *Auth) clearExistingSession(ctx echo.Context, username string) error {
 	return nil
 }
 
-func (h *Auth) createSession(ctx echo.Context, apiKey string, user *models.User) error {
+func (h *Handler) createSession(ctx echo.Context, apiKey string, user *models.User) error {
 	cookieValue := uuid.New().String()
 	isHTTPS := ctx.Request().TLS != nil || ctx.Scheme() == "https"
 

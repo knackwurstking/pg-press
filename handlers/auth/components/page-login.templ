@@ -1,10 +1,12 @@
 package components
 
+import "github.com/knackwurstking/pg-press/components"
+
 templ PageLogin(apiKey string, invalidApiKey bool) {
-	@Layout(LayoutOptions{
+	@components.Layout(components.LayoutOptions{
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
-		NavContent:  BasicNavContent(),
+		NavContent:  components.BasicNavContent(),
 	}) {
 		<main class="container">
 			@loginDialog(apiKey, invalidApiKey)

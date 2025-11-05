@@ -37,36 +37,36 @@ func (h *Profile) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Profile) GetProfilePage(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to get user from context")
+		return utils.HandleBadRequest(err, "failed to get user from context")
 	}
 
 	slog.Debug("Rendering profile page", "user_name", user.Name)
 
 	if err = h.handleUserNameChange(c, user); err != nil {
-		return HandleError(err, "error updating username")
+		return utils.HandleError(err, "error updating username")
 	}
 
 	page := components.PageProfile(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render profile page")
+		return utils.HandleError(err, "failed to render profile page")
 	}
 
 	return nil
 }
 
 func (h *Profile) HTMXGetCookies(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to get user from context")
+		return utils.HandleBadRequest(err, "failed to get user from context")
 	}
 
 	slog.Debug("Fetching cookies for user", "user_name", user.Name)
 
 	cookies, err := h.registry.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
-		return HandleError(err, "failed to list cookies")
+		return utils.HandleError(err, "failed to list cookies")
 	}
 
 	slog.Debug("Found cookies for user", "cookies", len(cookies), "user_name", user.Name)
@@ -74,22 +74,22 @@ func (h *Profile) HTMXGetCookies(c echo.Context) error {
 	cookiesTable := components.CookiesDetails(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return HandleError(err, "failed to render cookies table")
+		return utils.HandleError(err, "failed to render cookies table")
 	}
 
 	return nil
 }
 
 func (h *Profile) HTMXDeleteCookies(c echo.Context) error {
-	value, err := ParseQueryString(c, "value")
+	value, err := utils.ParseQueryString(c, "value")
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse value")
+		return utils.HandleBadRequest(err, "failed to parse value")
 	}
 
 	slog.Info("Deleting cookie", "value", utils.MaskString(value))
 
 	if err := h.registry.Cookies.Remove(value); err != nil {
-		return HandleError(err, "failed to delete cookie")
+		return utils.HandleError(err, "failed to delete cookie")
 	}
 
 	return h.HTMXGetCookies(c)

@@ -5,6 +5,7 @@ import (
 
 	pgpress "github.com/knackwurstking/pg-press"
 	"github.com/knackwurstking/pg-press/handlers"
+	"github.com/knackwurstking/pg-press/handlers/auth"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ func Serve(e *echo.Echo, r *services.Registry) {
 
 	handlers.NewNav(r, wsFeedHandler).RegisterRoutes(e)
 	handlers.NewHome(r).RegisterRoutes(e)
-	handlers.NewAuth(r).RegisterRoutes(e)
+	auth.NewHandler(r).RegisterRoutes(e)
 	handlers.NewFeed(r).RegisterRoutes(e)
 	handlers.NewHelp(r).RegisterRoutes(e)
 	handlers.NewEditor(r).RegisterRoutes(e)

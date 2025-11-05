@@ -28,7 +28,7 @@ func (h *Help) RegisterRoutes(e *echo.Echo) {
 func (h *Help) GetMarkdown(c echo.Context) error {
 	page := components.PageHelpMarkdown()
 	if err := page.Render(c.Request().Context(), c.Response().Writer); err != nil {
-		return HandleError(err, "render help page failed")
+		return utils.HandleError(err, "render help page failed")
 	}
 	return nil
 }

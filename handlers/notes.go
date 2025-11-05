@@ -55,7 +55,7 @@ func (h *Notes) GetNotesPage(c echo.Context) error {
 	notes, err := h.registry.Notes.List()
 	if err != nil {
 		slog.Error("Failed to retrieve notes from database", "error", err)
-		return HandleError(err, "failed to get notes from database")
+		return utils.HandleError(err, "failed to get notes from database")
 	}
 
 	// Handle case where notes might be nil
@@ -70,7 +70,7 @@ func (h *Notes) GetNotesPage(c echo.Context) error {
 	tools, err := h.registry.Tools.List()
 	if err != nil {
 		slog.Error("Failed to retrieve tools from database", "error", err)
-		return HandleError(err, "failed to get tools from database")
+		return utils.HandleError(err, "failed to get tools from database")
 	}
 
 	// Handle case where tools might be nil
@@ -87,7 +87,7 @@ func (h *Notes) GetNotesPage(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render notes page")
+		return utils.HandleError(err, "failed to render notes page")
 	}
 
 	return nil
@@ -95,9 +95,9 @@ func (h *Notes) GetNotesPage(c echo.Context) error {
 
 // HTMXGetEditNoteDialog renders the edit note dialog
 func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to get user from context")
+		return utils.HandleBadRequest(err, "failed to get user from context")
 	}
 
 	props := &components.DialogEditNoteProps{
@@ -112,14 +112,14 @@ func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
 	}
 
 	// Check if we're editing an existing note
-	if idq, _ := ParseQueryInt64(c, "id"); idq > 0 {
+	if idq, _ := utils.ParseQueryInt64(c, "id"); idq > 0 {
 		noteID := models.NoteID(idq)
 
 		slog.Debug("Opening edit dialog for note", "note", noteID)
 
 		note, err := h.registry.Notes.Get(noteID)
 		if err != nil {
-			return HandleError(err, "failed to get note from database")
+			return utils.HandleError(err, "failed to get note from database")
 		}
 		props.Note = note
 	} else {
@@ -128,7 +128,7 @@ func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
 
 	dialog := components.DialogEditNote(*props)
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render edit note dialog")
+		return utils.HandleError(err, "failed to render edit note dialog")
 	}
 
 	return nil
@@ -136,22 +136,22 @@ func (h *Notes) HTMXGetEditNoteDialog(c echo.Context) error {
 
 // HTMXPostEditNoteDialog creates a new note
 func (h *Notes) HTMXPostEditNoteDialog(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
 	slog.Debug("Creating a new note", "user_name", user.Name)
 
 	note, err := h.parseNoteFromForm(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse note form data")
+		return utils.HandleBadRequest(err, "failed to parse note form data")
 	}
 
 	// Create the note
 	noteID, err := h.registry.Notes.Add(note)
 	if err != nil {
-		return HandleError(err, "failed to create note")
+		return utils.HandleError(err, "failed to create note")
 	}
 
 	slog.Info("Created note", "note", noteID, "user_name", user.Name)
@@ -170,21 +170,21 @@ func (h *Notes) HTMXPostEditNoteDialog(c echo.Context) error {
 		slog.Error("Failed to create feed for cycle creation", "error", err)
 	}
 
-	SetHXTrigger(c, env.HXGlobalTrigger)
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
 
 // HTMXPutEditNoteDialog updates an existing note
 func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
-	idq, err := ParseQueryInt64(c, "id")
+	idq, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse note ID")
+		return utils.HandleBadRequest(err, "failed to parse note ID")
 	}
 	noteID := models.NoteID(idq)
 
@@ -192,7 +192,7 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	note, err := h.parseNoteFromForm(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse note form data")
+		return utils.HandleBadRequest(err, "failed to parse note form data")
 	}
 
 	// Set the ID for update
@@ -200,7 +200,7 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 
 	// Update the note
 	if err := h.registry.Notes.Update(note); err != nil {
-		return HandleError(err, "failed to update note")
+		return utils.HandleError(err, "failed to update note")
 	}
 
 	slog.Info("Updated note", "user_name", user.Name, "note", noteID)
@@ -220,27 +220,27 @@ func (h *Notes) HTMXPutEditNoteDialog(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	SetHXTrigger(c, env.HXGlobalTrigger)
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
 
 // HTMXDeleteNote deletes a note and unlinks it from all tools
 func (h *Notes) HTMXDeleteNote(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
-	idq, err := ParseQueryInt64(c, "id")
+	idq, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse note ID")
+		return utils.HandleBadRequest(err, "failed to parse note ID")
 	}
 	noteID := models.NoteID(idq)
 
 	// Delete the note
 	if err := h.registry.Notes.Delete(noteID); err != nil {
-		return HandleError(err, "failed to delete note")
+		return utils.HandleError(err, "failed to delete note")
 	}
 
 	slog.Info("Deleted note", "note", noteID, "user_name", user.Name)
@@ -252,7 +252,7 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
-	SetHXTrigger(c, env.HXGlobalTrigger)
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -260,17 +260,17 @@ func (h *Notes) HTMXDeleteNote(c echo.Context) error {
 func (h *Notes) HTMXGetNotesGrid(c echo.Context) error {
 	notes, err := h.registry.Notes.List()
 	if err != nil {
-		return HandleError(err, "failed to list notes")
+		return utils.HandleError(err, "failed to list notes")
 	}
 
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return HandleError(err, "failed to list tools")
+		return utils.HandleError(err, "failed to list tools")
 	}
 
 	ng := components.PageNotes_NotesGrid(notes, tools)
 	if err := ng.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render notes grid")
+		return utils.HandleError(err, "failed to render notes grid")
 	}
 	return nil
 }

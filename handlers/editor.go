@@ -39,7 +39,7 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 	returnURL := c.QueryParam("return_url")
 
 	if editorType == "" {
-		return HandleBadRequest(nil, "editor type is required")
+		return utils.HandleBadRequest(nil, "editor type is required")
 	}
 
 	var id int64
@@ -47,7 +47,7 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return HandleBadRequest(err, "invalid ID parameter")
+			return utils.HandleBadRequest(err, "invalid ID parameter")
 		}
 	}
 
@@ -61,14 +61,14 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 	if id > 0 {
 		err := h.loadExistingContent(options)
 		if err != nil {
-			return HandleError(err, "failed to load existing content")
+			return utils.HandleError(err, "failed to load existing content")
 		}
 	}
 
 	// Render the editor page
 	page := components.PageEditor(options)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render editor page")
+		return utils.HandleError(err, "failed to render editor page")
 	}
 
 	return nil
@@ -76,9 +76,9 @@ func (h *Editor) GetEditorPage(c echo.Context) error {
 
 func (h *Editor) PostSaveContent(c echo.Context) error {
 	// Get user from context
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
 	// Parse form data
@@ -90,11 +90,11 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 	returnURL := c.FormValue("return_url")
 
 	if editorType == "" {
-		return HandleBadRequest(nil, "editor type is required")
+		return utils.HandleBadRequest(nil, "editor type is required")
 	}
 
 	if title == "" || content == "" {
-		return HandleBadRequest(nil, "title and content are required")
+		return utils.HandleBadRequest(nil, "title and content are required")
 	}
 
 	useMarkdown := useMarkdownStr == "on"
@@ -104,20 +104,20 @@ func (h *Editor) PostSaveContent(c echo.Context) error {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return HandleBadRequest(err, "invalid ID parameter")
+			return utils.HandleBadRequest(err, "invalid ID parameter")
 		}
 	}
 
 	// Handle attachments
 	attachments, err := h.processAttachments(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to process attachments")
+		return utils.HandleBadRequest(err, "failed to process attachments")
 	}
 
 	// Save content based on type
 	err = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
 	if err != nil {
-		return HandleError(err, "failed to save content")
+		return utils.HandleError(err, "failed to save content")
 	}
 
 	// Redirect back to return URL or appropriate page

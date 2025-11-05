@@ -46,27 +46,27 @@ func (h *TroubleReports) RegisterRoutes(e *echo.Echo) {
 func (h *TroubleReports) GetPage(c echo.Context) error {
 	page := components.PageTroubleReports()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render trouble reports page")
+		return utils.HandleError(err, "failed to render trouble reports page")
 	}
 	return nil
 }
 
 func (h *TroubleReports) GetSharePDF(c echo.Context) error {
 	var troubleReportID models.TroubleReportID
-	if id, err := ParseQueryInt64(c, "id"); err != nil {
-		return HandleBadRequest(err, "missing id query parameter")
+	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
+		return utils.HandleBadRequest(err, "missing id query parameter")
 	} else {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
 	tr, err := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
-		return HandleError(err, "failed to retrieve trouble report")
+		return utils.HandleError(err, "failed to retrieve trouble report")
 	}
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		return HandleError(err, "failed to generate PDF")
+		return utils.HandleError(err, "failed to generate PDF")
 	}
 
 	return h.shareResponse(c, tr, pdfBuffer)
@@ -74,15 +74,15 @@ func (h *TroubleReports) GetSharePDF(c echo.Context) error {
 
 func (h *TroubleReports) GetAttachment(c echo.Context) error {
 	var attachmentID models.AttachmentID
-	if id, err := ParseQueryInt64(c, "attachment_id"); err != nil {
-		return HandleBadRequest(err, "invalid attachment ID")
+	if id, err := utils.ParseQueryInt64(c, "attachment_id"); err != nil {
+		return utils.HandleBadRequest(err, "invalid attachment ID")
 	} else {
 		attachmentID = models.AttachmentID(id)
 	}
 
 	attachment, err := h.registry.Attachments.Get(attachmentID)
 	if err != nil {
-		return HandleError(err, "failed to get attachment")
+		return utils.HandleError(err, "failed to get attachment")
 	}
 
 	// Set appropriate headers
@@ -100,9 +100,9 @@ func (h *TroubleReports) GetAttachment(c echo.Context) error {
 }
 
 func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
-	id, err := ParseParamInt64(c, "id")
+	id, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return HandleBadRequest(err, "invalid id in request")
+		return utils.HandleBadRequest(err, "invalid id in request")
 	}
 
 	modifications, err := h.registry.Modifications.List(
@@ -110,7 +110,7 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 		id, 100, 0,
 	)
 	if err != nil {
-		return HandleError(err, "failed to retrieve modifications")
+		return utils.HandleError(err, "failed to retrieve modifications")
 	}
 
 	// Convert to the format expected by the modifications page
@@ -125,34 +125,34 @@ func (h *TroubleReports) GetModificationsForID(c echo.Context) error {
 	}
 
 	// Render the page
-	currentUser, err := GetUserFromContext(c)
+	currentUser, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to retrieve user from context")
+		return utils.HandleError(err, "failed to retrieve user from context")
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
 	itemRenderFunc := components.TroubleReportCreateModificationRenderer(models.TroubleReportID(id), isAdmin)
 	page := components.PageModifications[models.TroubleReportModData](resolvedModifications, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render page")
+		return utils.HandleError(err, "failed to render page")
 	}
 
 	return nil
 }
 
 func (h *TroubleReports) HTMXGetData(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
 	trs, err := h.registry.TroubleReports.ListWithAttachments()
 	if err != nil {
-		return HandleError(err, "failed to load trouble reports")
+		return utils.HandleError(err, "failed to load trouble reports")
 	}
 
 	troubleReportsList := components.ListReports(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render trouble reports list component")
+		return utils.HandleError(err, "failed to render trouble reports list component")
 	}
 
 	return nil
@@ -160,20 +160,20 @@ func (h *TroubleReports) HTMXGetData(c echo.Context) error {
 
 func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 	var troubleReportID models.TroubleReportID
-	if id, err := ParseQueryInt64(c, "id"); err != nil {
-		return HandleBadRequest(err, "failed to parse trouble report ID")
+	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
+		return utils.HandleBadRequest(err, "failed to parse trouble report ID")
 	} else {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleBadRequest(err, "failed to get user from context")
+		return utils.HandleBadRequest(err, "failed to get user from context")
 	}
 
 	removedReport, err := h.registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
 	if err != nil {
-		return HandleError(err, "failed to delete trouble report")
+		return utils.HandleError(err, "failed to delete trouble report")
 	}
 
 	// Create feed entry
@@ -189,15 +189,15 @@ func (h *TroubleReports) HTMXDeleteTroubleReport(c echo.Context) error {
 
 func (h *TroubleReports) HTMXGetAttachmentsPreview(c echo.Context) error {
 	var troubleReportID models.TroubleReportID
-	if id, err := ParseQueryInt64(c, "id"); err != nil {
-		return HandleBadRequest(err, "failed to parse ID from query")
+	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
+		return utils.HandleBadRequest(err, "failed to parse ID from query")
 	} else {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
 	tr, err := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
 	if err != nil {
-		return HandleError(err, "failed to load trouble report")
+		return utils.HandleError(err, "failed to load trouble report")
 	}
 
 	attachmentsPreview := components.AttachmentsPreview(
@@ -206,32 +206,32 @@ func (h *TroubleReports) HTMXGetAttachmentsPreview(c echo.Context) error {
 	)
 
 	if err := attachmentsPreview.Render(c.Request().Context(), c.Response()); err != nil {
-		return HandleError(err, "failed to render attachments preview component")
+		return utils.HandleError(err, "failed to render attachments preview component")
 	}
 
 	return nil
 }
 
 func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
-	user, err := GetUserFromContext(c)
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return HandleError(err, "failed to get user from context")
+		return utils.HandleError(err, "failed to get user from context")
 	}
 
-	id, err := ParseQueryInt64(c, "id")
+	id, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return HandleBadRequest(err, "failed to parse ID query")
+		return utils.HandleBadRequest(err, "failed to parse ID query")
 	}
 	troubleReportID := models.TroubleReportID(id)
 
 	modTimeStr := c.FormValue("modification_time")
 	if modTimeStr == "" {
-		return HandleBadRequest(nil, "modification_time form value is required")
+		return utils.HandleBadRequest(nil, "modification_time form value is required")
 	}
 
 	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
 	if err != nil {
-		return HandleBadRequest(err, "invalid modification_time format")
+		return utils.HandleBadRequest(err, "invalid modification_time format")
 	}
 
 	modifications, err := h.registry.Modifications.ListAll(
@@ -239,7 +239,7 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 		id,
 	)
 	if err != nil {
-		return HandleError(err, "failed to retrieve modifications")
+		return utils.HandleError(err, "failed to retrieve modifications")
 	}
 
 	var targetMod *models.Modification[any]
@@ -251,21 +251,21 @@ func (h *TroubleReports) HTMXPostRollback(c echo.Context) error {
 	}
 
 	if targetMod == nil {
-		return HandleNotFound(nil, fmt.Sprintf("modification %d not found", modTime))
+		return utils.HandleNotFound(nil, fmt.Sprintf("modification %d not found", modTime))
 	}
 
 	var modData models.TroubleReportModData
 	if err := json.Unmarshal(targetMod.Data, &modData); err != nil {
-		return HandleError(err, "failed to parse modification data")
+		return utils.HandleError(err, "failed to parse modification data")
 	}
 
 	tr, err := h.registry.TroubleReports.Get(troubleReportID)
 	if err != nil {
-		return HandleError(err, "failed to retrieve trouble report")
+		return utils.HandleError(err, "failed to retrieve trouble report")
 	}
 
 	if err := h.registry.TroubleReports.Update(modData.CopyTo(tr), user); err != nil {
-		return HandleError(err, "failed to rollback trouble report")
+		return utils.HandleError(err, "failed to rollback trouble report")
 	}
 
 	// Create feed entry
@@ -287,10 +287,10 @@ func (h *TroubleReports) shareResponse(
 	buf *bytes.Buffer,
 ) error {
 	if buf == nil || buf.Len() == 0 {
-		return HandleError(nil, "PDF buffer is empty")
+		return utils.HandleError(nil, "PDF buffer is empty")
 	}
 
-	sanitizedTitle := SanitizeFilename(tr.Title)
+	sanitizedTitle := utils.SanitizeFilename(tr.Title)
 	if sanitizedTitle == "" {
 		sanitizedTitle = "fehlerbericht"
 	}
