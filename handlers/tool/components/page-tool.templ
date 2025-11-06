@@ -6,8 +6,6 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
-	"github.com/knackwurstking/ui"
-	"net/http"
 )
 
 type PageToolProps struct {
@@ -299,7 +297,7 @@ templ pageTool_RegenerationsTableRows(regenerations []*models.ResolvedRegenerati
 			</td>
 			<td>
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.HXGetToolRegenerationEdit(regen.GetTool().ID, &regen.ID),
+					EditHref:        utils.HXGetToolRegenerationEdit(regen.ID),
 					EditAdminOnly:   false,
 					DeleteHref:      utils.HXDeleteToolRegeneration(regen.GetTool().ID, regen.ID),
 					DeleteAdminOnly: true,
@@ -668,28 +666,5 @@ templ PageTool_Notes(tool *models.ResolvedTool) {
 		<div class="empty-state">
 			<p class="text-muted">Keine Notizen für dieses Werkzeug vorhanden.</p>
 		</div>
-	}
-}
-
-templ PageTool_DialogEditRegeneration(r *models.ResolvedRegeneration) {
-	@ui.Dialog(ui.DialogProps{
-		Method:           http.MethodPut,
-		Href:             utils.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID),
-		ID:               "regeneration-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
-	}) {
-		<section>
-			<p>Tool: { r.GetTool().String() }</p>
-			<p>Regeneriert am: { r.GetCycle().Date.Format(env.DateFormat) }</p>
-		</section>
-		<label class="flex flex-col gap-0">
-			Grund
-			<input
-				id="reason"
-				name="reason"
-				type="text"
-				value={ r.Reason }
-			/>
-		</label>
 	}
 }

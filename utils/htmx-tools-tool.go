@@ -7,25 +7,18 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func HXGetToolRegenerationEdit(toolID models.ToolID, regenerationID *models.RegenerationID) templ.SafeURL {
-	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
-
-	if regenerationID == nil {
-		return buildURL(path, nil)
-	}
-
-	params := map[string]string{
-		"id": fmt.Sprintf("%d", *regenerationID),
-	}
-	return buildURL(path, params)
+func HXGetToolRegenerationEdit(regenerationID models.RegenerationID) templ.SafeURL {
+	return buildURL(
+		fmt.Sprintf("/htmx/dialogs/edit-regeneration?id=%d", regenerationID),
+		nil,
+	)
 }
 
 func HXPutToolRegenerationEdit(toolID models.ToolID, regenerationID models.RegenerationID) templ.SafeURL {
-	path := fmt.Sprintf("/htmx/tools/tool/%d/edit-regeneration", toolID)
-	params := map[string]string{
-		"id": fmt.Sprintf("%d", regenerationID),
-	}
-	return buildURL(path, params)
+	return buildURL(
+		fmt.Sprintf("/htmx/dialogs/edit-regeneration?id=%d", regenerationID),
+		nil,
+	)
 }
 
 func HXDeleteToolRegeneration(toolID models.ToolID, regenerationID models.RegenerationID) templ.SafeURL {

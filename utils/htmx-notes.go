@@ -23,7 +23,7 @@ func HXGetNotesEditDialog(noteID *models.NoteID, linkToTables ...string) templ.S
 		params["link_to_tables"] = strings.Join(linkToTables, ",")
 	}
 
-	return buildURL("/htmx/notes/edit", params)
+	return buildURL("/htmx/dialogs/edit-note", params)
 }
 
 func HXPostNotesEditDialog(linkToTables ...string) templ.SafeURL {
@@ -33,7 +33,7 @@ func HXPostNotesEditDialog(linkToTables ...string) templ.SafeURL {
 		params["link_to_tables"] = strings.Join(linkToTables, ",")
 	}
 
-	return buildURL("/htmx/notes/edit", params)
+	return buildURL("/htmx/dialogs/edit-note", params)
 }
 
 func HXPutNotesEditDialog(noteID models.NoteID, linkToTables ...string) templ.SafeURL {
@@ -45,7 +45,7 @@ func HXPutNotesEditDialog(noteID models.NoteID, linkToTables ...string) templ.Sa
 		params["link_to_tables"] = strings.Join(linkToTables, ",")
 	}
 
-	return buildURL("/htmx/notes/edit", params)
+	return buildURL("/htmx/dialogs/edit-note", params)
 }
 
 func HXDeleteNote(noteID models.NoteID) templ.SafeURL {

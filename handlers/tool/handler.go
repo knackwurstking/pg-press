@@ -15,10 +15,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type ToolRegenerationEditDialogFormData struct {
-	Reason string
-}
-
 type Handler struct {
 	registry *services.Registry
 }
@@ -35,10 +31,6 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 		utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.GetToolPage),
 
 		// Regenerations Table
-		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/tool/:id/edit-regeneration", h.HTMXGetEditRegeneration),
-		utils.NewEchoRoute(http.MethodPut,
-			"/htmx/tools/tool/:id/edit-regeneration", h.HTMXPutEditRegeneration),
 		utils.NewEchoRoute(http.MethodDelete,
 			"/htmx/tools/tool/:id/delete-regeneration", h.HTMXDeleteRegeneration),
 
@@ -467,81 +459,6 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetEditRegeneration(c echo.Context) error {
-	rid, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse regeneration id")
-	}
-	regenerationID := models.RegenerationID(rid)
-
-	regeneration, err := h.registry.ToolRegenerations.Get(regenerationID)
-	if err != nil {
-		return utils.HandleError(err, "get regeneration failed")
-	}
-
-	resolvedRegeneration, err := services.ResolveRegeneration(h.registry, regeneration)
-	if err != nil {
-		return err
-	}
-
-	dialog := components.PageTool_DialogEditRegeneration(resolvedRegeneration)
-
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "render dialog failed")
-	}
-
-	return nil
-}
-
-func (h *Handler) HTMXPutEditRegeneration(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
-	}
-
-	var regenerationID models.RegenerationID
-	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
-		return utils.HandleBadRequest(err, "failed to get the regeneration id from url query")
-	} else {
-		regenerationID = models.RegenerationID(id)
-	}
-
-	var regeneration *models.ResolvedRegeneration
-	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
-		return utils.HandleError(err, "failed to get regeneration before deleting")
-	} else {
-		regeneration, err = services.ResolveRegeneration(h.registry, r)
-
-		formData := h.parseRegenerationEditFormData(c)
-		regeneration.Reason = formData.Reason
-	}
-
-	err = h.registry.ToolRegenerations.Update(regeneration.Regeneration, user)
-	if err != nil {
-		return utils.HandleError(err, "failed to update regeneration")
-	}
-
-	{ // Create Feed
-		title := "Werkzeug Regenerierung aktualisiert"
-		content := fmt.Sprintf(
-			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-			regeneration.GetTool().String(),
-			regeneration.GetCycle().Date.Format(env.DateFormat),
-			regeneration.GetCycle().PartialCycles,
-		)
-
-		if regeneration.Reason != "" {
-			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
-		}
-
-		h.createFeed(title, content, user.TelegramID)
-	}
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
-
-	return nil
-}
-
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
@@ -799,12 +716,6 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) 
 	return filteredToolsForBinding, nil
 }
 
-func (h *Handler) parseRegenerationEditFormData(c echo.Context) *ToolRegenerationEditDialogFormData {
-	return &ToolRegenerationEditDialogFormData{
-		Reason: c.FormValue("reason"),
-	}
-}
-
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
 	return components.ToolPage_ToolStatusEdit(&components.ToolPage_ToolStatusEditProps{
 		Tool:              tool,
@@ -816,6 +727,6 @@ func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
 	feed := models.NewFeed(title, content, userID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
-		slog.Error("Failed to create feed for cycle creation", "error", err)
+		slog.Error("Failed to create feed", "error", err)
 	}
 }

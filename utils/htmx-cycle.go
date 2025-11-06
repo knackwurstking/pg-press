@@ -19,17 +19,17 @@ func HXGetCycleEditDialog(toolID models.ToolID, cycleID *models.CycleID, toolCha
 		params["id"] = fmt.Sprintf("%d", *cycleID)
 	}
 
-	return buildURL("/htmx/tools/cycle/edit", params)
+	return buildURL("/htmx/dialogs/edit-cycle", params)
 }
 
 func HXPostCycleEditDialog(toolID models.ToolID) templ.SafeURL {
-	return buildURL("/htmx/tools/cycle/edit", map[string]string{
+	return buildURL("/htmx/dialogs/edit-cycle", map[string]string{
 		"tool_id": fmt.Sprintf("%d", toolID),
 	})
 }
 
 func HXPutCycleEditDialog(cycleID models.CycleID) templ.SafeURL {
-	return buildURL("/htmx/tools/cycle/edit", map[string]string{
+	return buildURL("/htmx/dialogs/edit-cycle", map[string]string{
 		"id": fmt.Sprintf("%d", cycleID),
 	})
 }

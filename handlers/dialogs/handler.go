@@ -46,6 +46,10 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-note", h.GetEditNote),
 		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-note", h.PostEditNote),
 		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-note", h.PutEditNote),
+
+		// Edit regeneration dialog
+		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-regeneration", h.GetEditRegeneration),
+		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-regeneration", h.PutEditRegeneration),
 	})
 }
 
@@ -655,6 +659,81 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 	}
 
 	// Trigger reload of notes sections
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+func (h *Handler) GetEditRegeneration(c echo.Context) error {
+	rid, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to parse regeneration id")
+	}
+	regenerationID := models.RegenerationID(rid)
+
+	regeneration, err := h.registry.ToolRegenerations.Get(regenerationID)
+	if err != nil {
+		return utils.HandleError(err, "get regeneration failed")
+	}
+
+	resolvedRegeneration, err := services.ResolveRegeneration(h.registry, regeneration)
+	if err != nil {
+		return err
+	}
+
+	dialog := components.PageTool_DialogEditRegeneration(resolvedRegeneration)
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return utils.HandleError(err, "render dialog failed")
+	}
+
+	return nil
+}
+
+func (h *Handler) PutEditRegeneration(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	var regenerationID models.RegenerationID
+	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
+		return utils.HandleBadRequest(err, "failed to get the regeneration id from url query")
+	} else {
+		regenerationID = models.RegenerationID(id)
+	}
+
+	var regeneration *models.ResolvedRegeneration
+	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
+		return utils.HandleError(err, "failed to get regeneration before deleting")
+	} else {
+		regeneration, err = services.ResolveRegeneration(h.registry, r)
+
+		formData := getEditRegenerationFormData(c)
+		regeneration.Reason = formData.Reason
+	}
+
+	err = h.registry.ToolRegenerations.Update(regeneration.Regeneration, user)
+	if err != nil {
+		return utils.HandleError(err, "failed to update regeneration")
+	}
+
+	{ // Create Feed
+		title := "Werkzeug Regenerierung aktualisiert"
+		content := fmt.Sprintf(
+			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+			regeneration.GetTool().String(),
+			regeneration.GetCycle().Date.Format(env.DateFormat),
+			regeneration.GetCycle().PartialCycles,
+		)
+
+		if regeneration.Reason != "" {
+			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+		}
+
+		h.createFeed(title, content, user.TelegramID)
+	}
+
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil

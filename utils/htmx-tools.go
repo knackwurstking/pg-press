@@ -35,20 +35,20 @@ func HXGetToolsPageAllToolsSectionContent() templ.SafeURL {
 
 func HXGetToolEditDialog(toolID *models.ToolID) templ.SafeURL {
 	if toolID == nil {
-		return buildURL("/htmx/tools/edit", nil)
+		return buildURL("/htmx/dialogs/edit-tool", nil)
 	}
 
-	return buildURL("/htmx/tools/edit", map[string]string{
+	return buildURL("/htmx/dialogs/edit-tool", map[string]string{
 		"id": fmt.Sprintf("%d", *toolID),
 	})
 }
 
 func HXPostToolEditDialog() templ.SafeURL {
-	return buildURL("/htmx/tools/edit", nil)
+	return buildURL("/htmx/dialogs/edit-tool", nil)
 }
 
 func HXPutToolEditDialog(toolID models.ToolID) templ.SafeURL {
-	return buildURL("/htmx/tools/edit", map[string]string{
+	return buildURL("/htmx/dialogs/edit-tool", map[string]string{
 		"id": fmt.Sprintf("%d", toolID),
 	})
 }

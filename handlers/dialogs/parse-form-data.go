@@ -28,6 +28,10 @@ type DialogEditToolFormData struct {
 	Press    *models.PressNumber
 }
 
+type DialogEditToolRegenerationFormData struct {
+	Reason string
+}
+
 func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 	form := &DialogEditCycleFormData{}
 
@@ -223,4 +227,10 @@ func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
 	}
 
 	return note, nil
+}
+
+func getEditRegenerationFormData(c echo.Context) *DialogEditToolRegenerationFormData {
+	return &DialogEditToolRegenerationFormData{
+		Reason: c.FormValue("reason"),
+	}
 }
