@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/knackwurstking/pg-press/handlers/auth"
+	"github.com/knackwurstking/pg-press/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/handlers/editor"
 	"github.com/knackwurstking/pg-press/handlers/feed"
 	"github.com/knackwurstking/pg-press/handlers/help"
@@ -40,6 +41,7 @@ func RegisterAll(r *services.Registry, e *echo.Echo) {
 	tools.NewHandler(r).RegisterRoutes(e)
 	tool.NewHandler(r).RegisterRoutes(e)
 	press.NewHandler(r).RegisterRoutes(e)
+	dialogs.NewHandler(r).RegisterRoutes(e)
 }
 
 func StartWsFeedHandler(r *services.Registry) *wsfeed.Handler {
