@@ -112,7 +112,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 		return utils.HandleError(err, "failed to get press utilization")
 	}
 
-	section := components.PageTools_SectionPress(pressUtilization)
+	section := components.SectionPress(pressUtilization)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render press section")
 	}
@@ -147,7 +147,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		tools = append(tools, models.NewResolvedTool(t, bindingTool, notes))
 	}
 
-	section := components.PageTools_SectionTools(tools)
+	section := components.SectionTools(tools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render tools section")
 	}
@@ -167,7 +167,7 @@ func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 		return utils.HandleError(err, "failed to get overlapping tools")
 	}
 
-	section := components.PageTools_AdminOverlappingToolsSectionContent(overlappingTools)
+	section := components.AdminOverlappingToolsSectionContent(overlappingTools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render admin overlapping tools section")
 	}

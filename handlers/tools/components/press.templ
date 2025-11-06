@@ -1,0 +1,98 @@
+package components
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ SectionPress(pressUtilization []models.PressUtilization) {
+	<span
+		hx-get={ utils.HXGetToolsPagePressSectionContent() }
+		hx-trigger="pageLoaded from:body"
+		hx-target="#section-press"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	></span>
+	<summary>
+		<h4>
+			<i class="bi bi-gear-fill mr"></i>
+			Eingebaute Werkzeuge
+		</h4>
+	</summary>
+	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
+		for _, u := range pressUtilization {
+			{{
+				var (
+					top         string
+					topCassette string
+					bottom      string
+				)
+
+				for _, t := range u.Tools {
+					switch t.Position {
+					case models.PositionTop:
+						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					case models.PositionTopCassette:
+						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					case models.PositionBottom:
+						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					}
+				}
+			}}
+			@listPressItem(pageTools_SectionPress_ListItemProps{
+				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
+				Top:         top,
+				TopCassette: topCassette,
+				Bottom:      bottom,
+				Href:        fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
+			})
+		}
+	</ul>
+}
+
+templ listPressItem(props pageTools_SectionPress_ListItemProps) {
+	<li title={ props.Title }>
+		<a
+			role="button"
+			href={ props.Href }
+			class="outline contrast flex justify-between items-center"
+		>
+			<span class="flex flex-col gap-lg w-full">
+				<h5>{ props.Title }</h5>
+				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
+					if props.Top != "" || props.TopCassette != "" {
+						<!-- Upper Tool -->
+						<span class="flex flex-col gap-sm">
+							if props.Top != "" {
+								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+									@components.PositionBadge(
+										models.PositionTop, "primary text-bold",
+									)
+									<small class="text-sm">{ props.Top }</small>
+								</span>
+							}
+							if props.TopCassette != "" {
+								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+									@components.PositionBadge(
+										models.PositionTopCassette, "primary text-bold",
+									)
+									<small class="text-sm">{ props.TopCassette }</small>
+								</span>
+							}
+						</span>
+					}
+					if props.Bottom != "" {
+						<!-- Lower Tool -->
+						<span class="flex flex-col justify-center items-start gap-sm">
+							@components.PositionBadge(models.PositionBottom, "primary text-bold")
+							<small class="text-sm">{ props.Bottom }</small>
+						</span>
+					}
+				</span>
+			</span>
+			<i class="bi bi-chevron-right"></i>
+		</a>
+	</li>
+}
