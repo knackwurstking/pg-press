@@ -46,9 +46,8 @@ templ metaTags() {
 
 templ links() {
 	<link rel="icon" href={ ui.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
-	<link rel="icon" href={ ui.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
 	<link rel="apple-touch-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
-	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#b8bb26"/>
+	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/maskable-icon-512x512.png") } color="#b8bb26"/>
 	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
 	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
 	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
