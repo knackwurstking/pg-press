@@ -6,6 +6,8 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
+	"net/http"
 )
 
 type PageToolProps struct {
@@ -670,18 +672,11 @@ templ PageTool_Notes(tool *models.ResolvedTool) {
 }
 
 templ PageTool_DialogEditRegeneration(r *models.ResolvedRegeneration) {
-	{{
-		var (
-			baseType         = "PUT"
-			submitButtonText = "Aktualisieren"
-			baseHref         = utils.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID)
-		)
-	}}
-	@components.BaseDialog(components.BaseDialogProps{
-		Type:             baseType,
-		Href:             baseHref,
+	@ui.Dialog(ui.DialogProps{
+		Method:           http.MethodPut,
+		Href:             utils.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID),
 		ID:               "regeneration-edit-dialog",
-		SubmitButtonText: submitButtonText,
+		SubmitButtonText: "Aktualisieren",
 	}) {
 		<section>
 			<p>Tool: { r.GetTool().String() }</p>

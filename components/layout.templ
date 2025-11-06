@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 )
 
 type LayoutOptions struct {
@@ -45,20 +45,20 @@ templ metaTags() {
 }
 
 templ links() {
-	<link rel="icon" href={ utils.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
-	<link rel="icon" href={ utils.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
-	<link rel="apple-touch-icon" href={ utils.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
-	<link rel="mask-icon" href={ utils.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#b8bb26"/>
-	<link rel="manifest" href={ utils.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
-	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
-	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
-	<link rel="stylesheet" href={ utils.AssetURL(env.ServerPathPrefix, "/css/main-layout.css") }/>
+	<link rel="icon" href={ ui.AssetURL(env.ServerPathPrefix, "/favicon.ico") } sizes="any"/>
+	<link rel="icon" href={ ui.AssetURL(env.ServerPathPrefix, "/icon.png") } type="image/png"/>
+	<link rel="apple-touch-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
+	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/icon.png") } color="#b8bb26"/>
+	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/main-layout.css") }/>
 }
 
 templ scripts() {
-	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
-	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
-	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/main-layout.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/main-layout.js") }></script>
 }
 
 templ appBar(title string, navContent templ.Component) {

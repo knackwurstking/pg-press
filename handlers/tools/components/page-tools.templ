@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"time"
 )
 
@@ -57,7 +58,7 @@ templ PageTools() {
 }
 
 templ pageTools_additionalHead() {
-	<script src={ utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
 	<style>
 		#section-tools-list {
 			min-height: 100vh;

@@ -2,12 +2,13 @@ package components
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 )
 
 type DialogEditToolCycleProps struct {
@@ -23,19 +24,19 @@ type DialogEditToolCycleProps struct {
 templ DialogEditToolCycle(props *DialogEditToolCycleProps) {
 	{{
 		var (
-			baseType         = "POST"
+			method           = http.MethodPost
 			submitButtonText = "Erstellen"
 			baseHref         = utils.HXPostCycleEditDialog(props.Tool.ID)
 		)
 
 		if props.CycleID > 0 {
-			baseType = "PUT"
+			method = http.MethodPut
 			submitButtonText = "Aktualisieren"
 			baseHref = utils.HXPutCycleEditDialog(props.CycleID)
 		}
 	}}
-	@components.BaseDialog(components.BaseDialogProps{
-		Type:             baseType,
+	@ui.Dialog(ui.DialogProps{
+		Method:           method,
 		Href:             baseHref,
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: submitButtonText,

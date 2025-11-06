@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"io"
 )
 
@@ -57,7 +58,7 @@ templ PageTroubleReports() {
 templ additionalHeadTroubleReportsPage() {
 	<link
 		rel="stylesheet"
-		href={ utils.AssetURL(env.ServerPathPrefix, "/css/page-trouble-reports.css") }
+		href={ ui.AssetURL(env.ServerPathPrefix, "/css/page-trouble-reports.css") }
 	/>
 	<script>
 		var searchTimer;

@@ -9,9 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
+	"net/http"
 )
 
 type DialogEditNoteProps struct {
@@ -42,12 +43,12 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		baseType := "POST"
+		method := http.MethodPost
 		submitButtonText := "Erstellen"
 		baseHref := utils.HXPostNotesEditDialog(props.LinkToTables...)
 
 		if props.Note.ID > 0 {
-			baseType = "PUT"
+			method = http.MethodPut
 			submitButtonText = "Aktualisieren"
 			baseHref = utils.HXPutNotesEditDialog(props.Note.ID, props.LinkToTables...)
 		}
@@ -100,7 +101,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Note.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 55, Col: 24}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 56, Col: 24}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -133,7 +134,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(table)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 71, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 72, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -146,7 +147,7 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(table)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 74, Col: 14}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/notes/components/dialog-edit-note.templ`, Line: 75, Col: 14}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -164,8 +165,8 @@ func DialogEditNote(props DialogEditNoteProps) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = components.BaseDialog(components.BaseDialogProps{
-			Type:             baseType,
+		templ_7745c5c3_Err = ui.Dialog(ui.DialogProps{
+			Method:           method,
 			Href:             baseHref,
 			ID:               "notes-edit-dialog",
 			SubmitButtonText: submitButtonText,

@@ -14,6 +14,7 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"time"
 )
 
@@ -141,9 +142,9 @@ func pageTools_additionalHead() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(utils.AssetURL(env.ServerPathPrefix, "/js/page-tools.js"))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/page-tools.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 60, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 61, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -185,7 +186,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolOverlappingTools())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 70, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 71, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -208,7 +209,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 99, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 100, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -226,7 +227,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(tool.ToolCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 108, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 109, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -258,7 +259,7 @@ func PageTools_AdminOverlappingToolsSectionContent(overlappingTools []*models.Ov
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", instance.PressNumber))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 127, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 128, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 					if templ_7745c5c3_Err != nil {
@@ -338,7 +339,7 @@ func PageTools_SectionPress(pressUtilization []models.PressUtilization) templ.Co
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolsPagePressSectionContent())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 153, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 154, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -413,7 +414,7 @@ func pageTools_sectionPress_listItem(props pageTools_SectionPress_ListItemProps)
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 196, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 197, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -426,7 +427,7 @@ func pageTools_sectionPress_listItem(props pageTools_SectionPress_ListItemProps)
 		var templ_7745c5c3_Var14 templ.SafeURL
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(props.Href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 199, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 200, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -439,7 +440,7 @@ func pageTools_sectionPress_listItem(props pageTools_SectionPress_ListItemProps)
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 203, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 204, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -512,7 +513,7 @@ func pageTools_sectionPress_renderTopTools(top, cassette string) templ.Component
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(top)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 226, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 227, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -541,7 +542,7 @@ func pageTools_sectionPress_renderTopTools(top, cassette string) templ.Component
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(cassette)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 234, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 235, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -596,7 +597,7 @@ func pageTools_sectionPress_renderBottomTools(bottom string) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(bottom)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 244, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 245, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -638,7 +639,7 @@ func PageTools_SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolsPageAllToolsSectionContent())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 250, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 251, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -651,7 +652,7 @@ func PageTools_SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s", PageTools_IDSectionToolsList))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 252, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 253, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -672,7 +673,7 @@ func PageTools_SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolEditDialog(nil))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 267, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 268, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -726,7 +727,7 @@ func pageTools_sectionTools_Filter(tools []*models.ResolvedTool) templ.Component
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(PageTools_IDToolsFilter)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 290, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 291, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -819,7 +820,7 @@ func pageTools_toolsList_listItem(id models.ToolID, tool *models.ResolvedTool) t
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tool-%d", id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 322, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 323, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {

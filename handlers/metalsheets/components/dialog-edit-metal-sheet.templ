@@ -2,9 +2,10 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
+	"net/http"
 )
 
 type DialogEditMetalSheetProps struct {
@@ -14,19 +15,19 @@ type DialogEditMetalSheetProps struct {
 
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
-		baseType := "POST"
+		method := http.MethodPost
 		baseHref := utils.HXPostMetalSheetEditDialog(props.Tool.ID)
 		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
-			baseType = "PUT"
+			method = http.MethodPut
 			baseHref = utils.HXPutMetalSheetEditDialog(props.MetalSheet.ID)
 			submitButtonText = "Aktualisieren"
 		}
 	}}
-	@components.BaseDialog(components.BaseDialogProps{
+	@ui.Dialog(ui.DialogProps{
 		ID:               "metal-sheet-edit-dialog",
-		Type:             baseType,
+		Method:           method,
 		Href:             baseHref,
 		SubmitButtonText: submitButtonText,
 	}) {

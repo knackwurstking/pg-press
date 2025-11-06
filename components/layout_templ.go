@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 )
 
 type LayoutOptions struct {
@@ -159,9 +159,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 templ.SafeURL
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/favicon.ico"))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/favicon.ico"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 48, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 48, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -172,9 +172,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 templ.SafeURL
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/icon.png"))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/icon.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 49, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -185,9 +185,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 templ.SafeURL
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png"))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 50, Col: 106}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 50, Col: 103}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -198,9 +198,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 templ.SafeURL
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/icon.png"))
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/icon.png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 51, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 51, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -211,9 +211,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 templ.SafeURL
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/manifest.json"))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/manifest.json"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 52, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -224,9 +224,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 templ.SafeURL
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css"))
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 53, Col: 99}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 53, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -237,9 +237,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 templ.SafeURL
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/css/ui.min.css"))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/css/ui.min.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 54, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 54, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -250,9 +250,9 @@ func links() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 templ.SafeURL
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(utils.AssetURL(env.ServerPathPrefix, "/css/main-layout.css"))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(ui.AssetURL(env.ServerPathPrefix, "/css/main-layout.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 55, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 55, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -292,9 +292,9 @@ func scripts() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(utils.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js"))
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 59, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 59, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -305,9 +305,9 @@ func scripts() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(utils.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js"))
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 60, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 60, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -318,9 +318,9 @@ func scripts() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(utils.AssetURL(env.ServerPathPrefix, "/js/main-layout.js"))
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/main-layout.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 61, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/layout.templ`, Line: 61, Col: 70}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {

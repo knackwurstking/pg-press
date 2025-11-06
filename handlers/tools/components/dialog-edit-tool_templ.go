@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 )
 
 type DialogEditToolProps struct {
@@ -46,12 +46,12 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 
-		baseType := "POST"
+		method := "POST"
 		baseHref := utils.HXPostToolEditDialog()
 		submitButtonText := "Erstellen"
 
 		if props.Tool != nil && props.Tool.ID > 0 {
-			baseType = "PUT"
+			method = "PUT"
 			baseHref = utils.HXPutToolEditDialog(props.Tool.ID)
 			submitButtonText = "Aktualisieren"
 		}
@@ -284,8 +284,8 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = components.BaseDialog(components.BaseDialogProps{
-			Type:             baseType,
+		templ_7745c5c3_Err = ui.Dialog(ui.DialogProps{
+			Method:           method,
 			Href:             baseHref,
 			ID:               "tool-edit-dialog",
 			SubmitButtonText: submitButtonText,
