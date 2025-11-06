@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/handlers/dialogs/components"
@@ -35,6 +36,16 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-tool", h.GetEditTool),
 		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-tool", h.PostEditTool),
 		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-tool", h.PutEditTool),
+
+		// Edit metal sheet dialog
+		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-metal-sheet", h.GetEditMetalSheet),
+		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-metal-sheet", h.PostEditMetalSheet),
+		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-metal-sheet", h.PutEditMetalSheet),
+
+		// Edit note dialog
+		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-note", h.GetEditNote),
+		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-note", h.PostEditNote),
+		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-note", h.PutEditNote),
 	})
 }
 
@@ -394,9 +405,337 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	return nil
 }
 
+func (h *Handler) GetEditMetalSheet(c echo.Context) error {
+	renderProps := &components.DialogEditMetalSheetProps{}
+	var toolID models.ToolID
+	var err error
+
+	// Check if we're editing an existing metal sheet (has ID) or creating new one
+	if metalSheetIDQuery, _ := utils.ParseQueryInt64(c, "id"); metalSheetIDQuery > 0 {
+		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
+
+		// Fetch existing metal sheet for editing
+		if renderProps.MetalSheet, err = h.registry.MetalSheets.Get(metalSheetID); err != nil {
+			return utils.HandleError(err, "failed to fetch metal sheet from database")
+		}
+		toolID = renderProps.MetalSheet.ToolID
+	} else {
+		// Creating new metal sheet, get tool_id from query
+		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
+		if err != nil {
+			return utils.HandleError(err, "failed to get the tool id from query")
+		}
+		toolID = models.ToolID(toolIDQuery)
+	}
+
+	// Fetch the associated tool for the dialog
+	if renderProps.Tool, err = h.registry.Tools.Get(toolID); err != nil {
+		return utils.HandleError(err, "failed to get tool from database")
+	}
+
+	// Render the edit dialog template
+	d := components.DialogEditMetalSheet(renderProps)
+	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
+		return utils.HandleError(err, "failed to render edit metal sheet dialog")
+	}
+
+	return nil
+}
+
+func (h *Handler) PostEditMetalSheet(c echo.Context) error {
+	// Get current user for feed creation
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	// Extract tool ID from query parameters
+	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
+	if err != nil {
+		return utils.HandleError(err, "failed to get tool_id from query")
+	}
+	toolID := models.ToolID(toolIDQuery)
+
+	// Fetch the associated tool
+	tool, err := h.registry.Tools.Get(toolID)
+	if err != nil {
+		return utils.HandleError(err, "failed to get tool from database")
+	}
+
+	// Parse form data into metal sheet model
+	metalSheet, err := getMetalSheetFormData(c)
+	if err != nil {
+		return utils.HandleError(err, "failed to parse metal sheet form data")
+	}
+
+	// Associate metal sheet with the tool
+	metalSheet.ToolID = toolID
+
+	// Save new metal sheet to database
+	if _, err := h.registry.MetalSheets.Add(metalSheet); err != nil {
+		return utils.HandleError(err, "failed to create metal sheet in database")
+	}
+
+	h.createNewMetalSheetFeed(user, tool, metalSheet)
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+func (h *Handler) PutEditMetalSheet(c echo.Context) error {
+	// Get current user for feed creation
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	// Extract metal sheet ID from query parameters
+	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get id from query")
+	}
+	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
+
+	// Fetch the existing metal sheet to preserve ID and tool association
+	existingSheet, err := h.registry.MetalSheets.Get(metalSheetID)
+	if err != nil {
+		return utils.HandleError(err, "failed to get existing metal sheet from database")
+	}
+
+	// Fetch the associated tool for feed creation
+	tool, err := h.registry.Tools.Get(existingSheet.ToolID)
+	if err != nil {
+		return utils.HandleError(err, "failed to get tool from database")
+	}
+
+	// Parse updated form data
+	metalSheet, err := getMetalSheetFormData(c)
+	if err != nil {
+		return utils.HandleError(err, "failed to parse metal sheet form data")
+	}
+
+	// Preserve the original ID and tool association
+	metalSheet.ID = existingSheet.ID
+	metalSheet.ToolID = existingSheet.ToolID
+
+	// Update the metal sheet in database
+	if err := h.registry.MetalSheets.Update(metalSheet); err != nil {
+		return utils.HandleError(err, "failed to update metal sheet in database")
+	}
+
+	h.createUpdateMetalSheetFeed(user, tool, existingSheet, metalSheet)
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+func (h *Handler) GetEditNote(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	props := &components.DialogEditNoteProps{
+		Note:         &models.Note{}, // Default empty note for creation
+		LinkToTables: []string{},
+		User:         user,
+	}
+
+	// Parse linked tables from query parameter
+	if linkToTables := c.QueryParam("link_to_tables"); linkToTables != "" {
+		props.LinkToTables = strings.Split(linkToTables, ",")
+	}
+
+	// Check if we're editing an existing note
+	if idq, _ := utils.ParseQueryInt64(c, "id"); idq > 0 {
+		noteID := models.NoteID(idq)
+
+		slog.Debug("Opening edit dialog for note", "note", noteID)
+
+		note, err := h.registry.Notes.Get(noteID)
+		if err != nil {
+			return utils.HandleError(err, "failed to get note from database")
+		}
+		props.Note = note
+	} else {
+		slog.Debug("Opening create dialog for new note")
+	}
+
+	dialog := components.DialogEditNote(*props)
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return utils.HandleError(err, "failed to render edit note dialog")
+	}
+
+	return nil
+}
+
+func (h *Handler) PostEditNote(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleError(err, "failed to get user from context")
+	}
+
+	slog.Debug("Creating a new note", "user_name", user.Name)
+
+	note, err := getNoteFromFormData(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to parse note form data")
+	}
+
+	// Create the note
+	noteID, err := h.registry.Notes.Add(note)
+	if err != nil {
+		return utils.HandleError(err, "failed to create note")
+	}
+
+	slog.Info("Created note", "note", noteID, "user_name", user.Name)
+
+	// Create feed entry
+	title := "Neue Notiz erstellt"
+	content := fmt.Sprintf("Eine neue Notiz wurde erstellt: %s", note.Content)
+
+	// Add linked info if any
+	if note.Linked != "" {
+		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.registry.Feeds.Add(feed); err != nil {
+		slog.Error("Failed to create feed for cycle creation", "error", err)
+	}
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+func (h *Handler) PutEditNote(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleError(err, "failed to get user from context")
+	}
+
+	idq, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to parse note ID")
+	}
+	noteID := models.NoteID(idq)
+
+	slog.Debug("Updating note", "note", noteID, "user_name", user.Name)
+
+	note, err := getNoteFromFormData(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to parse note form data")
+	}
+
+	// Set the ID for update
+	note.ID = noteID
+
+	// Update the note
+	if err := h.registry.Notes.Update(note); err != nil {
+		return utils.HandleError(err, "failed to update note")
+	}
+
+	slog.Info("Updated note", "user_name", user.Name, "note", noteID)
+
+	// Create feed entry
+	title := "Notiz aktualisiert"
+	content := fmt.Sprintf("Eine Notiz wurde aktualisiert: %s", note.Content)
+
+	// Add linked info if any
+	if note.Linked != "" {
+		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
+	}
+
+	feed := models.NewFeed(title, content, user.TelegramID)
+	if err := h.registry.Feeds.Add(feed); err != nil {
+		slog.Error("Failed to create feed for cycle creation", "error", err)
+	}
+
+	// Trigger reload of notes sections
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
 	feed := models.NewFeed(title, content, userID)
 	if err := h.registry.Feeds.Add(feed); err != nil {
 		slog.Error("Failed to create feed", "error", err)
+	}
+}
+
+func (h *Handler) createNewMetalSheetFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet) {
+	// Build base feed content with tool and metal sheet info
+	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm\nTyp: %s",
+		tool.String(), metalSheet.TileHeight, metalSheet.Value, metalSheet.Identifier.String())
+
+	// Add additional fields for bottom position tools
+	if tool.Position == models.PositionBottom {
+		content += fmt.Sprintf("\nMarke: %d mm\nStf.: %.1f\nStf. Max: %.1f",
+			metalSheet.MarkeHeight, metalSheet.STF, metalSheet.STFMax)
+	}
+
+	// Create and save the feed entry
+	feed := models.NewFeed("Blech erstellt", content, user.TelegramID)
+	if err := h.registry.Feeds.Add(feed); err != nil {
+		slog.Error("Failed to create feed", "error", err)
+	}
+}
+
+func (h *Handler) createUpdateMetalSheetFeed(user *models.User, tool *models.Tool, oldSheet, newSheet *models.MetalSheet) {
+	content := fmt.Sprintf("Werkzeug: %s", tool.String())
+
+	// Check for changes in TileHeight
+	if oldSheet.TileHeight != newSheet.TileHeight {
+		content += fmt.Sprintf("\nStärke: %.1f mm → %.1f mm", oldSheet.TileHeight, newSheet.TileHeight)
+	} else {
+		content += fmt.Sprintf("\nStärke: %.1f mm", newSheet.TileHeight)
+	}
+
+	// Check for changes in Value
+	if oldSheet.Value != newSheet.Value {
+		content += fmt.Sprintf("\nBlech: %.1f mm → %.1f mm", oldSheet.Value, newSheet.Value)
+	} else {
+		content += fmt.Sprintf("\nBlech: %.1f mm", newSheet.Value)
+	}
+
+	// Check for changes in machine type
+	if oldSheet.Identifier != newSheet.Identifier {
+		content += fmt.Sprintf("\nTyp: %s → %s", oldSheet.Identifier.String(), newSheet.Identifier.String())
+	} else {
+		content += fmt.Sprintf("\nTyp: %s", newSheet.Identifier.String())
+	}
+
+	// Add additional fields for bottom position tools
+	if tool.Position == models.PositionBottom {
+		// Check for changes in MarkeHeight
+		if oldSheet.MarkeHeight != newSheet.MarkeHeight {
+			content += fmt.Sprintf("\nMarke: %d mm → %d mm", oldSheet.MarkeHeight, newSheet.MarkeHeight)
+		} else {
+			content += fmt.Sprintf("\nMarke: %d mm", newSheet.MarkeHeight)
+		}
+
+		// Check for changes in STF
+		if oldSheet.STF != newSheet.STF {
+			content += fmt.Sprintf("\nStf.: %.1f → %.1f", oldSheet.STF, newSheet.STF)
+		} else {
+			content += fmt.Sprintf("\nStf.: %.1f", newSheet.STF)
+		}
+
+		// Check for changes in STFMax
+		if oldSheet.STFMax != newSheet.STFMax {
+			content += fmt.Sprintf("\nStf. Max: %.1f → %.1f", oldSheet.STFMax, newSheet.STFMax)
+		} else {
+			content += fmt.Sprintf("\nStf. Max: %.1f", newSheet.STFMax)
+		}
+	}
+
+	// Create and save the feed entry
+	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
+	if err := h.registry.Feeds.Add(feed); err != nil {
+		slog.Error("Failed to create update feed", "error", err)
 	}
 }

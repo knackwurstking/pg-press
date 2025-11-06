@@ -138,3 +138,89 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 
 	return data, nil
 }
+
+func getMetalSheetFormData(c echo.Context) (*models.MetalSheet, error) {
+	metalSheet := &models.MetalSheet{}
+
+	// Parse required tile height field
+	tileHeight, err := strconv.ParseFloat(c.FormValue("tile_height"), 64)
+	if err != nil {
+		return nil, err
+	}
+	metalSheet.TileHeight = tileHeight
+
+	// Parse required value field
+	value, err := strconv.ParseFloat(c.FormValue("value"), 64)
+	if err != nil {
+		return nil, err
+	}
+	metalSheet.Value = value
+
+	// Parse optional marke height field
+	if markeHeightStr := c.FormValue("marke_height"); markeHeightStr != "" {
+		if markeHeight, err := strconv.Atoi(markeHeightStr); err == nil {
+			metalSheet.MarkeHeight = markeHeight
+		}
+	}
+
+	// Parse optional STF field
+	if stfStr := c.FormValue("stf"); stfStr != "" {
+		if stf, err := strconv.ParseFloat(stfStr, 64); err == nil {
+			metalSheet.STF = stf
+		}
+	}
+
+	// Parse optional STF Max field
+	if stfMaxStr := c.FormValue("stf_max"); stfMaxStr != "" {
+		if stfMax, err := strconv.ParseFloat(stfMaxStr, 64); err == nil {
+			metalSheet.STFMax = stfMax
+		}
+	}
+
+	// Parse identifier field with validation
+	identifierStr := c.FormValue("identifier")
+	if machineType, err := models.ParseMachineType(identifierStr); err == nil {
+		metalSheet.Identifier = machineType
+	} else {
+		// Log the invalid value but don't fail - default to SACMI
+		metalSheet.Identifier = models.MachineTypeSACMI // Default to SACMI
+	}
+
+	return metalSheet, nil
+}
+
+func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
+	note = &models.Note{}
+
+	// Parse level
+	levelStr := c.FormValue("level")
+	if levelStr == "" {
+		return nil, fmt.Errorf("level is required")
+	}
+
+	levelInt, err := strconv.Atoi(levelStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid level format: %v", err)
+	}
+
+	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
+	if levelInt < 0 || levelInt > 2 {
+		return nil, fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt)
+	}
+
+	note.Level = models.Level(levelInt)
+
+	// Parse content
+	note.Content = strings.TrimSpace(c.FormValue("content"))
+	if note.Content == "" {
+		return nil, fmt.Errorf("content is required")
+	}
+
+	// Handle linked field - get first linked_tables value or empty string
+	linkedTables := c.Request().Form["linked_tables"]
+	if len(linkedTables) > 0 {
+		note.Linked = linkedTables[0]
+	}
+
+	return note, nil
+}

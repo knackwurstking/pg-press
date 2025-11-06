@@ -42,3 +42,5 @@
 - [ ] Organize dialogs into a dedicated package for better management.
   - [ ] Edit cycle dialog: changed server path
   - [ ] Edit tool dialog: changed server path
+  - [ ] Edit metal sheet dialog: changed server path
+  - [ ] Edit note dialog: changed server path
