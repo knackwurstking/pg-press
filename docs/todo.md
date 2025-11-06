@@ -37,4 +37,5 @@
 
 - [x] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag.
 
-- [ ] Change the base dialogs' error handling, see picow-led project.
+- [ ] Utilize the Dialog and AssetURL functionalities provided by the ui library.
+- [ ] Organize dialogs into a dedicated package for better management.
