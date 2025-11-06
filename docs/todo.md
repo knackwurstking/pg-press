@@ -37,5 +37,7 @@
 
 - [x] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag.
 
-- [ ] Utilize the Dialog and AssetURL functionalities provided by the ui library.
+- [x] Utilize the Dialog and AssetURL functionalities provided by the ui library.
+
 - [ ] Organize dialogs into a dedicated package for better management.
+  - [ ] Edit cycle dialog changed server path

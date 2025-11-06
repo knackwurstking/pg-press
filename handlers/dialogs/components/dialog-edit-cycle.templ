@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/ui"
 )
 
-type DialogEditToolCycleProps struct {
+type DialogEditCycleProps struct {
 	Tool             *models.Tool
 	CycleID          models.CycleID
 	InputTotalCycles int64
@@ -21,7 +21,7 @@ type DialogEditToolCycleProps struct {
 	AvailableTools   []*models.Tool
 }
 
-templ DialogEditToolCycle(props *DialogEditToolCycleProps) {
+templ DialogEditCycle(props *DialogEditCycleProps) {
 	{{
 		var (
 			method           = http.MethodPost
