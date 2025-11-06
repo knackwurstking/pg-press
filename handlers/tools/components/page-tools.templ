@@ -3,24 +3,12 @@ package components
 import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/knackwurstking/ui"
 )
 
-const (
-	PageTools_IDToolsFilter      = "tools-filter"
-	PageTools_IDSectionToolsList = "section-tools-list"
-)
-
-type pageTools_SectionPress_ListItemProps struct {
-	Title       string
-	Top         string
-	TopCassette string
-	Bottom      string
-	Href        string
-}
-
-templ PageTools() {
+templ PageTools(user *models.User) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Werkzeuge",
@@ -30,35 +18,41 @@ templ PageTools() {
 		},
 	) {
 		<main class="container fluid">
-			<div class="flex flex-col gap">
-				@components.HXDetails(
-					utils.HXGetToolOverlappingTools(),
-					"section-admin-overlapping-tools",
-					"bi-exclamation-triangle",
-					"Admin Tools: Werkzeug-Überschneidungen",
-				)
-				@components.HXDetails(
-					utils.HXGetToolsPagePressSectionContent(),
-					"section-press",
-					"bi-gear-fill",
-					"Eingebaute Werkzeuge",
-				)
-				@components.HXDetails(
-					utils.HXGetToolsPageAllToolsSectionContent(),
-					PageTools_IDSectionToolsList,
-					"bi-archive",
-					"Alle Werkzeuge",
-				)
+			<div class="tabs">
+				if user.IsAdmin() {
+					<div
+						class="tab"
+						hx-get={ utils.HxGetToolsPageAdminTools() }
+						hx-trigger="click"
+						hx-target={ IDTabContent }
+						hx-on::response-error="alert(event.detail.xhr.responseText)"
+					>Admin Tools</div>
+				}
+				<div
+					class="tab"
+					hx-get={ utils.HxGetToolsPagePressSection() }
+					hx-trigger="click"
+					hx-target={ IDTabContent }
+					hx-on::response-error="alert(event.detail.xhr.responseText)"
+				>Pressen</div>
+				<div
+					class="tab"
+					hx-get={ utils.HxGetToolsPageToolsSection() }
+					hx-trigger="click"
+					hx-target={ IDTabContent }
+					hx-on::response-error="alert(event.detail.xhr.responseText)"
+				>Werkzeuge</div>
+			</div>
+			<div
+				class="tab-content"
+				id={ IDTabContent }
+			>
+				@components.Spinner("100%")
 			</div>
 		</main>
 	}
 }
 
 templ additionalHead() {
-	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
-	<style>
-		#section-tools-list {
-			min-height: 100vh;
-		}
-	</style>
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/page-tools.css") }/>
 }

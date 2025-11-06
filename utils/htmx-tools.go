@@ -27,7 +27,7 @@ func HXGetToolCyclesSectionContent(toolID models.ToolID) templ.SafeURL {
 	})
 }
 
-func HXGetToolsPageAllToolsSectionContent() templ.SafeURL {
+func HxGetToolsPageToolsSection() templ.SafeURL {
 	return buildURL("/htmx/tools/section/tools", nil)
 }
 
@@ -61,7 +61,7 @@ func HXPatchToolMarkDead(toolID models.ToolID) templ.SafeURL {
 	})
 }
 
-func HXGetToolOverlappingTools() templ.SafeURL {
+func HxGetToolsPageAdminTools() templ.SafeURL {
 	return buildURL("/htmx/tools/admin/overlapping-tools", nil)
 }
 

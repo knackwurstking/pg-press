@@ -9,9 +9,9 @@ import (
 
 templ SectionTools(tools []*models.ResolvedTool) {
 	<span
-		hx-get={ utils.HXGetToolsPageAllToolsSectionContent() }
+		hx-get={ utils.HxGetToolsPageToolsSection() }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ fmt.Sprintf("#%s", PageTools_IDSectionToolsList) }
+		hx-target={ IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary>
@@ -36,11 +36,10 @@ templ SectionTools(tools []*models.ResolvedTool) {
 				<span>Erstellen</span>
 			</button>
 		</div>
-		<ul id="tools-list" class="flex flex-col gap m-t p-0" style="list-style: none;">
+		<ul id={ IDToolsList } class="flex flex-col gap m-t p-0" style="list-style: none;">
 			@ToolsList(tools)
 		</ul>
 	</div>
-	@initializeFilterInput()
 }
 
 templ sectionTools_Filter(tools []*models.ResolvedTool) {
@@ -48,8 +47,9 @@ templ sectionTools_Filter(tools []*models.ResolvedTool) {
 		<!-- Filter for Tool Format -->
 		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
 			Suche (Lazy)
+			// TODO: Initialize value from url search param "tools_filter"
 			<input
-				id={ PageTools_IDToolsFilter }
+				id={ IDToolsFilter }
 				type="search"
 				oninput="scrollFilterInputIntoView(event); filterToolsList(event);"
 				onblur="unscrollFilterInputIntoView(event);"
@@ -58,30 +58,19 @@ templ sectionTools_Filter(tools []*models.ResolvedTool) {
 			/>
 		</label>
 	</div>
-}
-
-script initializeFilterInput() {
-	setTimeout(function () {
-		var params = new URLSearchParams(window.location.search);
-
-		const input = document.querySelector(`input#${IDToolsFilter}`);
-		if (input) {
-			input.value = params.get("tools_filter");
-			filterToolsList();
-		}
-	}, 100);
+	<script>initializeFilterInput()</script>
 }
 
 templ ToolsList(tools []*models.ResolvedTool) {
 	for _, t := range tools {
 		if t.Position != models.PositionTopCassette || !t.IsBound() {
-			@toolsList_listItem(t.ID, t)
+			@toolsListItem(t.ID, t)
 		}
 	}
 }
 
-templ toolsList_listItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf("tool-%d", id) }>
+templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
+	<li id={ fmt.Sprintf(IDToolListItem, id) }>
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge:  true,
 			EnableBindingBadge: true,

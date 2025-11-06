@@ -10,9 +10,9 @@ import (
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
 	<span
-		hx-get={ utils.HXGetToolsPagePressSectionContent() }
+		hx-get={ utils.HxGetToolsPagePressSection() }
 		hx-trigger="pageLoaded from:body"
-		hx-target="#section-press"
+		hx-target={ IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary>
@@ -41,7 +41,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 					}
 				}
 			}}
-			@listPressItem(pageTools_SectionPress_ListItemProps{
+			@listPressItem(listPressItemProps{
 				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
 				Top:         top,
 				TopCassette: topCassette,
@@ -52,7 +52,15 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 	</ul>
 }
 
-templ listPressItem(props pageTools_SectionPress_ListItemProps) {
+type listPressItemProps struct {
+	Title       string
+	Top         string
+	TopCassette string
+	Bottom      string
+	Href        string
+}
+
+templ listPressItem(props listPressItemProps) {
 	<li title={ props.Title }>
 		<a
 			role="button"

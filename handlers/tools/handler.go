@@ -35,7 +35,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetToolsPage(c echo.Context) error {
-	page := components.PageTools()
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	page := components.PageTools(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render tools page")
 	}
@@ -167,7 +172,7 @@ func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 		return utils.HandleError(err, "failed to get overlapping tools")
 	}
 
-	section := components.AdminOverlappingToolsSectionContent(overlappingTools)
+	section := components.AdminToolsSectionContent(overlappingTools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render admin overlapping tools section")
 	}

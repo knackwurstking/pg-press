@@ -45,7 +45,7 @@ templ PagePress(props PagePressProps) {
 					hx-trigger="load, pageLoaded from:body"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
 				>
-					@components.Spinner()
+					@components.Spinner("5rem")
 				</div>
 			</section>
 			<br/>
@@ -60,7 +60,7 @@ templ PagePress(props PagePressProps) {
 					hx-trigger="load, pageLoaded from:body"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 				>
-					@components.Spinner()
+					@components.Spinner("5rem")
 				</div>
 			</section>
 			<br/>
@@ -74,7 +74,7 @@ templ PagePress(props PagePressProps) {
 					hx-trigger="load, pageLoaded from:body"
 					hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 				>
-					@components.Spinner()
+					@components.Spinner("5rem")
 				</div>
 			</section>
 			<br/>
@@ -98,7 +98,7 @@ templ PagePress(props PagePressProps) {
 					hx-trigger="load, pageLoaded from:body"
 					hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 				>
-					@components.Spinner()
+					@components.Spinner("5rem")
 				</div>
 			</section>
 		</main>

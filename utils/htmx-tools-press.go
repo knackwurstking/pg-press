@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func HXGetToolsPagePressSectionContent() templ.SafeURL {
+func HxGetToolsPagePressSection() templ.SafeURL {
 	return buildURL("/htmx/tools/section/press", nil)
 }
 

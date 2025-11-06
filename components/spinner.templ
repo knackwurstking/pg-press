@@ -1,7 +1,9 @@
 package components
 
-templ Spinner() {
-	<div style="height: 5rem;">
+import "fmt"
+
+templ Spinner(height string) {
+	<div style={ fmt.Sprintf("height: %s;", height) }>
 		<div class="spinner"></div>
 	</div>
 }

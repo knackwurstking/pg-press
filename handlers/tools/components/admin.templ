@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-templ AdminOverlappingToolsSectionContent(overlappingTools []*models.OverlappingTool) {
+templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 	<span
-		hx-get={ utils.HXGetToolOverlappingTools() }
+		hx-get={ utils.HxGetToolsPageAdminTools() }
 		hx-trigger="pageLoaded from:body"
-		hx-target="#section-admin-overlapping-tools"
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+		hx-target={ IDTabContent }
+		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary class="mb">
 		<h4>
