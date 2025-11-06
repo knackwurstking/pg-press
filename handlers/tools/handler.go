@@ -4,25 +4,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
-	"strings"
 
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/tools/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
 )
-
-type ToolsDialogEditForm struct {
-	Position models.Position
-	Format   models.Format
-	Type     string
-	Code     string
-	Press    *models.PressNumber
-}
 
 type Handler struct {
 	registry *services.Registry
@@ -37,9 +25,7 @@ func NewHandler(r *services.Registry) *Handler {
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		utils.NewEchoRoute(http.MethodGet, "/tools", h.GetToolsPage),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/edit", h.HTMXGetEditToolDialog),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/tools/edit", h.HTMXPostEditToolDialog),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/tools/edit", h.HTMXPutEditToolDialog),
+
 		utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.HTMXDeleteTool),
 		utils.NewEchoRoute(http.MethodPatch, "/htmx/tools/mark-dead", h.HTMXMarkToolAsDead),
 		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/section/press", h.HTMXGetSectionPress),
@@ -53,111 +39,6 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return utils.HandleError(err, "failed to render tools page")
 	}
-	return nil
-}
-
-func (h *Handler) HTMXGetEditToolDialog(c echo.Context) error {
-	props := &components.DialogEditToolProps{}
-
-	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
-	if toolIDQuery > 0 {
-		tool, err := h.registry.Tools.Get(models.ToolID(toolIDQuery))
-		if err != nil {
-			return utils.HandleError(err, "failed to get tool from database")
-		}
-
-		props.Tool = tool
-		props.InputPosition = string(tool.Position)
-		props.InputWidth = tool.Format.Width
-		props.InputHeight = tool.Format.Height
-		props.InputType = tool.Type
-		props.InputCode = tool.Code
-		props.InputPressSelection = tool.Press
-	}
-
-	dialog := components.DialogEditTool(props)
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool edit dialog")
-	}
-	return nil
-}
-
-func (h *Handler) HTMXPostEditToolDialog(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
-	}
-
-	formData, err := h.getEditToolFormData(c)
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get tool form data")
-	}
-
-	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
-	tool.SetPress(formData.Press)
-
-	id, err := h.registry.Tools.Add(tool, user)
-	if err != nil {
-		return utils.HandleError(err, "failed to add tool")
-	}
-
-	slog.Info("Created tool", "id", id, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
-
-	// Create feed entry
-	h.createToolFeed(user, tool, "Neues Werkzeug erstellt")
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
-	return nil
-}
-
-func (h *Handler) HTMXPutEditToolDialog(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
-	}
-
-	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool ID")
-	}
-	toolID := models.ToolID(toolIDQuery)
-
-	formData, err := h.getEditToolFormData(c)
-	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get tool form data")
-	}
-
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return utils.HandleError(err, "failed to get tool")
-	}
-
-	tool.Press = formData.Press
-	tool.Position = formData.Position
-	tool.Format = formData.Format
-	tool.Code = formData.Code
-	tool.Type = formData.Type
-
-	if err := h.registry.Tools.Update(tool, user); err != nil {
-		return utils.HandleError(err, "failed to update tool")
-	}
-
-	slog.Info("Updated tool", "id", tool.ID, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
-
-	// Create feed entry
-	h.createToolFeed(user, tool, "Werkzeug aktualisiert")
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
-
-	utils.SetHXAfterSettle(c, map[string]interface{}{
-		"toolUpdated": map[string]string{
-			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
-				tool.String(), tool.Position.GermanString()),
-			"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
-				tool.Position.GermanString()),
-		},
-	})
-
 	return nil
 }
 
@@ -304,67 +185,4 @@ func (h *Handler) createToolFeed(user *models.User, tool *models.Tool, title str
 	if err := h.registry.Feeds.Add(feed); err != nil {
 		slog.Error("Failed to create feed", "error", err)
 	}
-}
-
-func (h *Handler) getEditToolFormData(c echo.Context) (*ToolsDialogEditForm, error) {
-	positionStr := c.FormValue("position")
-	position := models.Position(positionStr)
-
-	switch position {
-	case models.PositionTop, models.PositionTopCassette, models.PositionBottom:
-		// Valid position
-	default:
-		return nil, errors.NewValidationError(fmt.Sprintf("invalid position: %s", positionStr))
-	}
-
-	data := &ToolsDialogEditForm{Position: position}
-
-	// Parse width
-	if widthStr := c.FormValue("width"); widthStr != "" {
-		width, err := strconv.Atoi(widthStr)
-		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid width: %v", err))
-		}
-		data.Format.Width = width
-	}
-
-	// Parse height
-	if heightStr := c.FormValue("height"); heightStr != "" {
-		height, err := strconv.Atoi(heightStr)
-		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid height: %v", err))
-		}
-		data.Format.Height = height
-	}
-
-	// Parse type
-	data.Type = strings.TrimSpace(c.FormValue("type"))
-	if len(data.Type) > 25 {
-		return nil, errors.NewValidationError("type must be 25 characters or less")
-	}
-
-	// Parse code
-	data.Code = strings.TrimSpace(c.FormValue("code"))
-	if data.Code == "" {
-		return nil, errors.NewValidationError("code is required")
-	}
-	if len(data.Code) > 25 {
-		return nil, errors.NewValidationError("code must be 25 characters or less")
-	}
-
-	// Parse press
-	if pressStr := c.FormValue("press-selection"); pressStr != "" {
-		press, err := strconv.Atoi(pressStr)
-		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid press number: %v", err))
-		}
-
-		pressNumber := models.PressNumber(press)
-		if !models.IsValidPressNumber(&pressNumber) {
-			return nil, errors.NewValidationError("invalid press number: must be 0, 2, 3, 4, or 5")
-		}
-		data.Press = &pressNumber
-	}
-
-	return data, nil
 }

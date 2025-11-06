@@ -26,10 +26,15 @@ func NewHandler(r *services.Registry) *Handler {
 
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		// Get, add or edit a cycles table entry
+		// Edit cycle dialog
 		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-cycle", h.GetEditCycle),
 		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-cycle", h.PostEditCycle),
 		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-cycle", h.PutEditCycle),
+
+		// Edit tool dialog
+		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-tool", h.GetEditTool),
+		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-tool", h.PostEditTool),
+		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-tool", h.PutEditTool),
 	})
 }
 
@@ -122,7 +127,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 	}
 
 	// Parse form data
-	form, err := getCycleFormData(c)
+	form, err := getEditCycleFormData(c)
 	if err != nil {
 		return utils.HandleBadRequest(err, "failed to parse form data")
 	}
@@ -195,7 +200,7 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		return utils.HandleError(err, "failed to get original tool")
 	}
 
-	form, err := getCycleFormData(c)
+	form, err := getEditCycleFormData(c)
 	if err != nil {
 		return utils.HandleBadRequest(err, "failed to get cycle form data from query")
 	}
@@ -261,6 +266,130 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+func (h *Handler) GetEditTool(c echo.Context) error {
+	props := &components.DialogEditToolProps{}
+
+	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
+	if toolIDQuery > 0 {
+		tool, err := h.registry.Tools.Get(models.ToolID(toolIDQuery))
+		if err != nil {
+			return utils.HandleError(err, "failed to get tool from database")
+		}
+
+		props.Tool = tool
+		props.InputPosition = string(tool.Position)
+		props.InputWidth = tool.Format.Width
+		props.InputHeight = tool.Format.Height
+		props.InputType = tool.Type
+		props.InputCode = tool.Code
+		props.InputPressSelection = tool.Press
+	}
+
+	dialog := components.DialogEditTool(props)
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+		return utils.HandleError(err, "failed to render tool edit dialog")
+	}
+	return nil
+}
+
+func (h *Handler) PostEditTool(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	formData, err := getEditToolFormData(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get tool form data")
+	}
+
+	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
+	tool.SetPress(formData.Press)
+
+	id, err := h.registry.Tools.Add(tool, user)
+	if err != nil {
+		return utils.HandleError(err, "failed to add tool")
+	}
+
+	slog.Info("Created tool", "id", id, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
+
+	// Create feed entry
+	title := "Neues Werkzeug erstellt"
+
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	h.createFeed(title, content, user.TelegramID)
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	return nil
+}
+
+func (h *Handler) PutEditTool(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get user from context")
+	}
+
+	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to parse tool ID")
+	}
+	toolID := models.ToolID(toolIDQuery)
+
+	formData, err := getEditToolFormData(c)
+	if err != nil {
+		return utils.HandleBadRequest(err, "failed to get tool form data")
+	}
+
+	tool, err := h.registry.Tools.Get(toolID)
+	if err != nil {
+		return utils.HandleError(err, "failed to get tool")
+	}
+
+	tool.Press = formData.Press
+	tool.Position = formData.Position
+	tool.Format = formData.Format
+	tool.Code = formData.Code
+	tool.Type = formData.Type
+
+	if err := h.registry.Tools.Update(tool, user); err != nil {
+		return utils.HandleError(err, "failed to update tool")
+	}
+
+	slog.Info("Updated tool", "id", tool.ID, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
+
+	// Create feed entry
+	title := "Werkzeug aktualisiert"
+
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	h.createFeed(title, content, user.TelegramID)
+
+	// Set HX headers
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	utils.SetHXAfterSettle(c, map[string]interface{}{
+		"toolUpdated": map[string]string{
+			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
+				tool.String(), tool.Position.GermanString()),
+			"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
+				tool.Position.GermanString()),
+		},
+	})
 
 	return nil
 }

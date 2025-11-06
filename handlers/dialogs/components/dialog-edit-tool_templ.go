@@ -84,7 +84,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTop)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 50, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 50, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +107,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionBottom)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 58, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 58, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -130,7 +130,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(models.PositionTopCassette)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 66, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 66, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -218,7 +218,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputWidth)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 139, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 139, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -241,7 +241,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputHeight)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 151, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 151, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -259,7 +259,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputType)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 164, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 164, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -272,7 +272,7 @@ func DialogEditTool(props *DialogEditToolProps) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(props.InputCode)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/dialog-edit-tool.templ`, Line: 174, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/dialogs/components/dialog-edit-tool.templ`, Line: 174, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {

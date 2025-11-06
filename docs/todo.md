@@ -40,4 +40,5 @@
 - [x] Utilize the Dialog and AssetURL functionalities provided by the ui library.
 
 - [ ] Organize dialogs into a dedicated package for better management.
-  - [ ] Edit cycle dialog changed server path
+  - [ ] Edit cycle dialog: changed server path
+  - [ ] Edit tool dialog: changed server path
