@@ -43,6 +43,7 @@ templ SectionTools(tools []*models.ResolvedTool) {
 }
 
 templ sectionTools_Filter(tools []*models.ResolvedTool) {
+	// TODO: Make the filter input stick to the top of the page
 	<div class="flex gap-sm flex-wrap justify-evenly">
 		<!-- Filter for Tool Format -->
 		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
@@ -51,14 +52,13 @@ templ sectionTools_Filter(tools []*models.ResolvedTool) {
 			<input
 				id={ IDToolsFilter }
 				type="search"
-				oninput="scrollFilterInputIntoView(event); filterToolsList(event);"
-				onblur="unscrollFilterInputIntoView(event);"
+				oninput="filterToolsList(event);"
 				placeholder="z.B.: kassette 120x60 mass"
 				hx-preserve="true"
 			/>
 		</label>
 	</div>
-	<script>initializeFilterInput()</script>
+	<script>initFilterInputFromQuery()</script>
 }
 
 templ ToolsList(tools []*models.ResolvedTool) {
@@ -70,7 +70,7 @@ templ ToolsList(tools []*models.ResolvedTool) {
 }
 
 templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf(IDToolListItem, id) }>
+	<li id={ fmt.Sprintf(IDToolListItem, id) } class="tool-item">
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge:  true,
 			EnableBindingBadge: true,

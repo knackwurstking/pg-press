@@ -18,13 +18,14 @@ templ PageTools(user *models.User) {
 		},
 	) {
 		<main class="container fluid">
+			// TODO: Make ".tabs" stick to the top of the page
 			<div class="tabs">
 				if user.IsAdmin() {
 					<div
 						data-index="0"
 						class="tab secondary ghost"
 						hx-get={ utils.HxGetToolsPageAdminTools() }
-						hx-trigger="click"
+						hx-trigger="loadTabContent"
 						hx-target={ "#" + IDTabContent }
 						hx-on::response-error="alert(event.detail.xhr.responseText)"
 						onclick="toggleTab(event)"
@@ -34,7 +35,7 @@ templ PageTools(user *models.User) {
 					data-index="1"
 					class="tab secondary ghost"
 					hx-get={ utils.HxGetToolsPagePressSection() }
-					hx-trigger="click"
+					hx-trigger="loadTabContent"
 					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
 					onclick="toggleTab(event)"
@@ -43,21 +44,16 @@ templ PageTools(user *models.User) {
 					data-index="2"
 					class="tab secondary ghost"
 					hx-get={ utils.HxGetToolsPageToolsSection() }
-					hx-trigger="click"
+					hx-trigger="loadTabContent"
 					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
 					onclick="toggleTab(event)"
 				>Werkzeuge</div>
 			</div>
-			// FIXME: if press was klick it is loading fine, but on click of tools it is messed up, the press stuff does not get removed
 			<div
 				id={ IDTabContent }
 				class="tab-content p w-full h-fit"
-			>
-				<div class="spinner-container" style="display: none;">
-					@components.Spinner()
-				</div>
-			</div>
+			></div>
 		</main>
 	}
 }
