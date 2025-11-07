@@ -12,7 +12,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 	<span
 		hx-get={ utils.HxGetToolsPagePressSection() }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ IDTabContent }
+		hx-target={ "#" + IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary>

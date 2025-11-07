@@ -11,7 +11,7 @@ templ SectionTools(tools []*models.ResolvedTool) {
 	<span
 		hx-get={ utils.HxGetToolsPageToolsSection() }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ IDTabContent }
+		hx-target={ "#" + IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<summary>

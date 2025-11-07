@@ -25,7 +25,7 @@ templ PageTools(user *models.User) {
 						class="tab secondary ghost"
 						hx-get={ utils.HxGetToolsPageAdminTools() }
 						hx-trigger="click"
-						hx-target={ IDTabContent }
+						hx-target={ "#" + IDTabContent }
 						hx-on::response-error="alert(event.detail.xhr.responseText)"
 						onclick="toggleTab(event)"
 					>Admin Tools</div>
@@ -35,7 +35,7 @@ templ PageTools(user *models.User) {
 					class="tab secondary ghost"
 					hx-get={ utils.HxGetToolsPagePressSection() }
 					hx-trigger="click"
-					hx-target={ IDTabContent }
+					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
 					onclick="toggleTab(event)"
 				>Pressen</div>
@@ -44,7 +44,7 @@ templ PageTools(user *models.User) {
 					class="tab secondary ghost"
 					hx-get={ utils.HxGetToolsPageToolsSection() }
 					hx-trigger="click"
-					hx-target={ IDTabContent }
+					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
 					onclick="toggleTab(event)"
 				>Werkzeuge</div>
