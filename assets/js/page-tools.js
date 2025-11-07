@@ -1,85 +1,66 @@
-var idToolsFilter = "tools-filter";
-var idToolsList = "tools-list";
-var idTabContent = "tab-content";
-var urlSearchParamName = "tools_filter";
-var storageKeyLastActiveTab = "last-active-tab";
-var defaultTabIndex = 1;
+const idToolsFilter = "#tools-filter";
+const urlSearchParamName = "tools_filter";
+const storageKeyLastActiveTab = "last-active-tab";
 
 function filterToolsList(event = null, skipHistory = false) {
-	var target;
-	if (!event) target = document.querySelector(`#${idToolsFilter}`);
-	else target = event.currentTarget;
-
+	const target = event
+		? event.currentTarget
+		: document.querySelector(idToolsFilter);
 	if (!target) return;
 
-	if (!skipHistory) {
-		const urlParams = new URLSearchParams(window.location.search);
-		urlParams.set(urlSearchParamName, target.value);
-		window.history.replaceState({}, "", `?${urlParams.toString()}`);
-	}
-
-	var values = target.value
+	const query = target.value
 		.toLowerCase()
 		.split(" ")
 		.filter((v) => !!v);
+	const targets = document.querySelectorAll(`#tools-list > .tool-item`);
 
-	var targets = document.querySelectorAll(`#${idToolsList} > .tool-item`);
-	for (var child of targets) {
-		var textContent = child.textContent.toLowerCase();
-
-		var match = true;
-		for (var value of values) {
-			if (!textContent.includes(value)) {
-				match = false;
-				break;
-			}
-		}
-
-		if (!match) {
-			child.style.display = "none";
-		} else {
-			child.style.display = "block";
-		}
+	if (!skipHistory) {
+		updateUrlQueryParam(query);
 	}
+
+	targets.forEach((child) => {
+		child.style.display = query.every((value) =>
+			child.textContent.toLowerCase().includes(value),
+		)
+			? "block"
+			: "none";
+	});
 }
 
 function initFilterInputFromQuery() {
 	const urlParams = new URLSearchParams(window.location.search);
 	const query = urlParams.get(urlSearchParamName);
+	if (query) document.querySelector(idToolsFilter).value = query;
+}
 
-	if (query) document.getElementById(idToolsFilter).value = query;
+function updateUrlQueryParam(query) {
+	const urlParams = new URLSearchParams(window.location.search);
+	urlParams.set(urlSearchParamName, query.join(" "));
+	window.history.replaceState({}, "", `?${urlParams.toString()}`);
 }
 
 function toggleTab(event) {
-	document.querySelectorAll(".tabs > .tab").forEach((tab) => {
-		tab.classList.remove("active");
-	});
+	document
+		.querySelectorAll(".tabs > .tab")
+		.forEach((tab) => tab.classList.remove("active"));
 
-	event.currentTarget.classList.add("active");
-	event.currentTarget.dispatchEvent(new Event("loadTabContent"));
+	currentTab = event.currentTarget;
+	currentTab.classList.add("active");
+	currentTab.dispatchEvent(new Event("loadTabContent"));
 
-	localStorage.setItem(
-		storageKeyLastActiveTab,
-		event.currentTarget.dataset.index,
-	);
+	localStorage.setItem(storageKeyLastActiveTab, currentTab.dataset.index);
 }
 
-// On document loaded, restore last active tab
 document.addEventListener("DOMContentLoaded", () => {
-	var lastActiveTab = parseInt(localStorage.getItem(storageKeyLastActiveTab));
+	let lastActiveTab = parseInt(localStorage.getItem(storageKeyLastActiveTab));
 
-	if (!isNaN(lastActiveTab)) {
-		var tab = document.querySelector(
-			`.tabs > .tab[data-index="${lastActiveTab}"]`,
-		);
-		if (tab) {
-			toggleTab({ currentTarget: tab });
-		}
-	} else {
-		toggleTab({
-			currentTarget: document.querySelector(
-				`.tabs > .tab[data-index="${defaultTabIndex}"]`,
-			),
-		});
+	if (isNaN(lastActiveTab)) {
+		lastActiveTab = 1;
 	}
+
+	toggleTab({
+		currentTarget: document.querySelector(
+			`.tabs > .tab[data-index="${lastActiveTab}"]`,
+		),
+	});
 });
