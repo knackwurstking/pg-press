@@ -50,7 +50,7 @@ templ PageTool(props *PageToolProps) {
 				hx-swap="innerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			>
-				@components.Spinner("5rem")
+				@components.Spinner()
 			</section>
 			if props.Position == models.PositionTop || props.Position == models.PositionBottom {
 				<section
@@ -60,7 +60,7 @@ templ PageTool(props *PageToolProps) {
 					hx-swap="innerHTML"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				>
-					@components.Spinner("5rem")
+					@components.Spinner()
 				</section>
 			}
 			@PageTool_CyclesSection(props.ToolID, false)
@@ -79,7 +79,7 @@ templ PageTool_CyclesSection(toolID models.ToolID, oob bool) {
 		}
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	>
-		@components.Spinner("5rem")
+		@components.Spinner()
 	</section>
 }
 

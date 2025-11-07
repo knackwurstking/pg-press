@@ -3,7 +3,7 @@ package components
 templ MarkdownContent(content string, useMarkdown bool) {
 	if useMarkdown {
 		<div class="markdown-content" data-markdown-content={ content }>
-			@Spinner("5rem")
+			@Spinner()
 		</div>
 	} else {
 		<pre>{ content }</pre>
