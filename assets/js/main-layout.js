@@ -1,3 +1,5 @@
+var globalHxTrigger = "pageLoaded";
+
 // For the ui.min.css i need to set the data-theme to light/dark
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");
@@ -16,7 +18,7 @@ updateDataTheme();
 
 matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	"change",
-	function (event) {
+	function () {
 		updateDataTheme();
 	},
 );
@@ -39,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const debouncedReload = debounce(function () {
 		if (document.visibilityState === "visible") {
 			console.log("Page became visible - reloading HTMX sections");
-			document.body.dispatchEvent(new CustomEvent("pageLoaded"));
+			document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
 		}
 	}, 500);
 
@@ -49,6 +51,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Add manual refresh functionality
 	window.refreshPressSections = function () {
 		console.log("Manual refresh triggered");
-		document.body.dispatchEvent(new CustomEvent("pageLoaded"));
+		document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
 	};
 });
