@@ -41,7 +41,7 @@ templ sectionTools_Filter(tools []*models.ResolvedTool) {
 		class="flex gap-sm flex-wrap justify-evenly backdrop"
 		style="
 			position: fixed;
-			top: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 3rem);
+			top: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 2.5rem);
 			z-index: 1000;
 			width: calc(100% - var(--ui-spacing) * 4);
 		"
@@ -52,7 +52,6 @@ templ sectionTools_Filter(tools []*models.ResolvedTool) {
 				id={ IDToolsFilter }
 				type="search"
 				oninput="filterToolsList(event);"
-				placeholder="z.B.: kassette 120x60 mass"
 				hx-preserve="true"
 			/>
 		</label>

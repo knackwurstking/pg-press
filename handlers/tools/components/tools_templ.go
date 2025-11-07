@@ -133,7 +133,7 @@ func sectionTools_Filter(tools []*models.ResolvedTool) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex gap-sm flex-wrap justify-evenly backdrop\" style=\"\n\t\t\tposition: fixed;\n\t\t\ttop: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 3rem);\n\t\t\tz-index: 1000;\n\t\t\twidth: calc(100% - var(--ui-spacing) * 4);\n\t\t\"><label class=\"flex flex-1 flex-col gap-0\" style=\"width: 100%;\">Suche (Lazy) <input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex gap-sm flex-wrap justify-evenly backdrop\" style=\"\n\t\t\tposition: fixed;\n\t\t\ttop: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 2.5rem);\n\t\t\tz-index: 1000;\n\t\t\twidth: calc(100% - var(--ui-spacing) * 4);\n\t\t\"><label class=\"flex flex-1 flex-col gap-0\" style=\"width: 100%;\">Suche (Lazy) <input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -146,7 +146,7 @@ func sectionTools_Filter(tools []*models.ResolvedTool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" type=\"search\" oninput=\"filterToolsList(event);\" placeholder=\"z.B.: kassette 120x60 mass\" hx-preserve=\"true\"></label></div><script>initFilterInputFromQuery()</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" type=\"search\" oninput=\"filterToolsList(event);\" hx-preserve=\"true\"></label></div><script>initFilterInputFromQuery()</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -215,7 +215,7 @@ func toolsListItem(id models.ToolID, tool *models.ResolvedTool) templ.Component 
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(IDToolListItem, id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 72, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 71, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
