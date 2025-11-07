@@ -18,7 +18,6 @@ templ PageTools(user *models.User) {
 		},
 	) {
 		<main class="container fluid">
-			// TODO: Make ".tabs" stick to the top of the page
 			<div class="tabs">
 				if user.IsAdmin() {
 					<div
