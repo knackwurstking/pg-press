@@ -5,16 +5,18 @@ var urlSearchParamName = "tools_filter";
 var storageKeyLastActiveTab = "last-active-tab";
 var defaultTabIndex = 1;
 
-function filterToolsList(event) {
+function filterToolsList(event = null, skipHistory = false) {
 	var target;
 	if (!event) target = document.querySelector(`#${idToolsFilter}`);
 	else target = event.currentTarget;
 
 	if (!target) return;
 
-	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set(urlSearchParamName, target.value);
-	window.history.replaceState({}, "", `?${urlParams.toString()}`);
+	if (!skipHistory) {
+		const urlParams = new URLSearchParams(window.location.search);
+		urlParams.set(urlSearchParamName, target.value);
+		window.history.replaceState({}, "", `?${urlParams.toString()}`);
+	}
 
 	var values = target.value
 		.toLowerCase()
