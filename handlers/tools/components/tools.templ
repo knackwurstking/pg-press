@@ -14,12 +14,6 @@ templ SectionTools(tools []*models.ResolvedTool) {
 		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
-	<summary>
-		<h4>
-			<i class="bi bi-archive mr"></i>
-			Alle Werkzeuge
-		</h4>
-	</summary>
 	@sectionTools_Filter(tools)
 	<div class="all-tools p">
 		<div class="actions-bar flex gap justify-end items-center">

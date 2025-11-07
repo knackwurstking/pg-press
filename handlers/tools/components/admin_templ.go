@@ -64,7 +64,7 @@ func AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) templ.
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-on::response-error=\"alert(event.detail.xhr.responseText)\"></span> <summary class=\"mb\"><h4><i class=\"bi bi-exclamation-triangle mr\"></i> Admin Tools: Werkzeug-Überschneidungen</h4></summary><div class=\"admin-overlapping-tools\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-on::response-error=\"alert(event.detail.xhr.responseText)\"></span><div class=\"admin-overlapping-tools\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -81,7 +81,7 @@ func AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) templ.
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", len(overlappingTools)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 43, Col: 134}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 37, Col: 134}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -99,7 +99,7 @@ func AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) templ.
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tool.ToolCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 52, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 46, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -131,7 +131,7 @@ func AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) templ.
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", instance.PressNumber))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 71, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/admin.templ`, Line: 65, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {

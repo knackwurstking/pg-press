@@ -16,12 +16,6 @@ templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
-	<summary class="mb">
-		<h4>
-			<i class="bi bi-exclamation-triangle mr"></i>
-			Admin Tools: Werkzeug-Überschneidungen
-		</h4>
-	</summary>
 	<div class="admin-overlapping-tools">
 		if len(overlappingTools) == 0 {
 			<div class="card success outline p text-center">

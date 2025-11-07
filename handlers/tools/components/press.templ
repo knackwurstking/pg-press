@@ -15,12 +15,6 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 		hx-target={ "#" + IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
-	<summary>
-		<h4>
-			<i class="bi bi-gear-fill mr"></i>
-			Eingebaute Werkzeuge
-		</h4>
-	</summary>
 	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
 		for _, u := range pressUtilization {
 			{{
