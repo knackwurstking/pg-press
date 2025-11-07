@@ -62,7 +62,7 @@ func SectionTools(tools []*models.ResolvedTool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"></span> <summary><h4><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h4></summary>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-on::response-error=\"alert(event.detail.xhr.responseText)\" hx-on::after-request=\"filterToolsList()\"></span> <summary><h4><i class=\"bi bi-archive mr\"></i> Alle Werkzeuge</h4></summary>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -77,7 +77,7 @@ func SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolEditDialog(nil))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 29, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 30, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -90,7 +90,7 @@ func SectionTools(tools []*models.ResolvedTool) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(IDToolsList)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 39, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/tools.templ`, Line: 40, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -133,7 +133,7 @@ func sectionTools_Filter(tools []*models.ResolvedTool) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex gap-sm flex-wrap justify-evenly\"><!-- Filter for Tool Format --><label class=\"flex flex-1 flex-col gap-0\" style=\"width: 100%;\">Suche (Lazy)<input id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"flex gap-sm flex-wrap justify-evenly\"><!-- Filter for Tool Format --><label class=\"flex flex-1 flex-col gap-0\" style=\"width: 100%;\">Suche (Lazy) <input id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

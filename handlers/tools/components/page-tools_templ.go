@@ -137,14 +137,14 @@ func PageTools(user *models.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-on::response-error=\"alert(event.detail.xhr.responseText)\" onclick=\"toggleTab(event)\">Werkzeuge</div></div><div id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" hx-on::response-error=\"alert(event.detail.xhr.responseText)\" hx-on::after-request=\"filterToolsList()\" onclick=\"toggleTab(event)\">Werkzeuge</div></div><div id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(IDTabContent)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 54, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 55, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -199,7 +199,7 @@ func additionalHead() templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/page-tools.js"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 62, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/tools/components/page-tools.templ`, Line: 63, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {

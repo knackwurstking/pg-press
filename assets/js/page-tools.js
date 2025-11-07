@@ -1,4 +1,7 @@
 var idToolsFilter = "tools-filter";
+var idToolsList = "tools-list";
+var idTabContent = "tab-content";
+var urlSearchParamName = "tools_filter";
 var storageKeyLastActiveTab = "last-active-tab";
 var defaultTabIndex = 1;
 
@@ -7,16 +10,22 @@ function filterToolsList(event) {
 	if (!event) target = document.querySelector(`#${idToolsFilter}`);
 	else target = event.currentTarget;
 
+	if (!target) return;
+
+	const urlParams = new URLSearchParams(window.location.search);
+	urlParams.set(urlSearchParamName, target.value);
+	window.history.replaceState({}, "", `?${urlParams.toString()}`);
+
 	var values = target.value
 		.toLowerCase()
 		.split(" ")
 		.filter((v) => !!v);
 
-	var match = true;
 	var targets = document.querySelectorAll(`#${idToolsList} > .tool-item`);
 	for (var child of targets) {
 		var textContent = child.textContent.toLowerCase();
 
+		var match = true;
 		for (var value of values) {
 			if (!textContent.includes(value)) {
 				match = false;
@@ -34,12 +43,9 @@ function filterToolsList(event) {
 
 function initFilterInputFromQuery() {
 	const urlParams = new URLSearchParams(window.location.search);
-	const query = urlParams.get("tools_filter");
+	const query = urlParams.get(urlSearchParamName);
 
-	if (query) {
-		document.getElementById(idToolsFilter).value = query;
-		filterToolsList();
-	}
+	if (query) document.getElementById(idToolsFilter).value = query;
 }
 
 function toggleTab(event) {

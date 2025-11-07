@@ -47,6 +47,7 @@ templ PageTools(user *models.User) {
 					hx-trigger="loadTabContent"
 					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
+					hx-on::after-request="filterToolsList()"
 					onclick="toggleTab(event)"
 				>Werkzeuge</div>
 			</div>
