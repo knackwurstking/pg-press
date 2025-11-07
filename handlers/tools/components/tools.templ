@@ -15,7 +15,7 @@ templ SectionTools(tools []*models.ResolvedTool) {
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	@sectionTools_Filter(tools)
-	<div class="all-tools p">
+	<div class="all-tools p" style="margin-top: 3.5rem;">
 		<div class="actions-bar flex gap justify-end items-center">
 			<button
 				type="button"
@@ -30,14 +30,22 @@ templ SectionTools(tools []*models.ResolvedTool) {
 				<span>Erstellen</span>
 			</button>
 		</div>
-		<ul id={ IDToolsList } class="flex flex-col gap m-t p-0" style="list-style: none;">
+		<ul id={ IDToolsList } class="flex flex-col gap p-0" style="list-style: none;">
 			@ToolsList(tools)
 		</ul>
 	</div>
 }
 
 templ sectionTools_Filter(tools []*models.ResolvedTool) {
-	<div class="flex gap-sm flex-wrap justify-evenly">
+	<div
+		class="flex gap-sm flex-wrap justify-evenly backdrop"
+		style="
+			position: fixed;
+			top: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 3rem);
+			z-index: 1000;
+			width: calc(100% - var(--ui-spacing) * 4);
+		"
+	>
 		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
 			Suche (Lazy)
 			<input

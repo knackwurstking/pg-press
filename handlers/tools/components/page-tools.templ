@@ -18,7 +18,15 @@ templ PageTools(user *models.User) {
 		},
 	) {
 		<main class="container fluid">
-			<div class="tabs">
+			<div
+				class="tabs backdrop"
+				style="
+					position: fixed;
+					top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
+					z-index: 1500;
+					width: calc(100% - var(--ui-spacing) * 2);
+				"
+			>
 				if user.IsAdmin() {
 					<div
 						data-index="0"
@@ -52,6 +60,7 @@ templ PageTools(user *models.User) {
 			<div
 				id={ IDTabContent }
 				class="tab-content p w-full h-fit"
+				style="margin-top: 50px;"
 				hx-on::after-swap="filterToolsList(null, true)"
 			></div>
 		</main>
