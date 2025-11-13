@@ -4,7 +4,7 @@ BINARY_NAME := pg-press
 
 SERVER_ADDR := :9020
 SERVER_PATH_PREFIX := /$(BINARY_NAME)
-APP_DATA := $(HOME)/Library/Application\ Support/pg-press
+APP_DATA := $(HOME)/Library/Application Support/pg-press
 
 clean:
 	git clean -xfd
@@ -60,10 +60,10 @@ define LAUNCHCTL_PLIST
 	<true/>
 
 	<key>StandardOutPath</key>
-	<string>/var/log/pg-press.log</string>
+	<string>$(APP_DATA)/pg-press.log</string>
 
 	<key>StandardErrorPath</key>
-	<string>/var/log/pg-press.log</string>
+	<string>$(APP_DATA)/pg-press.log</string>
 
 	<key>EnvironmentVariables</key>
 	<dict>
@@ -86,8 +86,8 @@ export LAUNCHCTL_PLIST
 macos-install:
 	@echo "Installing $(BINARY_NAME) for macOS..."
 	mkdir -p /usr/local/bin
-	cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
-	chmod +x /usr/local/bin/$(BINARY_NAME)
+	sudo cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
+	sudo chmod +x /usr/local/bin/$(BINARY_NAME)
 	mkdir -p $(APP_DATA)
 	@echo "$$LAUNCHCTL_PLIST" > ~/Library/LaunchAgents/com.pg-press.plist
 	@echo "$(BINARY_NAME) installed successfully"
