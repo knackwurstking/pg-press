@@ -110,3 +110,13 @@ macos-restart-service:
 macos-print-service:
 	@echo "$(BINARY_NAME) service information:"
 	@launchctl print gui/$$(id -u)/com.$(BINARY_NAME) || echo "Service not loaded or running"
+
+macos-watch-service:
+	@echo "$(BINARY_NAME) watch server logs @ \"$(APP_DATA)/pg-press.log\":"
+	@if [ -f "$(APP_DATA)/pg-press.log" ]; then \
+		echo "Watching logs... Press Ctrl+C to stop"; \
+		tail -f "$(APP_DATA)/pg-press.log"; \
+	else \
+		echo "Log file not found. Make sure the service is running or has been started."; \
+		echo "Log file path: $(APP_DATA)/pg-press.log"; \
+	fi
