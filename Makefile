@@ -64,6 +64,20 @@ define LAUNCHCTL_PLIST
 
 	<key>StandardErrorPath</key>
 	<string>/var/log/pg-press.log</string>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>SERVER_ADDR</key>
+		<string>:9020</string>
+		<key>SERVER_PATH_PREFIX</key>
+		<string>/pg-press</string>
+		<key>LOG_LEVEL</key>
+		<string>info</string>
+		<key>LOG_FORMAT</key>
+		<string>text</string>
+		<key>ADMINS</key>
+		<string></string>
+	</dict>
 </dict>
 </plist>
 endef
