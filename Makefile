@@ -83,40 +83,40 @@ define LAUNCHCTL_PLIST
 endef
 
 export LAUNCHCTL_PLIST
+
 macos-install:
 	@echo "Installing $(BINARY_NAME) for macOS..."
-	mkdir -p /usr/local/bin
-	sudo cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
-	sudo chmod +x /usr/local/bin/$(BINARY_NAME)
-	mkdir -p $(APP_DATA)
-	@echo "$$LAUNCHCTL_PLIST" > ~/Library/LaunchAgents/com.pg-press.plist
+	mkdir -p $(INSTALL_DIR)
+	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	sudo chmod +x $(INSTALL_DIR)/$(BINARY_NAME)
+	echo "$$LAUNCHD_SERVICE_FILE_CONTENT" > $(SERVICE_FILE)
 	@echo "$(BINARY_NAME) installed successfully"
 
 macos-start-service:
 	@echo "Starting $(BINARY_NAME) service..."
-	launchctl load -w ~/Library/LaunchAgents/com.$(BINARY_NAME).plist
+	launchctl load -w $(SERVICE_FILE)
 	launchctl start com.$(BINARY_NAME)
 
 macos-stop-service:
 	@echo "Stopping $(BINARY_NAME) service..."
-	launchctl stop com.$(BINARY_NAME)
-	launchctl unload -w ~/Library/LaunchAgents/com.$(BINARY_NAME).plist
+	launchctl stop com.$(BINARY_NAME) || exit 0
+	launchctl unload -w $(SERVICE_FILE)
 
 macos-restart-service:
 	@echo "Restarting $(BINARY_NAME) service..."
-	make macos-stop-service
+	make macos-stop-service || exit 0
 	make macos-start-service
 
 macos-print-service:
 	@echo "$(BINARY_NAME) service information:"
-	@launchctl print gui/$$(id -u)/com.$(BINARY_NAME) || echo "Service not loaded or running"
+	launchctl print gui/$(shell id -u)/com.$(BINARY_NAME) || echo "Service not loaded or running"
 
 macos-watch-service:
-	@echo "$(BINARY_NAME) watch server logs @ \"$(APP_DATA)/pg-press.log\":"
-	@if [ -f "$(APP_DATA)/pg-press.log" ]; then \
+	@echo "$(BINARY_NAME) watch server logs @ \"$(LOG_FILE)\":"
+	if [ -f "$(LOG_FILE)" ]; then \
 		echo "Watching logs... Press Ctrl+C to stop"; \
-		tail -f "$(APP_DATA)/pg-press.log"; \
+		tail -f "$(LOG_FILE)"; \
 	else \
 		echo "Log file not found. Make sure the service is running or has been started."; \
-		echo "Log file path: $(APP_DATA)/pg-press.log"; \
+		echo "Log file path: \"$(LOG_FILE)\""; \
 	fi
