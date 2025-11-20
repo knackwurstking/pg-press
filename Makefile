@@ -4,7 +4,14 @@ BINARY_NAME := pg-press
 
 SERVER_ADDR := :9020
 SERVER_PATH_PREFIX := /$(BINARY_NAME)
-APP_DATA := $(HOME)/Library/Application Support/pg-press
+
+BIN_DIR := ./bin
+
+INSTALL_PATH := /usr/local/bin
+
+APP_DATA := $(HOME)/Library/Application Support/$(BINARY_NAME)
+SERVICE_FILE := $(HOME)/Library/LaunchAgents/com.$(BINARY_NAME).plist
+LOG_FILE := $(APP_DATA)/pg-press.log
 
 clean:
 	git clean -xfd
@@ -45,11 +52,11 @@ define LAUNCHCTL_PLIST
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.pg-press</string>
+	<string>com.$(BINARY_NAME)</string>
 
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/local/bin/pg-press</string>
+		<string>/usr/local/bin/$(BINARY_NAME)</string>
 		<string>server</string>
 	</array>
 
@@ -60,10 +67,10 @@ define LAUNCHCTL_PLIST
 	<true/>
 
 	<key>StandardOutPath</key>
-	<string>$(APP_DATA)/pg-press.log</string>
+	<string>$(LOG_FILE)</string>
 
 	<key>StandardErrorPath</key>
-	<string>$(APP_DATA)/pg-press.log</string>
+	<string>$(LOG_FILE)</string>
 
 	<key>EnvironmentVariables</key>
 	<dict>
@@ -86,10 +93,10 @@ export LAUNCHCTL_PLIST
 
 macos-install:
 	@echo "Installing $(BINARY_NAME) for macOS..."
-	mkdir -p $(INSTALL_DIR)
-	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
-	sudo chmod +x $(INSTALL_DIR)/$(BINARY_NAME)
-	echo "$$LAUNCHD_SERVICE_FILE_CONTENT" > $(SERVICE_FILE)
+	mkdir -p $(INSTALL_PATH)
+	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
+	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
+	echo "$$LAUNCHCTL_PLIST" > $(SERVICE_FILE)
 	@echo "$(BINARY_NAME) installed successfully"
 
 macos-start-service:
