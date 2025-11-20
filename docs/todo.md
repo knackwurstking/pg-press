@@ -20,23 +20,12 @@
   - `ResolveTool`
 
 - [x] Create a new feed entry after editing a regeneration (reason).
-
 - [x] Make the notes page reload content after editing or deleting a note.
-
 - [x] When the filter input is in focus, use `scrollIntoView` on each input change.
-
 - [x] Improve the notes flex grid settings (grow, shrink).
-
 - [x] Rename this module from `/pgpress` to `/pg-press`.
-
-- [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments).
-
-- [ ] Create a new page: "Daten Sammlung", for storing stuff like dryer temperatures (markdown editor support).
-
 - [x] Remove the logging package and use logger just like in the picow-led project.
-
 - [x] Modify the logging flags (env), remove the DEBUG flag and replace it with a LOG_LEVEL flag.
-
 - [x] Utilize the Dialog and AssetURL functionalities provided by the ui library.
 
 - [x] Organize dialogs into a dedicated package for better management.
@@ -44,3 +33,7 @@
   - [x] Edit tool dialog: changed server path
   - [x] Edit metal sheet dialog: changed server path
   - [x] Edit note dialog: changed server path
+
+- [ ] Fix metal sheet edit (put) error: method not allowed
+- [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments).
+- [ ] Create a new page: "Daten Sammlung", for storing stuff like dryer temperatures (markdown editor support).
