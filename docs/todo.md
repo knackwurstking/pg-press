@@ -34,6 +34,6 @@
   - [x] Edit metal sheet dialog: changed server path
   - [x] Edit note dialog: changed server path
 
-- [ ] Fix metal sheet edit (put) error: method not allowed
+- [x] Fix metal sheet edit (put) error: method not allowed
 - [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments).
 - [ ] Create a new page: "Daten Sammlung", for storing stuff like dryer temperatures (markdown editor support).
