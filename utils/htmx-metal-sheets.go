@@ -30,7 +30,7 @@ func HXPutMetalSheetEditDialog(metalSheetID models.MetalSheetID) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", metalSheetID),
 	}
-	return buildURL("/htmx/dialogs/edit-metal-sheets", params)
+	return buildURL("/htmx/dialogs/edit-metal-sheet", params)
 }
 
 func HXDeleteMetalSheet(metalSheetID models.MetalSheetID) templ.SafeURL {
