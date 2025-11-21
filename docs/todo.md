@@ -37,3 +37,6 @@
 - [x] Fix metal sheet edit (put) error: method not allowed
 - [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments).
 - [ ] Create a new page: "Daten Sammlung", for storing stuff like dryer temperatures (markdown editor support).
+- [ ] Allow pinning of tools, which will always appear at the top
+- [ ] Group tools by state: active, available, dead, and regenerating
+- [ ] Group tools by position: top, bottom, or top-cassette
