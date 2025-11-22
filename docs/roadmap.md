@@ -16,8 +16,6 @@ This document outlines the planned features and improvements for the PG Press sy
 ## Development Plans
 
 ### Chore
-- [ ] Refactor code to improve maintainability
-- [ ] Update documentation for new features
 - [ ] Remove outdated server script "./scripts/server"
 
 ### Feat
@@ -27,5 +25,6 @@ This document outlines the planned features and improvements for the PG Press sy
 - [ ] Change tools list item styles, showing regeneration count and notes count (for all 3 levels)
 
 ### Refactor
+- [ ] Refactor code to improve maintainability
 - [ ] Move shared components to "/handlers/components", using subdirectories as needed
 - [ ] Tools list: Server-side search
