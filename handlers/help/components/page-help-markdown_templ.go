@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/handlers/components"
 )
 
 func PageHelpMarkdown() templ.Component {
