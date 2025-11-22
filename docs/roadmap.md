@@ -27,7 +27,9 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Style
 
-- [ ] Change tools list item styles, showing regeneration count and notes count (for all 3 levels)
+- [ ] Tool List Item: Update item styles to reduce card-like appearance
+- [ ] Tool List Item: Display regeneration count
+- [ ] Tool List Item: Display notes count (all 3 levels)
 
 ### Refactor
 
