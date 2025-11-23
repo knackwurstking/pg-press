@@ -58,7 +58,7 @@ func showUserCommand() cli.Command {
 					fmt.Printf("%-15d %-20s %s\n", user.TelegramID, user.Name, user.ApiKey)
 
 					if cookies, err := r.Cookies.ListApiKey(user.ApiKey); err != nil {
-						fmt.Fprintf(os.Stderr, "Failed to get cookies from the database: %s\n", err.Error())
+						fmt.Fprintf(os.Stderr, "Get cookies from the database: %v\n", err)
 					} else {
 						if len(cookies) > 0 {
 							fmt.Printf("\n%s <last-login> - <api-key> - <value> - <user-agent>\n\n", color.Underline(color.Bold("Cookies:")))

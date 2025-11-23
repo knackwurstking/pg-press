@@ -106,7 +106,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
 			slog.Info("Authentication failed", "real_ip", realIP)
-			return false, echo.NewHTTPError(errors.GetHTTPStatusCodeFromError(err), "failed to validate user from API key: "+err.Error())
+			return false, echo.NewHTTPError(errors.GetHTTPStatusCodeFromError(err), "validate user from API key: "+err.Error())
 		}
 		slog.Debug("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	}
@@ -119,12 +119,12 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	realIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
+		return nil, fmt.Errorf("get cookie: %s", err.Error())
 	}
 
 	cookie, err := db.Cookies.Get(httpCookie.Value)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get cookie: %s", err.Error())
+		return nil, fmt.Errorf("get cookie: %s", err.Error())
 	}
 
 	// Check if cookie has expired
@@ -135,7 +135,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to validate user from API key: %s", err.Error())
+		return nil, fmt.Errorf("validate user from API key: %s", err.Error())
 	}
 
 	// Log user agent mismatch as potential security concern

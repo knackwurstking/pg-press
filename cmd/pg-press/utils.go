@@ -125,13 +125,13 @@ func createSimpleCommand(name, usage string, action func(*services.Registry) err
 // handleNotFoundError provides consistent handling for not found errors
 func handleNotFoundError(err error) {
 	if errors.IsNotFoundError(err) {
-		fmt.Fprintf(os.Stderr, "not found: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "not found: %v\n", err)
 		os.Exit(exitCodeNotFound)
 	}
 }
 
 // handleGenericError provides consistent error formatting and exit
 func handleGenericError(err error, message string) {
-	fmt.Fprintf(os.Stderr, "%s: %s\n", message, err.Error())
+	fmt.Fprintf(os.Stderr, "%s: %v\n", message, err)
 	os.Exit(exitCodeGeneric)
 }

@@ -205,7 +205,7 @@ func scanNote(scanner Scannable) (*models.Note, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan note: %v", err)
+		return nil, fmt.Errorf("scan note: %v", err)
 	}
 	return note, nil
 }

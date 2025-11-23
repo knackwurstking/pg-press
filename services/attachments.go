@@ -187,7 +187,7 @@ func scanAttachment(scanner Scannable) (*models.Attachment, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan attachment: %v", err)
+		return nil, fmt.Errorf("scan attachment: %v", err)
 	}
 
 	attachment.ID = fmt.Sprintf("%d", id)

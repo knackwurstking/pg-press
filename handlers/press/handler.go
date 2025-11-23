@@ -59,7 +59,7 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render press page")
+		return errors.Handler(err, "render press page")
 	}
 
 	return nil
@@ -74,7 +74,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	// Get ordered tools for this press with validation
 	tools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "failed to get tools for press")
+		return errors.Handler(err, "get tools for press")
 	}
 
 	// Resolve tools, notes not needed, only the binding tool
@@ -89,7 +89,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 
 	activeToolsSection := components.PagePress_ActiveToolsSection(resolvedTools, press)
 	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render active tools section")
+		return errors.Handler(err, "render active tools section")
 	}
 
 	return nil
@@ -104,14 +104,14 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 	// Get ordered tools for this press with validation
 	_, toolsMap, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "failed to get tools for press")
+		return errors.Handler(err, "get tools for press")
 	}
 
 	// Get metal sheets for tools on this press with automatic machine type filtering
 	// Press 0 and 5 use SACMI machines, all others use SITI machines
 	metalSheets, err := h.registry.MetalSheets.GetForPress(press, toolsMap)
 	if err != nil {
-		return errors.Handler(err, "failed to get metal sheets for press")
+		return errors.Handler(err, "get metal sheets for press")
 	}
 
 	metalSheetsSection := components.PagePress_MetalSheetsSection(
@@ -122,7 +122,7 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		},
 	)
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render metal sheets section")
+		return errors.Handler(err, "render metal sheets section")
 	}
 
 	return nil
@@ -137,19 +137,19 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	// Get user for permissions
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.Handler(err, "failed to get user from context")
+		return errors.Handler(err, "get user from context")
 	}
 
 	// Get cycles for this press
 	cycles, err := h.registry.PressCycles.GetPressCycles(press, nil, nil)
 	if err != nil {
-		return errors.Handler(err, "failed to get cycles from database")
+		return errors.Handler(err, "get cycles from database")
 	}
 
 	// Get tools for this press to create toolsMap
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return errors.Handler(err, "failed to get tools from database")
+		return errors.Handler(err, "get tools from database")
 	}
 
 	toolsMap := make(map[models.ToolID]*models.Tool)
@@ -168,7 +168,7 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	)
 
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render cycles section")
+		return errors.Handler(err, "render cycles section")
 	}
 
 	return nil
@@ -183,20 +183,20 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	// Get notes directly linked to this press
 	notes, err := h.registry.Notes.GetByPress(press)
 	if err != nil {
-		return errors.Handler(err, "failed to get notes for press")
+		return errors.Handler(err, "get notes for press")
 	}
 
 	// Get tools for this press for context
 	sortedTools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "failed to get tools for press")
+		return errors.Handler(err, "get tools for press")
 	}
 
 	// Get notes for tools
 	for _, t := range sortedTools {
 		n, err := h.registry.Notes.GetByTool(t.ID)
 		if err != nil {
-			return errors.Handler(err, fmt.Sprintf("failed to get notes for tool %d", t.ID))
+			return errors.Handler(err, fmt.Sprintf("get notes for tool %d", t.ID))
 		}
 		notes = append(notes, n...)
 	}
@@ -210,7 +210,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render press notes section")
+		return errors.Handler(err, "render press notes section")
 	}
 
 	return nil
@@ -225,7 +225,7 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	// Get user for logging purposes
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.Handler(err, "failed to get user from context")
+		return errors.Handler(err, "get user from context")
 	}
 
 	slog.Info("Generating cycle summary PDF for press", "press", press, "user_name", user.Name)
@@ -233,13 +233,13 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	// Get cycle summary data using service
 	cycles, toolsMap, usersMap, err := h.registry.PressCycles.GetCycleSummaryData(press)
 	if err != nil {
-		return errors.Handler(err, "failed to get cycle summary data")
+		return errors.Handler(err, "get cycle summary data")
 	}
 
 	// Generate PDF
 	pdfBuffer, err := pdf.GenerateCycleSummaryPDF(press, cycles, toolsMap, usersMap)
 	if err != nil {
-		return errors.Handler(err, "failed to generate PDF")
+		return errors.Handler(err, "generate PDF")
 	}
 
 	// Set response headers

@@ -44,7 +44,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 
 	page := components.PageLogin(apiKey, apiKey != "")
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render login page")
+		return errors.Handler(err, "render login page")
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 func (h *Handler) GetLogout(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.Handler(err, "failed to get user from context")
+		return errors.Handler(err, "get user from context")
 	}
 
 	if cookie, err := c.Cookie(env.CookieName); err == nil {

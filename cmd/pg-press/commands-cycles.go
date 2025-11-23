@@ -42,7 +42,7 @@ func listCyclesAllCommand() cli.Command {
 					// Get all cycles and filter by press
 					allCycles, err := r.PressCycles.List()
 					if err != nil {
-						return fmt.Errorf("failed to retrieve cycles: %v", err)
+						return fmt.Errorf("retrieve cycles: %v", err)
 					}
 
 					// Filter cycles by press number
@@ -105,7 +105,7 @@ func deleteCycleCommand() cli.Command {
 					// First check if there are any regenerations that reference this cycle
 					hasRegenerations, err := r.ToolRegenerations.HasRegenerationsForCycle(cycleID)
 					if err != nil {
-						return fmt.Errorf("failed to check for regenerations: %v", err)
+						return fmt.Errorf("check for regenerations: %v", err)
 					}
 
 					if hasRegenerations {
@@ -117,7 +117,7 @@ func deleteCycleCommand() cli.Command {
 					// Delete cycle
 					err = r.PressCycles.Delete(cycleID)
 					if err != nil {
-						return fmt.Errorf("failed to delete cycle: %v", err)
+						return fmt.Errorf("delete cycle: %v", err)
 					}
 
 					fmt.Printf("Successfully deleted cycle %d.\n", cycleID)

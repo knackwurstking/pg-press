@@ -185,7 +185,7 @@ func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Fee
 	if since != "" {
 		sinceTime, err = parseDateTime(since)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid since date format: %s\n", err)
+			fmt.Fprintf(os.Stderr, "Invalid since date format: %v\n", err)
 			return feeds
 		}
 	}
@@ -193,7 +193,7 @@ func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Fee
 	if before != "" {
 		beforeTime, err = parseDateTime(before)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid before date format: %s\n", err)
+			fmt.Fprintf(os.Stderr, "Invalid before date format: %v\n", err)
 			return feeds
 		}
 	}
@@ -293,7 +293,7 @@ func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 
 	deletionCount, err := r.Feeds.DeleteBefore(timestamp)
 	if err != nil {
-		return fmt.Errorf("failed to remove feeds: %s", err)
+		return fmt.Errorf("remove feeds: %s", err)
 	}
 
 	fmt.Printf("Removed %d feed(s) older than %s (before %s)\n",
@@ -312,7 +312,7 @@ func removeFeedsByDate(r *services.Registry, dateStr string) error {
 
 	rowsAffected, err := r.Feeds.DeleteBefore(timestamp)
 	if err != nil {
-		return fmt.Errorf("failed to remove feeds: %s", err)
+		return fmt.Errorf("remove feeds: %s", err)
 	}
 
 	fmt.Printf("Removed %d feed(s) before %s\n", rowsAffected, cutoffTime.Format("2006-01-02 15:04:05"))

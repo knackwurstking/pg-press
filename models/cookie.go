@@ -111,7 +111,7 @@ func (c *Cookie) UpdateLastLogin() {
 func (c *Cookie) RefreshToken() error {
 	newValue, err := GenerateSecureToken(32)
 	if err != nil {
-		return fmt.Errorf("failed to refresh token: %v", err)
+		return fmt.Errorf("refresh token: %v", err)
 	}
 
 	c.Value = newValue
@@ -123,7 +123,7 @@ func (c *Cookie) RefreshToken() error {
 func (c *Cookie) RefreshAPIKey() error {
 	newAPIKey, err := GenerateSecureToken(env.MinAPIKeyLength)
 	if err != nil {
-		return fmt.Errorf("failed to refresh API key: %v", err)
+		return fmt.Errorf("refresh API key: %v", err)
 	}
 
 	c.ApiKey = newAPIKey

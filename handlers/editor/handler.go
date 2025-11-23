@@ -62,14 +62,14 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	if id > 0 {
 		err := h.loadExistingContent(options)
 		if err != nil {
-			return errors.Handler(err, "failed to load existing content")
+			return errors.Handler(err, "load existing content")
 		}
 	}
 
 	// Render the editor page
 	page := components.PageEditor(options)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render editor page")
+		return errors.Handler(err, "render editor page")
 	}
 
 	return nil
@@ -79,7 +79,7 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	// Get user from context
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.Handler(err, "failed to get user from context")
+		return errors.Handler(err, "get user from context")
 	}
 
 	// Parse form data
@@ -112,13 +112,13 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	// Handle attachments
 	attachments, err := h.processAttachments(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to process attachments")
+		return errors.BadRequest(err, "process attachments")
 	}
 
 	// Save content based on type
 	err = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
 	if err != nil {
-		return errors.Handler(err, "failed to save content")
+		return errors.Handler(err, "save content")
 	}
 
 	// Redirect back to return URL or appropriate page
@@ -141,7 +141,7 @@ func (h *Handler) loadExistingContent(options *components.PageEditorOptions) err
 	case "troublereport":
 		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(options.ID))
 		if err != nil {
-			return fmt.Errorf("failed to get trouble report: %v", err)
+			return fmt.Errorf("get trouble report: %v", err)
 		}
 		options.Title = tr.Title
 		options.Content = tr.Content
@@ -176,7 +176,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			// Update existing trouble report
 			tr, err := h.registry.TroubleReports.Get(trID)
 			if err != nil {
-				return fmt.Errorf("failed to get trouble report: %v", err)
+				return fmt.Errorf("get trouble report: %v", err)
 			}
 
 			// Filter out existing and new attachments
@@ -197,7 +197,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 
 			err = h.registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
 			if err != nil {
-				return fmt.Errorf("failed to update trouble report: %v", err)
+				return fmt.Errorf("update trouble report: %v", err)
 			}
 
 			// Create feed entry
@@ -219,7 +219,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 
 			err := h.registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
 			if err != nil {
-				return fmt.Errorf("failed to add trouble report: %v", err)
+				return fmt.Errorf("add trouble report: %v", err)
 			}
 
 			// Create feed entry
@@ -276,7 +276,7 @@ func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, erro
 
 		attachment, err := h.processFileUpload(fileHeader)
 		if err != nil {
-			return nil, fmt.Errorf("failed to process file %s: %v", fileHeader.Filename, err)
+			return nil, fmt.Errorf("process file %s: %v", fileHeader.Filename, err)
 		}
 
 		attachments = append(attachments, attachment)
@@ -289,7 +289,7 @@ func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, erro
 func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %v", err)
+		return nil, fmt.Errorf("open file: %v", err)
 	}
 	defer file.Close()
 
@@ -297,7 +297,7 @@ func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.A
 	data := make([]byte, fileHeader.Size)
 	_, err = file.Read(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
+		return nil, fmt.Errorf("read file: %v", err)
 	}
 
 	// Get MIME type

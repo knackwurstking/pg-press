@@ -45,14 +45,14 @@ func listToolsCommand() cli.Command {
 					// Get all tools from database
 					tools, err := r.Tools.List()
 					if err != nil {
-						return fmt.Errorf("failed to retrieve tools: %v", err)
+						return fmt.Errorf("retrieve tools: %v", err)
 					}
 
 					// Filter tools by ID if range/list is specified
 					if *idRange != "" {
 						tools, err = filterToolsByIDs(tools, *idRange)
 						if err != nil {
-							return fmt.Errorf("failed to filter tools by IDs: %v", err)
+							return fmt.Errorf("filter tools by IDs: %v", err)
 						}
 					}
 
@@ -118,7 +118,7 @@ func listDeadToolsCommand() cli.Command {
 		// Get all dead tools from database
 		tools, err := r.Tools.ListDeadTools()
 		if err != nil {
-			return fmt.Errorf("failed to retrieve dead tools: %v", err)
+			return fmt.Errorf("retrieve dead tools: %v", err)
 		}
 
 		if len(tools) == 0 {
@@ -180,7 +180,7 @@ func markDeadCommand() cli.Command {
 					// Get tool first to check if it exists
 					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					if tool.IsDead {
@@ -197,7 +197,7 @@ func markDeadCommand() cli.Command {
 					// Mark tool as dead
 					err = r.Tools.MarkAsDead(toolID, user)
 					if err != nil {
-						return fmt.Errorf("failed to mark tool as dead: %v", err)
+						return fmt.Errorf("mark tool as dead: %v", err)
 					}
 
 					fmt.Printf("Successfully marked tool %d (%s %s) as dead.\n", tool.ID, tool.Format.String(), tool.Code)
@@ -223,7 +223,7 @@ func reviveDeadToolCommand() cli.Command {
 					// Get tool first to check if it exists
 					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					if !tool.IsDead {
@@ -240,7 +240,7 @@ func reviveDeadToolCommand() cli.Command {
 					// Revive tool (mark as alive)
 					err = r.Tools.ReviveTool(toolID, user)
 					if err != nil {
-						return fmt.Errorf("failed to revive tool: %v", err)
+						return fmt.Errorf("revive tool: %v", err)
 					}
 
 					fmt.Printf("Successfully revived tool %d (%s %s).\n", tool.ID, tool.Format.String(), tool.Code)
@@ -266,7 +266,7 @@ func deleteToolCommand() cli.Command {
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Deleting tool %d (%s %s) and all related data...\n", tool.ID, tool.Format.String(), tool.Code)
@@ -280,14 +280,14 @@ func deleteToolCommand() cli.Command {
 					// 1. Delete all regenerations for this tool first (they reference cycles)
 					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to get regenerations for tool: %v", err)
+						return fmt.Errorf("get regenerations for tool: %v", err)
 					}
 
 					if len(regenerations) > 0 {
 						fmt.Printf("Deleting %d regeneration(s)...\n", len(regenerations))
 						for _, regen := range regenerations {
 							if err := r.ToolRegenerations.Delete(regen.ID); err != nil {
-								return fmt.Errorf("failed to delete regeneration %d: %v", regen.ID, err)
+								return fmt.Errorf("delete regeneration %d: %v", regen.ID, err)
 							}
 						}
 					}
@@ -295,14 +295,14 @@ func deleteToolCommand() cli.Command {
 					// 2. Delete all cycles for this tool
 					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to get cycles for tool: %v", err)
+						return fmt.Errorf("get cycles for tool: %v", err)
 					}
 
 					if len(cycles) > 0 {
 						fmt.Printf("Deleting %d cycle(s)...\n", len(cycles))
 						for _, cycle := range cycles {
 							if err := r.PressCycles.Delete(cycle.ID); err != nil {
-								return fmt.Errorf("failed to delete cycle %d: %v", cycle.ID, err)
+								return fmt.Errorf("delete cycle %d: %v", cycle.ID, err)
 							}
 						}
 					}
@@ -310,7 +310,7 @@ func deleteToolCommand() cli.Command {
 					// 3. Finally, delete the tool itself
 					err = r.Tools.Delete(toolID, user)
 					if err != nil {
-						return fmt.Errorf("failed to delete tool: %v", err)
+						return fmt.Errorf("delete tool: %v", err)
 					}
 
 					fmt.Printf("Successfully deleted tool %d (%s %s) with %d cycle(s) and %d regeneration(s).\n",
@@ -337,7 +337,7 @@ func listCyclesCommand() cli.Command {
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
@@ -346,7 +346,7 @@ func listCyclesCommand() cli.Command {
 					// Get cycles for this tool
 					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to retrieve cycles: %v", err)
+						return fmt.Errorf("retrieve cycles: %v", err)
 					}
 
 					// Display Cycles
@@ -484,7 +484,7 @@ func listRegenerationsCommand() cli.Command {
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to find tool with ID %d: %v", toolID, err)
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
@@ -493,7 +493,7 @@ func listRegenerationsCommand() cli.Command {
 					// Get regenerations for this tool
 					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
 					if err != nil {
-						return fmt.Errorf("failed to retrieve regenerations: %v", err)
+						return fmt.Errorf("retrieve regenerations: %v", err)
 					}
 
 					// Display Regenerations

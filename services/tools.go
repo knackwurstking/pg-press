@@ -88,7 +88,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
+		return 0, fmt.Errorf("get last insert ID: %v", err)
 	}
 
 	return models.ToolID(id), nil
@@ -322,7 +322,7 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 
 	tool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get tool for press update: %v", err)
+		return fmt.Errorf("get tool for press update: %v", err)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET press = ? WHERE id = ?`, TableNameTools)
@@ -351,7 +351,7 @@ func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user
 	// Get the current tool to check if the regeneration status is actually changing
 	currentTool, err := t.Get(toolID)
 	if err != nil {
-		return fmt.Errorf("failed to get current tool state: %v", err)
+		return fmt.Errorf("get current tool state: %v", err)
 	}
 
 	if currentTool.Regenerating == regenerating {
@@ -525,7 +525,7 @@ func (t *Tools) validateBindingTools(cassetteID, targetID models.ToolID) error {
 func (t *Tools) marshalFormat(format models.Format) ([]byte, error) {
 	formatBytes, err := json.Marshal(format)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal tool format: %v", err)
+		return nil, fmt.Errorf("marshal tool format: %v", err)
 	}
 	return formatBytes, nil
 }
@@ -540,11 +540,11 @@ func scanTool(scannable Scannable) (*models.Tool, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan tool: %v", err)
+		return nil, fmt.Errorf("scan tool: %v", err)
 	}
 
 	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal tool format: %v", err)
+		return nil, fmt.Errorf("unmarshal tool format: %v", err)
 	}
 
 	return tool, nil

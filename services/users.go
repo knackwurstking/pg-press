@@ -48,7 +48,7 @@ func (u *Users) List() ([]*models.User, error) {
 
 	users, err := ScanRows(rows, scanUser)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan users: %v", err)
+		return nil, fmt.Errorf("scan users: %v", err)
 	}
 
 	return users, nil
@@ -152,7 +152,7 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError("apiKey: " + utils.MaskString(apiKey))
 		}
-		return nil, fmt.Errorf("failed to get user from API key: %v", err)
+		return nil, fmt.Errorf("get user from API key: %v", err)
 	}
 
 	return user, nil
@@ -165,7 +165,7 @@ func scanUser(scanner Scannable) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan user: %v", err)
+		return nil, fmt.Errorf("scan user: %v", err)
 	}
 
 	return user, nil

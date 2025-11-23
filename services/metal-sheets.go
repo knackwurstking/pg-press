@@ -225,7 +225,7 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) erro
 	}
 
 	if _, err := s.Get(sheetID); err != nil {
-		return fmt.Errorf("failed to get sheet for tool assignment: %v", err)
+		return fmt.Errorf("get sheet for tool assignment: %v", err)
 	}
 
 	query := fmt.Sprintf(`
@@ -262,7 +262,7 @@ func scanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan metal sheet: %v", err)
+		return nil, fmt.Errorf("scan metal sheet: %v", err)
 	}
 
 	sheet.Identifier = models.MachineType(identifierStr)

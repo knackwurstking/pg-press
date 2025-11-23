@@ -187,12 +187,12 @@ func (s *PressCycles) GetCycleSummaryData(
 
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get cycles for press %d: %w", pressNumber, err)
+		return nil, nil, nil, fmt.Errorf("get cycles for press %d: %w", pressNumber, err)
 	}
 
 	tools, err := s.Registry.Tools.List()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get tools: %w", err)
+		return nil, nil, nil, fmt.Errorf("get tools: %w", err)
 	}
 
 	toolsMap := make(map[models.ToolID]*models.Tool, len(tools))
@@ -202,7 +202,7 @@ func (s *PressCycles) GetCycleSummaryData(
 
 	users, err := s.Registry.Users.List()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get users: %w", err)
+		return nil, nil, nil, fmt.Errorf("get users: %w", err)
 	}
 
 	usersMap := make(map[models.TelegramID]*models.User, len(users))
@@ -808,7 +808,7 @@ func scanCycle(scannable Scannable) (*models.Cycle, error) {
 		&performedBy,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan press cycle: %w", err)
+		return nil, fmt.Errorf("scan press cycle: %w", err)
 	}
 
 	if performedBy.Valid {

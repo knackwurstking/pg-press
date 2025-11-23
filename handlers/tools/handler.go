@@ -38,12 +38,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetToolsPage(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "get user from context")
 	}
 
 	page := components.PageTools(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render tools page")
+		return errors.Handler(err, "render tools page")
 	}
 	return nil
 }
@@ -57,16 +57,16 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "get user from context")
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return errors.Handler(err, "failed to get tool for deletion")
+		return errors.Handler(err, "get tool for deletion")
 	}
 
 	if err := h.registry.Tools.Delete(toolID, user); err != nil {
-		return errors.Handler(err, "failed to delete tool")
+		return errors.Handler(err, "delete tool")
 	}
 
 	slog.Info("Tool deleted", "id", toolID, "user_name", user.Name)
@@ -87,12 +87,12 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "get user from context")
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return errors.Handler(err, "failed to get tool for marking as dead")
+		return errors.Handler(err, "get tool for marking as dead")
 	}
 
 	if tool.IsDead {
@@ -100,7 +100,7 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	}
 
 	if err := h.registry.Tools.MarkAsDead(toolID, user); err != nil {
-		return errors.Handler(err, "failed to mark tool as dead")
+		return errors.Handler(err, "mark tool as dead")
 	}
 
 	slog.Info("Tool marked as dead", "id", toolID, "user_name", user.Name)
@@ -115,12 +115,12 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 	pressUtilization, err := h.registry.Tools.GetPressUtilization()
 	if err != nil {
-		return errors.Handler(err, "failed to get press utilization")
+		return errors.Handler(err, "get press utilization")
 	}
 
 	section := components.SectionPress(pressUtilization)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render press section")
+		return errors.Handler(err, "render press section")
 	}
 	return nil
 }
@@ -128,7 +128,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	allTools, err := h.registry.Tools.List()
 	if err != nil {
-		return errors.Handler(err, "failed to get tools from database")
+		return errors.Handler(err, "get tools from database")
 	}
 
 	var tools []*models.ResolvedTool
@@ -147,7 +147,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 
 	section := components.SectionTools(tools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render tools section")
+		return errors.Handler(err, "render tools section")
 	}
 	return nil
 }
@@ -155,19 +155,19 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.Handler(err, "failed to get user from context")
+		return errors.Handler(err, "get user from context")
 	}
 
 	slog.Info("User requested overlapping tools analysis", "user_name", user.Name)
 
 	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
 	if err != nil {
-		return errors.Handler(err, "failed to get overlapping tools")
+		return errors.Handler(err, "get overlapping tools")
 	}
 
 	section := components.AdminToolsSectionContent(overlappingTools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render admin overlapping tools section")
+		return errors.Handler(err, "render admin overlapping tools section")
 	}
 	return nil
 }

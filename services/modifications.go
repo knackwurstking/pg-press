@@ -68,7 +68,7 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return 0, fmt.Errorf("failed to marshal modification data: %v", err)
+		return 0, fmt.Errorf("marshal modification data: %v", err)
 	}
 
 	query := fmt.Sprintf(`
@@ -314,7 +314,7 @@ func scanModification(scanner Scannable) (*models.Modification[any], error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan modification: %v", err)
+		return nil, fmt.Errorf("scan modification: %v", err)
 	}
 	return mod, nil
 }

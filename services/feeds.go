@@ -216,7 +216,7 @@ func scanFeed(scanner Scannable) (*models.Feed, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan feed: %v", err)
+		return nil, fmt.Errorf("scan feed: %v", err)
 	}
 	return feed, nil
 }

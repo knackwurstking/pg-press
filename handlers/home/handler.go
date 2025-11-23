@@ -30,7 +30,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetHomePage(c echo.Context) error {
 	page := components.PageHome()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render home page")
+		return errors.Handler(err, "render home page")
 	}
 	return nil
 }

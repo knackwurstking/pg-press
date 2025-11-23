@@ -81,7 +81,7 @@ func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, re
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("failed to get last insert ID: %v", err)
+		return 0, fmt.Errorf("get last insert ID: %v", err)
 	}
 
 	return models.RegenerationID(id), nil
@@ -162,7 +162,7 @@ func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *mod
 	}
 
 	if err := s.Registry.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-		return fmt.Errorf("failed to update tool regeneration status: %v", err)
+		return fmt.Errorf("update tool regeneration status: %v", err)
 	}
 
 	return nil
@@ -178,13 +178,13 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 	lastRegeneration, err := s.GetLastRegeneration(toolID)
 	if err != nil {
 		if !errors.IsNotFoundError(err) {
-			return fmt.Errorf("failed to get last regeneration record: %v", err)
+			return fmt.Errorf("get last regeneration record: %v", err)
 		}
 		slog.Debug("No regeneration record found to abort: tool", "tool", toolID)
 	} else {
 		tool, err := s.Registry.Tools.Get(toolID)
 		if err != nil {
-			return fmt.Errorf("failed to get tool: %v", err)
+			return fmt.Errorf("get tool: %v", err)
 		}
 		if !tool.Regenerating {
 			return fmt.Errorf("tool is not regenerating")
@@ -192,13 +192,13 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 
 		slog.Debug("Deleting regeneration record", "user_name", user.Name, "last_regeneration_id", lastRegeneration.ID)
 		if err := s.Delete(lastRegeneration.ID); err != nil {
-			return fmt.Errorf("failed to delete regeneration record: %v", err)
+			return fmt.Errorf("delete regeneration record: %v", err)
 		}
 	}
 
 	slog.Debug("Setting tool to non-regenerating status: tool", "tool", toolID)
 	if err := s.Registry.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-		return fmt.Errorf("failed to update tool regeneration status: %v", err)
+		return fmt.Errorf("update tool regeneration status: %v", err)
 	}
 
 	return nil
@@ -282,7 +282,7 @@ func scanToolRegeneration(scannable Scannable) (*models.Regeneration, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan tool regeneration: %v", err)
+		return nil, fmt.Errorf("scan tool regeneration: %v", err)
 	}
 
 	if performedBy.Valid {

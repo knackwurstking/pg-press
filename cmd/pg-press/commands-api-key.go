@@ -16,7 +16,7 @@ func apiKeyCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				apiKey, err := keymaker.NewApiKey("pgp", 32)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Generating a new api key failed: %s\n", err.Error())
+					fmt.Fprintf(os.Stderr, "Generating a new api key: %v\n", err)
 					return err
 				}
 

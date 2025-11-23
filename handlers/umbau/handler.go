@@ -37,12 +37,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetUmbauPage(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "get user from context")
 	}
 
 	pressNumberParam, err := utils.ParseParamInt8(c, "press")
 	if err != nil {
-		return errors.BadRequest(err, "failed to parse press number")
+		return errors.BadRequest(err, "parse press number")
 	}
 
 	pressNumber := models.PressNumber(pressNumberParam)
@@ -54,7 +54,7 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return errors.Handler(err, "failed to list tools")
+		return errors.Handler(err, "list tools")
 	}
 
 	umbauPage := components.PageUmbau(&components.PageUmbauProps{
@@ -64,7 +64,7 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 	})
 
 	if err := umbauPage.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "failed to render press umbau page")
+		return errors.Handler(err, "render press umbau page")
 	}
 
 	return nil
@@ -74,13 +74,13 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	// Get the user from the request context
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return errors.BadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "get user from context")
 	}
 
 	// Get the press number from the request context
 	pressNumberParam, err := utils.ParseParamInt8(c, "press")
 	if err != nil {
-		return errors.BadRequest(err, "failed to parse press number")
+		return errors.BadRequest(err, "parse press number")
 	}
 
 	// Validate the press number
@@ -122,7 +122,7 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	// Get a list with all tools
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return errors.Handler(err, "failed to get tools")
+		return errors.Handler(err, "get tools")
 	}
 
 	// Get the top tool
@@ -145,21 +145,21 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	// Get current tools for press
 	currentTools, err := h.registry.Tools.GetByPress(&pressNumber)
 	if err != nil {
-		return errors.Handler(err, "failed to get current tools for press")
+		return errors.Handler(err, "get current tools for press")
 	}
 
 	// Create final cycle entries for current tools with total cycles
 	for _, tool := range currentTools {
 		cycle := models.NewCycle(pressNumber, tool.ID, tool.Position, totalCycles, user.TelegramID)
 		if _, err := h.registry.PressCycles.Add(cycle, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("failed to create final cycle for tool %d", tool.ID))
+			return errors.Handler(err, fmt.Sprintf("create final cycle for tool %d", tool.ID))
 		}
 	}
 
 	// Unassign current tools from press
 	for _, tool := range currentTools {
 		if err := h.registry.Tools.UpdatePress(tool.ID, nil, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("failed to unassign tool %d", tool.ID))
+			return errors.Handler(err, fmt.Sprintf("unassign tool %d", tool.ID))
 		}
 	}
 
@@ -167,7 +167,7 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	newTools := []*models.Tool{topTool, bottomTool}
 	for _, tool := range newTools {
 		if err := h.registry.Tools.UpdatePress(tool.ID, &pressNumber, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("failed to assign tool %d to press", tool.ID))
+			return errors.Handler(err, fmt.Sprintf("assign tool %d to press", tool.ID))
 		}
 	}
 

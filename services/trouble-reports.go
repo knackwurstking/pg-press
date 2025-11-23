@@ -80,7 +80,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return 0, fmt.Errorf("failed to marshal linked attachments: %v", err)
+		return 0, fmt.Errorf("marshal linked attachments: %v", err)
 	}
 
 	query := fmt.Sprintf(`INSERT INTO %s (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`,
@@ -129,7 +129,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return fmt.Errorf("failed to marshal linked attachments: %v", err)
+		return fmt.Errorf("marshal linked attachments: %v", err)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`,
@@ -183,7 +183,7 @@ func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.
 
 	attachments, err := s.LoadAttachments(tr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load attachments: %v", err)
+		return nil, fmt.Errorf("load attachments: %v", err)
 	}
 
 	return &models.TroubleReportWithAttachments{
@@ -384,11 +384,11 @@ func scanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
 		if err == sql.ErrNoRows {
 			return nil, err
 		}
-		return nil, fmt.Errorf("failed to scan trouble report: %v", err)
+		return nil, fmt.Errorf("scan trouble report: %v", err)
 	}
 
 	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal linked attachments: %v", err)
+		return nil, fmt.Errorf("unmarshal linked attachments: %v", err)
 	}
 
 	return report, nil
