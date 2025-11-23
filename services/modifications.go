@@ -176,7 +176,15 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
-	return ScanSingleRow(row, scanModification)
+	mod, err := ScanSingleRow(row, scanModification)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("modification")
+		}
+		return nil, err
+	}
+
+	return mod, nil
 }
 
 func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
@@ -195,7 +203,15 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
-	return ScanSingleRow(row, scanModification)
+	mod, err := ScanSingleRow(row, scanModification)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError("modification")
+		}
+		return nil, err
+	}
+
+	return mod, nil
 }
 
 func (s *Modifications) Delete(id models.ModificationID) error {

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -65,7 +66,15 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
 	)
 
 	row := n.DB.QueryRow(query, id)
-	return ScanSingleRow(row, scanNote)
+	note, err := ScanSingleRow(row, scanNote)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
+		}
+		return nil, n.GetSelectError(err)
+	}
+
+	return note, nil
 }
 
 func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
