@@ -22,12 +22,13 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Style Improvements
 
-- [ ] Tool List Item: Update item styles to reduce card-like appearance [1]
-- [ ] Tool List Item: Display regeneration count [2]
-- [ ] Tool List Item: Display notes count (all 3 levels) [3]
+- [x] Tool List Item: Update item styles to reduce card-like appearance
+- [x] Tool List Item: Display regeneration count
+- [x] Tool List Item: Display notes count (all 3 levels)
 
 ### Refactoring
 
 - [x] Move handlers error utils to the errors package
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
-- [ ] Tools list: Server-side search [4]
+- [ ] Services needs to handler proper return the not found error type everywhere possible
+- [ ] Tools list: Server-side search
