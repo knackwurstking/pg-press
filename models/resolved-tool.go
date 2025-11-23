@@ -2,8 +2,9 @@ package models
 
 type ResolvedTool struct {
 	*Tool
-	bindingTool *Tool
-	notes       []*Note
+	bindingTool   *Tool
+	notes         []*Note
+	regenerations []*Regeneration
 }
 
 func NewResolvedTool(tool *Tool, bindingTool *Tool, notes []*Note) *ResolvedTool {
@@ -20,4 +21,8 @@ func (rt *ResolvedTool) GetBindingTool() *Tool {
 
 func (rt *ResolvedTool) GetNotes() []*Note {
 	return rt.notes
+}
+
+func (rt *ResolvedTool) GetRegenerations() []*Regeneration {
+	return rt.regenerations
 }
