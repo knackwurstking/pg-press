@@ -19,7 +19,7 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 	}
 	<a
 		role="button"
-		class="outline contrast flex justify-between items-center p"
+		class="ghost contrast flex justify-between items-center p"
 		href={ templ.URL(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID)) }
 	>
 		<div class="flex gap justify-between w-full">

@@ -45,7 +45,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		if options == nil {
 			options = &ToolAnchorOptions{}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<a role=\"button\" class=\"outline contrast flex justify-between items-center p\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<a role=\"button\" class=\"ghost contrast flex justify-between items-center p\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
