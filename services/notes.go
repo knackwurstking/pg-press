@@ -1,4 +1,3 @@
-// TODO: Services needs to handler proper return the not found error type everywhere possible
 package services
 
 import (
