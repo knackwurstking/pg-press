@@ -8,11 +8,11 @@ import (
 )
 
 type ToolAnchorOptions struct {
-	EnableStatusBadge  bool
-	EnableBindingBadge bool
-	EnableTotalCycles  bool
-	NotesCount         int
-	RegenerationsCount int
+	EnableStatusBadge        bool
+	EnableBindingBadge       bool
+	EnableTotalCycles        bool
+	EnableNotesCount         bool
+	EnableRegenerationsCount bool
 }
 
 templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
@@ -64,20 +64,23 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 			class="flex justify-end items-center gap-sm text-sm"
 			style="position: absolute; top: 0; right: 0;"
 		>
-			if options.NotesCount > 0 {
+			{{ notes := tool.GetNotes() }}
+			if options.EnableNotesCount && len(notes) > 0 {
 				<span class="info ghost">
 					<i class="bi bi-info-circle"></i>
 					<span>
-						{ options.NotesCount }
+						{ len(notes) }
 					</span>
 				</span>
 			}
-			<span class="warning ghost">
-				<i class="bi bi-arrow-repeat"></i>
-				<span>
-					{ options.RegenerationsCount }
+			if options.EnableRegenerationsCount {
+				<span class="warning ghost">
+					<i class="bi bi-arrow-repeat"></i>
+					<span>
+						{ len(tool.GetRegenerations()) }
+					</span>
 				</span>
-			</span>
+			}
 		</span>
 	</a>
 }
