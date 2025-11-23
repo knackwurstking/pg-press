@@ -3,6 +3,7 @@ all: init build
 BINARY_NAME := pg-press
 
 SERVER_ADDR := :9020
+SERVER_ADDR_DEV := :8888
 SERVER_PATH_PREFIX := /$(BINARY_NAME)
 
 BIN_DIR := ./bin
@@ -38,7 +39,7 @@ dev:
 	export LOG_LEVEL=debug && \
 	export LOG_FORMAT=text && \
 	export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
-	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR}
+	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR_DEV}
 
 build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
@@ -127,3 +128,9 @@ macos-watch-service:
 		echo "Log file not found. Make sure the service is running or has been started."; \
 		echo "Log file path: \"$(LOG_FILE)\""; \
 	fi
+
+macos-update: all
+	make macos-stop-service
+	make macos-install
+	make macos-start-service
+	make macos-watch-service
