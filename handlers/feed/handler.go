@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/feed/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -32,7 +33,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetFeedPage(c echo.Context) error {
 	page := components.PageFeed()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render feed page")
+		return errors.Handler(err, "failed to render feed page")
 	}
 	return nil
 }
@@ -40,12 +41,12 @@ func (h *Handler) GetFeedPage(c echo.Context) error {
 func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	feeds, err := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
 	if err != nil {
-		return utils.HandleError(err, "failed to get feeds")
+		return errors.Handler(err, "failed to get feeds")
 	}
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	userMap := make(map[models.TelegramID]*models.User)
@@ -60,7 +61,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 
 	feedData := components.FeedsList(feeds, user.LastFeed, userMap)
 	if err := feedData.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render feed data")
+		return errors.Handler(err, "failed to render feed data")
 	}
 
 	if len(feeds) > 0 && feeds[0].ID != user.LastFeed {
@@ -70,7 +71,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 			"user_name", user.Name, "last_feed_from", oldLastFeed, "last_feed_to", user.LastFeed)
 
 		if err := h.registry.Users.Update(user); err != nil {
-			return utils.HandleError(err, "failed to update user's last feed")
+			return errors.Handler(err, "failed to update user's last feed")
 		}
 	}
 

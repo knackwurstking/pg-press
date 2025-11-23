@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/tools/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -37,12 +38,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetToolsPage(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	page := components.PageTools(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tools page")
+		return errors.Handler(err, "failed to render tools page")
 	}
 	return nil
 }
@@ -50,22 +51,22 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "invalid or missing id parameter")
+		return errors.BadRequest(err, "invalid or missing id parameter")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool for deletion")
+		return errors.Handler(err, "failed to get tool for deletion")
 	}
 
 	if err := h.registry.Tools.Delete(toolID, user); err != nil {
-		return utils.HandleError(err, "failed to delete tool")
+		return errors.Handler(err, "failed to delete tool")
 	}
 
 	slog.Info("Tool deleted", "id", toolID, "user_name", user.Name)
@@ -80,26 +81,26 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "invalid or missing id parameter")
+		return errors.BadRequest(err, "invalid or missing id parameter")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool for marking as dead")
+		return errors.Handler(err, "failed to get tool for marking as dead")
 	}
 
 	if tool.IsDead {
-		return utils.HandleBadRequest(nil, "tool is already marked as dead")
+		return errors.BadRequest(nil, "tool is already marked as dead")
 	}
 
 	if err := h.registry.Tools.MarkAsDead(toolID, user); err != nil {
-		return utils.HandleError(err, "failed to mark tool as dead")
+		return errors.Handler(err, "failed to mark tool as dead")
 	}
 
 	slog.Info("Tool marked as dead", "id", toolID, "user_name", user.Name)
@@ -114,12 +115,12 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 	pressUtilization, err := h.registry.Tools.GetPressUtilization()
 	if err != nil {
-		return utils.HandleError(err, "failed to get press utilization")
+		return errors.Handler(err, "failed to get press utilization")
 	}
 
 	section := components.SectionPress(pressUtilization)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render press section")
+		return errors.Handler(err, "failed to render press section")
 	}
 	return nil
 }
@@ -127,7 +128,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	allTools, err := h.registry.Tools.List()
 	if err != nil {
-		return utils.HandleError(err, "failed to get tools from database")
+		return errors.Handler(err, "failed to get tools from database")
 	}
 
 	var tools []*models.ResolvedTool
@@ -140,13 +141,13 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		if t.IsBound() {
 			bindingTool, err = h.registry.Tools.Get(*t.Binding)
 			if err != nil {
-				return utils.HandleError(err, "failed to get binding tool")
+				return errors.Handler(err, "failed to get binding tool")
 			}
 		}
 
 		notes, err := h.registry.Notes.GetByTool(t.ID)
 		if err != nil {
-			return utils.HandleError(err, "failed to get notes for tool")
+			return errors.Handler(err, "failed to get notes for tool")
 		}
 
 		tools = append(tools, models.NewResolvedTool(t, bindingTool, notes))
@@ -154,7 +155,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 
 	section := components.SectionTools(tools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tools section")
+		return errors.Handler(err, "failed to render tools section")
 	}
 	return nil
 }
@@ -162,19 +163,19 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	slog.Info("User requested overlapping tools analysis", "user_name", user.Name)
 
 	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
 	if err != nil {
-		return utils.HandleError(err, "failed to get overlapping tools")
+		return errors.Handler(err, "failed to get overlapping tools")
 	}
 
 	section := components.AdminToolsSectionContent(overlappingTools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render admin overlapping tools section")
+		return errors.Handler(err, "failed to render admin overlapping tools section")
 	}
 	return nil
 }

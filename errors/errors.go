@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-func GetHTTPStatusCode(err error) int {
+func GetHTTPStatusCodeFromError(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
@@ -24,6 +26,33 @@ func GetHTTPStatusCode(err error) int {
 	}
 
 	return http.StatusInternalServerError
+}
+
+func NotFound(err error, format string, a ...any) *echo.HTTPError {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusNotFound, Wrap(nil, format, a...))
+	}
+
+	return echo.NewHTTPError(http.StatusNotFound, Wrap(err, format, a...))
+}
+
+func BadRequest(err error, format string, a ...any) *echo.HTTPError {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusBadRequest, Wrap(nil, format, a...))
+	}
+
+	return echo.NewHTTPError(http.StatusBadRequest, Wrap(err, format, a...))
+}
+
+func Handler(err error, format string, a ...any) *echo.HTTPError {
+	if err == nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, Wrap(nil, format, a...))
+	}
+	statusCode := GetHTTPStatusCodeFromError(err)
+	if statusCode == 0 {
+		statusCode = http.StatusInternalServerError
+	}
+	return echo.NewHTTPError(statusCode, Wrap(err, format, a...))
 }
 
 func Wrap(err error, format string, a ...any) error {

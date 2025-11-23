@@ -28,5 +28,6 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Refactoring
 
+- [x] Move handlers error utils to the errors package
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
 - [ ] Tools list: Server-side search [4]

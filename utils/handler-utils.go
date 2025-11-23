@@ -8,39 +8,9 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
-
-func HandleNotFound(err error, message string) error {
-	if err == nil {
-		return echo.NewHTTPError(http.StatusNotFound, message)
-	}
-
-	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("%s: %v", message, err))
-}
-
-func HandleBadRequest(err error, message string) error {
-	if err == nil {
-		return echo.NewHTTPError(http.StatusBadRequest, message)
-	}
-
-	return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s: %v", message, err))
-}
-
-// HandleError creates an HTTP error with the appropriate status code
-func HandleError(err error, context string) error {
-	if err == nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, context)
-	}
-
-	statusCode := errors.GetHTTPStatusCode(err)
-	if statusCode == 0 {
-		statusCode = http.StatusInternalServerError
-	}
-	return echo.NewHTTPError(statusCode, fmt.Sprintf("%s: %v", context, err))
-}
 
 // GetUserFromContext retrieves the authenticated user from the request context
 func GetUserFromContext(c echo.Context) (*models.User, error) {

@@ -3,6 +3,7 @@ package home
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/home/components"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -29,7 +30,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetHomePage(c echo.Context) error {
 	page := components.PageHome()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render home page")
+		return errors.Handler(err, "failed to render home page")
 	}
 	return nil
 }

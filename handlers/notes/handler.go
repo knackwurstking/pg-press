@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/notes/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -41,7 +42,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	notes, err := h.registry.Notes.List()
 	if err != nil {
 		slog.Error("Failed to retrieve notes from database", "error", err)
-		return utils.HandleError(err, "failed to get notes from database")
+		return errors.Handler(err, "failed to get notes from database")
 	}
 
 	// Handle case where notes might be nil
@@ -56,7 +57,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	tools, err := h.registry.Tools.List()
 	if err != nil {
 		slog.Error("Failed to retrieve tools from database", "error", err)
-		return utils.HandleError(err, "failed to get tools from database")
+		return errors.Handler(err, "failed to get tools from database")
 	}
 
 	// Handle case where tools might be nil
@@ -73,7 +74,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render notes page")
+		return errors.Handler(err, "failed to render notes page")
 	}
 
 	return nil
@@ -83,18 +84,18 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	idq, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse note ID")
+		return errors.BadRequest(err, "failed to parse note ID")
 	}
 	noteID := models.NoteID(idq)
 
 	// Delete the note
 	if err := h.registry.Notes.Delete(noteID); err != nil {
-		return utils.HandleError(err, "failed to delete note")
+		return errors.Handler(err, "failed to delete note")
 	}
 
 	slog.Info("Deleted note", "note", noteID, "user_name", user.Name)
@@ -114,17 +115,17 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 func (h *Handler) HTMXGetNotesGrid(c echo.Context) error {
 	notes, err := h.registry.Notes.List()
 	if err != nil {
-		return utils.HandleError(err, "failed to list notes")
+		return errors.Handler(err, "failed to list notes")
 	}
 
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return utils.HandleError(err, "failed to list tools")
+		return errors.Handler(err, "failed to list tools")
 	}
 
 	ng := components.PageNotes_NotesGrid(notes, tools)
 	if err := ng.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render notes grid")
+		return errors.Handler(err, "failed to render notes grid")
 	}
 	return nil
 }

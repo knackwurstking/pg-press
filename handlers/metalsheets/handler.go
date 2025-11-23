@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -34,31 +35,31 @@ func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	// Extract metal sheet ID from query parameters
 	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get id from query")
+		return errors.BadRequest(err, "failed to get id from query")
 	}
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet before deletion for feed creation
 	existingSheet, err := h.registry.MetalSheets.Get(metalSheetID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get existing metal sheet from database")
+		return errors.Handler(err, "failed to get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
 	tool, err := h.registry.Tools.Get(existingSheet.ToolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool from database")
+		return errors.Handler(err, "failed to get tool from database")
 	}
 
 	// Delete the metal sheet from database
 	if err := h.registry.MetalSheets.Delete(metalSheetID); err != nil {
-		return utils.HandleError(err, "failed to delete metal sheet from database")
+		return errors.Handler(err, "failed to delete metal sheet from database")
 	}
 
 	// Create feed entry for the deleted metal sheet

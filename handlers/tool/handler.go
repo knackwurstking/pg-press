@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/tool/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -69,12 +70,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetToolPage(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	idParam, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse id from query parameter")
+		return errors.BadRequest(err, "failed to parse id from query parameter")
 	}
 	toolID := models.ToolID(idParam)
 
@@ -82,7 +83,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	}
 
 	page := components.PageTool(&components.PageToolProps{
@@ -93,7 +94,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool page")
+		return errors.Handler(err, "failed to render tool page")
 	}
 
 	return nil
@@ -104,7 +105,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	{ // Check for admin
 		user, err := utils.GetUserFromContext(c)
 		if err != nil {
-			return utils.HandleBadRequest(err, "failed to get user from context")
+			return errors.BadRequest(err, "failed to get user from context")
 		}
 		isAdmin = user.IsAdmin()
 	}
@@ -112,17 +113,17 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	// Get tool from param "/:id"
 	toolIDQuery, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool_id")
+		return errors.BadRequest(err, "failed to parse tool_id")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	var tool *models.ResolvedTool
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	} else {
 		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
-			return utils.HandleError(err, "failed to resolve tool")
+			return errors.Handler(err, "failed to resolve tool")
 		}
 	}
 
@@ -130,13 +131,13 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	{ // Get target_id from form value
 		targetIDString := c.FormValue("target_id")
 		if targetIDString == "" {
-			return utils.HandleBadRequest(nil, fmt.Sprintf(
+			return errors.BadRequest(nil, fmt.Sprintf(
 				"failed to parse target_id: %+v", targetIDString))
 		}
 
 		targetIDParsed, err := strconv.ParseInt(targetIDString, 10, 64)
 		if err != nil {
-			return utils.HandleBadRequest(err, "invalid target_id")
+			return errors.BadRequest(err, "invalid target_id")
 		}
 		targetID = models.ToolID(targetIDParsed)
 	}
@@ -159,7 +160,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 
 		// Bind tool to target, this will get an error if target already has a binding
 		if err = h.registry.Tools.Bind(cassette, target); err != nil {
-			return utils.HandleError(err, "failed to bind tool")
+			return errors.Handler(err, "failed to bind tool")
 		}
 	}
 
@@ -180,7 +181,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render binding section")
+		return errors.Handler(err, "failed to render binding section")
 	}
 
 	return nil
@@ -191,7 +192,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	{ // Check for admin
 		user, err := utils.GetUserFromContext(c)
 		if err != nil {
-			return utils.HandleBadRequest(err, "failed to get user from context")
+			return errors.BadRequest(err, "failed to get user from context")
 		}
 		isAdmin = user.IsAdmin()
 	}
@@ -199,22 +200,22 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	// Get tool from param "/:id"
 	toolIDParam, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool_id")
+		return errors.BadRequest(err, "failed to parse tool_id")
 	}
 	toolID := models.ToolID(toolIDParam)
 
 	if err := h.registry.Tools.UnBind(toolID); err != nil {
-		return utils.HandleError(err, "failed to unbind tool")
+		return errors.Handler(err, "failed to unbind tool")
 	}
 
 	// Get tools for rendering the template
 	var tool *models.ResolvedTool
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return utils.HandleBadRequest(err, "failed to get tool")
+		return errors.BadRequest(err, "failed to get tool")
 	} else {
 		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
-			return utils.HandleError(err, "failed to resolve tool")
+			return errors.Handler(err, "failed to resolve tool")
 		}
 	}
 
@@ -232,7 +233,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render binding section")
+		return errors.Handler(err, "failed to render binding section")
 	}
 
 	return nil
@@ -241,22 +242,22 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	toolIDParam, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool_id")
+		return errors.BadRequest(err, "failed to parse tool_id")
 	}
 	toolID := models.ToolID(toolIDParam)
 
 	var tool *models.ResolvedTool
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	} else {
 		tool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
-			return utils.HandleError(err, "failed to resolve tool")
+			return errors.Handler(err, "failed to resolve tool")
 		}
 	}
 
@@ -264,7 +265,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	{
 		cycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
 		if err != nil {
-			return utils.HandleError(err, "failed to get press cycles")
+			return errors.Handler(err, "failed to get press cycles")
 		}
 
 		filteredCycles = models.FilterCyclesByToolPosition(
@@ -306,7 +307,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	})
 
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		utils.HandleError(err, "failed to render tool cycles")
+		errors.Handler(err, "failed to render tool cycles")
 	}
 
 	return nil
@@ -316,19 +317,19 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	// Get tool and position parameters
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool ID")
+		return errors.BadRequest(err, "failed to parse tool ID")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	}
 
 	// Get cycles for this specific tool
 	toolCycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get press cycles")
+		return errors.Handler(err, "failed to get press cycles")
 	}
 
 	// Filter cycles by position
@@ -344,38 +345,38 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse ID query")
+		return errors.BadRequest(err, "failed to parse ID query")
 	}
 	cycleID := models.CycleID(cycleIDQuery)
 
 	// Get cycle data before deletion for the feed
 	cycle, err := h.registry.PressCycles.Get(cycleID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get cycle for deletion")
+		return errors.Handler(err, "failed to get cycle for deletion")
 	}
 
 	tool, err := h.registry.Tools.Get(cycle.ToolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool for deletion")
+		return errors.Handler(err, "failed to get tool for deletion")
 	}
 
 	// Check if there are any regenerations associated with this cycle
 	hasRegenerations, err := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
 	if err != nil {
-		return utils.HandleError(err, "failed to check for regenerations")
+		return errors.Handler(err, "failed to check for regenerations")
 	}
 
 	if hasRegenerations {
-		return utils.HandleBadRequest(nil, "Cannot delete cycle: it has associated regenerations. Please remove regenerations first.")
+		return errors.BadRequest(nil, "Cannot delete cycle: it has associated regenerations. Please remove regenerations first.")
 	}
 
 	if err := h.registry.PressCycles.Delete(cycleID); err != nil {
-		return utils.HandleError(err, "failed to delete press cycle")
+		return errors.Handler(err, "failed to delete press cycle")
 	}
 
 	{ // Create Feed
@@ -394,12 +395,12 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool_id")
+		return errors.BadRequest(err, "failed to parse tool_id")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
@@ -407,7 +408,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	}
 
 	// Fetch metal sheets assigned to this tool
@@ -421,7 +422,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	metalSheetsSection := components.PageTool_MetalSheets(user, metalSheets, tool)
 
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool metal sheets section")
+		return errors.Handler(err, "failed to render tool metal sheets section")
 	}
 
 	return nil
@@ -430,7 +431,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool_id")
+		return errors.BadRequest(err, "failed to parse tool_id")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
@@ -439,13 +440,13 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	// Get the tool
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool")
+		return errors.Handler(err, "failed to get tool")
 	}
 
 	// Get notes for this tool
 	notes, err := h.registry.Notes.GetByTool(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get notes for tool")
+		return errors.Handler(err, "failed to get notes for tool")
 	}
 
 	// Create ToolWithNotes for template compatibility
@@ -453,7 +454,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	notesSection := components.PageTool_Notes(resolvedTool)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool notes section")
+		return errors.Handler(err, "failed to render tool notes section")
 	}
 
 	return nil
@@ -462,12 +463,12 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	var regenerationID models.RegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
-		return utils.HandleBadRequest(err, "failed to get the regeneration id from url query")
+		return errors.BadRequest(err, "failed to get the regeneration id from url query")
 	} else {
 		regenerationID = models.RegenerationID(id)
 	}
@@ -476,13 +477,13 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 
 	var regeneration *models.ResolvedRegeneration
 	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
-		return utils.HandleError(err, "failed to get regeneration before deleting")
+		return errors.Handler(err, "failed to get regeneration before deleting")
 	} else {
 		regeneration, err = services.ResolveRegeneration(h.registry, r)
 	}
 
 	if err := h.registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
-		return utils.HandleError(err, "failed to delete regeneration")
+		return errors.Handler(err, "failed to delete regeneration")
 	}
 
 	{ // Create Feed
@@ -514,23 +515,23 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool ID")
+		return errors.BadRequest(err, "failed to parse tool ID")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool from database")
+		return errors.Handler(err, "failed to get tool from database")
 	}
 
 	statusEdit := h.renderStatusComponent(tool, true, user)
 	if err := statusEdit.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool status edit")
+		return errors.Handler(err, "failed to render tool status edit")
 	}
 
 	return nil
@@ -539,23 +540,23 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleError(err, "failed to get user from context")
+		return errors.Handler(err, "failed to get user from context")
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to parse tool ID")
+		return errors.BadRequest(err, "failed to parse tool ID")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool from database")
+		return errors.Handler(err, "failed to get tool from database")
 	}
 
 	statusDisplay := h.renderStatusComponent(tool, false, user)
 	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render tool status display")
+		return errors.Handler(err, "failed to render tool status display")
 	}
 
 	return nil
@@ -564,28 +565,28 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	user, err := utils.GetUserFromContext(c)
 	if err != nil {
-		return utils.HandleBadRequest(err, "failed to get user from context")
+		return errors.BadRequest(err, "failed to get user from context")
 	}
 
 	toolIDStr := c.FormValue("tool_id")
 	if toolIDStr == "" {
-		return utils.HandleBadRequest(nil, "tool_id is required")
+		return errors.BadRequest(nil, "tool_id is required")
 	}
 
 	toolIDQuery, err := strconv.ParseInt(toolIDStr, 10, 64)
 	if err != nil {
-		return utils.HandleBadRequest(nil, "invalid tool_id")
+		return errors.BadRequest(nil, "invalid tool_id")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	statusStr := c.FormValue("status")
 	if statusStr == "" {
-		return utils.HandleBadRequest(nil, "status is required")
+		return errors.BadRequest(nil, "status is required")
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get tool from database")
+		return errors.Handler(err, "failed to get tool from database")
 	}
 
 	slog.Info(
@@ -602,7 +603,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		// Start regeneration
 		_, err := h.registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
 		if err != nil {
-			return utils.HandleError(err, "failed to start tool regeneration")
+			return errors.Handler(err, "failed to start tool regeneration")
 		}
 
 		{ // Create Feed
@@ -613,7 +614,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 
 	case "active":
 		if err := h.registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
-			return utils.HandleError(err, "failed to stop tool regeneration")
+			return errors.Handler(err, "failed to stop tool regeneration")
 		}
 
 		{ // Create Feed
@@ -626,7 +627,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
 		if err := h.registry.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
-			return utils.HandleError(err, "failed to abort tool regeneration")
+			return errors.Handler(err, "failed to abort tool regeneration")
 		}
 
 		{ // Create Feed
@@ -637,19 +638,19 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 		}
 
 	default:
-		return utils.HandleBadRequest(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
+		return errors.BadRequest(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
 	}
 
 	// Get updated tool and render status display
 	updatedTool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return utils.HandleError(err, "failed to get updated tool from database")
+		return errors.Handler(err, "failed to get updated tool from database")
 	}
 
 	// Render the updated status component
 	statusDisplay := h.renderStatusComponent(updatedTool, false, user)
 	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
-		return utils.HandleError(err, "failed to render updated tool status")
+		return errors.Handler(err, "failed to render updated tool status")
 	}
 
 	// Render out-of-band swap for cycles section to trigger reload
@@ -691,7 +692,7 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) 
 	// Get all tools
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		return nil, utils.HandleError(err, "failed to get tools")
+		return nil, errors.Handler(err, "failed to get tools")
 	}
 	// Filter tools for binding
 	for _, t := range tools {

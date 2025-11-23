@@ -3,6 +3,7 @@ package help
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/help/components"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -28,7 +29,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 func (h *Handler) GetMarkdown(c echo.Context) error {
 	page := components.PageHelpMarkdown()
 	if err := page.Render(c.Request().Context(), c.Response().Writer); err != nil {
-		return utils.HandleError(err, "render help page failed")
+		return errors.Handler(err, "render help page failed")
 	}
 	return nil
 }

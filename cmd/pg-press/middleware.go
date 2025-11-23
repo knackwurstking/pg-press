@@ -106,7 +106,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
 			slog.Info("Authentication failed", "real_ip", realIP)
-			return false, echo.NewHTTPError(errors.GetHTTPStatusCode(err), "failed to validate user from API key: "+err.Error())
+			return false, echo.NewHTTPError(errors.GetHTTPStatusCodeFromError(err), "failed to validate user from API key: "+err.Error())
 		}
 		slog.Debug("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	}
