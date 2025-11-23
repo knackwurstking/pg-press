@@ -32,3 +32,6 @@ This document outlines the planned features and improvements for the PG Press sy
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
 - [ ] Services needs to handler proper return the not found error type everywhere possible
 - [ ] Tools list: Server-side search
+- [ ] Remove useless stuff from models (user, note, modification, feed, metalsheet, cookie, attachment)
+- [ ] Migrate attachment ID to numeric ID
+- [ ] Move javascript to /assets/js/page-trouble-reports.js
