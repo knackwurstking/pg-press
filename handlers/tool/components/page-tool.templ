@@ -183,10 +183,16 @@ templ PageTool_BindingSection(props PageTool_BindingSectionProps) {
 		</span>
 		if props.Tool.IsBound() {
 			<span>
+				// Display the binding tool
 				@components.ToolAnchor(
-					models.NewResolvedTool(props.Tool.GetBindingTool(),
-						props.Tool.Tool, props.Tool.GetNotes()),
-					nil,
+					models.NewResolvedTool(
+						props.Tool.GetBindingTool(),
+						props.Tool.Tool,
+						nil,
+					),
+					&components.ToolAnchorOptions{
+						EnableTotalCycles: true,
+					},
 				)
 			</span>
 		}
