@@ -11,6 +11,8 @@ type ToolAnchorOptions struct {
 	EnableStatusBadge  bool
 	EnableBindingBadge bool
 	EnableTotalCycles  bool
+	NotesCount         int
+	RegenerationsCount int
 }
 
 templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
@@ -22,38 +24,60 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 		class="ghost contrast flex justify-between items-center p"
 		href={ templ.URL(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID)) }
 	>
-		<div class="flex gap justify-between w-full">
-			<div class="flex flex-col gap w-full">
-				<span class="text-semibold">
-					{ tool.String() }
-				</span>
-				<div class="flex gap justify-between items-center w-full">
-					@PositionBadge(tool.Position, "primary text-bold")
-					if options.EnableStatusBadge {
-						@ToolStatusBadge(tool.Tool)
-					}
-					if options.EnableTotalCycles {
-						<span
-							class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-							hx-get={ utils.HXGetToolTotalCycles(tool.ID, tool.Position, false) }
-							hx-trigger="load"
-							hx-swap="innerHTML"
-							hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-						></span>
-					}
-				</div>
-				if tool.Position == models.PositionTop && tool.IsBound() {
-					<div class="text-sm italic info ghost">
-						if tool.GetBindingTool() == nil {
-							<i>Ooops, there is no binding tool</i>
-						} else {
-							{{ bindingTool := tool.GetBindingTool() }}
-							<i>Kassette: { bindingTool.Code } { bindingTool.Type }</i>
-						}
-					</div>
+		<div class="flex flex-col gap justify-between w-full">
+			// Title
+			<span class="text-semibold">
+				{ tool.String() }
+			</span>
+			// Badges
+			<div class="flex gap justify-between items-center w-full">
+				@PositionBadge(tool.Position, "primary text-bold")
+				if options.EnableStatusBadge {
+					@ToolStatusBadge(tool.Tool)
+				}
+				if options.EnableTotalCycles {
+					<span
+						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+						hx-get={ utils.HXGetToolTotalCycles(tool.ID, tool.Position, false) }
+						hx-trigger="load"
+						hx-swap="innerHTML"
+						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					></span>
 				}
 			</div>
+			// Bindings
+			if tool.Position == models.PositionTop && tool.IsBound() {
+				<div class="text-sm italic info ghost">
+					if tool.GetBindingTool() == nil {
+						<i>Ooops, there is no binding tool</i>
+					} else {
+						{{ bindingTool := tool.GetBindingTool() }}
+						<i>Kassette: { bindingTool.Code } { bindingTool.Type }</i>
+					}
+				</div>
+			}
 		</div>
-		<i class="bi bi-chevron-right"></i>
+		<div class="flex flex-col gap justify-between items-center">
+			<i class="bi bi-chevron-right"></i>
+		</div>
+		<span
+			class="flex justify-end items-center gap-sm text-sm"
+			style="position: absolute; top: 0; right: 0;"
+		>
+			if options.NotesCount > 0 {
+				<span class="info ghost">
+					<i class="bi bi-info-circle"></i>
+					<span>
+						{ options.NotesCount }
+					</span>
+				</span>
+			}
+			<span class="warning ghost">
+				<i class="bi bi-arrow-repeat"></i>
+				<span>
+					{ options.RegenerationsCount }
+				</span>
+			</span>
+		</span>
 	</a>
 }
