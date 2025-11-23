@@ -1,3 +1,4 @@
+// TODO: Services needs to handler proper return the not found error type everywhere possible
 package services
 
 import (
@@ -11,7 +12,6 @@ import (
 
 const TableNameNotes = "notes"
 
-// TODO: refactor error return, need a proper not found error handling
 type Notes struct {
 	*Base
 }
