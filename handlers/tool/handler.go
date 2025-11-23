@@ -450,7 +450,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	}
 
 	// Create ToolWithNotes for template compatibility
-	resolvedTool := models.NewResolvedTool(tool, nil, notes)
+	resolvedTool := models.NewResolvedTool(tool, nil, notes, nil)
 	notesSection := components.PageTool_Notes(resolvedTool)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {

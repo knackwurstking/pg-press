@@ -137,20 +137,12 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 			continue
 		}
 
-		var bindingTool *models.Tool
-		if t.IsBound() {
-			bindingTool, err = h.registry.Tools.Get(*t.Binding)
-			if err != nil {
-				return errors.Handler(err, "failed to get binding tool")
-			}
-		}
-
-		notes, err := h.registry.Notes.GetByTool(t.ID)
+		rt, err := services.ResolveTool(h.registry, t)
 		if err != nil {
-			return errors.Handler(err, "failed to get notes for tool")
+			return errors.Handler(err, "resolving tool")
 		}
 
-		tools = append(tools, models.NewResolvedTool(t, bindingTool, notes))
+		tools = append(tools, rt)
 	}
 
 	section := components.SectionTools(tools)

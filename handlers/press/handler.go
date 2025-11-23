@@ -84,7 +84,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		if tool.Binding != nil {
 			bindingTool, _ = h.registry.Tools.Get(*tool.Binding)
 		}
-		resolvedTools = append(resolvedTools, models.NewResolvedTool(tool, bindingTool, nil))
+		resolvedTools = append(resolvedTools, models.NewResolvedTool(tool, bindingTool, nil, nil))
 	}
 
 	activeToolsSection := components.PagePress_ActiveToolsSection(resolvedTools, press)

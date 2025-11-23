@@ -7,11 +7,12 @@ type ResolvedTool struct {
 	regenerations []*Regeneration
 }
 
-func NewResolvedTool(tool *Tool, bindingTool *Tool, notes []*Note) *ResolvedTool {
+func NewResolvedTool(t *Tool, b *Tool, n []*Note, r []*Regeneration) *ResolvedTool {
 	return &ResolvedTool{
-		Tool:        tool,
-		bindingTool: bindingTool,
-		notes:       notes,
+		Tool:          t,
+		bindingTool:   b,
+		notes:         n,
+		regenerations: r,
 	}
 }
 

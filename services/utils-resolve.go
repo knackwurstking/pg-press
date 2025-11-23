@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -35,16 +36,21 @@ func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, e
 		var err error
 		bindingTool, err = registry.Tools.Get(*tool.Binding)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "get binding tool %d for %d", tool.Binding, tool.ID)
 		}
 	}
 
 	notes, err := registry.Notes.GetByTool(tool.ID)
-	if err != nil {
-		return nil, err
+	if err != nil && !errors.IsNotFoundError(err) {
+		return nil, errors.Wrap(err, "get notes for tool %d", tool.ID)
 	}
 
-	return models.NewResolvedTool(tool, bindingTool, notes), nil
+	regenerations, err := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
+	if err != nil && !errors.IsNotFoundError(err) {
+		return nil, errors.Wrap(err, "get regeneration for tool %d", tool.ID)
+	}
+
+	return models.NewResolvedTool(tool, bindingTool, notes, regenerations), nil
 }
 
 func ResolveModification[T any](registry *Registry, modification *models.Modification[any]) (*models.ResolvedModification[T], error) {

@@ -11,6 +11,7 @@ import (
 
 const TableNameNotes = "notes"
 
+// TODO: refactor error return, need a proper not found error handling
 type Notes struct {
 	*Base
 }
