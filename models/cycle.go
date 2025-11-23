@@ -43,16 +43,6 @@ func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition P
 	}
 }
 
-func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {
-	filteredCycles := make([]*Cycle, 0, len(cycles))
-	for _, cycle := range cycles {
-		if cycle.ToolPosition == toolPosition {
-			filteredCycles = append(filteredCycles, cycle)
-		}
-	}
-	return filteredCycles
-}
-
 func (c *Cycle) Validate() error {
 	if !IsValidPressNumber(&c.PressNumber) {
 		return errors.NewValidationError("invalid press number")
@@ -67,4 +57,14 @@ func (c *Cycle) Validate() error {
 		return errors.NewValidationError("total cycles must be non-negative")
 	}
 	return nil
+}
+
+func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {
+	filteredCycles := make([]*Cycle, 0, len(cycles))
+	for _, cycle := range cycles {
+		if cycle.ToolPosition == toolPosition {
+			filteredCycles = append(filteredCycles, cycle)
+		}
+	}
+	return filteredCycles
 }

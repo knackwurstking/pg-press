@@ -1,4 +1,3 @@
-// TODO: Remove useless stuff
 package models
 
 import (
@@ -8,16 +7,16 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
-type MetalSheetID int64
-
-// MachineType represents the type of machine (SACMI or SITI)
-type MachineType string
-
 // Machine type identifiers
 const (
 	MachineTypeSACMI MachineType = "SACMI"
 	MachineTypeSITI  MachineType = "SITI"
 )
+
+type MetalSheetID int64
+
+// MachineType represents the type of machine (SACMI or SITI)
+type MachineType string
 
 // String returns the string representation of the machine type
 func (mt MachineType) String() string {
@@ -39,71 +38,16 @@ func (mt MachineType) IsSITI() bool {
 	return mt == MachineTypeSITI
 }
 
-// ParseMachineType parses a string into a MachineType with validation
-func ParseMachineType(s string) (MachineType, error) {
-	mt := MachineType(s)
-	if !mt.IsValid() {
-		return "", fmt.Errorf("invalid machine type: %s (must be %s or %s)", s, MachineTypeSACMI, MachineTypeSITI)
-	}
-	return mt, nil
-}
-
-// MustParseMachineType parses a string into a MachineType, panicking on invalid input
-func MustParseMachineType(s string) MachineType {
-	mt, err := ParseMachineType(s)
-	if err != nil {
-		panic(err)
-	}
-	return mt
-}
-
-// GetAllMachineTypes returns all valid machine types
-func GetAllMachineTypes() []MachineType {
-	return []MachineType{MachineTypeSACMI, MachineTypeSITI}
-}
-
-// GetAllMachineTypeStrings returns all valid machine types as strings
-func GetAllMachineTypeStrings() []string {
-	types := GetAllMachineTypes()
-	result := make([]string, len(types))
-	for i, mt := range types {
-		result[i] = mt.String()
-	}
-	return result
-}
-
 // DisplayName returns a human-readable display name for the machine type
 func (mt MachineType) DisplayName() string {
 	switch mt {
 	case MachineTypeSACMI:
-		return "SACMI Machine"
+		return "SACMI"
 	case MachineTypeSITI:
-		return "SITI Machine"
+		return "SITI"
 	default:
 		return string(mt)
 	}
-}
-
-// MarshalJSON implements the json.Marshaler interface
-func (mt MachineType) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + string(mt) + `"`), nil
-}
-
-// UnmarshalJSON implements the json.Unmarshaler interface
-func (mt *MachineType) UnmarshalJSON(data []byte) error {
-	// Remove quotes from JSON string
-	if len(data) < 2 || data[0] != '"' || data[len(data)-1] != '"' {
-		return fmt.Errorf("invalid JSON string for MachineType: %s", string(data))
-	}
-
-	str := string(data[1 : len(data)-1])
-	parsed, err := ParseMachineType(str)
-	if err != nil {
-		return err
-	}
-
-	*mt = parsed
-	return nil
 }
 
 type MetalSheetList []*MetalSheet
@@ -203,20 +147,18 @@ func (ms *MetalSheet) Validate() error {
 	return nil
 }
 
-// SetMachineType sets the machine type identifier with validation
-func (ms *MetalSheet) SetMachineType(machineType MachineType) error {
-	if !machineType.IsValid() {
-		return fmt.Errorf("invalid machine type: %s (must be %s or %s)",
-			machineType, MachineTypeSACMI, MachineTypeSITI)
+// ParseMachineType parses a string into a MachineType with validation
+func ParseMachineType(s string) (MachineType, error) {
+	mt := MachineType(s)
+	if !mt.IsValid() {
+		return "", fmt.Errorf("invalid machine type: %s (must be %s or %s)", s, MachineTypeSACMI, MachineTypeSITI)
 	}
-	ms.Identifier = machineType
-	return nil
+	return mt, nil
 }
 
-// GetValidMachineTypes returns a slice of all valid machine types
-// Deprecated: Use GetAllMachineTypes() instead
-func GetValidMachineTypes() []MachineType {
-	return GetAllMachineTypes()
+// GetAllMachineTypes returns all valid machine types
+func GetAllMachineTypes() []MachineType {
+	return []MachineType{MachineTypeSACMI, MachineTypeSITI}
 }
 
 // GetMachineTypeForPress returns the machine type for a given press number
@@ -230,12 +172,12 @@ func GetMachineTypeForPress(pressNumber PressNumber) MachineType {
 
 // IsSACMIPress returns true if the given press number uses SACMI machines
 // Press 0 and 5 use SACMI machines
-func IsSACMIPress(pressNumber PressNumber) bool {
+func IsSACMI(pressNumber PressNumber) bool {
 	return pressNumber == 0 || pressNumber == 5
 }
 
 // IsSITIPress returns true if the given press number uses SITI machines
 // All presses except 0 and 5 use SITI machines
-func IsSITIPress(pressNumber PressNumber) bool {
-	return !IsSACMIPress(pressNumber)
+func IsSITI(pressNumber PressNumber) bool {
+	return !IsSACMI(pressNumber)
 }

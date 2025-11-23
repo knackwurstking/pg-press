@@ -161,9 +161,8 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	}
 
 	if pathMatches {
-		now := time.Now()
-		cookie.LastLogin = now.UnixMilli()
-		httpCookie.Expires = now.Add(env.CookieExpirationDuration)
+		cookie.UpdateLastLogin()
+		httpCookie.Expires = cookie.Expires()
 
 		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
 

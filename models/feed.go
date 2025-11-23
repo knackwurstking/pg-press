@@ -1,4 +1,3 @@
-// TODO: Remove useless stuff
 package models
 
 import (
@@ -57,33 +56,17 @@ func (f *Feed) Validate() error {
 }
 
 // GetCreatedTime returns the feed creation time as a Go time.Time.
-func (f *Feed) GetCreatedTime() time.Time {
+func (f *Feed) GetCreatedAt() time.Time {
 	return time.UnixMilli(f.CreatedAt)
 }
 
 // Age returns the duration since the feed was created.
 func (f *Feed) Age() time.Duration {
-	return time.Since(f.GetCreatedTime())
-}
-
-// IsOlderThan checks if the feed is older than the specified duration.
-func (f *Feed) IsOlderThan(duration time.Duration) bool {
-	return f.Age() > duration
+	return time.Since(f.GetCreatedAt())
 }
 
 // String returns a string representation of the feed.
 func (f *Feed) String() string {
 	return fmt.Sprintf("Feed{ID: %d, Title: %q, UserID: %d, CreatedAt: %s}",
-		f.ID, f.Title, f.UserID, f.GetCreatedTime().Format("2006-01-02 15:04:05"))
-}
-
-// Clone creates a copy of the feed.
-func (f *Feed) Clone() *Feed {
-	return &Feed{
-		ID:        f.ID,
-		Title:     f.Title,
-		Content:   f.Content,
-		UserID:    f.UserID,
-		CreatedAt: f.CreatedAt,
-	}
+		f.ID, f.Title, f.UserID, f.GetCreatedAt().Format("2006-01-02 15:04:05"))
 }

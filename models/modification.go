@@ -1,4 +1,3 @@
-// TODO: Remove useless stuff
 package models
 
 import (
@@ -6,11 +5,6 @@ import (
 	"fmt"
 	"time"
 )
-
-type ModificationID int64
-
-// ModificationType represents the type of entity being modified
-type ModificationType string
 
 const (
 	ModificationTypeTroubleReport ModificationType = "trouble_reports"
@@ -21,6 +15,11 @@ const (
 	ModificationTypeNote          ModificationType = "notes"
 	ModificationTypeAttachment    ModificationType = "attachments"
 )
+
+type ModificationID int64
+
+// ModificationType represents the type of entity being modified
+type ModificationType string
 
 // Modification represents a modification in the database
 type Modification[T any] struct {
@@ -43,25 +42,10 @@ func NewModification[T any](data T, telegramID TelegramID) *Modification[T] {
 	}
 }
 
-// UnmarshalData unmarshals the data into the provided value
-func (m *Modification[T]) UnmarshalData(v *T) error {
-	if v == nil {
-		return fmt.Errorf("target cannot be nil")
-	}
-	return json.Unmarshal(m.Data, v)
-}
-
-// MarshalData marshals the data into JSON format and stores it in the Data field
-func (m *Modification[T]) MarshalData(v T) ([]byte, error) {
-	var err error
-	m.Data, err = json.Marshal(v)
-	return m.Data, err
-}
-
 // GetData unmarshals and returns the data as the specified type
 func (m *Modification[T]) GetData() (*T, error) {
 	var data T
-	if err := m.UnmarshalData(&data); err != nil {
+	if err := m.unmarshalData(&data); err != nil {
 		return nil, err
 	}
 	return &data, nil
@@ -110,15 +94,9 @@ func (m *Modification[T]) Validate() error {
 	return nil
 }
 
-// Clone creates a deep copy of the modification
-func (m *Modification[T]) Clone() *Modification[T] {
-	dataCopy := make([]byte, len(m.Data))
-	copy(dataCopy, m.Data)
-
-	return &Modification[T]{
-		ID:        m.ID,
-		UserID:    m.UserID,
-		Data:      dataCopy,
-		CreatedAt: m.CreatedAt,
+func (m *Modification[T]) unmarshalData(v *T) error {
+	if v == nil {
+		return fmt.Errorf("target cannot be nil")
 	}
+	return json.Unmarshal(m.Data, v)
 }

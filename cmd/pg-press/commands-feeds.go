@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -98,7 +99,7 @@ func listFeedsCommand() cli.Command {
 						}
 						fmt.Printf("%-6d %-19s %-8s %-30s %s\n",
 							feed.ID,
-							feed.GetCreatedTime().Format("2006-01-02 15:04:05"),
+							feed.GetCreatedAt().Format(env.DateTimeFormat),
 							age,
 							title,
 							content,
@@ -199,7 +200,7 @@ func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Fee
 	}
 
 	for _, feed := range feeds {
-		feedTime := feed.GetCreatedTime()
+		feedTime := feed.GetCreatedAt()
 
 		if since != "" && feedTime.Before(sinceTime) {
 			continue

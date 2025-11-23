@@ -1,9 +1,6 @@
-// TODO: Remove useless stuff
 package models
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"slices"
 	"strings"
@@ -14,6 +11,7 @@ import (
 )
 
 const (
+	// TODO: Move to "env" package
 	DefaultExpiration  = 6 * 30 * 24 * time.Hour
 	MinValueLength     = 16
 	MaxUserAgentLength = 1000
@@ -74,32 +72,20 @@ func (c *Cookie) GetLastLoginTime() time.Time {
 
 // TimeString returns a formatted string representation of the last login time.
 func (c *Cookie) TimeString() string {
-	return c.GetLastLoginTime().Format("2006/01/02 15:04:05")
+	return c.GetLastLoginTime().Format(env.DateTimeFormat)
 }
 
-// TimeStringISO returns the last login time in ISO 8601 format.
-func (c *Cookie) TimeStringISO() string {
-	return c.GetLastLoginTime().Format(time.RFC3339)
-}
-
-// Age returns the duration since the last login.
 func (c *Cookie) Age() time.Duration {
 	return time.Since(c.GetLastLoginTime())
 }
 
 // IsExpired checks if the cookie has expired based on the default expiration time.
 func (c *Cookie) IsExpired() bool {
-	return c.IsExpiredAfter(DefaultExpiration)
+	return c.Age() > DefaultExpiration
 }
 
-// IsExpiredAfter checks if the cookie has expired after a specific duration.
-func (c *Cookie) IsExpiredAfter(duration time.Duration) bool {
-	return c.Age() > duration
-}
-
-// IsActive checks if the cookie is still active (not expired).
-func (c *Cookie) IsActive() bool {
-	return !c.IsExpired()
+func (c *Cookie) Expires() time.Time {
+	return time.UnixMilli(c.LastLogin).Add(DefaultExpiration)
 }
 
 // UpdateLastLogin updates the last login timestamp to the current time.
@@ -107,61 +93,10 @@ func (c *Cookie) UpdateLastLogin() {
 	c.LastLogin = time.Now().UnixMilli()
 }
 
-// RefreshToken generates a new secure token for the cookie value.
-func (c *Cookie) RefreshToken() error {
-	newValue, err := GenerateSecureToken(32)
-	if err != nil {
-		return fmt.Errorf("refresh token: %v", err)
-	}
-
-	c.Value = newValue
-	c.UpdateLastLogin()
-	return nil
-}
-
-// RefreshAPIKey generates a new secure API key.
-func (c *Cookie) RefreshAPIKey() error {
-	newAPIKey, err := GenerateSecureToken(env.MinAPIKeyLength)
-	if err != nil {
-		return fmt.Errorf("refresh API key: %v", err)
-	}
-
-	c.ApiKey = newAPIKey
-	c.UpdateLastLogin()
-	return nil
-}
-
-// MatchesUserAgent checks if the provided user agent matches the cookie's user agent.
-func (c *Cookie) MatchesUserAgent(userAgent string) bool {
-	return c.UserAgent == userAgent
-}
-
 // String returns a string representation of the cookie (without sensitive data).
 func (c *Cookie) String() string {
 	return fmt.Sprintf("Cookie{UserAgent: %s, LastLogin: %s, Age: %v}",
 		c.UserAgent, c.TimeString(), c.Age())
-}
-
-// Clone creates a deep copy of the cookie.
-func (c *Cookie) Clone() *Cookie {
-	return &Cookie{
-		UserAgent: c.UserAgent,
-		Value:     c.Value,
-		ApiKey:    c.ApiKey,
-		LastLogin: c.LastLogin,
-	}
-}
-
-// Equals checks if two cookies are equal.
-func (c *Cookie) Equals(other *Cookie) bool {
-	if other == nil {
-		return false
-	}
-
-	return c.UserAgent == other.UserAgent &&
-		c.Value == other.Value &&
-		c.ApiKey == other.ApiKey &&
-		c.LastLogin == other.LastLogin
 }
 
 // SortCookies sorts a slice of cookies by last login time in descending order.
@@ -184,12 +119,4 @@ outer:
 	}
 
 	return cookiesSorted
-}
-
-func GenerateSecureToken(length int) (string, error) {
-	bytes := make([]byte, length/2)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
 }

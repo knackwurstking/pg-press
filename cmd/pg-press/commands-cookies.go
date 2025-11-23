@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 
@@ -55,11 +53,6 @@ func autoCleanCookiesCommand() cli.Command {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					telegramID := models.TelegramID(*telegramIDArg)
 
-					t := time.Now().Add(0 - env.CookieExpirationDuration).UnixMilli()
-					isExpired := func(cookie *models.Cookie) bool {
-						return t >= cookie.LastLogin
-					}
-
 					// Clean up cookies for a specific telegram user
 					if telegramID != 0 {
 						u, err := r.Users.Get(telegramID)
@@ -74,7 +67,7 @@ func autoCleanCookiesCommand() cli.Command {
 						}
 
 						for _, cookie := range cookies {
-							if isExpired(cookie) {
+							if cookie.IsExpired() {
 								if err = r.Cookies.Remove(cookie.Value); err != nil {
 									// Print out error and continue
 									fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\": %v\n", cookie.Value, err)
@@ -92,7 +85,7 @@ func autoCleanCookiesCommand() cli.Command {
 					}
 
 					for _, cookie := range cookies {
-						if isExpired(cookie) {
+						if cookie.IsExpired() {
 							if err = r.Cookies.Remove(cookie.Value); err != nil {
 								// Print out error and continue
 								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\": %v\n", cookie.Value, err)
