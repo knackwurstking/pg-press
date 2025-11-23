@@ -70,9 +70,11 @@ templ ToolsList(tools []*models.ResolvedTool) {
 templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
 	<li id={ fmt.Sprintf(IDToolListItem, id) } class="tool-item" style="display: none;" hx-preserve="true">
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
-			EnableStatusBadge:  true,
-			EnableBindingBadge: true,
-			EnableTotalCycles:  true,
+			EnableStatusBadge:        true,
+			EnableBindingBadge:       true,
+			EnableTotalCycles:        true,
+			EnableNotesCount:         true,
+			EnableRegenerationsCount: true,
 		})
 	</li>
 }

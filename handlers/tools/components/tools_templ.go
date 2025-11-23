@@ -226,9 +226,11 @@ func toolsListItem(id models.ToolID, tool *models.ResolvedTool) templ.Component 
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.ToolAnchor(tool, &components.ToolAnchorOptions{
-			EnableStatusBadge:  true,
-			EnableBindingBadge: true,
-			EnableTotalCycles:  true,
+			EnableStatusBadge:        true,
+			EnableBindingBadge:       true,
+			EnableTotalCycles:        true,
+			EnableNotesCount:         true,
+			EnableRegenerationsCount: true,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
