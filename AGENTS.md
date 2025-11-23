@@ -42,4 +42,4 @@ go test -run TestName ./...  # Run a specific test
 - Handle errors explicitly and provide meaningful error messages
 - Use custom error types for better error categorization (e.g., `errors.AlreadyExists`)
 - Log errors with context using structured logging
-- Do not use "failed" in error returns, I mean it is an error, so it is clear that something has failed.
+- Do not use "failed" in error messages
