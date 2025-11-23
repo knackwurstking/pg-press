@@ -18,15 +18,15 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Chore
 
-- [ ] Remove outdated server script "./scripts/server" [1] [WIP]
+- [x] Remove outdated server script "./scripts/server"
 
 ### Style Improvements
 
-- [ ] Tool List Item: Update item styles to reduce card-like appearance [2]
-- [ ] Tool List Item: Display regeneration count [3]
-- [ ] Tool List Item: Display notes count (all 3 levels) [4]
+- [ ] Tool List Item: Update item styles to reduce card-like appearance [1]
+- [ ] Tool List Item: Display regeneration count [2]
+- [ ] Tool List Item: Display notes count (all 3 levels) [3]
 
 ### Refactoring
 
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
-- [ ] Tools list: Server-side search [5]
+- [ ] Tools list: Server-side search [4]
