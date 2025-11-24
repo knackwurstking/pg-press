@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -46,7 +47,7 @@ func serverCommand() cli.Command {
 				}))
 
 				e.Use(middlewareKeyAuth(r))
-				e.Use(middlewareCache())
+				e.Use(ui.EchoMiddlewareCache())
 
 				Serve(e, r)
 
