@@ -66,8 +66,6 @@ func (tr *TroubleReport) String() string {
 }
 
 // TroubleReportWithAttachments represents a trouble report with its attachments loaded.
-//
-// TODO: Maybe replace this with a `ResolvedTroubleReport` type
 type TroubleReportWithAttachments struct {
 	*TroubleReport
 	LoadedAttachments []*Attachment `json:"loaded_attachments"`
