@@ -137,7 +137,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 			continue
 		}
 
-		rt, err := services.ResolveTool(h.registry, t)
+		rt, err := services.ResolveTool(h.registry, t, false)
 		if err != nil {
 			return errors.Handler(err, "resolving tool")
 		}

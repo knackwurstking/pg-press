@@ -121,7 +121,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return errors.Handler(err, "get tool")
 	} else {
-		tool, err = services.ResolveTool(h.registry, t)
+		tool, err = services.ResolveTool(h.registry, t, false)
 		if err != nil {
 			return errors.Handler(err, "resolve tool")
 		}
@@ -213,7 +213,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return errors.BadRequest(err, "get tool")
 	} else {
-		tool, err = services.ResolveTool(h.registry, t)
+		tool, err = services.ResolveTool(h.registry, t, true)
 		if err != nil {
 			return errors.Handler(err, "resolve tool")
 		}
@@ -255,7 +255,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return errors.Handler(err, "get tool")
 	} else {
-		tool, err = services.ResolveTool(h.registry, t)
+		tool, err = services.ResolveTool(h.registry, t, true)
 		if err != nil {
 			return errors.Handler(err, "resolve tool")
 		}

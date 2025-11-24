@@ -30,13 +30,16 @@ func ResolveRegeneration(registry *Registry, regeneration *models.Regeneration) 
 	return models.NewResolvedRegeneration(regeneration, tool, cycle, user), nil
 }
 
-func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, error) {
-	var bindingTool *models.Tool
-	if tool.IsBound() {
-		var err error
-		bindingTool, err = registry.Tools.Get(*tool.Binding)
+func ResolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
+	var bindingTool *models.ResolvedTool
+	if tool.IsBound() && !skipResolveBindingTool {
+		bt, err := registry.Tools.Get(*tool.Binding)
 		if err != nil {
 			return nil, errors.Wrap(err, "get binding tool %d for %d", tool.Binding, tool.ID)
+		}
+		bindingTool, err = ResolveTool(registry, bt, true)
+		if err != nil {
+			return nil, errors.Wrap(err, "resolve binding tool %d for %d", tool.Binding, tool.ID)
 		}
 	}
 
@@ -50,7 +53,11 @@ func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, e
 		return nil, errors.Wrap(err, "get regeneration for tool %d", tool.ID)
 	}
 
-	return models.NewResolvedTool(tool, bindingTool, notes, regenerations), nil
+	rt := models.NewResolvedTool(tool, bindingTool, notes, regenerations)
+	if bindingTool != nil {
+		bindingTool.SetBindingTool(rt)
+	}
+	return rt, nil
 }
 
 func ResolveModification[T any](registry *Registry, modification *models.Modification[any]) (*models.ResolvedModification[T], error) {

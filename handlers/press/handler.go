@@ -80,11 +80,11 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	// Resolve tools, notes not needed, only the binding tool
 	resolvedTools := make([]*models.ResolvedTool, 0, len(tools))
 	for _, tool := range tools {
-		var bindingTool *models.Tool
-		if tool.Binding != nil {
-			bindingTool, _ = h.registry.Tools.Get(*tool.Binding)
+		rt, err := services.ResolveTool(h.registry, tool, false)
+		if err != nil {
+			return errors.Handler(err, "resolve tool %d", tool.ID)
 		}
-		resolvedTools = append(resolvedTools, models.NewResolvedTool(tool, bindingTool, nil, nil))
+		resolvedTools = append(resolvedTools, rt)
 	}
 
 	activeToolsSection := components.PagePress_ActiveToolsSection(resolvedTools, press)
