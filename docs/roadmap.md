@@ -7,6 +7,7 @@ This document outlines the planned features and improvements for the PG Press sy
 - [x] Tool total cycles incorrect when cycles were added from new to old (backwards)
 - [x] Change tool regenerations table heading from "Grund" to "Bemerkung"
 - [ ] Tools list does not reload when navigating backwards in history
+- [ ] Notes management page needs improvements after editing or deleting a note
 
 ## Feat
 
