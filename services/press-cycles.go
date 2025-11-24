@@ -44,6 +44,7 @@ func NewPressCycles(r *Registry) *PressCycles {
 
 	// Clean up after commit 2f46fb55, press_number column type changed
 	r.DB.Exec(`DROP INDEX idx_press_cycles_press_number`)
+	// TODO: Drop foreign keys from the tool_regenerations table `FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL`
 	if _, err := r.DB.Exec(`DROP TABLE IF EXISTS press_cycles`); err != nil {
 		panic("drop press_cycles table: " + err.Error())
 	}

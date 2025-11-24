@@ -15,7 +15,6 @@ type ToolRegenerations struct {
 	*Base
 }
 
-// TODO: Alter table, remove foreign keys
 func NewToolRegenerations(r *Registry) *ToolRegenerations {
 	base := NewBase(r)
 
