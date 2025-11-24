@@ -20,7 +20,7 @@ templ PageTool_DialogEditRegeneration(r *models.ResolvedRegeneration) {
 			<p>Regeneriert am: { r.GetCycle().Date.Format(env.DateFormat) }</p>
 		</section>
 		<label class="flex flex-col gap-0">
-			Grund
+			Bemerkung
 			<input
 				id="reason"
 				name="reason"

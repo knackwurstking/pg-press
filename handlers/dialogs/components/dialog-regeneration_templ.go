@@ -75,7 +75,7 @@ func PageTool_DialogEditRegeneration(r *models.ResolvedRegeneration) templ.Compo
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></section><label class=\"flex flex-col gap-0\">Grund <input id=\"reason\" name=\"reason\" type=\"text\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></section><label class=\"flex flex-col gap-0\">Bemerkung <input id=\"reason\" name=\"reason\" type=\"text\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
