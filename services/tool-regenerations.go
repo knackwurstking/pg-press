@@ -205,8 +205,6 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 }
 
 func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.Regeneration, error) {
-	slog.Debug("Getting last regeneration for tool", "tool", toolID)
-
 	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM %s
@@ -226,6 +224,7 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.R
 		return nil, err
 	}
 
+	slog.Debug("Got last regeneration for tool", "tool", toolID, "regeneration", regeneration)
 	return regeneration, nil
 }
 

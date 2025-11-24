@@ -663,6 +663,8 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 }
 
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
+	slog.Debug("Get total cycles", "tool", toolID, "cycles", len(cycles))
+
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
 	if r, err := h.registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
@@ -671,9 +673,10 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 
 	var totalCycles int64
 
-	for _, cycle := range cycles {
-		if cycle.ID <= startCycleID {
-			continue
+	for i, cycle := range cycles {
+		if cycle.ID == startCycleID {
+			slog.Debug("Stop counting...", "tool", toolID, "index", i, "cycle", cycle)
+			break
 		}
 
 		totalCycles += cycle.PartialCycles

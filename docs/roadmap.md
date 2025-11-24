@@ -2,6 +2,11 @@
 
 This document outlines the planned features and improvements for the PG Press system.
 
+## Fix
+
+- [x] Tool total cycles incorrect when cycles were added from new to old (backwards)
+- [ ] Change tool regenerations table heading from "Grund" to "Bemerkung"
+
 ## Feat
 
 - [x] Resolve binding tool and update press and tool pages to enable regeneration counter
