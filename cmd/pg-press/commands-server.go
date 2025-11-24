@@ -45,8 +45,6 @@ func serverCommand() cli.Command {
 					CustomTimeFormat: "2006-01-02 15:04:05",
 				}))
 
-				e.Use(conditionalCacheMiddleware())
-				e.Use(staticCacheMiddleware())
 				e.Use(middlewareKeyAuth(r))
 
 				Serve(e, r)
