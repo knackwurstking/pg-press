@@ -131,6 +131,7 @@ macos-watch-service:
 
 macos-update: all
 	make macos-stop-service
-	make macos-install
+	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
+	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
 	make macos-start-service
 	make macos-watch-service
