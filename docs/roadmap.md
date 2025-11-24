@@ -18,7 +18,7 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Feat
 
-- [ ] Resolve binding tool and update press and tool pages to enable regeneration counter
+- [x] Resolve binding tool and update press and tool pages to enable regeneration counter
 
 ### Chore
 
