@@ -46,6 +46,7 @@ func serverCommand() cli.Command {
 				}))
 
 				e.Use(middlewareKeyAuth(r))
+				e.Use(middlewareCache())
 
 				Serve(e, r)
 
