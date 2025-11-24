@@ -110,7 +110,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if tool.Position == models.PositionTop && tool.IsBound() {
+		if tool.Position == models.PositionTop && tool.IsBound() && options.EnableBindingBadge {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"text-sm italic info ghost\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

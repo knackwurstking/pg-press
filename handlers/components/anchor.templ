@@ -46,7 +46,7 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 				}
 			</div>
 			// Bindings
-			if tool.Position == models.PositionTop && tool.IsBound() {
+			if tool.Position == models.PositionTop && tool.IsBound() && options.EnableBindingBadge {
 				<div class="text-sm italic info ghost">
 					if tool.GetBindingTool() == nil {
 						<i>Ooops, there is no binding tool</i>
