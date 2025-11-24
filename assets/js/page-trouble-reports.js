@@ -26,13 +26,27 @@ function search(event) {
 				report.style.display = "";
 			} else {
 				var summary = report.querySelector("summary");
-				var content = report.querySelector("pre");
+
+				// Get content from either <pre> element or rendered markdown
+				var contentText = "";
+				var markdownContent = report.querySelector(".markdown-content");
+				var preElement = report.querySelector("pre");
+
+				if (markdownContent) {
+					// Markdown content - get the text content of the rendered markdown
+					// Use textContent to get all text, including from nested elements
+					contentText = (
+						markdownContent.textContent ||
+						markdownContent.innerText ||
+						""
+					).toLowerCase();
+				} else if (preElement) {
+					// Non-markdown content
+					contentText = preElement.textContent.toLowerCase();
+				}
 
 				var summaryText = summary
 					? summary.textContent.toLowerCase()
-					: "";
-				var contentText = content
-					? content.textContent.toLowerCase()
 					: "";
 				var combinedText = summaryText + " " + contentText;
 
