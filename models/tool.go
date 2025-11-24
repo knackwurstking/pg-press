@@ -10,9 +10,6 @@ import (
 )
 
 const (
-	ToolCycleWarning int64 = 800000  // Orange
-	ToolCycleError   int64 = 1000000 // Red
-
 	StatusActive       = Status("active")
 	StatusAvailable    = Status("available")
 	StatusRegenerating = Status("regenerating")

@@ -5,13 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-)
-
-const (
-	MinIDLength = 1
-	MaxIDLength = 255
-	MaxDataSize = 10 * 1024 * 1024 // 10MB
 )
 
 var (
@@ -49,7 +44,7 @@ func (a *Attachment) Validate() error {
 		return errors.NewValidationError("data cannot be nil")
 	}
 
-	if len(a.Data) > MaxDataSize {
+	if len(a.Data) > env.MaxDataSize {
 		return errors.NewValidationError("data too large")
 	}
 

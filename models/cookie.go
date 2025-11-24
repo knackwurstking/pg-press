@@ -10,12 +10,6 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
-const (
-	DefaultExpiration  = 6 * 30 * 24 * time.Hour
-	MinValueLength     = 16
-	MaxUserAgentLength = 1000
-)
-
 // Cookie represents a user session with authentication information.
 type Cookie struct {
 	UserAgent string `json:"user_agent"`
@@ -39,14 +33,14 @@ func (c *Cookie) Validate() error {
 	if c.UserAgent == "" {
 		return errors.NewValidationError("user_agent: cannot be empty")
 	}
-	if len(c.UserAgent) > MaxUserAgentLength {
+	if len(c.UserAgent) > env.MaxUserAgentLength {
 		return errors.NewValidationError("user_agent: too long")
 	}
 
 	if c.Value == "" {
 		return errors.NewValidationError("value: cannot be empty")
 	}
-	if len(c.Value) < MinValueLength {
+	if len(c.Value) < env.MinValueLength {
 		return errors.NewValidationError("value: too short for security")
 	}
 
@@ -80,11 +74,11 @@ func (c *Cookie) Age() time.Duration {
 
 // IsExpired checks if the cookie has expired based on the default expiration time.
 func (c *Cookie) IsExpired() bool {
-	return c.Age() > DefaultExpiration
+	return c.Age() > env.DefaultExpiration
 }
 
 func (c *Cookie) Expires() time.Time {
-	return time.UnixMilli(c.LastLogin).Add(DefaultExpiration)
+	return time.UnixMilli(c.LastLogin).Add(env.DefaultExpiration)
 }
 
 // UpdateLastLogin updates the last login timestamp to the current time.

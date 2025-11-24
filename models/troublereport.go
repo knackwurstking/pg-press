@@ -4,14 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-)
-
-const (
-	MinTitleLength   = 1
-	MaxTitleLength   = 500
-	MinContentLength = 1
-	MaxContentLength = 50000
 )
 
 type TroubleReportID int64
@@ -40,20 +34,20 @@ func (tr *TroubleReport) Validate() error {
 	if tr.Title == "" {
 		return errors.NewValidationError("cannot be empty")
 	}
-	if len(tr.Title) < MinTitleLength {
+	if len(tr.Title) < env.MinTitleLength {
 		return errors.NewValidationError("title too short")
 	}
-	if len(tr.Title) > MaxTitleLength {
+	if len(tr.Title) > env.MaxTitleLength {
 		return errors.NewValidationError("title too long")
 	}
 
 	if tr.Content == "" {
 		return errors.NewValidationError("content cannot be empty")
 	}
-	if len(tr.Content) < MinContentLength {
+	if len(tr.Content) < env.MinContentLength {
 		return errors.NewValidationError("content too short")
 	}
-	if len(tr.Content) > MaxContentLength {
+	if len(tr.Content) > env.MaxContentLength {
 		return errors.NewValidationError("content too long")
 	}
 

@@ -5,12 +5,12 @@ package components
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/models"
+
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
+	"github.com/knackwurstking/pg-press/env"
 )
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
@@ -38,11 +38,11 @@ func TotalCycles(totalCycles int64, input bool) templ.Component {
 
 		var colorClass = "contrast ghost"
 
-		if totalCycles > models.ToolCycleWarning {
+		if totalCycles > env.ToolCycleWarning {
 			colorClass = "warning ghost"
 		}
 
-		if totalCycles > models.ToolCycleError {
+		if totalCycles > env.ToolCycleError {
 			colorClass = "destructive ghost"
 		}
 		if input {
