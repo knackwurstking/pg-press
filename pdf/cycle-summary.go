@@ -108,19 +108,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	o.PDF.CellFormat(0, 10, o.Translator("WERKZEUG-ÜBERSICHT"), "1", 1, "L", true, 0, "")
 	o.PDF.Ln(5)
 
-	// Create individual cycle summaries without combining by ToolID
-	type toolSummary struct {
-		toolID            models.ToolID
-		toolCode          string
-		position          models.Position
-		startDate         time.Time
-		endDate           time.Time
-		maxCycles         int64
-		totalPartial      int64
-		isFirstAppearance bool
-	}
-
-	var toolSummaries []*toolSummary
+	var toolSummaries []*models.ToolSummary
 
 	// Create a summary for each individual cycle
 	for _, cycle := range o.Cycles {
@@ -130,15 +118,15 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			toolCode = fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
 		}
 
-		toolSummaries = append(toolSummaries, &toolSummary{
-			toolID:            cycle.ToolID,
-			toolCode:          toolCode,
-			position:          cycle.ToolPosition,
-			startDate:         cycle.Date,
-			endDate:           cycle.Date,
-			maxCycles:         cycle.TotalCycles,
-			totalPartial:      cycle.PartialCycles,
-			isFirstAppearance: false, // Will be set during consolidation
+		toolSummaries = append(toolSummaries, &models.ToolSummary{
+			ToolID:            cycle.ToolID,
+			ToolCode:          toolCode,
+			Position:          cycle.ToolPosition,
+			StartDate:         cycle.Date,
+			EndDate:           cycle.Date,
+			MaxCycles:         cycle.TotalCycles,
+			TotalPartial:      cycle.PartialCycles,
+			IsFirstAppearance: false, // Will be set during consolidation
 		})
 	}
 
@@ -157,68 +145,71 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	// First sort chronologically for proper consolidation
 	for i := 0; i < len(toolSummaries)-1; i++ {
 		for j := i + 1; j < len(toolSummaries); j++ {
-			if toolSummaries[i].startDate.After(toolSummaries[j].startDate) ||
-				(toolSummaries[i].startDate.Equal(toolSummaries[j].startDate) && getPositionOrder(toolSummaries[i].position) > getPositionOrder(toolSummaries[j].position)) ||
-				(toolSummaries[i].startDate.Equal(toolSummaries[j].startDate) && toolSummaries[i].position == toolSummaries[j].position && toolSummaries[i].endDate.After(toolSummaries[j].endDate)) {
+			if toolSummaries[i].StartDate.After(toolSummaries[j].StartDate) ||
+				(toolSummaries[i].StartDate.Equal(toolSummaries[j].StartDate) &&
+					getPositionOrder(toolSummaries[i].Position) > getPositionOrder(toolSummaries[j].Position)) ||
+				(toolSummaries[i].StartDate.Equal(toolSummaries[j].StartDate) &&
+					toolSummaries[i].Position == toolSummaries[j].Position &&
+					toolSummaries[i].EndDate.After(toolSummaries[j].EndDate)) {
 				toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
 			}
 		}
 	}
 
 	// Consolidate consecutive entries for the same tool in the same position
-	var consolidatedSummaries []*toolSummary
+	var consolidatedSummaries []*models.ToolSummary
 	lastToolByPosition := make(map[models.Position]models.ToolID)
 	positionIndexMap := make(map[models.Position]int)
 
 	for _, summary := range toolSummaries {
-		lastToolID, hasLastTool := lastToolByPosition[summary.position]
+		lastToolID, hasLastTool := lastToolByPosition[summary.Position]
 
 		// Check if this is the same tool as the last one in this position
-		if hasLastTool && lastToolID == summary.toolID {
+		if hasLastTool && lastToolID == summary.ToolID {
 			// Consolidate with the existing entry for this position
-			existingIndex := positionIndexMap[summary.position]
+			existingIndex := positionIndexMap[summary.Position]
 			existingSummary := consolidatedSummaries[existingIndex]
 
 			// Extend the date range
-			if summary.startDate.Before(existingSummary.startDate) {
-				existingSummary.startDate = summary.startDate
+			if summary.StartDate.Before(existingSummary.StartDate) {
+				existingSummary.StartDate = summary.StartDate
 			}
-			if summary.endDate.After(existingSummary.endDate) {
-				existingSummary.endDate = summary.endDate
+			if summary.EndDate.After(existingSummary.EndDate) {
+				existingSummary.EndDate = summary.EndDate
 			}
 
 			// Take highest total cycles
-			if summary.maxCycles > existingSummary.maxCycles {
-				existingSummary.maxCycles = summary.maxCycles
+			if summary.MaxCycles > existingSummary.MaxCycles {
+				existingSummary.MaxCycles = summary.MaxCycles
 			}
 
 			// Sum partial cycles
-			existingSummary.totalPartial += summary.totalPartial
+			existingSummary.TotalPartial += summary.TotalPartial
 		} else {
 			// Create new entry (start date will be fixed in second pass)
-			newSummary := &toolSummary{
-				toolID:            summary.toolID,
-				toolCode:          summary.toolCode,
-				position:          summary.position,
-				startDate:         summary.startDate,
-				endDate:           summary.endDate,
-				maxCycles:         summary.maxCycles,
-				totalPartial:      summary.totalPartial,
-				isFirstAppearance: false, // Will be set in second pass
+			newSummary := &models.ToolSummary{
+				ToolID:            summary.ToolID,
+				ToolCode:          summary.ToolCode,
+				Position:          summary.Position,
+				StartDate:         summary.StartDate,
+				EndDate:           summary.EndDate,
+				MaxCycles:         summary.MaxCycles,
+				TotalPartial:      summary.TotalPartial,
+				IsFirstAppearance: false, // Will be set in second pass
 			}
 
 			consolidatedSummaries = append(consolidatedSummaries, newSummary)
 
 			// Update tracking maps
-			lastToolByPosition[summary.position] = summary.toolID
-			positionIndexMap[summary.position] = len(consolidatedSummaries) - 1
+			lastToolByPosition[summary.Position] = summary.ToolID
+			positionIndexMap[summary.Position] = len(consolidatedSummaries) - 1
 		}
 	}
 
 	// Second pass: Fix start dates based on tool changes per position
-	positionEntries := make(map[models.Position][]*toolSummary)
+	positionEntries := make(map[models.Position][]*models.ToolSummary)
 	for _, summary := range consolidatedSummaries {
-		positionEntries[summary.position] = append(positionEntries[summary.position], summary)
+		positionEntries[summary.Position] = append(positionEntries[summary.Position], summary)
 	}
 
 	// For each position, sort by start date and fix start dates
@@ -226,7 +217,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		// Sort entries by original start date
 		for i := 0; i < len(entries)-1; i++ {
 			for j := i + 1; j < len(entries); j++ {
-				if entries[i].startDate.After(entries[j].startDate) {
+				if entries[i].StartDate.After(entries[j].StartDate) {
 					entries[i], entries[j] = entries[j], entries[i]
 				}
 			}
@@ -236,11 +227,11 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		for i, entry := range entries {
 			if i == 0 {
 				// First tool in this position - unknown start date
-				entry.isFirstAppearance = true
+				entry.IsFirstAppearance = true
 			} else {
 				// Tool replacement - starts when previous tool ended
-				entry.startDate = entries[i-1].endDate
-				entry.isFirstAppearance = false
+				entry.StartDate = entries[i-1].EndDate
+				entry.IsFirstAppearance = false
 			}
 		}
 	}
@@ -251,11 +242,11 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	for i := 0; i < len(toolSummaries)-1; i++ {
 		for j := i + 1; j < len(toolSummaries); j++ {
 			// Primary sort: by cycle count
-			if toolSummaries[i].maxCycles > toolSummaries[j].maxCycles {
+			if toolSummaries[i].MaxCycles > toolSummaries[j].MaxCycles {
 				toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
-			} else if toolSummaries[i].maxCycles == toolSummaries[j].maxCycles {
+			} else if toolSummaries[i].MaxCycles == toolSummaries[j].MaxCycles {
 				// Secondary sort: by position (top, top cassette, bottom)
-				if getPositionOrder(toolSummaries[i].position) > getPositionOrder(toolSummaries[j].position) {
+				if getPositionOrder(toolSummaries[i].Position) > getPositionOrder(toolSummaries[j].Position) {
 					toolSummaries[i], toolSummaries[j] = toolSummaries[j], toolSummaries[i]
 				}
 			}
@@ -271,8 +262,8 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 
 	for _, summary := range toolSummaries {
 		// Check if this is a new cycle count group
-		if summary.maxCycles != currentCycleCount {
-			currentCycleCount = summary.maxCycles
+		if summary.MaxCycles != currentCycleCount {
+			currentCycleCount = summary.MaxCycles
 			cycleGroupIndex++
 		}
 
@@ -285,30 +276,30 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		}
 
 		// Tool code with format
-		o.PDF.CellFormat(colWidths[0], 6, o.Translator(summary.toolCode), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[0], 6, o.Translator(summary.ToolCode), "1", 0, "C", fill, 0, "")
 
 		// Position
-		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.position.GermanString()), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.Position.GermanString()), "1", 0, "C", fill, 0, "")
 
 		// Start date - show empty for first appearance of tool
 		var startDateStr string
-		if summary.isFirstAppearance {
+		if summary.IsFirstAppearance {
 			startDateStr = ""
 		} else {
-			startDateStr = summary.startDate.Format(env.DateFormat)
+			startDateStr = summary.StartDate.Format(env.DateFormat)
 		}
 
 		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
 		// End date
-		endDateStr := summary.endDate.Format(env.DateFormat)
+		endDateStr := summary.EndDate.Format(env.DateFormat)
 		o.PDF.CellFormat(colWidths[3], 6, endDateStr, "1", 0, "C", fill, 0, "")
 
 		// Max cycles
-		o.PDF.CellFormat(colWidths[4], 6, fmt.Sprintf("%d", summary.maxCycles), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[4], 6, fmt.Sprintf("%d", summary.MaxCycles), "1", 0, "C", fill, 0, "")
 
 		// Total partial cycles
-		o.PDF.CellFormat(colWidths[5], 6, fmt.Sprintf("%d", summary.totalPartial), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[5], 6, fmt.Sprintf("%d", summary.TotalPartial), "1", 0, "C", fill, 0, "")
 
 		o.PDF.Ln(6)
 

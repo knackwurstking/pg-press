@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"sort"
-	"strings"
-	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
 )
@@ -14,44 +12,12 @@ const (
 	StatusAvailable    = Status("available")
 	StatusRegenerating = Status("regenerating")
 	StatusDead         = Status("dead")
-
-	PositionTop         = Position("top")
-	PositionTopCassette = Position("cassette top")
-	PositionBottom      = Position("bottom")
 )
 
 type (
-	ToolID      int64
-	Status      string
-	PressNumber int8
-	Position    string
+	ToolID int64
+	Status string
 )
-
-func (p Position) GermanString() string {
-	switch p {
-	case PositionTop:
-		return "Oberteil"
-	case PositionTopCassette:
-		return "Kassette"
-	case PositionBottom:
-		return "Unterteil"
-	default:
-		return "unknown"
-	}
-}
-
-type Format struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-func (f Format) String() string {
-	if f.Width == 0 && f.Height == 0 {
-		return ""
-	}
-
-	return fmt.Sprintf("%dx%d", f.Width, f.Height)
-}
 
 // Tool represents a tool in the database.
 // Max cycles: 800.000 (Orange) -> 1.000.000 (Red)
@@ -148,20 +114,6 @@ func (t *Tool) IsBindable() bool {
 	return t.Position == PositionTop || t.Position == PositionTopCassette
 }
 
-// GetPositionOrder returns the sort order for a position (lower number = higher priority)
-func GetPositionOrder(position Position) int {
-	switch position {
-	case PositionTop:
-		return 1
-	case PositionTopCassette:
-		return 2
-	case PositionBottom:
-		return 3
-	default:
-		return 999 // Unknown positions go to the end
-	}
-}
-
 // SortToolsByPosition sorts tools by position: top, top cassette, bottom
 func SortToolsByPosition(tools []*Tool) []*Tool {
 	sorted := make([]*Tool, len(tools))
@@ -172,45 +124,4 @@ func SortToolsByPosition(tools []*Tool) []*Tool {
 	})
 
 	return sorted
-}
-
-// ValidateUniquePositions checks that there's only one tool per position
-// Returns an error if duplicates are found
-func ValidateUniquePositions(tools []*Tool) error {
-	positionCount := make(map[Position][]ToolID)
-
-	for _, tool := range tools {
-		positionCount[tool.Position] = append(positionCount[tool.Position], tool.ID)
-	}
-
-	var duplicates []string
-	for position, toolIDs := range positionCount {
-		if len(toolIDs) > 1 {
-			duplicates = append(duplicates, fmt.Sprintf("%s (%s): Tools %v",
-				position, position.GermanString(), toolIDs))
-		}
-	}
-
-	if len(duplicates) > 0 {
-		return fmt.Errorf("duplicate tool positions found: %s", strings.Join(duplicates, ", "))
-	}
-
-	return nil
-}
-
-// OverlappingToolInstance represents one instance of a tool on a specific press
-type OverlappingToolInstance struct {
-	PressNumber PressNumber `json:"press_number"`
-	Position    Position    `json:"position"`
-	StartDate   time.Time   `json:"start_date"`
-	EndDate     time.Time   `json:"end_date"`
-}
-
-// OverlappingTool represents a tool that appears on multiple presses simultaneously
-type OverlappingTool struct {
-	ToolID    ToolID                     `json:"tool_id"`
-	ToolCode  string                     `json:"tool_code"`
-	Overlaps  []*OverlappingToolInstance `json:"overlaps"`
-	StartDate time.Time                  `json:"start_date"`
-	EndDate   time.Time                  `json:"end_date"`
 }
