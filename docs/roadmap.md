@@ -16,6 +16,10 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ## Development
 
+### Feat
+
+- [ ] Resolve binding tool and update press and tool pages to enable regeneration counter
+
 ### Chore
 
 - [x] Remove outdated server script "./scripts/server"
