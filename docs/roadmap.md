@@ -35,5 +35,4 @@ This document outlines the planned features and improvements for the PG Press sy
 - [x] Move all 'page-trouble-reports' related JavaScript to '/assets/js/page-trouble-reports.js'
 - [ ] Cleanup middleware
 - [ ] Create a `ResolvedTroubleReport` type and replace `TroubleReportWithAttachments` with this
-- [ ] Tools list: Server-side search
 - [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the database table for this
