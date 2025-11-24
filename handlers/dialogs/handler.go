@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
@@ -55,7 +56,20 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetEditCycle(c echo.Context) error {
-	props := &components.DialogEditCycleProps{}
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return errors.BadRequest(err, "user not in context")
+	}
+
+	var (
+		tool             *models.Tool
+		cycleID          models.CycleID
+		inputPressNumber *models.PressNumber
+		inputTotalCycles int64
+		originalDate     *time.Time
+		allowToolChange  bool
+		availableTools   []*models.Tool
+	)
 
 	// Check if we're in tool change mode
 	toolChangeMode := utils.ParseQueryBool(c, "tool_change_mode")
@@ -65,25 +79,25 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 		if err != nil {
 			return errors.BadRequest(err, "parse cycle ID")
 		}
-		props.CycleID = models.CycleID(cycleIDQuery)
+		cycleID = models.CycleID(cycleIDQuery)
 
 		// Get cycle data from the database
-		cycle, err := h.registry.PressCycles.Get(props.CycleID)
+		cycle, err := h.registry.PressCycles.Get(cycleID)
 		if err != nil {
 			return errors.Handler(err, "load cycle data")
 		}
-		props.InputPressNumber = &(cycle.PressNumber)
-		props.InputTotalCycles = cycle.TotalCycles
-		props.OriginalDate = &cycle.Date
+		inputPressNumber = &(cycle.PressNumber)
+		inputTotalCycles = cycle.TotalCycles
+		originalDate = &cycle.Date
 
 		// Set the cycles (original) tool to props
-		if props.Tool, err = h.registry.Tools.Get(cycle.ToolID); err != nil {
+		if tool, err = h.registry.Tools.Get(cycle.ToolID); err != nil {
 			return errors.Handler(err, "load tool data")
 		}
 
 		// If in tool change mode, load all available tools for this press
 		if toolChangeMode {
-			props.AllowToolChange = true
+			allowToolChange = true
 
 			// Get all tools
 			allTools, err := h.registry.Tools.List()
@@ -93,14 +107,14 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 
 			// Filter out tools not matching the original tools position
 			for _, t := range allTools {
-				if t.Position == props.Tool.Position {
-					props.AvailableTools = append(props.AvailableTools, t)
+				if t.Position == tool.Position {
+					availableTools = append(availableTools, t)
 				}
 			}
 
 			// Sort tools alphabetically by code
-			sort.Slice(props.AvailableTools, func(i, j int) bool {
-				return props.AvailableTools[i].String() < props.AvailableTools[j].String()
+			sort.Slice(availableTools, func(i, j int) bool {
+				return availableTools[i].String() < availableTools[j].String()
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
@@ -110,13 +124,23 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 		}
 		toolID := models.ToolID(toolIDQuery)
 
-		if props.Tool, err = h.registry.Tools.Get(toolID); err != nil {
+		if tool, err = h.registry.Tools.Get(toolID); err != nil {
 			return errors.Handler(err, "load tool data")
 		}
 	} else {
 		return errors.BadRequest(nil, "missing tool or cycle ID")
 	}
 
+	props := &components.DialogEditCycleProps{
+		Tool:             tool,
+		CycleID:          cycleID,
+		InputTotalCycles: inputTotalCycles,
+		InputPressNumber: inputPressNumber,
+		OriginalDate:     originalDate,
+		AllowToolChange:  allowToolChange,
+		AvailableTools:   availableTools,
+		User:             user,
+	}
 	cycleEditDialog := components.DialogEditCycle(props)
 	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render cycle edit dialog")
