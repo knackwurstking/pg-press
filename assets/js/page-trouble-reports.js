@@ -1,0 +1,101 @@
+var searchTimer;
+
+function search(event) {
+	var searchValue = event.target.value.toLowerCase().trim();
+
+	clearTimeout(searchTimer);
+
+	searchTimer = setTimeout(function () {
+		var url = new URL(window.location);
+		if (searchValue) {
+			url.searchParams.set("search", searchValue);
+		} else {
+			url.searchParams.delete("search");
+		}
+		history.replaceState(null, "", url);
+
+		var searchTerms = searchValue.split(/\s+/).filter(function (term) {
+			return term.length > 0;
+		});
+
+		var troubleReports = document.querySelectorAll("span.trouble-report");
+
+		for (var i = 0; i < troubleReports.length; i++) {
+			var report = troubleReports[i];
+			if (searchTerms.length === 0) {
+				report.style.display = "";
+			} else {
+				var summary = report.querySelector("summary");
+				var content = report.querySelector("pre");
+
+				var summaryText = summary
+					? summary.textContent.toLowerCase()
+					: "";
+				var contentText = content
+					? content.textContent.toLowerCase()
+					: "";
+				var combinedText = summaryText + " " + contentText;
+
+				var allTermsFound = true;
+				for (var j = 0; j < searchTerms.length; j++) {
+					if (!combinedText.includes(searchTerms[j])) {
+						allTermsFound = false;
+						break;
+					}
+				}
+
+				report.style.display = allTermsFound ? "" : "none";
+			}
+		}
+	}, 300);
+}
+
+function updateURLHash(event) {
+	var details = event.target;
+	if (details.open) {
+		// Update URL hash when details is opened
+		history.replaceState(null, "", "#" + details.id);
+	} else {
+		// Clear hash when details is closed
+		history.replaceState(
+			null,
+			"",
+			window.location.pathname + window.location.search,
+		);
+	}
+}
+
+window.addEventListener("beforeunload", function () {
+	clearTimeout(searchTimer);
+});
+
+window.search = search;
+
+document.addEventListener("DOMContentLoaded", function () {
+	if (location.hash !== "") {
+		var details = document.querySelector(location.hash);
+		console.debug(location.hash, details);
+		if (details) {
+			details.open = true;
+			setTimeout(
+				() =>
+					details.scrollIntoView({
+						behavior: "smooth",
+						block: "start",
+					}),
+				100,
+			);
+		}
+	}
+
+	var urlParams = new URLSearchParams(window.location.search);
+	var searchParam = urlParams.get("search");
+	if (searchParam) {
+		var searchInput = document.querySelector('input[name="search"]');
+		if (searchInput) {
+			searchInput.value = searchParam;
+			var inputEvent = new Event("input", { bubbles: true });
+			searchInput.dispatchEvent(inputEvent);
+		}
+	}
+});

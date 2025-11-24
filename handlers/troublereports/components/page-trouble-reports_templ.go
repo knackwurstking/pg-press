@@ -133,7 +133,20 @@ func additionalHeadTroubleReportsPage() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><script>\n\t\tvar searchTimer;\n\n\t\tfunction search(event) {\n\t\t\tvar searchValue = event.target.value.toLowerCase().trim();\n\n\t\t\tclearTimeout(searchTimer);\n\n\t\t\tsearchTimer = setTimeout(function() {\n\t\t\t\tvar url = new URL(window.location);\n\t\t\t\tif (searchValue) {\n\t\t\t\t\turl.searchParams.set('search', searchValue);\n\t\t\t\t} else {\n\t\t\t\t\turl.searchParams.delete('search');\n\t\t\t\t}\n\t\t\t\thistory.replaceState(null, '', url);\n\n\t\t\t\tvar searchTerms = searchValue.split(/\\s+/).filter(function(term) {\n\t\t\t\t\treturn term.length > 0;\n\t\t\t\t});\n\n\t\t\t\tvar troubleReports = document.querySelectorAll('span.trouble-report');\n\n\t\t\t\tfor (var i = 0; i < troubleReports.length; i++) {\n\t\t\t\t\tvar report = troubleReports[i];\n\t\t\t\t\tif (searchTerms.length === 0) {\n\t\t\t\t\t\treport.style.display = '';\n\t\t\t\t\t} else {\n\t\t\t\t\t\tvar summary = report.querySelector('summary');\n\t\t\t\t\t\tvar content = report.querySelector('pre');\n\n\t\t\t\t\t\tvar summaryText = summary ? summary.textContent.toLowerCase() : '';\n\t\t\t\t\t\tvar contentText = content ? content.textContent.toLowerCase() : '';\n\t\t\t\t\t\tvar combinedText = summaryText + ' ' + contentText;\n\n\t\t\t\t\t\tvar allTermsFound = true;\n\t\t\t\t\t\tfor (var j = 0; j < searchTerms.length; j++) {\n\t\t\t\t\t\t\tif (!combinedText.includes(searchTerms[j])) {\n\t\t\t\t\t\t\t\tallTermsFound = false;\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\treport.style.display = allTermsFound ? '' : 'none';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}, 300);\n\t\t}\n\n\t\twindow.addEventListener('beforeunload', function() {\n\t\t\tclearTimeout(searchTimer);\n\t\t});\n\n\t\twindow.search = search;\n\n\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\tvar urlParams = new URLSearchParams(window.location.search);\n\t\t\tvar searchParam = urlParams.get('search');\n\t\t\tif (searchParam) {\n\t\t\t\tvar searchInput = document.querySelector('input[name=\"search\"]');\n\t\t\t\tif (searchInput) {\n\t\t\t\t\tsearchInput.value = searchParam;\n\t\t\t\t\tvar inputEvent = new Event('input', { bubbles: true });\n\t\t\t\t\tsearchInput.dispatchEvent(inputEvent);\n\t\t\t\t}\n\t\t\t}\n\t\t});\n\t</script>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><script src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(ui.AssetURL(env.ServerPathPrefix, "/js/page-trouble-reports.js"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 62, Col: 79}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"></script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -157,56 +170,39 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		for _, tr := range troubleReports {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<span class=\"trouble-report\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<span class=\"trouble-report\"><details id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, updateURLHash(templ.JSExpression("event")))
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("trouble-report-%d", tr.ID))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 69, Col: 48}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<details id=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("trouble-report-%d", tr.ID))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 136, Col: 48}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" ontoggle=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 templ.ComponentScript = updateURLHash(templ.JSExpression("event"))
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9.Call)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><summary>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" ontoggle=\"updateURLHash(event)\"><summary>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(tr.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 139, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 72, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</summary>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</summary>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -214,56 +210,56 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<!-- Attachments Preview Container -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- Attachments Preview Container -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(tr.LoadedAttachments) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<br><div class=\"attachments-preview-placeholder\" data-trouble-report-id=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<br><div class=\"attachments-preview-placeholder\" data-trouble-report-id=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 146, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 79, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetTroubleReportsAttachmentsPreview(tr.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 147, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 80, Col: 65}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-trigger=\"click\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"><div class=\"attachments-preview-label\"><i class=\"bi bi-paperclip\"></i> Anhänge (")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-trigger=\"click\" hx-swap=\"outerHTML\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\"><div class=\"attachments-preview-label\"><i class=\"bi bi-paperclip\"></i> Anhänge (")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(len(tr.LoadedAttachments))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 154, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 87, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ") - Klicken Sie hier, um zu laden...</div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ") - Klicken Sie hier, um zu laden...</div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</details><div class=\"actions flex gap justify-end items-center\"><a role=\"button\" class=\"ghost secondary icon\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</details><div class=\"actions flex gap justify-end items-center\"><a role=\"button\" class=\"ghost secondary icon\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -273,13 +269,13 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 				env.ServerPathPrefix, tr.ID,
 			))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 167, Col: 6}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 100, Col: 6}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\"><i class=\"bi bi-clock-history\"></i></a><a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><i class=\"bi bi-clock-history\"></i></a><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -289,13 +285,13 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 				env.ServerPathPrefix, tr.ID, env.ServerPathPrefix,
 			)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 176, Col: 7}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 109, Col: 7}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "\" class=\"ghost icon\" role=\"button\"><i class=\"bi bi-pen\"></i></a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" class=\"ghost icon\" role=\"button\"><i class=\"bi bi-pen\"></i></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -303,7 +299,7 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<button role=\"button\" class=\"info ghost icon\" title=\"Als PDF teilen\" onclick=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<button role=\"button\" class=\"info ghost icon\" title=\"Als PDF teilen\" onclick=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -312,30 +308,30 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\"><i class=\"bi bi-share\"></i></button><button hx-delete=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\"><i class=\"bi bi-share\"></i></button><button hx-delete=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXDeleteTroubleReportsData(tr.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 193, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 126, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-trigger=\"click\" hx-target=\"#data\" hx-confirm=\"Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?\" hx-on:htmx:response-error=\"alert(event.detail.xhr.responseText)\" class=\"ghost destructive icon\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if !user.IsAdmin() {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " disabled")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " disabled")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "><i class=\"bi bi-trash\"></i></button></div><hr></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -348,50 +344,8 @@ func ListReports(user *models.User, troubleReports []*models.TroubleReportWithAt
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = listReportsScript().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		return nil
 	})
-}
-
-func updateURLHash(event templ.JSExpression) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_updateURLHash_77e8`,
-		Function: `function __templ_updateURLHash_77e8(event){var details = event.target;
-	if (details.open) {
-		// Update URL hash when details is opened
-		history.replaceState(null, '', '#' + details.id);
-	} else {
-		// Clear hash when details is closed
-		history.replaceState(null, '', window.location.pathname + window.location.search);
-	}
-}`,
-		Call:       templ.SafeScript(`__templ_updateURLHash_77e8`, event),
-		CallInline: templ.SafeScriptInline(`__templ_updateURLHash_77e8`, event),
-	}
-}
-
-func listReportsScript() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_listReportsScript_b69d`,
-		Function: `function __templ_listReportsScript_b69d(){if (location.hash === "") {
-		return;
-	}
-
-	var details = document.querySelector(location.hash);
-	console.debug(location.hash, details)
-	if (details) {
-		details.open = true;
-		setTimeout(() =>
-			details.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-		100);
-	}
-}`,
-		Call:       templ.SafeScript(`__templ_listReportsScript_b69d`),
-		CallInline: templ.SafeScriptInline(`__templ_listReportsScript_b69d`),
-	}
 }
 
 func TroubleReportModificationEntry(
@@ -422,46 +376,46 @@ func TroubleReportModificationEntry(
 
 		time := modification.CreatedAt.UnixMilli()
 		data, _ := modification.GetData()
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"card seamless p mb\"><div class=\"flex flex-col gap mb\"><div class=\"flex gap-sm justify-between items-center\"><span class=\"text-semibold\">Modified by ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"card seamless p mb\"><div class=\"flex flex-col gap mb\"><div class=\"flex gap-sm justify-between items-center\"><span class=\"text-semibold\">Modified by ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(modification.GetUser().Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 252, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 158, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span> <span class=\"badge info text-xs\">v")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span> <span class=\"badge info text-xs\">v")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", time))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 253, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 159, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</span></div><div class=\"flex gap-sm justify-between items-center\"><span class=\"text-sm muted\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></div><div class=\"flex gap-sm justify-between items-center\"><span class=\"text-sm muted\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(modification.CreatedAt.Format(env.DateTimeFormat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 256, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 162, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -471,46 +425,46 @@ func TroubleReportModificationEntry(
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></div><div class=\"card muted p\"><div class=\"flex flex-col gap\"><div><label class=\"block text-semibold mb-sm\">Title:</label><div class=\"card p-sm\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div></div><div class=\"card muted p\"><div class=\"flex flex-col gap\"><div><label class=\"block text-semibold mb-sm\">Title:</label><div class=\"card p-sm\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 266, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 172, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div><div><label class=\"block text-semibold mb-sm\">Content:</label><div class=\"card p-sm whitespace-pre-wrap max-h-40 overflow-y-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></div><div><label class=\"block text-semibold mb-sm\">Content:</label><div class=\"card p-sm whitespace-pre-wrap max-h-40 overflow-y-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(data.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 270, Col: 87}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 176, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div></div><div><label class=\"block text-semibold mb-sm\">Attachments:</label><div class=\"flex items-center\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div><div><label class=\"block text-semibold mb-sm\">Attachments:</label><div class=\"flex items-center\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(data.LinkedAttachments)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 275, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 181, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " attachment(s)</span> <svg width=\"16\" height=\"16\" style=\"margin-left: var(--ui-spacing);\" class=\"muted\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13\"></path></svg></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, " attachment(s)</span> <svg width=\"16\" height=\"16\" style=\"margin-left: var(--ui-spacing);\" class=\"muted\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13\"></path></svg></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -539,33 +493,33 @@ func TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTi
 			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<form hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<form hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXPostTroubleReportsRollback(reportID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 288, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 194, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" hx-swap=\"none\" hx-on:htmx:after-request=\"\n\t\t\tif (event.detail.successful) {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\t\t\" class=\"inline\"><input type=\"hidden\" name=\"modification_time\" value=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" hx-swap=\"none\" hx-on:htmx:after-request=\"\n\t\t\tif (event.detail.successful) {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\t\t\" class=\"inline\"><input type=\"hidden\" name=\"modification_time\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", modificationTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 297, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/troublereports/components/page-trouble-reports.templ`, Line: 203, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"> <button type=\"submit\" class=\"primary small\" onclick=\"return confirm('Are you sure you want to rollback to this version? This will overwrite the current trouble report.')\">Rollback</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"> <button type=\"submit\" class=\"primary small\" onclick=\"return confirm('Are you sure you want to rollback to this version? This will overwrite the current trouble report.')\">Rollback</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
