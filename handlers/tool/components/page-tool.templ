@@ -185,14 +185,13 @@ templ PageTool_BindingSection(props PageTool_BindingSectionProps) {
 			<span>
 				// Display the binding tool
 				@components.ToolAnchor(
-					models.NewResolvedTool(
-						props.Tool.GetBindingTool(),
-						props.Tool.Tool,
-						nil,
-						nil,
-					),
+					props.Tool.GetBindingTool(),
 					&components.ToolAnchorOptions{
-						EnableTotalCycles: true,
+						EnableStatusBadge:        false,
+						EnableBindingBadge:       false,
+						EnableTotalCycles:        true,
+						EnableRegenerationsCount: true,
+						EnableNotesCount:         true,
 					},
 				)
 			</span>
