@@ -513,11 +513,7 @@ func PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.Pre
 		} else {
 			for _, t := range tools {
 				templ_7745c5c3_Err = components.ToolAnchor(t, &components.ToolAnchorOptions{
-					EnableStatusBadge:        false,
-					EnableBindingBadge:       false,
-					EnableTotalCycles:        true,
-					EnableRegenerationsCount: true,
-					EnableNotesCount:         true,
+					EnableStatusBadge: false,
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -567,7 +563,7 @@ func PagePress_MetalSheetsSection(props PagePress_MetalSheetSectionProps) templ.
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(expectedMachineType.DisplayName())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 257, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 253, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -580,7 +576,7 @@ func PagePress_MetalSheetsSection(props PagePress_MetalSheetSectionProps) templ.
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", props.Press))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 258, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 254, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -712,7 +708,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.Date.Format(env.DateFormat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 310, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 306, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
@@ -732,7 +728,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s %s",
 				tool.Format.String(), tool.Code, tool.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 318, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 314, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -750,7 +746,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.ToolID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 321, Col: 59}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 317, Col: 59}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -768,7 +764,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(cycle.ToolPosition.GermanString())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 326, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 322, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -781,7 +777,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.TotalCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 330, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 326, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -794,7 +790,7 @@ func pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSe
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", cycle.PartialCycles))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 335, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 331, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -906,7 +902,7 @@ func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, t
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(topSheets)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 377, Col: 78}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 373, Col: 78}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
@@ -930,7 +926,7 @@ func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, t
 				var templ_7745c5c3_Var34 string
 				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.TileHeight))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 398, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 394, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
 				if templ_7745c5c3_Err != nil {
@@ -943,7 +939,7 @@ func PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, t
 				var templ_7745c5c3_Var35 string
 				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 399, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 395, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 				if templ_7745c5c3_Err != nil {
@@ -1002,7 +998,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(bottomSheets)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 419, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 415, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -1026,7 +1022,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 				var templ_7745c5c3_Var38 string
 				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.TileHeight))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 443, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 439, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
@@ -1039,7 +1035,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 				var templ_7745c5c3_Var39 string
 				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.Value))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 444, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 440, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
@@ -1053,7 +1049,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 					var templ_7745c5c3_Var40 string
 					templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", sheet.MarkeHeight))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 447, Col: 49}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 443, Col: 49}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 					if templ_7745c5c3_Err != nil {
@@ -1073,7 +1069,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 					var templ_7745c5c3_Var41 string
 					templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.STF))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 454, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 450, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 					if templ_7745c5c3_Err != nil {
@@ -1093,7 +1089,7 @@ func PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet
 					var templ_7745c5c3_Var42 string
 					templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%.1f", sheet.STFMax))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 461, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/press/components/page-press.templ`, Line: 457, Col: 46}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
 					if templ_7745c5c3_Err != nil {

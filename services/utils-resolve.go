@@ -30,14 +30,18 @@ func ResolveRegeneration(registry *Registry, regeneration *models.Regeneration) 
 	return models.NewResolvedRegeneration(regeneration, tool, cycle, user), nil
 }
 
-func ResolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
+func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, error) {
+	return resolveTool(registry, tool, false)
+}
+
+func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
 	var bindingTool *models.ResolvedTool
 	if tool.IsBound() && !skipResolveBindingTool {
 		bt, err := registry.Tools.Get(*tool.Binding)
 		if err != nil {
 			return nil, errors.Wrap(err, "get binding tool %d for %d", tool.Binding, tool.ID)
 		}
-		bindingTool, err = ResolveTool(registry, bt, true)
+		bindingTool, err = resolveTool(registry, bt, true)
 		if err != nil {
 			return nil, errors.Wrap(err, "resolve binding tool %d for %d", tool.Binding, tool.ID)
 		}

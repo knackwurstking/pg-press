@@ -184,16 +184,20 @@ templ PageTool_BindingSection(props PageTool_BindingSectionProps) {
 		if props.Tool.IsBound() {
 			<span>
 				// Display the binding tool
-				@components.ToolAnchor(
-					props.Tool.GetBindingTool(),
-					&components.ToolAnchorOptions{
-						EnableStatusBadge:        false,
-						EnableBindingBadge:       false,
-						EnableTotalCycles:        true,
-						EnableRegenerationsCount: true,
-						EnableNotesCount:         true,
-					},
-				)
+				{{ bindingTool := props.Tool.GetBindingTool() }}
+				if bindingTool != nil {
+					@components.ToolAnchor(
+						bindingTool,
+						&components.ToolAnchorOptions{
+							EnableStatusBadge: false,
+						},
+					)
+				} else {
+					<!-- Binding tool not available -->
+					<span class="text-sm italic info ghost">
+						<i>Binding tool not available</i>
+					</span>
+				}
 			</span>
 		}
 	</span>

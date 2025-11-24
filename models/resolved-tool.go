@@ -15,8 +15,6 @@ func NewResolvedTool(t *Tool, b *ResolvedTool, n []*Note, r []*Regeneration) *Re
 		regenerations: r,
 	}
 
-	rt.bindingTool = rt
-
 	return rt
 }
 
@@ -25,8 +23,8 @@ func (rt *ResolvedTool) GetBindingTool() *ResolvedTool {
 }
 
 func (rt *ResolvedTool) SetBindingTool(t *ResolvedTool) {
-	rt.Binding = &t.ID
 	rt.bindingTool = t
+	rt.Binding = &rt.bindingTool.ID
 }
 
 func (rt *ResolvedTool) GetNotes() []*Note {
