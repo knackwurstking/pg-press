@@ -2,35 +2,25 @@
 
 This document outlines the planned features and improvements for the PG Press system.
 
-## Features
+## Feat
 
-### Tools Management
-
-- [ ] Group tools by state: active, available, dead, and regenerating
-- [ ] Tools List Filter: Add checkbox to show already bounded "top cassette" tools
-
-### New Pages
-
+- [x] Resolve binding tool and update press and tool pages to enable regeneration counter
+- [ ] Tools List: Group tools by state: active, available, dead, and regenerating
+- [ ] Tools List: Add filter utils (youtube like) for filtering tools contains notes, regenerations, ... (or something like this)
 - [ ] Create a new page: "Probleme Checklist" (votes, attachments, comments, close/open)
 - [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures (Markdown editor support)
 
-## Development
-
-### Feat
-
-- [x] Resolve binding tool and update press and tool pages to enable regeneration counter
-
-### Chore
+## Chore
 
 - [x] Remove outdated server script "./scripts/server"
 
-### Style Improvements
+## Style Improvements
 
 - [x] Tool List Item: Update item styles to reduce card-like appearance
 - [x] Tool List Item: Display regeneration count
 - [x] Tool List Item: Display notes count (all 3 levels)
 
-### Refactoring
+## Refactoring
 
 - [x] Move handlers error utils to the errors package
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
