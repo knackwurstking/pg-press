@@ -126,6 +126,11 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return errors.BadRequest(err, "user missing in context")
+	}
+
 	allTools, err := h.registry.Tools.List()
 	if err != nil {
 		return errors.Handler(err, "get tools from database")
@@ -145,7 +150,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		tools = append(tools, rt)
 	}
 
-	section := components.SectionTools(tools)
+	section := components.SectionTools(tools, user)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render tools section")
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ SectionTools(tools []*models.ResolvedTool) {
+templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	<span
 		hx-get={ utils.HxGetToolsPageToolsSection() }
 		hx-trigger="pageLoaded from:body"
@@ -31,7 +31,7 @@ templ SectionTools(tools []*models.ResolvedTool) {
 			</button>
 		</div>
 		<ul id={ IDToolsList } class="flex flex-col gap p-0" style="list-style: none;">
-			@ToolsList(tools)
+			@ToolsList(tools, user)
 		</ul>
 	</div>
 }
@@ -59,11 +59,13 @@ templ sectionToolsFilter(tools []*models.ResolvedTool) {
 	<script>initFilterInputFromQuery()</script>
 }
 
-templ ToolsList(tools []*models.ResolvedTool) {
+templ ToolsList(tools []*models.ResolvedTool, user *models.User) {
 	for _, t := range tools {
-		if t.Position != models.PositionTopCassette || !t.IsBound() {
-			@toolsListItem(t.ID, t)
+		// NOTE: This is just a provisorium
+		if (t.Tool.Type == "Unbekannt" || t.Tool.Code == "Unbekannt") && !user.IsAdmin() {
+			{{ continue }}
 		}
+		@toolsListItem(t.ID, t)
 	}
 }
 
