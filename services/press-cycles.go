@@ -21,10 +21,37 @@ type PressCycles struct {
 func NewPressCycles(r *Registry) *PressCycles {
 	base := NewBase(r)
 
+	// Clean up after commit 2f46fb55, press_number column type changed
+	var cycles []*models.Cycle
+	rows, _ := r.DB.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name='press_cycles';`)
+	if rows.Next() {
+		rows.Close()
+
+		// Copy content of press_number_old to press_number
+		rows, err := r.DB.Query(`SELECT * FROM press_cycles`)
+		if err == nil {
+			for rows.Next() {
+				cycle, err := scanCycle(rows)
+				if err != nil {
+					break
+				}
+				cycles = append(cycles, cycle)
+			}
+		}
+
+		rows.Close()
+	}
+
+	// Clean up after commit 2f46fb55, press_number column type changed
+	r.DB.Exec(`DROP INDEX idx_press_cycles_press_number`)
+	if _, err := r.DB.Exec(`DROP TABLE IF EXISTS press_cycles`); err != nil {
+		panic("drop press_cycles table: " + err.Error())
+	}
+
 	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %[1]s (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			press_number INTEGER NOT NULL CHECK(press_number >= 0 AND press_number <= 5),
+			press_number INTEGER NOT NULL,
 			tool_id INTEGER NOT NULL,
 			tool_position TEXT NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
@@ -33,13 +60,33 @@ func NewPressCycles(r *Registry) *PressCycles {
 			FOREIGN KEY (tool_id) REFERENCES %[2]s(id),
 			FOREIGN KEY (performed_by) REFERENCES %[3]s(telegram_id) ON DELETE SET NULL
 		);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_id ON %[1]s(tool_id);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_position ON %[1]s(tool_position);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_press_number ON %[1]s(press_number);
+		ALTER TABLE %[1]s DROP COLUMN press_number;
+		ALTER TABLE %[1]s ADD COLUMN press_number INTEGER NOT NULL;
 	`, TableNamePressCycles, TableNameTools, TableNameUsers)
-
 	if err := base.CreateTable(query, TableNamePressCycles); err != nil {
 		panic(err)
+	}
+
+	// Clean up after commit 2f46fb55, press_number column type changed
+	for _, cycle := range cycles {
+		query := `
+			UPDATE press_cycles
+			SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
+			WHERE id = ?
+		`
+		_, err := r.DB.Exec(
+			query,
+			cycle.TotalCycles,
+			cycle.ToolID,
+			cycle.ToolPosition,
+			cycle.PerformedBy,
+			cycle.PressNumber,
+			cycle.Date,
+			cycle.ID,
+		)
+		if err != nil {
+			panic("add cycle: " + err.Error())
+		}
 	}
 
 	return &PressCycles{Base: base}
@@ -259,7 +306,7 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 	slog.Debug("Listing press cycles")
 
 	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		SELECT *
 		FROM %s
 		ORDER BY total_cycles DESC
 	`, TableNamePressCycles)
@@ -805,7 +852,7 @@ func scanCycle(scannable Scannable) (*models.Cycle, error) {
 		&cycle.ToolPosition,
 		&cycle.TotalCycles,
 		&cycle.Date,
-		&performedBy,
+		&cycle.PerformedBy,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("scan press cycle: %w", err)

@@ -109,14 +109,26 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 				>
 					Presse auswählen
 				</option>
-				// TODO: If user is admin, add the unknown tool to the last position
-				for _, i := range []int{0, 2, 3, 4, 5} {
+				{{
+					presses := []models.PressNumber{0, 2, 3, 4, 5}
+					if props.User.IsAdmin() {
+						presses = []models.PressNumber{models.PressNumberUnknown, 0, 2, 3, 4, 5}
+					}
+				}}
+				for _, i := range presses {
 					<option
 						value={ fmt.Sprintf("%d", i) }
-						selected?={ (props.InputPressNumber != nil && int(*props.InputPressNumber) == i) ||
-							(props.InputPressNumber == nil && props.Tool != nil && props.Tool.Press != nil && int(*props.Tool.Press) == i) }
+						selected?={ (props.InputPressNumber != nil && *props.InputPressNumber == i) ||
+							(props.InputPressNumber == nil &&
+								props.Tool != nil &&
+								props.Tool.Press != nil &&
+								*props.Tool.Press == i) }
 					>
-						Presse { fmt.Sprintf("%d", i) }
+						if i == models.PressNumberUnknown {
+							Presse Unbekannt
+						} else {
+							Presse { fmt.Sprintf("%d", i) }
+						}
 					</option>
 				}
 			</select>
