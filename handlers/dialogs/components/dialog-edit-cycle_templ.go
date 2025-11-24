@@ -126,13 +126,13 @@ func DialogEditCycle(props *DialogEditCycleProps) templ.Component {
 
 					statusText := ""
 					if tool.Press != nil {
-						statusText = fmt.Sprintf(" P%d", *tool.Press)
+						statusText = fmt.Sprintf(" [P%d]", *tool.Press)
 					}
 					if tool.Regenerating {
-						statusText += " R"
+						statusText += " [Reg.]"
 					}
 					if tool.IsDead {
-						statusText += " ✗"
+						statusText += " [✗]"
 					}
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %s%s", tool.Code, tool.Format.String(), statusText))
