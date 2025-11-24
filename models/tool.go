@@ -12,28 +12,22 @@ import (
 const (
 	ToolCycleWarning int64 = 800000  // Orange
 	ToolCycleError   int64 = 1000000 // Red
-)
 
-type ToolID int64
-
-type Status string
-
-const (
 	StatusActive       = Status("active")
 	StatusAvailable    = Status("available")
 	StatusRegenerating = Status("regenerating")
 	StatusDead         = Status("dead")
-)
 
-type (
-	PressNumber int8
-	Position    string
-)
-
-const (
 	PositionTop         = Position("top")
 	PositionTopCassette = Position("cassette top")
 	PositionBottom      = Position("bottom")
+)
+
+type (
+	ToolID      int64
+	Status      string
+	PressNumber int8
+	Position    string
 )
 
 func (p Position) GermanString() string {
@@ -147,22 +141,6 @@ func (t *Tool) ClearPress() {
 // IsActive checks if the tool is active on a press
 func (t *Tool) IsActive() bool {
 	return t.Status() == StatusActive && t.Press != nil
-}
-
-// GetPressString returns a formatted string of the press assignment
-func (t *Tool) GetPress() PressNumber {
-	if t.Press == nil {
-		return -1
-	}
-	return *t.Press
-}
-
-// GetPressString returns a formatted string of the press assignment
-func (t *Tool) GetPressString() string {
-	if t.Press == nil {
-		return "Nicht zugewiesen"
-	}
-	return fmt.Sprintf("Presse %d", *t.Press)
 }
 
 func (t *Tool) IsBound() bool {

@@ -38,11 +38,11 @@ func NoteCard(note *models.Note) templ.Component {
 
 		filterClass := ""
 		switch note.Level {
-		case models.INFO:
+		case models.LevelInfo:
 			filterClass = "outline"
-		case models.ATTENTION:
+		case models.LevelAttention:
 			filterClass = "warning outline"
-		case models.BROKEN:
+		case models.LevelBroken:
 			filterClass = "destructive outline"
 		}
 		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("card compact elevation-2 %s", filterClass)}
@@ -68,17 +68,17 @@ func NoteCard(note *models.Note) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch note.Level {
-		case models.INFO:
+		case models.LevelInfo:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<i class=\"bi bi-info-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case models.ATTENTION:
+		case models.LevelAttention:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<i class=\"bi bi-exclamation-triangle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case models.BROKEN:
+		case models.LevelBroken:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<i class=\"bi bi-x-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

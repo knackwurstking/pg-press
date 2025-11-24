@@ -92,11 +92,11 @@ func PageNotes(props *PageNotesProps) templ.Component {
 				}
 
 				switch note.Level {
-				case models.BROKEN:
+				case models.LevelBroken:
 					brokenCount++
-				case models.ATTENTION:
+				case models.LevelAttention:
 					attentionCount++
-				case models.INFO:
+				case models.LevelInfo:
 					infoCount++
 				}
 			}
@@ -254,11 +254,11 @@ func PageNotes_NotesGrid(notes []*models.Note, tools []*models.Tool) templ.Compo
 
 				filterClass := ""
 				switch note.Level {
-				case models.INFO:
+				case models.LevelInfo:
 					filterClass = "outline"
-				case models.ATTENTION:
+				case models.LevelAttention:
 					filterClass = "warning outline"
-				case models.BROKEN:
+				case models.LevelBroken:
 					filterClass = "destructive outline"
 				}
 				if !skip {
@@ -339,17 +339,17 @@ func NotesCard(note *models.Note, filterClass string, tools []*models.Tool) temp
 			return templ_7745c5c3_Err
 		}
 		switch note.Level {
-		case models.INFO:
+		case models.LevelInfo:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<i class=\"bi bi-info-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case models.ATTENTION:
+		case models.LevelAttention:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<i class=\"bi bi-exclamation-triangle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case models.BROKEN:
+		case models.LevelBroken:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<i class=\"bi bi-x-circle\"></i> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

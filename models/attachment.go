@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	// TODO: Move to "env" package
 	MinIDLength = 1
 	MaxIDLength = 255
 	MaxDataSize = 10 * 1024 * 1024 // 10MB

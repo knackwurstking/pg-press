@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	// TODO: Move to "env" package
 	DefaultExpiration  = 6 * 30 * 24 * time.Hour
 	MinValueLength     = 16
 	MaxUserAgentLength = 1000

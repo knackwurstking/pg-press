@@ -1,4 +1,3 @@
-// TODO: Remove useless stuff
 package models
 
 import (
@@ -10,9 +9,9 @@ import (
 )
 
 const (
-	INFO Level = iota
-	ATTENTION
-	BROKEN
+	LevelInfo Level = iota
+	LevelAttention
+	LevelBroken
 )
 
 type NoteID int64
@@ -41,8 +40,8 @@ func NewNote(l Level, message string) *Note {
 	}
 }
 
-// NewNoteLinked creates a new note linked to a specific entity
-func NewNoteLinked(l Level, message string, linked string) *Note {
+// NewLinkedNote creates a new linked note to a specific entity
+func NewLinkedNote(l Level, message string, linked string) *Note {
 	return &Note{
 		Level:     l,
 		Content:   message,
@@ -61,23 +60,6 @@ func (n *Note) Validate() error {
 	}
 
 	return nil
-}
-
-// Important returns true if the note level is ATTENTION or BROKEN
-func (n *Note) IsImportant() bool {
-	return n.Level == ATTENTION || n.Level == BROKEN
-}
-
-func (n *Note) IsInfo() bool {
-	return n.Level == INFO
-}
-
-func (n *Note) IsAttention() bool {
-	return n.Level == ATTENTION
-}
-
-func (n *Note) IsBroken() bool {
-	return n.Level == BROKEN
 }
 
 // IsLinked returns true if the note is linked to any entity

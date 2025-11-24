@@ -10,11 +10,11 @@ templ NoteCard(note *models.Note) {
 	{{
 		filterClass := ""
 		switch note.Level {
-		case models.INFO:
+		case models.LevelInfo:
 			filterClass = "outline"
-		case models.ATTENTION:
+		case models.LevelAttention:
 			filterClass = "warning outline"
-		case models.BROKEN:
+		case models.LevelBroken:
 			filterClass = "destructive outline"
 		}
 	}}
@@ -22,11 +22,11 @@ templ NoteCard(note *models.Note) {
 		<div class="card-header flex gap-sm justify-between items-center">
 			<span class="note-importance flex gap">
 				switch note.Level {
-					case models.INFO:
+					case models.LevelInfo:
 						<i class="bi bi-info-circle"></i>
-					case models.ATTENTION:
+					case models.LevelAttention:
 						<i class="bi bi-exclamation-triangle"></i>
-					case models.BROKEN:
+					case models.LevelBroken:
 						<i class="bi bi-x-circle"></i>
 				}
 				<span class="note-date">
