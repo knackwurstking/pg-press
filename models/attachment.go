@@ -25,7 +25,7 @@ type AttachmentID int64
 
 // Attachment represents a file attachment with its data and metadata.
 type Attachment struct {
-	ID       string `json:"id"` // TODO: Migrate this to a numeric ID, also need to update the database table for this
+	ID       string `json:"id"`
 	MimeType string `json:"mime_type"`
 	Data     []byte `json:"data"`
 }

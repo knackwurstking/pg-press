@@ -35,3 +35,6 @@ This document outlines the planned features and improvements for the PG Press sy
 - [ ] Remove useless stuff from models (user, note, modification, feed, metalsheet, cookie, attachment)
 - [ ] Migrate attachment ID to numeric ID
 - [ ] Move javascript to /assets/js/page-trouble-reports.js
+- [ ] Move all 'page-trouble-reports' related javascript to '/assets/js/page-trouble-reports.js'
+- [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the database table for this
+- [ ] Create a `ResolvedTroubleReport` type and replace `TroubleReportWithAttachments` with this
