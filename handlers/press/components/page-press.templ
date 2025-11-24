@@ -231,7 +231,13 @@ templ PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.Pr
 			</div>
 		} else {
 			for _, t := range tools {
-				@components.ToolAnchor(t, nil)
+				@components.ToolAnchor(t, &components.ToolAnchorOptions{
+					EnableStatusBadge:        false,
+					EnableBindingBadge:       false,
+					EnableTotalCycles:        true,
+					EnableRegenerationsCount: true,
+					EnableNotesCount:         true,
+				})
 			}
 		}
 	</div>
