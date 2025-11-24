@@ -11,8 +11,8 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### New Pages
 
-- [ ] Create a new page: "Probleme Checklist" (votings, attachments, comments, close/open)
-- [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures (markdown editor support)
+- [ ] Create a new page: "Probleme Checklist" (votes, attachments, comments, close/open)
+- [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures (Markdown editor support)
 
 ## Development
 
@@ -30,9 +30,9 @@ This document outlines the planned features and improvements for the PG Press sy
 
 - [x] Move handlers error utils to the errors package
 - [x] Move shared components to "/handlers/components", using subdirectories as needed
-- [x] Services needs to handler proper return the not found error type everywhere possible
+- [x] Services need to properly return the not found error type everywhere possible
 - [ ] Tools list: Server-side search
 - [x] Remove useless stuff from models (user, note, modification, feed, metalsheet, cookie, attachment)
-- [ ] Move all 'page-trouble-reports' related javascript to '/assets/js/page-trouble-reports.js'
+- [ ] Move all 'page-trouble-reports' related JavaScript to '/assets/js/page-trouble-reports.js'
 - [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the database table for this
 - [ ] Create a `ResolvedTroubleReport` type and replace `TroubleReportWithAttachments` with this
