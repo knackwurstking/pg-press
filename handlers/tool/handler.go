@@ -281,7 +281,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 
 		// Resolve regenerations
 		for _, r := range regenerations {
-			rr, err := services.ResolveRegeneration(h.registry, r)
+			rr, err := services.ResolveToolRegeneration(h.registry, r)
 			if err != nil {
 				return err
 			}
@@ -466,20 +466,20 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 		return errors.BadRequest(err, "get user from context")
 	}
 
-	var regenerationID models.RegenerationID
+	var regenerationID models.ToolRegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
 		return errors.BadRequest(err, "get the regeneration id from url query")
 	} else {
-		regenerationID = models.RegenerationID(id)
+		regenerationID = models.ToolRegenerationID(id)
 	}
 
 	slog.Info("Deleting the regeneration", "regeneration", regenerationID, "user_name", user.Name)
 
-	var regeneration *models.ResolvedRegeneration
+	var regeneration *models.ResolvedToolRegeneration
 	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
 		return errors.Handler(err, "get regeneration before deleting")
 	} else {
-		regeneration, err = services.ResolveRegeneration(h.registry, r)
+		regeneration, err = services.ResolveToolRegeneration(h.registry, r)
 	}
 
 	if err := h.registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
