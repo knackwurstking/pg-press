@@ -16,13 +16,13 @@ This document outlines the planned features and improvements for the PG Press sy
 
 ### Press Regeneration
 
-Implement the `PressRegenerations` system, which will reset the press total cycles back to 
+Implement the `PressRegenerations` system, which will reset the press total cycles back to
 zero just like the `ToolRegenerations` system just with presses
 
-- [ ] Rename the current `Regeneration` model to `ToolRegeneration` [WIP]
-- [ ] Add a `PressRegeneration` model
+- [x] Rename the current `Regeneration` model to `ToolRegeneration`
+- [ ] Add a `PressRegeneration` model [WIP]
 - [ ] Add a `PressRegenerations` service
-- [ ] Remove the dead press (-1) stuff again
+- [ ] Remove the dead press (-1) stuff again [WIP]
 
 ## Refactoring
 
