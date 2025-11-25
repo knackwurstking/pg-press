@@ -151,7 +151,7 @@ The database is automatically initialized on first run with proper SQLite optimi
 
 ## Technology Stack
 
-- **Backend**: Go 1.25.0 with Echo web framework
+- **Backend**: Go 1.25.3 with Echo web framework
 - **Database**: SQLite with comprehensive schema
 - **Frontend**: HTMX for dynamic interactions, vanilla JavaScript
 - **Templates**: Templ for type-safe HTML generation
@@ -176,3 +176,7 @@ The database is automatically initialized on first run with proper SQLite optimi
 3. **Run in development mode**: `make dev` (with hot reload)
 4. **Build for production**: `make build`
 5. **Run with server**: `make run`
+
+## Cursor/Copilot Rules
+
+No specific Cursor or Copilot rules configured.
