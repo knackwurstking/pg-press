@@ -694,14 +694,14 @@ func (h *Handler) GetEditRegeneration(c echo.Context) error {
 	if err != nil {
 		return errors.BadRequest(err, "parse regeneration id")
 	}
-	regenerationID := models.RegenerationID(rid)
+	regenerationID := models.ToolRegenerationID(rid)
 
 	regeneration, err := h.registry.ToolRegenerations.Get(regenerationID)
 	if err != nil {
 		return errors.Handler(err, "get regeneration")
 	}
 
-	resolvedRegeneration, err := services.ResolveRegeneration(h.registry, regeneration)
+	resolvedRegeneration, err := services.ResolveToolRegeneration(h.registry, regeneration)
 	if err != nil {
 		return err
 	}
@@ -721,24 +721,24 @@ func (h *Handler) PutEditRegeneration(c echo.Context) error {
 		return errors.BadRequest(err, "get user from context")
 	}
 
-	var regenerationID models.RegenerationID
+	var regenerationID models.ToolRegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
 		return errors.BadRequest(err, "get the regeneration id from url query")
 	} else {
-		regenerationID = models.RegenerationID(id)
+		regenerationID = models.ToolRegenerationID(id)
 	}
 
-	var regeneration *models.ResolvedRegeneration
+	var regeneration *models.ResolvedToolRegeneration
 	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
 		return errors.Handler(err, "get regeneration before deleting")
 	} else {
-		regeneration, err = services.ResolveRegeneration(h.registry, r)
+		regeneration, err = services.ResolveToolRegeneration(h.registry, r)
 
 		formData := getEditRegenerationFormData(c)
 		regeneration.Reason = formData.Reason
 	}
 
-	err = h.registry.ToolRegenerations.Update(regeneration.Regeneration, user)
+	err = h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user)
 	if err != nil {
 		return errors.Handler(err, "update regeneration")
 	}

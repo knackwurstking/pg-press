@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func ResolveRegeneration(registry *Registry, regeneration *models.Regeneration) (*models.ResolvedRegeneration, error) {
+func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegeneration) (*models.ResolvedToolRegeneration, error) {
 	tool, err := registry.Tools.Get(regeneration.ToolID)
 	if err != nil {
 		return nil, err

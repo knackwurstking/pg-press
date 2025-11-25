@@ -1,4 +1,3 @@
-// TODO: Rename this from `Regeneration` to `ToolRegeneration`
 package models
 
 import "github.com/knackwurstking/pg-press/errors"

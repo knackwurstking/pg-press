@@ -272,7 +272,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 			tool.Position, cycles...)
 	}
 
-	var resolvedRegenerations []*models.ResolvedRegeneration
+	var resolvedRegenerations []*models.ResolvedToolRegeneration
 	{ // Get (resolved) regeneration history for this tool
 		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
 		if err != nil {

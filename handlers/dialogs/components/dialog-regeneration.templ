@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-templ PageTool_DialogEditRegeneration(r *models.ResolvedRegeneration) {
+templ PageTool_DialogEditRegeneration(r *models.ResolvedToolRegeneration) {
 	@ui.Dialog(ui.DialogProps{
 		Method:           http.MethodPut,
 		Href:             utils.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID),

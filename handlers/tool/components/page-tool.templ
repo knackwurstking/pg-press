@@ -210,7 +210,7 @@ type PageTool_CyclesProps struct {
 	ToolPosition    string
 	TotalCycles     int64
 	Cycles          []*models.Cycle
-	Regenerations   []*models.ResolvedRegeneration
+	Regenerations   []*models.ResolvedToolRegeneration
 }
 
 templ PageTool_Cycles(props PageTool_CyclesProps) {
@@ -274,7 +274,7 @@ templ pageTool_RegenerationsSection(props PageTool_CyclesProps) {
 	</section>
 }
 
-templ pageTool_RegenerationsTable(regenerations []*models.ResolvedRegeneration, user *models.User) {
+templ pageTool_RegenerationsTable(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table title="Regenerationen">
 			<thead>
@@ -299,7 +299,7 @@ templ pageTool_RegenerationsTable(regenerations []*models.ResolvedRegeneration, 
 	</figure>
 }
 
-templ pageTool_RegenerationsTableRows(regenerations []*models.ResolvedRegeneration, user *models.User) {
+templ pageTool_RegenerationsTableRows(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
 	for _, regen := range regenerations {
 		<tr>
 			<td>
@@ -376,7 +376,7 @@ templ pageTool_CyclesTable(props PageTool_CyclesProps) {
 					</tr>
 				} else {
 					{{
-						var lastRegeneration *models.ResolvedRegeneration
+						var lastRegeneration *models.ResolvedToolRegeneration
 						if len(props.Regenerations) > 0 {
 							lastRegeneration = props.Regenerations[0]
 						}
@@ -392,7 +392,7 @@ templ pageTool_CyclesTable(props PageTool_CyclesProps) {
 
 templ pageTool_CycleRowWithPartialCalc(
 	cycle *models.Cycle,
-	lastRegeneration *models.ResolvedRegeneration,
+	lastRegeneration *models.ResolvedToolRegeneration,
 	props PageTool_CyclesProps,
 ) {
 	<tr
