@@ -32,6 +32,16 @@ func (b *Base) QueryCount(query string, args ...any) (int, error) {
 	return count, nil
 }
 
+func (b *Base) HasTable(tableName string) bool {
+	rows, err := b.DB.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name='press_cycles';`)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	return rows.Next()
+}
+
 func (b *Base) GetSelectError(err error) error {
 	if err == nil {
 		return nil

@@ -19,80 +19,90 @@ type PressCycles struct {
 }
 
 func NewPressCycles(r *Registry) *PressCycles {
-	base := NewBase(r)
+	s := &PressCycles{Base: NewBase(r)}
 
-	// Clean up after commit 2f46fb55, press_number column type changed
-	var cycles []*models.Cycle
-	rows, _ := r.DB.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name='press_cycles';`)
-	if rows.Next() {
-		rows.Close()
+	if err := s.CreateTable(); err != nil {
+		panic(err)
+	}
 
-		// Copy content of press_number_old to press_number
-		rows, err := r.DB.Query(`SELECT * FROM press_cycles`)
-		if err == nil {
-			for rows.Next() {
-				cycle, err := scanCycle(rows)
-				if err != nil {
-					break
-				}
-				cycles = append(cycles, cycle)
-			}
+	return s
+}
+
+func (s *PressCycles) CreateTable() error {
+
+	if s.HasTable("tool_regenerations") {
+		// Drop foreign keys from the tool_regenerations table
+		// `FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL`
+		_, err := s.DB.Exec(`
+			PRAGMA foreign_keys=off;
+
+			ALTER TABLE tool_regenerations RENAME TO tool_regenerations_old;
+
+			CREATE TABLE tool_regenerations (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				tool_id INTEGER NOT NULL,
+				cycle_id INTEGER NOT NULL,
+				reason TEXT,
+				performed_by INTEGER NOT NULL
+			);
+
+			INSERT INTO tool_regenerations SELECT * FROM tool_regenerations_old;
+
+			DROP TABLE tool_regenerations_old;
+
+			PRAGMA foreign_keys=on;
+		`)
+		if err != nil {
+			return fmt.Errorf("alter tool_regenerations table: %v", err)
 		}
-
-		rows.Close()
 	}
 
-	// Clean up after commit 2f46fb55, press_number column type changed
-	r.DB.Exec(`DROP INDEX idx_press_cycles_press_number`)
+	if s.HasTable("press_cycles") {
+		s.DB.Exec(`DROP INDEX idx_press_cycles_tool_id`)
+		s.DB.Exec(`DROP INDEX idx_press_cycles_tool_position`)
+		s.DB.Exec(`DROP INDEX idx_press_cycles_press_number`)
 
-	// TODO: Drop foreign keys from the tool_regenerations table `FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL`
+		query := `
+		PRAGMA foreign_keys=off;
 
-	if _, err := r.DB.Exec(`DROP TABLE IF EXISTS press_cycles`); err != nil {
-		panic("drop press_cycles table: " + err.Error())
-	}
+		ALTER TABLE press_cycles RENAME TO press_cycles_old;
 
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %[1]s (
+		CREATE TABLE press_cycles (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL,
 			tool_id INTEGER NOT NULL,
 			tool_position TEXT NOT NULL,
 			total_cycles INTEGER NOT NULL DEFAULT 0,
 			date DATETIME NOT NULL,
-			performed_by INTEGER NOT NULL,
-			FOREIGN KEY (tool_id) REFERENCES %[2]s(id),
-			FOREIGN KEY (performed_by) REFERENCES %[3]s(telegram_id) ON DELETE SET NULL
+			performed_by INTEGER NOT NULL
 		);
-		ALTER TABLE %[1]s DROP COLUMN press_number;
-		ALTER TABLE %[1]s ADD COLUMN press_number INTEGER NOT NULL;
-	`, TableNamePressCycles, TableNameTools, TableNameUsers)
-	if err := base.CreateTable(query, TableNamePressCycles); err != nil {
-		panic(err)
-	}
 
-	// Clean up after commit 2f46fb55, press_number column type changed
-	for _, cycle := range cycles {
-		query := `
-			UPDATE press_cycles
-			SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
-			WHERE id = ?
-		`
-		_, err := r.DB.Exec(
-			query,
-			cycle.TotalCycles,
-			cycle.ToolID,
-			cycle.ToolPosition,
-			cycle.PerformedBy,
-			cycle.PressNumber,
-			cycle.Date,
-			cycle.ID,
-		)
-		if err != nil {
-			panic("add cycle: " + err.Error())
+		INSERT INTO press_cycles SELECT * FROM press_cycles_old;
+
+		DROP TABLE press_cycles_old;
+
+		PRAGMA foreign_keys=on;
+	`
+		if err := s.Base.CreateTable(query, "press_cycles"); err != nil {
+			return err
+		}
+	} else {
+		if err := s.Base.CreateTable(`
+			CREATE TABLE press_cycles (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				press_number INTEGER NOT NULL,
+				tool_id INTEGER NOT NULL,
+				tool_position TEXT NOT NULL,
+				total_cycles INTEGER NOT NULL DEFAULT 0,
+				date DATETIME NOT NULL,
+				performed_by INTEGER NOT NULL
+			);
+		`, "press_cycles"); err != nil {
+			return err
 		}
 	}
 
-	return &PressCycles{Base: base}
+	return nil
 }
 
 // CRUD Operations
@@ -846,7 +856,6 @@ func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) []*models.Cycl
 
 func scanCycle(scannable Scannable) (*models.Cycle, error) {
 	cycle := &models.Cycle{}
-	var performedBy sql.NullInt64
 
 	err := scannable.Scan(
 		&cycle.ID,
@@ -859,10 +868,6 @@ func scanCycle(scannable Scannable) (*models.Cycle, error) {
 	)
 	if err != nil {
 		return nil, fmt.Errorf("scan press cycle: %w", err)
-	}
-
-	if performedBy.Valid {
-		cycle.PerformedBy = models.TelegramID(performedBy.Int64)
 	}
 
 	return cycle, nil

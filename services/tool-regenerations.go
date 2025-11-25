@@ -24,13 +24,8 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 			tool_id INTEGER NOT NULL,
 			cycle_id INTEGER NOT NULL,
 			reason TEXT,
-			performed_by INTEGER NOT NULL,
-			FOREIGN KEY (tool_id) REFERENCES %[2]s(id) ON DELETE CASCADE,
-			FOREIGN KEY (performed_by) REFERENCES users(telegram_id) ON DELETE SET NULL,
-			FOREIGN KEY (cycle_id) REFERENCES press_cycles(id) ON DELETE SET NULL
+			performed_by INTEGER NOT NULL
 		);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_tool_id ON %[1]s(tool_id);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_cycle_id ON %[1]s(cycle_id);
 	`, TableNameToolRegenerations, TableNameTools)
 
 	if err := base.CreateTable(query, TableNameToolRegenerations); err != nil {
