@@ -67,8 +67,8 @@ templ ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) {
 			<i class="bi bi-chevron-right"></i>
 		</div>
 		<span
-			class="flex justify-end items-center gap-sm text-sm"
-			style="position: absolute; top: 0; right: 0;"
+			class="flex justify-end items-center gap-sm text-xs"
+			style="position: absolute; top: 0.15rem; right: 0.25rem;"
 		>
 			{{ notes := tool.GetNotes() }}
 			if len(notes) > 0 {
