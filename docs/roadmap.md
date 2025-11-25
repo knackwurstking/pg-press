@@ -20,7 +20,7 @@ Implement the `PressRegenerations` system, which will reset the press total cycl
 zero just like the `ToolRegenerations` system just with presses
 
 - [x] Rename the current `Regeneration` model to `ToolRegeneration`
-- [ ] Add a `PressRegeneration` model [WIP]
+- [x] Add a `PressRegeneration` model
 - [ ] Add a `PressRegenerations` service
 - [ ] Remove the dead press (-1) stuff again [WIP]
 
