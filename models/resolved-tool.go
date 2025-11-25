@@ -4,10 +4,10 @@ type ResolvedTool struct {
 	*Tool
 	bindingTool   *ResolvedTool
 	notes         []*Note
-	regenerations []*Regeneration
+	regenerations []*ToolRegeneration
 }
 
-func NewResolvedTool(t *Tool, b *ResolvedTool, n []*Note, r []*Regeneration) *ResolvedTool {
+func NewResolvedTool(t *Tool, b *ResolvedTool, n []*Note, r []*ToolRegeneration) *ResolvedTool {
 	rt := &ResolvedTool{
 		Tool:          t,
 		bindingTool:   b,
@@ -31,6 +31,6 @@ func (rt *ResolvedTool) GetNotes() []*Note {
 	return rt.notes
 }
 
-func (rt *ResolvedTool) GetRegenerations() []*Regeneration {
+func (rt *ResolvedTool) GetRegenerations() []*ToolRegeneration {
 	return rt.regenerations
 }
