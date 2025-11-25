@@ -15,7 +15,7 @@ This document outlines the planned features and improvements for the PG Press sy
 - [x] To keep it simple, remove (UI) tool cycles for "top cassette"
 - [ ] ~Tools List: Group tools by state: active, available, dead, and regenerating~
 - [ ] ~Tools List: Add filter utils (youtube like) for filtering tools contains notes, regenerations, ... (or something like this)~
-- [x] Need a dead press (nr. -1) (admin only) where i can store cycles where a press is no longer available
+- [ ] Need a dead press (nr. -1) (admin only) where i can store cycles where a press is no longer available, need to change the cycles handling, i can no longer calculate partial cycles based on press total cycles [WIP]
 - [ ] Create a new page: "Probleme Checklist" (votes, attachments, comments, close/open)
 - [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures (Markdown editor support)
 
