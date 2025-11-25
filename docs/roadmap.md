@@ -2,20 +2,20 @@
 
 This document outlines the planned features and improvements for the PG Press system.
 
-## Fix
+## Bug Fixes
 
 - [x] Tool total cycles incorrect when cycles were added from new to old (backwards)
 - [x] Change tool regenerations table heading from "Grund" to "Bemerkung"
 - [ ] Tools list does not reload when navigating backwards in history
 - [ ] Notes management page needs improvements after editing or deleting a note
 
-## Feat
+## Features
 
 - [x] Resolve binding tool and update press and tool pages to enable regeneration counter
 - [x] To keep it simple, remove (UI) tool cycles for "top cassette"
-- [ ] ~Tools List: Group tools by state: active, available, dead, and regenerating~
-- [ ] ~Tools List: Add filter utils (youtube like) for filtering tools contains notes, regenerations, ... (or something like this)~
-- [ ] Need a dead press (nr. -1) (admin only) where i can store cycles where a press is no longer available, need to change the cycles handling, i can no longer calculate partial cycles based on press total cycles [WIP]
+- [ ] Tools List: Group tools by state: active, available, dead, and regenerating
+- [ ] Tools List: Add filter utils (youtube like) for filtering tools contains notes, regenerations, ... (or something like this)
+- [ ] Need a dead press (nr. -1) (admin only) where I can store cycles where a press is no longer available, need to change the cycles handling, I can no longer calculate partial cycles based on press total cycles [WIP]
 - [ ] Create a new page: "Probleme Checklist" (votes, attachments, comments, close/open)
 - [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures (Markdown editor support)
 
