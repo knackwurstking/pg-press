@@ -9,7 +9,6 @@ import (
 )
 
 // GetPartialCycles calculates the partial cycles for a given cycle
-// TODO: ... [WIP]
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
 		slog.Error("Invalid cycle for partial calculation", "error", err)
@@ -26,16 +25,21 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 		}
 		return cycle.TotalCycles
 	}
+	slog.Debug(
+		"Partial cycles calculation",
+		"previous_total_cycles", previousTotalCycles,
+		"cycle_id", cycle.ID,
+		"cycle_total_cycles", cycle.TotalCycles,
+	)
 
 	return cycle.TotalCycles - previousTotalCycles
 }
 
 func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
-	// TODO: ... [WIP]
 	baseQuery := `
 		SELECT total_cycles
 		FROM %s
-		WHERE press_number = ? AND tool_id > 0 AND %s AND total_cycles < ?
+		WHERE press_number = ? AND %s AND date < ?
 		ORDER BY date DESC
 		LIMIT 1
 	`
@@ -57,7 +61,7 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
 		args = append(args, cycle.ToolPosition)
 	}
 
-	args = append(args, cycle.TotalCycles)
+	args = append(args, cycle.Date)
 	return args
 }
 

@@ -85,7 +85,6 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 func (s *PressCycles) List() ([]*models.Cycle, error) {
 	slog.Debug("Listing press cycles")
 
-	// TODO: ... [WIP]
 	query := fmt.Sprintf(`
 		SELECT *
 		FROM %s

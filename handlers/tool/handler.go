@@ -662,7 +662,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-// TODO: ... [WIP]
+// TODO: Handle press regenerations(?)
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
 	slog.Debug("Get total cycles", "tool", toolID, "cycles", len(cycles))
 
