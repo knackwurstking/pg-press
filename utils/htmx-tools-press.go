@@ -7,6 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
+// TODO: Add URLs for the page-press-regenerations
+
 func HxGetToolsPagePressSection() templ.SafeURL {
 	return buildURL("/htmx/tools/section/press", nil)
 }
