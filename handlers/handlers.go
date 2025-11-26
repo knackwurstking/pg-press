@@ -13,6 +13,8 @@ import (
 	"github.com/knackwurstking/pg-press/handlers/nav"
 	"github.com/knackwurstking/pg-press/handlers/notes"
 	"github.com/knackwurstking/pg-press/handlers/press"
+	"github.com/knackwurstking/pg-press/handlers/pressregenerations"
+
 	"github.com/knackwurstking/pg-press/handlers/profile"
 	"github.com/knackwurstking/pg-press/handlers/tool"
 	"github.com/knackwurstking/pg-press/handlers/tools"
@@ -41,6 +43,8 @@ func RegisterAll(r *services.Registry, e *echo.Echo) {
 	tools.NewHandler(r).RegisterRoutes(e)
 	tool.NewHandler(r).RegisterRoutes(e)
 	press.NewHandler(r).RegisterRoutes(e)
+	pressregenerations.NewHandler(r).RegisterRoutes(e)
+
 	dialogs.NewHandler(r).RegisterRoutes(e)
 }
 

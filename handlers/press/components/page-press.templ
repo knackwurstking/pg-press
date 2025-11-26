@@ -33,6 +33,14 @@ templ PagePress(props PagePressProps) {
 				>
 					Umbau
 				</a>
+				<a
+					role="button"
+					class="secondary"
+					href={ fmt.Sprintf("%s/tools/press/%d/regenerations",
+						env.ServerPathPrefix, props.Press) }
+				>
+					Regeneration
+				</a>
 			</section>
 			// Notes section
 			<section id="notes-section" class="mt">
