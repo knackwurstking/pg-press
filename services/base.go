@@ -3,6 +3,8 @@ package services
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type Base struct {
@@ -43,33 +45,17 @@ func (b *Base) HasTable(tableName string) bool {
 }
 
 func (b *Base) GetSelectError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("database select: %v", err)
+	return errors.NewDatabaseSelectError(err)
 }
 
 func (b *Base) GetInsertError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("database insert: %v", err)
+	return errors.NewDatabaseInsertError(err)
 }
 
 func (b *Base) GetUpdateError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("database update: %v", err)
+	return errors.NewDatabaseUpdateError(err)
 }
 
 func (b *Base) GetDeleteError(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	return fmt.Errorf("database delete: %v", err)
+	return errors.NewDatabaseDeleteError(err)
 }

@@ -1,4 +1,4 @@
-package services
+package utils
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
+// ValidateAPIKey validates an API key according to the minimum length requirement
 func ValidateAPIKey(apiKey string) error {
 	if apiKey == "" {
 		return errors.NewValidationError("api_key is required")

@@ -52,7 +52,7 @@ func (c *Cookies) List() ([]*models.Cookie, error) {
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 	slog.Debug("Listing cookies by API key")
 
-	if err := ValidateAPIKey(apiKey); err != nil {
+	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return nil, err
 	}
 
@@ -161,7 +161,7 @@ func (c *Cookies) Remove(value string) error {
 func (c *Cookies) RemoveApiKey(apiKey string) error {
 	slog.Debug("Removing cookies by API key", "api_key", utils.MaskString(apiKey))
 
-	if err := ValidateAPIKey(apiKey); err != nil {
+	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return err
 	}
 

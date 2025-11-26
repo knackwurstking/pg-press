@@ -138,9 +138,9 @@ func (u *Users) Update(user *models.User) error {
 }
 
 func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
-	slog.Debug("Getting user by API key", "api_key", utils.MaskString(apiKey))
+	slog.Debug("Getting user from API key")
 
-	if err := ValidateAPIKey(apiKey); err != nil {
+	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return nil, err
 	}
 

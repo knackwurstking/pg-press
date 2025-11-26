@@ -8,6 +8,35 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Database error constructors
+func NewDatabaseSelectError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("database select: %v", err)
+}
+
+func NewDatabaseInsertError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("database insert: %v", err)
+}
+
+func NewDatabaseUpdateError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("database update: %v", err)
+}
+
+func NewDatabaseDeleteError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("database delete: %v", err)
+}
+
 func GetHTTPStatusCodeFromError(err error) int {
 	if err == nil {
 		return http.StatusOK
