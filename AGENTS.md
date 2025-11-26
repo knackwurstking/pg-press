@@ -147,7 +147,8 @@ The application uses SQLite with a comprehensive schema supporting:
 - **Documentation**: Notes, reports, and attachments
 - **Audit Trail**: Complete modification history
 
-The database is automatically initialized on first run with proper SQLite optimizations including WAL mode and foreign key constraints.
+The database is automatically initialized on first run with proper SQLite
+optimizations including WAL mode and foreign key constraints.
 
 ## Technology Stack
 
