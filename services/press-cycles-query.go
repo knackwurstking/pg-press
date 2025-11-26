@@ -65,11 +65,12 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 	slog.Debug("Getting press cycles for press",
 		"press", pressNumber, "limit", limit, "offset", offset)
 
+	// TODO: ... [WIP]
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
 		WHERE press_number = ?
-		ORDER BY total_cycles DESC
+		ORDER BY date DESC
 	`, TableNamePressCycles)
 
 	args := []any{pressNumber}
