@@ -31,6 +31,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 			h.GetPressRegenerationsPage,
 		),
 
+		// TODO: Just one route for handling post request, the rest can be removed
+
 		// HTMX endpoints for press regeneration content
 		utils.NewEchoRoute(
 			http.MethodGet,
