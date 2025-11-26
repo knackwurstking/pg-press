@@ -99,14 +99,6 @@ func (s *PressCycles) CreateTable() error {
 	return nil
 }
 
-func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) []*models.Cycle {
-	for _, cycle := range cycles {
-		cycle.PartialCycles = s.GetPartialCycles(cycle)
-	}
-
-	return cycles
-}
-
 func scanCycle(scannable Scannable) (*models.Cycle, error) {
 	cycle := &models.Cycle{}
 

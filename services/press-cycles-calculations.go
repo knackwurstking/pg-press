@@ -58,3 +58,11 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
 	args = append(args, cycle.TotalCycles)
 	return args
 }
+
+func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) []*models.Cycle {
+	for _, cycle := range cycles {
+		cycle.PartialCycles = s.GetPartialCycles(cycle)
+	}
+
+	return cycles
+}
