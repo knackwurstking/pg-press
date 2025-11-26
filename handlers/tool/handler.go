@@ -668,7 +668,6 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
 
-	// TODO: Also get the last press regeneration (this is just a date start/completed)
 	if r, err := h.registry.ToolRegenerations.GetLastRegeneration(toolID); err == nil {
 		startCycleID = r.CycleID
 	}
@@ -676,8 +675,6 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 	var totalCycles int64
 
 	for i, cycle := range cycles {
-		// TODO: Stop counting on the cycle before completed press regeneration
-
 		if cycle.ID == startCycleID {
 			slog.Debug("Stop counting...", "tool", toolID, "index", i, "cycle", cycle)
 			break
