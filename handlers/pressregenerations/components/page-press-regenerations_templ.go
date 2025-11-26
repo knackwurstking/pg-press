@@ -9,140 +9,75 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"strconv"
+	"fmt"
 
 	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
-	. "github.com/mashingan/soup"
 )
 
 type PagePressRegenerationsProps struct {
 	Press models.PressNumber
 }
 
-func PagePressRegenerations(props PagePressRegenerationsProps) {
-	Layout(
-		components.LayoutProps{
-			Title:        "Presse-Regeneration",
-			CurrentPress: props.Press,
-		},
-		func() {
-			components.NavBar()
-
-			// Main content
-			Div(
-				"class:container mx-auto p-4",
-				Div(
-					"class:flex flex-col md:flex-row gap-4",
-					// Left column - Controls
-					Div(
-						"class:w-full md:w-1/3",
-						Div(
-							"class:bg-white rounded-lg shadow p-6 mb-4",
-							H2("class:text-xl font-bold mb-4", "Regeneration Controls"),
-							Div(
-								"class:space-y-4",
-								// Start Regeneration
-								Form(
-									"class:space-y-2",
-									"hx-post", "/htmx/tools/press/"+strconv.Itoa(int(props.Press))+"/regenerations/start",
-									"hx-target", "#regeneration-history",
-									"hx-swap", "beforeend",
-									Div(
-										"class:mb-2",
-										Label("class:block text-sm font-medium mb-1", "Grund"),
-										Input(
-											"type:text",
-											"name:reason",
-											"required:true",
-											"class:border border-gray-300 rounded px-3 py-2 w-full",
-											"placeholder:Grund für die Regeneration",
-										),
-									),
-									Button(
-										"type:submit",
-										"class:bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded",
-										"Start Regeneration",
-									),
-								),
-
-								// Stop Regeneration
-								Form(
-									"class:space-y-2",
-									"hx-post", "/htmx/tools/press/"+strconv.Itoa(int(props.Press))+"/regenerations/stop",
-									"hx-target", "#regeneration-history",
-									"hx-swap", "beforeend",
-									Button(
-										"type:submit",
-										"class:bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded",
-										"Regeneration beenden",
-									),
-								),
-
-								// Add Regeneration (Retroactively)
-								H3("class:text-lg font-semibold mt-6 mb-2", "Regeneration hinzufügen (Retroaktiv)"),
-								Form(
-									"class:space-y-2",
-									"hx-post", "/htmx/tools/press/"+strconv.Itoa(int(props.Press))+"/regenerations/add",
-									"hx-target", "#regeneration-history",
-									"hx-swap", "beforeend",
-									Div(
-										"class:mb-2",
-										Label("class:block text-sm font-medium mb-1", "Startzeit"),
-										Input(
-											"type:datetime-local",
-											"name:started_at",
-											"required:true",
-											"class:border border-gray-300 rounded px-3 py-2 w-full",
-										),
-									),
-									Div(
-										"class:mb-2",
-										Label("class:block text-sm font-medium mb-1", "Endzeit"),
-										Input(
-											"type:datetime-local",
-											"name:completed_at",
-											"class:border border-gray-300 rounded px-3 py-2 w-full",
-										),
-									),
-									Div(
-										"class:mb-2",
-										Label("class:block text-sm font-medium mb-1", "Grund"),
-										Input(
-											"type:text",
-											"name:reason",
-											"required:true",
-											"class:border border-gray-300 rounded px-3 py-2 w-full",
-											"placeholder:Grund für die Regeneration",
-										),
-									),
-									Button(
-										"type:submit",
-										"class:bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded",
-										"Regeneration hinzufügen",
-									),
-								),
-							),
-						),
-					),
-
-					// Right column - History
-					Div(
-						"class:w-full md:w-2/3",
-						Div(
-							"class:bg-white rounded-lg shadow p-6",
-							H2("class:text-xl font-bold mb-4", "Regeneration History"),
-							Div(
-								"id:regeneration-history",
-								// History will be loaded here via HTMX
-								components.LoadingSpinner(),
-							),
-						),
-					),
-				),
-			)
-		},
-	)
+func PagePressRegenerations(props PagePressRegenerationsProps) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var1 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var1 == nil {
+			templ_7745c5c3_Var1 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container fluid\"><div class=\"flex flex-col gap-lg\"><!-- Left column - Controls --><div><div><h2 class=\"text-xl text-bold\">Regeneration Controls</h2><div><!-- Start Regeneration --><form hx-post=\"/htmx/tools/press/{{props.Press}}/regenerations/start\" hx-target=\"#regeneration-history\" hx-swap=\"beforeend\"><div class=\"mb\"><label class=\"text-sm text-medium\">Grund</label> <input type=\"text\" name=\"reason\" required placeholder=\"Grund für die Regeneration\"></div><button type=\"submit\">Start Regeneration</button></form><!-- Stop Regeneration --><form hx-post=\"/htmx/tools/press/{{props.Press}}/regenerations/stop\" hx-target=\"#regeneration-history\" hx-swap=\"beforeend\"><button type=\"submit\">Regeneration beenden</button></form><!-- Add Regeneration (Retroactively) --><h3>Regeneration hinzufügen (Retroaktiv)</h3><form hx-post=\"/htmx/tools/press/{{props.Press}}/regenerations/add\" hx-target=\"#regeneration-history\" hx-swap=\"beforeend\"><div class=\"mb\"><label>Startzeit</label> <input type=\"datetime-local\" name=\"started_at\" required></div><div class=\"mb\"><label>Endzeit</label> <input type=\"datetime-local\" name=\"completed_at\"></div><div class=\"mb\"><label>Grund</label> <input type=\"text\" name=\"reason\" required placeholder=\"Grund für die Regeneration\"></div><button type=\"submit\">Regeneration hinzufügen</button></form></div></div></div><!-- Right column - History --><div><div><h2>Regeneration History</h2><div id=\"regeneration-history\"><!-- History will be loaded here via HTMX -->")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></div></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = components.Layout(
+			components.LayoutOptions{
+				PageTitle:   fmt.Sprintf("PG Presse | Regeneration P%d", props.Press),
+				AppBarTitle: fmt.Sprintf("Regeneration P%d", props.Press),
+				NavContent:  components.StandardNavContent(),
+			},
+		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
 }
 
 var _ = templruntime.GeneratedTemplate
