@@ -21,8 +21,9 @@ zero just like the `ToolRegenerations` system just with presses
 
 - [x] Rename the current `Regeneration` model to `ToolRegeneration`
 - [x] Add a `PressRegeneration` model
-- [ ] Add a `PressRegenerations` service
+- [x] Add a `PressRegenerations` service
 - [x] Remove the dead press (-1) stuff again
+- [ ] Update the cycles calculation inside the tool handler
 
 ## Refactoring
 

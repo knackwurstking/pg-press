@@ -5,17 +5,18 @@ import "database/sql"
 type Registry struct {
 	DB *sql.DB
 
-	Cookies           *Cookies
-	Users             *Users
-	Feeds             *Feeds
-	Attachments       *Attachments
-	Modifications     *Modifications
-	MetalSheets       *MetalSheets
-	Notes             *Notes
-	PressCycles       *PressCycles
-	Tools             *Tools
-	ToolRegenerations *ToolRegenerations
-	TroubleReports    *TroubleReports
+	Cookies            *Cookies
+	Users              *Users
+	Feeds              *Feeds
+	Attachments        *Attachments
+	Modifications      *Modifications
+	MetalSheets        *MetalSheets
+	Notes              *Notes
+	PressCycles        *PressCycles
+	Tools              *Tools
+	ToolRegenerations  *ToolRegenerations
+	TroubleReports     *TroubleReports
+	PressRegenerations *PressRegenerations
 }
 
 func NewRegistry(db *sql.DB) *Registry {
@@ -34,6 +35,7 @@ func NewRegistry(db *sql.DB) *Registry {
 	registry.Tools = NewTools(registry)
 	registry.ToolRegenerations = NewToolRegenerations(registry)
 	registry.TroubleReports = NewTroubleReports(registry)
+	registry.PressRegenerations = NewPressRegenerations(registry)
 
 	return registry
 }
