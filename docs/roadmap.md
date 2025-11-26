@@ -23,7 +23,7 @@ zero just like the `ToolRegenerations` system just with presses
 - [x] Add a `PressRegeneration` model
 - [x] Add a `PressRegenerations` service
 - [x] Remove the dead press (-1) stuff again
-- [ ] Update the cycles calculation inside the tool handler
+- [ ] Press Cycles ordering needs to be changed; I need to sort by date, not total cycles (find "ORDER BY total_cycles")
 
 ## Refactoring
 
