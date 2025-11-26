@@ -22,7 +22,7 @@ zero just like the `ToolRegenerations` system just with presses
 - [x] Rename the current `Regeneration` model to `ToolRegeneration`
 - [x] Add a `PressRegeneration` model
 - [ ] Add a `PressRegenerations` service
-- [ ] Remove the dead press (-1) stuff again [WIP]
+- [x] Remove the dead press (-1) stuff again
 
 ## Refactoring
 

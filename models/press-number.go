@@ -2,9 +2,8 @@ package models
 
 import "slices"
 
-const (
-	// PressNumberUnknown is used for tools that can no longer be bound to a valid press.
-	PressNumberUnknown PressNumber = -1
+var (
+	ValidPressNumbers = []PressNumber{0, 2, 3, 4, 5}
 )
 
 type PressNumber int8
@@ -17,5 +16,5 @@ func IsValidPressNumber(n *PressNumber) bool {
 		return false
 	}
 
-	return slices.Contains([]PressNumber{PressNumberUnknown, 0, 2, 3, 4, 5}, *n)
+	return slices.Contains(ValidPressNumbers, *n)
 }

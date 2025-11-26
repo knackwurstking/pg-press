@@ -109,13 +109,7 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 				>
 					Presse auswählen
 				</option>
-				{{
-					presses := []models.PressNumber{0, 2, 3, 4, 5}
-					if props.User.IsAdmin() {
-						presses = []models.PressNumber{models.PressNumberUnknown, 0, 2, 3, 4, 5}
-					}
-				}}
-				for _, i := range presses {
+				for _, i := range models.ValidPressNumbers {
 					<option
 						value={ fmt.Sprintf("%d", i) }
 						selected?={ (props.InputPressNumber != nil && *props.InputPressNumber == i) ||
@@ -124,11 +118,7 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 								props.Tool.Press != nil &&
 								*props.Tool.Press == i) }
 					>
-						if i == models.PressNumberUnknown {
-							Presse Unbekannt
-						} else {
-							Presse { fmt.Sprintf("%d", i) }
-						}
+						Presse { fmt.Sprintf("%d", i) }
 					</option>
 				}
 			</select>
