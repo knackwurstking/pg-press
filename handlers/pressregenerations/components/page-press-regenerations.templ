@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 type PagePressRegenerationsProps struct {
@@ -20,95 +21,21 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 		},
 	) {
 		<div class="container fluid">
-			<div class="flex flex-col gap-lg">
-				<!-- Left column - Controls -->
-				<div>
-					<div>
-						<h2 class="text-xl text-bold">Regeneration Controls</h2>
-						<div>
-							<!-- Start Regeneration -->
-							// TODO: Fix the URL for hx-post
-							<form
-								hx-post="/htmx/tools/press/{{props.Press}}/regenerations/start"
-								hx-target="#regeneration-history"
-								hx-swap="beforeend"
-							>
-								<div class="mb">
-									<label
-										class="text-sm text-medium"
-									>Grund</label>
-									<input
-										type="text"
-										name="reason"
-										required
-										placeholder="Grund für die Regeneration"
-									/>
-								</div>
-								<button
-									type="submit"
-								>Start Regeneration</button>
-							</form>
-							<!-- Stop Regeneration -->
-							// TODO: Fix hx-post URL
-							<form
-								hx-post="/htmx/tools/press/{{props.Press}}/regenerations/stop"
-								hx-target="#regeneration-history"
-								hx-swap="beforeend"
-							>
-								<button
-									type="submit"
-								>Regeneration beenden</button>
-							</form>
-							<!-- Add Regeneration (Retroactively) -->
-							<h3>Regeneration hinzufügen (Retroaktiv)</h3>
-							// TODO: Fix hx-post URL
-							<form
-								hx-post="/htmx/tools/press/{{props.Press}}/regenerations/add"
-								hx-target="#regeneration-history"
-								hx-swap="beforeend"
-							>
-								<div class="mb">
-									<label>Startzeit</label>
-									<input
-										type="datetime-local"
-										name="started_at"
-										required
-									/>
-								</div>
-								<div class="mb">
-									<label>Endzeit</label>
-									<input
-										type="datetime-local"
-										name="completed_at"
-									/>
-								</div>
-								<div class="mb">
-									<label>Grund</label>
-									<input
-										type="text"
-										name="reason"
-										required
-										placeholder="Grund für die Regeneration"
-									/>
-								</div>
-								<button
-									type="submit"
-								>Regeneration hinzufügen</button>
-							</form>
-						</div>
-					</div>
-				</div>
-				<!-- Right column - History -->
-				<div>
-					<div>
-						<h2>Regeneration History</h2>
-						<div id="regeneration-history">
-							<!-- History will be loaded here via HTMX -->
-							@components.Spinner()
-						</div>
-					</div>
-				</div>
-			</div>
+			<form
+				hx-post={ utils.HxPostPressRegenration() }
+				hx-trigger="submit"
+				hx-swap="none"
+			>
+				// TODO: How to change the date format, using `env.DateFormat`
+				{{ labelStartedID := "started" }}
+				<label for={ labelStartedID }></label>
+				<input id={ labelStartedID } type="date" required />
+
+				// TODO: How to change the date format, using `env.DateFormat`
+				{{ labelCompletedID := "completed" }}
+				<label for={ labelCompletedID }></label>
+				<input id={ labelCompletedID } type="date" required />
+			<form>
 		</div>
 	}
 }
