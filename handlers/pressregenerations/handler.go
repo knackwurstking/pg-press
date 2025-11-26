@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/handlers/pressregenerations/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,13 +25,33 @@ func NewHandler(r *services.Registry) *Handler {
 func (h *Handler) RegisterRoutes(e *echo.Echo) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Press regeneration page
-		utils.NewEchoRoute(http.MethodGet, "/tools/press/:press/regenerations", h.GetPressRegenerationsPage),
+		utils.NewEchoRoute(
+			http.MethodGet,
+			"/tools/press/:press/regenerations",
+			h.GetPressRegenerationsPage,
+		),
 
 		// HTMX endpoints for press regeneration content
-		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/press/:press/regenerations/history", h.HTMXGetPressRegenerationHistory),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/tools/press/:press/regenerations/start", h.HTMXStartPressRegeneration),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/tools/press/:press/regenerations/stop", h.HTMXStopPressRegeneration),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/tools/press/:press/regenerations/add", h.HTMXAddPressRegeneration),
+		utils.NewEchoRoute(
+			http.MethodGet,
+			"/htmx/tools/press/:press/regenerations/history",
+			h.HTMXGetPressRegenerationHistory,
+		),
+		utils.NewEchoRoute(
+			http.MethodPost,
+			"/htmx/tools/press/:press/regenerations/start",
+			h.HTMXStartPressRegeneration,
+		),
+		utils.NewEchoRoute(
+			http.MethodPost,
+			"/htmx/tools/press/:press/regenerations/stop",
+			h.HTMXStopPressRegeneration,
+		),
+		utils.NewEchoRoute(
+			http.MethodPost,
+			"/htmx/tools/press/:press/regenerations/add",
+			h.HTMXAddPressRegeneration,
+		),
 	})
 }
 
@@ -39,8 +61,13 @@ func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
 		return err
 	}
 
-	// For now, just return a simple response to ensure the handler works
-	return c.String(http.StatusOK, "Press Regenerations Page for Press "+string(rune(press+'0')))
+	if err = components.PagePressRegenerations(components.PagePressRegenerationsProps{
+		Press: press,
+	}).Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.Handler(err, "render press page template")
+	}
+
+	return nil
 }
 
 func (h *Handler) HTMXGetPressRegenerationHistory(c echo.Context) error {
@@ -50,7 +77,11 @@ func (h *Handler) HTMXGetPressRegenerationHistory(c echo.Context) error {
 	}
 
 	// For now, just return a simple response to ensure the handler works
-	return c.String(http.StatusOK, "Regeneration History for Press "+string(rune(press+'0')))
+	return c.String(
+		http.StatusOK,
+		"Regeneration History for Press "+
+			string(rune(press+'0')),
+	)
 }
 
 func (h *Handler) HTMXStartPressRegeneration(c echo.Context) error {
@@ -65,7 +96,12 @@ func (h *Handler) HTMXStartPressRegeneration(c echo.Context) error {
 	}
 
 	// For now, just return a simple response to ensure the handler works
-	return c.String(http.StatusOK, "Started regeneration for Press "+string(rune(press+'0'))+" with reason: "+reason)
+	return c.String(
+		http.StatusOK,
+		"Started regeneration for Press "+
+			string(rune(press+'0'))+
+			" with reason: "+reason,
+	)
 }
 
 func (h *Handler) HTMXStopPressRegeneration(c echo.Context) error {
@@ -75,7 +111,11 @@ func (h *Handler) HTMXStopPressRegeneration(c echo.Context) error {
 	}
 
 	// For now, just return a simple response to ensure the handler works
-	return c.String(http.StatusOK, "Stopped regeneration for Press "+string(rune(press+'0')))
+	return c.String(
+		http.StatusOK,
+		"Stopped regeneration for Press "+
+			string(rune(press+'0')),
+	)
 }
 
 func (h *Handler) HTMXAddPressRegeneration(c echo.Context) error {
@@ -95,7 +135,12 @@ func (h *Handler) HTMXAddPressRegeneration(c echo.Context) error {
 	}
 
 	// For now, just return a simple response to ensure the handler works
-	return c.String(http.StatusOK, "Added regeneration for Press "+string(rune(press+'0'))+" with reason: "+reason)
+	return c.String(
+		http.StatusOK,
+		"Added regeneration for Press "+
+			string(rune(press+'0'))+
+			" with reason: "+reason,
+	)
 }
 
 func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, error) {
