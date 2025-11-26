@@ -1,0 +1,69 @@
+package services
+
+import (
+	"database/sql"
+	"fmt"
+
+	"github.com/knackwurstking/pg-press/models"
+)
+
+func (t *Tools) Bind(cassetteID, targetID models.ToolID) error {
+	if err := t.validateBindingTools(cassetteID, targetID); err != nil {
+		return err
+	}
+
+	// Get press from the target tool
+	targetTool, err := t.Get(targetID)
+	if err != nil {
+		return err
+	}
+
+	// Execute binding operations
+	queries := []string{
+		// Set bindings
+		fmt.Sprintf(`UPDATE %s SET binding = :target WHERE id = :cassette`, TableNameTools),
+		fmt.Sprintf(`UPDATE %s SET binding = :cassette WHERE id = :target`, TableNameTools),
+		// Clear press from other cassettes at the same press
+		fmt.Sprintf(`UPDATE %s SET press = NULL WHERE press = :press AND position = "cassette top"`, TableNameTools),
+		// Assign press to cassette
+		fmt.Sprintf(`UPDATE %s SET press = :press WHERE id = :cassette`, TableNameTools),
+	}
+
+	for _, query := range queries {
+		if _, err := t.DB.Exec(query,
+			sql.Named("target", targetID),
+			sql.Named("cassette", cassetteID),
+			sql.Named("press", targetTool.Press),
+		); err != nil {
+			return t.GetUpdateError(err)
+		}
+	}
+
+	return nil
+}
+
+func (t *Tools) UnBind(toolID models.ToolID) error {
+	tool, err := t.Get(toolID)
+	if err != nil {
+		return err
+	}
+
+	if tool.Binding == nil {
+		return nil
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE %s
+		SET binding = NULL
+		WHERE id = :toolID OR id = :binding`,
+		TableNameTools)
+
+	if _, err := t.DB.Exec(query,
+		sql.Named("toolID", toolID),
+		sql.Named("binding", *tool.Binding),
+	); err != nil {
+		return t.GetUpdateError(err)
+	}
+
+	return nil
+}
