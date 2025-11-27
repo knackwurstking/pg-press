@@ -28,9 +28,9 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
 - [x] Press Cycles ordering needs to be changed; I need to sort by date,
       not total cycles (find "ORDER BY total_cycles")
 - [x] Fix to total cycles calculation
-- [ ] UI: Add press regeneration section where the admin can start/stop a
-      regeneration, or retroactively add a regeneration [WIP]
-- [ ] Fix the `getTotalCycles tool handler method to check the last tool regeneration
+- [x] UI: Submit a press regeneration
+- [ ] UI: Add press regeneration section to the press page, just like the tool page has one
+- [ ] Fix the partial cycles calculation for tools, after adding a press regeneration, it is all messed up
 
 ## Refactoring
 
