@@ -51,3 +51,16 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*mode
 	return r, nil
 }
 
+func (h *Handler) parseParamPress(c echo.Context) (models.PressNumber, *echo.HTTPError) {
+	pressNum, err := utils.ParseParamInt8(c, "press")
+	if err != nil {
+		return -1, errors.BadRequest(err, "invalid or missing press parameter")
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return -1, errors.BadRequest(err, "invalid press number")
+	}
+
+	return press, nil
+}
