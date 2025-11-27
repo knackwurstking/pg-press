@@ -78,17 +78,26 @@ func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
 }
 
 func (h *Handler) PostPressRegenerationsPage(c echo.Context) error {
-	press, eerr := h.parseParamPress(c)
+	var (
+		press models.PressNumber
+		eerr  *echo.HTTPError
+	)
+
+	press, eerr = h.parseParamPress(c)
 	if eerr != nil {
 		return eerr
 	}
 
-	data, eerr := ParseFormRegenerationsPage(c, press)
+	var (
+		data *models.PressRegeneration
+	)
+
+	data, eerr = ParseFormRegenerationsPage(c, press)
 	if eerr != nil {
 		return eerr
 	}
 
-	// TODO: ...
+	// TODO: Add this new press regeneration to the database
 
 	return errors.BadRequest(nil, "Under Construction")
 }
