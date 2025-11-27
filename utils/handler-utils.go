@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
@@ -93,6 +95,21 @@ func ParseParamInt8(c echo.Context, paramName string) (int8, error) {
 		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
 	}
 	return int8(id), nil
+}
+
+func ParseFormValueTime(c echo.Context, paramName string) (t time.Time, err error) {
+	var (
+		v string
+	)
+
+	v = c.FormValue(paramName)
+
+	t, err = time.Parse("2006-01-02", v) // YYYY-MM-DD
+	if err != nil {
+		return t, errors.Wrap(err, "parsing date input")
+	}
+
+	return t, nil
 }
 
 func SanitizeFilename(filename string) string {

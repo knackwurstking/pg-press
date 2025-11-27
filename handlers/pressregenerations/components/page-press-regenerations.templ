@@ -24,6 +24,8 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 				action={ fmt.Sprintf("/tools/press/%d/regenerations", props.Press) }
 				method="post"
 			>
+				// TODO: Add reason text input field
+
 				{{ labelStartedID := "started" }}
 				<label for={ labelStartedID }></label>
 				<input id={ labelStartedID } name={ labelStartedID } type="date" required />
