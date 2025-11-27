@@ -28,17 +28,15 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				hx-on::before-request="event.currentTarget.disabled = true"
 				hx-on::after-request="event.currentTarget.disabled = false"
-				class="flex flex-col gap-xl"
+				class="container flex flex-col gap"
 			>
-				// TODO: Add reason text input field
-
 				<div class="flex gap justify-evenly w-full">
-					{{ labelStartedID := "started" }}
-					<label for={ labelStartedID } class="flex flex-col">
+					{{ startedID := "started" }}
+					<label for={ startedID } class="flex flex-col">
 						Start
 						<input 
-							id={ labelStartedID } 
-							name={ labelStartedID } 
+							id={ startedID } 
+							name={ startedID } 
 							class="flex! justify-center items-center" 
 							type="date" 
 							required 
@@ -50,17 +48,28 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 						style="margin-top: 2.5rem;"
 					></i>
 
-					{{ labelCompletedID := "completed" }}
-					<label for={ labelCompletedID } class="flex flex-col">
+					{{ completedID := "completed" }}
+					<label for={ completedID } class="flex flex-col">
 						Ende
 						<input 
-							id={ labelCompletedID } 
-							name={ labelCompletedID } 
+							id={ completedID } 
+							name={ completedID } 
 							class="flex! justify-center items-center" 
 							type="date" 
 							required
 						/>
 					</label>
+				</div>
+
+				{{ reasonID := "reason" }}
+				<div class="flex flex-col">
+					<label for={ reasonID }>Bemerkung</label>
+					<input 
+						id={ reasonID } 
+						name={ reasonID } 
+						type="text" 
+						class="border p-lg"
+					/>
 				</div>
 
 				<div class="w-full flex justify-end">
