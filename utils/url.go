@@ -6,10 +6,11 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
 )
 
-// buildURL constructs a URL with the given path and query parameters
-func buildURL(path string, params map[string]string) templ.SafeURL {
+// BuildURL constructs a URL with the given path and query parameters
+func BuildURL(path string, params map[string]string) templ.SafeURL {
 	u := fmt.Sprintf("%s%s", env.ServerPathPrefix, path)
 
 	if len(params) > 0 {
@@ -21,4 +22,8 @@ func buildURL(path string, params map[string]string) templ.SafeURL {
 	}
 
 	return templ.SafeURL(u)
+}
+
+func URLPressRegenerationsPage(press models.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tools/press/%d/regenerations", press), nil)
 }

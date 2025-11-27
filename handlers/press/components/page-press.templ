@@ -37,8 +37,7 @@ templ PagePress(props PagePressProps) {
 				<a
 					role="button"
 					class="secondary"
-					href={ fmt.Sprintf("%s/tools/press/%d/regenerations",
-						env.ServerPathPrefix, props.Press) }
+					href={ utils.URLPressRegenerationsPage(props.Press) }
 				>
 					Regeneration
 				</a>

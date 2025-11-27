@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/utils"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -21,8 +22,12 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 	) {
 		<div class="container fluid">
 			<form
-				action={ fmt.Sprintf("/tools/press/%d/regenerations", props.Press) }
-				method="post"
+				hx-post={ utils.HxPostPressRegenerations(props.Press) }
+				hx-trigger="submit"
+				hx-swap="none"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
+				hx-on::before-request="event.currentTarget.disabled = true"
+				hx-on::after-request="event.currentTarget.disabled = false"
 			>
 				// TODO: Add reason text input field
 

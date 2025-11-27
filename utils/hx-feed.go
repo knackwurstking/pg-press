@@ -5,5 +5,5 @@ import (
 )
 
 func HXGetFeedList() templ.SafeURL {
-	return buildURL("/htmx/feed/list", nil)
+	return BuildURL("/htmx/feed/list", nil)
 }

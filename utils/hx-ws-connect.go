@@ -5,5 +5,5 @@ import (
 )
 
 func HXWsConnectNavFeedCounter() templ.SafeURL {
-	return buildURL("/htmx/nav/feed-counter", nil)
+	return BuildURL("/htmx/nav/feed-counter", nil)
 }

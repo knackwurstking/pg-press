@@ -52,14 +52,13 @@ func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRe
 	return regeneration, nil
 }
 
-func (s *PressRegenerations) Add(pressNumber models.PressNumber, startedAt time.Time, completedAt time.Time, reason string) (models.PressRegenerationID, error) {
-	slog.Debug("Adding press regeneration",
-		"press_number", pressNumber, "started_at", startedAt, "completed_at", completedAt, "reason", reason)
-
-	r := models.NewPressRegeneration(pressNumber, startedAt, reason)
-	if !completedAt.IsZero() {
-		r.StopAt(completedAt)
-	}
+func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, error) {
+	slog.Debug(
+		"Adding press regeneration",
+		"press", r.PressNumber,
+		"started_at", r.StartedAt, "completed_at", r.CompletedAt,
+		"reason", r.Reason,
+	)
 
 	if err := r.Validate(); err != nil {
 		return 0, err
@@ -83,34 +82,30 @@ func (s *PressRegenerations) Add(pressNumber models.PressNumber, startedAt time.
 	return models.PressRegenerationID(id), nil
 }
 
-func (s *PressRegenerations) Update(id models.PressRegenerationID, completedAt time.Time, reason string) error {
-	slog.Debug("Updating press regeneration", "id", id, "completed_at", completedAt, "reason", reason)
+func (s *PressRegenerations) Update(r *models.PressRegeneration) error {
+	slog.Debug(
+		"Updating press regeneration",
+		"id", r.ID, "press", r.PressNumber,
+		"started_at", r.StartedAt, "completed_at", r.CompletedAt,
+		"reason", r.Reason,
+	)
 
-	regeneration, err := s.Get(id)
-	if err != nil {
+	var (
+		err   error
+		query string
+	)
+
+	if err = r.Validate(); err != nil {
 		return err
 	}
 
-	if !completedAt.IsZero() {
-		regeneration.StopAt(completedAt)
-	}
-
-	if reason != "" {
-		regeneration.Reason = reason
-	}
-
-	if err := regeneration.Validate(); err != nil {
-		return err
-	}
-
-	query := fmt.Sprintf(`
+	query = fmt.Sprintf(`
 		UPDATE %s
-		SET completed_at = ?, reason = ?
+		SET started_at = ?, completed_at = ?, reason = ?
 		WHERE id = ?
 	`, TableNamePressRegenerations)
 
-	_, err = s.DB.Exec(query, regeneration.CompletedAt, regeneration.Reason, id)
-	if err != nil {
+	if _, err = s.DB.Exec(query, r.StartedAt, r.CompletedAt, r.Reason, r.ID); err != nil {
 		return s.GetUpdateError(err)
 	}
 
@@ -129,10 +124,10 @@ func (s *PressRegenerations) Delete(id models.PressRegenerationID) error {
 	return nil
 }
 
-func (s *PressRegenerations) StartPressRegeneration(pressNumber models.PressNumber, reason string) (models.PressRegenerationID, error) {
-	slog.Debug("Starting press regeneration", "press_number", pressNumber, "reason", reason)
+func (s *PressRegenerations) StartPressRegeneration(pn models.PressNumber, reason string) (models.PressRegenerationID, error) {
+	slog.Debug("Starting press regeneration", "press_number", pn, "reason", reason)
 
-	regenerationID, err := s.Add(pressNumber, time.Now(), time.Time{}, reason)
+	regenerationID, err := s.Add(models.NewPressRegeneration(pn, time.Now(), reason))
 	if err != nil {
 		return 0, err
 	}
