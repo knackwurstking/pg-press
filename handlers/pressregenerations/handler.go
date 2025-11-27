@@ -80,7 +80,7 @@ func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
 func (h *Handler) PostPressRegenerationsPage(c echo.Context) error {
 	// TODO: Parse form...
 
-	return errors.BadRequest(nil, "Under Construction"))
+	return errors.BadRequest(nil, "Under Construction")
 }
 
 //func (h *Handler) HTMXGetPressRegenerationHistory(c echo.Context) error {
