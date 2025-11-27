@@ -13,7 +13,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
 )
 
 type PagePressRegenerationsProps struct {

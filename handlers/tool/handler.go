@@ -131,8 +131,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	{ // Get target_id from form value
 		targetIDString := c.FormValue("target_id")
 		if targetIDString == "" {
-			return errors.BadRequest(nil, fmt.Sprintf(
-				"failed to parse target_id: %+v", targetIDString))
+			return errors.BadRequest(nil, "failed to parse target_id: %#v", targetIDString)
 		}
 
 		targetIDParsed, err := strconv.ParseInt(targetIDString, 10, 64)

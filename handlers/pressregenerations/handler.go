@@ -63,12 +63,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.parseParamPress(c)
+	if eerr != nil {
+		return eerr
 	}
 
-	if err = components.PagePressRegenerations(components.PagePressRegenerationsProps{
+	if err := components.PagePressRegenerations(components.PagePressRegenerationsProps{
 		Press: press,
 	}).Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press page template")
@@ -81,6 +81,20 @@ func (h *Handler) PostPressRegenerationsPage(c echo.Context) error {
 	// TODO: Parse form...
 
 	return errors.BadRequest(nil, "Under Construction")
+}
+
+func (h *Handler) parseParamPress(c echo.Context) (models.PressNumber, *echo.HTTPError) {
+	pressNum, err := utils.ParseParamInt8(c, "press")
+	if err != nil {
+		return -1, errors.BadRequest(err, "invalid or missing press parameter")
+	}
+
+	press := models.PressNumber(pressNum)
+	if !models.IsValidPressNumber(&press) {
+		return -1, errors.BadRequest(err, "invalid press number")
+	}
+
+	return press, nil
 }
 
 //func (h *Handler) HTMXGetPressRegenerationHistory(c echo.Context) error {
@@ -156,16 +170,3 @@ func (h *Handler) PostPressRegenerationsPage(c echo.Context) error {
 //	)
 //}
 //
-//func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, error) {
-//	pressNum, err := utils.ParseParamInt8(c, "press")
-//	if err != nil {
-//		return -1, errors.BadRequest(err, "invalid or missing press parameter")
-//	}
-//
-//	press := models.PressNumber(pressNum)
-//	if !models.IsValidPressNumber(&press) {
-//		return -1, errors.BadRequest(err, "invalid press number")
-//	}
-//
-//	return press, nil
-//}
