@@ -9,11 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// RegenerationsFormData holds the form data for press regeneration
 type RegenerationsFormData struct {
 	Started   time.Time
 	Completed time.Time
 }
 
+// ParseFormRegenerationsPage parses the form data from the press regenerations page
+// and validates it to create a PressRegeneration model
 func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*models.PressRegeneration, *echo.HTTPError) {
 	var (
 		reason      string
@@ -34,10 +37,17 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*mode
 		return nil, errors.BadRequest(err, "parsing form value \"completed\"")
 	}
 
-	return &models.PressRegeneration{
+	r := &models.PressRegeneration{
 		PressNumber: press,
 		StartedAt:   startedAt,
 		CompletedAt: completedAt,
 		Reason:      reason,
-	}, nil
+	}
+
+	if err = r.Validate(); err != nil {
+		return r, errors.BadRequest(err, "invalid press regeneration data")
+	}
+
+	return r, nil
 }
+
