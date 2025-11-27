@@ -28,10 +28,11 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				hx-on::before-request="event.currentTarget.disabled = true"
 				hx-on::after-request="event.currentTarget.disabled = false"
+				class="flex flex-col gap-xl"
 			>
 				// TODO: Add reason text input field
 
-				<div class="flex justify-evenly w-full">
+				<div class="flex gap justify-evenly w-full">
 					{{ labelStartedID := "started" }}
 					<label for={ labelStartedID } class="flex flex-col">
 						Start
@@ -60,8 +61,10 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 							required
 						/>
 					</label>
+				</div>
 
-					// TODO: Add a submit button
+				<div class="w-full flex justify-end">
+					<input type="submit" />
 				</div>
 			</form>
 		</div>
