@@ -42,7 +42,7 @@ func (r *PressRegeneration) Validate() error {
 		return errors.NewValidationError("started_at is required")
 	}
 
-	if !r.CompletedAt.IsZero() && r.CompletedAt.After(r.StartedAt) {
+	if !r.CompletedAt.IsZero() && !r.CompletedAt.After(r.StartedAt) {
 		return errors.NewValidationError("completed_at cannot be before started_at")
 	}
 
