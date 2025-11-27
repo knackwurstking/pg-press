@@ -34,7 +34,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 
 		utils.NewEchoRoute(
 			http.MethodPost,
-			"/hx/tools/press/:press/regenerations",
+			"/htmx/tools/press/:press/regenerations",
 			h.HxPostPressRegenerationsPage,
 		),
 	})
