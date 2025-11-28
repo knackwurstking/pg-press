@@ -27,7 +27,7 @@ templ Page(props PageProps) {
 			@notes(props)
 			@activeTools(props)
 			@metalSheets(props)
-			// TODO: Press regenerations section
+			@regenerations(props)
 			@cycles(props)
 		</main>
 	}
@@ -105,6 +105,10 @@ templ metalSheets(props PageProps) {
 			@components.Spinner()
 		</div>
 	</section>
+}
+
+// TODO: Add some simple regenerations table with edit and delete functionality
+templ regenerations(props PageProps) {
 }
 
 // Cycles section - displays press cycle history
