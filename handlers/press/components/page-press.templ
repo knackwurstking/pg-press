@@ -11,7 +11,8 @@ import (
 )
 
 type PagePressProps struct {
-	Press models.PressNumber
+	Press 	models.PressNumber
+	User 	*models.User
 }
 
 templ PagePress(props PagePressProps) {
@@ -33,14 +34,15 @@ templ PagePress(props PagePressProps) {
 				>
 					Umbau
 				</a>
-				// TODO: Only show this button for Admins
-				<a
-					role="button"
-					class="secondary"
-					href={ utils.URLPressRegenerationsPage(props.Press) }
-				>
-					Regeneration
-				</a>
+				if props.User.IsAdmin() {
+					<a
+						role="button"
+						class="secondary"
+						href={ utils.URLPressRegenerationsPage(props.Press) }
+					>
+						Regeneration
+					</a>
+				}
 			</section>
 			// Notes section
 			<section id="notes-section" class="mt">

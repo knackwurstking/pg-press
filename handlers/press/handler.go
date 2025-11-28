@@ -48,6 +48,11 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetPressPage(c echo.Context) error {
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		return errors.BadRequest(err, "get user from context")
+	}
+
 	press, err := h.getPressNumberFromParam(c)
 	if err != nil {
 		return err
@@ -56,6 +61,7 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	// Render page
 	page := components.PagePress(components.PagePressProps{
 		Press: press,
+		User:  user,
 	})
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -196,7 +202,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	for _, t := range sortedTools {
 		n, err := h.registry.Notes.GetByTool(t.ID)
 		if err != nil {
-			return errors.Handler(err, fmt.Sprintf("get notes for tool %d", t.ID))
+			return errors.Handler(err, "get notes for tool %d", t.ID)
 		}
 		notes = append(notes, n...)
 	}
