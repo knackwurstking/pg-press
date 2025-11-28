@@ -11,8 +11,8 @@ import (
 )
 
 type PagePressProps struct {
-	Press 	models.PressNumber
-	User 	*models.User
+	Press models.PressNumber
+	User  *models.User
 }
 
 templ PagePress(props PagePressProps) {
@@ -39,7 +39,6 @@ templ pagePress_navContent() {
 	@components.NavProfileButton()
 	@components.NavHomeButton()
 }
-
 
 templ actions(props PagePressProps) {
 	<section class="flex justify-end items-center gap">
@@ -205,27 +204,27 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 templ pagePress_toolNotesSection(notes []*models.Note, tools []*models.Tool) {
 	<section class="notes-list flex flex-col gap-lg p">
 		{{
-				topToolNotes := make([]*models.Note, 0)
-				topCassetteToolNotes := make([]*models.Note, 0)
-				bottomToolNotes := make([]*models.Note, 0)
-				for _, n := range notes {
-					sID, _ := strings.CutPrefix(n.Linked, "tool_")
-					id, _ := strconv.ParseInt(sID, 10, 64)
-					for _, t := range tools {
-						if t.ID != models.ToolID(id) {
-							continue
-						}
+			topToolNotes := make([]*models.Note, 0)
+			topCassetteToolNotes := make([]*models.Note, 0)
+			bottomToolNotes := make([]*models.Note, 0)
+			for _, n := range notes {
+				sID, _ := strings.CutPrefix(n.Linked, "tool_")
+				id, _ := strconv.ParseInt(sID, 10, 64)
+				for _, t := range tools {
+					if t.ID != models.ToolID(id) {
+						continue
+					}
 
-						switch t.Position {
-						case models.PositionTop:
-							topToolNotes = append(topToolNotes, n)
-						case models.PositionTopCassette:
-							topCassetteToolNotes = append(topCassetteToolNotes, n)
-						case models.PositionBottom:
-							bottomToolNotes = append(bottomToolNotes, n)
-						}
+					switch t.Position {
+					case models.PositionTop:
+						topToolNotes = append(topToolNotes, n)
+					case models.PositionTopCassette:
+						topCassetteToolNotes = append(topCassetteToolNotes, n)
+					case models.PositionBottom:
+						bottomToolNotes = append(bottomToolNotes, n)
 					}
 				}
+			}
 		}}
 		if len(topToolNotes) > 0 {
 			<h4>{ models.PositionTop.GermanString() }</h4>
