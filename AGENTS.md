@@ -247,3 +247,43 @@ The project uses Go's built-in testing framework. Tests should be written in the
 - Proper validation and sanitization of all user inputs
 - Secure session handling with proper cookie attributes
 
+## Additional Information
+
+### Press Regenerations System
+The application includes a press regeneration system that works similarly to tool regenerations but resets press total cycles back to zero. Key aspects:
+- The current `Regeneration` model was renamed to `ToolRegeneration`
+- A new `PressRegeneration` model was added
+- A `PressRegenerations` service was implemented
+- The system handles sorting by date instead of total cycles for press cycles
+- UI elements for submitting press regenerations are implemented but not fully completed
+
+### Tool Management Details
+- Tools can be assigned to presses (0-5)
+- Tools can be marked as dead or regenerating
+- Tools have position, format, type and code attributes
+- The system supports tool binding between top/bottom positions
+- Real-time status updates are provided via WebSocket
+
+### Trouble Report Features
+- Comprehensive issue reporting with attachments
+- File preview functionality
+- PDF export capabilities
+- Modification history tracking
+- Searchable database of reports
+
+### Notes System
+- Multi-level priority system (INFO, ATTENTION, BROKEN)
+- Flexible linking to tools, presses, or any entity
+- Real-time collaborative editing capabilities
+- Advanced filtering and search features
+
+### Activity Feed
+- Comprehensive audit trail of all system activities
+- Real-time updates for collaborative environments
+- Push notifications for critical events
+
+### Cycle Tracking
+- Automated cycle counting and reporting for presses
+- Historical data with user attribution
+- Integration with tool regeneration schedules
+
