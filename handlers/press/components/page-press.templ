@@ -6,21 +6,20 @@ import (
 	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
-	"strconv"
-	"strings"
 )
 
-type PagePressProps struct {
+type PageProps struct {
 	Press models.PressNumber
 	User  *models.User
 }
 
-templ PagePress(props PagePressProps) {
+// Main page template
+templ Page(props PageProps) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Presse %d", props.Press),
 			AppBarTitle: fmt.Sprintf("Presse %d", props.Press),
-			NavContent:  pagePress_navContent(),
+			NavContent:  navContent(),
 		},
 	) {
 		<main class="container fluid">
@@ -34,13 +33,8 @@ templ PagePress(props PagePressProps) {
 	}
 }
 
-templ pagePress_navContent() {
-	@components.NavFeedButton()
-	@components.NavProfileButton()
-	@components.NavHomeButton()
-}
-
-templ actions(props PagePressProps) {
+// Actions section - contains buttons for umbau and regeneration
+templ actions(props PageProps) {
 	<section class="flex justify-end items-center gap">
 		<a
 			role="button"
@@ -62,7 +56,8 @@ templ actions(props PagePressProps) {
 	</section>
 }
 
-templ notes(props PagePressProps) {
+// Notes section - displays notes for the press
+templ notes(props PageProps) {
 	<section id="notes-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Notizen</h5>
@@ -78,7 +73,8 @@ templ notes(props PagePressProps) {
 	</section>
 }
 
-templ activeTools(props PagePressProps) {
+// Active tools section - displays active tools on the press
+templ activeTools(props PageProps) {
 	<section id="tool-state-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Aktive Werkzeuge</h5>
@@ -94,7 +90,8 @@ templ activeTools(props PagePressProps) {
 	</section>
 }
 
-templ metalSheets(props PagePressProps) {
+// Metal sheets section - displays metal sheets for the press
+templ metalSheets(props PageProps) {
 	<section id="metal-sheets-section">
 		<div class="flex justify-between items-center mb">
 			<h5>Blech Listen</h5>
@@ -110,7 +107,8 @@ templ metalSheets(props PagePressProps) {
 	</section>
 }
 
-templ cycles(props PagePressProps) {
+// Cycles section - displays press cycle history
+templ cycles(props PageProps) {
 	<section id="cycle-table-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Pressennutzungsverlauf</h5>
@@ -135,377 +133,9 @@ templ cycles(props PagePressProps) {
 	</section>
 }
 
-type PagePress_NotesSectionProps struct {
-	Notes []*models.Note
-	Tools []*models.Tool
-	Press models.PressNumber
-}
-
-templ PagePress_NotesSection(props PagePress_NotesSectionProps) {
-	{{
-		pressNotes := make([]*models.Note, 0)
-		toolNotes := make([]*models.Note, 0)
-		for _, n := range props.Notes {
-			if strings.HasPrefix(n.Linked, "press_") {
-				pressNotes = append(pressNotes, n)
-			} else if strings.HasPrefix(n.Linked, "tool_") {
-				toolNotes = append(toolNotes, n)
-			}
-		}
-	}}
-	@pressNotesSection(pressNotes, props.Press)
-	if len(toolNotes) > 0 {
-		@pagePress_toolNotesSection(toolNotes, props.Tools)
-	}
-}
-
-templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
-	if len(notes) > 0 {
-		// Press Notes
-		<section class="notes-list flex flex-col gap-lg p">
-			for _, note := range notes {
-				@components.NoteCard(note)
-			}
-		</section>
-		<section class="flex justify-center mt">
-			<button
-				class="primary"
-				hx-get={ utils.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				title="Neue Notiz für diese Presse hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-				Notiz hinzufügen
-			</button>
-		</section>
-	} else {
-		<section class="empty-state">
-			<h4>Keine Notizen</h4>
-			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
-			<button
-				class="primary"
-				hx-get={ utils.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				title="Neue Notiz für diese Presse hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-				Erste Notiz hinzufügen
-			</button>
-		</section>
-	}
-}
-
-templ pagePress_toolNotesSection(notes []*models.Note, tools []*models.Tool) {
-	<section class="notes-list flex flex-col gap-lg p">
-		{{
-			topToolNotes := make([]*models.Note, 0)
-			topCassetteToolNotes := make([]*models.Note, 0)
-			bottomToolNotes := make([]*models.Note, 0)
-			for _, n := range notes {
-				sID, _ := strings.CutPrefix(n.Linked, "tool_")
-				id, _ := strconv.ParseInt(sID, 10, 64)
-				for _, t := range tools {
-					if t.ID != models.ToolID(id) {
-						continue
-					}
-
-					switch t.Position {
-					case models.PositionTop:
-						topToolNotes = append(topToolNotes, n)
-					case models.PositionTopCassette:
-						topCassetteToolNotes = append(topCassetteToolNotes, n)
-					case models.PositionBottom:
-						bottomToolNotes = append(bottomToolNotes, n)
-					}
-				}
-			}
-		}}
-		if len(topToolNotes) > 0 {
-			<h4>{ models.PositionTop.GermanString() }</h4>
-			for _, n := range topToolNotes {
-				@components.NoteCard(n)
-			}
-		}
-		if len(topCassetteToolNotes) > 0 {
-			<h4>{ models.PositionTopCassette.GermanString() }</h4>
-			for _, n := range topCassetteToolNotes {
-				@components.NoteCard(n)
-			}
-		}
-		if len(bottomToolNotes) > 0 {
-			<h4>{ models.PositionBottom.GermanString() }</h4>
-			for _, n := range bottomToolNotes {
-				@components.NoteCard(n)
-			}
-		}
-	</section>
-}
-
-templ PagePress_ActiveToolsSection(tools []*models.ResolvedTool, press models.PressNumber) {
-	<div class="flex flex-col gap">
-		if len(tools) == 0 {
-			<div class="text-center text-muted">
-				Keine aktiven Werkzeuge für diese Presse
-			</div>
-		} else {
-			for _, t := range tools {
-				@components.ToolAnchor(t, &components.ToolAnchorOptions{
-					EnableStatusBadge: false,
-				})
-			}
-		}
-	</div>
-}
-
-type PagePress_MetalSheetSectionProps struct {
-	MetalSheets []*models.MetalSheet
-	ToolsMap    map[models.ToolID]*models.Tool
-	Press       models.PressNumber
-}
-
-templ PagePress_MetalSheetsSection(props PagePress_MetalSheetSectionProps) {
-	{{ expectedMachineType := models.GetMachineTypeForPress(props.Press) }}
-	<div class="flex flex-col gap-sm">
-		<div class="text-center">
-			<small class="text-muted">
-				Zeigt nur Bleche für { expectedMachineType.DisplayName() }
-				(Presse { fmt.Sprintf("%d", props.Press) })
-			</small>
-		</div>
-		@PagePress_MetalSheetTablesCollapsible(props.MetalSheets, props.ToolsMap)
-	</div>
-}
-
-type PagePress_CyclesSectionProps struct {
-	Cycles   []*models.Cycle
-	ToolsMap map[models.ToolID]*models.Tool
-	User     *models.User
-	Press    models.PressNumber
-}
-
-templ PagePress_CyclesSection(props PagePress_CyclesSectionProps) {
-	<figure class="w-full overflow-x-scroll">
-		<table name="additional-cycles-table" class="table borderless compact">
-			<thead>
-				<tr>
-					<th>Datum</th>
-					<th>Werkzeug</th>
-					<th>Position</th>
-					<th>Gesamtzyklen</th>
-					<th>Teilzyklen (berechnet)</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				@pagePress_renderPressCyclesRows(props)
-			</tbody>
-		</table>
-	</figure>
-}
-
-templ pagePress_renderPressCyclesRows(props PagePress_CyclesSectionProps) {
-	if len(props.Cycles) == 0 {
-		<tr>
-			<td colspan="6" class="text-center">
-				Kein Pressenverlauf verfügbar
-			</td>
-		</tr>
-	} else {
-		for _, cycle := range props.Cycles {
-			@pagePress_renderPressCycleRow(cycle, props)
-		}
-	}
-}
-
-templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSectionProps) {
-	<tr>
-		// Cycle Date
-		<td>
-			<span class="text-sm">{ cycle.Date.Format(env.DateFormat) }</span>
-		</td>
-		// Cycle Tool
-		<td>
-			{{ tool, exists := props.ToolsMap[cycle.ToolID] }}
-			if exists && tool != nil {
-				<span class="text-xs">
-					{ fmt.Sprintf("%s %s %s",
-						tool.Format.String(), tool.Code, tool.Type) }
-				</span>
-			} else {
-				<span class="text-xs">{ fmt.Sprintf("%d", cycle.ToolID) }</span>
-			}
-		</td>
-		// Cycle Position
-		<td>
-			<span class="text-xs">{ cycle.ToolPosition.GermanString() }</span>
-		</td>
-		// Total Cycles
-		<td>
-			{ fmt.Sprintf("%d", cycle.TotalCycles) }
-		</td>
-		// Partial Cycles
-		<td>
-			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ fmt.Sprintf("%d", cycle.PartialCycles) }
-			</span>
-		</td>
-		// Actions
-		<td>
-			<span class="button-group flex justify-end items-center">
-				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.HXGetCycleEditDialog(cycle.ToolID, &cycle.ID, true),
-					EditAdminOnly:   true,
-					DeleteHref:      utils.HXDeleteCycle(cycle.ID, cycle.ToolID),
-					DeleteAdminOnly: true,
-					User:            props.User,
-				})
-			</span>
-		</td>
-	</tr>
-}
-
-templ PagePress_MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	@PagePress_MetalSheetTableTopCollapsible(metalSheets, toolsMap)
-	<br/>
-	@PagePress_MetalSheetTableBottomCollapsible(metalSheets, toolsMap)
-}
-
-templ PagePress_MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	{{
-		topSheets := pagePress_filterMetalSheetsByPosition(
-			metalSheets,
-			toolsMap,
-			[]models.Position{
-				models.PositionTop,
-				models.PositionTopCassette,
-			},
-		)
-	}}
-	<details
-		class="mb"
-		if len(topSheets) > 0 {
-			open
-		}
-	>
-		<summary class="cursor-pointer select-none">
-			<h6 class="inline">Oberteil / Kassette ({ fmt.Sprintf("%d", len(topSheets)) } Einträge)</h6>
-		</summary>
-		<div class="mt">
-			<figure class="w-full overflow-x-scroll">
-				<table class="table borderless compact">
-					<thead>
-						<tr>
-							<th>Stärke (mm)</th>
-							<th>Blech (mm)</th>
-						</tr>
-					</thead>
-					<tbody>
-						if len(topSheets) == 0 {
-							<tr>
-								<td colspan="2" class="text-center">
-									Keine Bleche für Oberteil gefunden
-								</td>
-							</tr>
-						} else {
-							for _, sheet := range topSheets {
-								<tr>
-									<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-									<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-								</tr>
-							}
-						}
-					</tbody>
-				</table>
-			</figure>
-		</div>
-	</details>
-}
-
-templ PagePress_MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	{{ bottomSheets := pagePress_filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionBottom}) }}
-	<details
-		class="mb"
-		if len(bottomSheets) > 0 {
-			open
-		}
-	>
-		<summary class="cursor-pointer select-none">
-			<h6 class="inline">Unterteil ({ fmt.Sprintf("%d", len(bottomSheets)) } Einträge)</h6>
-		</summary>
-		<div class="mt">
-			<figure class="w-full overflow-x-scroll">
-				<table class="table borderless compact">
-					<thead>
-						<tr>
-							<th>Stärke (mm)</th>
-							<th>Blech (mm)</th>
-							<th>Marke (mm)</th>
-							<th>Stf.</th>
-							<th>Hubende</th>
-						</tr>
-					</thead>
-					<tbody>
-						if len(bottomSheets) == 0 {
-							<tr>
-								<td colspan="5" class="text-center">
-									Keine Bleche für Unterteil gefunden
-								</td>
-							</tr>
-						} else {
-							for _, sheet := range bottomSheets {
-								<tr>
-									<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-									<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-									<td>
-										if sheet.MarkeHeight > 0 {
-											{ fmt.Sprintf("%d", sheet.MarkeHeight) }
-										} else {
-											<span class="text-muted">-</span>
-										}
-									</td>
-									<td>
-										if sheet.STF > 0 {
-											{ fmt.Sprintf("%.1f", sheet.STF) }
-										} else {
-											<span class="text-muted">-</span>
-										}
-									</td>
-									<td>
-										if sheet.STFMax > 0 {
-											{ fmt.Sprintf("%.1f", sheet.STFMax) }
-										} else {
-											<span class="text-muted">-</span>
-										}
-									</td>
-								</tr>
-							}
-						}
-					</tbody>
-				</table>
-			</figure>
-		</div>
-	</details>
-}
-
-func pagePress_filterMetalSheetsByPosition(
-	metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool, positions []models.Position,
-) []*models.MetalSheet {
-	var filtered models.MetalSheetList
-	for _, sheet := range metalSheets {
-		if tool, exists := toolsMap[sheet.ToolID]; exists && tool != nil {
-			for _, pos := range positions {
-				if tool.Position == pos {
-					filtered = append(filtered, sheet)
-					break
-				}
-			}
-		}
-	}
-	return filtered.Sort()
+// Navigation content for the press page
+templ navContent() {
+	@components.NavFeedButton()
+	@components.NavProfileButton()
+	@components.NavHomeButton()
 }

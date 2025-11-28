@@ -59,7 +59,7 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	}
 
 	// Render page
-	page := components.PagePress(components.PagePressProps{
+	page := components.Page(components.PageProps{
 		Press: press,
 		User:  user,
 	})
@@ -93,7 +93,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		resolvedTools = append(resolvedTools, rt)
 	}
 
-	activeToolsSection := components.PagePress_ActiveToolsSection(resolvedTools, press)
+	activeToolsSection := components.ActiveToolsSection(resolvedTools, press)
 	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render active tools section")
 	}
@@ -120,8 +120,8 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		return errors.Handler(err, "get metal sheets for press")
 	}
 
-	metalSheetsSection := components.PagePress_MetalSheetsSection(
-		components.PagePress_MetalSheetSectionProps{
+	metalSheetsSection := components.MetalSheetsSection(
+		components.MetalSheetSectionProps{
 			MetalSheets: metalSheets,
 			ToolsMap:    toolsMap,
 			Press:       press,
@@ -207,8 +207,8 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		notes = append(notes, n...)
 	}
 
-	notesSection := components.PagePress_NotesSection(
-		components.PagePress_NotesSectionProps{
+	notesSection := components.NotesSection(
+		components.NotesSectionProps{
 			Notes: notes,
 			Tools: sortedTools,
 			Press: press,
