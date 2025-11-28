@@ -35,9 +35,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetUmbauPage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	pressNumberParam, err := utils.ParseParamInt8(c, "press")
@@ -47,7 +47,7 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 
 	pressNumber := models.PressNumber(pressNumberParam)
 	if !models.IsValidPressNumber(&pressNumber) {
-		return errors.BadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
+		return errors.BadRequest(nil, "invalid press number: %d", pressNumber)
 	}
 
 	slog.Info("Rendering the umbau page", "user_name", user.Name)
@@ -72,9 +72,9 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 
 func (h *Handler) PostUmbauPage(c echo.Context) error {
 	// Get the user from the request context
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get the press number from the request context
@@ -86,7 +86,7 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	// Validate the press number
 	pressNumber := models.PressNumber(pressNumberParam)
 	if !models.IsValidPressNumber(&pressNumber) {
-		return errors.BadRequest(nil, fmt.Sprintf("invalid press number: %d", pressNumber))
+		return errors.BadRequest(nil, "invalid press number: %d", pressNumber)
 	}
 
 	slog.Info("Handle a active tool change", "press", pressNumber, "user_name", user.Name)
@@ -152,14 +152,14 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	for _, tool := range currentTools {
 		cycle := models.NewCycle(pressNumber, tool.ID, tool.Position, totalCycles, user.TelegramID)
 		if _, err := h.registry.PressCycles.Add(cycle, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("create final cycle for tool %d", tool.ID))
+			return errors.Handler(err, "create final cycle for tool %d", tool.ID)
 		}
 	}
 
 	// Unassign current tools from press
 	for _, tool := range currentTools {
 		if err := h.registry.Tools.UpdatePress(tool.ID, nil, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("unassign tool %d", tool.ID))
+			return errors.Handler(err, "unassign tool %d", tool.ID)
 		}
 	}
 
@@ -167,7 +167,7 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	newTools := []*models.Tool{topTool, bottomTool}
 	for _, tool := range newTools {
 		if err := h.registry.Tools.UpdatePress(tool.ID, &pressNumber, user); err != nil {
-			return errors.Handler(err, fmt.Sprintf("assign tool %d to press", tool.ID))
+			return errors.Handler(err, "assign tool %d to press", tool.ID)
 		}
 	}
 

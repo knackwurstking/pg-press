@@ -34,9 +34,9 @@ func (h *Handler) GetFeedCounter(c echo.Context) error {
 	realIP := c.RealIP()
 
 	wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-		user, err := utils.GetUserFromContext(c)
-		if err != nil {
-			slog.Error("WebSocket authentication failed", "real_ip", realIP, "error", err)
+		user, eerr := utils.GetUserFromContext(c)
+		if eerr != nil {
+			slog.Error("WebSocket authentication failed", "real_ip", realIP, "error", eerr)
 			ws.Close()
 			return
 		}

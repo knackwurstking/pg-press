@@ -44,9 +44,9 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 		return errors.Handler(err, "get feeds")
 	}
 
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	userMap := make(map[models.TelegramID]*models.User)

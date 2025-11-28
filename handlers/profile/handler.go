@@ -37,14 +37,14 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetProfilePage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Debug("Rendering profile page", "user_name", user.Name)
 
-	if err = h.handleUserNameChange(c, user); err != nil {
+	if err := h.handleUserNameChange(c, user); err != nil {
 		return errors.Handler(err, "error updating username")
 	}
 
@@ -57,9 +57,9 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetCookies(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Debug("Fetching cookies for user", "user_name", user.Name)

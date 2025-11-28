@@ -51,9 +51,9 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 }
 
 func (h *Handler) GetLogout(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	if cookie, err := c.Cookie(env.CookieName); err == nil {
@@ -81,11 +81,11 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 		return false
 	}
 
-	if err := h.clearExistingSession(ctx, user.Name); err != nil {
+	if err := h.clearExistingSession(ctx); err != nil {
 		slog.Error("Failed to clear existing session", "error", err)
 	}
 
-	if err := h.createSession(ctx, apiKey, user); err != nil {
+	if err := h.createSession(ctx, apiKey); err != nil {
 		slog.Error("Failed to create session", "user_name", user.Name, "error", err)
 		return false
 	}
@@ -97,7 +97,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	return true
 }
 
-func (h *Handler) clearExistingSession(ctx echo.Context, username string) error {
+func (h *Handler) clearExistingSession(ctx echo.Context) error {
 	cookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
 		return nil
@@ -110,7 +110,7 @@ func (h *Handler) clearExistingSession(ctx echo.Context, username string) error 
 	return nil
 }
 
-func (h *Handler) createSession(ctx echo.Context, apiKey string, user *models.User) error {
+func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
 	cookieValue := uuid.New().String()
 	isHTTPS := ctx.Request().TLS != nil || ctx.Scheme() == "https"
 

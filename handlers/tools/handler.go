@@ -36,9 +36,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetToolsPage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	page := components.PageTools(user)
@@ -55,9 +55,9 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
@@ -85,9 +85,9 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	tool, err := h.registry.Tools.Get(toolID)
@@ -126,9 +126,9 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "user missing in context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	allTools, err := h.registry.Tools.List()
@@ -158,9 +158,9 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("User requested overlapping tools analysis", "user_name", user.Name)

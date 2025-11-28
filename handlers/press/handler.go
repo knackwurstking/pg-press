@@ -48,9 +48,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetPressPage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	press, err := h.getPressNumberFromParam(c)
@@ -141,9 +141,9 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	}
 
 	// Get user for permissions
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get cycles for this press
@@ -229,9 +229,9 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	}
 
 	// Get user for logging purposes
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("Generating cycle summary PDF for press", "press", press, "user_name", user.Name)

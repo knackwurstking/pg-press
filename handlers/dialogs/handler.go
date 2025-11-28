@@ -56,9 +56,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetEditCycle(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "user not in context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	var (
@@ -150,9 +150,9 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PostEditCycle(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -218,9 +218,9 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PutEditCycle(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -337,9 +337,9 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PostEditTool(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	formData, err := getEditToolFormData(c)
@@ -374,9 +374,9 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PutEditTool(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -422,7 +422,7 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	// Set HX headers
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
-	utils.SetHXAfterSettle(c, map[string]interface{}{
+	utils.SetHXAfterSettle(c, map[string]any{
 		"toolUpdated": map[string]string{
 			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
 				tool.String(), tool.Position.GermanString()),
@@ -473,9 +473,9 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 
 func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Extract tool ID from query parameters
@@ -514,9 +514,9 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 
 func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Extract metal sheet ID from query parameters
@@ -561,9 +561,9 @@ func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) GetEditNote(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	props := &components.DialogEditNoteProps{
@@ -601,9 +601,9 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PostEditNote(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Debug("Creating a new note", "user_name", user.Name)
@@ -641,9 +641,9 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PutEditNote(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	idq, err := utils.ParseQueryInt64(c, "id")
@@ -716,9 +716,9 @@ func (h *Handler) GetEditRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditRegeneration(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	var regenerationID models.ToolRegenerationID
@@ -738,8 +738,7 @@ func (h *Handler) PutEditRegeneration(c echo.Context) error {
 		regeneration.Reason = formData.Reason
 	}
 
-	err = h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user)
-	if err != nil {
+	if err := h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user); err != nil {
 		return errors.Handler(err, "update regeneration")
 	}
 

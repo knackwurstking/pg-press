@@ -82,9 +82,9 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 // HTMXDeleteNote deletes a note and unlinks it from all tools
 func (h *Handler) HTMXDeleteNote(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	idq, err := utils.ParseQueryInt64(c, "id")

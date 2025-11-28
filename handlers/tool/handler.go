@@ -68,9 +68,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 }
 
 func (h *Handler) GetToolPage(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	idParam, err := utils.ParseParamInt64(c, "id")
@@ -101,13 +101,9 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
-	var isAdmin bool
-	{ // Check for admin
-		user, err := utils.GetUserFromContext(c)
-		if err != nil {
-			return errors.BadRequest(err, "get user from context")
-		}
-		isAdmin = user.IsAdmin()
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get tool from param "/:id"
@@ -176,7 +172,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
-		IsAdmin:         isAdmin,
+		IsAdmin:         user.IsAdmin(),
 	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
@@ -187,13 +183,9 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
-	var isAdmin bool
-	{ // Check for admin
-		user, err := utils.GetUserFromContext(c)
-		if err != nil {
-			return errors.BadRequest(err, "get user from context")
-		}
-		isAdmin = user.IsAdmin()
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get tool from param "/:id"
@@ -228,7 +220,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
-		IsAdmin:         isAdmin,
+		IsAdmin:         user.IsAdmin(),
 	})
 
 	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
@@ -239,9 +231,9 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetCycles(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDParam, err := utils.ParseQueryInt64(c, "tool_id")
@@ -342,9 +334,9 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -392,9 +384,9 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -460,9 +452,9 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	var regenerationID models.ToolRegenerationID
@@ -499,7 +491,10 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 		}
 
 		if regeneration.PerformedBy != nil {
-			user, err = h.registry.Users.Get(*regeneration.PerformedBy)
+			user, err := h.registry.Users.Get(*regeneration.PerformedBy)
+			if err != nil {
+				slog.Warn("User not found", "error", err, "performed_by", regeneration.PerformedBy)
+			}
 			content += fmt.Sprintf("\nPerformed by: %s", user.Name)
 		}
 
@@ -512,9 +507,9 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -537,9 +532,9 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -562,9 +557,9 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 }
 
 func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	toolIDStr := c.FormValue("tool_id")

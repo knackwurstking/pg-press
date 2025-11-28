@@ -126,13 +126,13 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 	}
 
 	// Render the page
-	currentUser, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "retrieve user from context")
+	currentUser, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
 	itemRenderFunc := components.TroubleReportCreateModificationRenderer(models.TroubleReportID(id), isAdmin)
-	page := components.PageModifications[models.TroubleReportModData](resolvedModifications, itemRenderFunc)
+	page := components.PageModifications(resolvedModifications, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render page")
 	}
@@ -141,9 +141,9 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetData(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	trs, err := h.registry.TroubleReports.ListWithAttachments()
@@ -167,9 +167,9 @@ func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 		troubleReportID = models.TroubleReportID(id)
 	}
 
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	removedReport, err := h.registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
@@ -214,9 +214,9 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	id, err := utils.ParseQueryInt64(c, "id")
@@ -252,7 +252,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	}
 
 	if targetMod == nil {
-		return errors.NotFound(nil, fmt.Sprintf("modification %d not found", modTime))
+		return errors.NotFound(nil, "modification %d not found", modTime)
 	}
 
 	var modData models.TroubleReportModData

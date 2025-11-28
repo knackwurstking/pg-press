@@ -77,9 +77,9 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 
 func (h *Handler) PostSaveContent(c echo.Context) error {
 	// Get user from context
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.Handler(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Parse form data

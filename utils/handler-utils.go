@@ -15,15 +15,15 @@ import (
 )
 
 // GetUserFromContext retrieves the authenticated user from the request context
-func GetUserFromContext(c echo.Context) (*models.User, error) {
+func GetUserFromContext(c echo.Context) (*models.User, *echo.HTTPError) {
 	userInterface := c.Get("user")
 	if userInterface == nil {
-		return nil, fmt.Errorf("user not found in context")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "user not in context")
 	}
 
 	user, ok := userInterface.(*models.User)
 	if !ok {
-		return nil, fmt.Errorf("invalid user type in context")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid user in context")
 	}
 
 	return user, nil

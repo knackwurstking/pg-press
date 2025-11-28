@@ -33,9 +33,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo) {
 // DeleteMetalSheet handles the deletion of metal sheets
 func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Get current user for feed creation
-	user, err := utils.GetUserFromContext(c)
-	if err != nil {
-		return errors.BadRequest(err, "get user from context")
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Extract metal sheet ID from query parameters
