@@ -27,7 +27,7 @@ templ Page(props PageProps) {
 			@notes(props)
 			@activeTools(props)
 			@metalSheets(props)
-			@regenerations(props)
+			@pressRegenerations(props)
 			@cycles(props)
 		</main>
 	}
@@ -108,7 +108,20 @@ templ metalSheets(props PageProps) {
 }
 
 // TODO: Add some simple regenerations table with edit and delete functionality
-templ regenerations(props PageProps) {
+templ pressRegenerations(props PageProps) {
+	<section id="press-regenerations-section">
+		<div class="flex justify-between items-center mb">
+			<h5>Blech Listen</h5>
+		</div>
+		<div
+			id="press-regenerations-section-content"
+			hx-get={ utils.HxGetPressRegenerationsSection(props.Press) }
+			hx-trigger="loadd, pageLoaded from:body"
+			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
+		>
+			@components.Spinner()
+		</div>
+	</section>
 }
 
 // Cycles section - displays press cycle history
