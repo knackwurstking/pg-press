@@ -24,93 +24,12 @@ templ PagePress(props PagePressProps) {
 		},
 	) {
 		<main class="container fluid">
-			// Actions
-			<section class="flex justify-end items-center gap">
-				<a
-					role="button"
-					class="primary"
-					href={ fmt.Sprintf("%s/tools/press/%d/umbau",
-						env.ServerPathPrefix, props.Press) }
-				>
-					Umbau
-				</a>
-				if props.User.IsAdmin() {
-					<a
-						role="button"
-						class="secondary"
-						href={ utils.URLPressRegenerationsPage(props.Press) }
-					>
-						Regeneration
-					</a>
-				}
-			</section>
-			// Notes section
-			<section id="notes-section" class="mt">
-				<div class="flex justify-between items-center mb">
-					<h5>Notizen</h5>
-				</div>
-				<div
-					id="notes-content"
-					hx-get={ utils.HXGetPressNotesSectionContent(props.Press) }
-					hx-trigger="load, pageLoaded from:body"
-					hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
-				>
-					@components.Spinner()
-				</div>
-			</section>
-			<br/>
-			// Aktive tools table
-			<section id="tool-state-section" class="mt">
-				<div class="flex justify-between items-center mb">
-					<h5>Aktive Werkzeuge</h5>
-				</div>
-				<div
-					id="active-tools-content"
-					hx-get={ utils.HXGetPressActiveToolsSectionContent(props.Press) }
-					hx-trigger="load, pageLoaded from:body"
-					hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
-				>
-					@components.Spinner()
-				</div>
-			</section>
-			<br/>
-			<section id="metal-sheets-section">
-				<div class="flex justify-between items-center mb">
-					<h5>Blech Listen</h5>
-				</div>
-				<div
-					id="metal-sheets-content"
-					hx-get={ utils.HXGetPressMetalSheetsSectionContent(props.Press) }
-					hx-trigger="load, pageLoaded from:body"
-					hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
-				>
-					@components.Spinner()
-				</div>
-			</section>
-			<br/>
-			<!-- Press Cycles Table -->
-			<section id="cycle-table-section" class="mt">
-				<div class="flex justify-between items-center mb">
-					<h5>Pressennutzungsverlauf</h5>
-				</div>
-				<div class="mx w-full flex justify-end align-center">
-					<!-- Request a summary in PDF form from the server -->
-					<button
-						role="button"
-						class="info"
-						onclick={ components.DownloadCycleSummaryPDF(props.Press) }
-					>Zusammenfassung (PDF)</button>
-				</div>
-				<div
-					id="cycles-content"
-					class="mt"
-					hx-get={ utils.HXGetPressCyclesSectionContent(props.Press) }
-					hx-trigger="load, pageLoaded from:body"
-					hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
-				>
-					@components.Spinner()
-				</div>
-			</section>
+			@actions(props)
+			@notes(props)
+			@activeTools(props)
+			@metalSheets(props)
+			// TODO: Press regenerations section
+			@cycles(props)
 		</main>
 	}
 }
@@ -119,6 +38,102 @@ templ pagePress_navContent() {
 	@components.NavFeedButton()
 	@components.NavProfileButton()
 	@components.NavHomeButton()
+}
+
+
+templ actions(props PagePressProps) {
+	<section class="flex justify-end items-center gap">
+		<a
+			role="button"
+			class="primary"
+			href={ fmt.Sprintf("%s/tools/press/%d/umbau",
+				env.ServerPathPrefix, props.Press) }
+		>
+			Umbau
+		</a>
+		if props.User.IsAdmin() {
+			<a
+				role="button"
+				class="secondary"
+				href={ utils.URLPressRegenerationsPage(props.Press) }
+			>
+				Regeneration
+			</a>
+		}
+	</section>
+}
+
+templ notes(props PagePressProps) {
+	<section id="notes-section" class="mt">
+		<div class="flex justify-between items-center mb">
+			<h5>Notizen</h5>
+		</div>
+		<div
+			id="notes-content"
+			hx-get={ utils.HXGetPressNotesSectionContent(props.Press) }
+			hx-trigger="load, pageLoaded from:body"
+			hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
+		>
+			@components.Spinner()
+		</div>
+	</section>
+}
+
+templ activeTools(props PagePressProps) {
+	<section id="tool-state-section" class="mt">
+		<div class="flex justify-between items-center mb">
+			<h5>Aktive Werkzeuge</h5>
+		</div>
+		<div
+			id="active-tools-content"
+			hx-get={ utils.HXGetPressActiveToolsSectionContent(props.Press) }
+			hx-trigger="load, pageLoaded from:body"
+			hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
+		>
+			@components.Spinner()
+		</div>
+	</section>
+}
+
+templ metalSheets(props PagePressProps) {
+	<section id="metal-sheets-section">
+		<div class="flex justify-between items-center mb">
+			<h5>Blech Listen</h5>
+		</div>
+		<div
+			id="metal-sheets-content"
+			hx-get={ utils.HXGetPressMetalSheetsSectionContent(props.Press) }
+			hx-trigger="load, pageLoaded from:body"
+			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
+		>
+			@components.Spinner()
+		</div>
+	</section>
+}
+
+templ cycles(props PagePressProps) {
+	<section id="cycle-table-section" class="mt">
+		<div class="flex justify-between items-center mb">
+			<h5>Pressennutzungsverlauf</h5>
+		</div>
+		<div class="mx w-full flex justify-end align-center">
+			<!-- Request a summary in PDF form from the server -->
+			<button
+				role="button"
+				class="info"
+				onclick={ components.DownloadCycleSummaryPDF(props.Press) }
+			>Zusammenfassung (PDF)</button>
+		</div>
+		<div
+			id="cycles-content"
+			class="mt"
+			hx-get={ utils.HXGetPressCyclesSectionContent(props.Press) }
+			hx-trigger="load, pageLoaded from:body"
+			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
+		>
+			@components.Spinner()
+		</div>
+	</section>
 }
 
 type PagePress_NotesSectionProps struct {
