@@ -8,9 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/dialogs/components"
+	"github.com/knackwurstking/pg-press/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -56,19 +58,18 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetEditCycle(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
-	}
+	//user, eerr := utils.GetUserFromContext(c)
+	//if eerr != nil {
+	//	return eerr
+	//}
 
 	var (
 		tool             *models.Tool
-		cycleID          models.CycleID
+		cycle            *models.Cycle
+		tools            []*models.Tool
 		inputPressNumber *models.PressNumber
 		inputTotalCycles int64
 		originalDate     *time.Time
-		allowToolChange  bool
-		availableTools   []*models.Tool
 	)
 
 	// Check if we're in tool change mode
@@ -79,10 +80,10 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 		if err != nil {
 			return errors.BadRequest(err, "parse cycle ID")
 		}
-		cycleID = models.CycleID(cycleIDQuery)
+		cycleID := models.CycleID(cycleIDQuery)
 
 		// Get cycle data from the database
-		cycle, err := h.registry.PressCycles.Get(cycleID)
+		cycle, err = h.registry.PressCycles.Get(cycleID)
 		if err != nil {
 			return errors.Handler(err, "load cycle data")
 		}
@@ -97,8 +98,6 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 
 		// If in tool change mode, load all available tools for this press
 		if toolChangeMode {
-			allowToolChange = true
-
 			// Get all tools
 			allTools, err := h.registry.Tools.List()
 			if err != nil {
@@ -108,13 +107,13 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 			// Filter out tools not matching the original tools position
 			for _, t := range allTools {
 				if t.Position == tool.Position {
-					availableTools = append(availableTools, t)
+					tools = append(tools, t)
 				}
 			}
 
 			// Sort tools alphabetically by code
-			sort.Slice(availableTools, func(i, j int) bool {
-				return availableTools[i].String() < availableTools[j].String()
+			sort.Slice(tools, func(i, j int) bool {
+				return tools[i].String() < tools[j].String()
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
@@ -131,18 +130,14 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 		return errors.BadRequest(nil, "missing tool or cycle ID")
 	}
 
-	props := &components.DialogEditCycleProps{
-		Tool:             tool,
-		CycleID:          cycleID,
-		InputTotalCycles: inputTotalCycles,
-		InputPressNumber: inputPressNumber,
-		OriginalDate:     originalDate,
-		AllowToolChange:  allowToolChange,
-		AvailableTools:   availableTools,
-		User:             user,
+	var dialog templ.Component
+	if cycle != nil {
+		dialog = templates.EditCycleDialog(tool, cycle, tools, inputPressNumber, inputTotalCycles, originalDate)
+	} else {
+		dialog = templates.AddCycleDialog(tool, inputPressNumber, inputTotalCycles, originalDate)
 	}
-	cycleEditDialog := components.DialogEditCycle(props)
-	if err := cycleEditDialog.Render(c.Request().Context(), c.Response()); err != nil {
+
+	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render cycle edit dialog")
 	}
 

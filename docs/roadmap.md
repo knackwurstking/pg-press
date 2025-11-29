@@ -39,4 +39,26 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
 - [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the
       database table for this
 - [x] Change url builders in utils package, also update handlers
-- [ ] Refactor the handler+components structure, just put handlers and their components into the same directory
+- [ ] Refactor the handler+components structure, also rename the components directory to templates [WIP]
+    - [x] Auth
+    - [ ] Dialogs [WIP]
+        - [x] cycle dialog
+        - [ ] metal-sheet dialog
+        - [ ] note dialog
+        - [ ] tool dialog
+        - [ ] tool-regeneration dialog
+    - [ ] Editor
+    - [ ] Feed
+    - [ ] Help
+    - [ ] Home
+    - [ ] MetalSheets
+    - [ ] Nav
+    - [ ] Notes
+    - [ ] Press
+    - [ ] PressRegenerations
+    - [ ] Profile
+    - [ ] Tool
+    - [ ] Tools
+    - [ ] TroubleReports
+    - [ ] Umbau
+    - [ ] WSFeed
