@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/knackwurstking/ui"
 	"net/http"
+	"strings"
 )
 
 type DialogEditNoteProps struct {
@@ -17,12 +18,12 @@ templ DialogEditNote(props DialogEditNoteProps) {
 	{{
 		method := http.MethodPost
 		submitButtonText := "Erstellen"
-		baseHref := utils.HXPostNotesEditDialog(props.LinkToTables...)
+		baseHref := utils.UrlDialogs().EditNote(0, strings.Join(props.LinkToTables, ","))
 
 		if props.Note.ID > 0 {
 			method = http.MethodPut
 			submitButtonText = "Aktualisieren"
-			baseHref = utils.HXPutNotesEditDialog(props.Note.ID, props.LinkToTables...)
+			baseHref = utils.UrlDialogs().EditNote(props.Note.ID, strings.Join(props.LinkToTables, ","))
 		}
 	}}
 	@ui.Dialog(ui.DialogProps{

@@ -26,12 +26,12 @@ templ DialogEditCycle(props *DialogEditCycleProps) {
 	{{
 		method := http.MethodPost
 		submitButtonText := "Erstellen"
-		baseHref := utils.UrlDialogs().EditCycle("", fmt.Sprintf("%d", props.Tool.ID), "")
+		baseHref := utils.UrlDialogs().EditCycle(0, props.Tool.ID, nil)
 
 		if props.CycleID > 0 {
 			method = http.MethodPut
 			submitButtonText = "Aktualisieren"
-			baseHref = utils.UrlDialogs().EditCycle(fmt.Sprintf("%d", props.CycleID), "", "true")
+			baseHref = utils.UrlDialogs().EditCycle(props.CycleID, 0, &props.AllowToolChange)
 		}
 	}}
 	@ui.Dialog(ui.DialogProps{

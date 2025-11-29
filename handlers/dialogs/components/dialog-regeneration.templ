@@ -11,7 +11,7 @@ import (
 templ PageTool_DialogEditRegeneration(r *models.ResolvedToolRegeneration) {
 	@ui.Dialog(ui.DialogProps{
 		Method:           http.MethodPut,
-		Href:             utils.HXPutToolRegenerationEdit(r.GetTool().ID, r.ID),
+		Href:             utils.UrlDialogs().EditToolRegeneration(r.ID),
 		ID:               "regeneration-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {

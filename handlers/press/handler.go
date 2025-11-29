@@ -40,6 +40,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 			path+"/:press/cycles", h.HTMXGetPressCycles),
 		utils.NewEchoRoute(http.MethodGet,
 			path+"/:press/notes", h.HTMXGetPressNotes),
+		utils.NewEchoRoute(http.MethodGet,
+			path+"/:press/press-regenerations", h.HTMXGetPressRegenerations),
 
 		// PDF Handlers
 		utils.NewEchoRoute(http.MethodGet,
@@ -217,6 +219,27 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press notes section")
+	}
+
+	return nil
+}
+
+func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
+	press, err := h.getPressNumberFromParam(c)
+	if err != nil {
+		return err
+	}
+
+	// Get press regenerations from service
+	regenerations, err := h.registry.PressRegenerations.GetRegenerationHistory(press)
+	if err != nil {
+		return errors.Handler(err, "get press regenerations")
+	}
+
+	regenerationsSection := components.PressRegenerationsSections(regenerations)
+
+	if err := regenerationsSection.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.Handler(err, "render press regenerations section")
 	}
 
 	return nil

@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 	"strconv"
@@ -45,7 +45,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 		<section class="flex justify-center mt">
 			<button
 				class="primary"
-				hx-get={ utils.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)) }
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -62,7 +62,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
 				class="primary"
-				hx-get={ utils.HXGetNotesEditDialog(nil, fmt.Sprintf("press_%d", press)) }
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"

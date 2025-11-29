@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -75,7 +75,7 @@ templ PageNotes(props *PageNotesProps) {
 			<section
 				class="notes-grid max-w-full"
 				style="margin: 0 auto;"
-				hx-get={ utils.HXGetNotesGrid() }
+				hx-get={ utils.UrlNotes(0).Grid }
 				hx-trigger="pageLoaded from:body"
 			>
 				@PageNotes_NotesGrid(props.Notes, props.Tools)
@@ -172,7 +172,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ utils.HXGetNotesEditDialog(&note.ID, note.Linked) }
+					hx-get={ utils.UrlDialogs().EditNote(note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -183,7 +183,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 				</button>
 				<button
 					class="icon small destructive"
-					hx-delete={ utils.HXDeleteNote(note.ID) }
+					hx-delete={ utils.UrlNotes(note.ID).Delete }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -218,7 +218,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 							}
 						case "press":
 							<a
-								href={ utils.UrlPress(fmt.Sprintf("%d", linked.ID)).Page }
+								href={ utils.UrlPress(models.PressNumber(linked.ID)).Page }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }

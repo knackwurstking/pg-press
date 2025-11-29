@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -85,10 +85,11 @@ templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesS
 		// Actions
 		<td>
 			<span class="button-group flex justify-end items-center">
+				{{ toolChangeMode := true }}
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.HXGetCycleEditDialog(cycle.ToolID, &cycle.ID, true),
+					EditHref:        utils.UrlDialogs().EditCycle(cycle.ID, cycle.ToolID, &toolChangeMode),
 					EditAdminOnly:   true,
-					DeleteHref:      utils.HXDeleteCycle(cycle.ID, cycle.ToolID),
+					DeleteHref:      utils.UrlTool(cycle.ToolID, 0, cycle.ID).CycleDelete,
 					DeleteAdminOnly: true,
 					User:            props.User,
 				})

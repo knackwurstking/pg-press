@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -45,7 +45,7 @@ templ PageTool(props *PageToolProps) {
 			@pageTool_sectionActions(props.User, props.ToolID)
 			<section
 				id="notes-section"
-				hx-get={ utils.HXGetToolNotesSectionContent(props.ToolID) }
+				hx-get={ utils.UrlTool(props.ToolID, 0, 0).Notes }
 				hx-trigger="load, pageLoaded from:body"
 				hx-swap="innerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -55,7 +55,7 @@ templ PageTool(props *PageToolProps) {
 			if props.Position == models.PositionTop || props.Position == models.PositionBottom {
 				<section
 					id="metal-sheets-section"
-					hx-get={ utils.HXGetToolMetalSheetsSectionContent(props.ToolID) }
+					hx-get={ utils.UrlTool(props.ToolID, 0, 0).MetalSheets }
 					hx-trigger="load, pageLoaded from:body"
 					hx-swap="innerHTML"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -71,7 +71,7 @@ templ PageTool(props *PageToolProps) {
 templ PageTool_CyclesSection(toolID models.ToolID, oob bool) {
 	<section
 		id="cycles-section"
-		hx-get={ utils.HXGetToolCyclesSectionContent(toolID) }
+		hx-get={ utils.UrlTool(toolID, 0, 0).Cycles }
 		hx-trigger="load, pageLoaded from:body"
 		hx-swap="innerHTML"
 		if oob {
@@ -87,7 +87,7 @@ templ pageTool_sectionActions(user *models.User, toolID models.ToolID) {
 	<section class="action-bar flex gap justify-end items-center">
 		<button
 			class="primary flex gap"
-			hx-get={ utils.HXGetToolEditDialog(&toolID) }
+			hx-get={ utils.UrlDialogs().EditTool(toolID) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -98,7 +98,7 @@ templ pageTool_sectionActions(user *models.User, toolID models.ToolID) {
 		</button>
 		<button
 			class="destructive flex gap"
-			hx-patch={ utils.HXPatchToolMarkDead(toolID) }
+			hx-patch={ utils.UrlTools(toolID).MarkDead }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -143,7 +143,7 @@ templ PageTool_BindingSection(props PageTool_BindingSectionProps) {
 		>
 			<select
 				id="tool-binding-select"
-				hx-patch={ utils.HXPatchToolBind(props.Tool.ID) }
+				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).Bind }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
 				hx-target="#binding-section"
@@ -169,7 +169,7 @@ templ PageTool_BindingSection(props PageTool_BindingSectionProps) {
 			</select>
 			<button
 				class="small ghost destructive"
-				hx-patch={ utils.HXPatchToolUnbind(props.Tool.ID) }
+				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).UnBind }
 				hx-trigger="click"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
@@ -310,9 +310,9 @@ templ pageTool_RegenerationsTableRows(regenerations []*models.ResolvedToolRegene
 			</td>
 			<td>
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.HXGetToolRegenerationEdit(regen.ID),
+					EditHref:        utils.UrlDialogs().EditToolRegeneration(regen.ID),
 					EditAdminOnly:   false,
-					DeleteHref:      utils.HXDeleteToolRegeneration(regen.GetTool().ID, regen.ID),
+					DeleteHref:      utils.UrlTool(regen.GetTool().ID, regen.ID, 0).DeleteRegeneration,
 					DeleteAdminOnly: true,
 					User:            user,
 				})
@@ -326,7 +326,7 @@ templ pageTool_CyclesSection(props PageTool_CyclesProps) {
 		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ utils.HXGetCycleEditDialog(props.Tool.ID, nil, false) }
+				hx-get={ utils.UrlDialogs().EditCycle(0, props.Tool.ID, nil) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -416,9 +416,9 @@ templ pageTool_CycleRowWithPartialCalc(
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        utils.HXGetCycleEditDialog(props.Tool.ID, &cycle.ID, false),
+				EditHref:        utils.UrlDialogs().EditCycle(cycle.ID, props.Tool.ID, nil),
 				EditAdminOnly:   true,
-				DeleteHref:      utils.HXDeleteCycle(cycle.ID, props.Tool.ID),
+				DeleteHref:      utils.UrlTool(props.Tool.ID, 0, cycle.ID).CycleDelete,
 				DeleteAdminOnly: true,
 				User:            props.User,
 			})
@@ -451,7 +451,7 @@ templ toolPage_toolStatusDisplay(tool *models.Tool) {
 		<button
 			type="button"
 			class="small ghost flex gap"
-			hx-get={ utils.HXGetToolStatusEdit(tool.ID) }
+			hx-get={ utils.UrlTool(tool.ID, 0, 0).StatusEdit }
 			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 			hx-swap="outerHTML"
 			title="Status bearbeiten"
@@ -473,7 +473,7 @@ templ toolPage_toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 		</div>
 		<div class="flex flex-col gap-sm">
 			<form
-				hx-put={ utils.HXPutToolStatus() }
+				hx-put={ utils.UrlTool(tool.ID, 0, 0).Status }
 				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 				hx-swap="outerHTML"
 			>
@@ -504,7 +504,7 @@ templ toolPage_toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 			</form>
 			if tool.Status() == models.StatusRegenerating {
 				<form
-					hx-put={ utils.HXPutToolStatus() }
+					hx-put={ utils.UrlTool(tool.ID, 0, 0).Status }
 					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 					hx-swap="outerHTML"
 				>
@@ -525,7 +525,7 @@ templ toolPage_toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 			<button
 				type="button"
 				class="small secondary flex gap"
-				hx-get={ utils.HXGetToolStatusDisplay(tool.ID) }
+				hx-get={ utils.UrlTool(tool.ID, 0, 0).StatusDisplay }
 				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
 				hx-swap="outerHTML"
 			>
@@ -542,7 +542,7 @@ templ PageTool_MetalSheets(user *models.User, metalSheets models.MetalSheetList,
 		@components.SectionTitle(components.SectionTitleLevelMain, "Bleche") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ utils.HXGetMetalSheetEditDialog(nil, &tool.ID) }
+				hx-get={ utils.UrlDialogs().EditMetalSheet(0, tool.ID) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -591,9 +591,9 @@ templ PageTool_MetalSheetTableTop(user *models.User, metalSheets []*models.Metal
 							</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        utils.HXGetMetalSheetEditDialog(&sheet.ID, nil),
+									EditHref:        utils.UrlDialogs().EditMetalSheet(sheet.ID, 0),
 									EditAdminOnly:   false,
-									DeleteHref:      utils.UrlMetalSheets(fmt.Sprintf("%d", sheet.ID)).Delete,
+									DeleteHref:      utils.UrlMetalSheets(sheet.ID).Delete,
 									DeleteAdminOnly: true,
 									User:            user,
 								})
@@ -640,9 +640,9 @@ templ PageTool_MetalSheetTableBottom(user *models.User, metalSheets []*models.Me
 							</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        utils.HXGetMetalSheetEditDialog(&sheet.ID, nil),
+									EditHref:        utils.UrlDialogs().EditMetalSheet(sheet.ID, 0),
 									EditAdminOnly:   false,
-									DeleteHref:      utils.UrlMetalSheets(fmt.Sprintf("%d", sheet.ID)).Delete,
+									DeleteHref:      utils.UrlMetalSheets(sheet.ID).Delete,
 									DeleteAdminOnly: true,
 									User:            user,
 								})
@@ -659,7 +659,7 @@ templ PageTool_Notes(tool *models.ResolvedTool) {
 	@components.SectionTitle(components.SectionTitleLevelSub, "Notizen") {
 		<button
 			class="icon secondary small flex"
-			hx-get={ utils.HXGetNotesEditDialog(nil, fmt.Sprintf("tool_%d", tool.ID)) }
+			hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", tool.ID)) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"

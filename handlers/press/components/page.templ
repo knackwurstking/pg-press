@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -48,7 +48,7 @@ templ actions(props PageProps) {
 			<a
 				role="button"
 				class="secondary"
-				href={ utils.URLPressRegenerationsPage(props.Press) }
+				href={ utils.UrlPressRegeneration(props.Press) }
 			>
 				Regeneration
 			</a>
@@ -64,7 +64,7 @@ templ notes(props PageProps) {
 		</div>
 		<div
 			id="notes-content"
-			hx-get={ utils.HXGetPressNotesSectionContent(props.Press) }
+			hx-get={ utils.UrlPress(props.Press).Notes }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
 		>
@@ -81,7 +81,7 @@ templ activeTools(props PageProps) {
 		</div>
 		<div
 			id="active-tools-content"
-			hx-get={ utils.HXGetPressActiveToolsSectionContent(props.Press) }
+			hx-get={ utils.UrlPress(props.Press).ActiveTools }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 		>
@@ -98,7 +98,7 @@ templ metalSheets(props PageProps) {
 		</div>
 		<div
 			id="metal-sheets-content"
-			hx-get={ utils.HXGetPressMetalSheetsSectionContent(props.Press) }
+			hx-get={ utils.UrlPress(props.Press).MetalSheets }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 		>
@@ -115,7 +115,7 @@ templ pressRegenerations(props PageProps) {
 		</div>
 		<div
 			id="press-regenerations-section-content"
-			hx-get={ utils.HxGetPressRegenerationsSection(props.Press) }
+			hx-get={ utils.UrlPress(props.Press).PressRegenerations }
 			hx-trigger="loadd, pageLoaded from:body"
 			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>

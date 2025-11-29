@@ -16,12 +16,12 @@ type DialogEditMetalSheetProps struct {
 templ DialogEditMetalSheet(props *DialogEditMetalSheetProps) {
 	{{
 		method := http.MethodPost
-		baseHref := utils.UrlDialogs().EditMetalSheet("", fmt.Sprintf("%d", props.Tool.ID))
+		baseHref := utils.UrlDialogs().EditMetalSheet(0, props.Tool.ID)
 		submitButtonText := "Erstellen"
 
 		if props.MetalSheet != nil && props.MetalSheet.ID > 0 {
 			method = http.MethodPut
-			baseHref = utils.UrlDialogs().EditMetalSheet(fmt.Sprintf("%d", props.MetalSheet.ID), "")
+			baseHref = utils.UrlDialogs().EditMetalSheet(props.MetalSheet.ID, 0)
 			submitButtonText = "Aktualisieren"
 		}
 	}}

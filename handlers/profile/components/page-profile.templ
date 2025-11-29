@@ -3,8 +3,8 @@ package components
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -59,7 +59,7 @@ templ cookiesSection() {
 	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
 		<span
 			id="cookies"
-			hx-get={ utils.HXGetCookies() }
+			hx-get={ utils.UrlProfile("").Cookies }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -175,7 +175,7 @@ templ CookiesDetails(cookies []*models.Cookie) {
 								<td class="left user-agent-cell">{ cookie.UserAgent }</td>
 								<td class="right select-none">
 									<a
-										hx-delete={ utils.HXDeleteCookies(cookie.Value) }
+										hx-delete={ utils.UrlProfile(cookie.Value).Cookies }
 										hx-trigger="click"
 										hx-target="#cookies"
 										hx-swap="outerHTML"

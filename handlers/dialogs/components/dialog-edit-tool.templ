@@ -19,12 +19,12 @@ type DialogEditToolProps struct {
 templ DialogEditTool(props *DialogEditToolProps) {
 	{{
 		method := "POST"
-		baseHref := utils.HXPostToolEditDialog()
+		baseHref := utils.UrlDialogs().EditTool(0)
 		submitButtonText := "Erstellen"
 
 		if props.Tool != nil && props.Tool.ID > 0 {
 			method = "PUT"
-			baseHref = utils.HXPutToolEditDialog(props.Tool.ID)
+			baseHref = utils.UrlDialogs().EditTool(props.Tool.ID)
 			submitButtonText = "Aktualisieren"
 		}
 	}}

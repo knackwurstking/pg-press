@@ -3,9 +3,9 @@ package components
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/handlers/components"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 type PagePressRegenerationsProps struct {
@@ -22,7 +22,7 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 	) {
 		<div class="container fluid">
 			<form
-				hx-post={ utils.HxPostPressRegenerations(props.Press) }
+				hx-post={ utils.UrlPressRegeneration(props.Press).Page }
 				hx-trigger="submit"
 				hx-swap="none"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
@@ -34,46 +34,42 @@ templ PagePressRegenerations(props PagePressRegenerationsProps) {
 					{{ startedID := "started" }}
 					<label for={ startedID } class="flex flex-col">
 						Start
-						<input 
-							id={ startedID } 
-							name={ startedID } 
-							class="flex! justify-center items-center" 
-							type="date" 
-							required 
+						<input
+							id={ startedID }
+							name={ startedID }
+							class="flex! justify-center items-center"
+							type="date"
+							required
 						/>
 					</label>
-
-					<i 
-						class="bi bi-arrow-right contrast ghost my-auto" 
+					<i
+						class="bi bi-arrow-right contrast ghost my-auto"
 						style="margin-top: 2.5rem;"
 					></i>
-
 					{{ completedID := "completed" }}
 					<label for={ completedID } class="flex flex-col">
 						Ende
-						<input 
-							id={ completedID } 
-							name={ completedID } 
-							class="flex! justify-center items-center" 
-							type="date" 
+						<input
+							id={ completedID }
+							name={ completedID }
+							class="flex! justify-center items-center"
+							type="date"
 							required
 						/>
 					</label>
 				</div>
-
 				{{ reasonID := "reason" }}
 				<div class="flex flex-col">
 					<label for={ reasonID }>Bemerkung</label>
-					<input 
-						id={ reasonID } 
-						name={ reasonID } 
-						type="text" 
+					<input
+						id={ reasonID }
+						name={ reasonID }
+						type="text"
 						class="border p-lg"
 					/>
 				</div>
-
 				<div class="w-full flex justify-end">
-					<input type="submit" />
+					<input type="submit"/>
 				</div>
 			</form>
 		</div>
