@@ -36,8 +36,10 @@ func init() {
 		serverPathPrefix + "/trouble-reports",
 		serverPathPrefix + "/notes",
 		serverPathPrefix + "/tools",
-		serverPathPrefix + "/tools/tool",
-		serverPathPrefix + "/tools/press",
+		serverPathPrefix + "/tool",
+		serverPathPrefix + "/press",
+		serverPathPrefix + "/umbau",
+		serverPathPrefix + "/press-regenerations",
 	}
 
 	// NOTE: Important for skipping key authentication

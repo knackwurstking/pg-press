@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -25,30 +26,36 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-// TODO: Add a proper post /login handler for the api key, with a redirect to the profile page
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		utils.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),
+		utils.NewEchoRoute(http.MethodPost, path+"/login", h.PostLoginPage),
+
 		utils.NewEchoRoute(http.MethodGet, path+"/logout", h.GetLogout),
 	})
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) error {
+	invalid := utils.ParseQueryBool(c, "invalid")
 	apiKey := c.FormValue("api-key")
-	if apiKey != "" {
-		if h.processApiKeyLogin(apiKey, c) {
-			slog.Info("Successful login", "real_ip", c.RealIP())
-			return utils.RedirectTo(c, string(utils.UrlProfile().Page))
-		}
-		slog.Info("Failed login attempt", "real_ip", c.RealIP())
-	}
-
-	page := components.PageLogin(apiKey, apiKey != "")
+	page := components.PageLogin(apiKey, invalid)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render login page")
 	}
 
 	return nil
+}
+
+func (h *Handler) PostLoginPage(c echo.Context) error {
+	// Parse form
+	apiKey := c.FormValue("api-key")
+	if apiKey == "" || h.processApiKeyLogin(apiKey, c) != nil {
+		invalid := true
+		return utils.RedirectTo(c, string(utils.UrlLogin(&apiKey, &invalid).Page))
+	}
+
+	slog.Info("Successful login", "real_ip", c.RealIP())
+	return utils.RedirectTo(c, string(utils.UrlProfile().Page))
 }
 
 func (h *Handler) GetLogout(c echo.Context) error {
@@ -63,23 +70,21 @@ func (h *Handler) GetLogout(c echo.Context) error {
 		}
 	}
 
-	return utils.RedirectTo(c, "./login")
+	return utils.RedirectTo(c, string(utils.UrlLogin(nil, nil).Page))
 }
 
-func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
+func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 	if len(apiKey) < 16 {
-		slog.Debug("API key too short", "real_ip", ctx.RealIP())
-		return false
+		return fmt.Errorf("api key too short")
 	}
 
 	user, err := h.registry.Users.GetUserFromApiKey(apiKey)
 	if err != nil {
 		if !errors.IsNotFoundError(err) {
-			slog.Error("Database error during authentication", "error", err)
+			return errors.Wrap(err, "database authentication")
 		} else {
-			slog.Debug("Invalid API key", "real_ip", ctx.RealIP())
+			return errors.Wrap(err, "invalid api key")
 		}
-		return false
 	}
 
 	if err := h.clearExistingSession(ctx); err != nil {
@@ -87,15 +92,14 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) bool {
 	}
 
 	if err := h.createSession(ctx, apiKey); err != nil {
-		slog.Error("Failed to create session", "user_name", user.Name, "error", err)
-		return false
+		return errors.Wrap(err, "create session")
 	}
 
 	if user.IsAdmin() {
 		slog.Info("Administrator logged in", "user_name", user.Name, "real_ip", ctx.RealIP())
 	}
 
-	return true
+	return nil
 }
 
 func (h *Handler) clearExistingSession(ctx echo.Context) error {
