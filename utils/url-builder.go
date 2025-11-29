@@ -24,6 +24,13 @@ func BuildURL(path string, params map[string]string) templ.SafeURL {
 	return templ.SafeURL(u)
 }
 
+func UrlLogin() (url struct {
+	Page templ.SafeURL
+}) {
+	url.Page = BuildURL("/login", nil)
+	return url
+}
+
 func UrlNav() (url struct {
 	FeedCounter templ.SafeURL
 }) {

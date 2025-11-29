@@ -25,6 +25,7 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
+// TODO: Add a proper post /login handler for the api key, with a redirect to the profile page
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		utils.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),

@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -87,7 +88,7 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 				"url_path", c.Request().URL.Path,
 				"real_ip", c.RealIP(),
 			)
-			return c.Redirect(http.StatusSeeOther, serverPathPrefix+"/login")
+			return c.Redirect(http.StatusSeeOther, string(utils.UrlLogin().Page))
 		},
 	})
 }
