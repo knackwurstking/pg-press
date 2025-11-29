@@ -83,11 +83,14 @@ func UrlEditor(_type, id, returnURL string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlProfile() (url struct {
-	Page templ.SafeURL
+func UrlProfile(value string) (url struct {
+	Page    templ.SafeURL
+	Cookies templ.SafeURL
 }) {
 	url.Page = BuildURL("/profile", nil)
+	url.Cookies = BuildURL("/profile", map[string]string{
+		"value": value,
+	})
 	return url
 }
 

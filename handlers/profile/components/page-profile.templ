@@ -73,7 +73,7 @@ templ editUserDialog(user *models.User) {
 		class="profile-dialog border clean"
 		oncancel="event.preventDefault()"
 	>
-		<form action={ templ.URL(fmt.Sprintf("%s/profile", env.ServerPathPrefix)) }>
+		<form action={ utils.UrlProfile("").Page }>
 			<label class="flex flex-col">
 				<strong>Benutzername ändern</strong>
 				<input
@@ -87,7 +87,7 @@ templ editUserDialog(user *models.User) {
 			<footer class="flex gap justify-end mt-lg">
 				<a
 					role="button"
-					href={ templ.SafeURL(env.ServerPathPrefix + "/profile") }
+					href={ utils.UrlProfile("").Page }
 					class="secondary flex gap"
 				>
 					<i class="bi bi-x-circle"></i>

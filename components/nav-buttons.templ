@@ -9,7 +9,7 @@ templ NavProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ templ.SafeURL(env.ServerPathPrefix + "/profile") }
+		href={ utils.UrlProfile("").Page }
 		title="Profil"
 	>
 		<i class="bi bi-person-circle"></i>
