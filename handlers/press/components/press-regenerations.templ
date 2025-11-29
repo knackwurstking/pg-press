@@ -1,2 +1,33 @@
 package components
 
+import (
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/models"
+)
+
+templ PressRegenerationsSections(pressRegenerations []*models.PressRegeneration) {
+	<figure>
+		<table>
+			<tr>
+				// TODO: Find better <th> names for this table (start/stop)
+				<th>Start</th>
+				<th>Stop</th>
+				<th>Bemerkung</th>
+				<th></th>
+			</tr>
+			for _, r := range pressRegenerations {
+				<tr>
+					<td>{ r.StartedAt.Format(env.DateFormat) }</td>
+					<td>{ r.CompletedAt.Format(env.DateFormat) }</td>
+					<td>{ r.Reason }</td>
+					<td>
+						@components.TableActions(components.TableActionsOptions{
+							// TODO: Action buttons: Edit and Delete
+						})
+					</td>
+				</tr>
+			}
+		</table>
+	</figure>
+}
