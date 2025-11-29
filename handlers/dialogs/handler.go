@@ -50,8 +50,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		utils.NewEchoRoute(http.MethodPut, path+"/edit-note", h.PutEditNote),
 
 		// Edit regeneration dialog
-		utils.NewEchoRoute(http.MethodGet, path+"/edit-regeneration", h.GetEditRegeneration),
-		utils.NewEchoRoute(http.MethodPut, path+"/edit-regeneration", h.PutEditRegeneration),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
 	})
 }
 
@@ -689,7 +689,7 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) GetEditRegeneration(c echo.Context) error {
+func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 	rid, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "parse regeneration id")
@@ -715,7 +715,7 @@ func (h *Handler) GetEditRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditRegeneration(c echo.Context) error {
+func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr

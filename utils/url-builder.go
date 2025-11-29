@@ -237,3 +237,62 @@ func UrlPressRegeneration(press models.PressNumber) (url struct {
 	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press), nil)
 	return url
 }
+
+func UrlDialogs() (url struct {
+	EditCycle            func(cycleID, toolChangeMode string) templ.SafeURL
+	EditTool             func(toolID string) templ.SafeURL
+	EditMetalSheet       func(metalSheetID, toolID string) templ.SafeURL
+	EditNote             func(noteID, linkToTables string) templ.SafeURL
+	EditToolRegeneration func(toolRegenerationID string) templ.SafeURL
+}) {
+	url.EditCycle = urlEditCycleDialog
+	url.EditTool = urlEditToolDialog
+	url.EditMetalSheet = urlEditMetalSheetDialog
+	url.EditNote = urlEditNoteDialog
+	url.EditToolRegeneration = urlEditToolRegenerationDialog
+
+	return url
+}
+
+func urlEditCycleDialog(cycleID, toolChangeMode string) templ.SafeURL {
+	params := map[string]string{
+		"id":               cycleID,
+		"tool_change_mode": toolChangeMode,
+	}
+
+	return BuildURL("/dialog/edit-cycle", params)
+}
+
+func urlEditToolDialog(toolID string) templ.SafeURL {
+	params := map[string]string{
+		"id": toolID,
+	}
+
+	return BuildURL("/dialog/edit-tool", params)
+}
+
+func urlEditMetalSheetDialog(metalSheetID, toolID string) templ.SafeURL {
+	params := map[string]string{
+		"id":      metalSheetID,
+		"tool_id": toolID,
+	}
+
+	return BuildURL("/dialog/edit-metal-sheet", params)
+}
+
+func urlEditNoteDialog(noteID, linkToTables string) templ.SafeURL {
+	params := map[string]string{
+		"id":             noteID,
+		"link_to_tables": linkToTables,
+	}
+
+	return BuildURL("/dialog/edit-note", params)
+}
+
+func urlEditToolRegenerationDialog(toolRegenerationID string) templ.SafeURL {
+	params := map[string]string{
+		"id": toolRegenerationID,
+	}
+
+	return BuildURL("/dialog/edit-tool-regeneration", params)
+}
