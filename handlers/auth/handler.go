@@ -38,7 +38,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 	if apiKey != "" {
 		if h.processApiKeyLogin(apiKey, c) {
 			slog.Info("Successful login", "real_ip", c.RealIP())
-			return utils.RedirectTo(c, "./profile")
+			return utils.RedirectTo(c, string(utils.UrlProfile().Page))
 		}
 		slog.Info("Failed login attempt", "real_ip", c.RealIP())
 	}

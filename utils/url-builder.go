@@ -24,10 +24,16 @@ func BuildURL(path string, params map[string]string) templ.SafeURL {
 	return templ.SafeURL(u)
 }
 
-func UrlLogin() (url struct {
+func UrlLogin(apiKey *string) (url struct {
 	Page templ.SafeURL
 }) {
-	url.Page = BuildURL("/login", nil)
+	var params map[string]string
+	if apiKey != nil {
+		params = map[string]string{
+			"api-key": *apiKey,
+		}
+	}
+	url.Page = BuildURL("/login", params)
 	return url
 }
 
