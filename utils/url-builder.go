@@ -16,9 +16,13 @@ func BuildURL(path string, params map[string]string) templ.SafeURL {
 	if len(params) > 0 {
 		values := url.Values{}
 		for k, v := range params {
-			values.Add(k, v)
+			if v != "" {
+				values.Add(k, v)
+			}
 		}
-		u = fmt.Sprintf("%s?%s", u, values.Encode())
+		if len(values) > 0 {
+			u = fmt.Sprintf("%s?%s", u, values.Encode())
+		}
 	}
 
 	return templ.SafeURL(u)
