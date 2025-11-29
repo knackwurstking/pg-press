@@ -1,7 +1,5 @@
 package components
 
-import "github.com/knackwurstking/pg-press/models"
-
 templ ImageViewerTemplate() {
 	<template name="image-viewer">
 		<dialog name="image-viewer" class="image-viewer fullscreen clean flex justify-center items-center">
@@ -18,7 +16,7 @@ templ ImageViewerTemplate() {
 	</template>
 }
 
-script OpenImageViewer(attachmentID models.AttachmentID) {
+script OpenImageViewer(imageURL templ.SafeURL) {
 	// Close any existing image viewer
 	var existingDialog = document.querySelector('dialog[name="image-viewer"]');
 	if (existingDialog) {
@@ -26,7 +24,6 @@ script OpenImageViewer(attachmentID models.AttachmentID) {
 	}
 
 	// Create new dialog from template
-	var imageURL = `./trouble-reports/attachment?attachment_id=${attachmentID}`;
 	var template = document.querySelector('template[name="image-viewer"]');
 	var dialog = template.content.cloneNode(true).querySelector('dialog');
 	var img = dialog.querySelector('img.attachment');

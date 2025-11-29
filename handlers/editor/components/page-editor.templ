@@ -234,7 +234,9 @@ templ existingAttachmentItem(attachment *models.Attachment, index int) {
 			<button
 				type="button"
 				class="secondary small"
-				onclick={ components.OpenImageViewer(attachment.GetID()) }
+				onclick={ components.OpenImageViewer(
+					utils.UrlTroubleReports("", attachment.ID, "").Attachment,
+				) }
 			>
 				<i class="bi bi-eye"></i>
 				Anzeigen

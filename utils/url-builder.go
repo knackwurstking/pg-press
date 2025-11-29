@@ -123,11 +123,29 @@ func UrlUmbau(press models.PressNumber) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlTroubleReports() (url struct {
-	Page templ.SafeURL
+func UrlTroubleReports(troubleReportID, attachmentID, modificationTime string) (url struct {
+	Page               templ.SafeURL
+	SharePDF           templ.SafeURL
+	Attachment         templ.SafeURL
+	Modifications      templ.SafeURL
+	Data               templ.SafeURL
+	AttachmentsPreview templ.SafeURL
+	Rollback           templ.SafeURL
 }) {
+	params := map[string]string{
+		"id":                troubleReportID,
+		"attachment_id":     attachmentID,
+		"modification_time": modificationTime,
+	}
+
 	url.Page = BuildURL("/trouble-reports", nil)
+	url.SharePDF = BuildURL("/trouble-reports/share-pdf", params)
+	url.Attachment = BuildURL("/trouble-reports/attachment", params)
+	url.Modifications = BuildURL("/trouble-reports/modifications/"+troubleReportID, params)
+	url.Data = BuildURL("/trouble-reports/data", params)
+	url.AttachmentsPreview = BuildURL("/trouble-reports/attachments-preview", params)
+	url.Rollback = BuildURL("/trouble-reports/rollback", params)
+
 	return url
 }
 

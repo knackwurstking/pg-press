@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -92,8 +91,7 @@ func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
 
 func DownloadTroubleReportPDF(troubleReportID models.TroubleReportID) templ.ComponentScript {
 	return DownloadPDF(
-		templ.SafeURL(fmt.Sprintf("%s/trouble-reports/share-pdf?id=%d",
-			env.ServerPathPrefix, troubleReportID)),
+		utils.UrlTroubleReports(fmt.Sprintf("%d", troubleReportID), "", "").SharePDF,
 		"trouble_report.pdf",
 		`<i class="bi bi-hourglass-split"></i>`,
 		`<i class="bi bi-share"></i>`,
