@@ -55,7 +55,7 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 	}
 
 	slog.Info("Successful login", "real_ip", c.RealIP())
-	return utils.RedirectTo(c, string(utils.UrlProfile().Page))
+	return utils.RedirectTo(c, string(utils.UrlProfile("").Page))
 }
 
 func (h *Handler) GetLogout(c echo.Context) error {
