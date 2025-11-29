@@ -153,27 +153,71 @@ func UrlTroubleReports(troubleReportID, attachmentID, modificationTime string) (
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlTools() (url struct {
-	Page templ.SafeURL
+func UrlTools(id string) (url struct {
+	Page                  templ.SafeURL
+	Delete                templ.SafeURL
+	MarkDead              templ.SafeURL
+	SectionPress          templ.SafeURL
+	SectionTools          templ.SafeURL
+	AdminOverlappingTools templ.SafeURL
 }) {
+	params := map[string]string{
+		"id": id,
+	}
+
 	url.Page = BuildURL("/tools", nil)
+	url.Delete = BuildURL("/tools/delete", params)
+	url.MarkDead = BuildURL("/tools/mark-dead", params)
+	url.SectionPress = BuildURL("/tools/section-press", nil)
+	url.SectionTools = BuildURL("/tools/section-tools", nil)
+	url.AdminOverlappingTools = BuildURL("/tools/admin-overlapping-tools", nil)
+
+	return url
+}
+
+func UrlTool(toolID, toolRegenerationID, cycleID string) (url struct {
+	Page               templ.SafeURL
+	DeleteRegeneration templ.SafeURL
+	StatusEdit         templ.SafeURL
+	StatusDisplay      templ.SafeURL
+	Status             templ.SafeURL
+	Notes              templ.SafeURL
+	MetalSheets        templ.SafeURL
+	Cycles             templ.SafeURL
+	TotalCycles        templ.SafeURL
+	CycleDelete        templ.SafeURL
+	Bind               templ.SafeURL
+	UnBind             templ.SafeURL
+}) {
+	url.Page = BuildURL(fmt.Sprintf("/tool/%s", toolID), nil)
+
+	url.DeleteRegeneration = BuildURL(fmt.Sprintf("/tool/%s/delete-regeneration", toolID), map[string]string{
+		"id": toolRegenerationID,
+	})
+
+	url.StatusEdit = BuildURL(fmt.Sprintf("/tool/%s/status-edit", toolID), nil)
+	url.StatusDisplay = BuildURL(fmt.Sprintf("/tool/%s/status-display", toolID), nil)
+	url.Status = BuildURL(fmt.Sprintf("/tool/%s/status", toolID), nil)
+	url.Notes = BuildURL(fmt.Sprintf("/tool/%s/notes", toolID), nil)
+	url.MetalSheets = BuildURL(fmt.Sprintf("/tool/%s/metal-sheets", toolID), nil)
+	url.Cycles = BuildURL(fmt.Sprintf("/tool/%s/cycles", toolID), nil)
+	url.TotalCycles = BuildURL(fmt.Sprintf("/tool/%s/total-cycles", toolID), nil)
+
+	url.CycleDelete = BuildURL("/tool/cycle/delete", map[string]string{
+		"id": cycleID,
+	})
+
+	url.Bind = BuildURL(fmt.Sprintf("/tool/%s/bind", toolID), nil)
+	url.UnBind = BuildURL(fmt.Sprintf("/tool/%s/unbind", toolID), nil)
+
 	return url
 }
 
 // TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlTool(tool models.ToolID) (url struct {
+func UrlPress(pressNumber string) (url struct {
 	Page templ.SafeURL
 }) {
-	url.Page = BuildURL(fmt.Sprintf("/tool/%d", tool), nil)
-	return url
-}
-
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlPress(press models.PressNumber) (url struct {
-	Page templ.SafeURL
-}) {
-	url.Page = BuildURL(fmt.Sprintf("/press/%d", press), nil)
+	url.Page = BuildURL(fmt.Sprintf("/press/%s", pressNumber), nil)
 	return url
 }
 

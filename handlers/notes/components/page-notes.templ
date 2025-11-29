@@ -218,7 +218,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 							}
 						case "press":
 							<a
-								href={ templ.SafeURL(fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, linked.ID)) }
+								href={ utils.UrlPress(fmt.Sprintf("%d", linked.ID)).Page }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }
