@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 templ PageHome() {
@@ -16,50 +16,43 @@ templ PageHome() {
 	) {
 		<main class="container fluid">
 			<nav class="flex flex-col gap-lg justify-center">
-				@pageHomeAnchorButton(pageHomeAnchorButtonProps{
-					Href:        templ.URL(env.ServerPathPrefix + "/trouble-reports"),
-					Icon:        "exclamation-triangle",
-					Title:       "Problemberichte",
-					Description: "Verwalten Sie Problemberichte und Lösungen",
-				})
-				@pageHomeAnchorButton(pageHomeAnchorButtonProps{
-					Href:        templ.URL(env.ServerPathPrefix + "/tools"),
-					Icon:        "tools",
-					Title:       "Werkzeuglisten",
-					Description: "Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
-				})
-				@pageHomeAnchorButton(pageHomeAnchorButtonProps{
-					Href:        templ.URL(env.ServerPathPrefix + "/notes"),
-					Icon:        "journal-text",
-					Title:       "Notizen Verwaltung",
-					Description: "Verwalten Sie Notizen für Werkzeuge und Pressen",
-				})
+				@pageHomeAnchorButton(
+					utils.UrlTroubleReports().Page,
+					"exclamation-triangle",
+					"Problemberichte",
+					"Verwalten Sie Problemberichte und Lösungen",
+				)
+				@pageHomeAnchorButton(
+					utils.UrlTools().Page,
+					"tools",
+					"Werkzeuglisten",
+					"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
+				)
+				@pageHomeAnchorButton(
+					utils.UrlNotes().Page,
+					"journal-text",
+					"Notizen Verwaltung",
+					"Verwalten Sie Notizen für Werkzeuge und Pressen",
+				)
 			</nav>
 		</main>
 	}
 }
 
-type pageHomeAnchorButtonProps struct {
-	Href        templ.SafeURL
-	Icon        string
-	Title       string
-	Description string
-}
-
-templ pageHomeAnchorButton(props pageHomeAnchorButtonProps) {
+templ pageHomeAnchorButton(href templ.SafeURL, icon, title, description string) {
 	<a
 		role="button"
 		class="ghost contrast flex flex-row gap justify-between items-center"
 		style="width: 90%; margin: 0 auto;"
-		href={ props.Href }
+		href={ href }
 	>
 		<span class="flex flex-row gap items-center" style="width: 100%;">
-			if props.Icon != "" {
-				<i class={ fmt.Sprintf("bi bi-%s", props.Icon) } style="margin: var(--ui-spacing);"></i>
+			if icon != "" {
+				<i class={ fmt.Sprintf("bi bi-%s", icon) } style="margin: var(--ui-spacing);"></i>
 			}
 			<span class="flex flex-col">
-				<strong>{ props.Title }</strong>
-				<small style="text-wrap: auto; text-transform: none;">{ props.Description }</small>
+				<strong>{ title }</strong>
+				<small style="text-wrap: auto; text-transform: none;">{ description }</small>
 			</span>
 		</span>
 		<i class="bi bi-chevron-right"></i>

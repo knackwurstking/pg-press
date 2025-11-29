@@ -27,31 +27,31 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Edit cycle dialog
-		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-cycle", h.GetEditCycle),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-cycle", h.PostEditCycle),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-cycle", h.PutEditCycle),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
+		utils.NewEchoRoute(http.MethodPost, path+"/edit-cycle", h.PostEditCycle),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
 
 		// Edit tool dialog
-		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-tool", h.GetEditTool),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-tool", h.PostEditTool),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-tool", h.PutEditTool),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-tool", h.GetEditTool),
+		utils.NewEchoRoute(http.MethodPost, path+"/edit-tool", h.PostEditTool),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-tool", h.PutEditTool),
 
 		// Edit metal sheet dialog
-		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-metal-sheet", h.GetEditMetalSheet),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-metal-sheet", h.PostEditMetalSheet),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-metal-sheet", h.PutEditMetalSheet),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),
+		utils.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", h.PostEditMetalSheet),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", h.PutEditMetalSheet),
 
 		// Edit note dialog
-		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-note", h.GetEditNote),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/dialogs/edit-note", h.PostEditNote),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-note", h.PutEditNote),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-note", h.GetEditNote),
+		utils.NewEchoRoute(http.MethodPost, path+"/edit-note", h.PostEditNote),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-note", h.PutEditNote),
 
 		// Edit regeneration dialog
-		utils.NewEchoRoute(http.MethodGet, "/htmx/dialogs/edit-regeneration", h.GetEditRegeneration),
-		utils.NewEchoRoute(http.MethodPut, "/htmx/dialogs/edit-regeneration", h.PutEditRegeneration),
+		utils.NewEchoRoute(http.MethodGet, path+"/edit-regeneration", h.GetEditRegeneration),
+		utils.NewEchoRoute(http.MethodPut, path+"/edit-regeneration", h.PutEditRegeneration),
 	})
 }
 

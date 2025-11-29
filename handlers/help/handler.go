@@ -20,9 +20,9 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, "/help/markdown", h.GetMarkdown),
+		utils.NewEchoRoute(http.MethodGet, path+"/markdown", h.GetMarkdown),
 	})
 }
 

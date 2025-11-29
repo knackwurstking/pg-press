@@ -28,19 +28,19 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Pages
-		utils.NewEchoRoute(http.MethodGet, "/trouble-reports", h.GetPage),
-		utils.NewEchoRoute(http.MethodGet, "/trouble-reports/share-pdf", h.GetSharePDF),
-		utils.NewEchoRoute(http.MethodGet, "/trouble-reports/attachment", h.GetAttachment),
-		utils.NewEchoRoute(http.MethodGet, "/trouble-reports/modifications/:id", h.GetModificationsForID),
+		utils.NewEchoRoute(http.MethodGet, path, h.GetPage),
+		utils.NewEchoRoute(http.MethodGet, path+"/share-pdf", h.GetSharePDF),
+		utils.NewEchoRoute(http.MethodGet, path+"/attachment", h.GetAttachment),
+		utils.NewEchoRoute(http.MethodGet, path+"/modifications/:id", h.GetModificationsForID),
 
 		// HTMX
-		utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/data", h.HTMXGetData),
-		utils.NewEchoRoute(http.MethodDelete, "/htmx/trouble-reports/data", h.HTMXDeleteTroubleReport),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/trouble-reports/attachments-preview", h.HTMXGetAttachmentsPreview),
-		utils.NewEchoRoute(http.MethodPost, "/htmx/trouble-reports/rollback", h.HTMXPostRollback),
+		utils.NewEchoRoute(http.MethodGet, path+"/data", h.HTMXGetData),
+		utils.NewEchoRoute(http.MethodDelete, path+"/data", h.HTMXDeleteTroubleReport),
+		utils.NewEchoRoute(http.MethodGet, path+"/attachments-preview", h.HTMXGetAttachmentsPreview),
+		utils.NewEchoRoute(http.MethodPost, path+"/rollback", h.HTMXPostRollback),
 	})
 }
 

@@ -23,15 +23,15 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, "/tools", h.GetToolsPage),
+		utils.NewEchoRoute(http.MethodGet, path, h.GetToolsPage),
 
-		utils.NewEchoRoute(http.MethodDelete, "/htmx/tools/delete", h.HTMXDeleteTool),
-		utils.NewEchoRoute(http.MethodPatch, "/htmx/tools/mark-dead", h.HTMXMarkToolAsDead),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/section/press", h.HTMXGetSectionPress),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/section/tools", h.HTMXGetSectionTools),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/tools/admin/overlapping-tools", h.HTMXGetAdminOverlappingTools),
+		utils.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteTool),
+		utils.NewEchoRoute(http.MethodPatch, path+"/mark-dead", h.HTMXMarkToolAsDead),
+		utils.NewEchoRoute(http.MethodGet, path+"/section/press", h.HTMXGetSectionPress),
+		utils.NewEchoRoute(http.MethodGet, path+"/section/tools", h.HTMXGetSectionTools),
+		utils.NewEchoRoute(http.MethodGet, path+"/admin/overlapping-tools", h.HTMXGetAdminOverlappingTools),
 	})
 }
 

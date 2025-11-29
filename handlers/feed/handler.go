@@ -23,10 +23,10 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, "/feed", h.GetFeedPage),
-		utils.NewEchoRoute(http.MethodGet, "/htmx/feed/list", h.HTMXGetFeedsList),
+		utils.NewEchoRoute(http.MethodGet, path, h.GetFeedPage),
+		utils.NewEchoRoute(http.MethodGet, path+"/list", h.HTMXGetFeedsList),
 	})
 }
 

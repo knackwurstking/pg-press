@@ -25,25 +25,25 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Press page
 		utils.NewEchoRoute(http.MethodGet,
-			"/tools/press/:press", h.GetPressPage),
+			path+"/:press", h.GetPressPage),
 
 		// HTMX endpoints for press content
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/press/:press/active-tools", h.HTMXGetPressActiveTools),
+			path+"/:press/active-tools", h.HTMXGetPressActiveTools),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/press/:press/metal-sheets", h.HTMXGetPressMetalSheets),
+			path+"/:press/metal-sheets", h.HTMXGetPressMetalSheets),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/press/:press/cycles", h.HTMXGetPressCycles),
+			path+"/:press/cycles", h.HTMXGetPressCycles),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/press/:press/notes", h.HTMXGetPressNotes),
+			path+"/:press/notes", h.HTMXGetPressNotes),
 
 		// PDF Handlers
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/press/:press/cycle-summary-pdf", h.HTMXGetCycleSummaryPDF),
+			path+"/:press/cycle-summary-pdf", h.HTMXGetCycleSummaryPDF),
 	})
 }
 

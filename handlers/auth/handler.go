@@ -25,10 +25,10 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, "/login", h.GetLoginPage),
-		utils.NewEchoRoute(http.MethodGet, "/logout", h.GetLogout),
+		utils.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),
+		utils.NewEchoRoute(http.MethodGet, path+"/logout", h.GetLogout),
 	})
 }
 

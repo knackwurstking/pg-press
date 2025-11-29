@@ -23,18 +23,18 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Press regeneration page
 		utils.NewEchoRoute(
 			http.MethodGet,
-			"/tools/press/:press/regenerations",
+			path+"/press-regeneration/:press",
 			h.GetPressRegenerationsPage,
 		),
 
 		utils.NewEchoRoute(
 			http.MethodPost,
-			"/htmx/tools/press/:press/regenerations",
+			path+"/press-regeneration/:press",
 			h.HxPostPressRegenerationsPage,
 		),
 	})

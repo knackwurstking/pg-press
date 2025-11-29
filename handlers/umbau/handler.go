@@ -24,12 +24,12 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(
 		e,
 		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/tools/press/:press/umbau", h.GetUmbauPage),
-			utils.NewEchoRoute(http.MethodPost, "/tools/press/:press/umbau", h.PostUmbauPage),
+			utils.NewEchoRoute(http.MethodGet, path+"/umbau/:press", h.GetUmbauPage),
+			utils.NewEchoRoute(http.MethodPost, path+"/umbau/:press", h.PostUmbauPage),
 		},
 	)
 }

@@ -23,10 +23,10 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// DELETE route for removing a metal sheet
-		utils.NewEchoRoute(http.MethodDelete, "/htmx/metal-sheets/delete", h.HTMXDeleteMetalSheet),
+		utils.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteMetalSheet),
 	})
 }
 

@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 func PageHome() templ.Component {
@@ -51,30 +51,30 @@ func PageHome() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageHomeAnchorButton(pageHomeAnchorButtonProps{
-				Href:        templ.URL(env.ServerPathPrefix + "/trouble-reports"),
-				Icon:        "exclamation-triangle",
-				Title:       "Problemberichte",
-				Description: "Verwalten Sie Problemberichte und Lösungen",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageHomeAnchorButton(
+				utils.UrlTroubleReports().Page,
+				"exclamation-triangle",
+				"Problemberichte",
+				"Verwalten Sie Problemberichte und Lösungen",
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageHomeAnchorButton(pageHomeAnchorButtonProps{
-				Href:        templ.URL(env.ServerPathPrefix + "/tools"),
-				Icon:        "tools",
-				Title:       "Werkzeuglisten",
-				Description: "Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageHomeAnchorButton(
+				utils.UrlTools().Page,
+				"tools",
+				"Werkzeuglisten",
+				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = pageHomeAnchorButton(pageHomeAnchorButtonProps{
-				Href:        templ.URL(env.ServerPathPrefix + "/notes"),
-				Icon:        "journal-text",
-				Title:       "Notizen Verwaltung",
-				Description: "Verwalten Sie Notizen für Werkzeuge und Pressen",
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = pageHomeAnchorButton(
+				utils.UrlNotes().Page,
+				"journal-text",
+				"Notizen Verwaltung",
+				"Verwalten Sie Notizen für Werkzeuge und Pressen",
+			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -98,14 +98,7 @@ func PageHome() templ.Component {
 	})
 }
 
-type pageHomeAnchorButtonProps struct {
-	Href        templ.SafeURL
-	Icon        string
-	Title       string
-	Description string
-}
-
-func pageHomeAnchorButton(props pageHomeAnchorButtonProps) templ.Component {
+func pageHomeAnchorButton(href templ.SafeURL, icon, title, description string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -131,9 +124,9 @@ func pageHomeAnchorButton(props pageHomeAnchorButtonProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 templ.SafeURL
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(props.Href)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(href)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 54, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 47, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -143,8 +136,8 @@ func pageHomeAnchorButton(props pageHomeAnchorButtonProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.Icon != "" {
-			var templ_7745c5c3_Var5 = []any{fmt.Sprintf("bi bi-%s", props.Icon)}
+		if icon != "" {
+			var templ_7745c5c3_Var5 = []any{fmt.Sprintf("bi bi-%s", icon)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -172,9 +165,9 @@ func pageHomeAnchorButton(props pageHomeAnchorButtonProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 61, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 54, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -185,9 +178,9 @@ func pageHomeAnchorButton(props pageHomeAnchorButtonProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(props.Description)
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 62, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/home/components/page-home.templ`, Line: 55, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {

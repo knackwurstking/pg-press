@@ -50,7 +50,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		var templ_7745c5c3_Var2 templ.SafeURL
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 21, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 21, Col: 82}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -63,7 +63,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tool.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 26, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 26, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -93,7 +93,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var4).String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 1, Col: 0}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 1, Col: 0}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -121,7 +121,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(utils.HXGetToolTotalCycles(tool.ID, tool.Position, false))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 47, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 47, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -155,7 +155,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(bindingTool.Position.GermanString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 61, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 61, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -168,7 +168,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(bindingTool.Code)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 61, Col: 94}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 61, Col: 94}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -181,7 +181,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(bindingTool.Type)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 61, Col: 115}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 61, Col: 115}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(len(notes))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 78, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 78, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -230,7 +230,7 @@ func ToolAnchor(tool *models.ResolvedTool, options *ToolAnchorOptions) templ.Com
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(len(regenerations))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `handlers/components/anchor.templ`, Line: 87, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/anchor.templ`, Line: 87, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {

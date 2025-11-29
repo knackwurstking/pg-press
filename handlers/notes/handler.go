@@ -23,16 +23,16 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Notes page
-		utils.NewEchoRoute(http.MethodGet, "/notes", h.GetNotesPage),
+		utils.NewEchoRoute(http.MethodGet, path, h.GetNotesPage),
 
 		// HTMX routes for notes deletion
-		utils.NewEchoRoute(http.MethodDelete, "/htmx/notes/delete", h.HTMXDeleteNote),
+		utils.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteNote),
 
 		// Render Notes Grid
-		utils.NewEchoRoute(http.MethodGet, "/htmx/notes/grid", h.HTMXGetNotesGrid),
+		utils.NewEchoRoute(http.MethodGet, path+"/grid", h.HTMXGetNotesGrid),
 	})
 }
 

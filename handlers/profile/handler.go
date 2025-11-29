@@ -24,13 +24,13 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(
 		e,
 		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, "/profile", h.GetProfilePage),
-			utils.NewEchoRoute(http.MethodGet, "/htmx/profile/cookies", h.HTMXGetCookies),
-			utils.NewEchoRoute(http.MethodDelete, "/htmx/profile/cookies",
+			utils.NewEchoRoute(http.MethodGet, path, h.GetProfilePage),
+			utils.NewEchoRoute(http.MethodGet, path+"/cookies", h.HTMXGetCookies),
+			utils.NewEchoRoute(http.MethodDelete, path+"/cookies",
 				h.HTMXDeleteCookies),
 		},
 	)

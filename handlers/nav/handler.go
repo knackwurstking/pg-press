@@ -24,9 +24,13 @@ func NewHandler(r *services.Registry, fh *wsfeed.Handler) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, "/htmx/nav/feed-counter", h.GetFeedCounter),
+		utils.NewEchoRoute(
+			http.MethodGet,
+			path+"/feed-counter",
+			h.GetFeedCounter,
+		),
 	})
 }
 

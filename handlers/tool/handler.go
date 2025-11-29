@@ -26,44 +26,44 @@ func NewHandler(r *services.Registry) *Handler {
 	}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
 		// Main Page
-		utils.NewEchoRoute(http.MethodGet, "/tools/tool/:id", h.GetToolPage),
+		utils.NewEchoRoute(http.MethodGet, path+"/:id", h.GetToolPage),
 
 		// Regenerations Table
 		utils.NewEchoRoute(http.MethodDelete,
-			"/htmx/tools/tool/:id/delete-regeneration", h.HTMXDeleteRegeneration),
+			path+"/:id/delete-regeneration", h.HTMXDeleteRegeneration),
 
 		// Tool status and regenerations management
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/status-edit", h.HTMXGetStatusEdit),
+			path+"/status-edit", h.HTMXGetStatusEdit),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/status-display", h.HTMXGetStatusDisplay),
+			path+"/status-display", h.HTMXGetStatusDisplay),
 		utils.NewEchoRoute(http.MethodPut,
-			"/htmx/tools/status", h.HTMXUpdateToolStatus),
+			path+"/status", h.HTMXUpdateToolStatus),
 
 		// Section loading
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/notes", h.HTMXGetToolNotes),
+			path+"/notes", h.HTMXGetToolNotes),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/metal-sheets", h.HTMXGetToolMetalSheets),
+			path+"/metal-sheets", h.HTMXGetToolMetalSheets),
 
 		// Cycles table rows
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/cycles", h.HTMXGetCycles),
+			path+"/cycles", h.HTMXGetCycles),
 		utils.NewEchoRoute(http.MethodGet,
-			"/htmx/tools/total-cycles", h.HTMXGetToolTotalCycles),
+			path+"/total-cycles", h.HTMXGetToolTotalCycles),
 
 		// Delete a cycle table entry
 		utils.NewEchoRoute(http.MethodDelete,
-			"/htmx/tools/cycle/delete", h.HTMXDeleteToolCycle),
+			path+"/cycle/delete", h.HTMXDeleteToolCycle),
 
 		// Update tools binding data
 		utils.NewEchoRoute(http.MethodPatch,
-			"/htmx/tools/tool/:id/bind", h.HTMXPatchToolBinding),
+			path+"/tool/:id/bind", h.HTMXPatchToolBinding),
 		utils.NewEchoRoute(http.MethodPatch,
-			"/htmx/tools/tool/:id/unbind", h.HTMXPatchToolUnBinding),
+			path+"/tool/:id/unbind", h.HTMXPatchToolUnBinding),
 	})
 }
 
