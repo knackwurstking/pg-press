@@ -28,8 +28,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	utils.RegisterEchoRoutes(
 		e,
 		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, path+"/umbau/:press", h.GetUmbauPage),
-			utils.NewEchoRoute(http.MethodPost, path+"/umbau/:press", h.PostUmbauPage),
+			utils.NewEchoRoute(http.MethodGet, path+"/:press", h.GetUmbauPage),
+			utils.NewEchoRoute(http.MethodPost, path+"/:press", h.PostUmbauPage),
 		},
 	)
 }

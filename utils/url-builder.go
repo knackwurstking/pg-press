@@ -107,7 +107,6 @@ func UrlNotes(noteID string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project
 func UrlMetalSheets(metalSheetID string) (url struct {
 	Delete templ.SafeURL
 }) {
@@ -117,7 +116,6 @@ func UrlMetalSheets(metalSheetID string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlUmbau(press models.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {

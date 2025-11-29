@@ -3,9 +3,9 @@ package components
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 type PageUmbauProps struct {
@@ -63,7 +63,7 @@ templ PageUmbau(props *PageUmbauProps) {
 		<main class="container fluid">
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
 			<form
-				hx-post={ fmt.Sprintf("%s/tools/press/%d/umbau", env.ServerPathPrefix, props.PressNumber) }
+				hx-post={ utils.UrlUmbau(props.PressNumber).Page }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
