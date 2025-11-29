@@ -52,11 +52,12 @@ func UrlHome() (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlFeed() (url struct {
 	Page templ.SafeURL
+	List templ.SafeURL
 }) {
 	url.Page = BuildURL("/feed", nil)
+	url.List = BuildURL("/feed/list", nil)
 	return url
 }
 

@@ -18,7 +18,7 @@ templ PageFeed() {
 		<main class="container fluid">
 			<span
 				id="data"
-				hx-get={ utils.HXGetFeedList() }
+				hx-get={ utils.UrlFeed().List }
 				hx-trigger="load"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
