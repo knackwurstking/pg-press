@@ -38,5 +38,5 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
       `TroubleReportWithAttachments` with this
 - [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the
       database table for this
-- [ ] Change url builders in utils package [WIP], also update handlers
-    - [x] /home
+- [x] Change url builders in utils package, also update handlers
+- [ ] Refactor the handler+components structure, just put handlers and their components into the same directory

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/auth/components"
+	"github.com/knackwurstking/pg-press/handlers/auth/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -38,7 +38,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 func (h *Handler) GetLoginPage(c echo.Context) error {
 	invalid := utils.ParseQueryBool(c, "invalid")
 	apiKey := c.FormValue("api-key")
-	page := components.PageLogin(apiKey, invalid)
+	page := templates.LoginPage(apiKey, invalid)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render login page")
 	}
