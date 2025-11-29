@@ -87,13 +87,13 @@ func UrlEditor(_type, id, returnURL string) (url struct {
 	return url
 }
 
-func UrlProfile(value string) (url struct {
+func UrlProfile(cookieValue string) (url struct {
 	Page    templ.SafeURL
 	Cookies templ.SafeURL
 }) {
 	url.Page = BuildURL("/profile", nil)
 	url.Cookies = BuildURL("/profile", map[string]string{
-		"value": value,
+		"value": cookieValue,
 	})
 	return url
 }
