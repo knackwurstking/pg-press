@@ -107,11 +107,13 @@ func UrlNotes(noteID string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlMetalSheets() (url struct {
-	Page templ.SafeURL
+// TODO: Fix this across the whole project
+func UrlMetalSheets(metalSheetID string) (url struct {
+	Delete templ.SafeURL
 }) {
-	url.Page = BuildURL("/metal-sheets", nil)
+	url.Delete = BuildURL("/metal-sheets/delete", map[string]string{
+		"id": metalSheetID,
+	})
 	return url
 }
 

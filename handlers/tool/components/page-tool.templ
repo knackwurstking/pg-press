@@ -593,7 +593,7 @@ templ PageTool_MetalSheetTableTop(user *models.User, metalSheets []*models.Metal
 								@components.TableActions(components.TableActionsOptions{
 									EditHref:        utils.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 									EditAdminOnly:   false,
-									DeleteHref:      utils.HXDeleteMetalSheet(sheet.ID),
+									DeleteHref:      utils.UrlMetalSheets(fmt.Sprintf("%d", sheet.ID)).Delete,
 									DeleteAdminOnly: true,
 									User:            user,
 								})
@@ -642,7 +642,7 @@ templ PageTool_MetalSheetTableBottom(user *models.User, metalSheets []*models.Me
 								@components.TableActions(components.TableActionsOptions{
 									EditHref:        utils.HXGetMetalSheetEditDialog(&sheet.ID, nil),
 									EditAdminOnly:   false,
-									DeleteHref:      utils.HXDeleteMetalSheet(sheet.ID),
+									DeleteHref:      utils.UrlMetalSheets(fmt.Sprintf("%d", sheet.ID)).Delete,
 									DeleteAdminOnly: true,
 									User:            user,
 								})
