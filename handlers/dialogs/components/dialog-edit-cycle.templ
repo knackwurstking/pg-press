@@ -24,16 +24,14 @@ type DialogEditCycleProps struct {
 
 templ DialogEditCycle(props *DialogEditCycleProps) {
 	{{
-		var (
-			method           = http.MethodPost
-			submitButtonText = "Erstellen"
-			baseHref         = utils.HXPostCycleEditDialog(props.Tool.ID)
-		)
+		method := http.MethodPost
+		submitButtonText := "Erstellen"
+		baseHref := utils.UrlDialogs().EditCycle("", fmt.Sprintf("%d", props.Tool.ID), "")
 
 		if props.CycleID > 0 {
 			method = http.MethodPut
 			submitButtonText = "Aktualisieren"
-			baseHref = utils.HXPutCycleEditDialog(props.CycleID)
+			baseHref = utils.UrlDialogs().EditCycle(fmt.Sprintf("%d", props.CycleID), "", "true")
 		}
 	}}
 	@ui.Dialog(ui.DialogProps{

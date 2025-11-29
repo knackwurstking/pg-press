@@ -239,7 +239,7 @@ func UrlPressRegeneration(press models.PressNumber) (url struct {
 }
 
 func UrlDialogs() (url struct {
-	EditCycle            func(cycleID, toolChangeMode string) templ.SafeURL
+	EditCycle            func(cycleID, toolID, toolChangeMode string) templ.SafeURL
 	EditTool             func(toolID string) templ.SafeURL
 	EditMetalSheet       func(metalSheetID, toolID string) templ.SafeURL
 	EditNote             func(noteID, linkToTables string) templ.SafeURL
@@ -254,9 +254,10 @@ func UrlDialogs() (url struct {
 	return url
 }
 
-func urlEditCycleDialog(cycleID, toolChangeMode string) templ.SafeURL {
+func urlEditCycleDialog(cycleID, toolID, toolChangeMode string) templ.SafeURL {
 	params := map[string]string{
 		"id":               cycleID,
+		"tool_id":          toolID,
 		"tool_change_mode": toolChangeMode,
 	}
 
