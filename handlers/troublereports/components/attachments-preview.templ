@@ -2,8 +2,8 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -34,7 +34,7 @@ templ attachmentPreviewItem(attachment *models.Attachment, path AttachmentPath) 
 	<div
 		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
 		onclick={ components.OpenImageViewer(
-			utils.UrlTroubleReports("", attachment.ID, "").Attachment,
+			utils.UrlTroubleReports(0, attachment.GetID(), 0).Attachment,
 		) }
 		tabindex="0"
 		role="button"

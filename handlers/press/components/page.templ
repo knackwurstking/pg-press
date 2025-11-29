@@ -48,7 +48,7 @@ templ actions(props PageProps) {
 			<a
 				role="button"
 				class="secondary"
-				href={ utils.UrlPressRegeneration(props.Press) }
+				href={ utils.UrlPressRegeneration(props.Press).Page }
 			>
 				Regeneration
 			</a>
@@ -141,7 +141,7 @@ templ cycles(props PageProps) {
 		<div
 			id="cycles-content"
 			class="mt"
-			hx-get={ utils.HXGetPressCyclesSectionContent(props.Press) }
+			hx-get={ utils.UrlPress(props.Press).Cycles }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 		>

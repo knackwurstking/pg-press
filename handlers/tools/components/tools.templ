@@ -2,14 +2,14 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/handlers/components"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
 templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	<span
-		hx-get={ utils.HxGetToolsPageToolsSection() }
+		hx-get={ utils.UrlTools(0).SectionTools }
 		hx-trigger="pageLoaded from:body"
 		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
@@ -20,7 +20,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 			<button
 				type="button"
 				class="primary flex gap"
-				hx-get={ utils.HXGetToolEditDialog(nil) }
+				hx-get={ utils.UrlDialogs().EditTool(0) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"

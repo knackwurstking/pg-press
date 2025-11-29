@@ -2,15 +2,15 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
 	<span
-		hx-get={ utils.HxGetToolsPagePressSection() }
+		hx-get={ utils.UrlTools(0).SectionPress }
 		hx-trigger="pageLoaded from:body"
 		hx-target={ "#" + IDTabContent }
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"

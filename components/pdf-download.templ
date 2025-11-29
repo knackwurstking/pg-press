@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -82,7 +81,7 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 
 func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
 	return DownloadPDF(
-		utils.HXGetPressCycleSummaryPDF(press),
+		utils.UrlPress(press).CycleSummaryPDF,
 		"cycle_summary.pdf",
 		"Lädt...",
 		"Zusammenfassung (PDF)",
@@ -91,7 +90,7 @@ func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
 
 func DownloadTroubleReportPDF(troubleReportID models.TroubleReportID) templ.ComponentScript {
 	return DownloadPDF(
-		utils.UrlTroubleReports(fmt.Sprintf("%d", troubleReportID), "", "").SharePDF,
+		utils.UrlTroubleReports(troubleReportID, 0, 0).SharePDF,
 		"trouble_report.pdf",
 		`<i class="bi bi-hourglass-split"></i>`,
 		`<i class="bi bi-share"></i>`,

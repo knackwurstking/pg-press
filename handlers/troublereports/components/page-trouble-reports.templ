@@ -3,8 +3,8 @@ package components
 import (
 	"context"
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/knackwurstking/ui"
@@ -35,7 +35,11 @@ templ PageTroubleReports() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<a
-					href={ utils.UrlEditor("troublereport", "", string(utils.UrlTroubleReports().Page)).Page }
+					href={ utils.UrlEditor(
+						"troublereport", 
+						"", 
+						string(utils.UrlTroubleReports(0, 0, 0).Page),
+					).Page }
 					class="flex flex-row gap justify-between items-center"
 					role="button"
 				>
@@ -45,7 +49,7 @@ templ PageTroubleReports() {
 			</section>
 			<!-- Trouble Reports Entries -->
 			<section
-				hx-get={ utils.UrlTroubleReports("", "", "").Data }
+				hx-get={ utils.UrlTroubleReports(0, 0, 0).Data }
 				hx-trigger="load, pageLoaded from:body"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				id="data"
@@ -77,7 +81,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 					<div
 						class="attachments-preview-placeholder"
 						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-						hx-get={ utils.UrlTroubleReports(fmt.Sprintf("%d", tr.ID), "", "").AttachmentsPreview }
+						hx-get={ utils.UrlTroubleReports(tr.ID, 0, 0).AttachmentsPreview }
 						hx-trigger="click"
 						hx-swap="outerHTML"
 						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -94,13 +98,17 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				<a
 					role="button"
 					class="ghost secondary icon"
-					href={ utils.UrlTroubleReports(fmt.Sprintf("%d", tr.ID), "", "").Modifications }
+					href={ utils.UrlTroubleReports(tr.ID, 0, 0).Modifications }
 				>
 					<i class="bi bi-clock-history"></i>
 				</a>
 				// Edit Report
 				<a
-					href={ utils.UrlEditor("troublereport", fmt.Sprintf("%s", tr.ID), string(utils.UrlTroubleReports().Page)) }
+					href={ utils.UrlEditor(
+						"troublereport", 
+						fmt.Sprintf("%d", tr.ID), 
+						string(utils.UrlTroubleReports(0, 0, 0).Page),
+					).Page }
 					class="ghost icon"
 					role="button"
 				>
@@ -117,7 +125,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				</button>
 				// Admin only: Delete Report
 				<button
-					hx-delete={ utils.UrlTroubleReports(fmt.Sprintf("%d", tr.ID), "", "").Data }
+					hx-delete={ utils.UrlTroubleReports(tr.ID, 0, 0).Data }
 					hx-trigger="click"
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
@@ -185,7 +193,7 @@ templ TroubleReportModificationEntry(
 
 templ TroubleReportRollbackButton(reportID models.TroubleReportID, modificationTime int64) {
 	<form
-		hx-post={ utils.UrlTroubleReports(fmt.Sprintf("%d", reportID), "", "").Rollback }
+		hx-post={ utils.UrlTroubleReports(reportID, 0, 0).Rollback }
 		hx-swap="none"
 		hx-on:htmx:after-request="
 			if (event.detail.successful) {

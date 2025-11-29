@@ -11,7 +11,7 @@ import (
 
 templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 	<span
-		hx-get={ utils.HxGetToolsPageAdminTools() }
+		hx-get={ utils.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
 		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
