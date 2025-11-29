@@ -2,9 +2,10 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/components"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 	"strconv"
 )
 
@@ -102,7 +103,7 @@ templ markdownToggle(useMarkdown bool) {
 				<div class="ml-auto flex justify-end items-center gap-xs">
 					<a
 						role="button"
-						href={ templ.URL(env.ServerPathPrefix + "/help/markdown") }
+						href={ utils.UrlHelp().MarkdownPage }
 						target="_blank"
 						class="small primary ghost"
 						style="text-wrap: nowrap;"

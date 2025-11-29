@@ -61,11 +61,10 @@ func UrlFeed() (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlHelp() (url struct {
-	Page templ.SafeURL
+	MarkdownPage templ.SafeURL
 }) {
-	url.Page = BuildURL("/help", nil)
+	url.MarkdownPage = BuildURL("/help/markdown", nil)
 	return url
 }
 
