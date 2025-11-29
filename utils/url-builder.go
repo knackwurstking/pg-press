@@ -213,11 +213,21 @@ func UrlTool(toolID, toolRegenerationID, cycleID string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlPress(pressNumber string) (url struct {
-	Page templ.SafeURL
+	Page            templ.SafeURL
+	ActiveTools     templ.SafeURL
+	MetalSheets     templ.SafeURL
+	Cycles          templ.SafeURL
+	Notes           templ.SafeURL
+	CycleSummaryPDF templ.SafeURL
 }) {
 	url.Page = BuildURL(fmt.Sprintf("/press/%s", pressNumber), nil)
+	url.ActiveTools = BuildURL(fmt.Sprintf("/press/%s/active-tools", pressNumber), nil)
+	url.MetalSheets = BuildURL(fmt.Sprintf("/press/%s/metal-sheets", pressNumber), nil)
+	url.Cycles = BuildURL(fmt.Sprintf("/press/%s/cycles", pressNumber), nil)
+	url.Notes = BuildURL(fmt.Sprintf("/press/%s/notes", pressNumber), nil)
+	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%s/cycle-summary-pdf", pressNumber), nil)
+
 	return url
 }
 
