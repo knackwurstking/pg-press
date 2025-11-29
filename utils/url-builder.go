@@ -38,7 +38,6 @@ func UrlLogin(apiKey *string, invalid *bool) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlNav() (url struct {
 	FeedCounter templ.SafeURL
 }) {
@@ -46,7 +45,6 @@ func UrlNav() (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlHome() (url struct {
 	Page templ.SafeURL
 }) {
