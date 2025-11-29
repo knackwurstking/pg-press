@@ -38,6 +38,7 @@ func UrlLogin(apiKey *string, invalid *bool) (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlNav() (url struct {
 	FeedCounter templ.SafeURL
 }) {
@@ -45,6 +46,7 @@ func UrlNav() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlHome() (url struct {
 	Page templ.SafeURL
 }) {
@@ -52,6 +54,7 @@ func UrlHome() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlFeed() (url struct {
 	Page templ.SafeURL
 }) {
@@ -59,6 +62,7 @@ func UrlFeed() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlHelp() (url struct {
 	Page templ.SafeURL
 }) {
@@ -66,6 +70,7 @@ func UrlHelp() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlEditor() (url struct {
 	Page templ.SafeURL
 }) {
@@ -73,6 +78,7 @@ func UrlEditor() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlProfile() (url struct {
 	Page templ.SafeURL
 }) {
@@ -80,6 +86,7 @@ func UrlProfile() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlNotes() (url struct {
 	Page templ.SafeURL
 }) {
@@ -87,6 +94,7 @@ func UrlNotes() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlMetalSheets() (url struct {
 	Page templ.SafeURL
 }) {
@@ -94,6 +102,7 @@ func UrlMetalSheets() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlUmbau(press models.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
@@ -101,6 +110,7 @@ func UrlUmbau(press models.PressNumber) (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlTroubleReports() (url struct {
 	Page templ.SafeURL
 }) {
@@ -108,6 +118,7 @@ func UrlTroubleReports() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlTools() (url struct {
 	Page templ.SafeURL
 }) {
@@ -115,6 +126,7 @@ func UrlTools() (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlTool(tool models.ToolID) (url struct {
 	Page templ.SafeURL
 }) {
@@ -122,6 +134,7 @@ func UrlTool(tool models.ToolID) (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlPress(press models.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
@@ -129,6 +142,7 @@ func UrlPress(press models.PressNumber) (url struct {
 	return url
 }
 
+// TODO: Fix this across the whole project and also check the handler for params and routes
 func UrlPressRegeneration(press models.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
