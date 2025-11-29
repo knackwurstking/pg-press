@@ -94,11 +94,16 @@ func UrlProfile(value string) (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlNotes() (url struct {
-	Page templ.SafeURL
+func UrlNotes(noteID string) (url struct {
+	Page   templ.SafeURL
+	Delete templ.SafeURL
+	Grid   templ.SafeURL
 }) {
 	url.Page = BuildURL("/notes", nil)
+	url.Delete = BuildURL("/notes/delete", map[string]string{
+		"id": noteID,
+	})
+	url.Grid = BuildURL("/notes/grid", nil)
 	return url
 }
 
