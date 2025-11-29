@@ -24,12 +24,12 @@ func BuildURL(path string, params map[string]string) templ.SafeURL {
 	return templ.SafeURL(u)
 }
 
-func UrlLogin(apiKey *string, invalid *bool) (url struct {
+func UrlLogin(apiKey string, invalid *bool) (url struct {
 	Page templ.SafeURL
 }) {
 	params := map[string]string{}
-	if apiKey != nil {
-		params["api-key"] = *apiKey
+	if apiKey != "" {
+		params["api-key"] = apiKey
 	}
 	if invalid != nil {
 		params["invalid"] = fmt.Sprintf("%t", *invalid)
@@ -68,11 +68,18 @@ func UrlHelp() (url struct {
 	return url
 }
 
-// TODO: Fix this across the whole project and also check the handler for params and routes
-func UrlEditor() (url struct {
+func UrlEditor(_type, id, returnURL string) (url struct {
 	Page templ.SafeURL
+	Save templ.SafeURL
 }) {
-	url.Page = BuildURL("/editor", nil)
+	url.Page = BuildURL("/editor", map[string]string{
+		"type":      _type,
+		"id":        id,
+		"returnURL": returnURL,
+	})
+
+	url.Save = BuildURL("/editor/save", nil)
+
 	return url
 }
 

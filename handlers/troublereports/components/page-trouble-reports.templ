@@ -35,7 +35,7 @@ templ PageTroubleReports() {
 			<!-- Page Actions: Create -->
 			<section style="margin-top: 0" class="flex flex-row gap justify-end">
 				<a
-					href={ templ.URL(fmt.Sprintf("%s/editor?type=troublereport&return_url=%s/trouble-reports", env.ServerPathPrefix, env.ServerPathPrefix)) }
+					href={ utils.UrlEditor("troublereport", "", string(utils.UrlTroubleReports().Page)).Page }
 					class="flex flex-row gap justify-between items-center"
 					role="button"
 				>
@@ -103,10 +103,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				</a>
 				// Edit Report
 				<a
-					href={ templ.URL(fmt.Sprintf(
-						"%s/editor?type=troublereport&id=%d&return_url=%s/trouble-reports",
-						env.ServerPathPrefix, tr.ID, env.ServerPathPrefix,
-					)) }
+					href={ utils.UrlEditor("troublereport", fmt.Sprintf("%s", tr.ID), string(utils.UrlTroubleReports().Page)) }
 					class="ghost icon"
 					role="button"
 				>

@@ -3,14 +3,13 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 	"strconv"
 )
 
 type PageEditorOptions struct {
-	Type        string
+	Type        string // TODO: I could use a type alias here, and also define some constants
 	ID          int64
 	ReturnURL   string
 	Title       string
@@ -43,7 +42,7 @@ templ PageEditor(options *PageEditorOptions) {
 				<form
 					class="editor-form flex flex-col gap px"
 					method="POST"
-					action={ templ.URL(fmt.Sprintf("%s/editor/save", env.ServerPathPrefix)) }
+					action={ utils.UrlEditor("", "", "").Save }
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(options)
