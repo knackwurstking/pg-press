@@ -649,7 +649,6 @@ func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *echo.HTTPE
 	return models.ToolID(toolIDQuery), nil
 }
 
-// TODO: Handle press regenerations(?)
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
 	slog.Debug("Get total cycles", "tool", toolID, "cycles", len(cycles))
 
