@@ -1,31 +1,11 @@
-package components
+package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
 	"strings"
 	"time"
 )
-
-templ PageFeed() {
-	@components.Layout(components.LayoutOptions{
-		PageTitle:   "PG Presse | Feed",
-		AppBarTitle: "Feed",
-		NavContent:  components.StandardNavContent(),
-	}) {
-		<main class="container fluid">
-			<span
-				id="data"
-				hx-get={ utils.UrlFeed().List }
-				hx-trigger="load"
-				hx-swap="outerHTML"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			></span>
-		</main>
-	}
-}
 
 templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[models.TelegramID]*models.User) {
 	if len(feeds) > 0 {
@@ -37,7 +17,7 @@ templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[mode
 							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
 						</div>
 					}
-					@Feed(feed, userMap)
+					@feedItem(feed, userMap)
 				</section>
 			}
 		</ul>
@@ -46,7 +26,7 @@ templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[mode
 	}
 }
 
-templ Feed(feed *models.Feed, userMap map[models.TelegramID]*models.User) {
+templ feedItem(feed *models.Feed, userMap map[models.TelegramID]*models.User) {
 	<article
 		id={ fmt.Sprintf("feed-%d", feed.ID) }
 		class="card"

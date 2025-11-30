@@ -1,0 +1,24 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ PageFeed() {
+	@components.Layout(components.LayoutOptions{
+		PageTitle:   "PG Presse | Feed",
+		AppBarTitle: "Feed",
+		NavContent:  components.StandardNavContent(),
+	}) {
+		<main class="container fluid">
+			<span
+				id="data"
+				hx-get={ utils.UrlFeed().List }
+				hx-trigger="load"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			></span>
+		</main>
+	}
+}

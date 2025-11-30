@@ -6,7 +6,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/feed/components"
+	"github.com/knackwurstking/pg-press/handlers/feed/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -31,7 +31,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetFeedPage(c echo.Context) error {
-	page := components.PageFeed()
+	page := templates.PageFeed()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render feed page")
 	}
@@ -59,7 +59,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 		userMap[feed.UserID] = feedUser
 	}
 
-	feedData := components.FeedsList(feeds, user.LastFeed, userMap)
+	feedData := templates.FeedsList(feeds, user.LastFeed, userMap)
 	if err := feedData.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render feed data")
 	}
