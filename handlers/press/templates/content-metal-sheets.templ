@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -58,7 +59,7 @@ templ metalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap m
 						if len(topSheets) == 0 {
 							<tr>
 								<td colspan="2" class="text-center">
-									Keine Bleche für Oberteil gefunden
+									@components.NotFoundSectionText("Keine Bleche für Oberteil gefunden")
 								</td>
 							</tr>
 						} else {
@@ -103,7 +104,7 @@ templ metalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 						if len(bottomSheets) == 0 {
 							<tr>
 								<td colspan="5" class="text-center">
-									Keine Bleche für Unterteil gefunden
+									@components.NotFoundSectionText("Keine Bleche für Unterteil gefunden")
 								</td>
 							</tr>
 						} else {
