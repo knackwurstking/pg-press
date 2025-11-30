@@ -49,7 +49,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
         - [x] cycle dialog
         - [x] metal-sheet dialog
         - [ ] note dialog
-        - [ ] tool dialog
+        - [x] tool dialog
         - [ ] tool-regeneration dialog
     - [x] Editor
     - [x] Feed
