@@ -9,26 +9,27 @@ import (
 )
 
 templ PressPage(press models.PressNumber, user *models.User) {
+	{{ title := fmt.Sprintf("Presse %d", press) }}
 	@components.Layout(
 		components.LayoutOptions{
-			PageTitle:   fmt.Sprintf("PG Presse | Presse %d", press),
-			AppBarTitle: fmt.Sprintf("Presse %d", press),
-			NavContent:  navContent(),
+			PageTitle:   title,
+			AppBarTitle: title,
+			NavContent:  pressPageNavContent(),
 		},
 	) {
-		<main class="container fluid">
-			@actions(press, user)
-			@notes(press)
-			@activeTools(press)
-			@metalSheets(press)
-			@regenerations(press)
-			@cycles(press)
+		<main class="container fluid flex flex-col gap-lg py">
+			@sectionActions(press, user)
+			@sectionNotes(press)
+			@sectionActiveTools(press)
+			@sectionMetalSheets(press)
+			@sectionRegenerations(press)
+			@sectionCycles(press)
 		</main>
 	}
 }
 
 // Actions section - contains buttons for umbau and regeneration
-templ actions(press models.PressNumber, user *models.User) {
+templ sectionActions(press models.PressNumber, user *models.User) {
 	<section class="flex justify-end items-center gap">
 		<a
 			role="button"
@@ -50,7 +51,7 @@ templ actions(press models.PressNumber, user *models.User) {
 }
 
 // Notes section - displays notes for the press
-templ notes(press models.PressNumber) {
+templ sectionNotes(press models.PressNumber) {
 	<section id="notes-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Notizen</h5>
@@ -67,7 +68,7 @@ templ notes(press models.PressNumber) {
 }
 
 // Active tools section - displays active tools on the press
-templ activeTools(press models.PressNumber) {
+templ sectionActiveTools(press models.PressNumber) {
 	<section id="tool-state-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Aktive Werkzeuge</h5>
@@ -84,7 +85,7 @@ templ activeTools(press models.PressNumber) {
 }
 
 // Metal sheets section - displays metal sheets for the press
-templ metalSheets(press models.PressNumber) {
+templ sectionMetalSheets(press models.PressNumber) {
 	<section id="metal-sheets-section">
 		<div class="flex justify-between items-center mb">
 			<h5>Blech Listen</h5>
@@ -100,7 +101,7 @@ templ metalSheets(press models.PressNumber) {
 	</section>
 }
 
-templ regenerations(press models.PressNumber) {
+templ sectionRegenerations(press models.PressNumber) {
 	<section
 		id="press-regenerations-section"
 	>
@@ -119,7 +120,7 @@ templ regenerations(press models.PressNumber) {
 }
 
 // Cycles section - displays press cycle history
-templ cycles(press models.PressNumber) {
+templ sectionCycles(press models.PressNumber) {
 	<section id="cycle-table-section" class="mt">
 		<div class="flex justify-between items-center mb">
 			<h5>Pressennutzungsverlauf</h5>
@@ -145,7 +146,7 @@ templ cycles(press models.PressNumber) {
 }
 
 // Navigation content for the press page
-templ navContent() {
+templ pressPageNavContent() {
 	@components.NavFeedButton()
 	@components.NavProfileButton()
 	@components.NavHomeButton()

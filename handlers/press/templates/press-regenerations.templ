@@ -8,7 +8,9 @@ import (
 
 templ RegenerationsContent(pressRegenerations []*models.PressRegeneration) {
 	if len(pressRegenerations) == 0 {
-		<p class="muted ghost w-full text-center italic text-sm">Es sind keine Regenerationen für diese Presse vorhanden.</p>
+		@components.NotFoundSectionText(
+			"Es sind keine Regenerationen für diese Presse vorhanden.",
+		)
 		{{ return }}
 	}
 	<figure>
