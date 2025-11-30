@@ -1,0 +1,22 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ CyclesSection(toolID models.ToolID, oob bool) {
+	<section
+		id="cycles-section"
+		hx-get={ utils.UrlTool(toolID, 0, 0).Cycles }
+		hx-trigger="load, pageLoaded from:body"
+		hx-swap="innerHTML"
+		if oob {
+			hx-swap-oob="true"
+		}
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	>
+		@components.Spinner()
+	</section>
+}

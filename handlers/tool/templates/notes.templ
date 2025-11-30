@@ -1,0 +1,35 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ Notes(tool *models.ResolvedTool) {
+	@components.SectionTitle(components.SectionTitleLevelSub, "Notizen") {
+		<button
+			class="icon secondary small flex"
+			hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", tool.ID)) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			title="Neue Notiz hinzufügen"
+		>
+			<i class="bi bi-plus-lg"></i>
+		</button>
+	}
+	if len(tool.GetNotes()) > 0 {
+		<div class="notes-list">
+			for _, note := range tool.GetNotes() {
+				@components.NoteCard(note)
+			}
+		</div>
+	} else {
+		<div class="empty-state">
+			<p class="text-muted">Keine Notizen für dieses Werkzeug vorhanden.</p>
+		</div>
+	}
+}

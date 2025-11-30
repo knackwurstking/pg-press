@@ -1,0 +1,92 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+type BindingSectionProps struct {
+	Tool            *models.ResolvedTool
+	ToolsForBinding []*models.Tool
+	IsAdmin         bool
+}
+
+templ BindingSection(props BindingSectionProps) {
+	{{
+		var positionForBinding models.Position
+		if props.Tool.Position == models.PositionTop {
+			positionForBinding = models.PositionTopCassette
+		} else {
+			positionForBinding = models.PositionTop
+		}
+	}}
+	<span id="binding-section" class="flex flex-col gap">
+		@components.SectionTitle(components.SectionTitleLevelSub, "Werkzeuge Binden")
+		<span
+			class="flex gap flex-wrap"
+			if !props.IsAdmin {
+				disabled
+			}
+		>
+			<select
+				id="tool-binding-select"
+				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).Bind }
+				hx-vals="js:{target_id: event.target.value}"
+				hx-trigger="change"
+				hx-target="#binding-section"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+				if props.Tool.Binding != nil {
+					disabled
+				}
+			>
+				<option
+					value=""
+					disabled
+					selected?={ props.Tool.Binding == nil }
+				>
+					{ positionForBinding.GermanString() } Binden
+				</option>
+				for _, t := range props.ToolsForBinding {
+					<option
+						value={ t.ID }
+						selected?={ props.Tool.Binding != nil && t.ID == *props.Tool.Binding }
+					>{ t.Code } { t.Type }</option>
+				}
+			</select>
+			<button
+				class="small ghost destructive"
+				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).UnBind }
+				hx-trigger="click"
+				hx-target="#binding-section"
+				hx-swap="outerHTML"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
+				if !props.Tool.IsBound() {
+					disabled
+				}
+			>
+				Entbinden
+			</button>
+		</span>
+		if props.Tool.IsBound() {
+			<span>
+				// Display the binding tool
+				{{ bindingTool := props.Tool.GetBindingTool() }}
+				if bindingTool != nil {
+					@components.ToolAnchor(
+						bindingTool,
+						&components.ToolAnchorOptions{
+							EnableStatusBadge: false,
+						},
+					)
+				} else {
+					<!-- Binding tool not available -->
+					<span class="text-sm italic info ghost">
+						<i>Binding tool not available</i>
+					</span>
+				}
+			</span>
+		}
+	</span>
+}

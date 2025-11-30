@@ -1,0 +1,118 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+type ToolStatusEditProps struct {
+	Tool              *models.Tool
+	Editable          bool
+	UserHasPermission bool
+}
+
+templ ToolStatusEdit(props *ToolStatusEditProps) {
+	<div
+		id={ fmt.Sprintf("tool-status-%d", props.Tool.ID) }
+		class="flex flex-col gap-sm"
+	>
+		if props.Editable {
+			@toolStatusEditForm(props.Tool, props.UserHasPermission)
+		} else {
+			@toolStatusDisplay(props.Tool)
+		}
+	</div>
+}
+
+templ toolStatusDisplay(tool *models.Tool) {
+	<div class="flex items-center gap-lg">
+		@components.ToolStatusBadge(tool)
+		<button
+			type="button"
+			class="small ghost flex gap"
+			hx-get={ utils.UrlTool(tool.ID, 0, 0).StatusEdit }
+			hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+			hx-swap="outerHTML"
+			title="Status bearbeiten"
+			if tool.IsActive() {
+				disabled
+			}
+		>
+			<i class="bi bi-pencil-square text-sm"></i>
+			Regenerierung
+		</button>
+	</div>
+}
+
+templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
+	<div class="card p-sm flex flex-col gap-sm">
+		<div class="flex items-center gap-sm mb-sm">
+			@components.ToolStatusBadge(tool)
+			<span class="text-sm text-muted">Regenerierung steuern</span>
+		</div>
+		<div class="flex flex-col gap-sm">
+			<form
+				hx-put={ utils.UrlTool(tool.ID, 0, 0).Status }
+				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+				hx-swap="outerHTML"
+			>
+				<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+				if tool.Status() != models.StatusRegenerating {
+					<input type="hidden" name="status" value="regenerating"/>
+				} else {
+					<input type="hidden" name="status" value="active"/>
+				}
+				<button
+					type="submit"
+					if tool.Status() != models.StatusRegenerating {
+						class="small warning w-full m-0 flex gap"
+					} else {
+						class="small success w-full m-0 flex gap"
+					}
+					if !userHasPermission {
+						disabled
+					}
+				>
+					<i class="bi bi-arrow-clockwise"></i>
+					if tool.Status() != models.StatusRegenerating {
+						Regenerierung starten
+					} else {
+						Regenerierung stoppen
+					}
+				</button>
+			</form>
+			if tool.Status() == models.StatusRegenerating {
+				<form
+					hx-put={ utils.UrlTool(tool.ID, 0, 0).Status }
+					hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+					hx-swap="outerHTML"
+				>
+					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.ID) }/>
+					<input type="hidden" name="status" value="abort"/>
+					<button
+						type="submit"
+						class="small destructive w-full m-0 flex gap"
+						if !userHasPermission {
+							disabled
+						}
+					>
+						<i class="bi bi-trash"></i>
+						Regenerierung Abbrechen
+					</button>
+				</form>
+			}
+			<button
+				type="button"
+				class="small secondary flex gap"
+				hx-get={ utils.UrlTool(tool.ID, 0, 0).StatusDisplay }
+				hx-target={ fmt.Sprintf("#tool-status-%d", tool.ID) }
+				hx-swap="outerHTML"
+			>
+				<i class="bi bi-x"></i>
+				Abbrechen
+			</button>
+		</div>
+	</div>
+}

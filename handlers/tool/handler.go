@@ -9,7 +9,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/tool/components"
+	"github.com/knackwurstking/pg-press/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -85,7 +85,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return errors.Handler(err, "get tool")
 	}
 
-	page := components.PageTool(&components.PageToolProps{
+	page := templates.Page(&templates.PageProps{
 		User:       user,
 		ToolString: tool.String(),
 		ToolID:     tool.ID,
@@ -166,7 +166,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
+	bs := templates.BindingSection(templates.BindingSectionProps{
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         user.IsAdmin(),
@@ -212,7 +212,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Render the template
-	bs := components.PageTool_BindingSection(components.PageTool_BindingSectionProps{
+	bs := templates.BindingSection(templates.BindingSectionProps{
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         user.IsAdmin(),
@@ -282,7 +282,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	}
 
 	// Render the template
-	cyclesSection := components.PageTool_Cycles(components.PageTool_CyclesProps{
+	cyclesSection := templates.Cycles(templates.CyclesProps{
 		User:            user,
 		Tool:            tool,
 		ToolsForBinding: toolsForBinding,
@@ -321,7 +321,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	// Get total cycles from filtered cycles
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
-	tc := components.TotalCycles(totalCycles, utils.ParseQueryBool(c, "input"))
+	tc := templates.TotalCycles(totalCycles, utils.ParseQueryBool(c, "input"))
 	return tc.Render(c.Request().Context(), c.Response())
 }
 
@@ -401,7 +401,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 		metalSheets = []*models.MetalSheet{}
 	}
 
-	metalSheetsSection := components.PageTool_MetalSheets(user, metalSheets, tool)
+	metalSheetsSection := templates.MetalSheets(user, metalSheets, tool)
 
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render tool metal sheets section")
@@ -432,7 +432,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 
 	// Create ToolWithNotes for template compatibility
 	resolvedTool := models.NewResolvedTool(tool, nil, notes, nil)
-	notesSection := components.PageTool_Notes(resolvedTool)
+	notesSection := templates.Notes(resolvedTool)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render tool notes section")
@@ -633,7 +633,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	}
 
 	// Render out-of-band swap for cycles section to trigger reload
-	oobCyclesReload := components.PageTool_CyclesSection(toolID, true)
+	oobCyclesReload := templates.CyclesSection(toolID, true)
 	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
 		slog.Error("Failed to render out-of-band cycles reload", "error", err)
 	}
@@ -709,7 +709,7 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) 
 }
 
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
-	return components.ToolPage_ToolStatusEdit(&components.ToolPage_ToolStatusEditProps{
+	return templates.ToolStatusEdit(&templates.ToolStatusEditProps{
 		Tool:              tool,
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
