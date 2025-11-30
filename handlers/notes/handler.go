@@ -68,7 +68,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 	slog.Debug("Retrieved tools from database", "tools", len(tools))
 
-	page := templates.PageNotes(notes, tools)
+	page := templates.Page(notes, tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render notes page")
 	}

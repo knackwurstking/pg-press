@@ -61,7 +61,7 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	}
 
 	// Render page
-	page := templates.PressPage(press, user)
+	page := templates.Page(press, user)
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press page")

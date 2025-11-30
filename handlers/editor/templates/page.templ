@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-type EditorPageParams struct {
+type PageProps struct {
 	Type        string // TODO: I could use a type alias here, and also define some constants
 	ID          int64
 	ReturnURL   templ.SafeURL
@@ -18,12 +18,12 @@ type EditorPageParams struct {
 	Attachments []*models.Attachment
 }
 
-templ EditorPage(options *EditorPageParams) {
+templ Page(props *PageProps) {
 	{{
 		var pageTitle, editorTitle string
-		typeName := getTypeName(options.Type)
+		typeName := getTypeName(props.Type)
 
-		if options.ID > 0 {
+		if props.ID > 0 {
 			pageTitle = fmt.Sprintf("Bearbeiten - %s", typeName)
 			editorTitle = fmt.Sprintf("%s bearbeiten", typeName)
 		} else {
@@ -34,28 +34,28 @@ templ EditorPage(options *EditorPageParams) {
 	@components.Layout(components.LayoutOptions{
 		PageTitle:      pageTitle,
 		AppBarTitle:    editorTitle,
-		AdditionalHead: editorPageAdditionalHead(),
-		NavContent:     editorPageNavContent(options),
+		AdditionalHead: pageAdditionalHead(),
+		NavContent:     pageNavContent(props),
 	}) {
 		<main class="container fluid">
 			<div class="editor-container">
 				<form
 					class="editor-form flex flex-col gap px"
 					method="POST"
-					action={ utils.UrlEditor(options.Type, fmt.Sprintf("%d", options.ID), options.ReturnURL).Save }
+					action={ utils.UrlEditor(props.Type, fmt.Sprintf("%d", props.ID), props.ReturnURL).Save }
 					enctype="multipart/form-data"
 				>
-					@hiddenFields(options)
-					@titleInput(options.Title)
-					@markdownToggle(options.UseMarkdown)
+					@hiddenFields(props)
+					@titleInput(props.Title)
+					@markdownToggle(props.UseMarkdown)
 					@markdownTools()
-					@contentTextarea(options.Content)
+					@contentTextarea(props.Content)
 					@markdownPreview()
 					@attachmentsSeparator()
-					if supportsAttachments(options.Type) {
-						@attachmentsSection(options.Attachments)
+					if supportsAttachments(props.Type) {
+						@attachmentsSection(props.Attachments)
 					}
-					@formActions(options)
+					@formActions(props)
 				</form>
 			</div>
 		</main>
@@ -63,16 +63,16 @@ templ EditorPage(options *EditorPageParams) {
 	}
 }
 
-templ editorPageNavContent(options *EditorPageParams) {
-	if options.ReturnURL != "" {
-		<a href={ options.ReturnURL } class="secondary flex gap">
+templ pageNavContent(props *PageProps) {
+	if props.ReturnURL != "" {
+		<a href={ props.ReturnURL } class="secondary flex gap">
 			<i class="bi bi-arrow-left"></i>
 			Zurück
 		</a>
 	}
 }
 
-templ editorPageAdditionalHead() {
+templ pageAdditionalHead() {
 	@components.MarkdownStyles()
 	<style>
 		.markdown-content h1,
@@ -325,7 +325,7 @@ templ editorPageAdditionalHead() {
 	</script>
 }
 
-templ hiddenFields(options *EditorPageParams) {
+templ hiddenFields(options *PageProps) {
 	<input type="hidden" name="type" value={ options.Type }/>
 	<input type="hidden" name="id" value={ strconv.FormatInt(options.ID, 10) }/>
 	<input type="hidden" name="return_url" value={ string(options.ReturnURL) }/>
@@ -562,7 +562,7 @@ templ filePreviewArea() {
 	</div>
 }
 
-templ formActions(options *EditorPageParams) {
+templ formActions(options *PageProps) {
 	<div class="mt-lg pt border-top flex gap justify-end">
 		if options.ReturnURL != "" {
 			<a

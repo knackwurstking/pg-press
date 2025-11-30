@@ -7,13 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ PageProfile(user *models.User) {
+templ Page(user *models.User) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Profil",
 			AppBarTitle:    "Profil",
-			NavContent:     components.StandardNavContent(),
 			AdditionalHead: pageProfileAdditionalHead(),
+			NavContent:     components.StandardNavContent(),
 		},
 	) {
 		<main class="container fluid" style="max-width: 42rem; margin: 0 auto;">

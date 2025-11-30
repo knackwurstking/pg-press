@@ -53,7 +53,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 		}
 	}
 
-	options := &templates.EditorPageParams{
+	props := &templates.PageProps{
 		Type:      editorType,
 		ID:        int64(id),
 		ReturnURL: returnURL,
@@ -61,14 +61,14 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 
 	// Load existing content based on type
 	if id > 0 {
-		err := h.loadExistingContent(options)
+		err := h.loadExistingContent(props)
 		if err != nil {
 			return errors.Handler(err, "load existing content")
 		}
 	}
 
 	// Render the editor page
-	page := templates.EditorPage(options)
+	page := templates.Page(props)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render editor page")
 	}
@@ -137,31 +137,31 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 }
 
 // loadExistingContent loads existing content based on type and ID
-func (h *Handler) loadExistingContent(options *templates.EditorPageParams) error {
-	switch options.Type {
+func (h *Handler) loadExistingContent(props *templates.PageProps) error {
+	switch props.Type {
 	case "troublereport":
-		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(options.ID))
+		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(props.ID))
 		if err != nil {
 			return fmt.Errorf("get trouble report: %v", err)
 		}
-		options.Title = tr.Title
-		options.Content = tr.Content
-		options.UseMarkdown = tr.UseMarkdown
+		props.Title = tr.Title
+		props.Content = tr.Content
+		props.UseMarkdown = tr.UseMarkdown
 
 		// Load attachments
 		loadedAttachments, err := h.registry.TroubleReports.LoadAttachments(tr)
 		if err == nil {
-			options.Attachments = loadedAttachments
+			props.Attachments = loadedAttachments
 		} else {
 			slog.Error("Failed to load attachments for trouble report",
-				"trouble_report_id", options.ID, "error", err)
+				"trouble_report_id", props.ID, "error", err)
 		}
 
 	// Note: Notes are not supported in the editor as they have a different structure
 	// (Level-based rather than title/content based)
 
 	default:
-		return fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", options.Type)
+		return fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", props.Type)
 	}
 
 	return nil

@@ -7,13 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ PressPage(press models.PressNumber, user *models.User) {
+templ Page(press models.PressNumber, user *models.User) {
 	{{ title := fmt.Sprintf("Presse %d", press) }}
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:   title,
 			AppBarTitle: title,
-			NavContent:  pressPageNavContent(),
+			NavContent:  components.StandardNavContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap-lg py">
@@ -25,13 +25,6 @@ templ PressPage(press models.PressNumber, user *models.User) {
 			@sectionCycles(press)
 		</main>
 	}
-}
-
-// Navigation content for the press page
-templ pressPageNavContent() {
-	@components.NavFeedButton()
-	@components.NavProfileButton()
-	@components.NavHomeButton()
 }
 
 // Actions section - contains buttons for umbau and regeneration

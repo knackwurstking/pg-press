@@ -7,13 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ PageNotes(notes []*models.Note, tools []*models.Tool) {
+templ Page(notes []*models.Note, tools []*models.Tool) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Notizen Verwaltung",
 			AppBarTitle:    "Notizen Verwaltung",
 			NavContent:     components.StandardNavContent(),
-			AdditionalHead: pageNotesScript(),
+			AdditionalHead: pageScript(),
 		},
 	) {
 		<main class="container fluid">
@@ -78,7 +78,7 @@ templ PageNotes(notes []*models.Note, tools []*models.Tool) {
 	}
 }
 
-script pageNotesScript() {
+script pageScript() {
 	document.addEventListener('DOMContentLoaded', function() {
 		const filterButtons = document.querySelectorAll('.filter-btn');
 		const noteCards = document.querySelectorAll('.note-card');

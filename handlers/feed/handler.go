@@ -31,7 +31,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetFeedPage(c echo.Context) error {
-	page := templates.PageFeed()
+	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render feed page")
 	}

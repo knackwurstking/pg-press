@@ -48,7 +48,7 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return errors.Handler(err, "error updating username")
 	}
 
-	page := templates.PageProfile(user)
+	page := templates.Page(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render profile page")
 	}

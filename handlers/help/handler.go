@@ -27,7 +27,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetMarkdown(c echo.Context) error {
-	page := templates.HelpMarkdownPage()
+	page := templates.MarkdownPage()
 	if err := page.Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return errors.Handler(err, "render help page")
 	}
