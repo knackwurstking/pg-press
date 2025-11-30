@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -8,11 +8,11 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-type PagePressRegenerationsProps struct {
+type PageProps struct {
 	Press models.PressNumber
 }
 
-templ PagePressRegenerations(props PagePressRegenerationsProps) {
+templ Page(props PageProps) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Regeneration P%d", props.Press),

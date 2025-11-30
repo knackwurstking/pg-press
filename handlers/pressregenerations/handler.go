@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/pressregenerations/components"
+	"github.com/knackwurstking/pg-press/handlers/pressregenerations/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -45,7 +45,7 @@ func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
 		return eerr
 	}
 
-	if err := components.PagePressRegenerations(components.PagePressRegenerationsProps{
+	if err := templates.Page(templates.PageProps{
 		Press: press,
 	}).Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press page template")

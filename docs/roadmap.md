@@ -55,11 +55,11 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [x] Feed
     - [x] Help
     - [x] Home
-    - [ ] MetalSheets
+    - [x] MetalSheets
     - [x] Nav
     - [x] Notes
     - [x] Press
-    - [ ] PressRegenerations
+    - [x] PressRegenerations
     - [x] Profile
     - [ ] Tool
     - [ ] Tools
