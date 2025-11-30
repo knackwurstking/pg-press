@@ -5,8 +5,8 @@ system.
 
 ## Fixes
 
-- [ ] Tools list does not reload when navigating backwards in history
-- [ ] Notes management page needs improvements after editing or deleting a note
+- [ ] Tools list does not reload when navigating backwards in history(?)
+- [ ] Notes management page needs improvements after editing or deleting a note(?)
 
 ## Features
 
@@ -30,7 +30,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
 - [x] Fix to total cycles calculation
 - [x] UI: Submit a press regeneration
 - [x] UI: Add press regeneration section to the press page
-- [ ] Fix the `getTotalCycles tool handler method to check the last press regeneration
+- [x] Fix the `GetPartialCycles` press-cycles method, need to handle the press regenerations 
 
 ## Refactoring
 
