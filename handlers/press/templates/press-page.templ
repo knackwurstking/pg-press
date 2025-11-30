@@ -28,6 +28,13 @@ templ PressPage(press models.PressNumber, user *models.User) {
 	}
 }
 
+// Navigation content for the press page
+templ pressPageNavContent() {
+	@components.NavFeedButton()
+	@components.NavProfileButton()
+	@components.NavHomeButton()
+}
+
 // Actions section - contains buttons for umbau and regeneration
 templ sectionActions(press models.PressNumber, user *models.User) {
 	<section class="flex justify-end items-center gap">
@@ -143,11 +150,4 @@ templ sectionCycles(press models.PressNumber) {
 			@components.Spinner()
 		</div>
 	</section>
-}
-
-// Navigation content for the press page
-templ pressPageNavContent() {
-	@components.NavFeedButton()
-	@components.NavProfileButton()
-	@components.NavHomeButton()
 }
