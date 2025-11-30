@@ -65,4 +65,4 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [ ] Tools
     - [ ] TroubleReports
     - [ ] Umbau
-    - [ ] WSFeed
+    - [x] WSFeed

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/wsfeed/components"
+	"github.com/knackwurstking/pg-press/handlers/wsfeed/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 
@@ -24,9 +24,6 @@ const (
 
 	// Send pings to peer with this period. Must be less than pongWait
 	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer
-	maxMessageSize = 512
 )
 
 // Handler manages WebSocket connections for feed counter updates
@@ -170,7 +167,7 @@ func (h *Handler) renderFeedCounter(userLastFeed models.FeedID) ([]byte, error) 
 	}
 
 	var buf bytes.Buffer
-	if err := components.FeedCounter(count).Render(context.Background(), &buf); err != nil {
+	if err := templates.FeedCounter(count).Render(context.Background(), &buf); err != nil {
 		return nil, err
 	}
 
