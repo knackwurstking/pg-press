@@ -29,19 +29,19 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
       not total cycles (find "ORDER BY total_cycles")
 - [x] Fix to total cycles calculation
 - [x] UI: Submit a press regeneration
-- [ ] UI: Add press regeneration section to the press page [WIP]
+- [x] UI: Add press regeneration section to the press page
 - [ ] Fix the `getTotalCycles tool handler method to check the last press regeneration
 
 ## Refactoring
 
 - [ ] Create a `ResolvedTroubleReport` type and replace
       `TroubleReportWithAttachments` with this
-- [ ] Migrate `Attachment.ID` from string to int64, also need to migrate the
-      database table for this
+- [ ] ~Migrate `Attachment.ID` from string to int64, also need to migrate the
+      database table for this~
 - [x] Change url builders in utils package, also update handlers
 - [ ] Refactor the handler+components structure, also rename the components directory to templates [WIP]
     - [x] Auth
-    - [ ] Dialogs [WIP]
+    - [ ] Dialogs
         - [x] cycle dialog
         - [ ] metal-sheet dialog
         - [ ] note dialog
