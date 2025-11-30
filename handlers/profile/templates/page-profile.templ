@@ -1,8 +1,6 @@
-package components
+package templates
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
@@ -20,7 +18,7 @@ templ PageProfile(user *models.User) {
 	) {
 		<main class="container fluid" style="max-width: 42rem; margin: 0 auto;">
 			@profileHeader(user)
-			@cookiesSection()
+			@sectionCookies()
 			@editUserDialog(user)
 		</main>
 	}
@@ -55,7 +53,7 @@ templ profileHeader(user *models.User) {
 	</div>
 }
 
-templ cookiesSection() {
+templ sectionCookies() {
 	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
 		<span
 			id="cookies"
@@ -150,54 +148,4 @@ templ pageProfileAdditionalHead() {
 			font-style: italic;
 		}
 	</style>
-}
-
-templ CookiesDetails(cookies []*models.Cookie) {
-	if len(cookies) > 0 {
-		<details id="cookies" class="cookies-details" open>
-			<summary class="cookies-summary">
-				<i class="bi bi-cookie"></i>
-				Aktive Sitzungen { fmt.Sprintf("%d", len(cookies)) }
-			</summary>
-			<figure class="overflow-auto">
-				<table class="cookies-table borderless">
-					<thead>
-						<tr>
-							<th style="width: fit-content;">Letzte Anmeldung</th>
-							<th style="width: 100%;" class="left">Benutzeragent</th>
-							<th style="width: fit-content;"></th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, cookie := range cookies {
-							<tr>
-								<td class="time-cell">{ cookie.TimeString() }</td>
-								<td class="left user-agent-cell">{ cookie.UserAgent }</td>
-								<td class="right select-none">
-									<a
-										hx-delete={ utils.UrlProfile(cookie.Value).Cookies }
-										hx-trigger="click"
-										hx-target="#cookies"
-										hx-swap="outerHTML"
-										hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
-										hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-										role="button"
-										class="ghost destructive icon"
-										title="Sitzung beenden"
-									>
-										<i class="bi bi-trash"></i>
-									</a>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</figure>
-		</details>
-	} else {
-		<div id="cookies" class="no-cookies">
-			<i class="bi bi-info-circle"></i>
-			Keine aktiven Sitzungen gefunden
-		</div>
-	}
 }

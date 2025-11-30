@@ -60,7 +60,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [x] Notes
     - [x] Press
     - [ ] PressRegenerations
-    - [ ] Profile
+    - [x] Profile
     - [ ] Tool
     - [ ] Tools
     - [ ] TroubleReports

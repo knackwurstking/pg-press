@@ -7,7 +7,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/profile/components"
+	"github.com/knackwurstking/pg-press/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -48,7 +48,7 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return errors.Handler(err, "error updating username")
 	}
 
-	page := components.PageProfile(user)
+	page := templates.PageProfile(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render profile page")
 	}
@@ -71,7 +71,7 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 
 	slog.Debug("Found cookies for user", "cookies", len(cookies), "user_name", user.Name)
 
-	cookiesTable := components.CookiesDetails(models.SortCookies(cookies))
+	cookiesTable := templates.Cookies(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.Handler(err, "render cookies table")
