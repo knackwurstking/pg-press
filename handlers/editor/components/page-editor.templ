@@ -11,7 +11,7 @@ import (
 type PageEditorOptions struct {
 	Type        string // TODO: I could use a type alias here, and also define some constants
 	ID          int64
-	ReturnURL   string
+	ReturnURL   templ.SafeURL
 	Title       string
 	Content     string
 	UseMarkdown bool
@@ -42,7 +42,7 @@ templ PageEditor(options *PageEditorOptions) {
 				<form
 					class="editor-form flex flex-col gap px"
 					method="POST"
-					action={ utils.UrlEditor("", "", "").Save }
+					action={ utils.UrlEditor(options.Type, fmt.Sprintf("%d", options.ID), options.ReturnURL).Save }
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(options)
@@ -66,7 +66,7 @@ templ PageEditor(options *PageEditorOptions) {
 templ hiddenFields(options *PageEditorOptions) {
 	<input type="hidden" name="type" value={ options.Type }/>
 	<input type="hidden" name="id" value={ strconv.FormatInt(options.ID, 10) }/>
-	<input type="hidden" name="return_url" value={ options.ReturnURL }/>
+	<input type="hidden" name="return_url" value={ string(options.ReturnURL) }/>
 	<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
 }
 
@@ -305,7 +305,7 @@ templ formActions(options *PageEditorOptions) {
 		if options.ReturnURL != "" {
 			<a
 				role="button"
-				href={ templ.URL(options.ReturnURL) }
+				href={ options.ReturnURL }
 				class="secondary flex gap-sm items-center"
 			>
 				<i class="bi bi-x-circle"></i>
@@ -326,7 +326,7 @@ templ formActions(options *PageEditorOptions) {
 
 templ pageEditorNavContent(options *PageEditorOptions) {
 	if options.ReturnURL != "" {
-		<a href={ templ.URL(options.ReturnURL) } class="secondary flex gap">
+		<a href={ options.ReturnURL } class="secondary flex gap">
 			<i class="bi bi-arrow-left"></i>
 			Zurück
 		</a>

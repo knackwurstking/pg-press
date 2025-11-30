@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 templ PageHelpMarkdown() {
@@ -36,7 +36,7 @@ templ PageHelpMarkdown() {
 }
 
 templ pageHelpMarkdownNavContent() {
-	<a href={ templ.URL(env.ServerPathPrefix + "/") } class="flex items-center gap-xs muted hover:contrast transition-colors">
+	<a href={ utils.UrlHome().Page } class="flex items-center gap-xs muted hover:contrast transition-colors">
 		<i class="bi bi-house"></i>
 		<span class="hidden sm:inline">Startseite</span>
 	</a>

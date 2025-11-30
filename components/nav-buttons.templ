@@ -1,9 +1,6 @@
 package components
 
-import (
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/utils"
-)
+import "github.com/knackwurstking/pg-press/utils"
 
 templ NavProfileButton() {
 	<a
@@ -20,7 +17,7 @@ templ NavHomeButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ templ.SafeURL(env.ServerPathPrefix + "/") }
+		href={ utils.UrlHome().Page }
 		title="Startseite"
 	>
 		<i class="bi bi-house"></i>

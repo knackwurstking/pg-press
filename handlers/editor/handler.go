@@ -38,7 +38,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
 	editorType := c.QueryParam("type")
 	idParam := c.QueryParam("id")
-	returnURL := c.QueryParam("return_url")
+	returnURL := templ.SafeURL(c.QueryParam("return_url"))
 
 	if editorType == "" {
 		return errors.BadRequest(nil, "editor type is required")

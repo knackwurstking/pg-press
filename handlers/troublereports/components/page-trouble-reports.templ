@@ -38,7 +38,7 @@ templ PageTroubleReports() {
 					href={ utils.UrlEditor(
 						"troublereport", 
 						"", 
-						string(utils.UrlTroubleReports(0, 0, 0).Page),
+						utils.UrlTroubleReports(0, 0, 0).Page,
 					).Page }
 					class="flex flex-row gap justify-between items-center"
 					role="button"
@@ -107,7 +107,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 					href={ utils.UrlEditor(
 						"troublereport", 
 						fmt.Sprintf("%d", tr.ID), 
-						string(utils.UrlTroubleReports(0, 0, 0).Page),
+						utils.UrlTroubleReports(0, 0, 0).Page,
 					).Page }
 					class="ghost icon"
 					role="button"

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
@@ -72,14 +73,15 @@ func UrlHelp() (url struct {
 	return url
 }
 
-func UrlEditor(_type, id, returnURL string) (url struct {
+func UrlEditor(_type, id string, returnURL templ.SafeURL) (url struct {
 	Page templ.SafeURL
 	Save templ.SafeURL
 }) {
+	a, _ := strings.CutPrefix(string(returnURL), env.ServerPathPrefix)
 	url.Page = BuildURL("/editor", map[string]string{
-		"type":      _type,
-		"id":        id,
-		"returnURL": returnURL,
+		"type":       _type,
+		"id":         id,
+		"return_url": string(a),
 	})
 
 	url.Save = BuildURL("/editor/save", nil)
