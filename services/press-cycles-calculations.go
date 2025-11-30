@@ -10,7 +10,8 @@ import (
 
 // GetPartialCycles calculates the partial cycles for a given cycle
 //
-// TODO: Have a look, since the press regenerations feature was implemented, this does no longer work correctly
+// This function checks for press regenerations that might have occurred after the current cycle,
+// which would reset the cycle count, and adjusts the calculation accordingly.
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
 		slog.Error("Invalid cycle for partial calculation", "error", err)
@@ -27,6 +28,41 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 		}
 		return cycle.TotalCycles
 	}
+
+	// Check if there were any press regenerations for this press that occurred after the previous cycle
+	// but before or at the current cycle date. This would reset the cycle count, so we should
+	// return the current cycle's total cycles directly.
+	regenerationQuery := `
+		SELECT COUNT(*) 
+		FROM press_regenerations 
+		WHERE press_number = :press_number AND started_at > (
+			SELECT date 
+			FROM press_cycles 
+			WHERE total_cycles = :previous_total_cycles AND press_number = :press_number LIMIT 1
+		) AND started_at <= :cycle_date
+	`
+	var regenerationCount int64
+	err := s.DB.QueryRow(
+		regenerationQuery,
+		sql.Named("press_number", cycle.PressNumber),
+		sql.Named("previous_total_cycles", previousTotalCycles),
+		sql.Named("cycle_date", cycle.Date),
+	).Scan(&regenerationCount)
+	if err == nil && regenerationCount > 0 {
+		// A regeneration occurred between the previous cycle and this cycle
+		// Since regenerations reset total cycles to 0, we should return the current cycle's
+		// total cycles directly as the partial cycles
+		slog.Debug(
+			"Partial cycles calculation with regeneration",
+			"previous_total_cycles", previousTotalCycles,
+			"cycle_id", cycle.ID,
+			"cycle_total_cycles", cycle.TotalCycles,
+			"regeneration_count", regenerationCount,
+		)
+
+		return cycle.TotalCycles
+	}
+
 	slog.Debug(
 		"Partial cycles calculation",
 		"previous_total_cycles", previousTotalCycles,
