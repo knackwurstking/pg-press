@@ -569,34 +569,37 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 		return eerr
 	}
 
-	props := &components.DialogEditNoteProps{
-		Note:         &models.Note{}, // Default empty note for creation
-		LinkToTables: []string{},
-		User:         user,
-	}
+	var (
+		linkToTables []string
+		note         *models.Note
+	)
 
 	// Parse linked tables from query parameter
-	if linkToTables := c.QueryParam("link_to_tables"); linkToTables != "" {
-		props.LinkToTables = strings.Split(linkToTables, ",")
+	if ltt := c.QueryParam("link_to_tables"); ltt != "" {
+		linkToTables = strings.Split(ltt, ",")
 	}
 
 	// Check if we're editing an existing note
-	if idq, _ := utils.ParseQueryInt64(c, "id"); idq > 0 {
-		noteID := models.NoteID(idq)
+	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
+		noteID := models.NoteID(id)
 
 		slog.Debug("Opening edit dialog for note", "note", noteID)
 
-		note, err := h.registry.Notes.Get(noteID)
+		var err error
+		note, err = h.registry.Notes.Get(noteID)
 		if err != nil {
 			return errors.Handler(err, "get note from database")
 		}
-		props.Note = note
-	} else {
-		slog.Debug("Opening create dialog for new note")
 	}
 
-	dialog := components.DialogEditNote(*props)
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
+	var d templ.Component
+	if note != nil {
+		d = templates.EditNoteDialog(note, linkToTables, user)
+	} else {
+		d = templates.NewNoteDialog(linkToTables, user)
+	}
+
+	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render edit note dialog")
 	}
 

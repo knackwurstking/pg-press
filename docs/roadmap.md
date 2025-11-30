@@ -48,7 +48,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [ ] Dialogs
         - [x] cycle dialog
         - [x] metal-sheet dialog
-        - [ ] note dialog
+        - [x] note dialog
         - [x] tool dialog
         - [ ] tool-regeneration dialog
     - [x] Editor
