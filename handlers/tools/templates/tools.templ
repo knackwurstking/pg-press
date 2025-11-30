@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 				<span>Erstellen</span>
 			</button>
 		</div>
-		<ul id={ IDToolsList } class="flex flex-col gap p-0" style="list-style: none;">
+		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
 			@ToolsList(tools, user)
 		</ul>
 	</div>
@@ -49,7 +49,7 @@ templ sectionToolsFilter(tools []*models.ResolvedTool) {
 		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
 			Suche (Lazy)
 			<input
-				id={ IDToolsFilter }
+				id="tools-filter"
 				type="search"
 				oninput="filterToolsList(event);"
 				hx-preserve="true"
@@ -70,7 +70,7 @@ templ ToolsList(tools []*models.ResolvedTool, user *models.User) {
 }
 
 templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf(IDToolListItem, id) } class="tool-item" style="display: none;" hx-preserve="true">
+	<li id={ fmt.Sprintf("tool-%d", id) } class="tool-item" style="display: none;" hx-preserve="true">
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge: true,
 		})

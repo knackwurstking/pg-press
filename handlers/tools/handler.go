@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/tools/components"
+	"github.com/knackwurstking/pg-press/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -41,7 +41,7 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 		return eerr
 	}
 
-	page := components.PageTools(user)
+	page := templates.Page(user)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render tools page")
 	}
@@ -118,7 +118,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 		return errors.Handler(err, "get press utilization")
 	}
 
-	section := components.SectionPress(pressUtilization)
+	section := templates.SectionPress(pressUtilization)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press section")
 	}
@@ -150,7 +150,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		tools = append(tools, rt)
 	}
 
-	section := components.SectionTools(tools, user)
+	section := templates.SectionTools(tools, user)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render tools section")
 	}
@@ -170,7 +170,7 @@ func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
 		return errors.Handler(err, "get overlapping tools")
 	}
 
-	section := components.AdminToolsSectionContent(overlappingTools)
+	section := templates.AdminToolsSectionContent(overlappingTools)
 	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render admin overlapping tools section")
 	}

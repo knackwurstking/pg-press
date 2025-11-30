@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 	<span
 		hx-get={ utils.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ "#" + IDTabContent }
+		hx-target={ "#"+IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<div class="admin-overlapping-tools">

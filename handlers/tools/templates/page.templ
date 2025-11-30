@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"github.com/knackwurstking/pg-press/components"
@@ -8,7 +8,11 @@ import (
 	"github.com/knackwurstking/ui"
 )
 
-templ PageTools(user *models.User) {
+const (
+	IDTabContent = "tab-content"
+)
+
+templ Page(user *models.User) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Werkzeuge",
