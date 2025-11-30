@@ -218,10 +218,8 @@ templ PageTool_Cycles(props PageTool_CyclesProps) {
 	<div class="flex flex-col gap">
 		@pageTool_toolStatusSection(props)
 		// For now tool cycles for top cassette tools are ignored
-		if props.Tool.Position != models.PositionTopCassette {
-			@pageTool_RegenerationsSection(props)
-			@pageTool_CyclesSection(props)
-		}
+		@pageTool_RegenerationsSection(props)
+		@pageTool_CyclesSection(props)
 	</div>
 }
 
