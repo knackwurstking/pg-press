@@ -89,9 +89,8 @@ func addTroubleReportContentSection(o *troubleReportOptions) {
 // renderMarkdownContentToPDF renders markdown content with basic formatting in PDF
 func renderMarkdownContentToPDF(o *troubleReportOptions) {
 	content := o.Report.Content
-	lines := strings.Split(content, "\n")
 
-	for _, line := range lines {
+	for line := range strings.SplitSeq(content, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			o.PDF.Ln(3)
