@@ -43,9 +43,9 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
 - [ ] ~Migrate `Attachment.ID` from string to int64, also need to migrate the
       database table for this~
 - [x] Change url builders in utils package, also update handlers
-- [ ] Refactor the handler+components structure, also rename the components directory to templates [WIP]
+- [x] Refactor the handler+components structure, also rename the components directory to templates
     - [x] Auth
-    - [ ] Dialogs
+    - [x] Dialogs
         - [x] cycle dialog
         - [x] metal-sheet dialog
         - [x] note dialog
