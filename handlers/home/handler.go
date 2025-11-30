@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/home/components"
+	"github.com/knackwurstking/pg-press/handlers/home/templates"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 
@@ -28,7 +28,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetHomePage(c echo.Context) error {
-	page := components.PageHome()
+	page := templates.PageHome()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render home page")
 	}

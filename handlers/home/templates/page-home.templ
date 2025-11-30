@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -16,19 +16,19 @@ templ PageHome() {
 	) {
 		<main class="container fluid">
 			<nav class="flex flex-col gap-lg justify-center">
-				@pageHomeAnchorButton(
+				@anchorButton(
 					utils.UrlTroubleReports(0, 0, 0).Page,
 					"exclamation-triangle",
 					"Problemberichte",
 					"Verwalten Sie Problemberichte und Lösungen",
 				)
-				@pageHomeAnchorButton(
+				@anchorButton(
 					utils.UrlTools(0).Page,
 					"tools",
 					"Werkzeuglisten",
 					"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 				)
-				@pageHomeAnchorButton(
+				@anchorButton(
 					utils.UrlNotes(0).Page,
 					"journal-text",
 					"Notizen Verwaltung",
@@ -39,7 +39,7 @@ templ PageHome() {
 	}
 }
 
-templ pageHomeAnchorButton(href templ.SafeURL, icon, title, description string) {
+templ anchorButton(href templ.SafeURL, icon, title, description string) {
 	<a
 		role="button"
 		class="ghost contrast flex flex-row gap justify-between items-center"
