@@ -77,7 +77,7 @@ func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
 	baseQuery := `
 		SELECT total_cycles
 		FROM %s
-		WHERE press_number = ? AND %s AND date < ?
+		WHERE press_number = ? AND %s AND date < ? AND total_cycles < ?
 		ORDER BY date DESC
 		LIMIT 1
 	`
@@ -99,7 +99,7 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
 		args = append(args, cycle.ToolPosition)
 	}
 
-	args = append(args, cycle.Date)
+	args = append(args, cycle.Date, cycle.TotalCycles)
 	return args
 }
 
