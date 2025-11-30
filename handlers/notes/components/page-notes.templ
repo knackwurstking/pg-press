@@ -3,7 +3,6 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -206,7 +205,7 @@ templ NotesCard(note *models.Note, filterClass string, tools []*models.Tool) {
 							for _, tool := range tools {
 								if tool.ID == models.ToolID(linked.ID) {
 									<a
-										href={ templ.SafeURL(fmt.Sprintf("%s/tools/tool/%d", env.ServerPathPrefix, tool.ID)) }
+										href={ utils.UrlTool(tool.ID, 0, 0).Page }
 										class="tool-link"
 									>
 										{ fmt.Sprintf("Werkzeug %s %s", tool.Format.String(), tool.Code) }

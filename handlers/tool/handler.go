@@ -61,9 +61,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 		// Update tools binding data
 		utils.NewEchoRoute(http.MethodPatch,
-			path+"/tool/:id/bind", h.HTMXPatchToolBinding),
+			path+"/:id/bind", h.HTMXPatchToolBinding),
 		utils.NewEchoRoute(http.MethodPatch,
-			path+"/tool/:id/unbind", h.HTMXPatchToolUnBinding),
+			path+"/:id/unbind", h.HTMXPatchToolUnBinding),
 	})
 }
 

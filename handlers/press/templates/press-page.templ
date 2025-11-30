@@ -3,7 +3,6 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -41,8 +40,7 @@ templ sectionActions(press models.PressNumber, user *models.User) {
 		<a
 			role="button"
 			class="primary"
-			href={ fmt.Sprintf("%s/tools/press/%d/umbau",
-				env.ServerPathPrefix, press) }
+			href={ utils.UrlUmbau(press).Page }
 		>
 			Umbau
 		</a>
