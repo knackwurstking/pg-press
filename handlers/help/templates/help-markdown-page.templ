@@ -1,16 +1,16 @@
-package components
+package templates
 
 import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ PageHelpMarkdown() {
+templ HelpMarkdownPage() {
 	@components.Layout(components.LayoutOptions{
 		PageTitle:      "Markdown Hilfe",
 		AppBarTitle:    "Markdown Hilfe",
-		AdditionalHead: pageHelpMarkdownAdditionalHead(),
-		NavContent:     pageHelpMarkdownNavContent(),
+		AdditionalHead: helpMarkdownPageAdditionalHead(),
+		NavContent:     helpMarkdownPageNavContent(),
 	}) {
 		<main class="container py-lg">
 			<div class="max-w-4xl mx-auto">
@@ -35,14 +35,14 @@ templ PageHelpMarkdown() {
 	}
 }
 
-templ pageHelpMarkdownNavContent() {
+templ helpMarkdownPageNavContent() {
 	<a href={ utils.UrlHome().Page } class="flex items-center gap-xs muted hover:contrast transition-colors">
 		<i class="bi bi-house"></i>
 		<span class="hidden sm:inline">Startseite</span>
 	</a>
 }
 
-templ pageHelpMarkdownAdditionalHead() {
+templ helpMarkdownPageAdditionalHead() {
 	<style>
 		.demo-grid {
 			display: grid;

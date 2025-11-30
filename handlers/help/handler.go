@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/help/components"
+	"github.com/knackwurstking/pg-press/handlers/help/templates"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetMarkdown(c echo.Context) error {
-	page := components.PageHelpMarkdown()
+	page := templates.HelpMarkdownPage()
 	if err := page.Render(c.Request().Context(), c.Response().Writer); err != nil {
 		return errors.Handler(err, "render help page")
 	}
