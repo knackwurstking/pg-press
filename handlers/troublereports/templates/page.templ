@@ -1,0 +1,65 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
+)
+
+templ Page() {
+	@components.Layout(
+		components.LayoutOptions{
+			PageTitle:      "PG Presse | Problemberichte",
+			AppBarTitle:    "Problemberichte",
+			AdditionalHead: additionalHead(),
+			NavContent:     components.StandardNavContent(),
+		},
+	) {
+		<main class="container fluid">
+			<!-- Search Bar -->
+			<section style="margin-top: 0" class="flex flex-row gap justify-between">
+				<input
+					style="margin: auto 0; width: 100%"
+					type="search"
+					name="search"
+					placeholder="Suche"
+					aria-label="Suche"
+					oninput="window.search(event)"
+				/>
+			</section>
+			<!-- Page Actions: Create -->
+			<section style="margin-top: 0" class="flex flex-row gap justify-end">
+				<a
+					href={ utils.UrlEditor(
+						"troublereport", 
+						"", 
+						utils.UrlTroubleReports(0, 0, 0).Page,
+					).Page }
+					class="flex flex-row gap justify-between items-center"
+					role="button"
+				>
+					<i class="bi bi-plus-lg"></i>
+					Erstellen
+				</a>
+			</section>
+			<!-- Trouble Reports Entries -->
+			<section
+				hx-get={ utils.UrlTroubleReports(0, 0, 0).Data }
+				hx-trigger="load, pageLoaded from:body"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				id="data"
+			></section>
+		</main>
+	}
+}
+
+templ additionalHead() {
+	<link
+		rel="stylesheet"
+		href={ ui.AssetURL(env.ServerPathPrefix, "/css/page-trouble-reports.css") }
+	/>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/page-trouble-reports.js") }></script>
+}
+
+

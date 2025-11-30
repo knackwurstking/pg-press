@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/troublereports/components"
+	"github.com/knackwurstking/pg-press/handlers/troublereports/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
@@ -45,7 +45,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetPage(c echo.Context) error {
-	page := components.PageTroubleReports()
+	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render trouble reports page")
 	}
@@ -131,8 +131,8 @@ func (h *Handler) GetModificationsForID(c echo.Context) error {
 		return eerr
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
-	itemRenderFunc := components.TroubleReportCreateModificationRenderer(models.TroubleReportID(id), isAdmin)
-	page := components.PageModifications(resolvedModifications, itemRenderFunc)
+	itemRenderFunc := templates.CreateModificationRenderer(models.TroubleReportID(id), isAdmin)
+	page := templates.ModificationsPage(resolvedModifications, itemRenderFunc)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render page")
 	}
@@ -151,7 +151,7 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 		return errors.Handler(err, "load trouble reports")
 	}
 
-	troubleReportsList := components.ListReports(user, trs)
+	troubleReportsList := templates.ListReports(user, trs)
 	if err := troubleReportsList.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render trouble reports list component")
 	}
@@ -201,8 +201,8 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 		return errors.Handler(err, "load trouble report")
 	}
 
-	attachmentsPreview := components.AttachmentsPreview(
-		components.AttachmentPathTroubleReports,
+	attachmentsPreview := templates.AttachmentsPreview(
+		templates.AttachmentPathTroubleReports,
 		tr.LoadedAttachments,
 	)
 

@@ -63,6 +63,6 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [x] Profile
     - [x] Tool
     - [x] Tools
-    - [ ] TroubleReports
+    - [x] TroubleReports
     - [x] Umbau
     - [x] WSFeed

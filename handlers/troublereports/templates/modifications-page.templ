@@ -1,12 +1,16 @@
-package components
+package templates
 
 import (
+	"context"
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+	"io"
 )
 
-templ PageModifications[T any](
+templ ModificationsPage[T any](
 	modifications []*models.ResolvedModification[T],
 	itemRenderFunc func(modification *models.ResolvedModification[T], isCurrent bool) templ.Component,
 ) {
@@ -101,5 +105,94 @@ templ PageModifications[T any](
 				</div>
 			</div>
 		</div>
+	}
+}
+
+templ ModificationEntry(
+	modification *models.ResolvedModification[models.TroubleReportModData],
+	reportID models.TroubleReportID,
+	canRollback bool,
+) {
+	{{
+		time := modification.CreatedAt.UnixMilli()
+		data, _ := modification.GetData()
+	}}
+	<div class="card seamless p mb">
+		<div class="flex flex-col gap mb">
+			<div class="flex gap-sm justify-between items-center">
+				<span class="text-semibold">Modified by { modification.GetUser().Name }</span>
+				<span class="badge info text-xs">v{ fmt.Sprintf("%d", time) }</span>
+			</div>
+			<div class="flex gap-sm justify-between items-center">
+				<span class="text-sm muted">{ modification.CreatedAt.Format(env.DateTimeFormat) }</span>
+				if canRollback {
+					@ModificationRollbackButton(reportID, time)
+				}
+			</div>
+		</div>
+		<div class="card muted p">
+			<div class="flex flex-col gap">
+				<div>
+					<label class="block text-semibold mb-sm">Title:</label>
+					<div class="card p-sm">{ data.Title }</div>
+				</div>
+				<div>
+					<label class="block text-semibold mb-sm">Content:</label>
+					<div class="card p-sm whitespace-pre-wrap max-h-40 overflow-y-auto">{ data.Content }</div>
+				</div>
+				<div>
+					<label class="block text-semibold mb-sm">Attachments:</label>
+					<div class="flex items-center">
+						<span>{ fmt.Sprintf("%d", len(data.LinkedAttachments)) } attachment(s)</span>
+						<svg width="16" height="16" style="margin-left: var(--ui-spacing);" class="muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ ModificationRollbackButton(reportID models.TroubleReportID, modificationTime int64) {
+	<form
+		hx-post={ utils.UrlTroubleReports(reportID, 0, 0).Rollback }
+		hx-swap="none"
+		hx-on:htmx:after-request="
+			if (event.detail.successful) {
+				window.location.reload();
+			}
+		"
+		class="inline"
+	>
+		<input type="hidden" name="modification_time" value={ fmt.Sprintf("%d", modificationTime) }/>
+		<button
+			type="submit"
+			class="primary small"
+			onclick="return confirm('Are you sure you want to rollback to this version? This will overwrite the current trouble report.')"
+		>
+			Rollback
+		</button>
+	</form>
+}
+
+func CreateModificationRenderer(
+	reportID models.TroubleReportID, isAdmin bool,
+) func(modification *models.ResolvedModification[models.TroubleReportModData], isCurrent bool) templ.Component {
+
+	return func(mod *models.ResolvedModification[models.TroubleReportModData], isCurrent bool) templ.Component {
+
+		return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+			canRollback := isAdmin
+
+			if isCurrent {
+				canRollback = false
+			}
+
+			// Render the modification entry
+			entry := ModificationEntry(mod, reportID, canRollback)
+
+			return entry.Render(ctx, w)
+		})
 	}
 }
