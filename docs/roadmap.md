@@ -51,7 +51,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
         - [ ] note dialog
         - [ ] tool dialog
         - [ ] tool-regeneration dialog
-    - [ ] Editor [WIP]
+    - [x] Editor
     - [x] Feed
     - [x] Help
     - [x] Home
