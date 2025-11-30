@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -27,11 +28,6 @@ func GetUserFromContext(c echo.Context) (*models.User, *echo.HTTPError) {
 	}
 
 	return user, nil
-}
-
-// RedirectTo performs an HTTP redirect to the specified path
-func RedirectTo(c echo.Context, path string) error {
-	return c.Redirect(http.StatusSeeOther, path)
 }
 
 func ParseQueryString(c echo.Context, paramName string) (string, error) {
@@ -137,12 +133,17 @@ func SanitizeFilename(filename string) string {
 	return filename
 }
 
+// RedirectTo performs an HTTP redirect to the specified path
+func RedirectTo(c echo.Context, path templ.SafeURL) error {
+	return c.Redirect(http.StatusSeeOther, env.ServerPathPrefix+string(path))
+}
+
 func SetHXTrigger(c echo.Context, events ...string) {
 	c.Response().Header().Set("HX-Trigger", strings.Join(events, ", "))
 }
 
-func SetHXRedirect(c echo.Context, path string) {
-	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+path)
+func SetHXRedirect(c echo.Context, path templ.SafeURL) {
+	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+string(path))
 }
 
 // SetHXAfterSettle will set data passed to it as (json) data, which can be used to trigger client-side events after the response is settled.

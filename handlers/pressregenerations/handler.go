@@ -1,7 +1,6 @@
 package pressregenerations
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -79,7 +78,7 @@ func (h *Handler) HxPostPressRegenerationsPage(c echo.Context) (err error) {
 		return errors.Handler(err, "add press regeneration")
 	}
 
-	utils.SetHXRedirect(c, fmt.Sprintf("/tools/press/%d", press))
+	utils.SetHXRedirect(c, utils.UrlPress(press).Page)
 
 	return nil
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 	"regexp"
 	"slices"
 	"strings"
@@ -90,7 +89,7 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 				"url_path", c.Request().URL.Path,
 				"real_ip", c.RealIP(),
 			)
-			return c.Redirect(http.StatusSeeOther, string(utils.UrlLogin("", nil).Page))
+			return utils.RedirectTo(c, utils.UrlLogin("", nil).Page)
 		},
 	})
 }

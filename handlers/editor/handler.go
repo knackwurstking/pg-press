@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/editor/components"
 	"github.com/knackwurstking/pg-press/models"
@@ -123,15 +124,15 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 
 	// Redirect back to return URL or appropriate page
 	if returnURL != "" {
-		return c.Redirect(http.StatusSeeOther, returnURL)
+		return utils.RedirectTo(c, templ.SafeURL(returnURL))
 	}
 
 	// Default redirects based on type
 	switch editorType {
 	case "troublereport":
-		return c.Redirect(http.StatusSeeOther, "/trouble-reports")
+		return utils.RedirectTo(c, utils.UrlTroubleReports(0, 0, 0).Page)
 	default:
-		return c.Redirect(http.StatusSeeOther, "/")
+		return utils.RedirectTo(c, utils.UrlHome().Page)
 	}
 }
 
