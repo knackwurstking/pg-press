@@ -72,9 +72,9 @@ func openDB(customPath string, logging bool) (*services.Registry, error) {
 	}
 
 	// Configure connection pool to prevent resource exhaustion
-	r.SetMaxOpenConns(1)    // SQLite works best with single writer
-	r.SetMaxIdleConns(1)    // Keep one connection alive
-	r.SetConnMaxLifetime(0) // No maximum lifetime
+	r.SetMaxOpenConns(10)                 // Allow more concurrent connections
+	r.SetMaxIdleConns(5)                  // Keep some connections alive
+	r.SetConnMaxLifetime(5 * time.Minute) // Close connections after 5 minutes
 
 	// Test the connection
 	if err = r.Ping(); err != nil {
