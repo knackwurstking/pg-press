@@ -62,7 +62,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [x] PressRegenerations
     - [x] Profile
     - [x] Tool
-    - [ ] Tools [WIP]
+    - [x] Tools
     - [ ] TroubleReports
     - [ ] Umbau
     - [x] WSFeed
