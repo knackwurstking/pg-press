@@ -11,7 +11,6 @@ import (
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/dialogs/components"
 	"github.com/knackwurstking/pg-press/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -712,7 +711,7 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 		return err
 	}
 
-	dialog := components.PageTool_DialogEditRegeneration(resolvedRegeneration)
+	dialog := templates.EditToolRegenerationDialog(resolvedRegeneration)
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render dialog")

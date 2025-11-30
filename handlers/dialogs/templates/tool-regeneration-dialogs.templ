@@ -1,0 +1,32 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
+	"net/http"
+)
+
+templ EditToolRegenerationDialog(r *models.ResolvedToolRegeneration) {
+	@ui.Dialog(ui.DialogProps{
+		Method:           http.MethodPut,
+		Href:             utils.UrlDialogs().EditToolRegeneration(r.ID),
+		ID:               "regeneration-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		<section>
+			<p>Tool: { r.GetTool().String() }</p>
+			<p>Regeneriert am: { r.GetCycle().Date.Format(env.DateFormat) }</p>
+		</section>
+		<label class="flex flex-col gap-0">
+			Bemerkung
+			<input
+				id="reason"
+				name="reason"
+				type="text"
+				value={ r.Reason }
+			/>
+		</label>
+	}
+}

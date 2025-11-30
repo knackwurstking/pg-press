@@ -14,7 +14,7 @@ templ NewMetalSheetDialog(
 	@ui.Dialog(ui.DialogProps{
 		Method:           http.MethodPost,
 		Href:             utils.UrlDialogs().EditMetalSheet(0, tool.ID),
-		ID:               "metal-sheet-edit-dialog",
+		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
 		switch tool.Position {

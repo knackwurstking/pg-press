@@ -10,7 +10,7 @@ templ NewToolDialog() {
 	@ui.Dialog(ui.DialogProps{
 		Method:           "POST",
 		Href:             utils.UrlDialogs().EditTool(0),
-		ID:               "tool-edit-dialog",
+		ID:               "tool-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
 		{{ tool := &models.Tool{} }}
