@@ -134,7 +134,7 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 	if cycle != nil {
 		dialog = templates.EditCycleDialog(tool, cycle, tools, inputPressNumber, inputTotalCycles, originalDate)
 	} else {
-		dialog = templates.AddCycleDialog(tool, inputPressNumber, inputTotalCycles, originalDate)
+		dialog = templates.NewCycleDialog(tool, inputPressNumber, inputTotalCycles, originalDate)
 	}
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
@@ -306,28 +306,28 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) GetEditTool(c echo.Context) error {
-	props := &components.DialogEditToolProps{}
+	var tool *models.Tool
 
 	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
 	if toolIDQuery > 0 {
-		tool, err := h.registry.Tools.Get(models.ToolID(toolIDQuery))
+		var err error
+		tool, err = h.registry.Tools.Get(models.ToolID(toolIDQuery))
 		if err != nil {
 			return errors.Handler(err, "get tool from database")
 		}
-
-		props.Tool = tool
-		props.InputPosition = string(tool.Position)
-		props.InputWidth = tool.Format.Width
-		props.InputHeight = tool.Format.Height
-		props.InputType = tool.Type
-		props.InputCode = tool.Code
-		props.InputPressSelection = tool.Press
 	}
 
-	dialog := components.DialogEditTool(props)
-	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool edit dialog")
+	var d templ.Component
+	if tool != nil {
+		d = templates.EditToolDialog(tool)
+	} else {
+		d = templates.NewToolDialog()
 	}
+
+	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.Handler(err, "render tool dialog")
+	}
+
 	return nil
 }
 
@@ -464,7 +464,7 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 	if metalSheet != nil {
 		d = templates.EditMetalSheetDialog(metalSheet, tool)
 	} else {
-		d = templates.AddMetalSheetDialog(tool)
+		d = templates.NewMetalSheetDialog(tool)
 	}
 
 	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
