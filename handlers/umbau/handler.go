@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/umbau/components"
+	"github.com/knackwurstking/pg-press/handlers/umbau/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -57,7 +57,7 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 		return errors.Handler(err, "list tools")
 	}
 
-	umbauPage := components.PageUmbau(&components.PageUmbauProps{
+	umbauPage := templates.Page(&templates.PageProps{
 		PressNumber: pressNumber,
 		User:        user,
 		Tools:       tools,

@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -8,18 +8,18 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-type PageUmbauProps struct {
+type PageProps struct {
 	PressNumber models.PressNumber
 	User        *models.User
 	Tools       []*models.Tool
 }
 
-func (pp *PageUmbauProps) GetOptions(position models.Position) []PageUmbauOption {
-	var options []PageUmbauOption
+func (pp *PageProps) GetOptions(position models.Position) []OptionData {
+	var options []OptionData
 
 	for _, tool := range pp.Tools {
 		if tool.Position == position {
-			options = append(options, PageUmbauOption{
+			options = append(options, OptionData{
 				ToolID: tool.ID,
 				Label:  tool.String(),
 				Format: tool.Format.String(),
@@ -30,7 +30,7 @@ func (pp *PageUmbauProps) GetOptions(position models.Position) []PageUmbauOption
 	return options
 }
 
-func (pp *PageUmbauProps) GetSlotsMap() map[models.Position]*models.Tool {
+func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
 	slots := map[models.Position]*models.Tool{
 		models.PositionTop:    nil,
 		models.PositionBottom: nil,
@@ -45,13 +45,13 @@ func (pp *PageUmbauProps) GetSlotsMap() map[models.Position]*models.Tool {
 	return slots
 }
 
-type PageUmbauOption struct {
+type OptionData struct {
 	ToolID models.ToolID
 	Label  string
 	Format string
 }
 
-templ PageUmbau(props *PageUmbauProps) {
+templ Page(props *PageProps) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
@@ -67,7 +67,7 @@ templ PageUmbau(props *PageUmbauProps) {
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
-				@pageUmbau_cyclesSection()
+				@cyclesSection()
 				<hr/>
 				for _, position := range []models.Position{models.PositionTop, models.PositionBottom} {
 					{{ currentTool := slots[position] }}
@@ -92,7 +92,7 @@ templ PageUmbau(props *PageUmbauProps) {
 							<select
 								id={ id }
 								name={ id }
-								onchange={ pageUmbauOnToolChange(templ.JSExpression("event")) }
+								onchange={ onToolChange(templ.JSExpression("event")) }
 							>
 								<option value="" selected>{ position.GermanString() } wählen</option>
 								for _, o := range props.GetOptions(position) {
@@ -103,13 +103,13 @@ templ PageUmbau(props *PageUmbauProps) {
 					</section>
 				}
 				<hr/>
-				@pageUmbau_formActions(props.User)
+				@formActions(props.User)
 			</form>
 		</main>
 	}
 }
 
-templ pageUmbau_cyclesSection() {
+templ cyclesSection() {
 	<section>
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
@@ -124,7 +124,7 @@ templ pageUmbau_cyclesSection() {
 	</section>
 }
 
-templ pageUmbau_formActions(user *models.User) {
+templ formActions(user *models.User) {
 	<footer class="flex justify-end items-center">
 		<button
 			type="submit"
@@ -133,7 +133,7 @@ templ pageUmbau_formActions(user *models.User) {
 	</footer>
 }
 
-script pageUmbauOnToolChange(event templ.JSExpression) {
+script onToolChange(event templ.JSExpression) {
 	var target = event.currentTarget;
 
 	// Get the tool id from the target element
