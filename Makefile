@@ -1,3 +1,7 @@
+.PHONY: clean generate init run dev build count macos-install \
+	macos-start-service macos-stop-service macos-restart-service \
+	macos-print-service macos-watch-service macos-update
+
 all: init build
 
 BINARY_NAME := pg-press
@@ -17,16 +21,15 @@ LOG_FILE := $(APP_DATA)/pg-press.log
 clean:
 	git clean -xfd
 
-init:
+generate:
+	templ generate
+
+init: generate
 	go mod tidy -v
 	git submodule init
 	git submodule update --recursive
 
-generate:
-	templ generate
-
-run:
-	make generate
+run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
 		go run ./cmd/${BINARY_NAME} server -a ${SERVER_ADDR}
 
