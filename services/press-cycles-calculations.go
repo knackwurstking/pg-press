@@ -9,6 +9,8 @@ import (
 )
 
 // GetPartialCycles calculates the partial cycles for a given cycle
+//
+// TODO: Have a look, since the press regenerations feature was implemented, this does no longer work correctly
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
 		slog.Error("Invalid cycle for partial calculation", "error", err)
