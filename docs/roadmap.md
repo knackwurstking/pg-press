@@ -52,7 +52,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
         - [ ] tool dialog
         - [ ] tool-regeneration dialog
     - [ ] Editor
-    - [ ] Feed
+    - [x] Feed
     - [ ] Help
     - [ ] Home
     - [ ] MetalSheets

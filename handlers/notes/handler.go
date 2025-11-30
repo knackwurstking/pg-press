@@ -6,7 +6,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/notes/components"
+	"github.com/knackwurstking/pg-press/handlers/notes/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -68,7 +68,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 	slog.Debug("Retrieved tools from database", "tools", len(tools))
 
-	page := components.PageNotes(notes, tools)
+	page := templates.PageNotes(notes, tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render notes page")
 	}
@@ -119,7 +119,7 @@ func (h *Handler) HTMXGetNotesGrid(c echo.Context) error {
 		return errors.Handler(err, "list tools")
 	}
 
-	ng := components.NotesGrid(notes, tools)
+	ng := templates.NotesGrid(notes, tools)
 	if err := ng.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render notes grid")
 	}
