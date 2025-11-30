@@ -430,19 +430,21 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 }
 
 func (h *Handler) GetEditMetalSheet(c echo.Context) error {
-	renderProps := &components.DialogEditMetalSheetProps{}
-	var toolID models.ToolID
-	var err error
+	var (
+		toolID     models.ToolID
+		metalSheet *models.MetalSheet
+	)
 
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	if metalSheetIDQuery, _ := utils.ParseQueryInt64(c, "id"); metalSheetIDQuery > 0 {
 		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 		// Fetch existing metal sheet for editing
-		if renderProps.MetalSheet, err = h.registry.MetalSheets.Get(metalSheetID); err != nil {
+		var err error
+		if metalSheet, err = h.registry.MetalSheets.Get(metalSheetID); err != nil {
 			return errors.Handler(err, "fetch metal sheet from database")
 		}
-		toolID = renderProps.MetalSheet.ToolID
+		toolID = metalSheet.ToolID
 	} else {
 		// Creating new metal sheet, get tool_id from query
 		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -453,14 +455,20 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 	}
 
 	// Fetch the associated tool for the dialog
-	if renderProps.Tool, err = h.registry.Tools.Get(toolID); err != nil {
+	tool, err := h.registry.Tools.Get(toolID)
+	if err != nil {
 		return errors.Handler(err, "get tool from database")
 	}
 
-	// Render the edit dialog template
-	d := components.DialogEditMetalSheet(renderProps)
-	if err := d.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render edit metal sheet dialog")
+	var d templ.Component
+	if metalSheet != nil {
+		d = templates.EditMetalSheetDialog(metalSheet, tool)
+	} else {
+		d = templates.AddMetalSheetDialog(tool)
+	}
+
+	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.Handler(err, "render metal sheet dialog")
 	}
 
 	return nil
