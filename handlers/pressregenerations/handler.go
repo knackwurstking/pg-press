@@ -28,13 +28,13 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		// Press regeneration page
 		utils.NewEchoRoute(
 			http.MethodGet,
-			path+"/press-regeneration/:press",
+			path+"/:press",
 			h.GetPressRegenerationsPage,
 		),
 
 		utils.NewEchoRoute(
 			http.MethodPost,
-			path+"/press-regeneration/:press",
+			path+"/:press",
 			h.HxPostPressRegenerationsPage,
 		),
 	})

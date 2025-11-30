@@ -43,7 +43,7 @@ func RegisterAll(r *services.Registry, e *echo.Echo) {
 	tools.NewHandler(r).RegisterRoutes(e, "/tools")
 	tool.NewHandler(r).RegisterRoutes(e, "/tool")
 	press.NewHandler(r).RegisterRoutes(e, "/press")
-	pressregenerations.NewHandler(r).RegisterRoutes(e, "press-regeneration")
+	pressregenerations.NewHandler(r).RegisterRoutes(e, "/press-regeneration")
 
 	dialogs.NewHandler(r).RegisterRoutes(e, "/dialog")
 }
