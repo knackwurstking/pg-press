@@ -3,7 +3,6 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -40,7 +39,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 				Top:         top,
 				TopCassette: topCassette,
 				Bottom:      bottom,
-				Href:        fmt.Sprintf("%s/tools/press/%d", env.ServerPathPrefix, u.PressNumber),
+				Href:        string(utils.UrlPress(u.PressNumber).Page),
 			})
 		}
 	</ul>

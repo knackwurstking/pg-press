@@ -208,14 +208,17 @@ func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 		return err
 	}
 
+	slog.Info("Getting press regeneration history", "press", press)
+
 	// Get press regenerations from service
 	regenerations, err := h.registry.PressRegenerations.GetRegenerationHistory(press)
 	if err != nil {
-		return errors.Handler(err, "get press regenerations")
+		if !errors.IsNotFoundError(err) {
+			return errors.Handler(err, "get press regenerations")
+		}
 	}
 
-	regenerationsSection := templates.PressRegenerationsSections(regenerations)
-
+	regenerationsSection := templates.RegenerationsContent(regenerations)
 	if err := regenerationsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press regenerations section")
 	}

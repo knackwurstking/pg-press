@@ -642,9 +642,9 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 }
 
 func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *echo.HTTPError) {
-	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
+	toolIDQuery, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return 0, errors.BadRequest(err, "parse tool_id")
+		return 0, errors.BadRequest(err, "parse \"id\"")
 	}
 	return models.ToolID(toolIDQuery), nil
 }

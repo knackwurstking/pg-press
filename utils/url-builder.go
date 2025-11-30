@@ -174,9 +174,9 @@ func UrlTools(id models.ToolID) (url struct {
 	url.Page = BuildURL("/tools", nil)
 	url.Delete = BuildURL("/tools/delete", params)
 	url.MarkDead = BuildURL("/tools/mark-dead", params)
-	url.SectionPress = BuildURL("/tools/section-press", nil)
-	url.SectionTools = BuildURL("/tools/section-tools", nil)
-	url.AdminOverlappingTools = BuildURL("/tools/admin-overlapping-tools", nil)
+	url.SectionPress = BuildURL("/tools/section/press", nil)
+	url.SectionTools = BuildURL("/tools/section/tools", nil)
+	url.AdminOverlappingTools = BuildURL("/tools/admin/overlapping-tools", nil)
 
 	return url
 }

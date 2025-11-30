@@ -21,7 +21,7 @@ templ PressPage(press models.PressNumber, user *models.User) {
 			@notes(press)
 			@activeTools(press)
 			@metalSheets(press)
-			@pressRegenerations(press)
+			@regenerations(press)
 			@cycles(press)
 		</main>
 	}
@@ -38,15 +38,14 @@ templ actions(press models.PressNumber, user *models.User) {
 		>
 			Umbau
 		</a>
-		if user.IsAdmin() {
-			<a
-				role="button"
-				class="secondary"
-				href={ utils.UrlPressRegeneration(press).Page }
-			>
-				Regeneration
-			</a>
-		}
+		<a
+			role="button"
+			class="secondary"
+			href={ utils.UrlPressRegeneration(press).Page }
+			disabled?={ !user.IsAdmin() }
+		>
+			Regeneration
+		</a>
 	</section>
 }
 
@@ -101,15 +100,17 @@ templ metalSheets(press models.PressNumber) {
 	</section>
 }
 
-templ pressRegenerations(press models.PressNumber) {
-	<section id="press-regenerations-section">
+templ regenerations(press models.PressNumber) {
+	<section
+		id="press-regenerations-section"
+	>
 		<div class="flex justify-between items-center mb">
-			<h5>Blech Listen</h5>
+			<h5>Regenerationen</h5>
 		</div>
 		<div
 			id="press-regenerations-section-content"
 			hx-get={ utils.UrlPress(press).PressRegenerations }
-			hx-trigger="loadd, pageLoaded from:body"
+			hx-trigger="load, pageLoaded from:body"
 			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()
