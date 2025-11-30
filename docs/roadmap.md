@@ -50,7 +50,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
         - [x] metal-sheet dialog
         - [x] note dialog
         - [x] tool dialog
-        - [ ] tool-regeneration dialog [WIP]
+        - [x] tool-regeneration dialog
     - [x] Editor
     - [x] Feed
     - [x] Help
