@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -9,18 +9,11 @@ import (
 	"strings"
 )
 
-// Notes section components
-type NotesSectionProps struct {
-	Notes []*models.Note
-	Tools []*models.Tool
-	Press models.PressNumber
-}
-
-templ NotesSection(props NotesSectionProps) {
+templ NotesSection(press models.PressNumber, notes []*models.Note, tools []*models.Tool) {
 	{{
 		pressNotes := make([]*models.Note, 0)
 		toolNotes := make([]*models.Note, 0)
-		for _, n := range props.Notes {
+		for _, n := range notes {
 			if strings.HasPrefix(n.Linked, "press_") {
 				pressNotes = append(pressNotes, n)
 			} else if strings.HasPrefix(n.Linked, "tool_") {
@@ -28,9 +21,9 @@ templ NotesSection(props NotesSectionProps) {
 			}
 		}
 	}}
-	@pressNotesSection(pressNotes, props.Press)
+	@pressNotesSection(pressNotes, press)
 	if len(toolNotes) > 0 {
-		@toolNotesSection(toolNotes, props.Tools)
+		@toolNotesSection(toolNotes, tools)
 	}
 }
 

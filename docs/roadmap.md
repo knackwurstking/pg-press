@@ -54,7 +54,7 @@ cycles back to zero just like the `ToolRegenerations` system just with presses
     - [ ] MetalSheets
     - [ ] Nav
     - [ ] Notes
-    - [ ] Press
+    - [x] Press
     - [ ] PressRegenerations
     - [ ] Profile
     - [ ] Tool

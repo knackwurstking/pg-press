@@ -1,4 +1,4 @@
-package components
+package templates
 
 import (
 	"fmt"
@@ -8,15 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-// Cycles section components
-type PagePress_CyclesSectionProps struct {
-	Cycles   []*models.Cycle
-	ToolsMap map[models.ToolID]*models.Tool
-	User     *models.User
-	Press    models.PressNumber
-}
-
-templ PagePress_CyclesSection(props PagePress_CyclesSectionProps) {
+templ CyclesSection(cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool, user *models.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table name="additional-cycles-table" class="table borderless compact">
 			<thead>
@@ -30,27 +22,27 @@ templ PagePress_CyclesSection(props PagePress_CyclesSectionProps) {
 				</tr>
 			</thead>
 			<tbody>
-				@pagePress_renderPressCyclesRows(props)
+				@renderPressCyclesRows(cycles, toolsMap, user)
 			</tbody>
 		</table>
 	</figure>
 }
 
-templ pagePress_renderPressCyclesRows(props PagePress_CyclesSectionProps) {
-	if len(props.Cycles) == 0 {
+templ renderPressCyclesRows(cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool, user *models.User) {
+	if len(cycles) == 0 {
 		<tr>
 			<td colspan="6" class="text-center">
 				Kein Pressenverlauf verfügbar
 			</td>
 		</tr>
 	} else {
-		for _, cycle := range props.Cycles {
-			@pagePress_renderPressCycleRow(cycle, props)
+		for _, cycle := range cycles {
+			@renderPressCycleRow(cycle, toolsMap, user)
 		}
 	}
 }
 
-templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesSectionProps) {
+templ renderPressCycleRow(cycle *models.Cycle, toolsMap map[models.ToolID]*models.Tool, user *models.User) {
 	<tr>
 		// Cycle Date
 		<td>
@@ -58,7 +50,7 @@ templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesS
 		</td>
 		// Cycle Tool
 		<td>
-			{{ tool, exists := props.ToolsMap[cycle.ToolID] }}
+			{{ tool, exists := toolsMap[cycle.ToolID] }}
 			if exists && tool != nil {
 				<span class="text-xs">
 					{ fmt.Sprintf("%s %s %s",
@@ -91,7 +83,7 @@ templ pagePress_renderPressCycleRow(cycle *models.Cycle, props PagePress_CyclesS
 					EditAdminOnly:   true,
 					DeleteHref:      utils.UrlTool(cycle.ToolID, 0, cycle.ID).CycleDelete,
 					DeleteAdminOnly: true,
-					User:            props.User,
+					User:            user,
 				})
 			</span>
 		</td>

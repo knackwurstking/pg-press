@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/press/components"
+	"github.com/knackwurstking/pg-press/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
@@ -61,10 +61,7 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 	}
 
 	// Render page
-	page := components.Page(components.PageProps{
-		Press: press,
-		User:  user,
-	})
+	page := templates.PressPage(press, user)
 
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press page")
@@ -95,7 +92,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		resolvedTools = append(resolvedTools, rt)
 	}
 
-	activeToolsSection := components.ActiveToolsSection(resolvedTools, press)
+	activeToolsSection := templates.ActiveToolsSection(resolvedTools, press)
 	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render active tools section")
 	}
@@ -122,13 +119,7 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 		return errors.Handler(err, "get metal sheets for press")
 	}
 
-	metalSheetsSection := components.MetalSheetsSection(
-		components.MetalSheetSectionProps{
-			MetalSheets: metalSheets,
-			ToolsMap:    toolsMap,
-			Press:       press,
-		},
-	)
+	metalSheetsSection := templates.MetalSheetsSection(press, toolsMap, metalSheets)
 	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render metal sheets section")
 	}
@@ -166,14 +157,7 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		toolsMap[tool.ID] = tool
 	}
 
-	cyclesSection := components.PagePress_CyclesSection(
-		components.PagePress_CyclesSectionProps{
-			Cycles:   cycles,
-			ToolsMap: toolsMap,
-			User:     user,
-			Press:    press,
-		},
-	)
+	cyclesSection := templates.CyclesSection(cycles, toolsMap, user)
 
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render cycles section")
@@ -209,13 +193,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		notes = append(notes, n...)
 	}
 
-	notesSection := components.NotesSection(
-		components.NotesSectionProps{
-			Notes: notes,
-			Tools: sortedTools,
-			Press: press,
-		},
-	)
+	notesSection := templates.NotesSection(press, notes, sortedTools)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press notes section")
@@ -236,7 +214,7 @@ func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 		return errors.Handler(err, "get press regenerations")
 	}
 
-	regenerationsSection := components.PressRegenerationsSections(regenerations)
+	regenerationsSection := templates.PressRegenerationsSections(regenerations)
 
 	if err := regenerationsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press regenerations section")

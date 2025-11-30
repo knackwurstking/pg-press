@@ -1,40 +1,33 @@
-package components
+package templates
 
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/models"
 )
 
-// Metal sheets section components
-type MetalSheetSectionProps struct {
-	MetalSheets []*models.MetalSheet
-	ToolsMap    map[models.ToolID]*models.Tool
-	Press       models.PressNumber
-}
-
-templ MetalSheetsSection(props MetalSheetSectionProps) {
-	{{ expectedMachineType := models.GetMachineTypeForPress(props.Press) }}
+templ MetalSheetsSection(press models.PressNumber, toolsMap map[models.ToolID]*models.Tool, metalSheets []*models.MetalSheet) {
+	{{ expectedMachineType := models.GetMachineTypeForPress(press) }}
 	<div class="flex flex-col gap-sm">
 		<div class="text-center">
 			<small class="text-muted">
 				Zeigt nur Bleche für { expectedMachineType.DisplayName() }
-				(Presse { fmt.Sprintf("%d", props.Press) })
+				(Presse { fmt.Sprintf("%d", press) })
 			</small>
 		</div>
-		@MetalSheetTablesCollapsible(props.MetalSheets, props.ToolsMap)
+		@metalSheetTablesCollapsible(metalSheets, toolsMap)
 	</div>
 }
 
 // Metal sheet table components
-templ MetalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	@MetalSheetTableTopCollapsible(metalSheets, toolsMap)
+templ metalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
+	@metalSheetTableTopCollapsible(metalSheets, toolsMap)
 	<br/>
-	@MetalSheetTableBottomCollapsible(metalSheets, toolsMap)
+	@metalSheetTableBottomCollapsible(metalSheets, toolsMap)
 }
 
-templ MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
+templ metalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
 	{{
-		topSheets := pagePress_filterMetalSheetsByPosition(
+		topSheets := filterMetalSheetsByPosition(
 			metalSheets,
 			toolsMap,
 			[]models.Position{
@@ -83,8 +76,8 @@ templ MetalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap m
 	</details>
 }
 
-templ MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	{{ bottomSheets := pagePress_filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionBottom}) }}
+templ metalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
+	{{ bottomSheets := filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionBottom}) }}
 	<details
 		class="mb"
 		if len(bottomSheets) > 0 {
@@ -149,8 +142,7 @@ templ MetalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 	</details>
 }
 
-// Helper functions
-func pagePress_filterMetalSheetsByPosition(
+func filterMetalSheetsByPosition(
 	metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool, positions []models.Position,
 ) []*models.MetalSheet {
 	var filtered models.MetalSheetList
