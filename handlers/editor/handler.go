@@ -10,7 +10,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/editor/components"
+	"github.com/knackwurstking/pg-press/handlers/editor/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -53,7 +53,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 		}
 	}
 
-	options := &components.PageEditorOptions{
+	options := &templates.EditorPageParams{
 		Type:      editorType,
 		ID:        int64(id),
 		ReturnURL: returnURL,
@@ -68,7 +68,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	}
 
 	// Render the editor page
-	page := components.PageEditor(options)
+	page := templates.EditorPage(options)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render editor page")
 	}
@@ -137,7 +137,7 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 }
 
 // loadExistingContent loads existing content based on type and ID
-func (h *Handler) loadExistingContent(options *components.PageEditorOptions) error {
+func (h *Handler) loadExistingContent(options *templates.EditorPageParams) error {
 	switch options.Type {
 	case "troublereport":
 		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(options.ID))
