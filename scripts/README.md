@@ -4,49 +4,25 @@ This directory contains various migration scripts for managing database schema c
 
 ## Available Scripts
 
-### remove-indexes.sh
-This script removes all indexes from the SQLite database to improve performance during bulk operations.
+### remove-indexes.go
 
-**Usage:**
+This is a Go-based script for removing all indexes from the SQLite database.
+
+#### Usage
+
 ```bash
-# Use default database
-./scripts/remove-indexes.sh
-
-# Specify custom database path
-./scripts/remove-indexes.sh -d /path/to/database.db
-
-# Or use environment variable
-DB_PATH=/path/to/database.db ./scripts/remove-indexes.sh
+# Run the script
+go run scripts/remove-indexes.go /path/to/database.db
 ```
 
-**Features:**
-- Creates automatic backup before making changes
-- Shows all indexes that will be removed
-- Handles errors gracefully
+#### Features
+
+- Automatically detects all indexes in the database
+- Safely drops each index using DROP INDEX IF EXISTS
 - Provides clear status updates during execution
+- Error handling for failed index removals
 
-**Note:** Removing indexes can impact query performance. Re-add indexes after bulk operations are complete.
+#### Requirements
 
-### migrate-tools-binding.sh
-Migration script to add the binding column to tools table.
-
-**Usage:**
-```bash
-# Use default database
-./scripts/migrate-tools-binding.sh
-
-# Specify custom database path
-./scripts/migrate-tools-binding.sh -d /path/to/database.db
-```
-
-### migrate.sh
-Main migration script that runs all available migrations.
-
-**Usage:**
-```bash
-# Use default database
-./scripts/migrate.sh
-
-# Specify custom database path
-./scripts/migrate.sh /path/to/database.db
-```
+- Go 1.25 or higher
+- SQLite3 database file
