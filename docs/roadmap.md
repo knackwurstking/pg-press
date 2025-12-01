@@ -14,11 +14,13 @@ system.
 
 ## Features
 
+- [ ] Create a database migration system for managing schema changes
+
 ### New Pages
 
-- [ ] Create a new page: "Probleme Checklist" (votes, attachments, comments, close/open)
-- [ ] Create a new page: "Daten Sammlung" for storing dryer temperatures
-      (Markdown editor support)
+- [ ] "Probleme Checklist" (troublechecklist)
+- [ ] "Daten Sammlung" (datastorage)
+    - Store dryer settings here, temperature, press speeds, etc.
 
 ### Press Regeneration
 
