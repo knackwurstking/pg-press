@@ -30,9 +30,9 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 	}
 
 	query := fmt.Sprintf(`
-		INSERT INTO %s (%s)
+		INSERT INTO %s (position, format, type, code, regenerating, is_dead, press, binding)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		TableNameTools, ToolQueryInsert)
+		TableNameTools)
 
 	result, err := t.DB.Exec(query,
 		tool.Position,
@@ -77,9 +77,9 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 
 	query := fmt.Sprintf(`
 		UPDATE %s
-		SET %s
+		SET position = ?, format = ?, type = ?, code = ?, regenerating = ?, is_dead = ?, press = ?, binding = ?
 		WHERE id = ?`,
-		TableNameTools, ToolQueryUpdate)
+		TableNameTools)
 
 	_, err = t.DB.Exec(query,
 		tool.Position,

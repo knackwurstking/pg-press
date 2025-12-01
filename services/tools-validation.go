@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -80,24 +79,4 @@ func (t *Tools) marshalFormat(format models.Format) ([]byte, error) {
 		return nil, fmt.Errorf("marshal tool format: %v", err)
 	}
 	return formatBytes, nil
-}
-
-func scanTool(scannable Scannable) (*models.Tool, error) {
-	tool := &models.Tool{}
-	var format []byte
-
-	err := scannable.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press, &tool.Binding)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan tool: %v", err)
-	}
-
-	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, fmt.Errorf("unmarshal tool format: %v", err)
-	}
-
-	return tool, nil
 }
