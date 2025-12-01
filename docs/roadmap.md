@@ -15,6 +15,8 @@ system.
 ## Features
 
 - [x] Create a database migration system for managing schema changes
+- [ ] Improve press regenerations page visibility and add features
+- [ ] Add action buttons to press regenerations table (edit/delete)
 
 ### New Pages
 
