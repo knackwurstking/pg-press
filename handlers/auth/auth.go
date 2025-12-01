@@ -74,7 +74,7 @@ func (h *Handler) GetLogout(c echo.Context) error {
 }
 
 func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
-	if len(apiKey) < 16 {
+	if len(apiKey) < env.MinAPIKeyLength {
 		return fmt.Errorf("api key too short")
 	}
 
