@@ -87,10 +87,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%sFailed to drop index \"%s\" from table \"%s\": %v%s\n", Red, index.Name, index.Table, err, Reset)
 			continue
 		}
-
-		if verbose {
-			fmt.Printf("Successfully dropped index \"%s\" from table \"%s\"\n", index.Name, index.Table)
-		}
 	}
 
 	if verbose {
