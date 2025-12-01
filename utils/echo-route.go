@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
@@ -24,35 +25,32 @@ func NewEchoRoute(method string, path string, handler echo.HandlerFunc) *EchoRou
 }
 
 func RegisterEchoRoutes(e *echo.Echo, routes []*EchoRoute) {
+	registerFn := func(fn func(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route, path string, handler echo.HandlerFunc) {
+		fn(path, handler)
+		if !strings.HasSuffix(path, "/") {
+			fn(path+"/", handler)
+		}
+	}
+
 	for _, route := range routes {
+		path := filepath.Join(env.ServerPathPrefix, route.Path)
+
+		var fn func(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
 		switch route.Method {
 		case http.MethodGet:
-			e.GET(env.ServerPathPrefix+route.Path, route.Handler)
-			if !strings.HasSuffix(route.Path, "/") {
-				e.GET(env.ServerPathPrefix+route.Path+"/", route.Handler)
-			}
+			fn = e.GET
 		case http.MethodPost:
-			e.POST(env.ServerPathPrefix+route.Path, route.Handler)
-			if !strings.HasSuffix(route.Path, "/") {
-				e.POST(env.ServerPathPrefix+route.Path+"/", route.Handler)
-			}
+			fn = e.POST
 		case http.MethodPut:
-			e.PUT(env.ServerPathPrefix+route.Path, route.Handler)
-			if !strings.HasSuffix(route.Path, "/") {
-				e.PUT(env.ServerPathPrefix+route.Path+"/", route.Handler)
-			}
+			fn = e.PUT
 		case http.MethodDelete:
-			e.DELETE(env.ServerPathPrefix+route.Path, route.Handler)
-			if !strings.HasSuffix(route.Path, "/") {
-				e.DELETE(env.ServerPathPrefix+route.Path+"/", route.Handler)
-			}
+			fn = e.DELETE
 		case http.MethodPatch:
-			e.PATCH(env.ServerPathPrefix+route.Path, route.Handler)
-			if !strings.HasSuffix(route.Path, "/") {
-				e.PATCH(env.ServerPathPrefix+route.Path+"/", route.Handler)
-			}
+			fn = e.PATCH
 		default:
 			panic("unhandled method: " + route.Method)
 		}
+
+		registerFn(fn, path, route.Handler)
 	}
 }
