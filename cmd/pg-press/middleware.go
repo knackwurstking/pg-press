@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
@@ -132,8 +131,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	}
 
 	// Check if cookie has expired
-	expirationTime := time.Now().Add(-env.CookieExpirationDuration).UnixMilli()
-	if cookie.LastLogin < expirationTime {
+	if cookie.IsExpired() {
 		return nil, errors.NewValidationError("cookie: cookie has expired")
 	}
 
