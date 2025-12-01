@@ -12,7 +12,7 @@ This is a Go-based script for adding indexes to the SQLite database to improve q
 
 ```bash
 # Run the script
-go run scripts/add-indexes-press.go /path/to/database.db
+go run ./scripts/add-indexes-press -v /path/to/database.db
 ```
 
 #### Features
@@ -37,7 +37,7 @@ This is a Go-based script for removing all indexes from the SQLite database.
 
 ```bash
 # Run the script
-go run scripts/remove-indexes.go -v /path/to/database.db
+go run ./scripts/remove-indexes -v /path/to/database.db
 ```
 
 #### Features
