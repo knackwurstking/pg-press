@@ -24,49 +24,9 @@ system.
 - [ ] "Daten Sammlung" (datastorage)
     - Store dryer settings here, temperature, press speeds, etc.
 
-### Press Regeneration
-
-Implement the `PressRegenerations` system, which will reset the press total
-cycles back to zero just like the `ToolRegenerations` system just with presses
-
-- [x] Rename the current `Regeneration` model to `ToolRegeneration`
-- [x] Add a `PressRegeneration` model
-- [x] Add a `PressRegenerations` service
-- [x] Remove the dead press (-1) stuff again
-- [x] Press Cycles ordering needs to be changed; I need to sort by date,
-      not total cycles (find "ORDER BY total_cycles")
-- [x] Fix to total cycles calculation
-- [x] UI: Submit a press regeneration
-- [x] UI: Add press regeneration section to the press page
-- [x] Fix the `GetPartialCycles` press-cycles method, need to handle the press regenerations 
-
 ## Refactoring
 
 - [ ] Create a `ResolvedTroubleReport` type and replace
       `TroubleReportWithAttachments` with this
 - [ ] ~Migrate `Attachment.ID` from string to int64, also need to migrate the
       database table for this~
-- [x] Change url builders in utils package, also update handlers
-- [x] Refactor the handler+components structure, also rename the components directory to templates
-    - [x] Auth
-    - [x] Dialogs
-        - [x] cycle dialog
-        - [x] metal-sheet dialog
-        - [x] note dialog
-        - [x] tool dialog
-        - [x] tool-regeneration dialog
-    - [x] Editor
-    - [x] Feed
-    - [x] Help
-    - [x] Home
-    - [x] MetalSheets
-    - [x] Nav
-    - [x] Notes
-    - [x] Press
-    - [x] PressRegenerations
-    - [x] Profile
-    - [x] Tool
-    - [x] Tools
-    - [x] TroubleReports
-    - [x] Umbau
-    - [x] WSFeed
