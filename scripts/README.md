@@ -12,7 +12,7 @@ This is a Go-based script for removing all indexes from the SQLite database.
 
 ```bash
 # Run the script
-go run scripts/remove-indexes.go /path/to/database.db
+go run scripts/remove-indexes.go -v /path/to/database.db
 ```
 
 #### Features
