@@ -62,6 +62,6 @@ fi
 
 # Run the migration
 print_info "Running migration script..."
-./scripts/migrate-tools-binding.sh -d "$DB_PATH"
+./scripts/database-migration/migrate-tools-binding.sh -d "$DB_PATH"
 
 print_success "Migration completed!"

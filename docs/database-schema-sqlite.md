@@ -178,6 +178,16 @@ CREATE INDEX idx_feeds_created_at ON feeds(created_at);
 CREATE INDEX idx_trouble_reports_date ON trouble_reports(id DESC);
 ```
 
+## Migration Scripts
+
+To remove all indexes from the database for performance optimization during bulk operations, use:
+
+```bash
+./scripts/remove-indexes.sh
+```
+
+This will create a backup of your database before removing all indexes.
+
 ## Relationships
 
 - **tools** ↔ **press_cycles**: One-to-many (tool → cycles)

@@ -14,7 +14,7 @@ system.
 
 ## Features
 
-- [ ] Create a database migration system for managing schema changes
+- [x] Create a database migration system for managing schema changes
 
 ### New Pages
 

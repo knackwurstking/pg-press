@@ -258,6 +258,16 @@ The application uses SQLite with a comprehensive schema supporting:
 
 The database is automatically initialized on first run with proper SQLite optimizations including WAL mode and foreign key constraints.
 
+## Database Migration Scripts
+
+This project includes migration scripts for managing database schema changes:
+
+- `scripts/remove-indexes.sh` - Removes all indexes from the database to improve performance during bulk operations
+- `scripts/migrate-tools-binding.sh` - Adds binding column to tools table
+- `scripts/migrate.sh` - Runs all available migrations
+
+These scripts provide safe, automated ways to manage database schema changes with automatic backups.
+
 ## Development
 
 ### Project Structure
@@ -306,3 +316,13 @@ The application includes a comprehensive CLI for management tasks:
 - `pg-press cycles` - Press cycle data management
 - `pg-press tools` - Tool management operations
 - `pg-press server` - Start the web server
+
+### Database Migration Scripts
+
+The application includes scripts for managing database schema changes:
+
+- `scripts/remove-indexes.sh` - Removes all indexes from the database to improve performance during bulk operations
+- `scripts/database-migration/migrate-tools-binding.sh` - Adds binding column to tools table
+- `scripts/database-migration/migrate.sh` - Runs all available migrations
+
+These scripts provide safe, automated ways to manage database schema changes with automatic backups.
