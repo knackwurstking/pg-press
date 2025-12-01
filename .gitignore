@@ -2,3 +2,4 @@ test.db
 /bin
 *_templ.go
 /data
+pg-press.db
