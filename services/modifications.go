@@ -42,10 +42,6 @@ func NewModifications(r *Registry) *Modifications {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY(user_id) REFERENCES users(telegram_id) ON DELETE SET NULL
 		);
-
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_entity ON %[1]s(entity_type, entity_id);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_created_at ON %[1]s(created_at);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_user_id ON %[1]s(user_id);
 	`, TableNameModifications)
 
 	if err := base.CreateTable(query, TableNameModifications); err != nil {

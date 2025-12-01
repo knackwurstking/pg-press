@@ -28,9 +28,6 @@ func NewFeeds(r *Registry) *Feeds {
 			created_at INTEGER NOT NULL,
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
-
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_created_at ON %[1]s(created_at);
-		CREATE INDEX IF NOT EXISTS idx_%[1]s_user_id ON %[1]s(user_id);
 	`, TableNameFeeds)
 
 	if err := base.CreateTable(query, TableNameFeeds); err != nil {
