@@ -67,12 +67,11 @@ func (u *User) Validate() error {
 
 // IsAdmin checks if the user is an administrator
 func (u *User) IsAdmin() bool {
-	adminsEnv := os.Getenv("ADMINS")
-	if adminsEnv == "" {
+	if env.Admins == "" {
 		return false
 	}
 
-	adminIDs := strings.Split(adminsEnv, ",")
+	adminIDs := strings.Split(env.Admins, ",")
 	userIDStr := fmt.Sprintf("%d", u.TelegramID)
 
 	return slices.Contains(adminIDs, userIDStr)

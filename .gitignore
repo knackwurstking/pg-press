@@ -1,3 +1,4 @@
 test.db
 /bin
 *_templ.go
+/data

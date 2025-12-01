@@ -18,9 +18,7 @@ const (
 )
 
 var (
-	configPath       string
-	serverPathPrefix = os.Getenv("SERVER_PATH_PREFIX")
-	serverAddress    = os.Getenv("SERVER_ADDR")
+	configPath string
 )
 
 func init() {

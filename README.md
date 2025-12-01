@@ -167,12 +167,14 @@ This will execute all unit and integration tests in the project.
 
 ### Environment Variables
 
-| Variable             | Description          | Default       | Example          |
-| -------------------- | -------------------- | ------------- | ---------------- |
-| `SERVER_ADDR`        | Server bind address  | `:9020`       | `localhost:3000` |
-| `SERVER_PATH_PREFIX` | URL path prefix      | `/pg-press`   | `/`              |
-| `DATABASE_PATH`      | SQLite database file | `pg-press.db` | `/data/app.db`   |
-| `LOG_LEVEL`          | Logging level        | `INFO`        | `DEBUG`          |
+
+| Variable             | Description                | Default     | Example          |
+| -------------------- | -------------------------- | ----------- | ---------------- |
+| `ADMINS`             | Admin users (telegram ids) |             | `12345,23456`    |
+| `SERVER_ADDR`        | Server bind address        | `:9020`     | `localhost:3000` |
+| `SERVER_PATH_PREFIX` | URL path prefix            | `/pg-press` | `/`              |
+| `LOG_LEVEL`          | Logging level              | `INFO`      | `DEBUG`          |
+| `LOG_FORMAT`         | Logging format             | `json`      | `text`           |
 
 ### Production Deployment
 

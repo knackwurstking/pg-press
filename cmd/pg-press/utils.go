@@ -52,15 +52,16 @@ func initializeLogging() {
 
 func openDB(customPath string, logging bool) (*services.Registry, error) {
 	path := filepath.Join(configPath, databaseFile)
-	if logging {
-		slog.Info("Database opened", "path", path)
-	}
 
 	if customPath != "" {
 		var err error
 		if path, err = filepath.Abs(customPath); err != nil {
 			return nil, err
 		}
+	}
+
+	if logging {
+		slog.Info("Database opened", "path", path)
 	}
 
 	// Configure SQLite connection string with parameters to prevent locking issues
