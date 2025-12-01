@@ -4,7 +4,7 @@ This directory contains various migration scripts for managing database schema c
 
 ## Available Scripts
 
-### add-indexes-new.go
+### add-indexes-press.go
 
 This is a Go-based script for adding indexes to the SQLite database to improve query performance.
 
@@ -12,13 +12,14 @@ This is a Go-based script for adding indexes to the SQLite database to improve q
 
 ```bash
 # Run the script
-go run scripts/add-indexes-new.go /path/to/database.db
+go run scripts/add-indexes-press.go /path/to/database.db
 ```
 
 #### Features
 
-- Creates indexes on notes.linked column for faster note lookups
-- Creates indexes on tool_regenerations.tool_id column for faster regeneration history queries
+- Creates indexes on press_cycles.tool_id column for faster tool-specific cycle queries
+- Creates indexes on press_cycles.press_number column for faster press-specific cycle queries  
+- Creates indexes on press_cycles.date column for faster date-based sorting
 - Uses CREATE INDEX IF NOT EXISTS to avoid errors if indexes already exist
 - Provides clear status updates during execution
 
