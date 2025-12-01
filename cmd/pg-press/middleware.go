@@ -170,10 +170,17 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 
 		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
 
+		// Try to update cookie with lock
 		if err := db.Cookies.Update(cookie.Value, cookie); err != nil {
-			slog.Error("Failed to update cookie", "user_name", user.Name, "real_ip", realIP, "error", err)
+			// If the update failed due to a race condition (another goroutine updated first),
+			// we log it but don't treat it as a critical error
+			if strings.Contains(err.Error(), "cookie was updated by another process") {
+				slog.Debug("Cookie update skipped due to race condition", "user_name", user.Name, "real_ip", realIP)
+			} else {
+				slog.Error("Failed to update cookie with lock", "user_name", user.Name, "real_ip", realIP, "error", err)
+			}
 		} else {
-			slog.Debug("Cookie successfully updated", "user_name", user.Name, "real_ip", realIP)
+			slog.Debug("Cookie successfully updated with lock", "user_name", user.Name, "real_ip", realIP)
 		}
 	}
 

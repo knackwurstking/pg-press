@@ -119,6 +119,7 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 	return nil
 }
 
+// Update updates a cookie with database-level locking to prevent race conditions
 func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 	slog.Debug("Updating a cookie")
 
@@ -130,13 +131,50 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 		return err
 	}
 
+	// For SQLite, we'll use a different approach: attempt to update with a condition
+	// that ensures we're updating the same row with the same timestamp as when we read it
 	query := fmt.Sprintf(
-		`UPDATE %s SET user_agent = ?, value = ?, api_key = ?, last_login = ? WHERE value = ?`,
+		`
+			UPDATE %s 
+			SET 
+				user_agent = ?, 
+				value = ?, 
+				api_key = ?, 
+				last_login = ? 
+			WHERE value = ? AND last_login = ?`,
 		TableNameCookies,
 	)
-	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, value)
+
+	// First, get the current cookie to check its last_login timestamp
+	currentCookie, err := c.Get(value)
+	if err != nil {
+		return err
+	}
+
+	// Try to update with the current timestamp to ensure we're updating the same row
+	result, err := c.DB.Exec(
+		query,
+		cookie.UserAgent,
+		cookie.Value,
+		cookie.ApiKey,
+		cookie.LastLogin,
+		value,
+		currentCookie.LastLogin,
+	)
 	if err != nil {
 		return c.GetUpdateError(err)
+	}
+
+	// Check if any rows were affected (if not, it means another goroutine updated it first)
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		// Another goroutine updated the cookie first, so we need to retry or handle appropriately
+		// For now, we'll return an error to indicate the race condition occurred
+		return errors.NewValidationError("cookie was updated by another process")
 	}
 
 	return nil
