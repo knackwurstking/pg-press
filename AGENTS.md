@@ -49,3 +49,10 @@
 - Optimize database queries with proper indexing
 - Use connection pooling for database access
 - Minimize memory allocations in hot paths
+
+### Git Commit Messages
+- Always use semantic style git commit messages
+- Follow the convention: `<type>(<scope>): <subject>`
+- Use one of these types: feat, fix, docs, style, refactor, test, chore
+- Keep subject line under 50 characters
+- Use imperative mood in the subject line
