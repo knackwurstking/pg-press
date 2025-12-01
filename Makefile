@@ -29,6 +29,9 @@ init: generate
 	git submodule init
 	git submodule update --recursive
 
+test:
+	go test -v ./...
+
 run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
 		go run ./cmd/${BINARY_NAME} server -a ${SERVER_ADDR}

@@ -29,10 +29,6 @@ A comprehensive web application for press and tool management in manufacturing e
   - [Project Structure](#project-structure)
   - [Make Commands](#make-commands)
   - [CLI Commands](#cli-commands)
-  - [Contributing](#contributing)
-- [License](#license)
-- [Support](#support)
-- [Changelog](#changelog)
 
 ## Overview
 
@@ -44,6 +40,7 @@ PG Press is a manufacturing management system that provides real-time tracking a
 - **Notes System**: Comprehensive documentation and issue tracking
 - **Activity Feeds**: Real-time updates and audit trails
 - **Metal Sheet Management**: Inventory and specification tracking
+- **Tool Regeneration**: Automated tool regeneration scheduling and tracking
 
 ## Key Features
 
@@ -90,10 +87,11 @@ PG Press is a manufacturing management system that provides real-time tracking a
 - Efficient static file delivery
 - ETag and Last-Modified support
 - Optimized database queries with SQLite
+- Template pre-generation for faster rendering
 
 ## Technology Stack
 
-- **Backend**: Go 1.25.0 with Echo web framework
+- **Backend**: Go 1.25.3 with Echo web framework
 - **Database**: SQLite with comprehensive schema
 - **Frontend**: HTMX for dynamic interactions, vanilla JavaScript
 - **Templates**: Templ for type-safe HTML generation
@@ -101,14 +99,16 @@ PG Press is a manufacturing management system that provides real-time tracking a
 - **Authentication**: Cookie-based sessions with API key support
 - **Real-time**: WebSocket for live updates
 - **Architecture**: Server-rendered HTML with HTMX for dynamic updates (no REST API)
+- **Build Tools**: Make, templ for template generation
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go 1.25.0 or higher
+- Go 1.25.3 or higher
 - Make (for build automation)
 - Git
+- Node.js (for development tools)
 
 ### Installation
 
@@ -153,6 +153,16 @@ make dev
 
 This will start the server with automatic rebuilding on file changes using `gow`.
 
+### Testing
+
+To run tests:
+
+```bash
+make test
+```
+
+This will execute all unit and integration tests in the project.
+
 ## Configuration
 
 ### Environment Variables
@@ -172,23 +182,38 @@ This will start the server with automatic rebuilding on file changes using `gow`
    make build
    ```
 
-2. **Set production environment**
+2. **Install as macOS service (if on macOS)**
 
    ```bash
-   export SERVER_ADDR=":9020"
-   export SERVER_PATH_PREFIX="/pg-press"
+   make macos-install
    ```
 
-3. **Run with systemd**
-
-   A systemd service file is provided at `cmd/pg-press/pg-press.service`. Configure and install it:
+3. **Start the service**
 
    ```bash
-   sudo cp cmd/pg-press/pg-press.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   sudo systemctl enable pg-press
-   sudo systemctl start pg-press
+   make macos-start-service
    ```
+
+4. **Alternative: Run directly**
+
+   ```bash
+   ./bin/pg-press server
+   ```
+
+   Or with custom environment variables:
+
+   ```bash
+   SERVER_ADDR=":9020" SERVER_PATH_PREFIX="/pg-press" ./bin/pg-press server
+   ```
+
+A systemd service file is provided at `cmd/pg-press/pg-press.service`. Configure and install it:
+
+```bash
+sudo cp cmd/pg-press/pg-press.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable pg-press
+sudo systemctl start pg-press
+```
 
 ## API Documentation
 
@@ -200,11 +225,17 @@ PG Press uses an HTMX-based web interface that provides dynamic interactions wit
 
 - `/` - Dashboard with system overview
 - `/tools` - Tools management and press overview
-- `/tools/tool/{id}` - Individual tool details
-- `/tools/press/{number}` - Press-specific view
+- `/tool/{id}` - Individual tool details
+- `/press/{number}` - Press-specific view
 - `/trouble-reports` - Trouble reports management
 - `/notes` - Notes and documentation system
 - `/profile` - User profile and session management
+- `/feed` - Activity feed
+- `/metal-sheets` - Metal sheets management
+- `/umbau` - Umbau (conversion) management
+- `/help` - Help and documentation
+- `/editor` - Editor for content creation
+- `/press-regeneration` - Press regeneration scheduling
 
 #### Dynamic Features
 
@@ -232,33 +263,34 @@ The database is automatically initialized on first run with proper SQLite optimi
 ```
 pg-press/
 ├── cmd/pg-press/          # Application entry points and CLI commands
-├── internal/              # Internal application code
-│   ├── constants/         # Application constants
-│   ├── env/              # Environment configuration
-│   ├── interfaces/       # Interface definitions
-│   ├── pdf/              # PDF generation utilities
-│   ├── services/         # Business logic layer
-│   └── web/              # Web handlers and templates
-├── pkg/                  # Reusable packages
-│   ├── constants/        # Shared constants
-│   ├── logger/           # Logging system
-│   ├── models/           # Data models
-│   ├── modification/     # Modification tracking
-│   └── utils/            # Utility functions
-├── scripts/              # Build and deployment scripts
-└── bin/                  # Compiled binaries
+├── components/            # Reusable UI components
+├── docs/                  # Documentation files
+├── handlers/              # HTTP handlers and templates
+├── models/                # Data models
+├── services/              # Business logic layer
+├── utils/                 # Utility functions
+├── scripts/               # Build and deployment scripts
+└── bin/                   # Compiled binaries
 ```
 
 ### Make Commands
 
 ```bash
-make init       # Initialize project (tidy modules, update submodules)
+make init       # Initialize project (tidy modules, update submodules, generate templates)
 make build      # Build production binary
 make run        # Generate templates and run
 make dev        # Run with hot reload using gow
 make generate   # Generate templ templates
 make clean      # Clean build artifacts
 make count      # Count lines of code
+make test       # Run tests (Golang)
+make macos-install     # Install pg-press as a macOS service
+make macos-start-service   # Start the pg-press service
+make macos-stop-service    # Stop the pg-press service
+make macos-restart-service # Restart the pg-press service
+make macos-print-service   # Print information about the pg-press service
+make macos-watch-service   # Watch the pg-press service logs
+make macos-update     # Update the pg-press service
 ```
 
 ### CLI Commands
@@ -272,36 +304,3 @@ The application includes a comprehensive CLI for management tasks:
 - `pg-press cycles` - Press cycle data management
 - `pg-press tools` - Tool management operations
 - `pg-press server` - Start the web server
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is proprietary software. All rights reserved.
-
-## Support
-
-For support and questions:
-
-- Create an issue on GitHub
-- Contact the development team
-
-## Changelog
-
-### v0.0.1 (Current)
-
-- Initial release
-- Core tool and press management
-- Trouble reporting system
-- Notes and documentation
-- Real-time updates via WebSocket
-- PDF export functionality
-- Advanced caching system
-- CLI management tools
-- Systemd service integration
