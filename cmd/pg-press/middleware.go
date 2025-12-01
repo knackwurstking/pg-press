@@ -82,7 +82,7 @@ func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			slog.Info(
+			slog.Error(
 				"Authentication required",
 				"method", c.Request().Method,
 				"url_path", c.Request().URL.Path,
@@ -108,10 +108,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			slog.Info("Authentication failed", "real_ip", realIP)
+			slog.Error("Authentication failed", "real_ip", realIP)
 			return false, echo.NewHTTPError(errors.GetHTTPStatusCodeFromError(err), "validate user from API key: "+err.Error())
 		}
-		slog.Debug("API key auth successful", "user_name", user.Name, "real_ip", realIP)
+		slog.Info("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	}
 
 	ctx.Set("user", user)
@@ -132,6 +132,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 
 	// Check if cookie has expired
 	if cookie.IsExpired() {
+		slog.Error("Cookie has expired", "real_ip", realIP)
 		return nil, errors.NewValidationError("cookie: cookie has expired")
 	}
 
@@ -148,7 +149,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
 			slog.Info("Significant user agent change", "user_name", user.Name, "real_ip", realIP)
 		} else {
-			slog.Debug("Minor user agent variation (likely PWA)", "user_name", user.Name, "real_ip", realIP)
+			slog.Info("Minor user agent variation (likely PWA)", "user_name", user.Name, "real_ip", realIP)
 		}
 	}
 

@@ -76,6 +76,8 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		return err
 	}
 
+	slog.Info("Getting active tools for press", "press", press)
+
 	// Get ordered tools for this press with validation
 	tools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
@@ -97,6 +99,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 		return errors.Handler(err, "render active tools section")
 	}
 
+	slog.Info("Successfully rendered active tools section", "press", press, "tool_count", len(resolvedTools))
 	return nil
 }
 
@@ -133,6 +136,8 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		return err
 	}
 
+	slog.Info("Getting cycles for press", "press", press)
+
 	// Get user for permissions
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -163,6 +168,7 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		return errors.Handler(err, "render cycles section")
 	}
 
+	slog.Info("Successfully rendered cycles section", "press", press, "cycle_count", len(cycles))
 	return nil
 }
 
@@ -171,6 +177,8 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	slog.Info("Getting notes for press", "press", press)
 
 	// Get notes directly linked to this press
 	notes, err := h.registry.Notes.GetByPress(press)
@@ -199,6 +207,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 		return errors.Handler(err, "render press notes section")
 	}
 
+	slog.Info("Successfully rendered notes section", "press", press, "note_count", len(notes))
 	return nil
 }
 

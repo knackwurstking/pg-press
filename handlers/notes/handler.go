@@ -47,11 +47,11 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 	// Handle case where notes might be nil
 	if notes == nil {
-		slog.Debug("No notes found in database, initializing empty slice")
+		slog.Info("No notes found in database, initializing empty slice")
 		notes = []*models.Note{}
 	}
 
-	slog.Debug("Retrieved notes from database", "notes", len(notes))
+	slog.Info("Retrieved notes from database", "notes", len(notes))
 
 	// Get all tools to show relationships
 	tools, err := h.registry.Tools.List()
@@ -62,11 +62,11 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 	// Handle case where tools might be nil
 	if tools == nil {
-		slog.Debug("No tools found in database, initializing empty slice")
+		slog.Info("No tools found in database, initializing empty slice")
 		tools = []*models.Tool{}
 	}
 
-	slog.Debug("Retrieved tools from database", "tools", len(tools))
+	slog.Info("Retrieved tools from database", "tools", len(tools))
 
 	page := templates.Page(notes, tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {

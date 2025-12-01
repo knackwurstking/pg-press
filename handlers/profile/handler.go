@@ -42,7 +42,7 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Rendering profile page", "user_name", user.Name)
+	slog.Info("Rendering profile page", "user_name", user.Name)
 
 	if err := h.handleUserNameChange(c, user); err != nil {
 		return errors.Handler(err, "error updating username")
@@ -62,14 +62,14 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Fetching cookies for user", "user_name", user.Name)
+	slog.Info("Fetching cookies for user", "user_name", user.Name)
 
 	cookies, err := h.registry.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		return errors.Handler(err, "list cookies")
 	}
 
-	slog.Debug("Found cookies for user", "cookies", len(cookies), "user_name", user.Name)
+	slog.Info("Found cookies for user", "cookies", len(cookies), "user_name", user.Name)
 
 	cookiesTable := templates.Cookies(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())

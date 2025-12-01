@@ -88,7 +88,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 	}
 
 	if err := h.clearExistingSession(ctx); err != nil {
-		slog.Error("Failed to clear existing session", "error", err)
+		slog.Info("Failed to clear existing session", "error", err)
 	}
 
 	if err := h.createSession(ctx, apiKey); err != nil {

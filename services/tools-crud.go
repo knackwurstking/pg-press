@@ -18,7 +18,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 		return 0, err
 	}
 
-	slog.Debug("Adding tool", "user_name", user.Name, "position", tool.Position, "type", tool.Type, "code", tool.Code)
+	slog.Info("Adding tool", "user_name", user.Name, "position", tool.Position, "type", tool.Type, "code", tool.Code)
 
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
 		return 0, err
@@ -64,7 +64,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 		return err
 	}
 
-	slog.Debug("Updating tool", "user_name", user.Name, "tool_id", tool.ID)
+	slog.Info("Updating tool", "user_name", user.Name, "tool_id", tool.ID)
 
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
 		return err

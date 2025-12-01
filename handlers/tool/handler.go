@@ -78,7 +78,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Fetching tool with notes", "tool", toolID)
+	slog.Info("Fetching tool with notes", "tool", toolID)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
@@ -386,7 +386,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Fetching metal sheets", "tool", toolID, "user_name", user.Name)
+	slog.Info("Fetching metal sheets", "tool", toolID, "user_name", user.Name)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
@@ -416,7 +416,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Fetching notes for tool", "tool", toolID)
+	slog.Info("Fetching notes for tool", "tool", toolID)
 
 	// Get the tool
 	tool, err := h.registry.Tools.Get(toolID)
@@ -650,7 +650,7 @@ func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *echo.HTTPE
 }
 
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
-	slog.Debug("Get total cycles", "tool", toolID, "cycles", len(cycles))
+	slog.Info("Get total cycles", "tool", toolID, "cycles", len(cycles))
 
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
@@ -663,7 +663,7 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 
 	for i, cycle := range cycles {
 		if cycle.ID == startCycleID {
-			slog.Debug("Stop counting...", "tool", toolID, "index", i, "cycle", cycle)
+			slog.Info("Stop counting...", "tool", toolID, "index", i, "cycle", cycle)
 			break
 		}
 

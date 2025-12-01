@@ -582,7 +582,7 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := models.NoteID(id)
 
-		slog.Debug("Opening edit dialog for note", "note", noteID)
+		slog.Info("Opening edit dialog for note", "note", noteID)
 
 		var err error
 		note, err = h.registry.Notes.Get(noteID)
@@ -611,7 +611,7 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Debug("Creating a new note", "user_name", user.Name)
+	slog.Info("Creating a new note", "user_name", user.Name)
 
 	note, err := getNoteFromFormData(c)
 	if err != nil {
@@ -657,7 +657,7 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 	}
 	noteID := models.NoteID(idq)
 
-	slog.Debug("Updating note", "note", noteID, "user_name", user.Name)
+	slog.Info("Updating note", "note", noteID, "user_name", user.Name)
 
 	note, err := getNoteFromFormData(c)
 	if err != nil {

@@ -88,7 +88,7 @@ func (h *Handler) UnregisterConnection(conn *Connection) {
 func (h *Handler) Broadcast() {
 	select {
 	case h.broadcast <- struct{}{}:
-		slog.Debug("Feed update notification queued")
+		slog.Info("Feed update notification queued")
 	default:
 		slog.Warn("Broadcast channel full, skipping notification")
 	}

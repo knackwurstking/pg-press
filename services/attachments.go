@@ -38,7 +38,7 @@ func NewAttachments(r *Registry) *Attachments {
 }
 
 func (a *Attachments) List() ([]*models.Attachment, error) {
-	slog.Debug("Listing attachments")
+	slog.Info("Listing attachments")
 
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
@@ -55,7 +55,7 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 }
 
 func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
-	slog.Debug("Getting attachment for ID", "id", id)
+	slog.Info("Getting attachment for ID", "id", id)
 
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
@@ -77,7 +77,7 @@ func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
 }
 
 func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, error) {
-	slog.Debug("Getting attachments by IDs", "ids", len(ids))
+	slog.Info("Getting attachments by IDs", "ids", len(ids))
 
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
