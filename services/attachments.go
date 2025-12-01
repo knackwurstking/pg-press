@@ -28,8 +28,8 @@ func NewAttachments(r *Registry) *Attachments {
 		);
 	`, TableNameAttachments)
 
-	if err := base.CreateTable(query, TableNameAttachments); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameAttachments))
 	}
 
 	return &Attachments{

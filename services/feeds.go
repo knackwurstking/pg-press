@@ -30,8 +30,8 @@ func NewFeeds(r *Registry) *Feeds {
 		);
 	`, TableNameFeeds)
 
-	if err := base.CreateTable(query, TableNameFeeds); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameFeeds))
 	}
 
 	return &Feeds{

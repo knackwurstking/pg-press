@@ -29,8 +29,8 @@ func NewCookies(registry *Registry) *Cookies {
 		);
 	`, TableNameCookies)
 
-	if err := base.CreateTable(query, TableNameCookies); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameCookies))
 	}
 
 	return &Cookies{Base: base}

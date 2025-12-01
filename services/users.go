@@ -29,8 +29,8 @@ func NewUsers(r *Registry) *Users {
 		);
 	`, TableNameUsers)
 
-	if err := base.CreateTable(query, TableNameUsers); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameUsers))
 	}
 
 	return &Users{Base: base}

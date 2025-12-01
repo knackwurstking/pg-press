@@ -2,7 +2,6 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
 )
@@ -17,13 +16,6 @@ func NewBase(r *Registry) *Base {
 		Registry: r,
 		DB:       r.DB,
 	}
-}
-
-func (b *Base) CreateTable(query, tableName string) error {
-	if _, err := b.DB.Exec(query); err != nil {
-		return fmt.Errorf("create %s table: %v", tableName, err)
-	}
-	return nil
 }
 
 func (b *Base) QueryCount(query string, args ...any) (int, error) {

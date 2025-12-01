@@ -29,8 +29,8 @@ func NewNotes(r *Registry) *Notes {
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);`, TableNameNotes)
 
-	if err := base.CreateTable(query, TableNameNotes); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameNotes))
 	}
 
 	return &Notes{Base: base}

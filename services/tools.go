@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -37,8 +38,8 @@ func NewTools(r *Registry) *Tools {
 			PRIMARY KEY("id" AUTOINCREMENT)
 		)`, TableNameTools)
 
-	if err := t.CreateTable(query, TableNameTools); err != nil {
-		panic(err)
+	if _, err := t.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameTools))
 	}
 
 	return t

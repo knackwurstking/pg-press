@@ -30,8 +30,8 @@ func NewTroubleReports(r *Registry) *TroubleReports {
 		);
 	`, TableNameTroubleReports)
 
-	if err := base.CreateTable(query, TableNameTroubleReports); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameTroubleReports))
 	}
 
 	return &TroubleReports{Base: base}

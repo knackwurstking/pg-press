@@ -28,8 +28,8 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 		);
 	`, TableNameToolRegenerations, TableNameTools)
 
-	if err := base.CreateTable(query, TableNameToolRegenerations); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameToolRegenerations))
 	}
 
 	return &ToolRegenerations{

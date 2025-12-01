@@ -29,8 +29,8 @@ func NewPressRegenerations(r *Registry) *PressRegenerations {
 		);
 	`, TableNamePressRegenerations)
 
-	if err := base.CreateTable(query, TableNamePressRegenerations); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNamePressRegenerations))
 	}
 
 	return &PressRegenerations{

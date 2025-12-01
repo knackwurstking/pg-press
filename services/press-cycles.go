@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
@@ -23,7 +24,7 @@ func NewPressCycles(r *Registry) *PressCycles {
 }
 
 func (s *PressCycles) CreateTable() error {
-	return s.Base.CreateTable(fmt.Sprintf(`
+	query := fmt.Sprintf(`
 		CREATE TABLE IF NOT EXISTS %s (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			press_number INTEGER NOT NULL,
@@ -33,7 +34,13 @@ func (s *PressCycles) CreateTable() error {
 			date DATETIME NOT NULL,
 			performed_by INTEGER NOT NULL
 		);
-	`, TableNamePressCycles), TableNamePressCycles)
+	`, TableNamePressCycles)
+
+	if _, err := s.DB.Exec(query); err != nil {
+		return errors.Wrap(err, "create %s table", TableNamePressCycles)
+	}
+
+	return nil
 }
 
 func scanCycle(scannable Scannable) (*models.Cycle, error) {

@@ -35,8 +35,8 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 		);
 	`, TableNameMetalSheets)
 
-	if err := base.CreateTable(query, TableNameMetalSheets); err != nil {
-		panic(err)
+	if _, err := base.DB.Exec(query); err != nil {
+		panic(errors.Wrap(err, "create %s table", TableNameMetalSheets))
 	}
 
 	return &MetalSheets{
