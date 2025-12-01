@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
@@ -135,7 +134,7 @@ func SanitizeFilename(filename string) string {
 
 // RedirectTo performs an HTTP redirect to the specified path
 func RedirectTo(c echo.Context, path templ.SafeURL) error {
-	return c.Redirect(http.StatusSeeOther, env.ServerPathPrefix+string(path))
+	return c.Redirect(http.StatusSeeOther, string(path))
 }
 
 func SetHXTrigger(c echo.Context, events ...string) {
@@ -143,7 +142,7 @@ func SetHXTrigger(c echo.Context, events ...string) {
 }
 
 func SetHXRedirect(c echo.Context, path templ.SafeURL) {
-	c.Response().Header().Set("HX-Redirect", env.ServerPathPrefix+string(path))
+	c.Response().Header().Set("HX-Redirect", string(path))
 }
 
 // SetHXAfterSettle will set data passed to it as (json) data, which can be used to trigger client-side events after the response is settled.
