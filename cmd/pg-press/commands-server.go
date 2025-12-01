@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,10 +24,9 @@ func serverCommand() cli.Command {
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd, "Custom database file path (defaults to standard location)")
 
-			addr := cli.String(cmd, "addr",
+			cli.StringVar(cmd, &env.ServerAddress, "addr",
 				cli.WithShort("a"),
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
-			*addr = serverAddress
 
 			return func(cmd *cli.Command) error {
 				initializeLogging()
@@ -51,9 +51,9 @@ func serverCommand() cli.Command {
 
 				Serve(e, r)
 
-				slog.Info("Starting HTTP server", "address", *addr)
-				if err := e.Start(*addr); err != nil {
-					slog.Error("Server startup failed", "address", *addr, "error", err)
+				slog.Info("Starting HTTP server", "address", env.ServerAddress)
+				if err := e.Start(env.ServerAddress); err != nil {
+					slog.Error("Server startup failed", "address", env.ServerAddress, "error", err)
 					slog.Error("Common causes: port already in use, permission denied, invalid address format")
 					os.Exit(exitCodeServerStart)
 				}

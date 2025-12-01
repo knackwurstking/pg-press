@@ -26,47 +26,47 @@ var (
 func init() {
 	// NOTE: Used for updating cookies
 	pages = []string{
-		serverPathPrefix + "/",
-		serverPathPrefix + "/feed",
-		serverPathPrefix + "/profile",
-		serverPathPrefix + "/editor",
-		serverPathPrefix + "/help",
-		serverPathPrefix + "/trouble-reports",
-		serverPathPrefix + "/notes",
-		serverPathPrefix + "/tools",
-		serverPathPrefix + "/tool",
-		serverPathPrefix + "/press",
-		serverPathPrefix + "/umbau",
-		serverPathPrefix + "/press-regenerations",
+		env.ServerPathPrefix + "/",
+		env.ServerPathPrefix + "/feed",
+		env.ServerPathPrefix + "/profile",
+		env.ServerPathPrefix + "/editor",
+		env.ServerPathPrefix + "/help",
+		env.ServerPathPrefix + "/trouble-reports",
+		env.ServerPathPrefix + "/notes",
+		env.ServerPathPrefix + "/tools",
+		env.ServerPathPrefix + "/tool",
+		env.ServerPathPrefix + "/press",
+		env.ServerPathPrefix + "/umbau",
+		env.ServerPathPrefix + "/press-regenerations",
 	}
 
 	// NOTE: Important for skipping key authentication
 	keyAuthFilesToSkip = []string{
 		// Pages
-		serverPathPrefix + "/login",
+		env.ServerPathPrefix + "/login",
 
 		// CSS
-		serverPathPrefix + "/css/bootstrap-icons.min.css",
-		serverPathPrefix + "/css/ui.min.css",
-		serverPathPrefix + "/css/main-layout.css",
+		env.ServerPathPrefix + "/css/bootstrap-icons.min.css",
+		env.ServerPathPrefix + "/css/ui.min.css",
+		env.ServerPathPrefix + "/css/main-layout.css",
 
 		// Libraries
-		serverPathPrefix + "/js/htmx-v2.0.7.min.js",
-		serverPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
-		serverPathPrefix + "/js/main-layout.js",
+		env.ServerPathPrefix + "/js/htmx-v2.0.7.min.js",
+		env.ServerPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
+		env.ServerPathPrefix + "/js/main-layout.js",
 
 		// Fonts
-		serverPathPrefix + "/bootstrap-icons.woff",
-		serverPathPrefix + "/bootstrap-icons.woff2",
+		env.ServerPathPrefix + "/bootstrap-icons.woff",
+		env.ServerPathPrefix + "/bootstrap-icons.woff2",
 
 		// Icons
-		serverPathPrefix + "/apple-touch-icon-180x180.png",
-		serverPathPrefix + "/favicon.ico",
-		serverPathPrefix + "/icon.png",
-		serverPathPrefix + "/manifest.json",
-		serverPathPrefix + "/pwa-192x192.png",
-		serverPathPrefix + "/pwa-512x512.png",
-		serverPathPrefix + "/pwa-64x64.png",
+		env.ServerPathPrefix + "/apple-touch-icon-180x180.png",
+		env.ServerPathPrefix + "/favicon.ico",
+		env.ServerPathPrefix + "/icon.png",
+		env.ServerPathPrefix + "/manifest.json",
+		env.ServerPathPrefix + "/pwa-192x192.png",
+		env.ServerPathPrefix + "/pwa-512x512.png",
+		env.ServerPathPrefix + "/pwa-64x64.png",
 	}
 
 	keyAuthFilesToSkipRegExp = regexp.MustCompile(`.*woff[2]`)
