@@ -86,6 +86,8 @@ func (h *Handler) HxAddRegeneration(c echo.Context) (err error) {
 		return errors.Handler(err, "add press regeneration")
 	}
 
+	// TODO: Feed generating logic here
+
 	utils.SetHXRedirect(c, utils.UrlPress(press).Page)
 
 	return nil
@@ -100,6 +102,8 @@ func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
 	if err := h.registry.PressRegenerations.Delete(models.PressRegenerationID(id)); err != nil {
 		return errors.Handler(err, "delete press regeneration")
 	}
+
+	// TODO: Feed generating logic here
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 

@@ -769,13 +769,26 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
-	// TODO: ...
+	id, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return errors.BadRequest(err, "press regeneration id query")
+	}
 
-	return fmt.Errorf("under construction")
+	r, err := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
+	if err != nil {
+		return errors.Handler(err, "get press regeneration from database")
+	}
+
+	d := templates.EditPressRegenerationDialog(r)
+	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.Handler(err, "render press regeneration dialog")
+	}
+
+	return nil
 }
 
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
-	// TODO: ...
+	// TODO: parse form data and update
 
 	return fmt.Errorf("under construction")
 }
