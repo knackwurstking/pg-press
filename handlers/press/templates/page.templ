@@ -40,7 +40,7 @@ templ sectionActions(press models.PressNumber, user *models.User) {
 		<a
 			role="button"
 			class="secondary"
-			href={ utils.UrlPressRegeneration(press).Page }
+			href={ utils.UrlPressRegeneration(press, 0).Page }
 			disabled?={ !user.IsAdmin() }
 		>
 			Regeneration

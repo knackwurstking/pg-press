@@ -250,10 +250,17 @@ func UrlPress(pressNumber models.PressNumber) (url struct {
 	return url
 }
 
-func UrlPressRegeneration(press models.PressNumber) (url struct {
-	Page templ.SafeURL
+func UrlPressRegeneration(press models.PressNumber, rid models.PressRegenerationID) (url struct {
+	Page   templ.SafeURL
+	Delete templ.SafeURL
 }) {
+	params := map[string]string{
+		"id": fmt.Sprintf("%d", rid),
+	}
+
 	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press), nil)
+	url.Delete = BuildURL(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
+
 	return url
 }
 

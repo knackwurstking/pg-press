@@ -28,18 +28,24 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		utils.NewEchoRoute(
 			http.MethodGet,
 			path+"/:press",
-			h.GetPressRegenerationsPage,
+			h.GetRegenerationPage,
 		),
 
 		utils.NewEchoRoute(
 			http.MethodPost,
 			path+"/:press",
-			h.HxPostPressRegenerationsPage,
+			h.HxAddRegeneration,
+		),
+
+		utils.NewEchoRoute(
+			http.MethodPost,
+			path+"/:press/delete",
+			h.HxDeleteRegeneration,
 		),
 	})
 }
 
-func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
+func (h *Handler) GetRegenerationPage(c echo.Context) error {
 	press, eerr := h.parseParamPress(c)
 	if eerr != nil {
 		return eerr
@@ -54,7 +60,7 @@ func (h *Handler) GetPressRegenerationsPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HxPostPressRegenerationsPage(c echo.Context) (err error) {
+func (h *Handler) HxAddRegeneration(c echo.Context) (err error) {
 	var (
 		press models.PressNumber
 		eerr  *echo.HTTPError
@@ -79,6 +85,19 @@ func (h *Handler) HxPostPressRegenerationsPage(c echo.Context) (err error) {
 	}
 
 	utils.SetHXRedirect(c, utils.UrlPress(press).Page)
+
+	return nil
+}
+
+func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
+	id, err := utils.ParseQueryInt64(c, "id") // PressRegenerationID
+	if err != nil {
+		return errors.BadRequest(err, "missing id query")
+	}
+
+	if err := h.registry.PressRegenerations.Delete(models.PressRegenerationID(id)); err != nil {
+		return errors.Handler(err, "delete press regeneration")
+	}
 
 	return nil
 }

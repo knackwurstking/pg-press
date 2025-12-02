@@ -71,9 +71,9 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("Getting active tools for press", "press", press)
@@ -104,9 +104,9 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get ordered tools for this press with validation
@@ -131,9 +131,9 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("Getting cycles for press", "press", press)
@@ -173,9 +173,9 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("Getting notes for press", "press", press)
@@ -212,9 +212,14 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
+	}
+
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	slog.Info("Getting press regeneration history", "press", press)
@@ -227,7 +232,7 @@ func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 		}
 	}
 
-	regenerationsSection := templates.RegenerationsContent(regenerations)
+	regenerationsSection := templates.RegenerationsContent(regenerations, user)
 	if err := regenerationsSection.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press regenerations section")
 	}
@@ -236,9 +241,9 @@ func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get user for logging purposes
@@ -270,7 +275,7 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	return c.Stream(http.StatusOK, "application/pdf", pdfBuffer)
 }
 
-func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, error) {
+func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, *echo.HTTPError) {
 	pressNum, err := utils.ParseParamInt8(c, "press")
 	if err != nil {
 		return -1, errors.BadRequest(err, "invalid or missing press parameter")

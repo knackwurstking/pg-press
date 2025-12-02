@@ -4,9 +4,10 @@ import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ RegenerationsContent(pressRegenerations []*models.PressRegeneration) {
+templ RegenerationsContent(pressRegenerations []*models.PressRegeneration, user *models.User) {
 	if len(pressRegenerations) == 0 {
 		@components.NotFoundSectionText(
 			"Es sind keine Regenerationen für diese Presse vorhanden.",
@@ -28,7 +29,11 @@ templ RegenerationsContent(pressRegenerations []*models.PressRegeneration) {
 					<td>{ r.Reason }</td>
 					<td>
 						@components.TableActions(components.TableActionsOptions{
-							// TODO: Action buttons: Edit and Delete
+							EditHref:        "", // TODO: Edit dialog?
+							EditAdminOnly:   false,
+							DeleteHref:      utils.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
+							DeleteAdminOnly: true,
+							User:            user,
 						})
 					</td>
 				</tr>
