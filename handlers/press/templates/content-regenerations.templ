@@ -29,7 +29,7 @@ templ RegenerationsContent(pressRegenerations []*models.PressRegeneration, user 
 					<td>{ r.Reason }</td>
 					<td>
 						@components.TableActions(components.TableActionsOptions{
-							EditHref:        "", // TODO: Edit dialog?
+							EditHref:        utils.UrlDialogs().EditPressRegeneration(r.ID),
 							EditAdminOnly:   false,
 							DeleteHref:      utils.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
 							DeleteAdminOnly: true,
