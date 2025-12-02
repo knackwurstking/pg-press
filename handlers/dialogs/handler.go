@@ -743,6 +743,8 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		regeneration.Reason = formData.Reason
 	}
 
+	slog.Info("Update tool regeneration", "id", regeneration.ID, "tool", regeneration.GetTool().String())
+
 	if err := h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user); err != nil {
 		return errors.Handler(err, "update regeneration")
 	}
@@ -788,9 +790,26 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
-	// TODO: parse form data and update
+	id, err := utils.ParseQueryInt64(c, "id")
+	if err != nil {
+		return errors.BadRequest(err, "")
+	}
 
-	return fmt.Errorf("under construction")
+	r, err := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
+	if err != nil {
+		return errors.Handler(err, "press regenerations")
+	}
+
+	slog.Info("Update press regeneration", "id", id, "press", r.PressNumber, "reason", r.Reason)
+
+	r.Reason = c.FormValue("reason")
+	if err = h.registry.PressRegenerations.Update(r); err != nil {
+		return errors.Handler(err, "press regenerations")
+	}
+
+	// TODO: Create feed
+
+	return nil
 }
 
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
