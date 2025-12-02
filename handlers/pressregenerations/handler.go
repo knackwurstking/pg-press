@@ -84,7 +84,7 @@ func (h *Handler) HxAddRegeneration(c echo.Context) error {
 		return errors.Handler(err, "add press regeneration")
 	}
 
-	h.createFeed("Eine Pressen \"Regenerierung\" hinzugefügt", data, user)
+	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d Hinzugefügt", press), data, user)
 	utils.SetHXRedirect(c, utils.UrlPress(press).Page)
 
 	return nil
@@ -107,7 +107,7 @@ func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
 		return errors.Handler(err, "delete press regeneration")
 	}
 
-	h.createFeed("Eine Pressen \"Regenerierung\" entfernt", r, user)
+	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d entfernt", r.PressNumber), r, user)
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
@@ -115,7 +115,7 @@ func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
 
 func (h *Handler) createFeed(feedTitle string, r *models.PressRegeneration, user *models.User) {
 	feedContent := fmt.Sprintf("Presse: %d\n", r.PressNumber)
-	feedContent += fmt.Sprintf("Von %s bis %s\n", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
+	feedContent += fmt.Sprintf("Von %s bis %s\n", r.StartedAt.Format(env.DateFormat), r.CompletedAt.Format(env.DateFormat))
 	feedContent += fmt.Sprintf("Reason: %s", r.Reason)
 	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 		slog.Warn("Failed to create feed for deleting a press regeneration", "error", err)

@@ -17,7 +17,7 @@ templ EditPressRegenerationDialog(r *models.PressRegeneration) {
 	}) {
 		<section>
 			<p>Presse: { r.PressNumber }</p>
-			<p>Von { r.StartedAt.Format(env.DateTimeFormat) } bis { r.CompletedAt.Format(env.DateTimeFormat) }</p>
+			<p>Von { r.StartedAt.Format(env.DateFormat) } bis { r.CompletedAt.Format(env.DateFormat) }</p>
 		</section>
 		<label class="flex flex-col gap-0">
 			Bemerkung

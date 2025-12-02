@@ -15,7 +15,7 @@ system.
 
 - [x] Create a database migration system for managing schema changes
 - [ ] Improve press regenerations page and add features
-- [ ] Add action buttons to press regenerations table (edit/delete) [WIP]
+- [ ] Add action buttons to press regenerations table (edit/delete) [WIP: Changes needs testing]
 - [ ] Improve feed generation, and add missing ones (press regeneration add/delete)
 
 ## New Pages
