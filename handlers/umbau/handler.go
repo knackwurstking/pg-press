@@ -183,7 +183,7 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 
 	// Create feed entry
 	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed", "press", pressNumber, "error", err)
+		slog.Warn("Failed to create feed", "press", pressNumber, "error", err)
 	}
 
 	return c.NoContent(http.StatusOK)

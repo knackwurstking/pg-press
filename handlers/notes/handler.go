@@ -99,7 +99,7 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 
 	// Create feed entry
 	if _, err := h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for note deletion", "error", err)
+		slog.Warn("Failed to create feed for note deletion", "error", err)
 	}
 
 	// Trigger reload of notes sections

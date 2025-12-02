@@ -206,7 +206,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		}
 
 		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Error("Failed to create feed for cycle creation", "error", err)
+			slog.Warn("Failed to create feed for cycle creation", "error", err)
 		}
 	}
 
@@ -303,7 +303,7 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		}
 
 		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Error("Failed to create feed for cycle update", "error", err)
+			slog.Warn("Failed to create feed for cycle update", "error", err)
 		}
 	}
 
@@ -373,7 +373,7 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 	}
 
 	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for tool creation", "error", err)
+		slog.Warn("Failed to create feed for tool creation", "error", err)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -425,7 +425,7 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	}
 
 	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for tool update", "error", err)
+		slog.Warn("Failed to create feed for tool update", "error", err)
 	}
 
 	// Set HX headers
@@ -657,7 +657,7 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 	}
 
 	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for cycle creation", "error", err)
+		slog.Warn("Failed to create feed for cycle creation", "error", err)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -702,7 +702,7 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 	}
 
 	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for cycle creation", "error", err)
+		slog.Warn("Failed to create feed for cycle creation", "error", err)
 	}
 
 	// Trigger reload of notes sections
@@ -782,7 +782,7 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		}
 
 		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Error("Failed to create feed for cycle creation", "error", err)
+			slog.Warn("Failed to create feed for cycle creation", "error", err)
 		}
 	}
 
@@ -861,7 +861,7 @@ func (h *Handler) createNewMetalSheetFeed(user *models.User, tool *models.Tool, 
 
 	// Create and save the feed entry
 	if _, err := h.registry.Feeds.AddSimple("Blech erstellt", content, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed", "error", err)
+		slog.Warn("Failed to create feed", "error", err)
 	}
 }
 
@@ -915,6 +915,6 @@ func (h *Handler) createUpdateMetalSheetFeed(user *models.User, tool *models.Too
 
 	// Create and save the feed entry
 	if _, err := h.registry.Feeds.AddSimple("Blech aktualisiert", content, user.TelegramID); err != nil {
-		slog.Error("Failed to create update feed", "error", err)
+		slog.Warn("Failed to create update feed", "error", err)
 	}
 }

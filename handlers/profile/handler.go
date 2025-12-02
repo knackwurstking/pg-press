@@ -121,7 +121,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 	feedTitle := "Benutzername geändert"
 	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
 	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-		slog.Error("Failed to create feed for username change", "error", err)
+		slog.Warn("Failed to create feed for username change", "error", err)
 	}
 
 	user.Name = userName

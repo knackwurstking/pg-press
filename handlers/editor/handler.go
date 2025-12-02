@@ -211,10 +211,10 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
 			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Error("Failed to create feed for trouble report creation", "error", err)
+				slog.Warn("Failed to create feed for trouble report creation", "error", err)
 			}
 			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Error("Failed to create feed for trouble report update", "error", err)
+				slog.Warn("Failed to create feed for trouble report update", "error", err)
 			}
 
 		} else {
@@ -234,7 +234,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
 			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Error("Failed to create feed for trouble report creation", "error", err)
+				slog.Warn("Failed to create feed for trouble report creation", "error", err)
 			}
 		}
 
