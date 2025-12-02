@@ -70,7 +70,7 @@ templ ToolsList(tools []*models.ResolvedTool, user *models.User) {
 }
 
 templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf("tool-%d", id) } class="tool-item" style="display: none;" hx-preserve="true">
+	<li id={ fmt.Sprintf("tool-%d", id) } class="tool-item" style="display: none;">
 		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
 			EnableStatusBadge: true,
 		})
