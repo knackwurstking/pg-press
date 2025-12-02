@@ -149,6 +149,8 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		return eerr
 	}
 
+	slog.Info("Creating a new cycle", "user_name", user.Name)
+
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
 		return errors.BadRequest(err, "parse tool ID")
@@ -216,6 +218,8 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Updating cycle", "user_name", user.Name)
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
@@ -314,6 +318,9 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 		if err != nil {
 			return errors.Handler(err, "get tool from database")
 		}
+		slog.Info("Opening edit dialog for tool", "tool_id", tool.ID)
+	} else {
+		slog.Info("Opening new tool dialog")
 	}
 
 	var d templ.Component
@@ -335,6 +342,8 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Creating a new tool", "user_name", user.Name)
 
 	formData, err := getEditToolFormData(c)
 	if err != nil {
@@ -372,6 +381,8 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Updating tool", "user_name", user.Name)
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
@@ -444,6 +455,7 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 			return errors.Handler(err, "fetch metal sheet from database")
 		}
 		toolID = metalSheet.ToolID
+		slog.Info("Opening edit dialog for metal sheet", "metal_sheet_id", metalSheetID)
 	} else {
 		// Creating new metal sheet, get tool_id from query
 		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -451,6 +463,7 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 			return errors.Handler(err, "get the tool id from query")
 		}
 		toolID = models.ToolID(toolIDQuery)
+		slog.Info("Opening new metal sheet dialog", "tool_id", toolID)
 	}
 
 	// Fetch the associated tool for the dialog
@@ -479,6 +492,8 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Creating a new metal sheet", "user_name", user.Name)
 
 	// Extract tool ID from query parameters
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -520,6 +535,8 @@ func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Updating metal sheet", "user_name", user.Name)
 
 	// Extract metal sheet ID from query parameters
 	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -582,13 +599,15 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := models.NoteID(id)
 
-		slog.Info("Opening edit dialog for note", "note", noteID)
+		slog.Info("Opening edit dialog for note", "note", noteID, "user_name", user.Name)
 
 		var err error
 		note, err = h.registry.Notes.Get(noteID)
 		if err != nil {
 			return errors.Handler(err, "get note from database")
 		}
+	} else {
+		slog.Info("Opening new note dialog", "user_name", user.Name)
 	}
 
 	var d templ.Component
@@ -651,6 +670,8 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 		return eerr
 	}
 
+	slog.Info("Updating note", "user_name", user.Name)
+
 	idq, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "parse note ID")
@@ -711,6 +732,8 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 		return err
 	}
 
+	slog.Info("Opening edit dialog for tool regeneration", "regeneration_id", regenerationID, "tool", resolvedRegeneration.GetTool().String())
+
 	dialog := templates.EditToolRegenerationDialog(resolvedRegeneration)
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
@@ -725,6 +748,8 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
+
+	slog.Info("Updating tool regeneration", "user_name", user.Name)
 
 	var regenerationID models.ToolRegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
@@ -781,6 +806,8 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 		return errors.Handler(err, "get press regeneration from database")
 	}
 
+	slog.Info("Opening edit dialog for press regeneration", "regeneration_id", id, "press", r.PressNumber)
+
 	d := templates.EditPressRegenerationDialog(r)
 	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press regeneration dialog")
@@ -790,6 +817,13 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
+	}
+
+	slog.Info("Updating press regeneration", "user_name", user.Name)
+
 	id, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "")
@@ -808,6 +842,8 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	}
 
 	// TODO: Create feed
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
