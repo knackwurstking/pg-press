@@ -18,17 +18,17 @@ updateDataTheme();
 
 matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	"change",
-	function () {
+	function() {
 		updateDataTheme();
 	},
 );
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
 	// Debounce function to prevent rapid reloads
 	function debounce(func, wait) {
 		let timeout;
 		return function executedFunction(...args) {
-			const later = function () {
+			const later = function() {
 				clearTimeout(timeout);
 				func(...args);
 			};
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	// Debounced reload function
-	const debouncedReload = debounce(function () {
+	const debouncedReload = debounce(function() {
 		if (document.visibilityState === "visible") {
 			console.log("Page became visible - reloading HTMX sections");
 			document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	window.addEventListener("visibilitychange", debouncedReload);
 
 	// Add manual refresh functionality
-	window.refreshPressSections = function () {
+	window.refreshPressSections = function() {
 		console.log("Manual refresh triggered");
 		document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
 	};
