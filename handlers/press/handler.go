@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,25 +28,25 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Press page
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press", h.GetPressPage),
 
 		// HTMX endpoints for press content
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/active-tools", h.HTMXGetPressActiveTools),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/metal-sheets", h.HTMXGetPressMetalSheets),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/cycles", h.HTMXGetPressCycles),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/notes", h.HTMXGetPressNotes),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/press-regenerations", h.HTMXGetPressRegenerations),
 
 		// PDF Handlers
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:press/cycle-summary-pdf", h.HTMXGetCycleSummaryPDF),
 	})
 }

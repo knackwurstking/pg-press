@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,15 +25,15 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Notes page
-		utils.NewEchoRoute(http.MethodGet, path, h.GetNotesPage),
+		ui.NewEchoRoute(http.MethodGet, path, h.GetNotesPage),
 
 		// HTMX routes for notes deletion
-		utils.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteNote),
+		ui.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteNote),
 
 		// Render Notes Grid
-		utils.NewEchoRoute(http.MethodGet, path+"/grid", h.HTMXGetNotesGrid),
+		ui.NewEchoRoute(http.MethodGet, path+"/grid", h.HTMXGetNotesGrid),
 	})
 }
 

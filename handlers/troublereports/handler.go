@@ -9,12 +9,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/troublereports/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,18 +31,18 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Pages
-		utils.NewEchoRoute(http.MethodGet, path, h.GetPage),
-		utils.NewEchoRoute(http.MethodGet, path+"/share-pdf", h.GetSharePDF),
-		utils.NewEchoRoute(http.MethodGet, path+"/attachment", h.GetAttachment),
-		utils.NewEchoRoute(http.MethodGet, path+"/modifications/:id", h.GetModificationsForID),
+		ui.NewEchoRoute(http.MethodGet, path, h.GetPage),
+		ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", h.GetSharePDF),
+		ui.NewEchoRoute(http.MethodGet, path+"/attachment", h.GetAttachment),
+		ui.NewEchoRoute(http.MethodGet, path+"/modifications/:id", h.GetModificationsForID),
 
 		// HTMX
-		utils.NewEchoRoute(http.MethodGet, path+"/data", h.HTMXGetData),
-		utils.NewEchoRoute(http.MethodDelete, path+"/data", h.HTMXDeleteTroubleReport),
-		utils.NewEchoRoute(http.MethodGet, path+"/attachments-preview", h.HTMXGetAttachmentsPreview),
-		utils.NewEchoRoute(http.MethodPost, path+"/rollback", h.HTMXPostRollback),
+		ui.NewEchoRoute(http.MethodGet, path+"/data", h.HTMXGetData),
+		ui.NewEchoRoute(http.MethodDelete, path+"/data", h.HTMXDeleteTroubleReport),
+		ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", h.HTMXGetAttachmentsPreview),
+		ui.NewEchoRoute(http.MethodPost, path+"/rollback", h.HTMXPostRollback),
 	})
 }
 

@@ -3,10 +3,11 @@ package help
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/help/templates"
 	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,8 +22,8 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, path+"/markdown", h.GetMarkdown),
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		ui.NewEchoRoute(http.MethodGet, path+"/markdown", h.GetMarkdown),
 	})
 }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,11 +28,11 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),
-		utils.NewEchoRoute(http.MethodPost, path+"/login", h.PostLoginPage),
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		ui.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),
+		ui.NewEchoRoute(http.MethodPost, path+"/login", h.PostLoginPage),
 
-		utils.NewEchoRoute(http.MethodGet, path+"/logout", h.GetLogout),
+		ui.NewEchoRoute(http.MethodGet, path+"/logout", h.GetLogout),
 	})
 }
 

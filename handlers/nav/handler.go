@@ -4,9 +4,11 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/handlers/wsfeed"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"golang.org/x/net/websocket"
 
 	"github.com/labstack/echo/v4"
@@ -25,8 +27,8 @@ func NewHandler(r *services.Registry, fh *wsfeed.Handler) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		ui.NewEchoRoute(
 			http.MethodGet,
 			path+"/feed-counter",
 			h.GetFeedCounter,

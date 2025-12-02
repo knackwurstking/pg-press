@@ -5,11 +5,13 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,14 +26,14 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
-		utils.NewEchoRoute(http.MethodGet, path, h.GetToolsPage),
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		ui.NewEchoRoute(http.MethodGet, path, h.GetToolsPage),
 
-		utils.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteTool),
-		utils.NewEchoRoute(http.MethodPatch, path+"/mark-dead", h.HTMXMarkToolAsDead),
-		utils.NewEchoRoute(http.MethodGet, path+"/section/press", h.HTMXGetSectionPress),
-		utils.NewEchoRoute(http.MethodGet, path+"/section/tools", h.HTMXGetSectionTools),
-		utils.NewEchoRoute(http.MethodGet, path+"/admin/overlapping-tools", h.HTMXGetAdminOverlappingTools),
+		ui.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteTool),
+		ui.NewEchoRoute(http.MethodPatch, path+"/mark-dead", h.HTMXMarkToolAsDead),
+		ui.NewEchoRoute(http.MethodGet, path+"/section/press", h.HTMXGetSectionPress),
+		ui.NewEchoRoute(http.MethodGet, path+"/section/tools", h.HTMXGetSectionTools),
+		ui.NewEchoRoute(http.MethodGet, path+"/admin/overlapping-tools", h.HTMXGetAdminOverlappingTools),
 	})
 }
 

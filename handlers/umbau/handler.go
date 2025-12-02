@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/umbau/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,11 +27,12 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(
+	ui.RegisterEchoRoutes(
 		e,
-		[]*utils.EchoRoute{
-			utils.NewEchoRoute(http.MethodGet, path+"/:press", h.GetUmbauPage),
-			utils.NewEchoRoute(http.MethodPost, path+"/:press", h.PostUmbauPage),
+		env.ServerPathPrefix,
+		[]*ui.EchoRoute{
+			ui.NewEchoRoute(http.MethodGet, path+"/:press", h.GetUmbauPage),
+			ui.NewEchoRoute(http.MethodPost, path+"/:press", h.PostUmbauPage),
 		},
 	)
 }

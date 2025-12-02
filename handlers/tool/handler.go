@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,42 +28,42 @@ func NewHandler(r *services.Registry) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	utils.RegisterEchoRoutes(e, []*utils.EchoRoute{
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Main Page
-		utils.NewEchoRoute(http.MethodGet, path+"/:id", h.GetToolPage),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id", h.GetToolPage),
 
 		// Regenerations Table
-		utils.NewEchoRoute(http.MethodDelete,
+		ui.NewEchoRoute(http.MethodDelete,
 			path+"/:id/delete-regeneration", h.HTMXDeleteRegeneration),
 
 		// Tool status and regenerations management
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/status-edit", h.HTMXGetStatusEdit),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/status-display", h.HTMXGetStatusDisplay),
-		utils.NewEchoRoute(http.MethodPut,
+		ui.NewEchoRoute(http.MethodPut,
 			path+"/:id/status", h.HTMXUpdateToolStatus),
 
 		// Section loading
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/notes", h.HTMXGetToolNotes),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/metal-sheets", h.HTMXGetToolMetalSheets),
 
 		// Cycles table rows
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/cycles", h.HTMXGetCycles),
-		utils.NewEchoRoute(http.MethodGet,
+		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/total-cycles", h.HTMXGetToolTotalCycles),
 
 		// Delete a cycle table entry
-		utils.NewEchoRoute(http.MethodDelete,
+		ui.NewEchoRoute(http.MethodDelete,
 			path+"/cycle/delete", h.HTMXDeleteToolCycle),
 
 		// Update tools binding data
-		utils.NewEchoRoute(http.MethodPatch,
+		ui.NewEchoRoute(http.MethodPatch,
 			path+"/:id/bind", h.HTMXPatchToolBinding),
-		utils.NewEchoRoute(http.MethodPatch,
+		ui.NewEchoRoute(http.MethodPatch,
 			path+"/:id/unbind", h.HTMXPatchToolUnBinding),
 	})
 }
