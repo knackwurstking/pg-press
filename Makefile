@@ -1,4 +1,4 @@
-.PHONY: clean generate init run dev build count macos-install \
+.PHONY: clean generate init lint run dev build count macos-install \
 	macos-start-service macos-stop-service macos-restart-service \
 	macos-print-service macos-watch-service macos-update
 
@@ -31,6 +31,10 @@ init: generate
 
 test:
 	go test -v ./...
+
+lint:
+	find . | grep -e '\.templ$$' | xargs -- gopls check -severity=hint 
+	find . | grep -e '\.go$$' | xargs -- gopls check -severity=hint 
 
 run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
