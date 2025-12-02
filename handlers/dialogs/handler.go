@@ -347,8 +347,6 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Creating a new tool", "user_name", user.Name)
-
 	formData, err := getEditToolFormData(c)
 	if err != nil {
 		return errors.BadRequest(err, "get tool form data")
@@ -387,8 +385,6 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Updating tool", "user_name", user.Name)
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
@@ -638,8 +634,6 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Creating a new note", "user_name", user.Name)
-
 	note, err := getNoteFromFormData(c)
 	if err != nil {
 		return errors.BadRequest(err, "parse note form data")
@@ -677,15 +671,11 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Updating note", "user_name", user.Name)
-
 	idq, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "parse note ID")
 	}
 	noteID := models.NoteID(idq)
-
-	slog.Info("Updating note", "note", noteID, "user_name", user.Name)
 
 	note, err := getNoteFromFormData(c)
 	if err != nil {
@@ -754,8 +744,6 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Updating tool regeneration", "user_name", user.Name)
 
 	var regenerationID models.ToolRegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
@@ -830,8 +818,6 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Updating press regeneration", "user_name", user.Name)
-
 	id, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "")
@@ -849,7 +835,13 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 		return errors.Handler(err, "press regenerations")
 	}
 
-	// TODO: Create feed
+	feedTitle := "Pressen Regenerierung Aktualisiert"
+	feedContent := fmt.Sprintf("Presse: %d", r.PressNumber)
+	feedContent += fmt.Sprintf("Von: %s, Bis: %s", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
+	feedContent += fmt.Sprintf("Bemerkung: %s", r.Reason)
+	if _, err = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
+		slog.Warn("Add feed", "error", err, "title", feedTitle)
+	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
