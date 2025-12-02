@@ -32,7 +32,8 @@ system.
 
 ## Performance Improvements
 
-- [ ] Optimize database queries with proper indexing
+- [ ] Optimize database queries with proper indexing, 
+    - For now use the scripts for this [scripts](/scripts/add-indexes-press)
 - [ ] Add caching layer for frequently accessed data
 
 ## Security Enhancements
@@ -40,7 +41,3 @@ system.
 - [ ] Implement CSRF protection for all forms
 - [ ] Improve session management and authentication flow
 - [ ] Add input sanitization for all user-provided data
-
-## Testing
-
-- [ ] Add unit tests for all service functions
