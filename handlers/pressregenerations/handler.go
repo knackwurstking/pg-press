@@ -3,6 +3,7 @@ package pressregenerations
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/pressregenerations/templates"
 	"github.com/knackwurstking/pg-press/models"
@@ -98,6 +99,8 @@ func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
 	if err := h.registry.PressRegenerations.Delete(models.PressRegenerationID(id)); err != nil {
 		return errors.Handler(err, "delete press regeneration")
 	}
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
