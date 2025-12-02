@@ -836,8 +836,8 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	}
 
 	feedTitle := "Pressen Regenerierung Aktualisiert"
-	feedContent := fmt.Sprintf("Presse: %d", r.PressNumber)
-	feedContent += fmt.Sprintf("Von: %s, Bis: %s", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
+	feedContent := fmt.Sprintf("Presse: %d\n", r.PressNumber)
+	feedContent += fmt.Sprintf("Von: %s, Bis: %s\n", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
 	feedContent += fmt.Sprintf("Bemerkung: %s", r.Reason)
 	if _, err = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 		slog.Warn("Add feed", "error", err, "title", feedTitle)

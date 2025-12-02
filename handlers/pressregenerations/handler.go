@@ -1,6 +1,8 @@
 package pressregenerations
 
 import (
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
@@ -62,50 +64,60 @@ func (h *Handler) GetRegenerationPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HxAddRegeneration(c echo.Context) (err error) {
-	var (
-		press models.PressNumber
-		eerr  *echo.HTTPError
-	)
-
-	press, eerr = h.parseParamPress(c)
+func (h *Handler) HxAddRegeneration(c echo.Context) error {
+	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
 	}
 
-	var (
-		data *models.PressRegeneration
-	)
-
-	data, eerr = ParseFormRegenerationsPage(c, press)
+	press, eerr := h.parseParamPress(c)
 	if eerr != nil {
 		return eerr
 	}
 
-	if _, err = h.registry.PressRegenerations.Add(data); err != nil {
+	data, eerr := ParseFormRegenerationsPage(c, press)
+	if eerr != nil {
+		return eerr
+	}
+
+	if _, err := h.registry.PressRegenerations.Add(data); err != nil {
 		return errors.Handler(err, "add press regeneration")
 	}
 
-	// TODO: Feed generating logic here
-
+	h.createFeed("Eine Pressen \"Regenerierung\" hinzugefügt", data, user)
 	utils.SetHXRedirect(c, utils.UrlPress(press).Page)
 
 	return nil
 }
 
 func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return eerr
+	}
+
 	id, err := utils.ParseQueryInt64(c, "id") // PressRegenerationID
 	if err != nil {
 		return errors.BadRequest(err, "missing id query")
 	}
 
-	if err := h.registry.PressRegenerations.Delete(models.PressRegenerationID(id)); err != nil {
+	rid := models.PressRegenerationID(id)
+	r, _ := h.registry.PressRegenerations.Get(rid) // Need this for the feed
+	if err := h.registry.PressRegenerations.Delete(rid); err != nil {
 		return errors.Handler(err, "delete press regeneration")
 	}
 
-	// TODO: Feed generating logic here
-
+	h.createFeed("Eine Pressen \"Regenerierung\" entfernt", r, user)
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
+}
+
+func (h *Handler) createFeed(feedTitle string, r *models.PressRegeneration, user *models.User) {
+	feedContent := fmt.Sprintf("Presse: %d\n", r.PressNumber)
+	feedContent += fmt.Sprintf("Von %s bis %s\n", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
+	feedContent += fmt.Sprintf("Reason: %s", r.Reason)
+	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
+		slog.Warn("Failed to create feed for deleting a press regeneration", "error", err)
+	}
 }
