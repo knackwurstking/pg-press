@@ -38,7 +38,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		),
 
 		utils.NewEchoRoute(
-			http.MethodPost,
+			http.MethodDelete,
 			path+"/:press/delete",
 			h.HxDeleteRegeneration,
 		),
