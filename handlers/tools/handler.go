@@ -186,8 +186,7 @@ func (h *Handler) createToolFeed(user *models.User, tool *models.Tool, title str
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed", "error", err)
 	}
 }

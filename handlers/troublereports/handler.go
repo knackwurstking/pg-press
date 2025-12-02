@@ -182,8 +182,7 @@ func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 	// Create feed entry
 	feedTitle := "Problembericht gelöscht"
 	feedContent := fmt.Sprintf("Titel: %s", removedReport.Title)
-	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed for trouble report deletion", "error", err)
 	}
 
@@ -276,8 +275,7 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	feedContent := fmt.Sprintf("Titel: %s\nZurückgesetzt auf Version vom: %s",
 		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
 
-	feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed for trouble report rollback", "error", err)
 	}
 

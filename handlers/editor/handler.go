@@ -208,10 +208,12 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			feedContent := fmt.Sprintf("Titel: %s", tr.Title)
 			totalAttachments := len(existingAttachmentIDs) + len(newAttachments)
 			if totalAttachments > 0 {
-				feedContent += fmt.Sprintf("\nAnhänge: %d", totalAttachments)
+				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
-			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.registry.Feeds.Add(feed); err != nil {
+			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
+				slog.Error("Failed to create feed for trouble report creation", "error", err)
+			}
+			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 				slog.Error("Failed to create feed for trouble report update", "error", err)
 			}
 
@@ -231,8 +233,7 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			if len(attachments) > 0 {
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
-			feed := models.NewFeed(feedTitle, feedContent, user.TelegramID)
-			if err := h.registry.Feeds.Add(feed); err != nil {
+			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 				slog.Error("Failed to create feed for trouble report creation", "error", err)
 			}
 		}

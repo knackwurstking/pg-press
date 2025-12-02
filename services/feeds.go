@@ -152,6 +152,42 @@ func (f *Feeds) Add(feed *models.Feed) error {
 	return nil
 }
 
+// AddSimple creates a new feed with automatic timestamp and broadcasts the update
+func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*models.Feed, error) {
+	slog.Info("Adding simple feed", "title", title, "user_id", userID)
+
+	// Create feed with automatic timestamp
+	feed := models.NewFeed(title, content, userID)
+
+	// Validate the feed
+	if err := feed.Validate(); err != nil {
+		return nil, err
+	}
+
+	query := fmt.Sprintf(
+		`INSERT INTO %s (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`,
+		TableNameFeeds,
+	)
+
+	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
+	if err != nil {
+		return nil, f.GetInsertError(err)
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, f.GetInsertError(err)
+	}
+	feed.ID = models.FeedID(id)
+
+	// Broadcast update if broadcaster is set
+	if f.broadcaster != nil {
+		f.broadcaster.Broadcast()
+	}
+
+	return feed, nil
+}
+
 func (f *Feeds) Delete(id models.FeedID) error {
 	slog.Info("Deleting feed", "id", id)
 

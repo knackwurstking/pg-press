@@ -205,7 +205,9 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 			content += "\nRegenerierung gestartet"
 		}
 
-		h.createFeed(title, content, user.TelegramID)
+		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+			slog.Error("Failed to create feed for cycle creation", "error", err)
+		}
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -300,7 +302,9 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 			content += "\nRegenerierung abgeschlossen"
 		}
 
-		h.createFeed(title, content, user.TelegramID)
+		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+			slog.Error("Failed to create feed for cycle update", "error", err)
+		}
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -370,7 +374,9 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	h.createFeed(title, content, user.TelegramID)
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+		slog.Error("Failed to create feed for tool creation", "error", err)
+	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 	return nil
@@ -422,7 +428,9 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	h.createFeed(title, content, user.TelegramID)
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+		slog.Error("Failed to create feed for tool update", "error", err)
+	}
 
 	// Set HX headers
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -654,8 +662,7 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
 	}
 
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed for cycle creation", "error", err)
 	}
 
@@ -704,8 +711,7 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
 	}
 
-	feed := models.NewFeed(title, content, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed for cycle creation", "error", err)
 	}
 
@@ -787,7 +793,9 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
 		}
 
-		h.createFeed(title, content, user.TelegramID)
+		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+			slog.Error("Failed to create feed for cycle creation", "error", err)
+		}
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -848,13 +856,6 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
-	feed := models.NewFeed(title, content, userID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
-		slog.Error("Failed to create feed", "error", err)
-	}
-}
-
 func (h *Handler) createNewMetalSheetFeed(user *models.User, tool *models.Tool, metalSheet *models.MetalSheet) {
 	// Build base feed content with tool and metal sheet info
 	content := fmt.Sprintf("Werkzeug: %s\nStärke: %.1f mm\nBlech: %.1f mm\nTyp: %s",
@@ -867,8 +868,7 @@ func (h *Handler) createNewMetalSheetFeed(user *models.User, tool *models.Tool, 
 	}
 
 	// Create and save the feed entry
-	feed := models.NewFeed("Blech erstellt", content, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple("Blech erstellt", content, user.TelegramID); err != nil {
 		slog.Error("Failed to create feed", "error", err)
 	}
 }
@@ -922,8 +922,7 @@ func (h *Handler) createUpdateMetalSheetFeed(user *models.User, tool *models.Too
 	}
 
 	// Create and save the feed entry
-	feed := models.NewFeed("Blech aktualisiert", content, user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple("Blech aktualisiert", content, user.TelegramID); err != nil {
 		slog.Error("Failed to create update feed", "error", err)
 	}
 }

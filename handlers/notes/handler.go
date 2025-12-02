@@ -98,8 +98,7 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	slog.Info("Deleted note", "note", noteID, "user_name", user.Name)
 
 	// Create feed entry
-	feed := models.NewFeed("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
-	if err := h.registry.Feeds.Add(feed); err != nil {
+	if _, err := h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID); err != nil {
 		slog.Error("Failed to create feed for note deletion", "error", err)
 	}
 
