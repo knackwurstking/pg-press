@@ -71,6 +71,7 @@ templ Page(notes []*models.Note, tools []*models.Tool) {
 				style="margin: 0 auto;"
 				hx-get={ utils.UrlNotes(0).Grid }
 				hx-trigger="pageLoaded from:body"
+				hx-on::after-request='document.querySelector("button.active")?.click()'
 			>
 				@NotesGrid(notes, tools)
 			</section>
@@ -81,7 +82,6 @@ templ Page(notes []*models.Note, tools []*models.Tool) {
 script pageScript() {
 	document.addEventListener('DOMContentLoaded', function() {
 		const filterButtons = document.querySelectorAll('.filter-btn');
-		const noteCards = document.querySelectorAll('.note-card');
 
 		filterButtons.forEach(button => {
 			button.addEventListener('click', function() {
@@ -90,7 +90,7 @@ script pageScript() {
 				filterButtons.forEach(btn => btn.classList.remove('active'));
 				this.classList.add('active');
 
-				noteCards.forEach(card => {
+				document.querySelectorAll('.note-card').forEach(card => {
 					const level = card.dataset.noteLevel;
 					const shouldShow = filter === 'all' ||
 						(filter === 'broken' && level === '2') ||
