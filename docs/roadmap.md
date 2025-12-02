@@ -33,7 +33,7 @@ system.
 ## Performance Improvements
 
 - [ ] Optimize database queries with proper indexing, 
-    - For now use the scripts for this [scripts](/scripts/add-indexes-press)
+    - For now use the scripts for this [scripts](/scripts)
 - [ ] Add caching layer for frequently accessed data
 
 ## Security Enhancements
