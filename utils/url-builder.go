@@ -265,17 +265,19 @@ func UrlPressRegeneration(press models.PressNumber, rid models.PressRegeneration
 }
 
 func UrlDialogs() (url struct {
-	EditCycle            func(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL
-	EditTool             func(toolID models.ToolID) templ.SafeURL
-	EditMetalSheet       func(metalSheetID models.MetalSheetID, toolID models.ToolID) templ.SafeURL
-	EditNote             func(noteID models.NoteID, linkToTables string) templ.SafeURL
-	EditToolRegeneration func(toolRegenerationID models.ToolRegenerationID) templ.SafeURL
+	EditCycle             func(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL
+	EditTool              func(toolID models.ToolID) templ.SafeURL
+	EditMetalSheet        func(metalSheetID models.MetalSheetID, toolID models.ToolID) templ.SafeURL
+	EditNote              func(noteID models.NoteID, linkToTables string) templ.SafeURL
+	EditToolRegeneration  func(toolRegenerationID models.ToolRegenerationID) templ.SafeURL
+	EditPressRegeneration func(pressRegenerationID models.PressRegenerationID) templ.SafeURL
 }) {
 	url.EditCycle = urlEditCycleDialog
 	url.EditTool = urlEditToolDialog
 	url.EditMetalSheet = urlEditMetalSheetDialog
 	url.EditNote = urlEditNoteDialog
 	url.EditToolRegeneration = urlEditToolRegenerationDialog
+	url.EditPressRegeneration = urlEditPressRegenerationDialog
 
 	return url
 }
@@ -334,4 +336,13 @@ func urlEditToolRegenerationDialog(toolRegenerationID models.ToolRegenerationID)
 	}
 
 	return BuildURL("/dialog/edit-tool-regeneration", params)
+}
+
+func urlEditPressRegenerationDialog(pressRegenerationID models.PressRegenerationID) templ.SafeURL {
+	params := map[string]string{}
+	if pressRegenerationID != 0 {
+		params["id"] = fmt.Sprintf("%d", pressRegenerationID)
+	}
+
+	return BuildURL("/dialog/edit-press-regeneration", params)
 }

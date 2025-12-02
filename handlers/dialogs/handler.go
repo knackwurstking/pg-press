@@ -51,18 +51,17 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-note", h.PostEditNote),
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", h.PutEditNote),
 
-		// Edit regeneration dialog
+		// Edit tool regeneration dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
+
+		// Edit press regeneration dialog
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-press-regeneration", h.GetEditPressRegeneration),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-press-regeneration", h.PutEditPressRegeneration),
 	})
 }
 
 func (h *Handler) GetEditCycle(c echo.Context) error {
-	//user, eerr := utils.GetUserFromContext(c)
-	//if eerr != nil {
-	//	return eerr
-	//}
-
 	var (
 		tool             *models.Tool
 		cycle            *models.Cycle
@@ -767,6 +766,18 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
+}
+
+func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
+	// TODO: ...
+
+	return fmt.Errorf("under construction")
+}
+
+func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
+	// TODO: ...
+
+	return fmt.Errorf("under construction")
 }
 
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
