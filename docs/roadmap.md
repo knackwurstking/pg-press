@@ -16,16 +16,31 @@ system.
 - [x] Create a database migration system for managing schema changes
 - [ ] Improve press regenerations page and add features
 - [ ] Add action buttons to press regenerations table (edit/delete) [WIP]
+- [ ] Improve feed generation, and add missing ones (press regeneration add/delete)
 
-### New Pages
+## New Pages
 
 - [ ] "Probleme Checklist" (troublechecklist)
 - [ ] "Daten Sammlung" (datastorage)
     - Store dryer settings here, temperature, press speeds, etc.
+- [ ] "Statistiken" (statistics dashboard)
+- [ ] "Benutzerverwaltung" (user management)
 
 ## Refactoring
 
-- [ ] Create a `ResolvedTroubleReport` type and replace
-      `TroubleReportWithAttachments` with this
-- [ ] ~Migrate `Attachment.ID` from string to int64, also need to migrate the
-      database table for this~
+- [ ] Extract common UI components into reusable templates
+
+## Performance Improvements
+
+- [ ] Optimize database queries with proper indexing
+- [ ] Add caching layer for frequently accessed data
+
+## Security Enhancements
+
+- [ ] Implement CSRF protection for all forms
+- [ ] Improve session management and authentication flow
+- [ ] Add input sanitization for all user-provided data
+
+## Testing
+
+- [ ] Add unit tests for all service functions
