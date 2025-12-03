@@ -1,6 +1,9 @@
 package templates
 
-import "github.com/knackwurstking/pg-press/models"
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+)
 
 templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 	if len(notes) > 0 {
@@ -18,18 +21,18 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 						}
 					}
 
-					filterClass := ""
-					switch note.Level {
-					case models.LevelInfo:
-						filterClass = "outline"
-					case models.LevelAttention:
-						filterClass = "warning outline"
-					case models.LevelBroken:
-						filterClass = "destructive outline"
-					}
+					//filterClass := ""
+					//switch note.Level {
+					//case models.LevelInfo:
+					//	filterClass = "outline"
+					//case models.LevelAttention:
+					//	filterClass = "warning outline"
+					//case models.LevelBroken:
+					//	filterClass = "destructive outline"
+					//}
 				}}
 				if !skip {
-					@NotesCard(note, filterClass, tools)
+					@components.NoteCard(note)
 				}
 			}
 		</div>

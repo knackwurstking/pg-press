@@ -835,7 +835,7 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 		return errors.Handler(err, "press regenerations")
 	}
 
-	feedTitle := fmt.Sprintf("Bemerkung für die \"Pressenregeneration\" aktualisiert", r.PressNumber)
+	feedTitle := fmt.Sprintf("\"Regenerierung\" für Presse %d aktualisiert", r.PressNumber)
 	feedContent := fmt.Sprintf("Presse: %d\n", r.PressNumber)
 	feedContent += fmt.Sprintf("Von: %s, Bis: %s\n", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
 	feedContent += fmt.Sprintf("Bemerkung: %s", r.Reason)
