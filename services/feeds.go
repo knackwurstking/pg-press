@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -40,13 +39,10 @@ func NewFeeds(r *Registry) *Feeds {
 }
 
 func (f *Feeds) SetBroadcaster(broadcaster Broadcaster) {
-	slog.Info("Setting broadcaster for real-time updates")
 	f.broadcaster = broadcaster
 }
 
 func (f *Feeds) List() ([]*models.Feed, error) {
-	slog.Info("Listing feeds")
-
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s ORDER BY created_at DESC`,
 		TableNameFeeds,
@@ -62,8 +58,6 @@ func (f *Feeds) List() ([]*models.Feed, error) {
 }
 
 func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
-	slog.Info("Listing feeds with pagination", "offset", offset, "limit", limit)
-
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
 		FROM %s
@@ -82,8 +76,6 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 }
 
 func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
-	slog.Info("Listing feeds for user", "telegram_id", userID, "offset", offset, "limit", limit)
-
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
 		FROM %s
@@ -103,8 +95,6 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 }
 
 func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
-	slog.Info("Getting feed", "id", id)
-
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s WHERE id = ?`,
 		TableNameFeeds,
@@ -123,8 +113,6 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
 }
 
 func (f *Feeds) Add(feed *models.Feed) error {
-	slog.Info("Adding feed", "feed", feed)
-
 	if err := feed.Validate(); err != nil {
 		return err
 	}
@@ -154,8 +142,6 @@ func (f *Feeds) Add(feed *models.Feed) error {
 
 // AddSimple creates a new feed with automatic timestamp and broadcasts the update
 func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*models.Feed, error) {
-	slog.Info("Adding simple feed", "title", title, "user_id", userID)
-
 	// Create feed with automatic timestamp
 	feed := models.NewFeed(title, content, userID)
 
@@ -189,8 +175,6 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 }
 
 func (f *Feeds) Delete(id models.FeedID) error {
-	slog.Info("Deleting feed", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
 	_, err := f.DB.Exec(query, id)
 	if err != nil {
@@ -201,8 +185,6 @@ func (f *Feeds) Delete(id models.FeedID) error {
 }
 
 func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
-	slog.Info("Deleting feeds before timestamp", "timestamp", timestamp)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
 	result, err := f.DB.Exec(query, timestamp)
 	if err != nil {
@@ -218,8 +200,6 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
 }
 
 func (f *Feeds) Count() (int, error) {
-	slog.Info("Counting feeds")
-
 	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
 	if err != nil {
 		return 0, f.GetSelectError(err)
@@ -229,8 +209,6 @@ func (f *Feeds) Count() (int, error) {
 }
 
 func (f *Feeds) CountByUser(userID int64) (int, error) {
-	slog.Info("Counting feeds by user", "telegram_id", userID)
-
 	count, err := f.QueryCount(
 		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE user_id = ?`, TableNameFeeds),
 		userID,

@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -39,8 +38,6 @@ func NewPressRegenerations(r *Registry) *PressRegenerations {
 }
 
 func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRegeneration, error) {
-	slog.Debug("Getting press regeneration by ID", "id", id)
-
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNamePressRegenerations)
 	row := s.DB.QueryRow(query, id)
 
@@ -53,13 +50,6 @@ func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRe
 }
 
 func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, error) {
-	slog.Debug(
-		"Adding press regeneration",
-		"press", r.PressNumber,
-		"started_at", r.StartedAt, "completed_at", r.CompletedAt,
-		"reason", r.Reason,
-	)
-
 	if err := r.Validate(); err != nil {
 		return 0, err
 	}
@@ -83,13 +73,6 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 }
 
 func (s *PressRegenerations) Update(r *models.PressRegeneration) error {
-	slog.Debug(
-		"Updating press regeneration",
-		"id", r.ID, "press", r.PressNumber,
-		"started_at", r.StartedAt, "completed_at", r.CompletedAt,
-		"reason", r.Reason,
-	)
-
 	var (
 		err   error
 		query string
@@ -113,8 +96,6 @@ func (s *PressRegenerations) Update(r *models.PressRegeneration) error {
 }
 
 func (s *PressRegenerations) Delete(id models.PressRegenerationID) error {
-	slog.Debug("Deleting press regeneration", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
@@ -125,8 +106,6 @@ func (s *PressRegenerations) Delete(id models.PressRegenerationID) error {
 }
 
 func (s *PressRegenerations) StartPressRegeneration(pn models.PressNumber, reason string) (models.PressRegenerationID, error) {
-	slog.Debug("Starting press regeneration", "press_number", pn, "reason", reason)
-
 	regenerationID, err := s.Add(models.NewPressRegeneration(pn, time.Now(), reason))
 	if err != nil {
 		return 0, err
@@ -136,8 +115,6 @@ func (s *PressRegenerations) StartPressRegeneration(pn models.PressNumber, reaso
 }
 
 func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID) error {
-	slog.Debug("Stopping press regeneration", "id", id)
-
 	regeneration, err := s.Get(id)
 	if err != nil {
 		return err
@@ -183,13 +160,10 @@ func (s *PressRegenerations) GetLastRegeneration(pressNumber models.PressNumber)
 		return nil, err
 	}
 
-	slog.Debug("Got last regeneration for press", "press", pressNumber, "regeneration", regeneration)
 	return regeneration, nil
 }
 
 func (s *PressRegenerations) GetRegenerationHistory(pressNumber models.PressNumber) ([]*models.PressRegeneration, error) {
-	slog.Debug("Getting regeneration history for press", "press", pressNumber)
-
 	query := fmt.Sprintf(`
 		SELECT id, press_number, started_at, completed_at, reason
 		FROM %s

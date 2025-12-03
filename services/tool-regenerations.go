@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -38,8 +37,6 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 }
 
 func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegeneration, error) {
-	slog.Debug("Getting tool regeneration by ID", "id", id)
-
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameToolRegenerations)
 	row := s.DB.QueryRow(query, id)
 
@@ -52,9 +49,6 @@ func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegen
 }
 
 func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User) (models.ToolRegenerationID, error) {
-	slog.Debug("Adding tool regeneration",
-		"user_name", user.Name, "tool_id", toolID, "cycle_id", cycleID, "reason", reason)
-
 	if err := user.Validate(); err != nil {
 		return 0, err
 	}
@@ -83,8 +77,6 @@ func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, re
 }
 
 func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) error {
-	slog.Debug("Updating tool regeneration", "user_name", user.Name, "regeneration_id", r.ID)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -108,8 +100,6 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 }
 
 func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) error {
-	slog.Debug("Deleting tool regeneration", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameToolRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
@@ -120,8 +110,6 @@ func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) error {
 }
 
 func (s *ToolRegenerations) StartToolRegeneration(toolID models.ToolID, reason string, user *models.User) (models.ToolRegenerationID, error) {
-	slog.Debug("Starting tool regeneration", "user_name", user.Name, "tool_id", toolID)
-
 	if err := user.Validate(); err != nil {
 		return 0, err
 	}
@@ -150,8 +138,6 @@ func (s *ToolRegenerations) StartToolRegeneration(toolID models.ToolID, reason s
 }
 
 func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) error {
-	slog.Debug("Stopping tool regeneration", "user_name", user.Name, "tool_id", toolID)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -164,8 +150,6 @@ func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *mod
 }
 
 func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) error {
-	slog.Debug("Aborting tool regeneration", "user_name", user.Name, "tool_id", toolID)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -175,7 +159,6 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 		if !errors.IsNotFoundError(err) {
 			return fmt.Errorf("get last regeneration record: %v", err)
 		}
-		slog.Debug("No regeneration record found to abort: tool", "tool", toolID)
 	} else {
 		tool, err := s.Registry.Tools.Get(toolID)
 		if err != nil {
@@ -185,13 +168,11 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 			return fmt.Errorf("tool is not regenerating")
 		}
 
-		slog.Debug("Deleting regeneration record", "user_name", user.Name, "last_regeneration_id", lastRegeneration.ID)
 		if err := s.Delete(lastRegeneration.ID); err != nil {
 			return fmt.Errorf("delete regeneration record: %v", err)
 		}
 	}
 
-	slog.Debug("Setting tool to non-regenerating status: tool", "tool", toolID)
 	if err := s.Registry.Tools.UpdateRegenerating(toolID, false, user); err != nil {
 		return fmt.Errorf("update tool regeneration status: %v", err)
 	}
@@ -219,13 +200,10 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.T
 		return nil, err
 	}
 
-	slog.Debug("Got last regeneration for tool", "tool", toolID, "regeneration", regeneration)
 	return regeneration, nil
 }
 
 func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, error) {
-	slog.Debug("Checking if cycle has regenerations", "cycle", cycleID)
-
 	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableNameToolRegenerations)
 
 	var count int
@@ -238,8 +216,6 @@ func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bo
 }
 
 func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) ([]*models.ToolRegeneration, error) {
-	slog.Debug("Getting regeneration history for tool", "tool", toolID)
-
 	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM %s

@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log/slog"
 	"sort"
 
 	"github.com/knackwurstking/pg-press/models"
@@ -12,8 +11,6 @@ import (
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
 ) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, error) {
-	slog.Debug("Getting cycle summary data for press", "press", pressNumber)
-
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("get cycles for press %d: %w", pressNumber, err)
@@ -46,10 +43,7 @@ func (s *PressCycles) GetCycleSummaryData(
 func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 	totalCycles, totalPartialCycles, activeToolsCount, entriesCount int64,
 ) {
-	slog.Debug("Calculating cycle summary stats")
-
 	if cycles == nil {
-		slog.Error("Cannot calculate stats from nil cycles data")
 		return 0, 0, 0, 0
 	}
 
@@ -70,8 +64,6 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 func (s *PressCycles) GetToolSummaries(
 	cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool,
 ) ([]*models.ToolSummary, error) {
-	slog.Debug("Creating tool summaries from cycles data")
-
 	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
 	s.sortToolSummariesChronologically(toolSummaries)
 	consolidatedSummaries := s.consolidateToolSummaries(toolSummaries)

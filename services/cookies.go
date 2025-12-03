@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -37,8 +36,6 @@ func NewCookies(registry *Registry) *Cookies {
 }
 
 func (c *Cookies) List() ([]*models.Cookie, error) {
-	slog.Info("Listing cookies")
-
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
 	rows, err := c.DB.Query(query)
 	if err != nil {
@@ -50,8 +47,6 @@ func (c *Cookies) List() ([]*models.Cookie, error) {
 }
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
-	slog.Info("Listing cookies by API key")
-
 	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return nil, err
 	}
@@ -70,8 +65,6 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, error) {
 }
 
 func (c *Cookies) Get(value string) (*models.Cookie, error) {
-	slog.Info("Getting cookie by value")
-
 	if value == "" {
 		return nil, errors.NewValidationError("value cannot be empty")
 	}
@@ -91,8 +84,6 @@ func (c *Cookies) Get(value string) (*models.Cookie, error) {
 }
 
 func (c *Cookies) Add(cookie *models.Cookie) error {
-	slog.Info("Add new cookie")
-
 	if err := cookie.Validate(); err != nil {
 		return err
 	}
@@ -121,8 +112,6 @@ func (c *Cookies) Add(cookie *models.Cookie) error {
 
 // Update updates a cookie with database-level locking to prevent race conditions
 func (c *Cookies) Update(value string, cookie *models.Cookie) error {
-	slog.Info("Updating a cookie")
-
 	if value == "" {
 		return errors.NewValidationError("current_value cannot be empty")
 	}
@@ -181,8 +170,6 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 }
 
 func (c *Cookies) Remove(value string) error {
-	slog.Info("Removing cookie", "value", utils.MaskString(value))
-
 	if value == "" {
 		return errors.NewValidationError("value cannot be empty")
 	}
@@ -197,8 +184,6 @@ func (c *Cookies) Remove(value string) error {
 }
 
 func (c *Cookies) RemoveApiKey(apiKey string) error {
-	slog.Info("Removing cookies by API key", "api_key", utils.MaskString(apiKey))
-
 	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return err
 	}
@@ -213,8 +198,6 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 }
 
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) error {
-	slog.Info("Removing expired cookies", "before_timestamp", beforeTimestamp)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {

@@ -4,11 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"slices"
 	"time"
 
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
@@ -52,8 +50,6 @@ func NewModifications(r *Registry) *Modifications {
 }
 
 func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user models.TelegramID) (models.ModificationID, error) {
-	slog.Info("Adding modification", "modification_type", mt, "modification_type_id", mtID, "telegram_id", user)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return 0, err
 	}
@@ -86,8 +82,6 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 }
 
 func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any], error) {
-	slog.Info("Getting modification", "modification", id)
-
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
 		FROM %s
@@ -107,8 +101,6 @@ func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any]
 }
 
 func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offset int) ([]*models.Modification[any], error) {
-	slog.Info("Listing modifications", "modification_type", mt, "modification_type_id", mtID, "limit", limit, "offset", offset)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
 	}
@@ -135,8 +127,6 @@ func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*mode
 }
 
 func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, error) {
-	slog.Info("Counting modifications", "modification_type", mt, "modification_type_id", mtID)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return 0, err
 	}
@@ -157,8 +147,6 @@ func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, er
 }
 
 func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
-	slog.Info("Getting latest modification", "modification_type", mt, "modification_type_id", mtID)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
 	}
@@ -184,8 +172,6 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 }
 
 func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], error) {
-	slog.Info("Getting oldest modification", "modification_type", mt, "modification_type_id", mtID)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
 	}
@@ -211,8 +197,6 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 }
 
 func (s *Modifications) Delete(id models.ModificationID) error {
-	slog.Info("Deleting modification", "modification_id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
@@ -223,8 +207,6 @@ func (s *Modifications) Delete(id models.ModificationID) error {
 }
 
 func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error {
-	slog.Info("Deleting all modifications", "modification_type", mt, "modification_type_id", mtID)
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return err
 	}
@@ -239,8 +221,6 @@ func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) error 
 }
 
 func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modification[any], error) {
-	slog.Info("Getting modifications by user", "telegram_id", user, "limit", limit, "offset", offset)
-
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
 		FROM %s
@@ -259,8 +239,6 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 }
 
 func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, from, to time.Time) ([]*models.Modification[any], error) {
-	slog.Info("Getting modifications by date range", "modification_type", mt, "modification_id", mtID, "from", from.Format(env.DateTimeFormat), "to", to.Format(env.DateTimeFormat))
-
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
 	}

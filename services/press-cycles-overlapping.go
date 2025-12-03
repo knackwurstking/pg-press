@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 	"time"
 
@@ -11,8 +10,6 @@ import (
 
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
 func (s *PressCycles) GetOverlappingTools() ([]*models.OverlappingTool, error) {
-	slog.Debug("Detecting overlapping tools across all presses")
-
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	allToolSummaries := s.collectAllPressSummaries(validPresses)
 	toolGroups := s.groupSummariesByToolID(allToolSummaries)
@@ -26,13 +23,11 @@ func (s *PressCycles) collectAllPressSummaries(presses []models.PressNumber) map
 	for _, press := range presses {
 		cycles, toolsMap, _, err := s.GetCycleSummaryData(press)
 		if err != nil {
-			slog.Error("Failed to get cycle summary data for press", "press", press, "error", err)
 			continue
 		}
 
 		summaries, err := s.GetToolSummaries(cycles, toolsMap)
 		if err != nil {
-			slog.Error("Failed to get tool summaries for press", "press", press, "error", err)
 			continue
 		}
 

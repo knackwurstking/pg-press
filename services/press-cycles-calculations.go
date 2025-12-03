@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/models"
 )
@@ -14,7 +13,6 @@ import (
 // which would reset the cycle count, and adjusts the calculation accordingly.
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	if err := cycle.Validate(); err != nil {
-		slog.Error("Invalid cycle for partial calculation", "error", err)
 		return cycle.TotalCycles
 	}
 
@@ -24,7 +22,6 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 	var previousTotalCycles int64
 	if err := s.DB.QueryRow(query, args...).Scan(&previousTotalCycles); err != nil {
 		if err != sql.ErrNoRows {
-			slog.Error("Failed to get previous total cycles", "error", err)
 		}
 		return cycle.TotalCycles
 	}
@@ -49,26 +46,8 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 		sql.Named("cycle_date", cycle.Date),
 	).Scan(&regenerationCount)
 	if err == nil && regenerationCount > 0 {
-		// A regeneration occurred between the previous cycle and this cycle
-		// Since regenerations reset total cycles to 0, we should return the current cycle's
-		// total cycles directly as the partial cycles
-		slog.Debug(
-			"Partial cycles calculation with regeneration",
-			"previous_total_cycles", previousTotalCycles,
-			"cycle_id", cycle.ID,
-			"cycle_total_cycles", cycle.TotalCycles,
-			"regeneration_count", regenerationCount,
-		)
-
 		return cycle.TotalCycles
 	}
-
-	slog.Debug(
-		"Partial cycles calculation",
-		"previous_total_cycles", previousTotalCycles,
-		"cycle_id", cycle.ID,
-		"cycle_total_cycles", cycle.TotalCycles,
-	)
 
 	return cycle.TotalCycles - previousTotalCycles
 }

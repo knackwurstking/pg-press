@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -38,8 +37,6 @@ func NewAttachments(r *Registry) *Attachments {
 }
 
 func (a *Attachments) List() ([]*models.Attachment, error) {
-	slog.Info("Listing attachments")
-
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
 		TableNameAttachments,
@@ -55,8 +52,6 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 }
 
 func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
-	slog.Info("Getting attachment for ID", "id", id)
-
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
 		TableNameAttachments,
@@ -77,8 +72,6 @@ func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
 }
 
 func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, error) {
-	slog.Info("Getting attachments by IDs", "ids", len(ids))
-
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -121,8 +114,6 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 }
 
 func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, error) {
-	slog.Debug("Adding attachment", "mime_type", attachment.MimeType, "size", len(attachment.Data))
-
 	if err := attachment.Validate(); err != nil {
 		return 0, err
 	}
@@ -146,8 +137,6 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, e
 }
 
 func (a *Attachments) Update(attachment *models.Attachment) error {
-	slog.Debug("Updating attachment", "attachment", attachment.ID)
-
 	if err := attachment.Validate(); err != nil {
 		return err
 	}
@@ -167,8 +156,6 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 }
 
 func (a *Attachments) Delete(id models.AttachmentID) error {
-	slog.Debug("Deleting attachment", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)
 	if err != nil {

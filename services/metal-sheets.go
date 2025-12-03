@@ -4,7 +4,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -45,8 +44,6 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 }
 
 func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
-	slog.Debug("Listing metal sheets")
-
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -63,8 +60,6 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
 }
 
 func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
-	slog.Debug("Getting metal sheet", "id", id)
-
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -86,8 +81,6 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
 }
 
 func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, error) {
-	slog.Debug("Getting metal sheets for tool", "tool", toolID)
-
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -105,8 +98,6 @@ func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, e
 }
 
 func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*models.MetalSheet, error) {
-	slog.Debug("Getting metal sheets for machine type", "machine_type", machineType)
-
 	if !machineType.IsValid() {
 		return nil, errors.NewValidationError(
 			fmt.Sprintf("invalid machine type: %s", machineType))
@@ -129,20 +120,14 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 }
 
 func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, error) {
-	slog.Debug("Getting metal sheets for press", "press", pressNumber, "tools", len(toolsMap))
-
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
-	slog.Debug("Press machine type determined",
-		"press", pressNumber, "machine-type", expectedMachineType)
 
 	var allSheets models.MetalSheetList
 	for toolID := range toolsMap {
 		sheets, err := s.GetByToolID(toolID)
 		if err != nil {
-			slog.Error("Failed to get metal sheets for tool", "tool", toolID, "error", err)
 			continue
 		}
-		slog.Debug("Retrieved sheets for tool", "tool", toolID, "sheets", len(sheets))
 		allSheets = append(allSheets, sheets...)
 	}
 
@@ -151,7 +136,6 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[m
 		if sheet.Identifier == expectedMachineType {
 			filteredSheets = append(filteredSheets, sheet)
 		} else if sheet.Identifier != models.MachineTypeSACMI && sheet.Identifier != models.MachineTypeSITI {
-			slog.Warn("Found metal sheet with unexpected identifier", "sheet", sheet.ID, "identifier", sheet.Identifier)
 		}
 	}
 
@@ -159,8 +143,6 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[m
 }
 
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error) {
-	slog.Debug("Adding metal sheet", "tool", sheet.ToolID, "identifier", sheet.Identifier)
-
 	if err := sheet.Validate(); err != nil {
 		return 0, err
 	}
@@ -194,8 +176,6 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error)
 }
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
-	slog.Debug("Updating metal sheet", "sheet", sheet.ID)
-
 	if err := sheet.Validate(); err != nil {
 		return err
 	}
@@ -218,8 +198,6 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 }
 
 func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) error {
-	slog.Debug("Assigning tool to metal sheet", "sheet", sheetID, "tool", toolID)
-
 	if toolID <= 0 {
 		return errors.NewValidationError("tool_id: must be positive")
 	}
@@ -242,8 +220,6 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) erro
 }
 
 func (s *MetalSheets) Delete(id models.MetalSheetID) error {
-	slog.Debug("Deleting metal sheet", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
 	if _, err := s.DB.Exec(query, id); err != nil {
 		return s.GetDeleteError(err)

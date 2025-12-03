@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -11,8 +10,6 @@ import (
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
 func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, error) {
-	slog.Debug("Getting last press cycle for tool", "tool", toolID)
-
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -35,8 +32,6 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, err
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
 func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, error) {
-	slog.Debug("Getting press cycles for tool", "tool", toolID)
-
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -62,9 +57,6 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
 func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
-	slog.Debug("Getting press cycles for press",
-		"press", pressNumber, "limit", limit, "offset", offset)
-
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s

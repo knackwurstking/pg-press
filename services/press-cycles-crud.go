@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -12,8 +11,6 @@ import (
 
 // Get retrieves a press cycle by ID
 func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
-	slog.Debug("Getting press cycle", "id", id)
-
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -35,14 +32,6 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
 
 // Add creates a new press cycle
 func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, error) {
-	slog.Debug(
-		"Adding press cycle",
-		"user_name", user.Name,
-		"tool_id", cycle.ToolID,
-		"cycle.ToolPosition", cycle.ToolPosition,
-		"cycle.TotalCycles", cycle.TotalCycles,
-	)
-
 	if err := cycle.Validate(); err != nil {
 		return 0, err
 	}
@@ -83,8 +72,6 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 
 // List retrieves all press cycles
 func (s *PressCycles) List() ([]*models.Cycle, error) {
-	slog.Debug("Listing press cycles")
-
 	query := fmt.Sprintf(`
 		SELECT *
 		FROM %s
@@ -108,8 +95,6 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 
 // Update modifies an existing press cycle
 func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
-	slog.Debug("Updating press cycle", "user_name", user.Name, "cycle.ID", cycle.ID)
-
 	if err := cycle.Validate(); err != nil {
 		return err
 	}
@@ -143,8 +128,6 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 
 // Delete removes a press cycle from the database
 func (s *PressCycles) Delete(id models.CycleID) error {
-	slog.Debug("Deleting press cycle", "cycle", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
 	_, err := s.DB.Exec(query, id)
 

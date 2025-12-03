@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -37,8 +36,6 @@ func NewUsers(r *Registry) *Users {
 }
 
 func (u *Users) List() ([]*models.User, error) {
-	slog.Debug("Listing users")
-
 	query := fmt.Sprintf(`SELECT * FROM %s`, TableNameUsers)
 	rows, err := u.DB.Query(query)
 	if err != nil {
@@ -55,8 +52,6 @@ func (u *Users) List() ([]*models.User, error) {
 }
 
 func (u *Users) Get(telegramID models.TelegramID) (*models.User, error) {
-	slog.Debug("Getting user", "telegram_id", telegramID)
-
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE telegram_id = ?`, TableNameUsers)
 	row := u.DB.QueryRow(query, telegramID)
 
@@ -74,8 +69,6 @@ func (u *Users) Get(telegramID models.TelegramID) (*models.User, error) {
 }
 
 func (u *Users) Add(user *models.User) (models.TelegramID, error) {
-	slog.Debug("Adding user", "user_name", user.Name, "telegram_id", user.TelegramID)
-
 	if err := user.Validate(); err != nil {
 		return 0, err
 	}
@@ -103,13 +96,10 @@ func (u *Users) Add(user *models.User) (models.TelegramID, error) {
 }
 
 func (u *Users) Delete(telegramID models.TelegramID) error {
-	slog.Debug("Removing user", "telegram_id", telegramID)
-
 	if _, err := u.Get(telegramID); err != nil {
 		if errors.IsNotFoundError(err) {
 			return err
 		}
-		slog.Error("Failed to get user before deletion", "telegram_id", telegramID, "error", err)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE telegram_id = ?`, TableNameUsers)
@@ -122,8 +112,6 @@ func (u *Users) Delete(telegramID models.TelegramID) error {
 }
 
 func (u *Users) Update(user *models.User) error {
-	slog.Debug("Updating user", "telegram_id", user.TelegramID, "user", user)
-
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -138,8 +126,6 @@ func (u *Users) Update(user *models.User) error {
 }
 
 func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, error) {
-	slog.Debug("Getting user from API key")
-
 	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return nil, err
 	}

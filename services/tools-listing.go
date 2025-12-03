@@ -2,15 +2,12 @@ package services
 
 import (
 	"fmt"
-	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
 func (t *Tools) List() ([]*models.Tool, error) {
-	slog.Debug("Listing tools")
-
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -27,8 +24,6 @@ func (t *Tools) List() ([]*models.Tool, error) {
 }
 
 func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
-	slog.Debug("Listing active tools")
-
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -46,8 +41,6 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, error) {
 }
 
 func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
-	slog.Debug("Listing dead tools")
-
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -65,8 +58,6 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, error) {
 }
 
 func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, error) {
-	slog.Debug("Getting tools by press", "press", pressNumber)
-
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
 		return nil, errors.NewValidationError(
 			fmt.Sprintf("invalid press number: %d (must be 0-5)", *pressNumber),
@@ -88,12 +79,9 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, err
 	return ScanRows(rows, scanTool)
 }
 
-func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models.Tool {
-	slog.Debug("Getting active tools for press", "press", pressNumber)
-
+func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, error) {
 	if !models.IsValidPressNumber(&pressNumber) {
-		slog.Error("Invalid press number (must be 0-5)", "press", pressNumber)
-		return nil
+		return nil, errors.NewValidationError(fmt.Sprintf("invalid press number: %d", pressNumber))
 	}
 
 	query := fmt.Sprintf(`
@@ -104,29 +92,28 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) []*models
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		slog.Error("Failed to query active tools", "error", err)
-		return nil
+		return nil, t.GetSelectError(err)
 	}
 	defer rows.Close()
 
 	tools, err := ScanRows(rows, scanTool)
 	if err != nil {
-		slog.Error("Failed to scan active tools", "error", err)
-		return nil
+		return nil, t.GetSelectError(err)
 	}
 
-	return tools
+	return tools, nil
 }
 
 func (t *Tools) GetPressUtilization() ([]models.PressUtilization, error) {
-	slog.Debug("Getting press utilization")
-
 	// Valid press numbers: 0, 2, 3, 4, 5
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	utilization := make([]models.PressUtilization, 0, len(validPresses))
 
 	for _, pressNum := range validPresses {
-		tools := t.GetActiveToolsForPress(pressNum)
+		tools, err := t.GetActiveToolsForPress(pressNum)
+		if err != nil {
+			return nil, err
+		}
 		count := len(tools)
 
 		utilization = append(utilization, models.PressUtilization{

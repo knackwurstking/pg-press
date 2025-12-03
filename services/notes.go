@@ -3,7 +3,6 @@ package services
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -37,8 +36,6 @@ func NewNotes(r *Registry) *Notes {
 }
 
 func (n *Notes) List() ([]*models.Note, error) {
-	slog.Debug("Listing notes")
-
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s;`,
@@ -55,8 +52,6 @@ func (n *Notes) List() ([]*models.Note, error) {
 }
 
 func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
-	slog.Debug("Getting note with ID", "id", id)
-
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -77,8 +72,6 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
 }
 
 func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
-	slog.Debug("Getting notes by IDs", "ids", len(ids))
-
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -123,12 +116,10 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
 }
 
 func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
-	slog.Debug("Getting notes for press", "press", press)
 	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
 func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, error) {
-	slog.Debug("Getting notes for tool", "tool", toolID)
 	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
 }
 
@@ -150,8 +141,6 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
 }
 
 func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
-	slog.Debug("Adding note: level", "level", note.Level)
-
 	if err := note.Validate(); err != nil {
 		return 0, err
 	}
@@ -175,8 +164,6 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
 }
 
 func (n *Notes) Update(note *models.Note) error {
-	slog.Debug("Updating note: id", "id", note.ID, "level", note.Level)
-
 	if err := note.Validate(); err != nil {
 		return err
 	}
@@ -191,8 +178,6 @@ func (n *Notes) Update(note *models.Note) error {
 }
 
 func (n *Notes) Delete(id models.NoteID) error {
-	slog.Debug("Deleting note for ID", "id", id)
-
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)
 	return n.GetDeleteError(err)
