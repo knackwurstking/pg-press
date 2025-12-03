@@ -20,6 +20,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 				var (
 					top         string
 					topCassette string
+					bottom      string
 				)
 
 				for _, t := range u.Tools {
@@ -28,6 +29,8 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
 					case models.PositionTopCassette:
 						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
+					case models.PositionBottom:
+						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
 					}
 				}
 			}}
@@ -35,6 +38,7 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
 				Top:         top,
 				TopCassette: topCassette,
+				Bottom:      bottom,
 				Href:        string(utils.UrlPress(u.PressNumber).Page),
 			})
 		}
@@ -45,6 +49,7 @@ type listPressItemOptions struct {
 	Title       string
 	Top         string
 	TopCassette string
+	Bottom      string
 	Href        string
 }
 
@@ -77,6 +82,13 @@ templ listPressItem(props listPressItemOptions) {
 									<small class="text-sm">{ props.TopCassette }</small>
 								</span>
 							}
+						</span>
+					}
+					if props.Bottom != "" {
+						<!-- Lower Tool -->
+						<span class="flex flex-col justify-center items-start gap-sm">
+							@components.PositionBadge(models.PositionBottom, "primary text-bold")
+							<small class="text-sm">{ props.Bottom }</small>
 						</span>
 					}
 				</span>
