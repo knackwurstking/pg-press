@@ -37,9 +37,12 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) error {
-	invalid := utils.ParseQueryBool(c, "invalid")
-	apiKey := c.FormValue("api-key")
-	page := templates.LoginPage(apiKey, invalid)
+	var (
+		invalid = utils.ParseQueryBool(c, "invalid")
+		apiKey  = c.FormValue("api-key")
+		page    = templates.LoginPage(apiKey, invalid)
+	)
+
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render login page")
 	}
@@ -52,7 +55,11 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 
 	// Parse form
 	apiKey := c.FormValue("api-key")
-	if apiKey == "" || h.processApiKeyLogin(apiKey, c) != nil {
+	err := h.processApiKeyLogin(apiKey, c)
+	if err != nil {
+		slog.Warn("Processing api key failed", "api_key", utils.MaskString(apiKey), "error", err)
+	}
+	if apiKey == "" || err != nil {
 		invalid := true
 		return utils.RedirectTo(c, utils.UrlLogin(apiKey, &invalid).Page)
 	}
@@ -118,25 +125,30 @@ func (h *Handler) clearExistingSession(ctx echo.Context) error {
 }
 
 func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
-	cookieValue := uuid.New().String()
-	isHTTPS := ctx.Request().TLS != nil || ctx.Scheme() == "https"
+	var (
+		cookieValue = uuid.New().String()
+		cookiePath  = env.ServerPathPrefix
+	)
 
-	cookiePath := env.ServerPathPrefix
 	if cookiePath == "" {
 		cookiePath = "/"
 	}
 
-	cookie := &http.Cookie{
+	err := h.registry.Cookies.Add(
+		models.NewCookie(ctx.Request().UserAgent(), cookieValue, apiKey),
+	)
+	if err != nil {
+		return err
+	}
+
+	ctx.SetCookie(&http.Cookie{
 		Name:     env.CookieName,
 		Value:    cookieValue,
 		Expires:  time.Now().Add(env.CookieExpirationDuration),
 		Path:     cookiePath,
 		HttpOnly: true,
-		Secure:   isHTTPS,
+		Secure:   ctx.Request().TLS != nil || ctx.Scheme() == "https",
 		SameSite: http.SameSiteLaxMode,
-	}
-	ctx.SetCookie(cookie)
-
-	sessionCookie := models.NewCookie(ctx.Request().UserAgent(), cookieValue, apiKey)
-	return h.registry.Cookies.Add(sessionCookie)
+	})
+	return nil
 }
