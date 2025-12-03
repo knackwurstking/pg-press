@@ -354,6 +354,10 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
 	tool.SetPress(formData.Press)
 
+	if _, err := h.registry.Tools.Add(tool, user); err != nil {
+		return errors.Handler(err, "add tool")
+	}
+
 	// Create feed entry
 	title := "Neues Werkzeug erstellt"
 
