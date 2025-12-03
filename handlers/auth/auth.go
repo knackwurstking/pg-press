@@ -48,7 +48,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 }
 
 func (h *Handler) PostLoginPage(c echo.Context) error {
-	slog.Info("Logging user in...")
+	slog.Info("User authentication request received")
 
 	// Parse form
 	apiKey := c.FormValue("api-key")
@@ -90,7 +90,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 	}
 
 	if err := h.clearExistingSession(ctx); err != nil {
-		slog.Info("Failed to clear existing session", "error", err)
+		slog.Warn("Failed to clear existing session", "error", err)
 	}
 
 	if err := h.createSession(ctx, apiKey); err != nil {
@@ -98,7 +98,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 	}
 
 	if user.IsAdmin() {
-		slog.Info("Administrator logged in", "user_name", user.Name, "real_ip", ctx.RealIP())
+		slog.Info("Administrator login successful", "user", user.Name, "ip", ctx.RealIP())
 	}
 
 	return nil

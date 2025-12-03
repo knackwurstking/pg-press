@@ -39,7 +39,7 @@ func (h *Handler) GetFeedPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
-	slog.Debug("Get a list with feeds", "offset", 0, "limit", env.MaxFeedsPerPage)
+	slog.Debug("Retrieving feed list", "offset", 0, "limit", env.MaxFeedsPerPage)
 
 	feeds, err := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
 	if err != nil {

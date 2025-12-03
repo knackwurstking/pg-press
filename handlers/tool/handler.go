@@ -99,7 +99,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
-	slog.Info("Bind a tool")
+	slog.Info("Initiating tool binding operation")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -179,7 +179,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
-	slog.Info("Unbind a tool")
+	slog.Info("Initiating tool unbinding operation")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -269,7 +269,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
-	slog.Info("Deleting a cycle")
+	slog.Info("Initiating cycle deletion operation")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -321,7 +321,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
-	slog.Info("Get metal sheets entries for a tool")
+	slog.Info("Retrieving metal sheet entries for tool")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -385,7 +385,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
-	slog.Info("Delete a tool regeneration entry")
+	slog.Info("Deleting tool regeneration entry")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {

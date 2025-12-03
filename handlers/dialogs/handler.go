@@ -144,7 +144,7 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PostEditCycle(c echo.Context) error {
-	slog.Info("Create a new cycle")
+	slog.Info("Cycle creation request received")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -189,10 +189,10 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		slog.Info("Start regeneration", "tool", tool.ID, "user_name", user.Name)
+		slog.Info("Starting tool regeneration", "tool_id", tool.ID, "user", user.Name)
 		_, err := h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
 		if err != nil {
-			slog.Error("Failed to start regeneration", "tool", tool.ID, "user_name", user.Name, "error", err)
+			slog.Error("Failed to start tool regeneration", "tool_id", tool.ID, "user", user.Name, "error", err)
 		}
 	}
 
@@ -216,7 +216,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PutEditCycle(c echo.Context) error {
-	slog.Info("Update cycle")
+	slog.Info("Updating cycle")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -339,7 +339,7 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PostEditTool(c echo.Context) error {
-	slog.Debug("Add a new tool")
+	slog.Info("Creating new tool")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -373,7 +373,7 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PutEditTool(c echo.Context) error {
-	slog.Info("Update an existing tool")
+	slog.Info("Updating existing tool")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -481,7 +481,7 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) PostEditMetalSheet(c echo.Context) error {
-	slog.Info("Creating a new metal sheet")
+	slog.Info("Metal sheet creation request received")
 
 	// Get current user for feed creation
 	user, eerr := utils.GetUserFromContext(c)
@@ -524,7 +524,7 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) PutEditMetalSheet(c echo.Context) error {
-	slog.Info("Update a metal sheet")
+	slog.Info("Updating metal sheet")
 
 	// Get current user for feed creation
 	user, eerr := utils.GetUserFromContext(c)
@@ -615,7 +615,7 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PostEditNote(c echo.Context) error {
-	slog.Info("Create a new note")
+	slog.Info("Creating new note")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -646,7 +646,7 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PutEditNote(c echo.Context) error {
-	slog.Info("Update an existing note")
+	slog.Info("Updating note")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -718,7 +718,7 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
-	slog.Info("Update a tool regeneration entry")
+	slog.Info("Updating tool regeneration entry")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -789,7 +789,7 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
-	slog.Info("Update a press regeneration entry")
+	slog.Info("Updating press regeneration entry")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {

@@ -51,7 +51,7 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteTool(c echo.Context) error {
-	slog.Info("Delete a tool")
+	slog.Info("Deleting tool")
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
@@ -81,7 +81,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 }
 
 func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
-	slog.Info("Mark a tool as dead")
+	slog.Info("Marking tool as dead")
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {

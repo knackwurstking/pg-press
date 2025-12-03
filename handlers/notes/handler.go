@@ -71,7 +71,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 // HTMXDeleteNote deletes a note and unlinks it from all tools
 func (h *Handler) HTMXDeleteNote(c echo.Context) error {
-	slog.Info("Deleted a note")
+	slog.Info("Deleting note")
 
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
