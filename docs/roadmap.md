@@ -31,7 +31,7 @@ system.
 - Extract common UI components into reusable templates
   - [x] Notes Card component (consolidate handler version with components/cards.templ)
   - [x] Section container templates with consistent styling
-  - [ ] Action bar components with edit/delete functionality
+  - [x] Action bar components with edit/delete functionality
   - [ ] Standard form controls for status display and editing
   - [ ] Table components with action buttons
 

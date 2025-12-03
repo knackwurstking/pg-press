@@ -32,10 +32,7 @@ templ Page() {
 				/>
 			}
 			<!-- Page Actions: Create -->
-			@components.Section(templ.Attributes{
-				"style": "margin-top: 0",
-				"class": "flex flex-row gap justify-end",
-			}) {
+			@components.ActionBar() {
 				<a
 					href={ utils.UrlEditor(
 						"troublereport", 

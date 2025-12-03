@@ -16,7 +16,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	></span>
 	@sectionToolsFilter(tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
-		<div class="actions-bar flex gap justify-end items-center">
+		@components.ActionBar() {
 			<button
 				type="button"
 				class="primary flex gap"
@@ -29,7 +29,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 				<i class="bi bi-plus-lg"></i>
 				<span>Erstellen</span>
 			</button>
-		</div>
+		}
 		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
 			@ToolsList(tools, user)
 		</ul>

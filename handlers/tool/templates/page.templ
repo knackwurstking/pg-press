@@ -42,9 +42,7 @@ templ Page(props *PageProps) {
 					document.querySelector("#app-bar-title").textContent = event.detail.appBarTitle;
 				});
 			</script>
-			@components.Section(templ.Attributes{
-				"class": "action-bar flex gap justify-end items-center",
-			}) {
+			@components.ActionBar() {
 				<button
 					class="primary flex gap"
 					hx-get={ utils.UrlDialogs().EditTool(props.ToolID) }

@@ -29,9 +29,7 @@ templ Page(press models.PressNumber, user *models.User) {
 
 // Actions section - contains buttons for umbau and regeneration
 templ sectionActions(press models.PressNumber, user *models.User) {
-	@components.Section(templ.Attributes{
-		"class": "flex justify-end items-center gap",
-	}) {
+	@components.ActionBar() {
 		<a
 			role="button"
 			class="primary"
