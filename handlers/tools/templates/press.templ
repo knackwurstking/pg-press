@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
-	uidev "github.com/knackwurstking/pg-press/ui"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
@@ -56,11 +56,11 @@ type listPressItemProps struct {
 
 templ listPressItem(props listPressItemProps) {
 	<li title={ props.Title }>
-		@uidev.Button("", uidev.ButtonOptions{
+		@ui.Button("", ui.ButtonOptions{
 			Anchor:  true,
 			Href:    templ.SafeURL(props.Href),
-			Variant: uidev.ButtonVariantOutline,
-			Color:   uidev.ColorContrast,
+			Variant: ui.ButtonVariantOutline,
+			Color:   ui.ColorContrast,
 			Classes: map[string]bool{
 				"flex":            true,
 				"justify-between": true,

@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/handlers/wsfeed"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
-	"github.com/knackwurstking/ui"
+	ui "github.com/knackwurstking/ui/ui-templ"
 	"golang.org/x/net/websocket"
 
 	"github.com/labstack/echo/v4"

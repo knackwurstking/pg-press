@@ -11,7 +11,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
-	"github.com/knackwurstking/ui"
+	ui "github.com/knackwurstking/ui/ui-templ"
 	"github.com/labstack/echo/v4"
 )
 

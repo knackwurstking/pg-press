@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
-	uidev "github.com/knackwurstking/pg-press/ui"
 	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
@@ -18,8 +18,8 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	@sectionToolsFilter(tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
-			@uidev.Button("", uidev.ButtonOptions{
-				HxOptions: uidev.HxOptions{
+			@ui.Button("", ui.ButtonOptions{
+				HxOptions: ui.HxOptions{
 					Method:          "get",
 					Href:            utils.UrlDialogs().EditTool(0),
 					Trigger:         "click",
@@ -30,7 +30,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 					"flex": true,
 					"gap":  true,
 				},
-				Color: uidev.ColorPrimary,
+				Color: ui.ColorPrimary,
 			}) {
 				<i class="bi bi-plus-lg"></i> // TODO: Use icon component
 				<span>Erstellen</span>
