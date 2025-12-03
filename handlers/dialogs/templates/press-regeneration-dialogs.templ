@@ -10,7 +10,7 @@ import (
 )
 
 templ EditPressRegenerationDialog(r *models.PressRegeneration) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             utils.UrlDialogs().EditPressRegeneration(r.ID),
 		ID:               "press-regeneration-dialog",

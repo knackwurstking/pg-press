@@ -9,7 +9,7 @@ import (
 )
 
 templ NewNoteDialog(linkToTables []string, user *models.User) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
 		Href:             utils.UrlDialogs().EditNote(0, strings.Join(linkToTables, ",")),
 		ID:               "notes-dialog",
@@ -22,7 +22,7 @@ templ NewNoteDialog(linkToTables []string, user *models.User) {
 }
 
 templ EditNoteDialog(note *models.Note, linkToTables []string, user *models.User) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             utils.UrlDialogs().EditNote(note.ID, strings.Join(linkToTables, ",")),
 		ID:               "notes-edit-dialog",

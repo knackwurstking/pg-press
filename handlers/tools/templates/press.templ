@@ -5,7 +5,6 @@ import (
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
-	"github.com/knackwurstking/ui/ui-templ"
 )
 
 templ SectionPress(pressUtilization []models.PressUtilization) {
@@ -21,7 +20,6 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 				var (
 					top         string
 					topCassette string
-					bottom      string
 				)
 
 				for _, t := range u.Tools {
@@ -30,43 +28,33 @@ templ SectionPress(pressUtilization []models.PressUtilization) {
 						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
 					case models.PositionTopCassette:
 						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					case models.PositionBottom:
-						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
 					}
 				}
 			}}
-			@listPressItem(listPressItemProps{
+			@listPressItem(listPressItemOptions{
 				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
 				Top:         top,
 				TopCassette: topCassette,
-				Bottom:      bottom,
 				Href:        string(utils.UrlPress(u.PressNumber).Page),
 			})
 		}
 	</ul>
 }
 
-type listPressItemProps struct {
+type listPressItemOptions struct {
 	Title       string
 	Top         string
 	TopCassette string
-	Bottom      string
 	Href        string
 }
 
-templ listPressItem(props listPressItemProps) {
+templ listPressItem(props listPressItemOptions) {
 	<li title={ props.Title }>
-		@ui.Button("", ui.ButtonOptions{
-			Anchor:  true,
-			Href:    templ.SafeURL(props.Href),
-			Variant: ui.ButtonVariantOutline,
-			Color:   ui.ColorContrast,
-			Classes: map[string]bool{
-				"flex":            true,
-				"justify-between": true,
-				"items-center":    true,
-			},
-		}) {
+		<a
+			role="button"
+			href={ templ.SafeURL(props.Href) }
+			class="outline contrast flex justify-between items-center"
+		>
 			<span class="flex flex-col gap-lg w-full">
 				<h5>{ props.Title }</h5>
 				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
@@ -91,16 +79,9 @@ templ listPressItem(props listPressItemProps) {
 							}
 						</span>
 					}
-					if props.Bottom != "" {
-						<!-- Lower Tool -->
-						<span class="flex flex-col justify-center items-start gap-sm">
-							@components.PositionBadge(models.PositionBottom, "primary text-bold")
-							<small class="text-sm">{ props.Bottom }</small>
-						</span>
-					}
 				</span>
 			</span>
 			<i class="bi bi-chevron-right"></i>
-		}
+		</a>
 	</li>
 }

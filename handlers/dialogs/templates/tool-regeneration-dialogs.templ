@@ -10,7 +10,7 @@ import (
 )
 
 templ EditToolRegenerationDialog(r *models.ResolvedToolRegeneration) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             utils.UrlDialogs().EditToolRegeneration(r.ID),
 		ID:               "regeneration-dialog",

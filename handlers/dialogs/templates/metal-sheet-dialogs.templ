@@ -11,7 +11,7 @@ import (
 templ NewMetalSheetDialog(
 	tool *models.Tool,
 ) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
 		Href:             utils.UrlDialogs().EditMetalSheet(0, tool.ID),
 		ID:               "metal-sheet-dialog",
@@ -30,7 +30,7 @@ templ EditMetalSheetDialog(
 	metalSheet *models.MetalSheet,
 	tool *models.Tool,
 ) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             utils.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
 		ID:               "metal-sheet-edit-dialog",

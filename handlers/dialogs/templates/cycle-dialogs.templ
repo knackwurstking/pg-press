@@ -18,7 +18,7 @@ templ NewCycleDialog(
 	inputTotalCycles int64,
 	originalDate *time.Time,
 ) {
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
 		Href:             utils.UrlDialogs().EditCycle(0, tool.ID, nil),
 		ID:               "cycle-dialog",
@@ -125,7 +125,7 @@ templ EditCycleDialog(
 	originalDate *time.Time,
 ) {
 	{{ toolChangeMode := len(tools) > 0 }}
-	@ui.Dialog(ui.DialogProps{
+	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             utils.UrlDialogs().EditCycle(cycle.ID, 0, &toolChangeMode),
 		ID:               "cycle-edit-dialog",
