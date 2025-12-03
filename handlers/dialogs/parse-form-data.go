@@ -35,16 +35,17 @@ type DialogEditToolRegenerationFormData struct {
 func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 	form := &DialogEditCycleFormData{}
 
+	// Parse press number
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)
 		if err != nil {
 			return nil, err
 		}
-
 		pn := models.PressNumber(press)
 		form.PressNumber = &pn
 	}
 
+	// Parse date
 	if dateString := c.FormValue("original_date"); dateString != "" {
 		var err error
 		form.Date, err = time.Parse(env.DateFormat, dateString)
@@ -55,16 +56,18 @@ func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 		form.Date = time.Now()
 	}
 
-	if totalCyclesString := c.FormValue("total_cycles"); totalCyclesString == "" {
+	// Parse total cycles (required)
+	totalCyclesString := c.FormValue("total_cycles")
+	if totalCyclesString == "" {
 		return nil, fmt.Errorf("form value total_cycles is required")
-	} else {
-		var err error
-		form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
-		if err != nil {
-			return nil, err
-		}
+	}
+	var err error
+	form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
+	if err != nil {
+		return nil, err
 	}
 
+	// Parse regenerating flag
 	form.Regenerating = c.FormValue("regenerating") != ""
 
 	// Parse tool_id if present (for tool change mode)
@@ -111,13 +114,13 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 		data.Format.Height = height
 	}
 
-	// Parse type
+	// Parse type (with length limit)
 	data.Type = strings.TrimSpace(c.FormValue("type"))
 	if len(data.Type) > 25 {
 		return nil, errors.NewValidationError("type must be 25 characters or less")
 	}
 
-	// Parse code
+	// Parse code (required, with length limit)
 	data.Code = strings.TrimSpace(c.FormValue("code"))
 	if data.Code == "" {
 		return nil, errors.NewValidationError("code is required")
@@ -126,7 +129,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 		return nil, errors.NewValidationError("code must be 25 characters or less")
 	}
 
-	// Parse press
+	// Parse press number
 	if pressStr := c.FormValue("press-selection"); pressStr != "" {
 		press, err := strconv.Atoi(pressStr)
 		if err != nil {
@@ -196,7 +199,7 @@ func getMetalSheetFormData(c echo.Context) (*models.MetalSheet, error) {
 func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
 	note = &models.Note{}
 
-	// Parse level
+	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
 		return nil, fmt.Errorf("level is required")
@@ -214,7 +217,7 @@ func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
 
 	note.Level = models.Level(levelInt)
 
-	// Parse content
+	// Parse content (required)
 	note.Content = strings.TrimSpace(c.FormValue("content"))
 	if note.Content == "" {
 		return nil, fmt.Errorf("content is required")

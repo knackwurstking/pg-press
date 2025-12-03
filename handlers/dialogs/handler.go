@@ -62,6 +62,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetEditCycle(c echo.Context) error {
+	// Check if we're in tool change mode
+	toolChangeMode := utils.ParseQueryBool(c, "tool_change_mode")
+
 	var (
 		tool             *models.Tool
 		cycle            *models.Cycle
@@ -70,9 +73,6 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 		inputTotalCycles int64
 		originalDate     *time.Time
 	)
-
-	// Check if we're in tool change mode
-	toolChangeMode := utils.ParseQueryBool(c, "tool_change_mode")
 
 	if c.QueryParam("id") != "" {
 		cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -196,18 +196,17 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		}
 	}
 
-	{ // Create Feed
-		title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
-		content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	// Create Feed
+	title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
+	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
 
-		if form.Regenerating {
-			content += "\nRegenerierung gestartet"
-		}
+	if form.Regenerating {
+		content += "\nRegenerierung gestartet"
+	}
 
-		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Warn("Failed to create feed for cycle creation", "error", err)
-		}
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", err)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -283,28 +282,27 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		}
 	}
 
-	{ // Create Feed
-		var title string
-		var content string
-		if form.ToolID != nil {
-			// Tool change occurred
-			title = "Zyklus aktualisiert mit Werkzeugwechsel"
-			content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-				*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-		} else {
-			// Regular cycle update
-			title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
-			content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-				*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-		}
+	// Create Feed
+	var title string
+	var content string
+	if form.ToolID != nil {
+		// Tool change occurred
+		title = "Zyklus aktualisiert mit Werkzeugwechsel"
+		content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	} else {
+		// Regular cycle update
+		title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
+		content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
+			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
+	}
 
-		if form.Regenerating {
-			content += "\nRegenerierung abgeschlossen"
-		}
+	if form.Regenerating {
+		content += "\nRegenerierung abgeschlossen"
+	}
 
-		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Warn("Failed to create feed for cycle update", "error", err)
-		}
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+		slog.Warn("Failed to create feed for cycle update", "error", err)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -313,9 +311,8 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) GetEditTool(c echo.Context) error {
-	var tool *models.Tool
-
 	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
+	var tool *models.Tool
 	if toolIDQuery > 0 {
 		var err error
 		tool, err = h.registry.Tools.Get(models.ToolID(toolIDQuery))
@@ -440,45 +437,48 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 }
 
 func (h *Handler) GetEditMetalSheet(c echo.Context) error {
-	var (
-		toolID     models.ToolID
-		metalSheet *models.MetalSheet
-	)
-
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	if metalSheetIDQuery, _ := utils.ParseQueryInt64(c, "id"); metalSheetIDQuery > 0 {
 		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 		// Fetch existing metal sheet for editing
-		var err error
-		if metalSheet, err = h.registry.MetalSheets.Get(metalSheetID); err != nil {
+		metalSheet, err := h.registry.MetalSheets.Get(metalSheetID)
+		if err != nil {
 			return errors.Handler(err, "fetch metal sheet from database")
 		}
-		toolID = metalSheet.ToolID
+
+		// Fetch the associated tool for the dialog
+		tool, err := h.registry.Tools.Get(metalSheet.ToolID)
+		if err != nil {
+			return errors.Handler(err, "get tool from database")
+		}
+
+		var d templ.Component
+		d = templates.EditMetalSheetDialog(metalSheet, tool)
+
+		if err = d.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.Handler(err, "render metal sheet dialog")
+		}
 	} else {
 		// Creating new metal sheet, get tool_id from query
 		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 		if err != nil {
 			return errors.Handler(err, "get the tool id from query")
 		}
-		toolID = models.ToolID(toolIDQuery)
-	}
+		toolID := models.ToolID(toolIDQuery)
 
-	// Fetch the associated tool for the dialog
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool from database")
-	}
+		// Fetch the associated tool for the dialog
+		tool, err := h.registry.Tools.Get(toolID)
+		if err != nil {
+			return errors.Handler(err, "get tool from database")
+		}
 
-	var d templ.Component
-	if metalSheet != nil {
-		d = templates.EditMetalSheetDialog(metalSheet, tool)
-	} else {
+		var d templ.Component
 		d = templates.NewMetalSheetDialog(tool)
-	}
 
-	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render metal sheet dialog")
+		if err = d.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.Handler(err, "render metal sheet dialog")
+		}
 	}
 
 	return nil
@@ -750,22 +750,21 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		return errors.Handler(err, "update regeneration")
 	}
 
-	{ // Create Feed
-		title := "Werkzeug Regenerierung aktualisiert"
-		content := fmt.Sprintf(
-			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-			regeneration.GetTool().String(),
-			regeneration.GetCycle().Date.Format(env.DateFormat),
-			regeneration.GetCycle().PartialCycles,
-		)
+	// Create Feed
+	title := "Werkzeug Regenerierung aktualisiert"
+	content := fmt.Sprintf(
+		"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+		regeneration.GetTool().String(),
+		regeneration.GetCycle().Date.Format(env.DateFormat),
+		regeneration.GetCycle().PartialCycles,
+	)
 
-		if regeneration.Reason != "" {
-			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
-		}
+	if regeneration.Reason != "" {
+		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+	}
 
-		if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-			slog.Warn("Failed to create feed for cycle creation", "error", err)
-		}
+	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", err)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
