@@ -29,7 +29,7 @@ system.
 ## Refactoring
 
 - Extract common UI components into reusable templates
-  - [ ] Notes Card component (consolidate handler version with components/cards.templ)
+  - [x] Notes Card component (consolidate handler version with components/cards.templ)
   - [ ] Section container templates with consistent styling
   - [ ] Action bar components with edit/delete functionality
   - [ ] Standard form controls for status display and editing
