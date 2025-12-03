@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/ui"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
@@ -17,18 +18,23 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	@sectionToolsFilter(tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
-			<button
-				type="button"
-				class="primary flex gap"
-				hx-get={ utils.UrlDialogs().EditTool(0) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-			>
-				<i class="bi bi-plus-lg"></i>
+			@uidev.Button("", &uidev.ButtonOptions{
+				HxOptions: &uidev.HxOptions{
+					Method:          "get",
+					Href:            utils.UrlDialogs().EditTool(0),
+					Trigger:         "click",
+					Swap:            "beforeend",
+					OnResponseError: "alert(event.detail.xhr.responseText)",
+				},
+				Classes: map[string]bool{
+					"flex": true,
+					"gap":  true,
+				},
+				Color: uidev.ColorPrimary,
+			}) {
+				<i class="bi bi-plus-lg"></i> // TODO: Use icon component
 				<span>Erstellen</span>
-			</button>
+			}
 		}
 		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
 			@ToolsList(tools, user)
