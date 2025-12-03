@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ NoteCard(note *models.Note) {
+templ NoteCard(note *models.Note, tools []*models.Tool) {
 	{{
 		filterClass := ""
 		switch note.Level {
@@ -18,8 +18,10 @@ templ NoteCard(note *models.Note) {
 			filterClass = "destructive outline"
 		}
 	}}
-	<div class={ fmt.Sprintf("card compact elevation-2 %s", filterClass) }>
-		<div class="card-header flex gap-sm justify-between items-center">
+	<div class={ fmt.Sprintf("card compact elevation-2 flex-1 min-w-fit %s", filterClass) }>
+		<div
+			class="card-header flex gap-sm justify-between items-center"
+		>
 			<span class="note-importance flex gap">
 				switch note.Level {
 					case models.LevelInfo:
@@ -60,5 +62,38 @@ templ NoteCard(note *models.Note) {
 		<div class="card-body">
 			{ note.Content }
 		</div>
+		if len(tools) > 0 && note.Linked != "" {
+			<div class="card-footer">
+				<small class="text-muted">
+					<span class="mr">Verknüpft mit:</span>
+					{{ linked := note.GetLinked() }}
+					switch linked.Name {
+						case "tool":
+							for _, tool := range tools {
+								if tool.ID == models.ToolID(linked.ID) {
+									<a
+										href={ utils.UrlTool(tool.ID, 0, 0).Page }
+										class="tool-link"
+									>
+										{ fmt.Sprintf("Werkzeug %s %s %s (%s)", tool.Format.String(), tool.Type, tool.Code, tool.Position.GermanString()) }
+										if tool.Press != nil {
+											({ fmt.Sprintf("Presse %d", *tool.Press) })
+										}
+									</a>
+								}
+							}
+						case "press":
+							<a
+								href={ utils.UrlPress(models.PressNumber(linked.ID)).Page }
+								class="press-link"
+							>
+								{ fmt.Sprintf("Presse %d", linked.ID) }
+							</a>
+						default:
+							<span>{ note.Linked }</span>
+					}
+				</small>
+			</div>
+		}
 	</div>
 }

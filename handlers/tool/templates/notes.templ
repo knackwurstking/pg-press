@@ -24,7 +24,7 @@ templ Notes(tool *models.ResolvedTool) {
 	if len(tool.GetNotes()) > 0 {
 		<div class="notes-list">
 			for _, note := range tool.GetNotes() {
-				@components.NoteCard(note)
+				@components.NoteCard(note, nil)
 			}
 		</div>
 	} else {

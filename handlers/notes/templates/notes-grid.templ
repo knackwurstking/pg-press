@@ -32,7 +32,7 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 					//}
 				}}
 				if !skip {
-					@components.NoteCard(note)
+					@components.NoteCard(note, tools)
 				}
 			}
 		</div>

@@ -32,7 +32,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 		// Press Notes
 		<section class="notes-list flex flex-col gap-lg p">
 			for _, note := range notes {
-				@components.NoteCard(note)
+				@components.NoteCard(note, nil)
 			}
 		</section>
 		<section class="flex justify-center mt">
@@ -97,19 +97,19 @@ templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
 		if len(topToolNotes) > 0 {
 			<h4>{ models.PositionTop.GermanString() }</h4>
 			for _, n := range topToolNotes {
-				@components.NoteCard(n)
+				@components.NoteCard(n, nil)
 			}
 		}
 		if len(topCassetteToolNotes) > 0 {
 			<h4>{ models.PositionTopCassette.GermanString() }</h4>
 			for _, n := range topCassetteToolNotes {
-				@components.NoteCard(n)
+				@components.NoteCard(n, nil)
 			}
 		}
 		if len(bottomToolNotes) > 0 {
 			<h4>{ models.PositionBottom.GermanString() }</h4>
 			for _, n := range bottomToolNotes {
-				@components.NoteCard(n)
+				@components.NoteCard(n, nil)
 			}
 		}
 	</section>
