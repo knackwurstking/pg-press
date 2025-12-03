@@ -79,8 +79,6 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Fetching tool with notes", "tool", toolID)
-
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
 		return errors.Handler(err, "get tool")
@@ -101,6 +99,8 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
+	slog.Info("Bind a tool")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -134,8 +134,6 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		}
 		targetID = models.ToolID(targetIDParsed)
 	}
-
-	slog.Info("Updating tool binding", "tool", toolID, "target", targetID)
 
 	{ // Make sure to check for position first (target == top && toolID == cassette)
 		var (
@@ -181,6 +179,8 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
+	slog.Info("Unbind a tool")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -269,6 +269,8 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
+	slog.Info("Deleting a cycle")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -319,6 +321,8 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
+	slog.Info("Get metal sheets entries for a tool")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -328,8 +332,6 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Fetching metal sheets", "tool", toolID, "user_name", user.Name)
 
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
@@ -359,8 +361,6 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Fetching notes for tool", "tool", toolID)
-
 	// Get the tool
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
@@ -385,6 +385,8 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
+	slog.Info("Delete a tool regeneration entry")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -396,8 +398,6 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 	} else {
 		regenerationID = models.ToolRegenerationID(id)
 	}
-
-	slog.Info("Deleting the regeneration", "regeneration", regenerationID, "user_name", user.Name)
 
 	var regeneration *models.ResolvedToolRegeneration
 	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
@@ -490,6 +490,8 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 }
 
 func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
+	slog.Info("Change the tool status")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -510,14 +512,6 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	if err != nil {
 		return errors.Handler(err, "get tool from database")
 	}
-
-	slog.Info(
-		"Updating tool status",
-		"user_name", user.Name,
-		"tool_id", toolID,
-		"status-from", tool.Status(),
-		"status-to", statusStr,
-	)
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
@@ -594,8 +588,6 @@ func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *echo.HTTPE
 }
 
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
-	slog.Info("Get total cycles", "tool", toolID, "cycles", len(cycles))
-
 	// Get regeneration for this tool
 	var startCycleID models.CycleID
 
@@ -605,9 +597,8 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 
 	var totalCycles int64
 
-	for i, cycle := range cycles {
+	for _, cycle := range cycles {
 		if cycle.ID == startCycleID {
-			slog.Info("Stop counting...", "tool", toolID, "index", i, "cycle", cycle)
 			break
 		}
 

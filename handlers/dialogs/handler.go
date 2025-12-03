@@ -144,12 +144,12 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PostEditCycle(c echo.Context) error {
+	slog.Info("Create a new cycle")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Creating a new cycle", "user_name", user.Name)
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
 	if err != nil {
@@ -189,7 +189,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		slog.Info("Starting regeneration", "tool", tool.ID, "user_name", user.Name)
+		slog.Info("Start regeneration", "tool", tool.ID, "user_name", user.Name)
 		_, err := h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
 		if err != nil {
 			slog.Error("Failed to start regeneration", "tool", tool.ID, "user_name", user.Name, "error", err)
@@ -216,12 +216,12 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 }
 
 func (h *Handler) PutEditCycle(c echo.Context) error {
+	slog.Info("Update cycle")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Updating cycle", "user_name", user.Name)
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
@@ -322,9 +322,6 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 		if err != nil {
 			return errors.Handler(err, "get tool from database")
 		}
-		slog.Info("Opening edit dialog for tool", "tool_id", tool.ID)
-	} else {
-		slog.Info("Opening new tool dialog")
 	}
 
 	var d templ.Component
@@ -342,6 +339,8 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PostEditTool(c echo.Context) error {
+	slog.Debug("Add a new tool")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -354,13 +353,6 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 
 	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
 	tool.SetPress(formData.Press)
-
-	id, err := h.registry.Tools.Add(tool, user)
-	if err != nil {
-		return errors.Handler(err, "add tool")
-	}
-
-	slog.Info("Created tool", "id", id, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
 
 	// Create feed entry
 	title := "Neues Werkzeug erstellt"
@@ -381,6 +373,8 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 }
 
 func (h *Handler) PutEditTool(c echo.Context) error {
+	slog.Info("Update an existing tool")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -411,8 +405,6 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	if err := h.registry.Tools.Update(tool, user); err != nil {
 		return errors.Handler(err, "update tool")
 	}
-
-	slog.Info("Updated tool", "id", tool.ID, "type", tool.Type, "code", tool.Code, "user_name", user.Name)
 
 	// Create feed entry
 	title := "Werkzeug aktualisiert"
@@ -459,7 +451,6 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 			return errors.Handler(err, "fetch metal sheet from database")
 		}
 		toolID = metalSheet.ToolID
-		slog.Info("Opening edit dialog for metal sheet", "metal_sheet_id", metalSheetID)
 	} else {
 		// Creating new metal sheet, get tool_id from query
 		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -467,7 +458,6 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 			return errors.Handler(err, "get the tool id from query")
 		}
 		toolID = models.ToolID(toolIDQuery)
-		slog.Info("Opening new metal sheet dialog", "tool_id", toolID)
 	}
 
 	// Fetch the associated tool for the dialog
@@ -491,13 +481,13 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) PostEditMetalSheet(c echo.Context) error {
+	slog.Info("Creating a new metal sheet")
+
 	// Get current user for feed creation
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Creating a new metal sheet", "user_name", user.Name)
 
 	// Extract tool ID from query parameters
 	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
@@ -534,13 +524,13 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) PutEditMetalSheet(c echo.Context) error {
+	slog.Info("Update a metal sheet")
+
 	// Get current user for feed creation
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
 	}
-
-	slog.Info("Updating metal sheet", "user_name", user.Name)
 
 	// Extract metal sheet ID from query parameters
 	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
@@ -603,15 +593,11 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := models.NoteID(id)
 
-		slog.Info("Opening edit dialog for note", "note", noteID, "user_name", user.Name)
-
 		var err error
 		note, err = h.registry.Notes.Get(noteID)
 		if err != nil {
 			return errors.Handler(err, "get note from database")
 		}
-	} else {
-		slog.Info("Opening new note dialog", "user_name", user.Name)
 	}
 
 	var d templ.Component
@@ -629,6 +615,8 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PostEditNote(c echo.Context) error {
+	slog.Info("Create a new note")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -638,14 +626,6 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 	if err != nil {
 		return errors.BadRequest(err, "parse note form data")
 	}
-
-	// Create the note
-	noteID, err := h.registry.Notes.Add(note)
-	if err != nil {
-		return errors.Handler(err, "create note")
-	}
-
-	slog.Info("Created note", "note", noteID, "user_name", user.Name)
 
 	// Create feed entry
 	title := "Neue Notiz erstellt"
@@ -666,6 +646,8 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 }
 
 func (h *Handler) PutEditNote(c echo.Context) error {
+	slog.Info("Update an existing note")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -689,8 +671,6 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 	if err := h.registry.Notes.Update(note); err != nil {
 		return errors.Handler(err, "update note")
 	}
-
-	slog.Info("Updated note", "user_name", user.Name, "note", noteID)
 
 	// Create feed entry
 	title := "Notiz aktualisiert"
@@ -728,8 +708,6 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 		return err
 	}
 
-	slog.Info("Opening edit dialog for tool regeneration", "regeneration_id", regenerationID, "tool", resolvedRegeneration.GetTool().String())
-
 	dialog := templates.EditToolRegenerationDialog(resolvedRegeneration)
 
 	if err := dialog.Render(c.Request().Context(), c.Response()); err != nil {
@@ -740,6 +718,8 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
+	slog.Info("Update a tool regeneration entry")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -761,8 +741,6 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		formData := getEditRegenerationFormData(c)
 		regeneration.Reason = formData.Reason
 	}
-
-	slog.Info("Update tool regeneration", "id", regeneration.ID, "tool", regeneration.GetTool().String())
 
 	if err := h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user); err != nil {
 		return errors.Handler(err, "update regeneration")
@@ -802,8 +780,6 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 		return errors.Handler(err, "get press regeneration from database")
 	}
 
-	slog.Info("Opening edit dialog for press regeneration", "regeneration_id", id, "press", r.PressNumber)
-
 	d := templates.EditPressRegenerationDialog(r)
 	if err = d.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render press regeneration dialog")
@@ -813,6 +789,8 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
+	slog.Info("Update a press regeneration entry")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -827,8 +805,6 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	if err != nil {
 		return errors.Handler(err, "press regenerations")
 	}
-
-	slog.Info("Update press regeneration", "id", id, "press", r.PressNumber, "reason", r.Reason)
 
 	r.Reason = c.FormValue("reason")
 	if err = h.registry.PressRegenerations.Update(r); err != nil {

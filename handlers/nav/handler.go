@@ -47,8 +47,6 @@ func (h *Handler) GetFeedCounter(c echo.Context) error {
 			return
 		}
 
-		slog.Info("WebSocket connection established", "real_ip", realIP, "user_name", user.Name)
-
 		feedConn := h.feedHandler.RegisterConnection(user.TelegramID, user.LastFeed, ws)
 		if feedConn == nil {
 			slog.Error("Failed to register WebSocket connection", "real_ip", realIP, "user_name", user.Name)
@@ -58,8 +56,8 @@ func (h *Handler) GetFeedCounter(c echo.Context) error {
 
 		defer slog.Info("WebSocket connection closed", "real_ip", realIP, "user_name", user.Name)
 
-		go feedConn.WritePump()
-		feedConn.ReadPump(h.feedHandler)
+		go feedConn.WritePipe()
+		feedConn.ReadPipe(h.feedHandler)
 	})
 
 	wsHandler.ServeHTTP(c.Response(), c.Request())

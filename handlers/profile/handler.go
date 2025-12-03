@@ -44,8 +44,6 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Rendering profile page", "user_name", user.Name)
-
 	if err := h.handleUserNameChange(c, user); err != nil {
 		return errors.Handler(err, "error updating username")
 	}
@@ -64,14 +62,10 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 		return eerr
 	}
 
-	slog.Info("Fetching cookies for user", "user_name", user.Name)
-
 	cookies, err := h.registry.Cookies.ListApiKey(user.ApiKey)
 	if err != nil {
 		return errors.Handler(err, "list cookies")
 	}
-
-	slog.Info("Found cookies for user", "cookies", len(cookies), "user_name", user.Name)
 
 	cookiesTable := templates.Cookies(models.SortCookies(cookies))
 	err = cookiesTable.Render(c.Request().Context(), c.Response())
@@ -83,12 +77,12 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteCookies(c echo.Context) error {
+	slog.Info("Eat the cookie from a user :)")
+
 	value, err := utils.ParseQueryString(c, "value")
 	if err != nil {
 		return errors.Handler(err, "parse value")
 	}
-
-	slog.Info("Deleting cookie", "value", utils.MaskString(value))
 
 	if err := h.registry.Cookies.Remove(value); err != nil {
 		return errors.Handler(err, "delete cookie")

@@ -79,6 +79,13 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 }
 
 func (h *Handler) PostSaveContent(c echo.Context) error {
+	var (
+		editorType = c.FormValue("type")
+		idParam    = c.FormValue("id")
+	)
+
+	slog.Info("Save editor content", "type", editorType, "id", idParam)
+
 	// Get user from context
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -86,12 +93,11 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	}
 
 	// Parse form data
-	editorType := c.FormValue("type")
-	idParam := c.FormValue("id")
-	title := strings.TrimSpace(c.FormValue("title"))
-	content := strings.TrimSpace(c.FormValue("content"))
-	useMarkdownStr := c.FormValue("use_markdown")
-	returnURL := c.FormValue("return_url")
+	var (
+		title       = strings.TrimSpace(c.FormValue("title"))
+		content     = strings.TrimSpace(c.FormValue("content"))
+		useMarkdown = c.FormValue("use_markdown") == "on"
+	)
 
 	if editorType == "" {
 		return errors.BadRequest(nil, "editor type is required")
@@ -100,8 +106,6 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	if title == "" || content == "" {
 		return errors.BadRequest(nil, "title and content are required")
 	}
-
-	useMarkdown := useMarkdownStr == "on"
 
 	var id int64
 	if idParam != "" {
@@ -125,6 +129,7 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	}
 
 	// Redirect back to return URL or appropriate page
+	returnURL := c.FormValue("return_url")
 	if returnURL != "" {
 		return utils.RedirectTo(c, templ.SafeURL(returnURL))
 	}

@@ -162,6 +162,8 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
+	slog.Info("Remove a trouble report")
+
 	var troubleReportID models.TroubleReportID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
 		return errors.BadRequest(err, "parse trouble report ID")
@@ -215,6 +217,8 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 }
 
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
+	slog.Info("Rollback a trouble report to an other version")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr

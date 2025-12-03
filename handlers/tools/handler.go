@@ -51,6 +51,8 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXDeleteTool(c echo.Context) error {
+	slog.Info("Delete a tool")
+
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "invalid or missing id parameter")
@@ -71,8 +73,6 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 		return errors.Handler(err, "delete tool")
 	}
 
-	slog.Info("Tool deleted", "id", toolID, "user_name", user.Name)
-
 	// Create feed entry
 	h.createToolFeed(user, tool, "Werkzeug gelöscht")
 
@@ -81,6 +81,8 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 }
 
 func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
+	slog.Info("Mark a tool as dead")
+
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.BadRequest(err, "invalid or missing id parameter")
@@ -104,8 +106,6 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	if err := h.registry.Tools.MarkAsDead(toolID, user); err != nil {
 		return errors.Handler(err, "mark tool as dead")
 	}
-
-	slog.Info("Tool marked as dead", "id", toolID, "user_name", user.Name)
 
 	// Create feed entry
 	h.createToolFeed(user, tool, "Werkzeug als Tot markiert")
@@ -160,13 +160,6 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
-	}
-
-	slog.Info("User requested overlapping tools analysis", "user_name", user.Name)
-
 	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
 	if err != nil {
 		return errors.Handler(err, "get overlapping tools")

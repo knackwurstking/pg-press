@@ -33,6 +33,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 // DeleteMetalSheet handles the deletion of metal sheets
 func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
+	slog.Info("Remove a metal sheet entry")
+
 	// Get current user for feed creation
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {

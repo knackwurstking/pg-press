@@ -209,7 +209,7 @@ func NewConnection(userID models.TelegramID, lastFeed models.FeedID, conn *webso
 }
 
 // WritePump handles writing messages to the WebSocket connection
-func (c *Connection) WritePump() {
+func (c *Connection) WritePipe() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -240,8 +240,7 @@ func (c *Connection) WritePump() {
 	}
 }
 
-// ReadPump handles reading messages from the WebSocket connection
-func (c *Connection) ReadPump(handler *Handler) {
+func (c *Connection) ReadPipe(handler *Handler) {
 	defer func() {
 		handler.UnregisterConnection(c)
 		c.conn.Close()

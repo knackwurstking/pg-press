@@ -30,7 +30,6 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodGet, path+"/list", h.HTMXGetFeedsList),
 	})
 }
-
 func (h *Handler) GetFeedPage(c echo.Context) error {
 	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -40,6 +39,8 @@ func (h *Handler) GetFeedPage(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
+	slog.Debug("Get a list with feeds", "offset", 0, "limit", env.MaxFeedsPerPage)
+
 	feeds, err := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
 	if err != nil {
 		return errors.Handler(err, "get feeds")
@@ -68,7 +69,7 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	if len(feeds) > 0 && feeds[0].ID != user.LastFeed {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
-		slog.Info("Updating users last feed",
+		slog.Debug("update users last viewed feed",
 			"user_name", user.Name, "last_feed_from", oldLastFeed, "last_feed_to", user.LastFeed)
 
 		if err := h.registry.Users.Update(user); err != nil {

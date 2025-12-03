@@ -42,32 +42,24 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	// Get all notes with defensive error handling
 	notes, err := h.registry.Notes.List()
 	if err != nil {
-		slog.Error("Failed to retrieve notes from database", "error", err)
 		return errors.Handler(err, "get notes from database")
 	}
 
 	// Handle case where notes might be nil
 	if notes == nil {
-		slog.Info("No notes found in database, initializing empty slice")
 		notes = []*models.Note{}
 	}
-
-	slog.Info("Retrieved notes from database", "notes", len(notes))
 
 	// Get all tools to show relationships
 	tools, err := h.registry.Tools.List()
 	if err != nil {
-		slog.Error("Failed to retrieve tools from database", "error", err)
 		return errors.Handler(err, "get tools from database")
 	}
 
 	// Handle case where tools might be nil
 	if tools == nil {
-		slog.Info("No tools found in database, initializing empty slice")
 		tools = []*models.Tool{}
 	}
-
-	slog.Info("Retrieved tools from database", "tools", len(tools))
 
 	page := templates.Page(notes, tools)
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
@@ -79,6 +71,8 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 
 // HTMXDeleteNote deletes a note and unlinks it from all tools
 func (h *Handler) HTMXDeleteNote(c echo.Context) error {
+	slog.Info("Deleted a note")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -94,8 +88,6 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	if err := h.registry.Notes.Delete(noteID); err != nil {
 		return errors.Handler(err, "delete note")
 	}
-
-	slog.Info("Deleted note", "note", noteID, "user_name", user.Name)
 
 	// Create feed entry
 	if _, err := h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID); err != nil {

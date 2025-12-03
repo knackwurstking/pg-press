@@ -74,6 +74,8 @@ func (h *Handler) GetUmbauPage(c echo.Context) error {
 }
 
 func (h *Handler) PostUmbauPage(c echo.Context) error {
+	slog.Info("Change the active tools")
+
 	// Get the user from the request context
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
@@ -91,8 +93,6 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	if !models.IsValidPressNumber(&pressNumber) {
 		return errors.BadRequest(nil, "invalid press number: %d", pressNumber)
 	}
-
-	slog.Info("Handle a active tool change", "press", pressNumber, "user_name", user.Name)
 
 	// Get form value for the press cycles
 	totalCyclesStr := c.FormValue("press-total-cycles")

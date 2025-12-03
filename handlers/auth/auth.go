@@ -48,6 +48,8 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 }
 
 func (h *Handler) PostLoginPage(c echo.Context) error {
+	slog.Info("Logging user in...")
+
 	// Parse form
 	apiKey := c.FormValue("api-key")
 	if apiKey == "" || h.processApiKeyLogin(apiKey, c) != nil {
@@ -55,7 +57,6 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 		return utils.RedirectTo(c, utils.UrlLogin(apiKey, &invalid).Page)
 	}
 
-	slog.Info("Successful login", "real_ip", c.RealIP())
 	return utils.RedirectTo(c, utils.UrlProfile("").Page)
 }
 

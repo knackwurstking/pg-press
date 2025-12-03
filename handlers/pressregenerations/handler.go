@@ -65,6 +65,8 @@ func (h *Handler) GetRegenerationPage(c echo.Context) error {
 }
 
 func (h *Handler) HxAddRegeneration(c echo.Context) error {
+	slog.Info("Add a new press regeneration entry")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
@@ -91,6 +93,8 @@ func (h *Handler) HxAddRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
+	slog.Info("Remove an press regeneration entry")
+
 	user, eerr := utils.GetUserFromContext(c)
 	if eerr != nil {
 		return eerr
