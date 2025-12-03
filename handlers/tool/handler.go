@@ -111,11 +111,11 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		return eerr
 	}
 
-	var tool *models.ResolvedTool
+	var rTool *models.ResolvedTool
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return errors.Handler(err, "get tool")
 	} else {
-		tool, err = services.ResolveTool(h.registry, t)
+		rTool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
 			return errors.Handler(err, "resolve tool")
 		}
@@ -141,12 +141,12 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 			target   models.ToolID // top position
 		)
 
-		if tool.Position == models.PositionTopCassette {
-			cassette = tool.ID
+		if rTool.Position == models.PositionTopCassette {
+			cassette = rTool.ID
 			target = targetID
 		} else {
 			cassette = targetID // If this is not a cassette, the bind method will return an error
-			target = tool.ID
+			target = rTool.ID
 		}
 
 		// Bind tool to target, this will get an error if target already has a binding
@@ -156,17 +156,18 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	}
 
 	// Update tools binding, no need to re fetch this tools data from the database
-	tool.Binding = &targetID
+	rTool.Binding = &targetID
+	rTool, _ = services.ResolveTool(h.registry, rTool.Tool)
 
 	// Get tools for binding
-	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
+	toolsForBinding, eerr := h.getToolsForBinding(rTool.Tool)
 	if eerr != nil {
 		return eerr
 	}
 
 	// Render the template
 	bs := templates.BindingSection(templates.BindingSectionProps{
-		Tool:            tool,
+		Tool:            rTool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         user.IsAdmin(),
 	})
@@ -196,25 +197,25 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Get tools for rendering the template
-	var tool *models.ResolvedTool
+	var rTool *models.ResolvedTool
 	if t, err := h.registry.Tools.Get(toolID); err != nil {
 		return errors.BadRequest(err, "get tool")
 	} else {
-		tool, err = services.ResolveTool(h.registry, t)
+		rTool, err = services.ResolveTool(h.registry, t)
 		if err != nil {
 			return errors.Handler(err, "resolve tool")
 		}
 	}
 
 	// Get tools for binding
-	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
+	toolsForBinding, eerr := h.getToolsForBinding(rTool.Tool)
 	if eerr != nil {
 		return eerr
 	}
 
 	// Render the template
 	bs := templates.BindingSection(templates.BindingSectionProps{
-		Tool:            tool,
+		Tool:            rTool,
 		ToolsForBinding: toolsForBinding,
 		IsAdmin:         user.IsAdmin(),
 	})
