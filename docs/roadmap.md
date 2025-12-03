@@ -22,7 +22,7 @@ system.
 
 - [ ] "Probleme Checklist" (troublechecklist)
 - [ ] "Daten Sammlung" (datastorage)
-    - Store dryer settings here, temperature, press speeds, etc.
+  - Store dryer settings here, temperature, press speeds, etc.
 - [ ] "Statistiken" (statistics dashboard)
 - [ ] "Benutzerverwaltung" (user management)
 
@@ -32,13 +32,13 @@ system.
   - [x] Notes Card component (consolidate handler version with components/cards.templ)
   - [x] Section container templates with consistent styling
   - [x] Action bar components with edit/delete functionality
-  - [ ] Standard form controls for status display and editing
-  - [ ] Table components with action buttons
+  - [ ] Button components with attributes: color, variant, attr
+  - [ ] Input components with attributes: name, attr
 
 ## Performance Improvements
 
-- [ ] Optimize database queries with proper indexing, 
-    - For now use the scripts for this [scripts](/scripts)
+- [ ] Optimize database queries with proper indexing,
+  - For now use the scripts for this [scripts](/scripts)
 - [ ] Add caching layer for frequently accessed data
 
 ## Security Enhancements
