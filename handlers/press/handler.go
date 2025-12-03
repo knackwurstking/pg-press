@@ -86,10 +86,6 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	// Resolve tools, notes not needed, only the binding tool
 	resolvedTools := make([]*models.ResolvedTool, 0, len(tools))
 	for _, tool := range tools {
-		if tool.Position == models.PositionTopCassette {
-			continue
-		}
-
 		rt, err := services.ResolveTool(h.registry, tool)
 		if err != nil {
 			return errors.Handler(err, "resolve tool %d", tool.ID)
