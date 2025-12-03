@@ -32,9 +32,6 @@ system.
   - [x] Notes Card component (consolidate handler version with components/cards.templ)
   - [x] Section container templates with consistent styling
   - [x] Action bar components with edit/delete functionality
-  - [ ] Button components with attributes: color, variant, attr
-    - [x] Tools Handler `Button`, `IconButton`
-  - [ ] Input components with attributes: name, attr
 
 ## Performance Improvements
 
