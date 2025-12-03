@@ -17,7 +17,9 @@ templ Page(notes []*models.Note, tools []*models.Tool) {
 		},
 	) {
 		<main class="container fluid">
-			<section class="filter-section mb">
+			@components.Section(templ.Attributes{
+				"class": "filter-section mb",
+			}) {
 				<div class="flex gap-sm justify-center items-center w-full flex-wrap">
 					<button class="filter-btn active small" data-filter="all">
 						Alle ({ fmt.Sprintf("%d", len(notes)) })
@@ -65,16 +67,16 @@ templ Page(notes []*models.Note, tools []*models.Tool) {
 						Info ({ fmt.Sprintf("%d", infoCount) })
 					</button>
 				</div>
-			</section>
-			<section
-				class="notes-grid max-w-full"
-				style="margin: 0 auto;"
-				hx-get={ utils.UrlNotes(0).Grid }
-				hx-trigger="pageLoaded from:body"
-				hx-on::after-request='document.querySelector("button.active")?.click()'
-			>
+			}
+			@components.Section(templ.Attributes{
+				"class":                "notes-grid max-w-full",
+				"style":                "margin: 0 auto;",
+				"hx-get":               string(utils.UrlNotes(0).Grid),
+				"hx-trigger":           "pageLoaded from:body",
+				"hx-on::after-request": "document.querySelector('button.active')?.click()",
+			}) {
 				@NotesGrid(notes, tools)
-			</section>
+			}
 		</main>
 	}
 }

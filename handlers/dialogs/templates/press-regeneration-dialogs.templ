@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
@@ -15,10 +16,10 @@ templ EditPressRegenerationDialog(r *models.PressRegeneration) {
 		ID:               "press-regeneration-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
-		<section>
+		@components.Section(nil) {
 			<p>Presse: { r.PressNumber }</p>
 			<p>Von { r.StartedAt.Format(env.DateFormat) } bis { r.CompletedAt.Format(env.DateFormat) }</p>
-		</section>
+		}
 		<label class="flex flex-col gap-0">
 			Bemerkung
 			<input

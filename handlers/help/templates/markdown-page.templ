@@ -101,7 +101,9 @@ templ helpMarkdownPageAdditionalHead() {
 }
 
 templ quickReferenceSection() {
-	<section class="card p-lg">
+	@components.Section(templ.Attributes{
+		"class": "card p-lg",
+	}) {
 		<h2 class="text-xl text-bold flex items-center ghost primary gap">
 			<i class="bi bi-lightning"></i>
 			Schnellreferenz
@@ -113,7 +115,7 @@ templ quickReferenceSection() {
 			@quickReferenceItem("`Code`", "Code", "code")
 			@quickReferenceItem("# Überschrift 1", "Überschrift 1", "h1")
 		</div>
-	</section>
+	}
 }
 
 templ quickReferenceItem(syntax, result, tagType string) {
@@ -138,7 +140,9 @@ templ quickReferenceItem(syntax, result, tagType string) {
 }
 
 templ interactiveDemoSection() {
-	<section class="card p-lg">
+	@components.Section(templ.Attributes{
+		"class": "card p-lg",
+	}) {
 		<h2 class="text-xl text-bold flex items-center ghost success gap">
 			<i class="bi bi-play-circle"></i>
 			Interaktive Vorschau
@@ -170,11 +174,13 @@ templ interactiveDemoSection() {
 				<div id="demo-preview" class="border rounded p-sm overflow-y-auto" style="min-height: 200px; max-height: 300px;"></div>
 			</div>
 		</div>
-	</section>
+	}
 }
 
 templ textFormattingSection() {
-	<section class="card p-lg flex flex-col gap">
+	@components.Section(templ.Attributes{
+		"class": "card p-lg flex flex-col gap",
+	}) {
 		<h2 class="text-xl text-bold flex items-center ghost info gap">
 			<i class="bi bi-type"></i>
 			Textformatierung
@@ -190,7 +196,7 @@ templ textFormattingSection() {
 			<hr/>
 			@listExample()
 		</div>
-	</section>
+	}
 }
 
 templ formattingExample(title, syntax, tagType, description string) {
@@ -241,7 +247,9 @@ templ listExample() {
 }
 
 templ blockquoteSection() {
-	<section class="card p-lg flex flex-col gap">
+	@components.Section(templ.Attributes{
+		"class": "card p-lg flex flex-col gap",
+	}) {
 		<h2 class="text-xl text-bold flex items-center ghost secondary gap">
 			<i class="bi bi-quote"></i>
 			Zitate
@@ -259,11 +267,13 @@ templ blockquoteSection() {
 		<p class="text-sm muted border">
 			Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.
 		</p>
-	</section>
+	}
 }
 
 templ tipsSection() {
-	<section class="card success outline p-lg">
+	@components.Section(templ.Attributes{
+		"class": "card success outline p-lg",
+	}) {
 		<h2 class="text-xl text-bold mb flex items-center ghost success gap">
 			<i class="bi bi-lightbulb"></i>
 			Tipps & Häufige Fehler
@@ -272,7 +282,7 @@ templ tipsSection() {
 			@tipItem("Leerzeichen beachten:", "Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.")
 			@tipItem("Zeilen trennen:", "Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.")
 		</div>
-	</section>
+	}
 }
 
 templ tipItem(title, description string) {

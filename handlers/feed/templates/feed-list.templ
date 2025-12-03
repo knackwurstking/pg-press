@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
 	"strings"
 	"time"
@@ -11,14 +12,16 @@ templ FeedsList(feeds []*models.Feed, lastFeedID models.FeedID, userMap map[mode
 	if len(feeds) > 0 {
 		<ul id="data">
 			for _, feed := range feeds {
-				<section style="position: relative;">
+				@components.Section(templ.Attributes{
+					"style": "position: relative;",
+				}) {
 					if feed.ID > lastFeedID {
 						<div style="position: absolute; top: 8px; right: 8px; z-index: 10;">
 							<i class="bi bi-eye info ghost" title="Neuer Feed"></i>
 						</div>
 					}
 					@feedItem(feed, userMap)
-				</section>
+				}
 			}
 		</ul>
 	} else {

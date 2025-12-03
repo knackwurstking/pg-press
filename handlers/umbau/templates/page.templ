@@ -71,7 +71,7 @@ templ Page(props *PageProps) {
 				<hr/>
 				for _, position := range []models.Position{models.PositionTop, models.PositionBottom} {
 					{{ currentTool := slots[position] }}
-					<section>
+					@components.Section(nil) {
 						<h3>{ models.PositionBottom.GermanString() }</h3>
 						if currentTool != nil {
 							<p>Aktuelles Werkzeug: { currentTool.String() }</p>
@@ -100,7 +100,7 @@ templ Page(props *PageProps) {
 								}
 							</select>
 						</span>
-					</section>
+					}
 				}
 				<hr/>
 				@formActions(props.User)
@@ -110,7 +110,7 @@ templ Page(props *PageProps) {
 }
 
 templ cyclesSection() {
-	<section>
+	@components.Section(nil) {
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
 			<input
@@ -121,7 +121,7 @@ templ cyclesSection() {
 				required
 			/>
 		</span>
-	</section>
+	}
 }
 
 templ formActions(user *models.User) {

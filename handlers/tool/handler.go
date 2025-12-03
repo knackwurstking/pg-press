@@ -161,9 +161,9 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	tool.Binding = &targetID
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
-	if err != nil {
-		return err
+	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Render the template
@@ -173,7 +173,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		IsAdmin:         user.IsAdmin(),
 	})
 
-	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
+	if err := bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render binding section")
 	}
 
@@ -207,9 +207,9 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	}
 
 	// Get tools for binding
-	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
-	if err != nil {
-		return err
+	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Render the template
@@ -219,7 +219,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 		IsAdmin:         user.IsAdmin(),
 	})
 
-	if err = bs.Render(c.Request().Context(), c.Response()); err != nil {
+	if err := bs.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.Handler(err, "render binding section")
 	}
 
@@ -227,70 +227,12 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetCycles(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
-	}
-
-	toolID, eerr := h.getToolIDFromParam(c)
-	if eerr != nil {
-		return eerr
-	}
-
-	var tool *models.ResolvedTool
-	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return errors.Handler(err, "get tool")
-	} else {
-		tool, err = services.ResolveTool(h.registry, t)
-		if err != nil {
-			return errors.Handler(err, "resolve tool")
-		}
-	}
-
-	var filteredCycles []*models.Cycle
-	{
-		cycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
-		if err != nil {
-			return errors.Handler(err, "get press cycles")
-		}
-
-		filteredCycles = models.FilterCyclesByToolPosition(
-			tool.Position, cycles...)
-	}
-
-	var resolvedRegenerations []*models.ResolvedToolRegeneration
-	{ // Get (resolved) regeneration history for this tool
-		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
-		if err != nil {
-			slog.Error("Failed to get tool regenerations", "tool", toolID, "error", err)
-		}
-
-		// Resolve regenerations
-		for _, r := range regenerations {
-			rr, err := services.ResolveToolRegeneration(h.registry, r)
-			if err != nil {
-				return err
-			}
-
-			resolvedRegenerations = append(resolvedRegenerations, rr)
-		}
-	}
-
-	// Only get tools for binding if the tool has no binding
-	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
-	if err != nil {
-		return err
-	}
-
 	// Render the template
-	cyclesSection := templates.Cycles(templates.CyclesProps{
-		User:            user,
-		Tool:            tool,
-		ToolsForBinding: toolsForBinding,
-		TotalCycles:     h.getTotalCycles(toolID, filteredCycles...),
-		Cycles:          filteredCycles,
-		Regenerations:   resolvedRegenerations,
-	})
+	cyclesProps, eerr := h.buildCyclesProps(c)
+	if eerr != nil {
+		return eerr
+	}
+	cyclesSection := templates.Cycles(*cyclesProps)
 
 	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
 		errors.Handler(err, "failed to render tool cycles")
@@ -634,7 +576,8 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	}
 
 	// Render out-of-band swap for cycles section to trigger reload
-	oobCyclesReload := templates.CyclesSection(toolID, true)
+	cyclesProps, _ := h.buildCyclesProps(c)
+	oobCyclesReload := templates.OOBCyclesSection(true, toolID, cyclesProps)
 	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
 		slog.Error("Failed to render out-of-band cycles reload", "error", err)
 	}
@@ -674,7 +617,7 @@ func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) 
 	return totalCycles
 }
 
-func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) {
+func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, *echo.HTTPError) {
 	var filteredToolsForBinding []*models.Tool
 
 	if tool.Position != models.PositionTopCassette && tool.Position != models.PositionTop {
@@ -707,6 +650,72 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, error) 
 	}
 
 	return filteredToolsForBinding, nil
+}
+
+func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *echo.HTTPError) {
+	user, eerr := utils.GetUserFromContext(c)
+	if eerr != nil {
+		return nil, eerr
+	}
+
+	toolID, eerr := h.getToolIDFromParam(c)
+	if eerr != nil {
+		return nil, eerr
+	}
+
+	var tool *models.ResolvedTool
+	if t, err := h.registry.Tools.Get(toolID); err != nil {
+		return nil, errors.Handler(err, "get tool")
+	} else {
+		tool, err = services.ResolveTool(h.registry, t)
+		if err != nil {
+			return nil, errors.Handler(err, "resolve tool")
+		}
+	}
+
+	var filteredCycles []*models.Cycle
+	{
+		cycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
+		if err != nil {
+			return nil, errors.Handler(err, "get press cycles")
+		}
+
+		filteredCycles = models.FilterCyclesByToolPosition(
+			tool.Position, cycles...)
+	}
+
+	var resolvedRegenerations []*models.ResolvedToolRegeneration
+	{ // Get (resolved) regeneration history for this tool
+		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
+		if err != nil {
+			slog.Error("Failed to get tool regenerations", "tool", toolID, "error", err)
+		}
+
+		// Resolve regenerations
+		for _, r := range regenerations {
+			rr, err := services.ResolveToolRegeneration(h.registry, r)
+			if err != nil {
+				return nil, errors.Handler(err, "")
+			}
+
+			resolvedRegenerations = append(resolvedRegenerations, rr)
+		}
+	}
+
+	// Only get tools for binding if the tool has no binding
+	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
+	if err != nil {
+		return nil, err
+	}
+
+	return &templates.CyclesProps{
+		User:            user,
+		Tool:            tool,
+		ToolsForBinding: toolsForBinding,
+		TotalCycles:     h.getTotalCycles(toolID, filteredCycles...),
+		Cycles:          filteredCycles,
+		Regenerations:   resolvedRegenerations,
+	}, nil
 }
 
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {

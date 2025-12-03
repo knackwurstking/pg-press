@@ -18,7 +18,10 @@ templ Page() {
 	) {
 		<main class="container fluid">
 			<!-- Search Bar -->
-			<section style="margin-top: 0" class="flex flex-row gap justify-between">
+			@components.Section(templ.Attributes{
+				"style": "margin-top: 0",
+				"class": "flex flex-row gap justify-between",
+			}) {
 				<input
 					style="margin: auto 0; width: 100%"
 					type="search"
@@ -27,9 +30,12 @@ templ Page() {
 					aria-label="Suche"
 					oninput="window.search(event)"
 				/>
-			</section>
+			}
 			<!-- Page Actions: Create -->
-			<section style="margin-top: 0" class="flex flex-row gap justify-end">
+			@components.Section(templ.Attributes{
+				"style": "margin-top: 0",
+				"class": "flex flex-row gap justify-end",
+			}) {
 				<a
 					href={ utils.UrlEditor(
 						"troublereport", 
@@ -42,14 +48,14 @@ templ Page() {
 					<i class="bi bi-plus-lg"></i>
 					Erstellen
 				</a>
-			</section>
+			}
 			<!-- Trouble Reports Entries -->
-			<section
-				hx-get={ utils.UrlTroubleReports(0, 0, 0).Data }
-				hx-trigger="load, pageLoaded from:body"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				id="data"
-			></section>
+			@components.Section(templ.Attributes{
+				"id":                        "data",
+				"hx-get":                    string(utils.UrlTroubleReports(0, 0, 0).Data),
+				"hx-trigger":                "load, pageLoaded from:body",
+				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+			})
 		</main>
 	}
 }
@@ -61,5 +67,3 @@ templ additionalHead() {
 	/>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/page-trouble-reports.js") }></script>
 }
-
-

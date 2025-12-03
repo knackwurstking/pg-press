@@ -1,0 +1,25 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ OOBCyclesSection(oob bool, toolID models.ToolID, cyclesProps *CyclesProps) {
+	@components.Section(templ.Attributes{
+		"id":                        "cycles-section",
+		"hx-get":                    string(utils.UrlTool(toolID, 0, 0).Cycles),
+		"hx-trigger":                "load, pageLoaded from:body",
+		"hx-swap":                   "innerHTML",
+		"hx-swap-oob":               fmt.Sprintf("%t", oob),
+		"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+	}) {
+		if cyclesProps != nil {
+			@Cycles(*cyclesProps)
+		} else {
+			@components.Spinner()
+		}
+	}
+}

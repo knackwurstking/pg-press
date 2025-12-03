@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
@@ -23,7 +24,9 @@ templ NewCycleDialog(
 		ID:               "cycle-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
-		<section class="tool-info flex flex-col gap-sm">
+		@components.Section(templ.Attributes{
+			"class": "tool-info flex flex-col gap-sm",
+		}) {
 			<label>Aktives Werkzeug</label>
 			<div class="flex flex-col gap-xs">
 				<div class="text-sm">
@@ -33,13 +36,15 @@ templ NewCycleDialog(
 					<strong>Position:</strong> { tool.Position.GermanString() }
 				</div>
 			</div>
-		</section>
+		}
 		<input
 			type="hidden"
 			name="original_tool_id"
 			value={ fmt.Sprintf("%d", tool.ID) }
 		/>
-		<section class="press flex flex-col gap-sm">
+		@components.Section(templ.Attributes{
+			"class": "press flex flex-col gap-sm",
+		}) {
 			<label for="press">Presse</label>
 			<select id="press" name="press_number" required>
 				<option
@@ -61,8 +66,10 @@ templ NewCycleDialog(
 					</option>
 				}
 			</select>
-		</section>
-		<section class="original-date flex flex-col gap-sm">
+		}
+		@components.Section(templ.Attributes{
+			"class": "original-date flex flex-col gap-sm",
+		}) {
 			<label>Ursprüngliches Datum</label>
 			<input
 				name="original_date"
@@ -74,8 +81,10 @@ templ NewCycleDialog(
 				}
 				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 			/>
-		</section>
-		<section class="total-cycles flex flex-col gap-sm">
+		}
+		@components.Section(templ.Attributes{
+			"class": "total-cycles flex flex-col gap-sm",
+		}) {
 			<label for="total_cycles">Gesamtzyklen</label>
 			<input
 				type="number"
@@ -89,8 +98,10 @@ templ NewCycleDialog(
 				}
 				required
 			/>
-		</section>
-		<section class="regeneration">
+		}
+		@components.Section(templ.Attributes{
+			"class": "regeneration",
+		}) {
 			<label class="flex flex-row justify-between items-center">
 				<span>
 					Werkzeug in den Regenerationszustand versetzen
@@ -101,7 +112,7 @@ templ NewCycleDialog(
 					onchange="if (this.checked && !confirm('Sicher, diesen Zustand ändern?')) this.checked = false;"
 				/>
 			</label>
-		</section>
+		}
 	}
 }
 

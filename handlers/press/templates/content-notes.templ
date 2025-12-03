@@ -30,12 +30,16 @@ templ NotesSection(press models.PressNumber, notes []*models.Note, tools []*mode
 templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 	if len(notes) > 0 {
 		// Press Notes
-		<section class="notes-list flex flex-col gap-lg p">
+		@components.Section(templ.Attributes{
+			"class": "notes-list flex flex-col gap-lg p",
+		}) {
 			for _, note := range notes {
 				@components.NoteCard(note, nil)
 			}
-		</section>
-		<section class="flex justify-center mt">
+		}
+		@components.Section(templ.Attributes{
+			"class": "flex justify-center mt",
+		}) {
 			<button
 				class="primary"
 				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
@@ -48,9 +52,11 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 				<i class="bi bi-plus-lg"></i>
 				Notiz hinzufügen
 			</button>
-		</section>
+		}
 	} else {
-		<section class="empty-state">
+		@components.Section(templ.Attributes{
+			"class": "empty-state",
+		}) {
 			<h4>Keine Notizen</h4>
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
@@ -65,12 +71,14 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 				<i class="bi bi-plus-lg"></i>
 				Erste Notiz hinzufügen
 			</button>
-		</section>
+		}
 	}
 }
 
 templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
-	<section class="notes-list flex flex-col gap-lg p">
+	@components.Section(templ.Attributes{
+		"class": "notes-list flex flex-col gap-lg p",
+	}) {
 		{{
 			topToolNotes := make([]*models.Note, 0)
 			topCassetteToolNotes := make([]*models.Note, 0)
@@ -112,5 +120,5 @@ templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
 				@components.NoteCard(n, nil)
 			}
 		}
-	</section>
+	}
 }
