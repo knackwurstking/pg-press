@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/ui"
+	uidev "github.com/knackwurstking/pg-press/ui"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
@@ -18,8 +18,8 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	@sectionToolsFilter(tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
-			@uidev.Button("", &uidev.ButtonOptions{
-				HxOptions: &uidev.HxOptions{
+			@uidev.Button("", uidev.ButtonOptions{
+				HxOptions: uidev.HxOptions{
 					Method:          "get",
 					Href:            utils.UrlDialogs().EditTool(0),
 					Trigger:         "click",

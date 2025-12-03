@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
 	"github.com/knackwurstking/pg-press/models"
+	uidev "github.com/knackwurstking/pg-press/ui"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
@@ -55,11 +56,17 @@ type listPressItemProps struct {
 
 templ listPressItem(props listPressItemProps) {
 	<li title={ props.Title }>
-		<a
-			role="button"
-			href={ props.Href }
-			class="outline contrast flex justify-between items-center"
-		>
+		@uidev.Button("", uidev.ButtonOptions{
+			Anchor:  true,
+			Href:    templ.SafeURL(props.Href),
+			Variant: uidev.VariantOutline,
+			Color:   uidev.ColorContrast,
+			Classes: map[string]bool{
+				"flex":            true,
+				"justify-between": true,
+				"items-center":    true,
+			},
+		}) {
 			<span class="flex flex-col gap-lg w-full">
 				<h5>{ props.Title }</h5>
 				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
@@ -94,6 +101,6 @@ templ listPressItem(props listPressItemProps) {
 				</span>
 			</span>
 			<i class="bi bi-chevron-right"></i>
-		</a>
+		}
 	</li>
 }

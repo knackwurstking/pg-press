@@ -78,6 +78,7 @@ const (
 	ColorSecondary   Color = "secondary"
 	ColorDestructive Color = "destructive"
 	ColorMuted       Color = "muted"
+	ColorContrast    Color = "contrast"
 	ColorSuccess     Color = "success"
 	ColorWarning     Color = "warning"
 )
@@ -92,7 +93,8 @@ const (
 
 // ButtonOptions defines the configuration options for the button component
 type ButtonOptions struct {
-	*HxOptions
+	HxOptions
+	Href     templ.SafeURL
 	Anchor   bool
 	Variant  Variant
 	Color    Color
@@ -105,10 +107,6 @@ type ButtonOptions struct {
 }
 
 func (o *ButtonOptions) Attributes(classes map[string]bool) templ.Attributes {
-	if o.HxOptions != nil {
-		o.HxOptions = &HxOptions{}
-	}
-
 	if classes == nil {
 		classes = map[string]bool{}
 	}
@@ -119,8 +117,8 @@ func (o *ButtonOptions) Attributes(classes map[string]bool) templ.Attributes {
 		a["role"] = "button"
 	}
 
-	if o.Href != "" {
-		a["href"] = o.Href
+	if o.Href != "" && o.HxOptions.Href != "" {
+		a["href"] = string(o.Href)
 	}
 
 	if o.Disabled {
@@ -162,17 +160,10 @@ func (o *ButtonOptions) Attributes(classes map[string]bool) templ.Attributes {
 }
 
 // Button renders a reusable button component with consistent styling
-templ Button(text string, options *ButtonOptions) {
-	{{
-		if options == nil {
-			options = &ButtonOptions{
-				HxOptions: &HxOptions{},
-			}
-		}
-
-		attr := options.Attributes(nil)
-	}}
+templ Button(text string, options ButtonOptions) {
+	{{ attr := options.Attributes(nil) }}
 	if options.Anchor {
+		{{ fmt.Printf("%#v\n", attr) }}
 		<a { attr... }>
 			{ text }
 			{ children... }
@@ -186,16 +177,8 @@ templ Button(text string, options *ButtonOptions) {
 }
 
 // IconButton renders a button with only an icon (similar to nav buttons)
-templ IconButton(icon string, options *ButtonOptions, hx *HxOptions) {
-	{{
-		if options == nil {
-			options = &ButtonOptions{
-				HxOptions: &HxOptions{},
-			}
-		}
-
-		attr := options.Attributes(nil)
-	}}
+templ IconButton(icon string, options ButtonOptions) {
+	{{ attr := options.Attributes(nil) }}
 	if options.Anchor {
 		<a { attr... }>
 			<i class={ "bi bi-" + icon }></i>
