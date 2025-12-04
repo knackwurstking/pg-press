@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -36,26 +35,29 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 	}
 }
 
-func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegeneration, error) {
+func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegeneration, *errors.DBError) {
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameToolRegenerations)
 	row := s.DB.QueryRow(query, id)
 
-	regeneration, err := ScanSingleRow(row, scanToolRegeneration)
+	regeneration, err := ScanRow(row, ScanToolRegeneration)
 	if err != nil {
-		return nil, errors.NewDatabaseError(err, errors.DatabaseTypeSelect)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 
 	return regeneration, nil
 }
 
-func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User) (models.ToolRegenerationID, error) {
-	if err := user.Validate(); err != nil {
-		return 0, err
+func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User) (
+	models.ToolRegenerationID, *errors.DBError,
+) {
+	err := user.Validate()
+	if err != nil {
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	r := models.NewToolRegeneration(toolID, cycleID, reason, &user.TelegramID)
 	if err := r.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -65,24 +67,26 @@ func (s *ToolRegenerations) Add(toolID models.ToolID, cycleID models.CycleID, re
 
 	result, err := s.DB.Exec(query, r.ToolID, r.CycleID, r.Reason, user.TelegramID)
 	if err != nil {
-		return 0, s.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("get last insert ID: %v", err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	return models.ToolRegenerationID(id), nil
 }
 
-func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) error {
-	if err := user.Validate(); err != nil {
-		return err
+func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) *errors.DBError {
+	err := user.Validate()
+	if err != nil {
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := r.Validate(); err != nil {
-		return err
+	err = r.Validate()
+	if err != nil {
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -91,96 +95,100 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 		WHERE id = ?
 	`, TableNameToolRegenerations)
 
-	_, err := s.DB.Exec(query, r.CycleID, r.Reason, user.TelegramID, r.ID)
+	_, err = s.DB.Exec(query, r.CycleID, r.Reason, user.TelegramID, r.ID)
 	if err != nil {
-		return s.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil
 }
 
-func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) error {
+func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameToolRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return s.GetDeleteError(err)
+		return errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return nil
 }
 
-func (s *ToolRegenerations) StartToolRegeneration(toolID models.ToolID, reason string, user *models.User) (models.ToolRegenerationID, error) {
-	if err := user.Validate(); err != nil {
-		return 0, err
-	}
-
-	cycle, err := s.Registry.PressCycles.GetLastToolCycle(toolID)
+func (s *ToolRegenerations) StartToolRegeneration(id models.ToolID, reason string, user *models.User) (
+	models.ToolRegenerationID, *errors.DBError,
+) {
+	err := user.Validate()
 	if err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := s.Registry.Tools.UpdateRegenerating(toolID, true, user); err != nil {
-		return 0, err
-	}
-
-	regenerationID, err := s.Add(toolID, cycle.ID, reason, user)
+	cycle, dberr := s.Registry.PressCycles.GetLastToolCycle(id)
 	if err != nil {
-		if undoErr := s.Registry.Tools.UpdateRegenerating(toolID, false, user); undoErr != nil {
-			return 0, fmt.Errorf(
-				"failed to create regeneration record: %v, failed to undo tool regeneration status: %v",
-				err, undoErr,
-			)
+		return 0, dberr
+	}
+
+	dberr = s.Registry.Tools.UpdateRegenerating(id, true, user)
+	if dberr != nil {
+		return 0, dberr
+	}
+
+	regenerationID, dberr := s.Add(id, cycle.ID, reason, user)
+	if dberr != nil {
+		undoErr := s.Registry.Tools.UpdateRegenerating(id, false, user)
+		if undoErr != nil {
+			return 0, undoErr
 		}
-		return 0, err
+		return 0, dberr
 	}
 
 	return regenerationID, nil
 }
 
-func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) error {
-	if err := user.Validate(); err != nil {
-		return err
-	}
-
-	if err := s.Registry.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-		return fmt.Errorf("update tool regeneration status: %v", err)
-	}
-
-	return nil
-}
-
-func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) error {
-	if err := user.Validate(); err != nil {
-		return err
-	}
-
-	lastRegeneration, err := s.GetLastRegeneration(toolID)
+func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) *errors.DBError {
+	err := user.Validate()
 	if err != nil {
-		if !errors.IsNotFoundError(err) {
-			return fmt.Errorf("get last regeneration record: %v", err)
-		}
-	} else {
-		tool, err := s.Registry.Tools.Get(toolID)
-		if err != nil {
-			return fmt.Errorf("get tool: %v", err)
-		}
-		if !tool.Regenerating {
-			return fmt.Errorf("tool is not regenerating")
-		}
-
-		if err := s.Delete(lastRegeneration.ID); err != nil {
-			return fmt.Errorf("delete regeneration record: %v", err)
-		}
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := s.Registry.Tools.UpdateRegenerating(toolID, false, user); err != nil {
-		return fmt.Errorf("update tool regeneration status: %v", err)
+	dberr := s.Registry.Tools.UpdateRegenerating(toolID, false, user)
+	if dberr != nil {
+		return dberr
 	}
 
 	return nil
 }
 
-func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.ToolRegeneration, error) {
+func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) *errors.DBError {
+	if err := user.Validate(); err != nil {
+		return errors.NewDBError(err, errors.DBTypeValidation)
+	}
+
+	lastRegeneration, dberr := s.GetLastRegeneration(toolID)
+	if dberr != nil {
+		return dberr
+	}
+
+	tool, dberr := s.Registry.Tools.Get(toolID)
+	if dberr != nil {
+		return dberr
+	}
+	if !tool.Regenerating {
+		return nil
+	}
+
+	dberr = s.Delete(lastRegeneration.ID)
+	if dberr != nil {
+		return dberr
+	}
+
+	dberr = s.Registry.Tools.UpdateRegenerating(toolID, false, user)
+	if dberr != nil {
+		return dberr
+	}
+
+	return nil
+}
+
+func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.ToolRegeneration, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM %s
@@ -190,32 +198,16 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (*models.T
 	`, TableNameToolRegenerations)
 
 	row := s.DB.QueryRow(query, toolID)
-	regeneration, err := ScanSingleRow(row, scanToolRegeneration)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(
-				fmt.Sprintf("tool regeneration for tool_id: %d", toolID),
-			)
-		}
-		return nil, err
-	}
-
-	return regeneration, nil
+	return ScanRow(row, ScanToolRegeneration)
 }
 
-func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, error) {
+func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, *errors.DBError) {
 	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableNameToolRegenerations)
-
-	var count int
-	err := s.DB.QueryRow(query, cycleID).Scan(&count)
-	if err != nil {
-		return false, s.GetSelectError(err)
-	}
-
-	return count > 0, nil
+	count, dberr := s.QueryCount(query, cycleID)
+	return count > 0, dberr
 }
 
-func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) ([]*models.ToolRegeneration, error) {
+func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) ([]*models.ToolRegeneration, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, tool_id, cycle_id, reason, performed_by
 		FROM %s
@@ -225,40 +217,9 @@ func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) ([]*mod
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	regenerations, err := ScanRows(rows, scanToolRegeneration)
-	if err != nil {
-		return nil, err
-	}
-
-	return regenerations, nil
-}
-
-func scanToolRegeneration(scannable Scannable) (*models.ToolRegeneration, error) {
-	regeneration := &models.ToolRegeneration{}
-	var performedBy sql.NullInt64
-
-	err := scannable.Scan(
-		&regeneration.ID,
-		&regeneration.ToolID,
-		&regeneration.CycleID,
-		&regeneration.Reason,
-		&performedBy,
-	)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan tool regeneration: %v", err)
-	}
-
-	if performedBy.Valid {
-		performedBy := models.TelegramID(performedBy.Int64)
-		regeneration.PerformedBy = &performedBy
-	}
-
-	return regeneration, nil
+	return ScanRows(rows, ScanToolRegeneration)
 }

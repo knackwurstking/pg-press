@@ -37,7 +37,7 @@ func NewTroubleReports(r *Registry) *TroubleReports {
 	return &TroubleReports{Base: base}
 }
 
-func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
+func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.DBError) {
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY id DESC`, TableNameTroubleReports)
 	rows, err := s.DB.Query(query)
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *TroubleReports) List() ([]*models.TroubleReport, error) {
 	return ScanRows(rows, scanTroubleReport)
 }
 
-func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, error) {
+func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, *errors.DBError) {
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameTroubleReports)
 	row := s.DB.QueryRow(query, id)
 
@@ -63,7 +63,7 @@ func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, 
 	return report, nil
 }
 
-func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, error) {
+func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *errors.DBError) {
 	if err := tr.Validate(); err != nil {
 		return 0, err
 	}
@@ -103,7 +103,7 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, e
 	return id, nil
 }
 
-func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error {
+func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *errors.DBError {
 	if err := tr.Validate(); err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) error 
 	return nil
 }
 
-func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) error {
+func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *errors.DBError {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) er
 	return nil
 }
 
-func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.TroubleReportWithAttachments, error) {
+func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.TroubleReportWithAttachments, *errors.DBError) {
 	tr, err := s.Get(id)
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.
 	}, nil
 }
 
-func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, error) {
+func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, *errors.DBError) {
 	reports, err := s.List()
 	if err != nil {
 		return nil, err
@@ -194,7 +194,7 @@ func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttac
 	return result, nil
 }
 
-func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport, user *models.User, attachments ...*models.Attachment) error {
+func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport, user *models.User, attachments ...*models.Attachment) *errors.DBError {
 	if err := user.Validate(); err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func (s *TroubleReports) AddWithAttachments(troubleReport *models.TroubleReport,
 	return nil
 }
 
-func (s *TroubleReports) UpdateWithAttachments(id models.TroubleReportID, tr *models.TroubleReport, user *models.User, newAttachments ...*models.Attachment) error {
+func (s *TroubleReports) UpdateWithAttachments(id models.TroubleReportID, tr *models.TroubleReport, user *models.User, newAttachments ...*models.Attachment) *errors.DBError {
 	if err := tr.Validate(); err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func (s *TroubleReports) UpdateWithAttachments(id models.TroubleReportID, tr *mo
 	return nil
 }
 
-func (s *TroubleReports) RemoveWithAttachments(id models.TroubleReportID, user *models.User) (*models.TroubleReport, error) {
+func (s *TroubleReports) RemoveWithAttachments(id models.TroubleReportID, user *models.User) (*models.TroubleReport, *errors.DBError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -304,7 +304,7 @@ func (s *TroubleReports) RemoveWithAttachments(id models.TroubleReportID, user *
 	return tr, nil
 }
 
-func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) ([]*models.Attachment, error) {
+func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) ([]*models.Attachment, *errors.DBError) {
 	if err := report.Validate(); err != nil {
 		return nil, err
 	}
@@ -327,23 +327,4 @@ func (s *TroubleReports) cleanupAttachments(attachmentIDs []models.AttachmentID)
 			slog.Error("Failed to cleanup attachment", "attachment_id", id, "error", err)
 		}
 	}
-}
-
-func scanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
-	report := &models.TroubleReport{}
-	var linkedAttachments string
-
-	err := scannable.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &report.UseMarkdown)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan trouble report: %v", err)
-	}
-
-	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		return nil, fmt.Errorf("unmarshal linked attachments: %v", err)
-	}
-
-	return report, nil
 }

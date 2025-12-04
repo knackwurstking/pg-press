@@ -57,7 +57,7 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.DBError) {
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *errors.DBError) {
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
 		return nil, errors.NewDBError(
 			fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber),
@@ -80,7 +80,7 @@ func (t *Tools) GetByPress(pressNumber *models.PressNumber) ([]*models.Tool, *er
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, *errors.DBError) {
 	if !models.IsValidPressNumber(&pressNumber) {
 		return nil, errors.NewDBError(
 			fmt.Errorf("invalid press number: %d", pressNumber),
@@ -108,13 +108,13 @@ func (t *Tools) GetActiveToolsForPress(pressNumber models.PressNumber) ([]*model
 	return tools, nil
 }
 
-func (t *Tools) GetPressUtilization() ([]models.PressUtilization, *errors.DBError) {
+func (t *Tools) PressUtilization() ([]models.PressUtilization, *errors.DBError) {
 	// Valid press numbers: 0, 2, 3, 4, 5
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	utilization := make([]models.PressUtilization, 0, len(validPresses))
 
 	for _, pressNum := range validPresses {
-		tools, dberr := t.GetActiveToolsForPress(pressNum)
+		tools, dberr := t.ListActiveToolsForPress(pressNum)
 		if dberr != nil {
 			return nil, dberr
 		}

@@ -4,18 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) Bind(cassetteID, targetID models.ToolID) error {
+func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.DBError {
 	if err := t.validateBindingTools(cassetteID, targetID); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	// Get press from the target tool
-	targetTool, err := t.Get(targetID)
-	if err != nil {
-		return err
+	targetTool, dberr := t.Get(targetID)
+	if dberr != nil {
+		return dberr
 	}
 
 	// Execute binding operations
@@ -35,17 +36,17 @@ func (t *Tools) Bind(cassetteID, targetID models.ToolID) error {
 			sql.Named("cassette", cassetteID),
 			sql.Named("press", targetTool.Press),
 		); err != nil {
-			return t.GetUpdateError(err)
+			return errors.NewDBError(err, errors.DBTypeUpdate)
 		}
 	}
 
 	return nil
 }
 
-func (t *Tools) UnBind(toolID models.ToolID) error {
-	tool, err := t.Get(toolID)
-	if err != nil {
-		return err
+func (t *Tools) UnBind(toolID models.ToolID) *errors.DBError {
+	tool, dberr := t.Get(toolID)
+	if dberr != nil {
+		return dberr
 	}
 
 	if tool.Binding == nil {
@@ -62,7 +63,7 @@ func (t *Tools) UnBind(toolID models.ToolID) error {
 		sql.Named("toolID", toolID),
 		sql.Named("binding", *tool.Binding),
 	); err != nil {
-		return t.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil

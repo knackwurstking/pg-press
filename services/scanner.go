@@ -175,6 +175,32 @@ func ScanPressRegeneration(scannable Scannable) (*models.PressRegeneration, erro
 	return regeneration, nil
 }
 
+func ScanToolRegeneration(scannable Scannable) (*models.ToolRegeneration, error) {
+	regeneration := &models.ToolRegeneration{}
+	var performedBy sql.NullInt64
+
+	err := scannable.Scan(
+		&regeneration.ID,
+		&regeneration.ToolID,
+		&regeneration.CycleID,
+		&regeneration.Reason,
+		&performedBy,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan tool-regeneration: %v", err)
+	}
+
+	if performedBy.Valid {
+		performedBy := models.TelegramID(performedBy.Int64)
+		regeneration.PerformedBy = &performedBy
+	}
+
+	return regeneration, nil
+}
+
 func ScanTool(scannable Scannable) (*models.Tool, error) {
 	tool := &models.Tool{}
 	var format []byte
@@ -193,4 +219,23 @@ func ScanTool(scannable Scannable) (*models.Tool, error) {
 	}
 
 	return tool, nil
+}
+
+func ScanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
+	report := &models.TroubleReport{}
+	var linkedAttachments string
+
+	err := scannable.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &report.UseMarkdown)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan trouble-report: %v", err)
+	}
+
+	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
+		return nil, fmt.Errorf("unmarshal linked attachments: %v", err)
+	}
+
+	return report, nil
 }

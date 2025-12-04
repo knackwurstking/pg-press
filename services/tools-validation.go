@@ -8,10 +8,10 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolID) error {
+func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolID) *errors.DBError {
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -20,15 +20,17 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolI
 		WHERE id != ? AND position = ? AND format = ? AND code = ?`,
 		TableNameTools)
 
-	count, err := t.QueryCount(query, excludeID, tool.Position, formatBytes, tool.Code)
-	if err != nil {
-		return t.GetSelectError(err)
+	count, dberr := t.QueryCount(query, excludeID, tool.Position, formatBytes, tool.Code)
+	if dberr != nil {
+		return dberr
 	}
 
 	if count > 0 {
-		return errors.NewAlreadyExistsError(
-			fmt.Sprintf("tool with position %s, format %s, and code %s already exists",
-				tool.Position, tool.Format, tool.Code))
+		err = fmt.Errorf(
+			"tool with position %s, format %s, and code %s already exists",
+			tool.Position, tool.Format, tool.Code,
+		)
+		return errors.NewDBError(err, errors.DBTypeExists)
 	}
 
 	return nil
@@ -39,35 +41,43 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolI
 // - The cassette tool is a top cassette position tool
 // - The target tool is a top position tool
 // - Neither tool is already bound to another tool (prevents multiple bindings)
-func (t *Tools) validateBindingTools(cassetteID, targetID models.ToolID) error {
-	cassetteTool, err := t.Get(cassetteID)
-	if err != nil {
-		return err
+func (t *Tools) validateBindingTools(cassetteID, targetID models.ToolID) *errors.DBError {
+	cassetteTool, dberr := t.Get(cassetteID)
+	if dberr != nil {
+		return dberr
 	}
 
 	if cassetteTool.Position != models.PositionTopCassette {
-		return errors.NewValidationError(
-			fmt.Sprintf("tool %d is not a top cassette", cassetteID))
+		return errors.NewDBError(
+			fmt.Errorf("tool %d is not a top cassette", cassetteID),
+			errors.DBTypeValidation,
+		)
 	}
 
 	if cassetteTool.Binding != nil {
-		return errors.NewValidationError(
-			fmt.Sprintf("cassette tool %d is already bound to tool %d", cassetteID, *cassetteTool.Binding))
+		return errors.NewDBError(
+			fmt.Errorf("cassette tool %d is already bound to tool %d", cassetteID, *cassetteTool.Binding),
+			errors.DBTypeValidation,
+		)
 	}
 
-	targetTool, err := t.Get(targetID)
-	if err != nil {
-		return err
+	targetTool, dberr := t.Get(targetID)
+	if dberr != nil {
+		return dberr
 	}
 
 	if targetTool.Position != models.PositionTop {
-		return errors.NewValidationError(
-			fmt.Sprintf("tool %d is not a top tool", targetID))
+		return errors.NewDBError(
+			fmt.Errorf("tool %d is not a top tool", targetID),
+			errors.DBTypeValidation,
+		)
 	}
 
 	if targetTool.Binding != nil {
-		return errors.NewValidationError(
-			fmt.Sprintf("target tool %d is already bound to tool %d", targetID, *targetTool.Binding))
+		return errors.NewDBError(
+			fmt.Errorf("target tool %d is already bound to tool %d", targetID, *targetTool.Binding),
+			errors.DBTypeValidation,
+		)
 	}
 
 	return nil

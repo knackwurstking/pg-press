@@ -26,6 +26,10 @@ func (e *DBError) Error() string {
 }
 
 func NewDBError(err error, typ DBType) *DBError {
+	if e, ok := err.(*DBError); ok {
+		return e
+	}
+
 	return &DBError{
 		Err: err,
 		Typ: typ,

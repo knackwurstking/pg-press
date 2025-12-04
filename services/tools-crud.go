@@ -8,16 +8,19 @@ import (
 )
 
 func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *errors.DBError) {
-	if err := tool.Validate(); err != nil {
+	err := tool.Validate()
+	if err != nil {
 		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := user.Validate(); err != nil {
+	err = user.Validate()
+	if err != nil {
 		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := t.validateToolUniqueness(tool, 0); err != nil {
-		return 0, err
+	err = t.validateToolUniqueness(tool, 0)
+	if err != nil {
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)
@@ -52,16 +55,19 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 }
 
 func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.DBError {
-	if err := tool.Validate(); err != nil {
+	err := tool.Validate()
+	if err != nil {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := user.Validate(); err != nil {
+	err = user.Validate()
+	if err != nil {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
-		return err
+	err = t.validateToolUniqueness(tool, tool.ID)
+	if err != nil {
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)
@@ -101,12 +107,7 @@ func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.DBError) {
 
 	row := t.DB.QueryRow(query, id)
 
-	tool, dberr := ScanRow(row, ScanTool)
-	if dberr != nil {
-		return nil, dberr
-	}
-
-	return tool, nil
+	return ScanRow(row, ScanTool)
 }
 
 func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.DBError {
