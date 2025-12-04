@@ -29,6 +29,7 @@ func BuildURL(path string, params map[string]string) templ.SafeURL {
 	return templ.SafeURL(u)
 }
 
+// UrlLogin constructs login URL with optional API key and invalid flag
 func UrlLogin(apiKey string, invalid *bool) (url struct {
 	Page templ.SafeURL
 }) {
@@ -43,6 +44,7 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 	return url
 }
 
+// UrlNav constructs navigation URLs
 func UrlNav() (url struct {
 	FeedCounter templ.SafeURL
 }) {
@@ -50,6 +52,7 @@ func UrlNav() (url struct {
 	return url
 }
 
+// UrlHome constructs home URL
 func UrlHome() (url struct {
 	Page templ.SafeURL
 }) {
@@ -57,6 +60,7 @@ func UrlHome() (url struct {
 	return url
 }
 
+// UrlFeed constructs feed URLs
 func UrlFeed() (url struct {
 	Page templ.SafeURL
 	List templ.SafeURL
@@ -66,6 +70,7 @@ func UrlFeed() (url struct {
 	return url
 }
 
+// UrlHelp constructs help URLs
 func UrlHelp() (url struct {
 	MarkdownPage templ.SafeURL
 }) {
@@ -73,6 +78,7 @@ func UrlHelp() (url struct {
 	return url
 }
 
+// UrlEditor constructs editor URLs
 func UrlEditor(_type, id string, returnURL templ.SafeURL) (url struct {
 	Page templ.SafeURL
 	Save templ.SafeURL
@@ -89,6 +95,7 @@ func UrlEditor(_type, id string, returnURL templ.SafeURL) (url struct {
 	return url
 }
 
+// UrlProfile constructs profile URLs
 func UrlProfile(cookieValue string) (url struct {
 	Page    templ.SafeURL
 	Cookies templ.SafeURL
@@ -100,6 +107,7 @@ func UrlProfile(cookieValue string) (url struct {
 	return url
 }
 
+// UrlNotes constructs notes URLs
 func UrlNotes(noteID models.NoteID) (url struct {
 	Page   templ.SafeURL
 	Delete templ.SafeURL
@@ -113,6 +121,7 @@ func UrlNotes(noteID models.NoteID) (url struct {
 	return url
 }
 
+// UrlMetalSheets constructs metal sheets URLs
 func UrlMetalSheets(metalSheetID models.MetalSheetID) (url struct {
 	Delete templ.SafeURL
 }) {
@@ -122,6 +131,7 @@ func UrlMetalSheets(metalSheetID models.MetalSheetID) (url struct {
 	return url
 }
 
+// UrlUmbau constructs umbau URLs
 func UrlUmbau(press models.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
@@ -129,6 +139,7 @@ func UrlUmbau(press models.PressNumber) (url struct {
 	return url
 }
 
+// UrlTroubleReports constructs trouble reports URLs
 func UrlTroubleReports(trID models.TroubleReportID, aID models.AttachmentID, modificationTime int64) (url struct {
 	Page               templ.SafeURL
 	SharePDF           templ.SafeURL
@@ -160,6 +171,7 @@ func UrlTroubleReports(trID models.TroubleReportID, aID models.AttachmentID, mod
 	return url
 }
 
+// UrlTools constructs tools URLs
 func UrlTools(id models.ToolID) (url struct {
 	Page                  templ.SafeURL
 	Delete                templ.SafeURL
@@ -183,6 +195,7 @@ func UrlTools(id models.ToolID) (url struct {
 	return url
 }
 
+// UrlTool constructs tool URLs
 func UrlTool(toolID models.ToolID, toolRegenerationID models.ToolRegenerationID, cycleID models.CycleID) (url struct {
 	Page               templ.SafeURL
 	DeleteRegeneration templ.SafeURL
@@ -230,6 +243,7 @@ func UrlTool(toolID models.ToolID, toolRegenerationID models.ToolRegenerationID,
 	return url
 }
 
+// UrlPress constructs press URLs
 func UrlPress(pressNumber models.PressNumber) (url struct {
 	Page               templ.SafeURL
 	ActiveTools        templ.SafeURL
@@ -250,6 +264,7 @@ func UrlPress(pressNumber models.PressNumber) (url struct {
 	return url
 }
 
+// UrlPressRegeneration constructs press regeneration URLs
 func UrlPressRegeneration(press models.PressNumber, rid models.PressRegenerationID) (url struct {
 	Page   templ.SafeURL
 	Delete templ.SafeURL
@@ -264,6 +279,7 @@ func UrlPressRegeneration(press models.PressNumber, rid models.PressRegeneration
 	return url
 }
 
+// UrlDialogs constructs dialog URLs
 func UrlDialogs() (url struct {
 	EditCycle             func(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL
 	EditTool              func(toolID models.ToolID) templ.SafeURL
@@ -282,6 +298,7 @@ func UrlDialogs() (url struct {
 	return url
 }
 
+// urlEditCycleDialog constructs edit cycle dialog URL
 func urlEditCycleDialog(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
@@ -297,6 +314,7 @@ func urlEditCycleDialog(cycleID models.CycleID, toolID models.ToolID, toolChange
 	return BuildURL("/dialog/edit-cycle", params)
 }
 
+// urlEditToolDialog constructs edit tool dialog URL
 func urlEditToolDialog(toolID models.ToolID) templ.SafeURL {
 	params := map[string]string{}
 	if toolID != 0 {
@@ -306,6 +324,7 @@ func urlEditToolDialog(toolID models.ToolID) templ.SafeURL {
 	return BuildURL("/dialog/edit-tool", params)
 }
 
+// urlEditMetalSheetDialog constructs edit metal sheet dialog URL
 func urlEditMetalSheetDialog(metalSheetID models.MetalSheetID, toolID models.ToolID) templ.SafeURL {
 	params := map[string]string{}
 	if metalSheetID != 0 {
@@ -318,6 +337,7 @@ func urlEditMetalSheetDialog(metalSheetID models.MetalSheetID, toolID models.Too
 	return BuildURL("/dialog/edit-metal-sheet", params)
 }
 
+// urlEditNoteDialog constructs edit note dialog URL
 func urlEditNoteDialog(noteID models.NoteID, linkToTables string) templ.SafeURL {
 	params := map[string]string{
 		"link_to_tables": linkToTables,
@@ -329,6 +349,7 @@ func urlEditNoteDialog(noteID models.NoteID, linkToTables string) templ.SafeURL 
 	return BuildURL("/dialog/edit-note", params)
 }
 
+// urlEditToolRegenerationDialog constructs edit tool regeneration dialog URL
 func urlEditToolRegenerationDialog(toolRegenerationID models.ToolRegenerationID) templ.SafeURL {
 	params := map[string]string{}
 	if toolRegenerationID != 0 {
@@ -338,6 +359,7 @@ func urlEditToolRegenerationDialog(toolRegenerationID models.ToolRegenerationID)
 	return BuildURL("/dialog/edit-tool-regeneration", params)
 }
 
+// urlEditPressRegenerationDialog constructs edit press regeneration dialog URL
 func urlEditPressRegenerationDialog(pressRegenerationID models.PressRegenerationID) templ.SafeURL {
 	params := map[string]string{}
 	if pressRegenerationID != 0 {
