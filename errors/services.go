@@ -5,9 +5,11 @@ import "fmt"
 type DBType string
 
 const (
+	DBTypeCount      DBType = "count"
 	DBTypeValidation DBType = "validation"
 	DBTypeScan       DBType = "scan"
 	DBTypeNotFound   DBType = "not found"
+	DBTypeExists     DBType = "exists"
 	DBTypeSelect     DBType = "SELECT"
 	DBTypeInsert     DBType = "INSERT"
 	DBTypeUpdate     DBType = "UPDATE"

@@ -60,3 +60,17 @@ func ScanAttachment(scanner Scannable) (*models.Attachment, error) {
 	attachment.ID = fmt.Sprintf("%d", id)
 	return attachment, nil
 }
+
+func ScanCookie(scanner Scannable) (*models.Cookie, error) {
+	cookie := &models.Cookie{}
+
+	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan cookie: %v", err)
+	}
+
+	return cookie, nil
+}
