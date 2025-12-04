@@ -41,6 +41,10 @@ func HandlerError(err error, format string, a ...any) *echo.HTTPError {
 	return echo.NewHTTPError(statusCode, Wrap(err, format, a...))
 }
 
+func NewBadRequestError(err error, format string, a ...any) *echo.HTTPError {
+	return echo.NewHTTPError(http.StatusBadRequest, Wrap(err, format, a...))
+}
+
 func NewRenderError(err error, name string) *echo.HTTPError {
 	return HandlerError(err, "%s", name)
 }
