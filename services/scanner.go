@@ -117,3 +117,15 @@ func ScanModification(scanner Scannable) (*models.Modification[any], error) {
 	}
 	return mod, nil
 }
+
+func ScanNote(scanner Scannable) (*models.Note, error) {
+	note := &models.Note{}
+	err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt, &note.Linked)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan note: %v", err)
+	}
+	return note, nil
+}

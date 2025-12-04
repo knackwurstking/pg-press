@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -35,7 +34,7 @@ func NewNotes(r *Registry) *Notes {
 	return &Notes{Base: base}
 }
 
-func (n *Notes) List() ([]*models.Note, error) {
+func (n *Notes) List() ([]*models.Note, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s;`,
@@ -44,14 +43,14 @@ func (n *Notes) List() ([]*models.Note, error) {
 
 	rows, err := n.DB.Query(query)
 	if err != nil {
-		return nil, n.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanNote)
+	return ScanRows(rows, ScanNote)
 }
 
-func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
+func (n *Notes) Get(id models.NoteID) (*models.Note, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -60,18 +59,10 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, error) {
 	)
 
 	row := n.DB.QueryRow(query, id)
-	note, err := ScanSingleRow(row, scanNote)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("note with ID %d not found", id))
-		}
-		return nil, n.GetSelectError(err)
-	}
-
-	return note, nil
+	return ScanRow(row, ScanNote)
 }
 
-func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
+func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.DBError) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -94,36 +85,37 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, error) {
 
 	rows, err := n.DB.Query(query, args...)
 	if err != nil {
-		return nil, n.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
 	// Store notes in a map for efficient lookup
-	noteMap, err := scanNotesIntoMap(rows)
-	if err != nil {
-		return nil, err
+	notes, dberr := ScanRows(rows, ScanNote)
+	if dberr != nil {
+		return nil, dberr
 	}
+	notesMap := MapNotes(notes)
 
 	// Return notes in the order of the requested IDs
-	notes := make([]*models.Note, 0, len(ids))
+	notesOrdered := make([]*models.Note, 0, len(ids))
 	for _, id := range ids {
-		if note, exists := noteMap[id]; exists {
-			notes = append(notes, note)
+		if n, ok := notesMap[id]; ok {
+			notesOrdered = append(notesOrdered, n)
 		}
 	}
 
 	return notes, nil
 }
 
-func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, error) {
+func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, *errors.DBError) {
 	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
-func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, error) {
+func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, *errors.DBError) {
 	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
 }
 
-func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
+func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -133,16 +125,16 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, error) {
 
 	rows, err := n.DB.Query(query, linked)
 	if err != nil {
-		return nil, n.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanNote)
+	return ScanRows(rows, ScanNote)
 }
 
-func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
+func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.DBError) {
 	if err := note.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -152,20 +144,20 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, error) {
 
 	result, err := n.DB.Exec(query, note.Level, note.Content, note.Linked)
 	if err != nil {
-		return 0, n.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, n.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	return models.NoteID(id), nil
 }
 
-func (n *Notes) Update(note *models.Note) error {
+func (n *Notes) Update(note *models.Note) *errors.DBError {
 	if err := note.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -174,41 +166,21 @@ func (n *Notes) Update(note *models.Note) error {
 	)
 
 	_, err := n.DB.Exec(query, note.Level, note.Content, note.Linked, note.ID)
-	return n.GetUpdateError(err)
+	return errors.NewDBError(err, errors.DBTypeUpdate)
 }
 
-func (n *Notes) Delete(id models.NoteID) error {
+func (n *Notes) Delete(id models.NoteID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)
-	return n.GetDeleteError(err)
+	return errors.NewDBError(err, errors.DBTypeDelete)
 }
 
-func scanNote(scanner Scannable) (*models.Note, error) {
-	note := &models.Note{}
-	err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt, &note.Linked)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan note: %v", err)
-	}
-	return note, nil
-}
+func MapNotes(notes []*models.Note) map[models.NoteID]*models.Note {
+	noteMap := make(map[models.NoteID]*models.Note)
 
-func scanNotesIntoMap(rows *sql.Rows) (map[models.NoteID]*models.Note, error) {
-	resultMap := make(map[models.NoteID]*models.Note)
-
-	for rows.Next() {
-		note, err := scanNote(rows)
-		if err != nil {
-			return nil, err
-		}
-		resultMap[note.ID] = note
+	for _, note := range notes {
+		noteMap[note.ID] = note
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
-	}
-
-	return resultMap, nil
+	return noteMap
 }
