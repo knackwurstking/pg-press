@@ -2,7 +2,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -43,23 +42,7 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 	}
 }
 
-func (s *MetalSheets) List() ([]*models.MetalSheet, error) {
-	query := fmt.Sprintf(`
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
-		FROM %s
-		ORDER BY id DESC;
-	`, TableNameMetalSheets)
-
-	rows, err := s.DB.Query(query)
-	if err != nil {
-		return nil, s.GetSelectError(err)
-	}
-	defer rows.Close()
-
-	return ScanRows(rows, scanMetalSheet)
-}
-
-func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
+func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -68,19 +51,31 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, error) {
 
 	row := s.DB.QueryRow(query, id)
 
-	sheet, err := ScanSingleRow(row, scanMetalSheet)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(
-				fmt.Sprintf("metal sheet with ID %d", id))
-		}
-		return nil, err
+	sheet, dberr := ScanRow(row, ScanMetalSheet)
+	if dberr != nil {
+		return nil, dberr
 	}
 
 	return sheet, nil
 }
 
-func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, error) {
+func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.DBError) {
+	query := fmt.Sprintf(`
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
+		FROM %s
+		ORDER BY id DESC;
+	`, TableNameMetalSheets)
+
+	rows, err := s.DB.Query(query)
+	if err != nil {
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+	}
+	defer rows.Close()
+
+	return ScanRows(rows, ScanMetalSheet)
+}
+
+func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -90,19 +85,14 @@ func (s *MetalSheets) GetByToolID(toolID models.ToolID) ([]*models.MetalSheet, e
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanMetalSheet)
+	return ScanRows(rows, ScanMetalSheet)
 }
 
-func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*models.MetalSheet, error) {
-	if !machineType.IsValid() {
-		return nil, errors.NewValidationError(
-			fmt.Sprintf("invalid machine type: %s", machineType))
-	}
-
+func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*models.MetalSheet, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -112,21 +102,21 @@ func (s *MetalSheets) GetByMachineType(machineType models.MachineType) ([]*model
 
 	rows, err := s.DB.Query(query, machineType.String())
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanMetalSheet)
+	return ScanRows(rows, ScanMetalSheet)
 }
 
-func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, error) {
+func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, *errors.DBError) {
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
 
 	var allSheets models.MetalSheetList
 	for toolID := range toolsMap {
-		sheets, err := s.GetByToolID(toolID)
-		if err != nil {
-			continue
+		sheets, dberr := s.ListByToolID(toolID)
+		if dberr != nil {
+			return nil, dberr
 		}
 		allSheets = append(allSheets, sheets...)
 	}
@@ -135,16 +125,15 @@ func (s *MetalSheets) GetForPress(pressNumber models.PressNumber, toolsMap map[m
 	for _, sheet := range allSheets {
 		if sheet.Identifier == expectedMachineType {
 			filteredSheets = append(filteredSheets, sheet)
-		} else if sheet.Identifier != models.MachineTypeSACMI && sheet.Identifier != models.MachineTypeSITI {
 		}
 	}
 
 	return filteredSheets, nil
 }
 
-func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error) {
+func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.DBError) {
 	if err := sheet.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -163,21 +152,21 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, error)
 		sheet.ToolID,
 	)
 	if err != nil {
-		return 0, s.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, s.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	sheet.ID = models.MetalSheetID(id)
 	return sheet.ID, nil
 }
 
-func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
+func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.DBError {
 	if err := sheet.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -191,19 +180,22 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) error {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.Identifier.String(), sheet.ToolID, sheet.ID)
 	if err != nil {
-		return s.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil
 }
 
-func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) error {
+func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *errors.DBError {
 	if toolID <= 0 {
-		return errors.NewValidationError("tool_id: must be positive")
+		return errors.NewDBError(
+			fmt.Errorf("tool_id: must be positive"),
+			errors.DBTypeValidation,
+		)
 	}
 
-	if _, err := s.Get(sheetID); err != nil {
-		return fmt.Errorf("get sheet for tool assignment: %v", err)
+	if _, dberr := s.Get(sheetID); dberr != nil {
+		return dberr
 	}
 
 	query := fmt.Sprintf(`
@@ -213,34 +205,18 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) erro
 	`, TableNameMetalSheets)
 
 	if _, err := s.DB.Exec(query, toolID, sheetID); err != nil {
-		return s.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil
 }
 
-func (s *MetalSheets) Delete(id models.MetalSheetID) error {
+func (s *MetalSheets) Delete(id models.MetalSheetID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
+
 	if _, err := s.DB.Exec(query, id); err != nil {
-		return s.GetDeleteError(err)
+		return errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return nil
-}
-
-func scanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
-	sheet := &models.MetalSheet{}
-	var identifierStr string
-
-	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
-		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan metal sheet: %v", err)
-	}
-
-	sheet.Identifier = models.MachineType(identifierStr)
-	return sheet, nil
 }

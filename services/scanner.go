@@ -88,3 +88,20 @@ func ScanFeed(scanner Scannable) (*models.Feed, error) {
 
 	return feed, nil
 }
+
+func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
+	sheet := &models.MetalSheet{}
+	var identifierStr string
+
+	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
+		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan metal-sheet: %v", err)
+	}
+
+	sheet.Identifier = models.MachineType(identifierStr)
+	return sheet, nil
+}
