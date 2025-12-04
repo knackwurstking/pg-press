@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
 // GetCycleSummaryData retrieves complete cycle summary data for a press
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
-) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, error) {
+) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, *errors.DBError) {
 	cycles, err := s.GetPressCycles(pressNumber, nil, nil)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("get cycles for press %d: %w", pressNumber, err)
@@ -63,7 +64,7 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 // GetToolSummaries creates consolidated tool summaries with start/end dates
 func (s *PressCycles) GetToolSummaries(
 	cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool,
-) ([]*models.ToolSummary, error) {
+) ([]*models.ToolSummary, *errors.DBError) {
 	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
 	s.sortToolSummariesChronologically(toolSummaries)
 	consolidatedSummaries := s.consolidateToolSummaries(toolSummaries)

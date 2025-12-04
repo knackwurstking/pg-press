@@ -129,3 +129,22 @@ func ScanNote(scanner Scannable) (*models.Note, error) {
 	}
 	return note, nil
 }
+
+func ScanCycle(scannable Scannable) (*models.Cycle, error) {
+	cycle := &models.Cycle{}
+
+	err := scannable.Scan(
+		&cycle.ID,
+		&cycle.PressNumber,
+		&cycle.ToolID,
+		&cycle.ToolPosition,
+		&cycle.TotalCycles,
+		&cycle.Date,
+		&cycle.PerformedBy,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("scan press-cycle: %w", err)
+	}
+
+	return cycle, nil
+}

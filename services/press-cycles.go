@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
 )
 
 const TableNamePressCycles = "press_cycles"
@@ -41,23 +40,4 @@ func (s *PressCycles) CreateTable() error {
 	}
 
 	return nil
-}
-
-func scanCycle(scannable Scannable) (*models.Cycle, error) {
-	cycle := &models.Cycle{}
-
-	err := scannable.Scan(
-		&cycle.ID,
-		&cycle.PressNumber,
-		&cycle.ToolID,
-		&cycle.ToolPosition,
-		&cycle.TotalCycles,
-		&cycle.Date,
-		&cycle.PerformedBy,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("scan press cycle: %w", err)
-	}
-
-	return cycle, nil
 }

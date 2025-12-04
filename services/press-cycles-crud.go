@@ -10,7 +10,7 @@ import (
 )
 
 // Get retrieves a press cycle by ID
-func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
+func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -18,7 +18,7 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
 	`, TableNamePressCycles)
 
 	row := s.DB.QueryRow(query, id)
-	cycle, err := ScanSingleRow(row, scanCycle)
+	cycle, err := ScanRow(row, ScanCycle)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
@@ -31,7 +31,7 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, error) {
 }
 
 // Add creates a new press cycle
-func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, error) {
+func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, *errors.DBError) {
 	if err := cycle.Validate(); err != nil {
 		return 0, err
 	}
@@ -71,7 +71,7 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 }
 
 // List retrieves all press cycles
-func (s *PressCycles) List() ([]*models.Cycle, error) {
+func (s *PressCycles) List() ([]*models.Cycle, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT *
 		FROM %s
@@ -94,7 +94,7 @@ func (s *PressCycles) List() ([]*models.Cycle, error) {
 }
 
 // Update modifies an existing press cycle
-func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
+func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.DBError {
 	if err := cycle.Validate(); err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) error {
 }
 
 // Delete removes a press cycle from the database
-func (s *PressCycles) Delete(id models.CycleID) error {
+func (s *PressCycles) Delete(id models.CycleID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
 	_, err := s.DB.Exec(query, id)
 

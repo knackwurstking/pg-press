@@ -9,7 +9,7 @@ import (
 )
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
-func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, error) {
+func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -31,7 +31,7 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, err
 }
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, error) {
+func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -56,7 +56,7 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 }
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
-func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, error) {
+func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
