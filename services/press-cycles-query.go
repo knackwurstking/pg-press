@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -19,14 +18,11 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *er
 	`, TableNamePressCycles)
 
 	row := s.DB.QueryRow(query, toolID)
-	cycle, err := ScanSingleRow(row, scanCycle)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("No cycles found for tool %d", toolID))
-		}
-		return nil, err
+	cycle, dberr := ScanRow(row, ScanCycle)
+	if dberr != nil {
+		return cycle, dberr
 	}
-
+	cycle.PartialCycles = s.GetPartialCycles(cycle)
 	return cycle, nil
 }
 
@@ -41,17 +37,16 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	cycles, err := ScanRows(rows, scanCycle)
-	if err != nil {
-		return nil, err
+	cycles, dberr := ScanRows(rows, ScanCycle)
+	if dberr != nil {
+		return nil, dberr
 	}
 
-	cycles = s.injectPartialCycles(cycles)
-
+	s.injectPartialCycles(cycles)
 	return cycles, nil
 }
 
@@ -69,17 +64,15 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 
 	rows, err := s.DB.Query(query, args...)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	cycles, err := ScanRows(rows, scanCycle)
-	if err != nil {
-		return nil, err
+	cycles, dberr := ScanRows(rows, ScanCycle)
+	if dberr != nil {
+		return cycles, nil
 	}
-
-	cycles = s.injectPartialCycles(cycles)
-
+	s.injectPartialCycles(cycles)
 	return cycles, nil
 }
 

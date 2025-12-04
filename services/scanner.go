@@ -239,3 +239,16 @@ func ScanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
 
 	return report, nil
 }
+
+func ScanUser(scanner Scannable) (*models.User, error) {
+	user := &models.User{}
+	err := scanner.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan user: %v", err)
+	}
+
+	return user, nil
+}

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -18,12 +17,9 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.DBError) {
 	`, TableNamePressCycles)
 
 	row := s.DB.QueryRow(query, id)
-	cycle, err := ScanRow(row, ScanCycle)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("Press cycle with ID %d not found", id))
-		}
-		return nil, err
+	cycle, dberr := ScanRow(row, ScanCycle)
+	if dberr != nil {
+		return cycle, dberr
 	}
 
 	cycle.PartialCycles = s.GetPartialCycles(cycle)
@@ -33,11 +29,11 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.DBError) {
 // Add creates a new press cycle
 func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, *errors.DBError) {
 	if err := cycle.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := user.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if cycle.Date.IsZero() {
@@ -58,12 +54,12 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, s.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, s.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	cycle.ID = models.CycleID(id)
@@ -80,27 +76,27 @@ func (s *PressCycles) List() ([]*models.Cycle, *errors.DBError) {
 
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	cycles, err := ScanRows(rows, scanCycle)
-	if err != nil {
-		return nil, err
+	cycles, dberr := ScanRows(rows, ScanCycle)
+	if dberr != nil {
+		return nil, dberr
 	}
 
-	cycles = s.injectPartialCycles(cycles)
+	s.injectPartialCycles(cycles)
 	return cycles, nil
 }
 
 // Update modifies an existing press cycle
 func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.DBError {
 	if err := cycle.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := user.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if cycle.Date.IsZero() {
@@ -122,14 +118,12 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.DBE
 		cycle.Date,
 		cycle.ID,
 	)
-
-	return s.GetUpdateError(err)
+	return errors.NewDBError(err, errors.DBTypeUpdate)
 }
 
 // Delete removes a press cycle from the database
 func (s *PressCycles) Delete(id models.CycleID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
 	_, err := s.DB.Exec(query, id)
-
-	return s.GetDeleteError(err)
+	return errors.NewDBError(err, errors.DBTypeDelete)
 }

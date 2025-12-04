@@ -82,10 +82,8 @@ func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {
 	return args
 }
 
-func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) []*models.Cycle {
+func (s *PressCycles) injectPartialCycles(cycles []*models.Cycle) {
 	for _, cycle := range cycles {
 		cycle.PartialCycles = s.GetPartialCycles(cycle)
 	}
-
-	return cycles
 }
