@@ -42,7 +42,7 @@ func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegen
 
 	regeneration, err := ScanSingleRow(row, scanToolRegeneration)
 	if err != nil {
-		return nil, s.GetSelectError(err)
+		return nil, errors.NewDatabaseError(err, errors.DatabaseTypeSelect)
 	}
 
 	return regeneration, nil

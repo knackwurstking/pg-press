@@ -3,26 +3,60 @@ package services
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/knackwurstking/pg-press/errors"
+	"github.com/knackwurstking/pg-press/models"
 )
 
-func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T, error) {
+func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T, *errors.DBError) {
 	var results []*T
 
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			return nil, err
+			if err == sql.ErrNoRows {
+				return nil, errors.NewDBError(err, errors.DBTypeNotFound)
+			}
+			return nil, errors.NewDBError(err, errors.DBTypeScan)
 		}
 		results = append(results, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
+		if err == sql.ErrNoRows {
+			return nil, errors.NewDBError(err, errors.DBTypeNotFound)
+		}
+		return nil, errors.NewDBError(err, errors.DBTypeScan)
 	}
 
 	return results, nil
 }
 
-func ScanSingleRow[T any](row *sql.Row, scanFunc func(Scannable) (*T, error)) (*T, error) {
-	return scanFunc(row)
+func ScanRow[T any](row *sql.Row, scanFunc func(Scannable) (*T, error)) (*T, *errors.DBError) {
+	t, err := scanFunc(row)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewDBError(err, errors.DBTypeNotFound)
+		}
+		return t, errors.NewDBError(err, errors.DBTypeScan)
+	}
+	return t, nil
+}
+
+// Scanner functions to pass into `ScanRows` or ScanRow`
+
+func ScanAttachment(scanner Scannable) (*models.Attachment, error) {
+	var id int64
+	attachment := &models.Attachment{}
+
+	err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan attachment: %v", err)
+	}
+
+	attachment.ID = fmt.Sprintf("%d", id)
+	return attachment, nil
 }

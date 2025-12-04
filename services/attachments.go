@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -36,7 +35,7 @@ func NewAttachments(r *Registry) *Attachments {
 	}
 }
 
-func (a *Attachments) List() ([]*models.Attachment, error) {
+func (a *Attachments) List() ([]*models.Attachment, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
 		TableNameAttachments,
@@ -44,34 +43,28 @@ func (a *Attachments) List() ([]*models.Attachment, error) {
 
 	rows, err := a.DB.Query(query)
 	if err != nil {
-		return nil, a.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanAttachment)
+	return ScanRows(rows, ScanAttachment)
 }
 
-func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, error) {
+func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
 		TableNameAttachments,
 	)
 
-	row := a.DB.QueryRow(query, id)
-	attachment, err := ScanSingleRow(row, scanAttachment)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(
-				fmt.Sprintf("attachment with ID %d not found", id),
-			)
-		}
-		return nil, a.GetSelectError(err)
+	attachment, dberr := ScanRow(a.DB.QueryRow(query, id), ScanAttachment)
+	if dberr != nil {
+		return nil, dberr
 	}
 
 	return attachment, nil
 }
 
-func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, error) {
+func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, *errors.DBError) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -92,30 +85,33 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 
 	rows, err := a.DB.Query(query, args...)
 	if err != nil {
-		return nil, a.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachmentMap, err := scanAttachmentsIntoMap(rows)
-	if err != nil {
-		return nil, err
+	attachments, dberr := ScanRows(rows, ScanAttachment)
+	if dberr != nil {
+		return nil, dberr
 	}
 
+	// Create a map for O(1) lookup
+	attachmentMap := MapAttachments(attachments)
+
 	// Return attachments in the order of the requested IDs
-	attachments := make([]*models.Attachment, 0, len(ids))
+	attachmentsInOrder := make([]*models.Attachment, 0, len(ids))
 	for _, id := range ids {
 		if attachment, exists := attachmentMap[id]; exists {
-			attachments = append(attachments, attachment)
+			attachmentsInOrder = append(attachmentsInOrder, attachment)
 		}
 	}
 
-	return attachments, nil
+	return attachmentsInOrder, nil
 }
 
-func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, error) {
+func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.DBError) {
 	if err := attachment.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -125,20 +121,20 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, e
 
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, a.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, a.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	return models.AttachmentID(id), nil
 }
 
-func (a *Attachments) Update(attachment *models.Attachment) error {
+func (a *Attachments) Update(attachment *models.Attachment) *errors.DBError {
 	if err := attachment.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	id := attachment.GetID()
@@ -149,54 +145,28 @@ func (a *Attachments) Update(attachment *models.Attachment) error {
 
 	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return a.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil
 }
 
-func (a *Attachments) Delete(id models.AttachmentID) error {
+func (a *Attachments) Delete(id models.AttachmentID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)
 	if err != nil {
-		return a.GetDeleteError(err)
+		return errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return nil
 }
 
-func scanAttachment(scanner Scannable) (*models.Attachment, error) {
-	var id int64
-	attachment := &models.Attachment{}
+func MapAttachments(attachments []*models.Attachment) map[models.AttachmentID]*models.Attachment {
+	attachmentMap := map[models.AttachmentID]*models.Attachment{}
 
-	err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan attachment: %v", err)
+	for _, a := range attachments {
+		attachmentMap[a.GetID()] = a
 	}
 
-	attachment.ID = fmt.Sprintf("%d", id)
-	return attachment, nil
-}
-
-func scanAttachmentsIntoMap(rows *sql.Rows) (map[models.AttachmentID]*models.Attachment, error) {
-	resultMap := make(map[models.AttachmentID]*models.Attachment)
-
-	for rows.Next() {
-		attachment, err := scanAttachment(rows)
-		if err != nil {
-			return nil, err
-		}
-
-		id := attachment.GetID()
-		resultMap[id] = attachment
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("row iteration error: %v", err)
-	}
-
-	return resultMap, nil
+	return attachmentMap
 }

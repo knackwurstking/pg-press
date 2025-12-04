@@ -2,8 +2,6 @@ package services
 
 import (
 	"database/sql"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 type Base struct {
@@ -16,38 +14,4 @@ func NewBase(r *Registry) *Base {
 		Registry: r,
 		DB:       r.DB,
 	}
-}
-
-func (b *Base) QueryCount(query string, args ...any) (int, error) {
-	var count int
-	if err := b.DB.QueryRow(query, args...).Scan(&count); err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-
-func (b *Base) HasTable(tableName string) bool {
-	rows, err := b.DB.Query(`SELECT name FROM sqlite_master WHERE type='table' AND name='press_cycles';`)
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-
-	return rows.Next()
-}
-
-func (b *Base) GetSelectError(err error) error {
-	return errors.NewDatabaseSelectError(err)
-}
-
-func (b *Base) GetInsertError(err error) error {
-	return errors.NewDatabaseInsertError(err)
-}
-
-func (b *Base) GetUpdateError(err error) error {
-	return errors.NewDatabaseUpdateError(err)
-}
-
-func (b *Base) GetDeleteError(err error) error {
-	return errors.NewDatabaseDeleteError(err)
 }
