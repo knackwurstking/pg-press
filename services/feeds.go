@@ -1,7 +1,6 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -42,7 +41,7 @@ func (f *Feeds) SetBroadcaster(broadcaster Broadcaster) {
 	f.broadcaster = broadcaster
 }
 
-func (f *Feeds) List() ([]*models.Feed, error) {
+func (f *Feeds) List() ([]*models.Feed, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s ORDER BY created_at DESC`,
 		TableNameFeeds,
@@ -50,14 +49,14 @@ func (f *Feeds) List() ([]*models.Feed, error) {
 
 	rows, err := f.DB.Query(query)
 	if err != nil {
-		return nil, f.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanFeed)
+	return ScanRows(rows, ScanFeed)
 }
 
-func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
+func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
 		FROM %s
@@ -68,14 +67,14 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, error) {
 
 	rows, err := f.DB.Query(query, limit, offset)
 	if err != nil {
-		return nil, f.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanFeed)
+	return ScanRows(rows, ScanFeed)
 }
 
-func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, error) {
+func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at
 		FROM %s
@@ -87,34 +86,30 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, err
 
 	rows, err := f.DB.Query(query, userID, limit, offset)
 	if err != nil {
-		return nil, f.GetSelectError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeSelect)
 	}
 	defer rows.Close()
 
-	return ScanRows(rows, scanFeed)
+	return ScanRows(rows, ScanFeed)
 }
 
-func (f *Feeds) Get(id models.FeedID) (*models.Feed, error) {
+func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.DBError) {
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at FROM %s WHERE id = ?`,
 		TableNameFeeds,
 	)
 
-	row := f.DB.QueryRow(query, id)
-	feed, err := ScanSingleRow(row, scanFeed)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("feed with id %d not found", id))
-		}
-		return nil, f.GetSelectError(err)
+	feed, dberr := ScanRow(f.DB.QueryRow(query, id), ScanFeed)
+	if dberr != nil {
+		return nil, dberr
 	}
 
 	return feed, nil
 }
 
-func (f *Feeds) Add(feed *models.Feed) error {
+func (f *Feeds) Add(feed *models.Feed) *errors.DBError {
 	if err := feed.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -124,12 +119,12 @@ func (f *Feeds) Add(feed *models.Feed) error {
 
 	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
-		return f.GetInsertError(err)
+		return errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return f.GetInsertError(err)
+		return errors.NewDBError(err, errors.DBTypeInsert)
 	}
 	feed.ID = models.FeedID(id)
 
@@ -141,13 +136,13 @@ func (f *Feeds) Add(feed *models.Feed) error {
 }
 
 // AddSimple creates a new feed with automatic timestamp and broadcasts the update
-func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*models.Feed, error) {
+func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*models.Feed, *errors.DBError) {
 	// Create feed with automatic timestamp
 	feed := models.NewFeed(title, content, userID)
 
 	// Validate the feed
 	if err := feed.Validate(); err != nil {
-		return nil, err
+		return nil, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -157,12 +152,12 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 
 	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
-		return nil, f.GetInsertError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, f.GetInsertError(err)
+		return nil, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 	feed.ID = models.FeedID(id)
 
@@ -174,60 +169,50 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 	return feed, nil
 }
 
-func (f *Feeds) Delete(id models.FeedID) error {
+func (f *Feeds) Delete(id models.FeedID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
+
 	_, err := f.DB.Exec(query, id)
 	if err != nil {
-		return f.GetDeleteError(err)
+		return errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return nil
 }
 
-func (f *Feeds) DeleteBefore(timestamp int64) (int, error) {
+func (f *Feeds) DeleteBefore(timestamp int64) (int, *errors.DBError) {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
+
 	result, err := f.DB.Exec(query, timestamp)
 	if err != nil {
-		return 0, f.GetDeleteError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, f.GetDeleteError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return int(rowsAffected), nil
 }
 
-func (f *Feeds) Count() (int, error) {
+func (f *Feeds) Count() (int, *errors.DBError) {
 	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
 	if err != nil {
-		return 0, f.GetSelectError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeCount)
 	}
 
 	return count, nil
 }
 
-func (f *Feeds) CountByUser(userID int64) (int, error) {
+func (f *Feeds) CountByUser(userID int64) (int, *errors.DBError) {
 	count, err := f.QueryCount(
 		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE user_id = ?`, TableNameFeeds),
 		userID,
 	)
 	if err != nil {
-		return 0, f.GetSelectError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeCount)
 	}
 
 	return count, nil
-}
-
-func scanFeed(scanner Scannable) (*models.Feed, error) {
-	feed := &models.Feed{}
-	err := scanner.Scan(&feed.ID, &feed.Title, &feed.Content, &feed.UserID, &feed.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan feed: %v", err)
-	}
-	return feed, nil
 }

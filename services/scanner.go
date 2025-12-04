@@ -74,3 +74,17 @@ func ScanCookie(scanner Scannable) (*models.Cookie, error) {
 
 	return cookie, nil
 }
+
+func ScanFeed(scanner Scannable) (*models.Feed, error) {
+	feed := &models.Feed{}
+
+	err := scanner.Scan(&feed.ID, &feed.Title, &feed.Content, &feed.UserID, &feed.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan feed: %v", err)
+	}
+
+	return feed, nil
+}
