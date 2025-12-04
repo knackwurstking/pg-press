@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -147,4 +148,49 @@ func ScanCycle(scannable Scannable) (*models.Cycle, error) {
 	}
 
 	return cycle, nil
+}
+
+func ScanPressRegeneration(scannable Scannable) (*models.PressRegeneration, error) {
+	regeneration := &models.PressRegeneration{}
+	var completedAt sql.NullTime
+
+	err := scannable.Scan(
+		&regeneration.ID,
+		&regeneration.PressNumber,
+		&regeneration.StartedAt,
+		&completedAt,
+		&regeneration.Reason,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan press regeneration: %v", err)
+	}
+
+	if completedAt.Valid {
+		regeneration.CompletedAt = completedAt.Time
+	}
+
+	return regeneration, nil
+}
+
+func ScanTool(scannable Scannable) (*models.Tool, error) {
+	tool := &models.Tool{}
+	var format []byte
+
+	err := scannable.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
+		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press, &tool.Binding)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan tool: %v", err)
+	}
+
+	if err := json.Unmarshal(format, &tool.Format); err != nil {
+		return nil, fmt.Errorf("unmarshal tool format: %v", err)
+	}
+
+	return tool, nil
 }

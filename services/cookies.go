@@ -114,7 +114,7 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.DBError {
 }
 
 // Update updates a cookie with database-level locking to prevent race conditions
-func (c *Cookies) Update(value string, cookie *models.Cookie) error {
+func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.DBError {
 	if value == "" {
 		return EmptyValueError
 	}
@@ -160,7 +160,7 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) error {
 	return nil
 }
 
-func (c *Cookies) Remove(value string) error {
+func (c *Cookies) Remove(value string) *errors.DBError {
 	if value == "" {
 		return EmptyValueError
 	}
@@ -175,7 +175,7 @@ func (c *Cookies) Remove(value string) error {
 	return nil
 }
 
-func (c *Cookies) RemoveApiKey(apiKey string) error {
+func (c *Cookies) RemoveApiKey(apiKey string) *errors.DBError {
 	if err := utils.ValidateAPIKey(apiKey); err != nil {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
@@ -189,7 +189,7 @@ func (c *Cookies) RemoveApiKey(apiKey string) error {
 	return nil
 }
 
-func (c *Cookies) RemoveExpired(beforeTimestamp int64) error {
+func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
 
 	_, err := c.DB.Exec(query, beforeTimestamp)

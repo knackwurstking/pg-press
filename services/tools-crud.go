@@ -1,20 +1,19 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error) {
+func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *errors.DBError) {
 	if err := tool.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := user.Validate(); err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := t.validateToolUniqueness(tool, 0); err != nil {
@@ -23,7 +22,7 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return 0, err
+		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -41,24 +40,24 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, error)
 		tool.Press,
 		tool.Binding)
 	if err != nil {
-		return 0, t.GetInsertError(err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, fmt.Errorf("get last insert ID: %v", err)
+		return 0, errors.NewDBError(err, errors.DBTypeInsert)
 	}
 
 	return models.ToolID(id), nil
 }
 
-func (t *Tools) Update(tool *models.Tool, user *models.User) error {
+func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.DBError {
 	if err := tool.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := user.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	if err := t.validateToolUniqueness(tool, tool.ID); err != nil {
@@ -67,7 +66,7 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -87,13 +86,13 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) error {
 		tool.Binding,
 		tool.ID)
 	if err != nil {
-		return t.GetUpdateError(err)
+		return errors.NewDBError(err, errors.DBTypeUpdate)
 	}
 
 	return nil
 }
 
-func (t *Tools) Get(id models.ToolID) (*models.Tool, error) {
+func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.DBError) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -102,26 +101,23 @@ func (t *Tools) Get(id models.ToolID) (*models.Tool, error) {
 
 	row := t.DB.QueryRow(query, id)
 
-	tool, err := ScanSingleRow(row, scanTool)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewNotFoundError(fmt.Sprintf("tool with ID %d not found", id))
-		}
-		return nil, t.GetSelectError(err)
+	tool, dberr := ScanRow(row, ScanTool)
+	if dberr != nil {
+		return nil, dberr
 	}
 
 	return tool, nil
 }
 
-func (t *Tools) Delete(id models.ToolID, user *models.User) error {
+func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.DBError {
 	if err := user.Validate(); err != nil {
-		return err
+		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTools)
 	_, err := t.DB.Exec(query, id)
 	if err != nil {
-		return t.GetDeleteError(err)
+		return errors.NewDBError(err, errors.DBTypeDelete)
 	}
 
 	return nil

@@ -1,12 +1,9 @@
 package services
 
 import (
-	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
 )
 
 const TableNameTools = "tools"
@@ -43,24 +40,4 @@ func NewTools(r *Registry) *Tools {
 	}
 
 	return t
-}
-
-func scanTool(scannable Scannable) (*models.Tool, error) {
-	tool := &models.Tool{}
-	var format []byte
-
-	err := scannable.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
-		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press, &tool.Binding)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan tool: %v", err)
-	}
-
-	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, fmt.Errorf("unmarshal tool format: %v", err)
-	}
-
-	return tool, nil
 }
