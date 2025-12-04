@@ -105,3 +105,15 @@ func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 	sheet.Identifier = models.MachineType(identifierStr)
 	return sheet, nil
 }
+
+func ScanModification(scanner Scannable) (*models.Modification[any], error) {
+	mod := &models.Modification[any]{}
+	err := scanner.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, fmt.Errorf("scan modification: %v", err)
+	}
+	return mod, nil
+}
