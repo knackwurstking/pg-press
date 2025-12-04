@@ -43,8 +43,9 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 		page    = templates.LoginPage(apiKey, invalid)
 	)
 
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render login page")
+	err := page.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "login-page")
 	}
 
 	return nil
@@ -73,9 +74,11 @@ func (h *Handler) GetLogout(c echo.Context) error {
 		return eerr
 	}
 
-	if cookie, err := c.Cookie(env.CookieName); err == nil {
-		if err := h.registry.Cookies.Remove(cookie.Value); err != nil {
-			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", err)
+	cookie, err := c.Cookie(env.CookieName)
+	if err == nil {
+		dberr := h.registry.Cookies.Remove(cookie.Value)
+		if dberr != nil {
+			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", dberr)
 		}
 	}
 
@@ -87,20 +90,22 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 		return fmt.Errorf("api key too short")
 	}
 
-	user, err := h.registry.Users.GetUserFromApiKey(apiKey)
-	if err != nil {
-		if !errors.IsNotFoundError(err) {
-			return errors.Wrap(err, "database authentication")
+	user, dberr := h.registry.Users.GetUserFromApiKey(apiKey)
+	if dberr != nil {
+		if dberr.Typ != errors.DBTypeNotFound {
+			return errors.Wrap(dberr, "database authentication")
 		} else {
-			return errors.Wrap(err, "invalid api key")
+			return errors.Wrap(dberr, "invalid api key")
 		}
 	}
 
-	if err := h.clearExistingSession(ctx); err != nil {
+	err := h.clearExistingSession(ctx)
+	if err != nil {
 		slog.Warn("Failed to clear existing session", "error", err)
 	}
 
-	if err := h.createSession(ctx, apiKey); err != nil {
+	err = h.createSession(ctx, apiKey)
+	if err != nil {
 		return errors.Wrap(err, "create session")
 	}
 

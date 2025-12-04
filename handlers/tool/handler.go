@@ -79,9 +79,9 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return eerr
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool")
 	}
 
 	page := templates.Page(&templates.PageProps{
@@ -91,8 +91,9 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		Position:   tool.Position,
 	})
 
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool page")
+	err := page.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "tool-page")
 	}
 
 	return nil
@@ -111,26 +112,26 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		return eerr
 	}
 
-	var rTool *models.ResolvedTool
-	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return errors.Handler(err, "get tool")
-	} else {
-		rTool, err = services.ResolveTool(h.registry, t)
-		if err != nil {
-			return errors.Handler(err, "resolve tool")
-		}
+	t, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool")
+	}
+
+	rTool, err := services.ResolveTool(h.registry, t)
+	if err != nil {
+		return errors.HandlerError(err, "resolve tool")
 	}
 
 	var targetID models.ToolID
 	{ // Get target_id from form value
 		targetIDString := c.FormValue("target_id")
 		if targetIDString == "" {
-			return errors.BadRequest(nil, "failed to parse target_id: %#v", targetIDString)
+			return errors.HandlerError(nil, "failed to parse target_id: %#v", targetIDString)
 		}
 
 		targetIDParsed, err := strconv.ParseInt(targetIDString, 10, 64)
 		if err != nil {
-			return errors.BadRequest(err, "invalid target_id")
+			return errors.NewBadRequestError(err, "invalid target_id")
 		}
 		targetID = models.ToolID(targetIDParsed)
 	}
@@ -151,7 +152,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 
 		// Bind tool to target, this will get an error if target already has a binding
 		if err := h.registry.Tools.Bind(cassette, target); err != nil {
-			return errors.Handler(err, "bind tool")
+			return errors.HandlerError(err, "bind tool")
 		}
 	}
 
@@ -172,8 +173,9 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		IsAdmin:         user.IsAdmin(),
 	})
 
-	if err := bs.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render binding section")
+	err = bs.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "binding-section")
 	}
 
 	return nil
@@ -192,19 +194,20 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 		return eerr
 	}
 
-	if err := h.registry.Tools.UnBind(toolID); err != nil {
-		return errors.Handler(err, "unbind tool")
+	dberr := h.registry.Tools.UnBind(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "unbind tool")
 	}
 
 	// Get tools for rendering the template
-	var rTool *models.ResolvedTool
-	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return errors.BadRequest(err, "get tool")
-	} else {
-		rTool, err = services.ResolveTool(h.registry, t)
-		if err != nil {
-			return errors.Handler(err, "resolve tool")
-		}
+	t, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.NewBadRequestError(dberr, "get tool")
+	}
+
+	rTool, err := services.ResolveTool(h.registry, t)
+	if err != nil {
+		return errors.HandlerError(err, "resolve tool")
 	}
 
 	// Get tools for binding
@@ -220,8 +223,9 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 		IsAdmin:         user.IsAdmin(),
 	})
 
-	if err := bs.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render binding section")
+	err = bs.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "binding-section")
 	}
 
 	return nil
@@ -235,8 +239,9 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	}
 	cyclesSection := templates.Cycles(*cyclesProps)
 
-	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		errors.Handler(err, "failed to render tool cycles")
+	err := cyclesSection.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "tool-cycles")
 	}
 
 	return nil
@@ -248,15 +253,15 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 		return eerr
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool")
 	}
 
 	// Get cycles for this specific tool
-	toolCycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
-	if err != nil {
-		return errors.Handler(err, "get press cycles")
+	toolCycles, dberr := h.registry.PressCycles.GetPressCyclesForTool(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get press cycles")
 	}
 
 	// Filter cycles by position
@@ -266,9 +271,15 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
 
 	tc := templates.TotalCycles(totalCycles, utils.ParseQueryBool(c, "input"))
-	return tc.Render(c.Request().Context(), c.Response())
+	err := tc.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "total-tool-cycles")
+	}
+
+	return nil
 }
 
+// TODO: Continue here..
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	slog.Info("Initiating cycle deletion operation")
 
@@ -279,33 +290,35 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "parse ID query")
+		return errors.NewBadRequestError(err, "parse ID query")
 	}
 	cycleID := models.CycleID(cycleIDQuery)
 
 	// Get cycle data before deletion for the feed
 	cycle, err := h.registry.PressCycles.Get(cycleID)
 	if err != nil {
-		return errors.Handler(err, "get cycle for deletion")
+		return errors.HandlerError(err, "get cycle for deletion")
 	}
 
 	tool, err := h.registry.Tools.Get(cycle.ToolID)
 	if err != nil {
-		return errors.Handler(err, "get tool for deletion")
+		return errors.HandlerError(err, "get tool for deletion")
 	}
 
 	// Check if there are any regenerations associated with this cycle
 	hasRegenerations, err := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
 	if err != nil {
-		return errors.Handler(err, "check for regenerations")
+		return errors.HandlerError(err, "check for regenerations")
 	}
 
 	if hasRegenerations {
-		return errors.BadRequest(nil, "Cannot delete cycle: it has associated regenerations. Please remove regenerations first.")
+		return errors.NewBadRequestError(nil,
+			"Cannot delete cycle: it has associated regenerations. "+
+				"Please remove regenerations first.")
 	}
 
 	if err := h.registry.PressCycles.Delete(cycleID); err != nil {
-		return errors.Handler(err, "delete press cycle")
+		return errors.HandlerError(err, "delete press cycle")
 	}
 
 	{ // Create Feed
@@ -334,23 +347,24 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 		return eerr
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool")
 	}
 
 	// Fetch metal sheets assigned to this tool
-	metalSheets, err := h.registry.MetalSheets.GetByToolID(toolID)
-	if err != nil {
+	metalSheets, dberr := h.registry.MetalSheets.ListByToolID(toolID)
+	if dberr != nil {
 		// Log error but don't fail - metal sheets are supplementary data
-		slog.Error("Failed to fetch metal sheets", "error", err, "user_name", user.Name)
+		slog.Error("Failed to fetch metal sheets", "error", dberr, "user_name", user.Name)
 		metalSheets = []*models.MetalSheet{}
 	}
 
 	metalSheetsSection := templates.MetalSheets(user, metalSheets, tool)
 
-	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool metal sheets section")
+	err := metalSheetsSection.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "metal-sheets")
 	}
 
 	return nil
@@ -365,13 +379,13 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	// Get the tool
 	tool, err := h.registry.Tools.Get(toolID)
 	if err != nil {
-		return errors.Handler(err, "get tool")
+		return errors.HandlerError(err, "get tool")
 	}
 
 	// Get notes for this tool
 	notes, err := h.registry.Notes.GetByTool(toolID)
 	if err != nil {
-		return errors.Handler(err, "get notes for tool")
+		return errors.HandlerError(err, "get notes for tool")
 	}
 
 	// Create ToolWithNotes for template compatibility
@@ -379,7 +393,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	notesSection := templates.Notes(resolvedTool)
 
 	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool notes section")
+		return errors.HandlerError(err, "render tool notes section")
 	}
 
 	return nil
@@ -395,45 +409,44 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 
 	var regenerationID models.ToolRegenerationID
 	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
-		return errors.BadRequest(err, "get the regeneration id from url query")
+		return errors.NewBadRequestError(err, "get the regeneration id from url query")
 	} else {
 		regenerationID = models.ToolRegenerationID(id)
 	}
 
-	var regeneration *models.ResolvedToolRegeneration
-	if r, err := h.registry.ToolRegenerations.Get(regenerationID); err != nil {
-		return errors.Handler(err, "get regeneration before deleting")
-	} else {
-		regeneration, err = services.ResolveToolRegeneration(h.registry, r)
+	r, dberr := h.registry.ToolRegenerations.Get(regenerationID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get regeneration before deleting")
+	}
+	regeneration, err := services.ResolveToolRegeneration(h.registry, r)
+	if err != nil {
+		return errors.HandlerError(err, "resolve regeneration")
 	}
 
-	if err := h.registry.ToolRegenerations.Delete(regeneration.ID); err != nil {
-		return errors.Handler(err, "delete regeneration")
+	dberr = h.registry.ToolRegenerations.Delete(regeneration.ID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "delete regeneration")
 	}
 
-	{ // Create Feed
-		title := "Werkzeug Regenerierung entfernt"
-		content := fmt.Sprintf(
-			"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-			regeneration.GetTool().String(),
-			regeneration.GetCycle().Date.Format(env.DateFormat),
-			regeneration.GetCycle().PartialCycles,
-		)
-
-		if regeneration.Reason != "" {
-			content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+	// Create Feed
+	title := "Werkzeug Regenerierung entfernt"
+	content := fmt.Sprintf(
+		"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
+		regeneration.GetTool().String(),
+		regeneration.GetCycle().Date.Format(env.DateFormat),
+		regeneration.GetCycle().PartialCycles,
+	)
+	if regeneration.Reason != "" {
+		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
+	}
+	if regeneration.PerformedBy != nil {
+		user, err := h.registry.Users.Get(*regeneration.PerformedBy)
+		if err != nil {
+			slog.Warn("User not found", "error", err, "performed_by", regeneration.PerformedBy)
 		}
-
-		if regeneration.PerformedBy != nil {
-			user, err := h.registry.Users.Get(*regeneration.PerformedBy)
-			if err != nil {
-				slog.Warn("User not found", "error", err, "performed_by", regeneration.PerformedBy)
-			}
-			content += fmt.Sprintf("\nPerformed by: %s", user.Name)
-		}
-
-		h.createFeed(title, content, user.TelegramID)
+		content += fmt.Sprintf("\nPerformed by: %s", user.Name)
 	}
+	h.createFeed(title, content, user.TelegramID)
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
@@ -448,18 +461,19 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 
 	idParam, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "parse id from query parameter")
+		return errors.NewBadRequestError(err, "parse id from query parameter")
 	}
 	toolID := models.ToolID(idParam)
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool from database")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool from database")
 	}
 
 	statusEdit := h.renderStatusComponent(tool, true, user)
-	if err := statusEdit.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool status edit")
+	err = statusEdit.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "status")
 	}
 
 	return nil
@@ -473,18 +487,19 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 
 	idParam, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "parse id from query parameter")
+		return errors.NewBadRequestError(err, "parse id from query parameter")
 	}
 	toolID := models.ToolID(idParam)
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool from database")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool from database")
 	}
 
 	statusDisplay := h.renderStatusComponent(tool, false, user)
-	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tool status display")
+	err = statusDisplay.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "status")
 	}
 
 	return nil
@@ -500,80 +515,81 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 
 	idParam, err := utils.ParseParamInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "parse id from query parameter")
+		return errors.NewBadRequestError(err, "parse id from query parameter")
 	}
 	toolID := models.ToolID(idParam)
 
 	statusStr := c.FormValue("status")
 	if statusStr == "" {
-		return errors.BadRequest(nil, "status is required")
+		return errors.NewBadRequestError(nil, "status is required")
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool from database")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool from database")
 	}
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":
 		// Start regeneration
-		_, err := h.registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
-		if err != nil {
-			return errors.Handler(err, "start tool regeneration")
+		_, dberr = h.registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
+		if dberr != nil {
+			return errors.HandlerError(dberr, "start tool regeneration")
 		}
 
-		{ // Create Feed
-			title := "Werkzeug Regenerierung gestartet"
-			content := fmt.Sprintf("Werkzeug: %s", tool.String())
-			h.createFeed(title, content, user.TelegramID)
-		}
+		// Create Feed
+		title := "Werkzeug Regenerierung gestartet"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		h.createFeed(title, content, user.TelegramID)
 
 	case "active":
-		if err := h.registry.ToolRegenerations.StopToolRegeneration(toolID, user); err != nil {
-			return errors.Handler(err, "stop tool regeneration")
+		dberr = h.registry.ToolRegenerations.StopToolRegeneration(toolID, user)
+		if dberr != nil {
+			return errors.HandlerError(dberr, "stop tool regeneration")
 		}
 
-		{ // Create Feed
-			title := "Werkzeug Regenerierung beendet"
-			content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		// Create Feed
+		title := "Werkzeug Regenerierung beendet"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
 
-			h.createFeed(title, content, user.TelegramID)
-		}
+		h.createFeed(title, content, user.TelegramID)
 
 	case "abort":
 		// Abort regeneration (remove regeneration record and set status to false)
-		if err := h.registry.ToolRegenerations.AbortToolRegeneration(toolID, user); err != nil {
-			return errors.Handler(err, "abort tool regeneration")
+		dberr = h.registry.ToolRegenerations.AbortToolRegeneration(toolID, user)
+		if dberr != nil {
+			return errors.HandlerError(dberr, "abort tool regeneration")
 		}
 
-		{ // Create Feed
-			title := "Werkzeug Regenerierung abgebrochen"
-			content := fmt.Sprintf("Werkzeug: %s", tool.String())
+		// Create Feed
+		title := "Werkzeug Regenerierung abgebrochen"
+		content := fmt.Sprintf("Werkzeug: %s", tool.String())
 
-			h.createFeed(title, content, user.TelegramID)
-		}
+		h.createFeed(title, content, user.TelegramID)
 
 	default:
-		return errors.BadRequest(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
+		return errors.NewBadRequestError(nil, "invalid status: must be 'regenerating', 'active', or 'abort'")
 	}
 
 	// Get updated tool and render status display
-	updatedTool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get updated tool from database")
+	updatedTool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get updated tool from database")
 	}
 
 	// Render the updated status component
 	statusDisplay := h.renderStatusComponent(updatedTool, false, user)
-	if err := statusDisplay.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render updated tool status")
+	err = statusDisplay.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.HandlerError(err, "render updated tool status")
 	}
 
 	// Render out-of-band swap for cycles section to trigger reload
 	cyclesProps, _ := h.buildCyclesProps(c)
 	oobCyclesReload := templates.OOBCyclesSection(true, toolID, cyclesProps)
-	if err := oobCyclesReload.Render(c.Request().Context(), c.Response()); err != nil {
+	err = oobCyclesReload.Render(c.Request().Context(), c.Response())
+	if err != nil {
 		slog.Error("Failed to render out-of-band cycles reload", "error", err)
 	}
 
@@ -582,9 +598,11 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 
 func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *echo.HTTPError) {
 	toolIDQuery, err := utils.ParseParamInt64(c, "id")
+
 	if err != nil {
-		return 0, errors.BadRequest(err, "parse \"id\"")
+		return 0, errors.NewBadRequestError(err, "parse \"id\"")
 	}
+
 	return models.ToolID(toolIDQuery), nil
 }
 
@@ -617,9 +635,9 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, *echo.H
 	}
 
 	// Get all tools
-	tools, err := h.registry.Tools.List()
-	if err != nil {
-		return nil, errors.Handler(err, "get tools")
+	tools, dberr := h.registry.Tools.List()
+	if dberr != nil {
+		return nil, errors.HandlerError(dberr, "get tools")
 	}
 	// Filter tools for binding
 	for _, t := range tools {
@@ -655,49 +673,45 @@ func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *ech
 		return nil, eerr
 	}
 
-	var tool *models.ResolvedTool
-	if t, err := h.registry.Tools.Get(toolID); err != nil {
-		return nil, errors.Handler(err, "get tool")
-	} else {
-		tool, err = services.ResolveTool(h.registry, t)
-		if err != nil {
-			return nil, errors.Handler(err, "resolve tool")
-		}
+	t, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return nil, errors.HandlerError(dberr, "get tool")
+	}
+	tool, err := services.ResolveTool(h.registry, t)
+	if err != nil {
+		return nil, errors.HandlerError(err, "resolve tool")
 	}
 
 	var filteredCycles []*models.Cycle
-	{
-		cycles, err := h.registry.PressCycles.GetPressCyclesForTool(toolID)
-		if err != nil {
-			return nil, errors.Handler(err, "get press cycles")
-		}
-
-		filteredCycles = models.FilterCyclesByToolPosition(
-			tool.Position, cycles...)
+	cycles, dberr := h.registry.PressCycles.GetPressCyclesForTool(toolID)
+	if dberr != nil {
+		return nil, errors.HandlerError(dberr, "get press cycles")
 	}
 
+	filteredCycles = models.FilterCyclesByToolPosition(
+		tool.Position, cycles...)
+
 	var resolvedRegenerations []*models.ResolvedToolRegeneration
-	{ // Get (resolved) regeneration history for this tool
-		regenerations, err := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
+	// Get (resolved) regeneration history for this tool
+	regenerations, dberr := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
+	if dberr != nil {
+		slog.Error("Failed to get tool regenerations", "tool", toolID, "error", dberr)
+	}
+
+	// Resolve regenerations
+	for _, r := range regenerations {
+		rr, err := services.ResolveToolRegeneration(h.registry, r)
 		if err != nil {
-			slog.Error("Failed to get tool regenerations", "tool", toolID, "error", err)
+			return nil, errors.HandlerError(err, "")
 		}
 
-		// Resolve regenerations
-		for _, r := range regenerations {
-			rr, err := services.ResolveToolRegeneration(h.registry, r)
-			if err != nil {
-				return nil, errors.Handler(err, "")
-			}
-
-			resolvedRegenerations = append(resolvedRegenerations, rr)
-		}
+		resolvedRegenerations = append(resolvedRegenerations, rr)
 	}
 
 	// Only get tools for binding if the tool has no binding
-	toolsForBinding, err := h.getToolsForBinding(tool.Tool)
+	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
 	if err != nil {
-		return nil, err
+		return nil, eerr
 	}
 
 	return &templates.CyclesProps{
@@ -719,7 +733,8 @@ func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *
 }
 
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
-	if _, err := h.registry.Feeds.AddSimple(title, content, userID); err != nil {
-		slog.Warn("Failed to create feed", "error", err)
+	_, dberr := h.registry.Feeds.AddSimple(title, content, userID)
+	if dberr != nil {
+		slog.Warn("Failed to create feed", "error", dberr)
 	}
 }
