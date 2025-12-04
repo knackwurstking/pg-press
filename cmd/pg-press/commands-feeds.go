@@ -244,9 +244,9 @@ func removeFeedsByIDs(r *services.Registry, ids []string) error {
 			continue
 		}
 
-		err = r.Feeds.Delete(models.FeedID(id))
-		if err != nil {
-			if errors.IsNotFoundError(err) {
+		dberr := r.Feeds.Delete(models.FeedID(id))
+		if dberr != nil {
+			if dberr.Typ == errors.DBTypeNotFound {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
 			} else {
 				failed = append(failed, fmt.Sprintf("failed to remove feed ID %d: %s", id, err))

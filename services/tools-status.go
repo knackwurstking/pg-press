@@ -70,7 +70,7 @@ func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user
 	return nil
 }
 
-func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) error {
+func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) *errors.DBError {
 	if err := user.Validate(); err != nil {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
@@ -83,7 +83,7 @@ func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) error {
 	return nil
 }
 
-func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) error {
+func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) *errors.DBError {
 	if err := user.Validate(); err != nil {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}

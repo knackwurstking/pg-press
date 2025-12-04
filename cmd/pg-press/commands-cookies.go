@@ -55,10 +55,10 @@ func autoCleanCookiesCommand() cli.Command {
 
 					// Clean up cookies for a specific telegram user
 					if telegramID != 0 {
-						u, err := r.Users.Get(telegramID)
-						if err != nil {
-							handleNotFoundError(err)
-							handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", telegramID))
+						u, dberr := r.Users.Get(telegramID)
+						if dberr != nil {
+							handleNotFoundError(dberr)
+							handleGenericError(dberr, fmt.Sprintf("Get user \"%d\" failed", telegramID))
 						}
 
 						cookies, err := r.Cookies.ListApiKey(u.ApiKey)

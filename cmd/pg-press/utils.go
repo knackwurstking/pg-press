@@ -124,8 +124,8 @@ func createSimpleCommand(name, usage string, action func(*services.Registry) err
 }
 
 // handleNotFoundError provides consistent handling for not found errors
-func handleNotFoundError(err error) {
-	if errors.IsNotFoundError(err) {
+func handleNotFoundError(err *errors.DBError) {
+	if err.Typ == errors.DBTypeNotFound {
 		fmt.Fprintf(os.Stderr, "not found: %v\n", err)
 		os.Exit(exitCodeNotFound)
 	}

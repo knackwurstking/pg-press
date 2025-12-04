@@ -41,11 +41,11 @@ func showUserCommand() cli.Command {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					telegramID := models.TelegramID(*telegramIDArg)
 
-					user, err := r.Users.Get(telegramID)
-					if err != nil {
-						handleNotFoundError(err)
-						handleGenericError(err, fmt.Sprintf("Get user \"%d\" failed", telegramID))
-						return err
+					user, dberr := r.Users.Get(telegramID)
+					if dberr != nil {
+						handleNotFoundError(dberr)
+						handleGenericError(dberr, fmt.Sprintf("Get user \"%d\" failed", telegramID))
+						return dberr
 					}
 
 					if *flagApiKey {
@@ -90,10 +90,11 @@ func addUserCommand() cli.Command {
 					telegramID := models.TelegramID(*telegramIDArg)
 
 					user := models.NewUser(telegramID, *userName, *apiKey)
-					if _, err := r.Users.Add(user); errors.IsAlreadyExistsError(err) {
+					_, dberr := r.Users.Add(user)
+					if dberr.Typ == errors.DBTypeExists {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					} else {
-						return err
+						return dberr
 					}
 				})
 			}

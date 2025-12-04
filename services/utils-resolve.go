@@ -37,24 +37,26 @@ func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, e
 func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
 	var bindingTool *models.ResolvedTool
 	if tool.IsBound() && !skipResolveBindingTool {
-		bt, err := registry.Tools.Get(*tool.Binding)
-		if err != nil {
-			return nil, errors.Wrap(err, "get binding tool %d for %d", tool.Binding, tool.ID)
+		bt, dberr := registry.Tools.Get(*tool.Binding)
+		if dberr != nil {
+			return nil, errors.Wrap(dberr, "get binding tool %d for %d", tool.Binding, tool.ID)
 		}
+
+		var err error
 		bindingTool, err = resolveTool(registry, bt, true)
 		if err != nil {
 			return nil, errors.Wrap(err, "resolve binding tool %d for %d", tool.Binding, tool.ID)
 		}
 	}
 
-	notes, err := registry.Notes.GetByTool(tool.ID)
-	if err != nil && !errors.IsNotFoundError(err) {
-		return nil, errors.Wrap(err, "get notes for tool %d", tool.ID)
+	notes, dberr := registry.Notes.GetByTool(tool.ID)
+	if dberr != nil && dberr.Typ != errors.DBTypeNotFound {
+		return nil, errors.Wrap(dberr, "get notes for tool %d", tool.ID)
 	}
 
-	regenerations, err := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
-	if err != nil && !errors.IsNotFoundError(err) {
-		return nil, errors.Wrap(err, "get regeneration for tool %d", tool.ID)
+	regenerations, dberr := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
+	if dberr != nil && dberr.Typ != errors.DBTypeNotFound {
+		return nil, errors.Wrap(dberr, "get regeneration for tool %d", tool.ID)
 	}
 
 	rt := models.NewResolvedTool(tool, bindingTool, notes, regenerations)

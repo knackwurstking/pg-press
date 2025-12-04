@@ -8,6 +8,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 
@@ -43,16 +44,17 @@ func listToolsCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					// Get all tools from database
-					tools, err := r.Tools.List()
-					if err != nil {
-						return fmt.Errorf("retrieve tools: %v", err)
+					tools, dberr := r.Tools.List()
+					if dberr != nil {
+						return errors.Wrap(dberr, "retrieve tools")
 					}
 
 					// Filter tools by ID if range/list is specified
 					if *idRange != "" {
+						var err error
 						tools, err = filterToolsByIDs(tools, *idRange)
 						if err != nil {
-							return fmt.Errorf("filter tools by IDs: %v", err)
+							return errors.Wrap(err, "filter tools by IDs")
 						}
 					}
 
@@ -195,9 +197,9 @@ func markDeadCommand() cli.Command {
 					}
 
 					// Mark tool as dead
-					err = r.Tools.MarkAsDead(toolID, user)
-					if err != nil {
-						return fmt.Errorf("mark tool as dead: %v", err)
+					dberr := r.Tools.MarkAsDead(toolID, user)
+					if dberr != nil {
+						return errors.Wrap(dberr, "mark tool as dead")
 					}
 
 					fmt.Printf("Successfully marked tool %d (%s %s) as dead.\n", tool.ID, tool.Format.String(), tool.Code)

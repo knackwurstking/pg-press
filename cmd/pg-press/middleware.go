@@ -122,18 +122,18 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	realIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
-		return nil, fmt.Errorf("get cookie: %s", err.Error())
+		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, err := db.Cookies.Get(httpCookie.Value)
-	if err != nil {
-		return nil, fmt.Errorf("get cookie: %s", err.Error())
+	cookie, dberr := db.Cookies.Get(httpCookie.Value)
+	if dberr != nil {
+		return nil, errors.Wrap(dberr, "get cookie")
 	}
 
 	// Check if cookie has expired
 	if cookie.IsExpired() {
 		slog.Error("Cookie has expired", "real_ip", realIP)
-		return nil, errors.NewValidationError("cookie: cookie has expired")
+		return nil, fmt.Errorf("cookie has expired")
 	}
 
 	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
