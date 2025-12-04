@@ -164,9 +164,6 @@ func (h *Handler) loadExistingContent(props *templates.PageProps) error {
 				"trouble_report_id", props.ID, "error", err)
 		}
 
-	// Note: Notes are not supported in the editor as they have a different structure
-	// (Level-based rather than title/content based)
-
 	default:
 		return fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", props.Type)
 	}
@@ -216,9 +213,6 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
 			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Warn("Failed to create feed for trouble report creation", "error", err)
-			}
-			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
 				slog.Warn("Failed to create feed for trouble report update", "error", err)
 			}
 
@@ -255,10 +249,6 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 // processAttachments handles file uploads and existing attachments
 func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, error) {
 	var attachments []*models.Attachment
-
-	// Handle existing attachments (for updates)
-	// existingAttachmentsRemoval := c.FormValue("existing_attachments_removal")
-	// This would need to be implemented based on the specific logic for handling existing attachments
 
 	// Handle new file uploads
 	form, err := c.MultipartForm()
