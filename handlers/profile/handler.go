@@ -44,13 +44,15 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return eerr
 	}
 
-	if err := h.handleUserNameChange(c, user); err != nil {
-		return errors.Handler(err, "error updating username")
+	err := h.handleUserNameChange(c, user)
+	if err != nil {
+		return errors.HandlerError(err, "error updating username")
 	}
 
 	page := templates.Page(user)
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render profile page")
+	err = page.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "ProfilePage")
 	}
 
 	return nil
@@ -62,15 +64,15 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 		return eerr
 	}
 
-	cookies, err := h.registry.Cookies.ListApiKey(user.ApiKey)
-	if err != nil {
-		return errors.Handler(err, "list cookies")
+	cookies, dberr := h.registry.Cookies.ListApiKey(user.ApiKey)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "list cookies")
 	}
 
 	cookiesTable := templates.Cookies(models.SortCookies(cookies))
-	err = cookiesTable.Render(c.Request().Context(), c.Response())
+	err := cookiesTable.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.Handler(err, "render cookies table")
+		return errors.NewRenderError(err, "Cookies")
 	}
 
 	return nil
@@ -81,11 +83,12 @@ func (h *Handler) HTMXDeleteCookies(c echo.Context) error {
 
 	value, err := utils.ParseQueryString(c, "value")
 	if err != nil {
-		return errors.Handler(err, "parse value")
+		return errors.HandlerError(err, "parse value")
 	}
 
-	if err := h.registry.Cookies.Remove(value); err != nil {
-		return errors.Handler(err, "delete cookie")
+	dberr := h.registry.Cookies.Remove(value)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "delete cookie")
 	}
 
 	return h.HTMXGetCookies(c)
@@ -98,8 +101,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 	}
 
 	if len(userName) < env.UserNameMinLength || len(userName) > env.UserNameMaxLength {
-		return errors.NewValidationError(
-			"user-name: username must be between 1 and 100 characters")
+		return fmt.Errorf("user-name: username must be between 1 and 100 characters")
 	}
 
 	slog.Info("Changing user name", "user_from", user.Name, "user_to", userName)
@@ -107,15 +109,17 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) error 
 	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
 	updatedUser.LastFeed = user.LastFeed
 
-	if err := h.registry.Users.Update(updatedUser); err != nil {
-		return err
+	dberr := h.registry.Users.Update(updatedUser)
+	if dberr != nil {
+		return dberr
 	}
 
 	// Create feed entry
 	feedTitle := "Benutzername geändert"
 	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
-	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-		slog.Warn("Failed to create feed for username change", "error", err)
+	_, dberr = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID)
+	if dberr != nil {
+		slog.Warn("Failed to create feed for username change", "error", dberr)
 	}
 
 	user.Name = userName

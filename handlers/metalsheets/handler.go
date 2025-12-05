@@ -44,25 +44,26 @@ func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 	// Extract metal sheet ID from query parameters
 	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "get id from query")
+		return errors.NewBadRequestError(err, "get id from query")
 	}
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet before deletion for feed creation
-	existingSheet, err := h.registry.MetalSheets.Get(metalSheetID)
-	if err != nil {
-		return errors.Handler(err, "get existing metal sheet from database")
+	existingSheet, dberr := h.registry.MetalSheets.Get(metalSheetID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get existing metal sheet from database")
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, err := h.registry.Tools.Get(existingSheet.ToolID)
-	if err != nil {
-		return errors.Handler(err, "get tool from database")
+	tool, dberr := h.registry.Tools.Get(existingSheet.ToolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool from database")
 	}
 
 	// Delete the metal sheet from database
-	if err := h.registry.MetalSheets.Delete(metalSheetID); err != nil {
-		return errors.Handler(err, "delete metal sheet from database")
+	dberr = h.registry.MetalSheets.Delete(metalSheetID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "delete metal sheet from database")
 	}
 
 	// Create feed entry for the deleted metal sheet

@@ -39,40 +39,38 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 func (h *Handler) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
 	editorType := c.QueryParam("type")
-	idParam := c.QueryParam("id")
-	returnURL := templ.SafeURL(c.QueryParam("return_url"))
-
 	if editorType == "" {
-		return errors.BadRequest(nil, "editor type is required")
+		return errors.NewBadRequestError(nil, "editor type is required")
 	}
 
 	var id int64
-	if idParam != "" {
+	if idParam := c.QueryParam("id"); idParam != "" {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return errors.BadRequest(err, "invalid ID parameter")
+			return errors.NewBadRequestError(err, "invalid ID parameter")
 		}
 	}
 
 	props := &templates.PageProps{
 		Type:      editorType,
 		ID:        int64(id),
-		ReturnURL: returnURL,
+		ReturnURL: templ.SafeURL(c.QueryParam("return_url")),
 	}
 
 	// Load existing content based on type
 	if id > 0 {
 		err := h.loadExistingContent(props)
 		if err != nil {
-			return errors.Handler(err, "load existing content")
+			return errors.HandlerError(err, "load existing content")
 		}
 	}
 
 	// Render the editor page
 	page := templates.Page(props)
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render editor page")
+	err := page.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "EditorPage")
 	}
 
 	return nil
@@ -100,11 +98,11 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	)
 
 	if editorType == "" {
-		return errors.BadRequest(nil, "editor type is required")
+		return errors.NewBadRequestError(nil, "editor type is required")
 	}
 
 	if title == "" || content == "" {
-		return errors.BadRequest(nil, "title and content are required")
+		return errors.NewBadRequestError(nil, "title and content are required")
 	}
 
 	var id int64
@@ -112,20 +110,20 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return errors.BadRequest(err, "invalid ID parameter")
+			return errors.NewBadRequestError(err, "invalid ID parameter")
 		}
 	}
 
 	// Handle attachments
 	attachments, err := h.processAttachments(c)
 	if err != nil {
-		return errors.BadRequest(err, "process attachments")
+		return errors.NewBadRequestError(err, "process attachments")
 	}
 
 	// Save content based on type
 	err = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
 	if err != nil {
-		return errors.Handler(err, "save content")
+		return errors.HandlerError(err, "save content")
 	}
 
 	// Redirect back to return URL or appropriate page
@@ -329,3 +327,4 @@ func (h *Handler) getMimeTypeFromFilename(filename string) string {
 		return "application/octet-stream"
 	}
 }
+

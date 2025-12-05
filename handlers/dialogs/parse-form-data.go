@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
@@ -91,7 +90,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	case models.PositionTop, models.PositionTopCassette, models.PositionBottom:
 		// Valid position
 	default:
-		return nil, errors.NewValidationError(fmt.Sprintf("invalid position: %s", positionStr))
+		return nil, fmt.Errorf(fmt.Sprintf("invalid position: %s", positionStr))
 	}
 
 	data := &DialogEditToolFormData{Position: position}
@@ -100,7 +99,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if widthStr := c.FormValue("width"); widthStr != "" {
 		width, err := strconv.Atoi(widthStr)
 		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid width: %v", err))
+			return nil, fmt.Errorf(fmt.Sprintf("invalid width: %v", err))
 		}
 		data.Format.Width = width
 	}
@@ -109,7 +108,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if heightStr := c.FormValue("height"); heightStr != "" {
 		height, err := strconv.Atoi(heightStr)
 		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid height: %v", err))
+			return nil, fmt.Errorf(fmt.Sprintf("invalid height: %v", err))
 		}
 		data.Format.Height = height
 	}
@@ -117,28 +116,28 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	// Parse type (with length limit)
 	data.Type = strings.TrimSpace(c.FormValue("type"))
 	if len(data.Type) > 25 {
-		return nil, errors.NewValidationError("type must be 25 characters or less")
+		return nil, fmt.Errorf("type must be 25 characters or less")
 	}
 
 	// Parse code (required, with length limit)
 	data.Code = strings.TrimSpace(c.FormValue("code"))
 	if data.Code == "" {
-		return nil, errors.NewValidationError("code is required")
+		return nil, fmt.Errorf("code is required")
 	}
 	if len(data.Code) > 25 {
-		return nil, errors.NewValidationError("code must be 25 characters or less")
+		return nil, fmt.Errorf("code must be 25 characters or less")
 	}
 
 	// Parse press number
 	if pressStr := c.FormValue("press-selection"); pressStr != "" {
 		press, err := strconv.Atoi(pressStr)
 		if err != nil {
-			return nil, errors.NewValidationError(fmt.Sprintf("invalid press number: %v", err))
+			return nil, fmt.Errorf(fmt.Sprintf("invalid press number: %v", err))
 		}
 
 		pressNumber := models.PressNumber(press)
 		if !models.IsValidPressNumber(&pressNumber) {
-			return nil, errors.NewValidationError("invalid press number: must be 0, 2, 3, 4, or 5")
+			return nil, fmt.Errorf("invalid press number: must be 0, 2, 3, 4, or 5")
 		}
 		data.Press = &pressNumber
 	}

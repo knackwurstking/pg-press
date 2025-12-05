@@ -15,3 +15,7 @@ system.
 
 - [ ] Optimize database queries with proper indexing,
   - For now use the scripts for this [scripts](/scripts)
+
+## Refactoring
+
+- [ ] Split the dialog handler, on file per dialog
