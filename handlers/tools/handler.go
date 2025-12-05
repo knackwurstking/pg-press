@@ -43,9 +43,10 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 		return eerr
 	}
 
-	page := templates.Page(user)
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tools page")
+	t := templates.Page(user)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "ToolsPage")
 	}
 	return nil
 }
@@ -55,7 +56,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "invalid or missing id parameter")
+		return errors.NewBadRequestError(err, "invalid or missing id parameter")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
@@ -64,13 +65,14 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 		return eerr
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool for deletion")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool for deletion")
 	}
 
-	if err := h.registry.Tools.Delete(toolID, user); err != nil {
-		return errors.Handler(err, "delete tool")
+	dberr = h.registry.Tools.Delete(toolID, user)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "delete tool")
 	}
 
 	// Create feed entry
@@ -85,7 +87,7 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 
 	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return errors.BadRequest(err, "invalid or missing id parameter")
+		return errors.NewBadRequestError(err, "invalid or missing id parameter")
 	}
 	toolID := models.ToolID(toolIDQuery)
 
@@ -94,17 +96,18 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 		return eerr
 	}
 
-	tool, err := h.registry.Tools.Get(toolID)
-	if err != nil {
-		return errors.Handler(err, "get tool for marking as dead")
+	tool, dberr := h.registry.Tools.Get(toolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool for marking as dead")
 	}
 
 	if tool.IsDead {
-		return errors.BadRequest(nil, "tool is already marked as dead")
+		return errors.NewBadRequestError(nil, "tool is already marked as dead")
 	}
 
-	if err := h.registry.Tools.MarkAsDead(toolID, user); err != nil {
-		return errors.Handler(err, "mark tool as dead")
+	dberr = h.registry.Tools.MarkAsDead(toolID, user)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "mark tool as dead")
 	}
 
 	// Create feed entry
@@ -115,14 +118,15 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
-	pressUtilization, err := h.registry.Tools.GetPressUtilization()
-	if err != nil {
-		return errors.Handler(err, "get press utilization")
+	pressUtilization, dberr := h.registry.Tools.PressUtilization()
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get press utilization")
 	}
 
-	section := templates.SectionPress(pressUtilization)
-	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render press section")
+	t := templates.SectionPress(pressUtilization)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "SectionPress")
 	}
 	return nil
 }
@@ -133,9 +137,9 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		return eerr
 	}
 
-	allTools, err := h.registry.Tools.List()
-	if err != nil {
-		return errors.Handler(err, "get tools from database")
+	allTools, dberr := h.registry.Tools.List()
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tools from database")
 	}
 
 	var tools []*models.ResolvedTool
@@ -146,29 +150,32 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 
 		rt, err := services.ResolveTool(h.registry, t)
 		if err != nil {
-			return errors.Handler(err, "resolving tool")
+			return errors.HandlerError(err, "resolving tool")
 		}
 
 		tools = append(tools, rt)
 	}
 
-	section := templates.SectionTools(tools, user)
-	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render tools section")
+	t := templates.SectionTools(tools, user)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "render tools section")
 	}
 	return nil
 }
 
 func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
-	overlappingTools, err := h.registry.PressCycles.GetOverlappingTools()
-	if err != nil {
-		return errors.Handler(err, "get overlapping tools")
+	overlappingTools, dberr := h.registry.PressCycles.GetOverlappingTools()
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get overlapping tools")
 	}
 
-	section := templates.AdminToolsSectionContent(overlappingTools)
-	if err := section.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render admin overlapping tools section")
+	t := templates.AdminToolsSectionContent(overlappingTools)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "AdminToolsSectionContent")
 	}
+
 	return nil
 }
 

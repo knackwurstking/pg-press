@@ -56,16 +56,16 @@ func (h *Handler) GetPressPage(c echo.Context) error {
 		return eerr
 	}
 
-	press, err := h.getPressNumberFromParam(c)
-	if err != nil {
-		return err
+	press, eerr := h.getPressNumberFromParam(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Render page
-	page := templates.Page(press, user)
-
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render press page")
+	t := templates.Page(press, user)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "PressPage")
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	// Get ordered tools for this press with validation
 	tools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "get tools for press")
+		return errors.HandlerError(err, "get tools for press")
 	}
 
 	// Resolve tools, notes not needed, only the binding tool
@@ -88,14 +88,15 @@ func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	for _, tool := range tools {
 		rt, err := services.ResolveTool(h.registry, tool)
 		if err != nil {
-			return errors.Handler(err, "resolve tool %d", tool.ID)
+			return errors.HandlerError(err, "resolve tool %d", tool.ID)
 		}
 		resolvedTools = append(resolvedTools, rt)
 	}
 
 	activeToolsSection := templates.ActiveToolsSection(resolvedTools, press)
-	if err := activeToolsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render active tools section")
+	err = activeToolsSection.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "ActiveToolsSection")
 	}
 
 	return nil
@@ -110,19 +111,20 @@ func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
 	// Get ordered tools for this press with validation
 	_, toolsMap, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "get tools for press")
+		return errors.HandlerError(err, "get tools for press")
 	}
 
 	// Get metal sheets for tools on this press with automatic machine type filtering
 	// Press 0 and 5 use SACMI machines, all others use SITI machines
-	metalSheets, err := h.registry.MetalSheets.GetForPress(press, toolsMap)
-	if err != nil {
-		return errors.Handler(err, "get metal sheets for press")
+	metalSheets, dberr := h.registry.MetalSheets.ListByPress(press, toolsMap)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get metal sheets for press")
 	}
 
 	metalSheetsSection := templates.MetalSheetsSection(press, toolsMap, metalSheets)
-	if err := metalSheetsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render metal sheets section")
+	err = metalSheetsSection.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "MetalSheetsSection")
 	}
 
 	return nil
@@ -141,15 +143,15 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	}
 
 	// Get cycles for this press
-	cycles, err := h.registry.PressCycles.GetPressCycles(press, nil, nil)
-	if err != nil {
-		return errors.Handler(err, "get cycles from database")
+	cycles, dberr := h.registry.PressCycles.GetPressCycles(press, nil, nil)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get cycles from database")
 	}
 
 	// Get tools for this press to create toolsMap
-	tools, err := h.registry.Tools.List()
-	if err != nil {
-		return errors.Handler(err, "get tools from database")
+	tools, dberr := h.registry.Tools.List()
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tools from database")
 	}
 
 	toolsMap := make(map[models.ToolID]*models.Tool)
@@ -158,10 +160,9 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 		toolsMap[tool.ID] = tool
 	}
 
-	cyclesSection := templates.CyclesSection(cycles, toolsMap, user)
-
-	if err := cyclesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render cycles section")
+	t := templates.CyclesSection(cycles, toolsMap, user)
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "CyclesSection")
 	}
 
 	return nil
@@ -174,30 +175,30 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	}
 
 	// Get notes directly linked to this press
-	notes, err := h.registry.Notes.GetByPress(press)
-	if err != nil {
-		return errors.Handler(err, "get notes for press")
+	notes, dberr := h.registry.Notes.GetByPress(press)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get notes for press")
 	}
 
 	// Get tools for this press for context
 	sortedTools, _, err := h.getOrderedToolsForPress(press)
 	if err != nil {
-		return errors.Handler(err, "get tools for press")
+		return errors.HandlerError(err, "get tools for press")
 	}
 
 	// Get notes for tools
 	for _, t := range sortedTools {
-		n, err := h.registry.Notes.GetByTool(t.ID)
-		if err != nil {
-			return errors.Handler(err, "get notes for tool %d", t.ID)
+		n, dberr := h.registry.Notes.GetByTool(t.ID)
+		if dberr != nil {
+			return errors.HandlerError(err, "get notes for tool %d", t.ID)
 		}
 		notes = append(notes, n...)
 	}
 
-	notesSection := templates.NotesSection(press, notes, sortedTools)
-
-	if err := notesSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render press notes section")
+	t := templates.NotesSection(press, notes, sortedTools)
+	err = t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "NotesSection")
 	}
 
 	return nil
@@ -215,16 +216,17 @@ func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 	}
 
 	// Get press regenerations from service
-	regenerations, err := h.registry.PressRegenerations.GetRegenerationHistory(press)
-	if err != nil {
-		if !errors.IsNotFoundError(err) {
-			return errors.Handler(err, "get press regenerations")
+	regenerations, dberr := h.registry.PressRegenerations.GetRegenerationHistory(press)
+	if dberr != nil {
+		if dberr.Typ != errors.DBTypeNotFound {
+			return errors.HandlerError(dberr, "get press regenerations")
 		}
 	}
 
-	regenerationsSection := templates.RegenerationsContent(regenerations, user)
-	if err := regenerationsSection.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render press regenerations section")
+	t := templates.RegenerationsContent(regenerations, user)
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "RegenerationsContent")
 	}
 
 	return nil
@@ -237,15 +239,15 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 	}
 
 	// Get cycle summary data using service
-	cycles, toolsMap, usersMap, err := h.registry.PressCycles.GetCycleSummaryData(press)
-	if err != nil {
-		return errors.Handler(err, "get cycle summary data")
+	cycles, toolsMap, usersMap, dberr := h.registry.PressCycles.GetCycleSummaryData(press)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get cycle summary data")
 	}
 
 	// Generate PDF
 	pdfBuffer, err := pdf.GenerateCycleSummaryPDF(press, cycles, toolsMap, usersMap)
 	if err != nil {
-		return errors.Handler(err, "generate PDF")
+		return errors.HandlerError(err, "generate PDF")
 	}
 
 	// Set response headers
@@ -260,12 +262,12 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, *echo.HTTPError) {
 	pressNum, err := utils.ParseParamInt8(c, "press")
 	if err != nil {
-		return -1, errors.BadRequest(err, "invalid or missing press parameter")
+		return -1, errors.NewBadRequestError(err, "invalid or missing press parameter")
 	}
 
 	press := models.PressNumber(pressNum)
 	if !models.IsValidPressNumber(&press) {
-		return -1, errors.BadRequest(err, "invalid press number")
+		return -1, errors.NewBadRequestError(err, "invalid press number")
 	}
 
 	return press, nil

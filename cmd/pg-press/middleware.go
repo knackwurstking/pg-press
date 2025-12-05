@@ -107,13 +107,14 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		if user, err = db.Users.GetUserFromApiKey(auth); err != nil {
-			slog.Error("Authentication failed", "real_ip", realIP)
-			return false, echo.NewHTTPError(errors.GetHTTPStatusCodeFromError(err), "validate user from API key: "+err.Error())
+		slog.Warn("Validate user from cookie failed... Get user from api key now...", "error", err)
+		var dberr *errors.DBError
+		if user, dberr = db.Users.GetUserFromApiKey(auth); dberr != nil {
+			return false, errors.HandlerError(dberr, "validate user from API key")
 		}
-		slog.Info("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	}
 
+	slog.Info("API key auth successful", "user_name", user.Name, "real_ip", realIP)
 	ctx.Set("user", user)
 	return true, nil
 }
@@ -136,9 +137,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
-	if err != nil {
-		return nil, fmt.Errorf("validate user from API key: %s", err.Error())
+	user, dberr := db.Users.GetUserFromApiKey(cookie.ApiKey)
+	if dberr != nil {
+		return nil, fmt.Errorf("validate user from API key: %s", dberr.Error())
 	}
 
 	// Log user agent mismatch as potential security concern

@@ -58,17 +58,17 @@ func listFeedsCommand() cli.Command {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					var feeds []*models.Feed
 
-					var err error
+					var dberr *errors.DBError
 					// Get feeds based on parameters
 					if *limit > 0 {
-						feeds, err = r.Feeds.ListRange(*offset, *limit)
-						if err != nil {
-							return err
+						feeds, dberr = r.Feeds.ListRange(*offset, *limit)
+						if dberr != nil {
+							return dberr
 						}
 					} else {
-						feeds, err = r.Feeds.List()
-						if err != nil {
-							return err
+						feeds, dberr = r.Feeds.List()
+						if dberr != nil {
+							return dberr
 						}
 					}
 
@@ -292,9 +292,9 @@ func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 	cutoffTime := time.Now().Add(-duration)
 	timestamp := cutoffTime.UnixMilli()
 
-	deletionCount, err := r.Feeds.DeleteBefore(timestamp)
-	if err != nil {
-		return fmt.Errorf("remove feeds: %s", err)
+	deletionCount, dberr := r.Feeds.DeleteBefore(timestamp)
+	if dberr != nil {
+		return fmt.Errorf("remove feeds: %s", dberr)
 	}
 
 	fmt.Printf("Removed %d feed(s) older than %s (before %s)\n",
@@ -311,9 +311,9 @@ func removeFeedsByDate(r *services.Registry, dateStr string) error {
 
 	timestamp := cutoffTime.UnixMilli()
 
-	rowsAffected, err := r.Feeds.DeleteBefore(timestamp)
-	if err != nil {
-		return fmt.Errorf("remove feeds: %s", err)
+	rowsAffected, dberr := r.Feeds.DeleteBefore(timestamp)
+	if dberr != nil {
+		return fmt.Errorf("remove feeds: %s", dberr)
 	}
 
 	fmt.Printf("Removed %d feed(s) before %s\n", rowsAffected, cutoffTime.Format("2006-01-02 15:04:05"))
