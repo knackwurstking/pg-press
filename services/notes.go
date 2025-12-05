@@ -34,7 +34,7 @@ func NewNotes(r *Registry) *Notes {
 	return &Notes{Base: base}
 }
 
-func (n *Notes) List() ([]*models.Note, *errors.DBError) {
+func (n *Notes) List() ([]*models.Note, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s;`,
@@ -43,14 +43,14 @@ func (n *Notes) List() ([]*models.Note, *errors.DBError) {
 
 	rows, err := n.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanNote)
 }
 
-func (n *Notes) Get(id models.NoteID) (*models.Note, *errors.DBError) {
+func (n *Notes) Get(id models.NoteID) (*models.Note, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -59,10 +59,14 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, *errors.DBError) {
 	)
 
 	row := n.DB.QueryRow(query, id)
-	return ScanRow(row, ScanNote)
+	note, err := ScanNote(row)
+	if err != nil {
+		return note, errors.NewMasterError(err)
+	}
+	return note, nil
 }
 
-func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.DBError) {
+func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.MasterError) {
 	if len(ids) == 0 {
 		return []*models.Note{}, nil
 	}
@@ -85,7 +89,7 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.DBError) 
 
 	rows, err := n.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -107,15 +111,15 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.DBError) 
 	return notes, nil
 }
 
-func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, *errors.DBError) {
+func (n *Notes) GetByPress(press models.PressNumber) ([]*models.Note, *errors.MasterError) {
 	return n.getByLinked(fmt.Sprintf("press_%d", press))
 }
 
-func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, *errors.DBError) {
+func (n *Notes) GetByTool(toolID models.ToolID) ([]*models.Note, *errors.MasterError) {
 	return n.getByLinked(fmt.Sprintf("tool_%d", toolID))
 }
 
-func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.DBError) {
+func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, level, content, created_at, COALESCE(linked, '') as linked
 		FROM %s
@@ -125,16 +129,16 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.DBError) {
 
 	rows, err := n.DB.Query(query, linked)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanNote)
 }
 
-func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.DBError) {
-	if err := note.Validate(); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
+	if !note.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -144,20 +148,20 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.DBError) {
 
 	result, err := n.DB.Exec(query, note.Level, note.Content, note.Linked)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return models.NoteID(id), nil
 }
 
-func (n *Notes) Update(note *models.Note) *errors.DBError {
-	if err := note.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (n *Notes) Update(note *models.Note) *errors.MasterError {
+	if !note.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -166,13 +170,13 @@ func (n *Notes) Update(note *models.Note) *errors.DBError {
 	)
 
 	_, err := n.DB.Exec(query, note.Level, note.Content, note.Linked, note.ID)
-	return errors.NewDBError(err, errors.DBTypeUpdate)
+	return errors.NewMasterError(err)
 }
 
-func (n *Notes) Delete(id models.NoteID) *errors.DBError {
+func (n *Notes) Delete(id models.NoteID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)
-	return errors.NewDBError(err, errors.DBTypeDelete)
+	return errors.NewMasterError(err)
 }
 
 func MapNotes(notes []*models.Note) map[models.NoteID]*models.Note {

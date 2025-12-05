@@ -42,16 +42,16 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 	}
 }
 
-func (t *Tool) Validate() error {
+func (t *Tool) Validate() bool {
 	if !IsValidPosition(&t.Position) {
-		return fmt.Errorf("position cannot be empty")
+		return false
 	}
 
 	if t.Code == "" {
-		return fmt.Errorf("code cannot be empty")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (t *Tool) Status() Status {

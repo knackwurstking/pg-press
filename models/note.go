@@ -49,16 +49,16 @@ func NewLinkedNote(l Level, message string, linked string) *Note {
 	}
 }
 
-func (n *Note) Validate() error {
+func (n *Note) Validate() bool {
 	if n.Content == "" {
-		return fmt.Errorf("content cannot be empty")
+		return false
 	}
 
 	if n.Level < 0 {
-		return fmt.Errorf("level must be non-negative")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // IsLinked returns true if the note is linked to any entity

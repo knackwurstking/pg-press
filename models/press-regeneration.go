@@ -31,18 +31,18 @@ func (r *PressRegeneration) StopAt(completedAt time.Time) {
 	r.CompletedAt = completedAt
 }
 
-func (r *PressRegeneration) Validate() error {
+func (r *PressRegeneration) Validate() bool {
 	if !IsValidPressNumber(&r.PressNumber) {
-		return fmt.Errorf("invalid press number: %d", r.PressNumber)
+		return false
 	}
 
 	if r.StartedAt.IsZero() {
-		return fmt.Errorf("started_at is required")
+		return false
 	}
 
 	if !r.CompletedAt.IsZero() && !r.CompletedAt.After(r.StartedAt) {
-		return fmt.Errorf("completed_at cannot be before started_at")
+		return false
 	}
 
-	return nil
+	return true
 }

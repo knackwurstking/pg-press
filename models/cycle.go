@@ -41,20 +41,20 @@ func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition P
 	}
 }
 
-func (c *Cycle) Validate() error {
+func (c *Cycle) Validate() bool {
 	if !IsValidPressNumber(&c.PressNumber) {
-		return fmt.Errorf("invalid press number")
+		return false
 	}
 	if c.ToolID <= 0 {
-		return fmt.Errorf("invalid tool ID: %d", c.ToolID)
+		return false
 	}
 	if !IsValidPosition(&c.ToolPosition) {
-		return fmt.Errorf("invalid tool position")
+		return false
 	}
 	if c.TotalCycles < 0 {
-		return fmt.Errorf("total cycles must be non-negative")
+		return false
 	}
-	return nil
+	return true
 }
 
 func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {

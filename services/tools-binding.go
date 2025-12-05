@@ -8,9 +8,9 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.DBError {
-	if err := t.validateBindingTools(cassetteID, targetID); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.MasterError {
+	if !t.validateBindingTools(cassetteID, targetID) {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	// Get press from the target tool
@@ -36,14 +36,14 @@ func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.DBError {
 			sql.Named("cassette", cassetteID),
 			sql.Named("press", targetTool.Press),
 		); err != nil {
-			return errors.NewDBError(err, errors.DBTypeUpdate)
+			return errors.NewMasterError(err)
 		}
 	}
 
 	return nil
 }
 
-func (t *Tools) UnBind(toolID models.ToolID) *errors.DBError {
+func (t *Tools) UnBind(toolID models.ToolID) *errors.MasterError {
 	tool, dberr := t.Get(toolID)
 	if dberr != nil {
 		return dberr
@@ -63,7 +63,7 @@ func (t *Tools) UnBind(toolID models.ToolID) *errors.DBError {
 		sql.Named("toolID", toolID),
 		sql.Named("binding", *tool.Binding),
 	); err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil

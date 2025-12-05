@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) List() ([]*models.Tool, *errors.DBError) {
+func (t *Tools) List() ([]*models.Tool, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -16,14 +16,14 @@ func (t *Tools) List() ([]*models.Tool, *errors.DBError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -33,14 +33,14 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.DBError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -50,19 +50,16 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.DBError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *errors.MasterError) {
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
-		return nil, errors.NewDBError(
-			fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber),
-			errors.DBTypeValidation,
-		)
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -73,19 +70,16 @@ func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *e
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanTool)
 }
 
-func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, *errors.DBError) {
+func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, *errors.MasterError) {
 	if !models.IsValidPressNumber(&pressNumber) {
-		return nil, errors.NewDBError(
-			fmt.Errorf("invalid press number: %d", pressNumber),
-			errors.DBTypeValidation,
-		)
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -96,7 +90,7 @@ func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*mode
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -108,15 +102,15 @@ func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*mode
 	return tools, nil
 }
 
-func (t *Tools) PressUtilization() ([]models.PressUtilization, *errors.DBError) {
+func (t *Tools) PressUtilization() ([]models.PressUtilization, *errors.MasterError) {
 	// Valid press numbers: 0, 2, 3, 4, 5
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	utilization := make([]models.PressUtilization, 0, len(validPresses))
 
 	for _, pressNum := range validPresses {
-		tools, dberr := t.ListActiveToolsForPress(pressNum)
-		if dberr != nil {
-			return nil, dberr
+		tools, err := t.ListActiveToolsForPress(pressNum)
+		if err != nil {
+			return nil, err
 		}
 		count := len(tools)
 

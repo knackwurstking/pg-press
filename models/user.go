@@ -29,33 +29,33 @@ func NewUser(telegramID TelegramID, userName, apiKey string) *User {
 }
 
 // Validate checks if the user has valid data
-func (u *User) Validate() error {
+func (u *User) Validate() bool {
 	if u.TelegramID <= 0 {
-		return fmt.Errorf("telegram_id: must be positive")
+		return false
 	}
 
 	if u.Name == "" {
-		return fmt.Errorf("user_name: cannot be empty")
+		return false
 	}
 	if len(u.Name) < env.UserNameMinLength {
-		return fmt.Errorf("user_name: too short")
+		return false
 	}
 	if len(u.Name) > env.UserNameMaxLength {
-		return fmt.Errorf("user_name: too long")
+		return false
 	}
 
 	if u.ApiKey == "" {
-		return fmt.Errorf("api_key: cannot be empty")
+		return false
 	}
 	if len(u.ApiKey) < env.MinAPIKeyLength {
-		return fmt.Errorf("api_key: too short for security, must be at least %d characters", env.MinAPIKeyLength)
+		return false
 	}
 
 	if u.LastFeed < 0 {
-		return fmt.Errorf("last_feed: cannot be negative")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // IsAdmin checks if the user is an administrator

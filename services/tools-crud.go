@@ -7,25 +7,18 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *errors.DBError) {
-	err := tool.Validate()
-	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *errors.MasterError) {
+	if !tool.Validate() || !user.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
-	err = user.Validate()
-	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
-	}
-
-	dberr := t.validateToolUniqueness(tool, 0)
-	if dberr != nil {
-		return 0, errors.NewDBError(dberr, errors.DBTypeValidation)
+	if !t.validateToolUniqueness(tool, 0) {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -43,36 +36,29 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 		tool.Press,
 		tool.Binding)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return models.ToolID(id), nil
 }
 
-func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.DBError {
-	err := tool.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.MasterError {
+	if !user.Validate() || !tool.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
-	err = user.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
-	}
-
-	dberr := t.validateToolUniqueness(tool, tool.ID)
-	if dberr != nil {
-		return dberr
+	if !t.validateToolUniqueness(tool, tool.ID) {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -92,13 +78,13 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.DBError {
 		tool.Binding,
 		tool.ID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.DBError) {
+func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT %s
 		FROM %s
@@ -107,18 +93,22 @@ func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.DBError) {
 
 	row := t.DB.QueryRow(query, id)
 
-	return ScanRow(row, ScanTool)
+	tool, err := ScanTool(row)
+	if err != nil {
+		return tool, errors.NewMasterError(err)
+	}
+	return tool, nil
 }
 
-func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.DBError {
-	if err := user.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.MasterError {
+	if !user.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTools)
 	_, err := t.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil

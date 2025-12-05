@@ -54,15 +54,12 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 	}
 
 	if data == nil {
-		return 0, errors.NewDBError(
-			fmt.Errorf("modification data cannot be nil"),
-			errors.DBTypeValidation,
-		)
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -72,18 +69,18 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 
 	result, err := s.DB.Exec(query, user, mt, mtID, jsonData, time.Now())
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return models.ModificationID(id), nil
 }
 
-func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any], *errors.DBError) {
+func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any], *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
 		FROM %s
@@ -91,10 +88,14 @@ func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any]
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, id)
-	return ScanRow(row, ScanModification)
+	m, err := ScanModification(row)
+	if err != nil {
+		return m, errors.NewMasterError(err)
+	}
+	return m, nil
 }
 
-func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offset int) ([]*models.Modification[any], *errors.DBError) {
+func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offset int) ([]*models.Modification[any], *errors.MasterError) {
 	if err := s.validateModificationType(mt, mtID); err != nil {
 		return nil, err
 	}
@@ -109,18 +110,18 @@ func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offs
 
 	rows, err := s.DB.Query(query, mt, mtID, limit, offset)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanModification)
 }
 
-func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*models.Modification[any], *errors.DBError) {
+func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*models.Modification[any], *errors.MasterError) {
 	return s.List(mt, mtID, -1, 0)
 }
 
-func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, *errors.DBError) {
+func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, *errors.MasterError) {
 	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
 		return 0, dberr
 	}
@@ -134,13 +135,13 @@ func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, *e
 	var count int64
 	err := s.DB.QueryRow(query, mt, mtID).Scan(&count)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeSelect)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return count, nil
 }
 
-func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.DBError) {
+func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.MasterError) {
 	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
 		return nil, dberr
 	}
@@ -154,10 +155,14 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
-	return ScanRow(row, ScanModification)
+	m, err := ScanModification(row)
+	if err != nil {
+		return m, errors.NewMasterError(err)
+	}
+	return m, nil
 }
 
-func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.DBError) {
+func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.MasterError) {
 	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
 		return nil, dberr
 	}
@@ -171,20 +176,24 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 	`, TableNameModifications)
 
 	row := s.DB.QueryRow(query, mt, mtID)
-	return ScanRow(row, ScanModification)
+	m, err := ScanModification(row)
+	if err != nil {
+		return m, errors.NewMasterError(err)
+	}
+	return m, nil
 }
 
-func (s *Modifications) Delete(id models.ModificationID) *errors.DBError {
+func (s *Modifications) Delete(id models.ModificationID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) *errors.DBError {
+func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) *errors.MasterError {
 	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
 		return dberr
 	}
@@ -192,13 +201,13 @@ func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) *error
 	query := fmt.Sprintf(`DELETE FROM %s WHERE entity_type = ? AND entity_id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, mt, mtID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modification[any], *errors.DBError) {
+func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modification[any], *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, user_id, data, created_at
 		FROM %s
@@ -209,23 +218,20 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 
 	rows, err := s.DB.Query(query, user, limit, offset)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanModification)
 }
 
-func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, from, to time.Time) ([]*models.Modification[any], *errors.DBError) {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return nil, dberr
+func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, from, to time.Time) ([]*models.Modification[any], *errors.MasterError) {
+	if err := s.validateModificationType(mt, mtID); err != nil {
+		return nil, err
 	}
 
 	if from.After(to) {
-		return nil, errors.NewDBError(
-			fmt.Errorf("from date must be before to date"),
-			errors.DBTypeValidation,
-		)
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -237,26 +243,20 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 
 	rows, err := s.DB.Query(query, mt, mtID, from, to)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanModification)
 }
 
-func (s *Modifications) validateModificationType(mt models.ModificationType, mtID int64) *errors.DBError {
+func (s *Modifications) validateModificationType(mt models.ModificationType, mtID int64) *errors.MasterError {
 	if !slices.Contains(ModificationTypes, mt) {
-		return errors.NewDBError(
-			fmt.Errorf("modification type %s is not supported", mt),
-			errors.DBTypeValidation,
-		)
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	if mtID <= 0 {
-		return errors.NewDBError(
-			fmt.Errorf("modification ID cannot be zero or negative"),
-			errors.DBTypeValidation,
-		)
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	return nil

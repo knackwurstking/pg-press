@@ -29,33 +29,33 @@ func NewTroubleReport(title, content string, linkedAttachments ...AttachmentID) 
 }
 
 // Validate checks if the trouble report has valid data.
-func (tr *TroubleReport) Validate() error {
+func (tr *TroubleReport) Validate() bool {
 	if tr.Title == "" {
-		return fmt.Errorf("cannot be empty")
+		return false
 	}
 	if len(tr.Title) < env.MinTitleLength {
-		return fmt.Errorf("title too short")
+		return false
 	}
 	if len(tr.Title) > env.MaxTitleLength {
-		return fmt.Errorf("title too long")
+		return false
 	}
 
 	if tr.Content == "" {
-		return fmt.Errorf("content cannot be empty")
+		return false
 	}
 	if len(tr.Content) < env.MinContentLength {
-		return fmt.Errorf("content too short")
+		return false
 	}
 	if len(tr.Content) > env.MaxContentLength {
-		return fmt.Errorf("content too long")
+		return false
 	}
 
 	for _, attachmentID := range tr.LinkedAttachments {
 		if attachmentID <= 0 {
-			return fmt.Errorf("linked_attachments: attachment ID must be positive")
+			return false
 		}
 	}
-	return nil
+	return true
 }
 
 // String returns a string representation of the trouble report.

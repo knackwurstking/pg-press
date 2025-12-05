@@ -34,39 +34,44 @@ func NewUsers(r *Registry) *Users {
 	return &Users{Base: base}
 }
 
-func (u *Users) Get(telegramID models.TelegramID) (*models.User, *errors.DBError) {
+func (u *Users) Get(telegramID models.TelegramID) (*models.User, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE telegram_id = ?`, TableNameUsers)
 	row := u.DB.QueryRow(query, telegramID)
-
-	return ScanRow(row, ScanUser)
+	user, err := ScanUser(row)
+	if err != nil {
+		return user, errors.NewMasterError(err)
+	}
+	return user, nil
 }
 
-func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, *errors.DBError) {
-	err := utils.ValidateAPIKey(apiKey)
-	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeValidation)
+func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, *errors.MasterError) {
+	if !utils.ValidateAPIKey(apiKey) {
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE api_key = ?`, TableNameUsers)
 	row := u.DB.QueryRow(query, apiKey)
-
-	return ScanRow(row, ScanUser)
+	user, err := ScanUser(row)
+	if err != nil {
+		return user, errors.NewMasterError(err)
+	}
+	return user, nil
 }
 
-func (u *Users) List() ([]*models.User, *errors.DBError) {
+func (u *Users) List() ([]*models.User, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s`, TableNameUsers)
 	rows, err := u.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanUser)
 }
 
-func (u *Users) Add(user *models.User) (models.TelegramID, *errors.DBError) {
-	if err := user.Validate(); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) {
+	if !user.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	// Check if user already exists
@@ -76,23 +81,20 @@ func (u *Users) Add(user *models.User) (models.TelegramID, *errors.DBError) {
 		return 0, dberr
 	}
 	if count > 0 {
-		return 0, errors.NewDBError(
-			fmt.Errorf("User with Telegram ID %d already exists", user.TelegramID),
-			errors.DBTypeExists,
-		)
+		return 0, errors.NewMasterError(fmt.Errorf("User with Telegram ID %d already exists", user.TelegramID))
 	}
 
 	// Insert the new user
 	query = fmt.Sprintf(`INSERT INTO %s (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`, TableNameUsers)
 	_, err := u.DB.Exec(query, user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return user.TelegramID, nil
 }
 
-func (u *Users) Delete(telegramID models.TelegramID) *errors.DBError {
+func (u *Users) Delete(telegramID models.TelegramID) *errors.MasterError {
 	_, dberr := u.Get(telegramID)
 	if dberr != nil {
 		return dberr
@@ -101,22 +103,21 @@ func (u *Users) Delete(telegramID models.TelegramID) *errors.DBError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE telegram_id = ?`, TableNameUsers)
 	_, err := u.DB.Exec(query, telegramID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (u *Users) Update(user *models.User) *errors.DBError {
-	err := user.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (u *Users) Update(user *models.User) *errors.MasterError {
+	if !user.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`, TableNameUsers)
-	_, err = u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, user.TelegramID)
+	_, err := u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, user.TelegramID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil

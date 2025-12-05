@@ -24,14 +24,14 @@ func NewToolRegeneration(toolID ToolID, cycleID CycleID, reason string, performe
 	}
 }
 
-func (r *ToolRegeneration) Validate() error {
+func (r *ToolRegeneration) Validate() bool {
 	if r.ToolID <= 0 {
-		return fmt.Errorf("tool_id")
+		return false
 	}
 
 	if r.CycleID <= 0 {
-		return fmt.Errorf("cycle_id")
+		return false
 	}
 
-	return nil
+	return true
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
-func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *errors.DBError) {
+func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -18,16 +18,16 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *er
 	`, TableNamePressCycles)
 
 	row := s.DB.QueryRow(query, toolID)
-	cycle, dberr := ScanRow(row, ScanCycle)
-	if dberr != nil {
-		return cycle, dberr
+	cycle, err := ScanCycle(row)
+	if err != nil {
+		return cycle, errors.NewMasterError(err)
 	}
 	cycle.PartialCycles = s.GetPartialCycles(cycle)
 	return cycle, nil
 }
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, *errors.DBError) {
+func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -37,7 +37,7 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -51,7 +51,9 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 }
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
-func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int, offset *int) ([]*models.Cycle, *errors.DBError) {
+func (s *PressCycles) GetPressCycles(
+	pressNumber models.PressNumber, limit *int, offset *int,
+) ([]*models.Cycle, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
 		FROM %s
@@ -64,7 +66,7 @@ func (s *PressCycles) GetPressCycles(pressNumber models.PressNumber, limit *int,
 
 	rows, err := s.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 

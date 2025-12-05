@@ -11,7 +11,7 @@ import (
 // GetCycleSummaryData retrieves complete cycle summary data for a press
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
-) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, *errors.DBError) {
+) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, *errors.MasterError) {
 	cycles, dberr := s.GetPressCycles(pressNumber, nil, nil)
 	if dberr != nil {
 		return nil, nil, nil, dberr
@@ -64,14 +64,15 @@ func (s *PressCycles) GetCycleSummaryStats(cycles []*models.Cycle) (
 // GetToolSummaries creates consolidated tool summaries with start/end dates
 func (s *PressCycles) GetToolSummaries(
 	cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool,
-) ([]*models.ToolSummary, *errors.DBError) {
+) []*models.ToolSummary {
 	toolSummaries := s.createInitialSummaries(cycles, toolsMap)
 	s.sortToolSummariesChronologically(toolSummaries)
 	consolidatedSummaries := s.consolidateToolSummaries(toolSummaries)
+
 	s.fixToolSummaryStartDates(consolidatedSummaries)
 	s.sortToolSummariesByCycles(consolidatedSummaries)
 
-	return consolidatedSummaries, nil
+	return consolidatedSummaries
 }
 
 func (s *PressCycles) createInitialSummaries(cycles []*models.Cycle, toolsMap map[models.ToolID]*models.Tool) []*models.ToolSummary {

@@ -36,36 +36,34 @@ func NewTroubleReports(r *Registry) *TroubleReports {
 	return &TroubleReports{Base: base}
 }
 
-func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.DBError) {
+func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY id DESC`, TableNameTroubleReports)
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanTroubleReport)
 }
 
-func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, *errors.DBError) {
+func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameTroubleReports)
-	return ScanRow(s.DB.QueryRow(query, id), ScanTroubleReport)
+	tr, err := ScanTroubleReport(s.DB.QueryRow(query, id))
+	if err != nil {
+		return tr, errors.NewMasterError(err)
+	}
+	return tr, nil
 }
 
-func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *errors.DBError) {
-	err := tr.Validate()
-	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
-	}
-
-	err = u.Validate()
-	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *errors.MasterError) {
+	if !tr.Validate() || !u.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+		return 0, errors.NewMasterError(err)
 	}
 
 	query := fmt.Sprintf(`INSERT INTO %s (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`,
@@ -73,12 +71,12 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 
 	result, err := s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 	tr.ID = models.TroubleReportID(id)
 
@@ -91,20 +89,14 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 	return id, dberr
 }
 
-func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *errors.DBError {
-	err := tr.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
-	}
-
-	err = u.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *errors.MasterError {
+	if !tr.Validate() || !u.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`,
@@ -112,7 +104,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 
 	_, err = s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown, tr.ID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeInsert)
+		return errors.NewMasterError(err)
 	}
 
 	_, dberr := s.Registry.Modifications.Add(
@@ -128,27 +120,26 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 	return nil
 }
 
-func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *errors.DBError {
-	err := user.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *errors.MasterError {
+	if !user.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
-	_, dberr := s.Get(id)
-	if dberr != nil {
-		return dberr
+	_, merr := s.Get(id)
+	if merr != nil {
+		return merr
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTroubleReports)
-	_, err = s.DB.Exec(query, id)
+	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.TroubleReportWithAttachments, *errors.DBError) {
+func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.TroubleReportWithAttachments, *errors.MasterError) {
 	tr, err := s.Get(id)
 	if err != nil {
 		return nil, err
@@ -165,7 +156,7 @@ func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.
 	}, nil
 }
 
-func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, *errors.DBError) {
+func (s *TroubleReports) ListWithAttachments() ([]*models.TroubleReportWithAttachments, *errors.MasterError) {
 	reports, err := s.List()
 	if err != nil {
 		return nil, err
@@ -191,10 +182,9 @@ func (s *TroubleReports) AddWithAttachments(
 	troubleReport *models.TroubleReport,
 	user *models.User,
 	attachments ...*models.Attachment,
-) *errors.DBError {
-	err := user.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+) *errors.MasterError {
+	if !user.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	var attachmentIDs []models.AttachmentID
@@ -229,15 +219,9 @@ func (s *TroubleReports) UpdateWithAttachments(
 	tr *models.TroubleReport,
 	user *models.User,
 	newAttachments ...*models.Attachment,
-) *errors.DBError {
-	err := tr.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
-	}
-
-	err = user.Validate()
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+) *errors.MasterError {
+	if !tr.Validate() || !user.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	var newAttachmentIDs []models.AttachmentID
@@ -270,20 +254,19 @@ func (s *TroubleReports) UpdateWithAttachments(
 func (s *TroubleReports) RemoveWithAttachments(
 	id models.TroubleReportID,
 	user *models.User,
-) (*models.TroubleReport, *errors.DBError) {
-	err := user.Validate()
-	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeValidation)
+) (*models.TroubleReport, *errors.MasterError) {
+	if !user.Validate() {
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
-	tr, dberr := s.Get(id)
-	if dberr != nil {
-		return tr, dberr
+	tr, merr := s.Get(id)
+	if merr != nil {
+		return tr, merr
 	}
 
-	dberr = s.Delete(id, user)
-	if dberr != nil {
-		return tr, dberr
+	merr = s.Delete(id, user)
+	if merr != nil {
+		return tr, merr
 	}
 
 	failedMessages := []string{}
@@ -310,20 +293,17 @@ func (s *TroubleReports) RemoveWithAttachments(
 				msg += "\n\t"
 			}
 		}
-		return tr, errors.NewDBError(
-			fmt.Errorf("Some attachments could not be removed:\n\t%s", msg),
-			errors.DBTypeDelete,
-		)
+		return tr, errors.NewMasterError(fmt.Errorf("Some attachments could not be removed:\n\t%s", msg))
 	}
 
 	return tr, nil
 }
 
 func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) (
-	[]*models.Attachment, *errors.DBError,
+	[]*models.Attachment, *errors.MasterError,
 ) {
-	if err := report.Validate(); err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeValidation)
+	if !report.Validate() {
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	var attachments []*models.Attachment

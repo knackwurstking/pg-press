@@ -20,10 +20,10 @@ func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegene
 
 	var user *models.User
 	if regeneration.PerformedBy != nil {
-		var dberr *errors.DBError
-		user, dberr = registry.Users.Get(*regeneration.PerformedBy)
-		if dberr != nil {
-			return nil, dberr
+		var merr *errors.MasterError
+		user, merr = registry.Users.Get(*regeneration.PerformedBy)
+		if merr != nil {
+			return nil, merr
 		}
 	}
 
@@ -37,9 +37,9 @@ func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, e
 func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
 	var bindingTool *models.ResolvedTool
 	if tool.IsBound() && !skipResolveBindingTool {
-		bt, dberr := registry.Tools.Get(*tool.Binding)
-		if dberr != nil {
-			return nil, errors.Wrap(dberr, "get binding tool %d for %d", tool.Binding, tool.ID)
+		bt, merr := registry.Tools.Get(*tool.Binding)
+		if merr != nil {
+			return nil, errors.Wrap(merr, "get binding tool %d for %d", tool.Binding, tool.ID)
 		}
 
 		var err error
@@ -49,14 +49,14 @@ func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool b
 		}
 	}
 
-	notes, dberr := registry.Notes.GetByTool(tool.ID)
-	if dberr != nil && dberr.Typ != errors.DBTypeNotFound {
-		return nil, errors.Wrap(dberr, "get notes for tool %d", tool.ID)
+	notes, merr := registry.Notes.GetByTool(tool.ID)
+	if merr != nil && merr.Type != errors.ErrorTypeNotFound {
+		return nil, errors.Wrap(merr, "get notes for tool %d", tool.ID)
 	}
 
-	regenerations, dberr := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
-	if dberr != nil && dberr.Typ != errors.DBTypeNotFound {
-		return nil, errors.Wrap(dberr, "get regeneration for tool %d", tool.ID)
+	regenerations, merr := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
+	if merr != nil && merr.Type != errors.ErrorTypeNotFound {
+		return nil, errors.Wrap(merr, "get regeneration for tool %d", tool.ID)
 	}
 
 	rt := models.NewResolvedTool(tool, bindingTool, notes, regenerations)

@@ -36,16 +36,19 @@ func NewPressRegenerations(r *Registry) *PressRegenerations {
 	}
 }
 
-func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRegeneration, *errors.DBError) {
+func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRegeneration, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNamePressRegenerations)
 	row := s.DB.QueryRow(query, id)
-
-	return ScanRow(row, ScanPressRegeneration)
+	r, err := ScanPressRegeneration(row)
+	if err != nil {
+		return r, errors.NewMasterError(err)
+	}
+	return r, nil
 }
 
-func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, *errors.DBError) {
-	if err := r.Validate(); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, *errors.MasterError) {
+	if !r.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -55,20 +58,20 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 
 	result, err := s.DB.Exec(query, r.PressNumber, r.StartedAt, r.CompletedAt, r.Reason)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return models.PressRegenerationID(id), nil
 }
 
-func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.DBError {
-	if err := r.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterError {
+	if !r.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -78,23 +81,25 @@ func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.DBError
 	`, TableNamePressRegenerations)
 
 	if _, err := s.DB.Exec(query, r.StartedAt, r.CompletedAt, r.Reason, r.ID); err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *PressRegenerations) Delete(id models.PressRegenerationID) *errors.DBError {
+func (s *PressRegenerations) Delete(id models.PressRegenerationID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *PressRegenerations) StartPressRegeneration(pn models.PressNumber, reason string) (models.PressRegenerationID, *errors.DBError) {
+func (s *PressRegenerations) StartPressRegeneration(
+	pn models.PressNumber, reason string,
+) (models.PressRegenerationID, *errors.MasterError) {
 	regenerationID, err := s.Add(models.NewPressRegeneration(pn, time.Now(), reason))
 	if err != nil {
 		return 0, err
@@ -103,7 +108,7 @@ func (s *PressRegenerations) StartPressRegeneration(pn models.PressNumber, reaso
 	return regenerationID, nil
 }
 
-func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID) *errors.DBError {
+func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID) *errors.MasterError {
 	regeneration, dberr := s.Get(id)
 	if dberr != nil {
 		return dberr
@@ -111,8 +116,8 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 
 	regeneration.Stop()
 
-	if err := regeneration.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+	if !regeneration.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -123,13 +128,15 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 
 	_, err := s.DB.Exec(query, regeneration.CompletedAt, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *PressRegenerations) GetLastRegeneration(pressNumber models.PressNumber) (*models.PressRegeneration, *errors.DBError) {
+func (s *PressRegenerations) GetLastRegeneration(
+	pressNumber models.PressNumber,
+) (*models.PressRegeneration, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, started_at, completed_at, reason
 		FROM %s
@@ -138,10 +145,16 @@ func (s *PressRegenerations) GetLastRegeneration(pressNumber models.PressNumber)
 		LIMIT 1
 	`, TableNamePressRegenerations)
 
-	return ScanRow(s.DB.QueryRow(query, pressNumber), ScanPressRegeneration)
+	r, err := ScanPressRegeneration(s.DB.QueryRow(query, pressNumber))
+	if err != nil {
+		return r, errors.NewMasterError(err)
+	}
+	return r, nil
 }
 
-func (s *PressRegenerations) GetRegenerationHistory(pressNumber models.PressNumber) ([]*models.PressRegeneration, *errors.DBError) {
+func (s *PressRegenerations) GetRegenerationHistory(
+	pressNumber models.PressNumber,
+) ([]*models.PressRegeneration, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, press_number, started_at, completed_at, reason
 		FROM %s
@@ -151,7 +164,7 @@ func (s *PressRegenerations) GetRegenerationHistory(pressNumber models.PressNumb
 
 	rows, err := s.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
