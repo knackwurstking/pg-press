@@ -215,7 +215,7 @@ func (s *TroubleReports) AddWithAttachments(
 	troubleReport.LinkedAttachments = attachmentIDs
 
 	id, dberr := s.Add(troubleReport, user)
-	if err != nil {
+	if dberr != nil {
 		s.cleanupAttachments(attachmentIDs)
 		return dberr
 	}

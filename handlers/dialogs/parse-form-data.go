@@ -90,7 +90,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	case models.PositionTop, models.PositionTopCassette, models.PositionBottom:
 		// Valid position
 	default:
-		return nil, fmt.Errorf(fmt.Sprintf("invalid position: %s", positionStr))
+		return nil, fmt.Errorf("invalid position: %s", positionStr)
 	}
 
 	data := &DialogEditToolFormData{Position: position}
@@ -99,7 +99,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if widthStr := c.FormValue("width"); widthStr != "" {
 		width, err := strconv.Atoi(widthStr)
 		if err != nil {
-			return nil, fmt.Errorf(fmt.Sprintf("invalid width: %v", err))
+			return nil, fmt.Errorf("invalid width: %v", err)
 		}
 		data.Format.Width = width
 	}
@@ -108,7 +108,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if heightStr := c.FormValue("height"); heightStr != "" {
 		height, err := strconv.Atoi(heightStr)
 		if err != nil {
-			return nil, fmt.Errorf(fmt.Sprintf("invalid height: %v", err))
+			return nil, fmt.Errorf("invalid height: %v", err)
 		}
 		data.Format.Height = height
 	}
@@ -132,7 +132,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if pressStr := c.FormValue("press-selection"); pressStr != "" {
 		press, err := strconv.Atoi(pressStr)
 		if err != nil {
-			return nil, fmt.Errorf(fmt.Sprintf("invalid press number: %v", err))
+			return nil, fmt.Errorf("invalid press number: %v", err)
 		}
 
 		pressNumber := models.PressNumber(press)

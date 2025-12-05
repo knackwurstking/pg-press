@@ -247,7 +247,7 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 func (s *Modifications) validateModificationType(mt models.ModificationType, mtID int64) *errors.DBError {
 	if !slices.Contains(ModificationTypes, mt) {
 		return errors.NewDBError(
-			fmt.Errorf("modification type %s is not supported"),
+			fmt.Errorf("modification type %s is not supported", mt),
 			errors.DBTypeValidation,
 		)
 	}

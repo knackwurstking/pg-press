@@ -122,7 +122,7 @@ func (s *ToolRegenerations) StartToolRegeneration(id models.ToolID, reason strin
 	}
 
 	cycle, dberr := s.Registry.PressCycles.GetLastToolCycle(id)
-	if err != nil {
+	if dberr != nil {
 		return 0, dberr
 	}
 

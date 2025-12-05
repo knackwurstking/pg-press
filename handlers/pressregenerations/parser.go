@@ -29,12 +29,12 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*mode
 
 	startedAt, err = utils.ParseFormValueTime(c, "started")
 	if err != nil {
-		return nil, errors.BadRequest(err, "parsing form value \"started\"")
+		return nil, errors.NewBadRequestError(err, "parsing form value \"started\"")
 	}
 
 	completedAt, err = utils.ParseFormValueTime(c, "completed")
 	if err != nil {
-		return nil, errors.BadRequest(err, "parsing form value \"completed\"")
+		return nil, errors.NewBadRequestError(err, "parsing form value \"completed\"")
 	}
 
 	r := &models.PressRegeneration{
@@ -45,7 +45,7 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*mode
 	}
 
 	if err = r.Validate(); err != nil {
-		return r, errors.BadRequest(err, "invalid press regeneration data")
+		return r, errors.NewBadRequestError(err, "invalid press regeneration data")
 	}
 
 	return r, nil
@@ -54,12 +54,12 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*mode
 func (h *Handler) parseParamPress(c echo.Context) (models.PressNumber, *echo.HTTPError) {
 	pressNum, err := utils.ParseParamInt8(c, "press")
 	if err != nil {
-		return -1, errors.BadRequest(err, "invalid or missing press parameter")
+		return -1, errors.NewBadRequestError(err, "invalid or missing press parameter")
 	}
 
 	press := models.PressNumber(pressNum)
 	if !models.IsValidPressNumber(&press) {
-		return -1, errors.BadRequest(err, "invalid press number")
+		return -1, errors.NewBadRequestError(err, "invalid press number")
 	}
 
 	return press, nil

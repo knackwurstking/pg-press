@@ -18,9 +18,9 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 		return 0, errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	err = t.validateToolUniqueness(tool, 0)
-	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+	dberr := t.validateToolUniqueness(tool, 0)
+	if dberr != nil {
+		return 0, errors.NewDBError(dberr, errors.DBTypeValidation)
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)
@@ -65,9 +65,9 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.DBError {
 		return errors.NewDBError(err, errors.DBTypeValidation)
 	}
 
-	err = t.validateToolUniqueness(tool, tool.ID)
-	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+	dberr := t.validateToolUniqueness(tool, tool.ID)
+	if dberr != nil {
+		return dberr
 	}
 
 	formatBytes, err := t.marshalFormat(tool.Format)

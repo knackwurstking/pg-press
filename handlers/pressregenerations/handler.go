@@ -58,7 +58,7 @@ func (h *Handler) GetRegenerationPage(c echo.Context) error {
 	if err := templates.Page(templates.PageProps{
 		Press: press,
 	}).Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render press page template")
+		return errors.HandlerError(err, "render press page template")
 	}
 
 	return nil
@@ -83,7 +83,7 @@ func (h *Handler) HxAddRegeneration(c echo.Context) error {
 	}
 
 	if _, err := h.registry.PressRegenerations.Add(data); err != nil {
-		return errors.Handler(err, "add press regeneration")
+		return errors.HandlerError(err, "add press regeneration")
 	}
 
 	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d Hinzugefügt", press), data, user)
@@ -102,13 +102,15 @@ func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
 
 	id, err := utils.ParseQueryInt64(c, "id") // PressRegenerationID
 	if err != nil {
-		return errors.BadRequest(err, "missing id query")
+		return errors.NewBadRequestError(err, "missing id query")
 	}
 
 	rid := models.PressRegenerationID(id)
 	r, _ := h.registry.PressRegenerations.Get(rid) // Need this for the feed
-	if err := h.registry.PressRegenerations.Delete(rid); err != nil {
-		return errors.Handler(err, "delete press regeneration")
+
+	dberr := h.registry.PressRegenerations.Delete(rid)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "delete press regeneration")
 	}
 
 	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d entfernt", r.PressNumber), r, user)

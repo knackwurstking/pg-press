@@ -20,10 +20,10 @@ func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegene
 
 	var user *models.User
 	if regeneration.PerformedBy != nil {
-		var err error
-		user, err = registry.Users.Get(*regeneration.PerformedBy)
-		if err != nil {
-			return nil, err
+		var dberr *errors.DBError
+		user, dberr = registry.Users.Get(*regeneration.PerformedBy)
+		if dberr != nil {
+			return nil, dberr
 		}
 	}
 
