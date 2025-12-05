@@ -30,24 +30,24 @@ type Attachment struct {
 }
 
 // Validate checks if the attachment has valid data.
-func (a *Attachment) Validate() error {
+func (a *Attachment) Validate() bool {
 	if a.MimeType == "" {
-		return fmt.Errorf("mime_type cannot be empty")
+		return false
 	}
 
 	if !a.IsImage() {
-		return fmt.Errorf("mime_type: only image files are allowed")
+		return false
 	}
 
 	if a.Data == nil {
-		return fmt.Errorf("data cannot be nil")
+		return false
 	}
 
 	if len(a.Data) > env.MaxDataSize {
-		return fmt.Errorf("data too large")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // GetFileExtension returns the file extension based on the mime type.

@@ -42,7 +42,7 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 	}
 }
 
-func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.DBError) {
+func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -51,15 +51,15 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.D
 
 	row := s.DB.QueryRow(query, id)
 
-	sheet, dberr := ScanRow(row, ScanMetalSheet)
-	if dberr != nil {
-		return nil, dberr
+	sheet, err := ScanMetalSheet(row)
+	if err != nil {
+		return nil, errors.NewMasterError(err)
 	}
 
 	return sheet, nil
 }
 
-func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.DBError) {
+func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -68,14 +68,14 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.DBError) {
 
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanMetalSheet)
 }
 
-func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, *errors.DBError) {
+func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -85,14 +85,14 @@ func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, 
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanMetalSheet)
 }
 
-func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*models.MetalSheet, *errors.DBError) {
+func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*models.MetalSheet, *errors.MasterError) {
 	query := fmt.Sprintf(`
 		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
 		FROM %s
@@ -102,21 +102,21 @@ func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*mode
 
 	rows, err := s.DB.Query(query, machineType.String())
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanMetalSheet)
 }
 
-func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, *errors.DBError) {
+func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[models.ToolID]*models.Tool) ([]*models.MetalSheet, *errors.MasterError) {
 	expectedMachineType := models.GetMachineTypeForPress(pressNumber)
 
 	var allSheets models.MetalSheetList
 	for toolID := range toolsMap {
-		sheets, dberr := s.ListByToolID(toolID)
-		if dberr != nil {
-			return nil, dberr
+		sheets, err := s.ListByToolID(toolID)
+		if err != nil {
+			return nil, err
 		}
 		allSheets = append(allSheets, sheets...)
 	}
@@ -131,9 +131,9 @@ func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[m
 	return filteredSheets, nil
 }
 
-func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.DBError) {
-	if err := sheet.Validate(); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.MasterError) {
+	if !sheet.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -152,21 +152,21 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 		sheet.ToolID,
 	)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	sheet.ID = models.MetalSheetID(id)
 	return sheet.ID, nil
 }
 
-func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.DBError {
-	if err := sheet.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
+	if !sheet.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`
@@ -180,18 +180,15 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.DBError {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.Identifier.String(), sheet.ToolID, sheet.ID)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *errors.DBError {
+func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *errors.MasterError {
 	if toolID <= 0 {
-		return errors.NewDBError(
-			fmt.Errorf("tool_id: must be positive"),
-			errors.DBTypeValidation,
-		)
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	if _, dberr := s.Get(sheetID); dberr != nil {
@@ -205,17 +202,17 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *err
 	`, TableNameMetalSheets)
 
 	if _, err := s.DB.Exec(query, toolID, sheetID); err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (s *MetalSheets) Delete(id models.MetalSheetID) *errors.DBError {
+func (s *MetalSheets) Delete(id models.MetalSheetID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
 
 	if _, err := s.DB.Exec(query, id); err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil

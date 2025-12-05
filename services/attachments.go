@@ -35,7 +35,7 @@ func NewAttachments(r *Registry) *Attachments {
 	}
 }
 
-func (a *Attachments) List() ([]*models.Attachment, *errors.DBError) {
+func (a *Attachments) List() ([]*models.Attachment, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
 		TableNameAttachments,
@@ -43,28 +43,28 @@ func (a *Attachments) List() ([]*models.Attachment, *errors.DBError) {
 
 	rows, err := a.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanAttachment)
 }
 
-func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.DBError) {
+func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
 		TableNameAttachments,
 	)
 
-	attachment, dberr := ScanRow(a.DB.QueryRow(query, id), ScanAttachment)
-	if dberr != nil {
-		return nil, dberr
+	attachment, err := ScanAttachment(a.DB.QueryRow(query, id))
+	if err != nil {
+		return nil, errors.NewMasterError(err)
 	}
 
 	return attachment, nil
 }
 
-func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, *errors.DBError) {
+func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, *errors.MasterError) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -85,14 +85,14 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 
 	rows, err := a.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachments, dberr := ScanRows(rows, ScanAttachment)
-	if dberr != nil {
-		return nil, dberr
+	attachments, err := ScanRows(rows, ScanAttachment)
+	if err != nil {
+		return nil, errors.NewMasterError(err)
 	}
 
 	// Create a map for O(1) lookup
@@ -109,9 +109,9 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 	return attachmentsInOrder, nil
 }
 
-func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.DBError) {
-	if err := attachment.Validate(); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeValidation)
+func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.MasterError) {
+	if !attachment.Validate() {
+		return 0, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -121,20 +121,20 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *
 
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeInsert)
+		return 0, errors.NewMasterError(err)
 	}
 
 	return models.AttachmentID(id), nil
 }
 
-func (a *Attachments) Update(attachment *models.Attachment) *errors.DBError {
-	if err := attachment.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError {
+	if !attachment.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	id := attachment.GetID()
@@ -145,17 +145,17 @@ func (a *Attachments) Update(attachment *models.Attachment) *errors.DBError {
 
 	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (a *Attachments) Delete(id models.AttachmentID) *errors.DBError {
+func (a *Attachments) Delete(id models.AttachmentID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil

@@ -28,33 +28,33 @@ func NewCookie(userAgent, value, apiKey string) *Cookie {
 }
 
 // Validate checks if the cookie has valid data.
-func (c *Cookie) Validate() error {
+func (c *Cookie) Validate() bool {
 	if c.UserAgent == "" {
-		return fmt.Errorf("user_agent: cannot be empty")
+		return false
 	}
 	if len(c.UserAgent) > env.MaxUserAgentLength {
-		return fmt.Errorf("user_agent: too long")
+		return false
 	}
 
 	if c.Value == "" {
-		return fmt.Errorf("value: cannot be empty")
+		return false
 	}
 	if len(c.Value) < env.MinValueLength {
-		return fmt.Errorf("value: too short for security")
+		return false
 	}
 
 	if c.ApiKey == "" {
-		return fmt.Errorf("api_key: cannot be empty")
+		return false
 	}
 	if len(c.ApiKey) < env.MinAPIKeyLength {
-		return fmt.Errorf("api_key: too short for security")
+		return false
 	}
 
 	if c.LastLogin <= 0 {
-		return fmt.Errorf("last_login: must be positive")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // GetLastLoginTime returns the last login time as a Go time.Time.

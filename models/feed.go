@@ -27,30 +27,30 @@ func NewFeed(title, content string, userID TelegramID) *Feed {
 }
 
 // Validate checks if the feed has valid data.
-func (f *Feed) Validate() error {
+func (f *Feed) Validate() bool {
 	if f.Title == "" {
-		return fmt.Errorf("title: cannot be empty")
+		return false
 	}
 	if len(f.Title) > 255 {
-		return fmt.Errorf("title: too long (max 255 characters)")
+		return false
 	}
 
 	if f.Content == "" {
-		return fmt.Errorf("content: cannot be empty")
+		return false
 	}
 	if len(f.Content) > 10000 {
-		return fmt.Errorf("content: too long (max 10000 characters)")
+		return false
 	}
 
 	if f.UserID <= 0 {
-		return fmt.Errorf("user_id: must be positive")
+		return false
 	}
 
 	if f.CreatedAt <= 0 {
-		return fmt.Errorf("created_at: must be positive")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // GetCreatedTime returns the feed creation time as a Go time.Time.

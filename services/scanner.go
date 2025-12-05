@@ -9,39 +9,23 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T, *errors.DBError) {
+func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T, *errors.MasterError) {
 	var results []*T
 
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				return nil, errors.NewDBError(err, errors.DBTypeNotFound)
-			}
-			return nil, errors.NewDBError(err, errors.DBTypeScan)
+			return nil, errors.NewMasterErrorDB(errors.ErrorTypeDB, err)
 		}
 		results = append(results, item)
 	}
 
-	if err := rows.Err(); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewDBError(err, errors.DBTypeNotFound)
-		}
-		return nil, errors.NewDBError(err, errors.DBTypeScan)
+	err := rows.Err()
+	if err != nil {
+		return results, errors.NewMasterErrorDB(errors.ErrorTypeDB, err)
 	}
 
 	return results, nil
-}
-
-func ScanRow[T any](row *sql.Row, scanFunc func(Scannable) (*T, error)) (*T, *errors.DBError) {
-	t, err := scanFunc(row)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.NewDBError(err, errors.DBTypeNotFound)
-		}
-		return t, errors.NewDBError(err, errors.DBTypeScan)
-	}
-	return t, nil
 }
 
 // Scanner functions to pass into `ScanRows` or ScanRow`
@@ -52,10 +36,7 @@ func ScanAttachment(scanner Scannable) (*models.Attachment, error) {
 
 	err := scanner.Scan(&id, &attachment.MimeType, &attachment.Data)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan attachment: %v", err)
+		return nil, err
 	}
 
 	attachment.ID = fmt.Sprintf("%d", id)
@@ -66,28 +47,14 @@ func ScanCookie(scanner Scannable) (*models.Cookie, error) {
 	cookie := &models.Cookie{}
 
 	err := scanner.Scan(&cookie.UserAgent, &cookie.Value, &cookie.ApiKey, &cookie.LastLogin)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan cookie: %v", err)
-	}
-
-	return cookie, nil
+	return cookie, err
 }
 
 func ScanFeed(scanner Scannable) (*models.Feed, error) {
 	feed := &models.Feed{}
 
 	err := scanner.Scan(&feed.ID, &feed.Title, &feed.Content, &feed.UserID, &feed.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan feed: %v", err)
-	}
-
-	return feed, nil
+	return feed, err
 }
 
 func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
@@ -97,10 +64,7 @@ func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
 		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan metal-sheet: %v", err)
+		return nil, err
 	}
 
 	sheet.Identifier = models.MachineType(identifierStr)
@@ -110,25 +74,13 @@ func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 func ScanModification(scanner Scannable) (*models.Modification[any], error) {
 	mod := &models.Modification[any]{}
 	err := scanner.Scan(&mod.ID, &mod.UserID, &mod.Data, &mod.CreatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan modification: %v", err)
-	}
-	return mod, nil
+	return mod, err
 }
 
 func ScanNote(scanner Scannable) (*models.Note, error) {
 	note := &models.Note{}
 	err := scanner.Scan(&note.ID, &note.Level, &note.Content, &note.CreatedAt, &note.Linked)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan note: %v", err)
-	}
-	return note, nil
+	return note, err
 }
 
 func ScanCycle(scannable Scannable) (*models.Cycle, error) {
@@ -143,11 +95,7 @@ func ScanCycle(scannable Scannable) (*models.Cycle, error) {
 		&cycle.Date,
 		&cycle.PerformedBy,
 	)
-	if err != nil {
-		return nil, fmt.Errorf("scan press-cycle: %w", err)
-	}
-
-	return cycle, nil
+	return cycle, err
 }
 
 func ScanPressRegeneration(scannable Scannable) (*models.PressRegeneration, error) {
@@ -162,10 +110,7 @@ func ScanPressRegeneration(scannable Scannable) (*models.PressRegeneration, erro
 		&regeneration.Reason,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan press regeneration: %v", err)
+		return nil, err
 	}
 
 	if completedAt.Valid {
@@ -187,10 +132,7 @@ func ScanToolRegeneration(scannable Scannable) (*models.ToolRegeneration, error)
 		&performedBy,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan tool-regeneration: %v", err)
+		return nil, err
 	}
 
 	if performedBy.Valid {
@@ -208,14 +150,12 @@ func ScanTool(scannable Scannable) (*models.Tool, error) {
 	err := scannable.Scan(&tool.ID, &tool.Position, &format, &tool.Type,
 		&tool.Code, &tool.Regenerating, &tool.IsDead, &tool.Press, &tool.Binding)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan tool: %v", err)
+		return nil, err
 	}
 
-	if err := json.Unmarshal(format, &tool.Format); err != nil {
-		return nil, fmt.Errorf("unmarshal tool format: %v", err)
+	err = json.Unmarshal(format, &tool.Format)
+	if err != nil {
+		return nil, err
 	}
 
 	return tool, nil
@@ -227,14 +167,12 @@ func ScanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
 
 	err := scannable.Scan(&report.ID, &report.Title, &report.Content, &linkedAttachments, &report.UseMarkdown)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan trouble-report: %v", err)
+		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments); err != nil {
-		return nil, fmt.Errorf("unmarshal linked attachments: %v", err)
+	err = json.Unmarshal([]byte(linkedAttachments), &report.LinkedAttachments)
+	if err != nil {
+		return nil, err
 	}
 
 	return report, nil
@@ -243,12 +181,5 @@ func ScanTroubleReport(scannable Scannable) (*models.TroubleReport, error) {
 func ScanUser(scanner Scannable) (*models.User, error) {
 	user := &models.User{}
 	err := scanner.Scan(&user.TelegramID, &user.Name, &user.ApiKey, &user.LastFeed)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, fmt.Errorf("scan user: %v", err)
-	}
-
-	return user, nil
+	return user, err
 }

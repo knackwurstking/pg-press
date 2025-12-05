@@ -100,48 +100,48 @@ func (ms *MetalSheet) String() string {
 		ms.ID, ms.Identifier, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
 }
 
-func (ms *MetalSheet) Validate() error {
+func (ms *MetalSheet) Validate() bool {
 	// Validate machine type identifier
 	if !ms.Identifier.IsValid() {
-		return fmt.Errorf("identifier: invalid machine type: %s", ms.Identifier)
+		return false
 	}
 
 	// Validate tool ID (foreign key reference)
 	if ms.ToolID <= 0 {
-		return fmt.Errorf("tool_id: must be positive")
+		return false
 	}
 
 	// Validate tile height
 	if ms.TileHeight < 0 {
-		return fmt.Errorf("tile_height: cannot be negative")
+		return false
 	}
 
 	// Validate value
 	if ms.Value < 0 {
-		return fmt.Errorf("value: cannot be negative")
+		return false
 	}
 
 	// Validate marke height
 	if ms.MarkeHeight < 0 {
-		return fmt.Errorf("marke_height: cannot be negative")
+		return false
 	}
 
 	// Validate STF
 	if ms.STF < 0 {
-		return fmt.Errorf("stf: cannot be negative")
+		return false
 	}
 
 	// Validate STF Max
 	if ms.STFMax < 0 {
-		return fmt.Errorf("stf_max: cannot be negative")
+		return false
 	}
 
 	// Validate STF relationship - STFMax should be >= STF
 	if ms.STFMax < ms.STF {
-		return fmt.Errorf("stf_max: must be greater than or equal to stf")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // ParseMachineType parses a string into a MachineType with validation

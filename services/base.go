@@ -18,10 +18,13 @@ func NewBase(r *Registry) *Base {
 	}
 }
 
-func (b *Base) QueryCount(query string, args ...any) (int, *errors.DBError) {
+func (b *Base) QueryCount(query string, args ...any) (int, *errors.MasterError) {
 	var count int
-	if err := b.DB.QueryRow(query, args...).Scan(&count); err != nil {
-		return 0, errors.NewDBError(err, errors.DBTypeCount)
+
+	err := b.DB.QueryRow(query, args...).Scan(&count)
+	if err != nil {
+		return 0, errors.NewMasterError(err)
 	}
+
 	return count, nil
 }

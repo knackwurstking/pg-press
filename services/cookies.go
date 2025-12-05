@@ -10,8 +10,6 @@ import (
 
 const TableNameCookies = "cookies"
 
-var EmptyValueError = errors.NewDBError(fmt.Errorf("empty value"), errors.DBTypeValidation)
-
 type Cookies struct {
 	*Base
 }
@@ -36,20 +34,20 @@ func NewCookies(registry *Registry) *Cookies {
 	return &Cookies{Base: base}
 }
 
-func (c *Cookies) List() ([]*models.Cookie, *errors.DBError) {
+func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
 	rows, err := c.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanCookie)
 }
 
-func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.DBError) {
-	if err := utils.ValidateAPIKey(apiKey); err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeValidation)
+func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterError) {
+	if !utils.ValidateAPIKey(apiKey) {
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(
@@ -59,27 +57,30 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.DBError) 
 
 	rows, err := c.DB.Query(query, apiKey)
 	if err != nil {
-		return nil, errors.NewDBError(err, errors.DBTypeSelect)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
 	return ScanRows(rows, ScanCookie)
 }
 
-func (c *Cookies) Get(value string) (*models.Cookie, *errors.DBError) {
+func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 	if value == "" {
-		return nil, EmptyValueError
+		return nil, errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies)
-	row := c.DB.QueryRow(query, value)
+	cookie, err := ScanCookie(c.DB.QueryRow(query, value))
+	if err != nil {
+		return cookie, errors.NewMasterError(err)
+	}
 
-	return ScanRow(row, ScanCookie)
+	return cookie, nil
 }
 
-func (c *Cookies) Add(cookie *models.Cookie) *errors.DBError {
-	if err := cookie.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
+	if !cookie.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	// Check if cookie already exists
@@ -91,14 +92,7 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.DBError {
 		return dberr
 	}
 	if count > 0 {
-		return errors.NewDBError(
-			fmt.Errorf(
-				"value %s already exists in %s",
-				utils.MaskString(cookie.Value),
-				TableNameCookies,
-			),
-			errors.DBTypeExists,
-		)
+		return errors.NewMasterError(errors.ErrExists)
 	}
 
 	query := fmt.Sprintf(
@@ -107,20 +101,16 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.DBError {
 	)
 	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeInsert)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
 // Update updates a cookie with database-level locking to prevent race conditions
-func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.DBError {
-	if value == "" {
-		return EmptyValueError
-	}
-
-	if err := cookie.Validate(); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterError {
+	if value == "" || !cookie.Validate() {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	// For SQLite, we'll use a different approach: attempt to update with a condition
@@ -154,47 +144,47 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.DBError {
 		currentCookie.LastLogin,
 	)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeUpdate)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (c *Cookies) Remove(value string) *errors.DBError {
+func (c *Cookies) Remove(value string) *errors.MasterError {
 	if value == "" {
-		return EmptyValueError
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE value = ?`, TableNameCookies)
 
 	_, err := c.DB.Exec(query, value)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (c *Cookies) RemoveApiKey(apiKey string) *errors.DBError {
-	if err := utils.ValidateAPIKey(apiKey); err != nil {
-		return errors.NewDBError(err, errors.DBTypeValidation)
+func (c *Cookies) RemoveApiKey(apiKey string) *errors.MasterError {
+	if !utils.ValidateAPIKey(apiKey) {
+		return errors.NewMasterError(errors.ErrValidation)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE api_key = ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, apiKey)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
 }
 
-func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.DBError {
+func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
 
 	_, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {
-		return errors.NewDBError(err, errors.DBTypeDelete)
+		return errors.NewMasterError(err)
 	}
 
 	return nil
