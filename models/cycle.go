@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"time"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 type CycleID int64
@@ -45,16 +43,16 @@ func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition P
 
 func (c *Cycle) Validate() error {
 	if !IsValidPressNumber(&c.PressNumber) {
-		return errors.NewValidationError("invalid press number")
+		return fmt.Errorf("invalid press number")
 	}
 	if c.ToolID <= 0 {
-		return errors.NewValidationError(fmt.Sprintf("invalid tool ID: %d", c.ToolID))
+		return fmt.Errorf("invalid tool ID: %d", c.ToolID)
 	}
 	if !IsValidPosition(&c.ToolPosition) {
-		return errors.NewValidationError("invalid tool position")
+		return fmt.Errorf("invalid tool position")
 	}
 	if c.TotalCycles < 0 {
-		return errors.NewValidationError("total cycles must be non-negative")
+		return fmt.Errorf("total cycles must be non-negative")
 	}
 	return nil
 }

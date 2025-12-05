@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 type TelegramID int64
@@ -32,33 +31,28 @@ func NewUser(telegramID TelegramID, userName, apiKey string) *User {
 // Validate checks if the user has valid data
 func (u *User) Validate() error {
 	if u.TelegramID <= 0 {
-		return errors.NewValidationError("telegram_id: must be positive")
+		return fmt.Errorf("telegram_id: must be positive")
 	}
 
 	if u.Name == "" {
-		return errors.NewValidationError("user_name: cannot be empty")
+		return fmt.Errorf("user_name: cannot be empty")
 	}
 	if len(u.Name) < env.UserNameMinLength {
-		return errors.NewValidationError("user_name: too short")
+		return fmt.Errorf("user_name: too short")
 	}
 	if len(u.Name) > env.UserNameMaxLength {
-		return errors.NewValidationError("user_name: too long")
+		return fmt.Errorf("user_name: too long")
 	}
 
 	if u.ApiKey == "" {
-		return errors.NewValidationError("api_key: cannot be empty")
+		return fmt.Errorf("api_key: cannot be empty")
 	}
 	if len(u.ApiKey) < env.MinAPIKeyLength {
-		return errors.NewValidationError(
-			fmt.Sprintf(
-				"api_key: too short for security, must be at least %d characters",
-				env.MinAPIKeyLength,
-			),
-		)
+		return fmt.Errorf("api_key: too short for security, must be at least %d characters", env.MinAPIKeyLength)
 	}
 
 	if u.LastFeed < 0 {
-		return errors.NewValidationError("last_feed: cannot be negative")
+		return fmt.Errorf("last_feed: cannot be negative")
 	}
 
 	return nil

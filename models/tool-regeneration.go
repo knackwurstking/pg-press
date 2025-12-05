@@ -1,6 +1,8 @@
 package models
 
-import "github.com/knackwurstking/pg-press/errors"
+import (
+	"fmt"
+)
 
 type ToolRegenerationID int64
 
@@ -24,11 +26,11 @@ func NewToolRegeneration(toolID ToolID, cycleID CycleID, reason string, performe
 
 func (r *ToolRegeneration) Validate() error {
 	if r.ToolID <= 0 {
-		return errors.NewValidationError("tool_id")
+		return fmt.Errorf("tool_id")
 	}
 
 	if r.CycleID <= 0 {
-		return errors.NewValidationError("cycle_id")
+		return fmt.Errorf("cycle_id")
 	}
 
 	return nil

@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"time"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 type FeedID int64
@@ -31,25 +29,25 @@ func NewFeed(title, content string, userID TelegramID) *Feed {
 // Validate checks if the feed has valid data.
 func (f *Feed) Validate() error {
 	if f.Title == "" {
-		return errors.NewValidationError("title: cannot be empty")
+		return fmt.Errorf("title: cannot be empty")
 	}
 	if len(f.Title) > 255 {
-		return errors.NewValidationError("title: too long (max 255 characters)")
+		return fmt.Errorf("title: too long (max 255 characters)")
 	}
 
 	if f.Content == "" {
-		return errors.NewValidationError("content: cannot be empty")
+		return fmt.Errorf("content: cannot be empty")
 	}
 	if len(f.Content) > 10000 {
-		return errors.NewValidationError("content: too long (max 10000 characters)")
+		return fmt.Errorf("content: too long (max 10000 characters)")
 	}
 
 	if f.UserID <= 0 {
-		return errors.NewValidationError("user_id: must be positive")
+		return fmt.Errorf("user_id: must be positive")
 	}
 
 	if f.CreatedAt <= 0 {
-		return errors.NewValidationError("created_at: must be positive")
+		return fmt.Errorf("created_at: must be positive")
 	}
 
 	return nil

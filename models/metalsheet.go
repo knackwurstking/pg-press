@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"sort"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 // Machine type identifiers
@@ -105,43 +103,42 @@ func (ms *MetalSheet) String() string {
 func (ms *MetalSheet) Validate() error {
 	// Validate machine type identifier
 	if !ms.Identifier.IsValid() {
-		return errors.NewValidationError(
-			fmt.Sprintf("identifier: invalid machine type: %s", ms.Identifier))
+		return fmt.Errorf("identifier: invalid machine type: %s", ms.Identifier)
 	}
 
 	// Validate tool ID (foreign key reference)
 	if ms.ToolID <= 0 {
-		return errors.NewValidationError("tool_id: must be positive")
+		return fmt.Errorf("tool_id: must be positive")
 	}
 
 	// Validate tile height
 	if ms.TileHeight < 0 {
-		return errors.NewValidationError("tile_height: cannot be negative")
+		return fmt.Errorf("tile_height: cannot be negative")
 	}
 
 	// Validate value
 	if ms.Value < 0 {
-		return errors.NewValidationError("value: cannot be negative")
+		return fmt.Errorf("value: cannot be negative")
 	}
 
 	// Validate marke height
 	if ms.MarkeHeight < 0 {
-		return errors.NewValidationError("marke_height: cannot be negative")
+		return fmt.Errorf("marke_height: cannot be negative")
 	}
 
 	// Validate STF
 	if ms.STF < 0 {
-		return errors.NewValidationError("stf: cannot be negative")
+		return fmt.Errorf("stf: cannot be negative")
 	}
 
 	// Validate STF Max
 	if ms.STFMax < 0 {
-		return errors.NewValidationError("stf_max: cannot be negative")
+		return fmt.Errorf("stf_max: cannot be negative")
 	}
 
 	// Validate STF relationship - STFMax should be >= STF
 	if ms.STFMax < ms.STF {
-		return errors.NewValidationError("stf_max: must be greater than or equal to stf")
+		return fmt.Errorf("stf_max: must be greater than or equal to stf")
 	}
 
 	return nil

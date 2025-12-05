@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 // Cookie represents a user session with authentication information.
@@ -31,28 +30,28 @@ func NewCookie(userAgent, value, apiKey string) *Cookie {
 // Validate checks if the cookie has valid data.
 func (c *Cookie) Validate() error {
 	if c.UserAgent == "" {
-		return errors.NewValidationError("user_agent: cannot be empty")
+		return fmt.Errorf("user_agent: cannot be empty")
 	}
 	if len(c.UserAgent) > env.MaxUserAgentLength {
-		return errors.NewValidationError("user_agent: too long")
+		return fmt.Errorf("user_agent: too long")
 	}
 
 	if c.Value == "" {
-		return errors.NewValidationError("value: cannot be empty")
+		return fmt.Errorf("value: cannot be empty")
 	}
 	if len(c.Value) < env.MinValueLength {
-		return errors.NewValidationError("value: too short for security")
+		return fmt.Errorf("value: too short for security")
 	}
 
 	if c.ApiKey == "" {
-		return errors.NewValidationError("api_key: cannot be empty")
+		return fmt.Errorf("api_key: cannot be empty")
 	}
 	if len(c.ApiKey) < env.MinAPIKeyLength {
-		return errors.NewValidationError("api_key: too short for security")
+		return fmt.Errorf("api_key: too short for security")
 	}
 
 	if c.LastLogin <= 0 {
-		return errors.NewValidationError("last_login: must be positive")
+		return fmt.Errorf("last_login: must be positive")
 	}
 
 	return nil

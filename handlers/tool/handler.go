@@ -93,7 +93,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 
 	err := page.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "tool-page")
+		return errors.NewRenderError(err, "ToolPage")
 	}
 
 	return nil
@@ -175,7 +175,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 
 	err = bs.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "binding-section")
+		return errors.NewRenderError(err, "BindingSection")
 	}
 
 	return nil
@@ -225,7 +225,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 
 	err = bs.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "binding-section")
+		return errors.NewRenderError(err, "BindingSection")
 	}
 
 	return nil
@@ -241,7 +241,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 
 	err := cyclesSection.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "tool-cycles")
+		return errors.NewRenderError(err, "Cycles")
 	}
 
 	return nil
@@ -273,13 +273,12 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	tc := templates.TotalCycles(totalCycles, utils.ParseQueryBool(c, "input"))
 	err := tc.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "total-tool-cycles")
+		return errors.NewRenderError(err, "TotalCycles")
 	}
 
 	return nil
 }
 
-// TODO: Continue here..
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	slog.Info("Initiating cycle deletion operation")
 
@@ -295,20 +294,20 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	cycleID := models.CycleID(cycleIDQuery)
 
 	// Get cycle data before deletion for the feed
-	cycle, err := h.registry.PressCycles.Get(cycleID)
-	if err != nil {
-		return errors.HandlerError(err, "get cycle for deletion")
+	cycle, dberr := h.registry.PressCycles.Get(cycleID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get cycle for deletion")
 	}
 
-	tool, err := h.registry.Tools.Get(cycle.ToolID)
-	if err != nil {
-		return errors.HandlerError(err, "get tool for deletion")
+	tool, dberr := h.registry.Tools.Get(cycle.ToolID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get tool for deletion")
 	}
 
 	// Check if there are any regenerations associated with this cycle
-	hasRegenerations, err := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
-	if err != nil {
-		return errors.HandlerError(err, "check for regenerations")
+	hasRegenerations, dberr := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "check for regenerations")
 	}
 
 	if hasRegenerations {
@@ -710,7 +709,7 @@ func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *ech
 
 	// Only get tools for binding if the tool has no binding
 	toolsForBinding, eerr := h.getToolsForBinding(tool.Tool)
-	if err != nil {
+	if eerr != nil {
 		return nil, eerr
 	}
 

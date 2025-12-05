@@ -1,11 +1,10 @@
 package models
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (
@@ -52,11 +51,11 @@ func NewLinkedNote(l Level, message string, linked string) *Note {
 
 func (n *Note) Validate() error {
 	if n.Content == "" {
-		return errors.NewValidationError("content cannot be empty")
+		return fmt.Errorf("content cannot be empty")
 	}
 
 	if n.Level < 0 {
-		return errors.NewValidationError("level must be non-negative")
+		return fmt.Errorf("level must be non-negative")
 	}
 
 	return nil

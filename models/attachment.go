@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 var (
@@ -33,19 +32,19 @@ type Attachment struct {
 // Validate checks if the attachment has valid data.
 func (a *Attachment) Validate() error {
 	if a.MimeType == "" {
-		return errors.NewValidationError("mime_type cannot be empty")
+		return fmt.Errorf("mime_type cannot be empty")
 	}
 
 	if !a.IsImage() {
-		return errors.NewValidationError("mime_type: only image files are allowed")
+		return fmt.Errorf("mime_type: only image files are allowed")
 	}
 
 	if a.Data == nil {
-		return errors.NewValidationError("data cannot be nil")
+		return fmt.Errorf("data cannot be nil")
 	}
 
 	if len(a.Data) > env.MaxDataSize {
-		return errors.NewValidationError("data too large")
+		return fmt.Errorf("data too large")
 	}
 
 	return nil

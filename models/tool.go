@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"sort"
-
-	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (
@@ -88,7 +86,7 @@ func (t *Tool) SetPress(pressNumber *PressNumber) error {
 	}
 
 	if !IsValidPressNumber(pressNumber) {
-		return errors.NewValidationError("invalid press number")
+		return fmt.Errorf("invalid press number")
 	}
 
 	t.Press = pressNumber

@@ -33,7 +33,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 func (h *Handler) GetFeedPage(c echo.Context) error {
 	page := templates.Page()
 	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render feed page")
+		return errors.NewRenderError(err, "FeedPage")
 	}
 	return nil
 }
@@ -41,9 +41,9 @@ func (h *Handler) GetFeedPage(c echo.Context) error {
 func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	slog.Debug("Retrieving feed list", "offset", 0, "limit", env.MaxFeedsPerPage)
 
-	feeds, err := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
-	if err != nil {
-		return errors.Handler(err, "get feeds")
+	feeds, dberr := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
+	if dberr != nil {
+		return errors.HandlerError(dberr, "get feeds")
 	}
 
 	user, eerr := utils.GetUserFromContext(c)
@@ -62,8 +62,9 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	}
 
 	feedData := templates.FeedsList(feeds, user.LastFeed, userMap)
-	if err := feedData.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.Handler(err, "render feed data")
+	err := feedData.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "FeedsList")
 	}
 
 	if len(feeds) > 0 && feeds[0].ID != user.LastFeed {
@@ -72,8 +73,9 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 		slog.Debug("update users last viewed feed",
 			"user_name", user.Name, "last_feed_from", oldLastFeed, "last_feed_to", user.LastFeed)
 
-		if err := h.registry.Users.Update(user); err != nil {
-			return errors.Handler(err, "update user's last feed")
+		dberr := h.registry.Users.Update(user)
+		if dberr != nil {
+			return errors.HandlerError(dberr, "update user's last feed")
 		}
 	}
 
