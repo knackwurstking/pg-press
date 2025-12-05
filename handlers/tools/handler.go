@@ -67,12 +67,12 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 
 	tool, dberr := h.registry.Tools.Get(toolID)
 	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool for deletion")
+		return dberr.Echo()
 	}
 
 	dberr = h.registry.Tools.Delete(toolID, user)
 	if dberr != nil {
-		return errors.HandlerError(dberr, "delete tool")
+		return dberr.Echo()
 	}
 
 	// Create feed entry

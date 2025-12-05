@@ -108,9 +108,9 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		slog.Warn("Validate user from cookie failed... Get user from api key now...", "error", err)
-		var dberr *errors.DBError
-		if user, dberr = db.Users.GetUserFromApiKey(auth); dberr != nil {
-			return false, errors.HandlerError(dberr, "validate user from API key")
+		var masterErr *errors.MasterError
+		if user, masterErr = db.Users.GetUserFromApiKey(auth); masterErr != nil {
+			return false, masterErr.Echo()
 		}
 	}
 
@@ -126,9 +126,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, dberr := db.Cookies.Get(httpCookie.Value)
-	if dberr != nil {
-		return nil, errors.Wrap(dberr, "get cookie")
+	cookie, err := db.Cookies.Get(httpCookie.Value)
+	if err != nil {
+		return nil, errors.Wrap(err, "get cookie")
 	}
 
 	// Check if cookie has expired
@@ -137,9 +137,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, dberr := db.Users.GetUserFromApiKey(cookie.ApiKey)
-	if dberr != nil {
-		return nil, fmt.Errorf("validate user from API key: %s", dberr.Error())
+	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
+	if err != nil {
+		return nil, fmt.Errorf("validate user from API key: %s", err.Error())
 	}
 
 	// Log user agent mismatch as potential security concern

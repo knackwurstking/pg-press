@@ -76,34 +76,33 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 	)
 
 	if c.QueryParam("id") != "" {
-		cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
-		if err != nil {
-			return errors.NewBadRequestError(err, "parse cycle ID")
+		cycleIDQuery, merr := utils.ParseQueryInt64(c, "id")
+		if merr != nil {
+			return merr.Echo()
 		}
 		cycleID := models.CycleID(cycleIDQuery)
 
 		// Get cycle data from the database
-		var dberr *errors.DBError
-		cycle, dberr = h.registry.PressCycles.Get(cycleID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "load cycle data")
+		cycle, merr = h.registry.PressCycles.Get(cycleID)
+		if merr != nil {
+			return merr.Echo()
 		}
 		inputPressNumber = &(cycle.PressNumber)
 		inputTotalCycles = cycle.TotalCycles
 		originalDate = &cycle.Date
 
 		// Set the cycles (original) tool to props
-		tool, dberr = h.registry.Tools.Get(cycle.ToolID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "load tool data")
+		tool, merr = h.registry.Tools.Get(cycle.ToolID)
+		if merr != nil {
+			return merr.Echo()
 		}
 
 		// If in tool change mode, load all available tools for this press
 		if toolChangeMode {
 			// Get all tools
-			allTools, dberr := h.registry.Tools.List()
-			if dberr != nil {
-				return errors.HandlerError(dberr, "load available tools")
+			allTools, merr := h.registry.Tools.List()
+			if merr != nil {
+				return merr.Echo()
 			}
 
 			// Filter out tools not matching the original tools position
@@ -119,35 +118,37 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
-		toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
-		if err != nil {
-			return errors.NewBadRequestError(err, "parse tool ID")
+		toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+		if merr != nil {
+			return merr.Echo()
 		}
 		toolID := models.ToolID(toolIDQuery)
 
-		var dberr *errors.DBError
-		tool, dberr = h.registry.Tools.Get(toolID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "load tool data")
+		tool, merr = h.registry.Tools.Get(toolID)
+		if merr != nil {
+			return merr.Echo()
 		}
 	} else {
-		return errors.NewBadRequestError(nil, "missing tool or cycle ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "missing tool or cycle ID")
 	}
 
-	var dialog templ.Component
+	var t templ.Component
+	var tName string
 	if cycle != nil {
-		dialog = templates.EditCycleDialog(
+		t = templates.EditCycleDialog(
 			tool, cycle, tools, inputPressNumber, inputTotalCycles, originalDate,
 		)
+		tName = "EditCycleDialog"
 	} else {
-		dialog = templates.NewCycleDialog(
+		t = templates.NewCycleDialog(
 			tool, inputPressNumber, inputTotalCycles, originalDate,
 		)
+		tName = "NewCycleDialog"
 	}
 
-	err := dialog.Render(c.Request().Context(), c.Response())
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "CycleDialog")
+		return errors.NewRenderError(err, tName)
 	}
 
 	return nil
@@ -156,55 +157,47 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 func (h *Handler) PostEditCycle(c echo.Context) error {
 	slog.Info("Cycle creation request received")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse tool ID")
+	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	tool, dberr := h.registry.Tools.Get(toolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "load tool data")
+	tool, merr := h.registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Parse form data
-	form, err := getEditCycleFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse form data")
+	form, merr := getEditCycleFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	if !models.IsValidPressNumber(form.PressNumber) {
-		return errors.NewBadRequestError(nil, "press_number must be a valid integer")
-	}
-
-	pressCycle := models.NewCycle(
-		*form.PressNumber,
-		tool.ID,
-		tool.Position,
-		form.TotalCycles,
-		user.TelegramID,
-	)
+	pressCycle := models.NewCycle(*form.PressNumber, tool.ID, tool.Position,
+		form.TotalCycles, user.TelegramID)
 
 	pressCycle.Date = form.Date
 
-	_, dberr = h.registry.PressCycles.Add(pressCycle, user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "add cycle")
+	_, merr = h.registry.PressCycles.Add(pressCycle, user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Handle regeneration if requested
 	if form.Regenerating {
 		slog.Info("Starting tool regeneration", "tool_id", tool.ID, "user", user.Name)
-		_, dberr = h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
-		if dberr != nil {
+
+		_, merr = h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
+		if merr != nil {
 			slog.Error(
 				"Failed to start tool regeneration",
-				"tool_id", tool.ID, "user", user.Name, "error", dberr,
+				"tool_id", tool.ID, "user", user.Name, "error", merr,
 			)
 		}
 	}
@@ -218,9 +211,9 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		content += "\nRegenerierung gestartet"
 	}
 
-	_, dberr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -228,7 +221,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditCycle(c echo.Context) error {
+func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError { // TODO: ...
 	slog.Info("Updating cycle")
 
 	user, eerr := utils.GetUserFromContext(c)

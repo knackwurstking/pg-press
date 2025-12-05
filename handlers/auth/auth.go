@@ -45,7 +45,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 
 	err := page.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "LoginPage")
+		return errors.NewRenderError(err, "login page")
 	}
 
 	return nil
@@ -90,12 +90,12 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 		return fmt.Errorf("api key too short")
 	}
 
-	user, dberr := h.registry.Users.GetUserFromApiKey(apiKey)
-	if dberr != nil {
-		if dberr.Typ != errors.DBTypeNotFound {
-			return errors.Wrap(dberr, "database authentication")
+	user, merr := h.registry.Users.GetUserFromApiKey(apiKey)
+	if merr != nil {
+		if merr.Code != http.StatusNotFound {
+			return errors.Wrap(merr, "database authentication")
 		} else {
-			return errors.Wrap(dberr, "invalid api key")
+			return errors.Wrap(merr, "invalid api key")
 		}
 	}
 

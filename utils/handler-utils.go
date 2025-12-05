@@ -15,58 +15,69 @@ import (
 )
 
 // GetUserFromContext retrieves the authenticated user from the request context
-func GetUserFromContext(c echo.Context) (*models.User, *echo.HTTPError) {
+func GetUserFromContext(c echo.Context) (*models.User, *errors.MasterError) {
 	userInterface := c.Get("user")
 	if userInterface == nil {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "user not in context")
+		return nil, errors.NewMasterError(fmt.Errorf("user missing"), http.StatusBadRequest)
 	}
 
 	user, ok := userInterface.(*models.User)
 	if !ok {
-		return nil, echo.NewHTTPError(http.StatusBadRequest, "invalid user in context")
+		return nil, errors.NewMasterError(fmt.Errorf("invalid user"), http.StatusUnauthorized)
 	}
 
 	return user, nil
 }
 
 // ParseParamInt64 parses an int64 parameter from the request
-func ParseParamInt64(c echo.Context, paramName string) (int64, error) {
+func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, fmt.Errorf("missing %s parameter", paramName)
+		return 0, errors.NewMasterError(fmt.Errorf("missing %s", paramName), http.StatusBadRequest)
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid %s", paramName), http.StatusBadRequest)
 	}
 	return id, nil
 }
 
 // ParseParamInt8 parses an int8 parameter from the request
-func ParseParamInt8(c echo.Context, paramName string) (int8, error) {
+func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, fmt.Errorf("missing %s parameter", paramName)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("missing %s", paramName), http.StatusNotFound,
+		)
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 8)
 	if err != nil {
-		return 0, fmt.Errorf("invalid %s parameter: must be a number", paramName)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("invalid %s", paramName), http.StatusBadRequest,
+		)
+
 	}
 	return int8(id), nil
 }
 
 // ParseQueryInt64 parses an int64 query parameter from the request
-func ParseQueryInt64(c echo.Context, paramName string) (int64, error) {
+func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, fmt.Errorf("missing %s query parameter", paramName)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("missing %s query parameter", paramName),
+			http.StatusNotFound,
+		)
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, fmt.Errorf("invalid %s query parameter: must be a number", paramName)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("invalid %s query parameter: must be a number", paramName),
+			http.StatusBadRequest,
+		)
 	}
 
 	return id, nil
@@ -88,22 +99,27 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 }
 
 // ParseQueryString parses a string query parameter from the request
-func ParseQueryString(c echo.Context, paramName string) (string, error) {
+func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
-		return "", fmt.Errorf("missing %s query parameter", paramName)
+		return s, errors.NewMasterError(fmt.Errorf("missing %s", paramName), http.StatusNotFound)
 	}
 
 	return s, nil
 }
 
 // ParseFormValueTime parses a date from a form value
-func ParseFormValueTime(c echo.Context, paramName string) (t time.Time, err error) {
+func ParseFormValueTime(c echo.Context, paramName string) (time.Time, *errors.MasterError) {
 	v := c.FormValue(paramName)
+	if v == "" {
+		return time.Time{}, errors.NewMasterError(
+			fmt.Errorf("missing %s", paramName), http.StatusNotFound,
+		)
+	}
 
-	t, err = time.Parse("2006-01-02", v) // YYYY-MM-DD
+	t, err := time.Parse("2006-01-02", v) // YYYY-MM-DD
 	if err != nil {
-		return t, errors.Wrap(err, "parsing date input")
+		return t, errors.NewMasterError(errors.Wrap(err, "parsing date input"), http.StatusBadRequest)
 	}
 
 	return t, nil
@@ -136,8 +152,12 @@ func SanitizeFilename(filename string) string {
 }
 
 // RedirectTo performs an HTTP redirect to the specified path
-func RedirectTo(c echo.Context, path templ.SafeURL) error {
-	return c.Redirect(http.StatusSeeOther, string(path))
+func RedirectTo(c echo.Context, path templ.SafeURL) *errors.MasterError {
+	err := c.Redirect(http.StatusSeeOther, string(path))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
 }
 
 // SetHXTrigger sets HX-Trigger header

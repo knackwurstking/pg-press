@@ -2,11 +2,13 @@ package dialogs
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
@@ -31,17 +33,24 @@ type DialogEditToolRegenerationFormData struct {
 	Reason string
 }
 
-func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
+func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, *errors.MasterError) {
 	form := &DialogEditCycleFormData{}
 
 	// Parse press number
 	if pressString := c.FormValue("press_number"); pressString != "" {
 		press, err := strconv.Atoi(pressString)
 		if err != nil {
-			return nil, err
+			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
 		pn := models.PressNumber(press)
 		form.PressNumber = &pn
+
+		if !models.IsValidPressNumber(form.PressNumber) {
+			return nil, errors.NewMasterError(
+				fmt.Errorf("press_number must be a valid integer"),
+				http.StatusBadRequest,
+			)
+		}
 	}
 
 	// Parse date
@@ -49,7 +58,7 @@ func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 		var err error
 		form.Date, err = time.Parse(env.DateFormat, dateString)
 		if err != nil {
-			return nil, err
+			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
 	} else {
 		form.Date = time.Now()
@@ -58,12 +67,16 @@ func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 	// Parse total cycles (required)
 	totalCyclesString := c.FormValue("total_cycles")
 	if totalCyclesString == "" {
-		return nil, fmt.Errorf("form value total_cycles is required")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("form value total_cycles is required"),
+			http.StatusBadRequest,
+		)
 	}
+
 	var err error
 	form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewMasterError(err, http.StatusBadRequest)
 	}
 
 	// Parse regenerating flag
@@ -73,7 +86,7 @@ func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
 		toolIDParsed, err := strconv.ParseInt(toolIDString, 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("invalid tool_id: %v", err)
+			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
 		toolID := models.ToolID(toolIDParsed)
 		form.ToolID = &toolID
@@ -82,7 +95,7 @@ func getEditCycleFormData(c echo.Context) (*DialogEditCycleFormData, error) {
 	return form, nil
 }
 
-func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
+func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, *errors.MasterError) {
 	positionStr := c.FormValue("position")
 	position := models.Position(positionStr)
 
@@ -90,7 +103,10 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	case models.PositionTop, models.PositionTopCassette, models.PositionBottom:
 		// Valid position
 	default:
-		return nil, fmt.Errorf("invalid position: %s", positionStr)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("invalid position: %s", positionStr),
+			http.StatusBadRequest,
+		)
 	}
 
 	data := &DialogEditToolFormData{Position: position}
@@ -99,7 +115,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if widthStr := c.FormValue("width"); widthStr != "" {
 		width, err := strconv.Atoi(widthStr)
 		if err != nil {
-			return nil, fmt.Errorf("invalid width: %v", err)
+			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
 		data.Format.Width = width
 	}
@@ -108,7 +124,7 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	if heightStr := c.FormValue("height"); heightStr != "" {
 		height, err := strconv.Atoi(heightStr)
 		if err != nil {
-			return nil, fmt.Errorf("invalid height: %v", err)
+			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
 		data.Format.Height = height
 	}
@@ -116,28 +132,43 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	// Parse type (with length limit)
 	data.Type = strings.TrimSpace(c.FormValue("type"))
 	if len(data.Type) > 25 {
-		return nil, fmt.Errorf("type must be 25 characters or less")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("type must be 25 characters or less"),
+			http.StatusBadRequest,
+		)
 	}
 
 	// Parse code (required, with length limit)
 	data.Code = strings.TrimSpace(c.FormValue("code"))
 	if data.Code == "" {
-		return nil, fmt.Errorf("code is required")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("code is required"),
+			http.StatusBadRequest,
+		)
 	}
 	if len(data.Code) > 25 {
-		return nil, fmt.Errorf("code must be 25 characters or less")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("code must be 25 characters or less"),
+			http.StatusBadRequest,
+		)
 	}
 
 	// Parse press number
 	if pressStr := c.FormValue("press-selection"); pressStr != "" {
 		press, err := strconv.Atoi(pressStr)
 		if err != nil {
-			return nil, fmt.Errorf("invalid press number: %v", err)
+			return nil, errors.NewMasterError(
+				fmt.Errorf("invalid press number: %v", err),
+				http.StatusBadRequest,
+			)
 		}
 
 		pressNumber := models.PressNumber(press)
 		if !models.IsValidPressNumber(&pressNumber) {
-			return nil, fmt.Errorf("invalid press number: must be 0, 2, 3, 4, or 5")
+			return nil, errors.NewMasterError(
+				fmt.Errorf("invalid press number: must be 0, 2, 3, 4, or 5"),
+				http.StatusBadRequest,
+			)
 		}
 		data.Press = &pressNumber
 	}
@@ -145,20 +176,20 @@ func getEditToolFormData(c echo.Context) (*DialogEditToolFormData, error) {
 	return data, nil
 }
 
-func getMetalSheetFormData(c echo.Context) (*models.MetalSheet, error) {
+func getMetalSheetFormData(c echo.Context) (*models.MetalSheet, *errors.MasterError) {
 	metalSheet := &models.MetalSheet{}
 
 	// Parse required tile height field
 	tileHeight, err := strconv.ParseFloat(c.FormValue("tile_height"), 64)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewMasterError(err, http.StatusBadRequest)
 	}
 	metalSheet.TileHeight = tileHeight
 
 	// Parse required value field
 	value, err := strconv.ParseFloat(c.FormValue("value"), 64)
 	if err != nil {
-		return nil, err
+		return nil, errors.NewMasterError(err, http.StatusBadRequest)
 	}
 	metalSheet.Value = value
 
@@ -195,23 +226,29 @@ func getMetalSheetFormData(c echo.Context) (*models.MetalSheet, error) {
 	return metalSheet, nil
 }
 
-func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
-	note = &models.Note{}
+func getNoteFromFormData(c echo.Context) (*models.Note, *errors.MasterError) {
+	note := &models.Note{}
 
 	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
-		return nil, fmt.Errorf("level is required")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("level is required"),
+			http.StatusBadRequest,
+		)
 	}
 
 	levelInt, err := strconv.Atoi(levelStr)
 	if err != nil {
-		return nil, fmt.Errorf("invalid level format: %v", err)
+		return nil, errors.NewMasterError(err, http.StatusBadRequest)
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
 	if levelInt < 0 || levelInt > 2 {
-		return nil, fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt),
+			http.StatusBadRequest,
+		)
 	}
 
 	note.Level = models.Level(levelInt)
@@ -219,7 +256,10 @@ func getNoteFromFormData(c echo.Context) (note *models.Note, err error) {
 	// Parse content (required)
 	note.Content = strings.TrimSpace(c.FormValue("content"))
 	if note.Content == "" {
-		return nil, fmt.Errorf("content is required")
+		return nil, errors.NewMasterError(
+			fmt.Errorf("content is required"),
+			http.StatusBadRequest,
+		)
 	}
 
 	// Handle linked field - get first linked_tables value or empty string
