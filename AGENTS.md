@@ -26,3 +26,4 @@
 ## Git commit guidlines
 
 - Commit message format (semantic) - `type(scope): subject`
+- The `(scope)` is optional
