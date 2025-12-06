@@ -19,5 +19,5 @@ system.
 ## Refactoring
 
 - [ ] Split the dialog handler, on file per dialog
-- [ ] Implement a validation error
-- [ ] Implement a already exists error
+- [ ] Implement a validation error, update all validation functions/methods
+- [ ] Implement a already exists error (bad request), and update the already exists check in `commands-user.go`
