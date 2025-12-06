@@ -19,3 +19,4 @@ system.
 ## Refactoring
 
 - [ ] Split the dialog handler, on file per dialog
+- [ ] Implement a validation error helper for the `MasterError`
