@@ -2,20 +2,26 @@ package services
 
 import (
 	"encoding/json"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
-func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegeneration) (*models.ResolvedToolRegeneration, error) {
-	tool, err := registry.Tools.Get(regeneration.ToolID)
-	if err != nil {
-		return nil, err
+func ResolveToolRegeneration(
+	registry *Registry, regeneration *models.ToolRegeneration,
+) (*models.ResolvedToolRegeneration, *errors.MasterError) {
+
+	tool, merr := registry.Tools.Get(regeneration.ToolID)
+	if merr != nil {
+		merr.Code = http.StatusInternalServerError
+		return nil, merr
 	}
 
-	cycle, err := registry.PressCycles.Get(regeneration.CycleID)
-	if err != nil {
-		return nil, err
+	cycle, merr := registry.PressCycles.Get(regeneration.CycleID)
+	if merr != nil {
+		merr.Code = http.StatusInternalServerError
+		return nil, merr
 	}
 
 	var user *models.User
@@ -23,6 +29,7 @@ func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegene
 		var merr *errors.MasterError
 		user, merr = registry.Users.Get(*regeneration.PerformedBy)
 		if merr != nil {
+			merr.Code = http.StatusInternalServerError
 			return nil, merr
 		}
 	}
@@ -30,33 +37,42 @@ func ResolveToolRegeneration(registry *Registry, regeneration *models.ToolRegene
 	return models.NewResolvedRegeneration(regeneration, tool, cycle, user), nil
 }
 
-func ResolveTool(registry *Registry, tool *models.Tool) (*models.ResolvedTool, error) {
+func ResolveTool(registry *Registry, tool *models.Tool) (
+	*models.ResolvedTool, *errors.MasterError,
+) {
+
 	return resolveTool(registry, tool, false)
 }
 
-func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool bool) (*models.ResolvedTool, error) {
+func resolveTool(
+	registry *Registry, tool *models.Tool, skipResolveBindingTool bool,
+) (*models.ResolvedTool, *errors.MasterError) {
+
 	var bindingTool *models.ResolvedTool
 	if tool.IsBound() && !skipResolveBindingTool {
 		bt, merr := registry.Tools.Get(*tool.Binding)
 		if merr != nil {
-			return nil, errors.Wrap(merr, "get binding tool %d for %d", tool.Binding, tool.ID)
+			merr.Code = http.StatusInternalServerError
+			return nil, merr
 		}
 
-		var err error
-		bindingTool, err = resolveTool(registry, bt, true)
-		if err != nil {
-			return nil, errors.Wrap(err, "resolve binding tool %d for %d", tool.Binding, tool.ID)
+		bindingTool, merr = resolveTool(registry, bt, true)
+		if merr != nil {
+			merr.Code = http.StatusInternalServerError
+			return nil, merr
 		}
 	}
 
 	notes, merr := registry.Notes.GetByTool(tool.ID)
-	if merr != nil && merr.Type != errors.ErrorTypeNotFound {
-		return nil, errors.Wrap(merr, "get notes for tool %d", tool.ID)
+	if merr != nil && merr.Code != http.StatusNotFound {
+		merr.Code = http.StatusInternalServerError
+		return nil, merr
 	}
 
 	regenerations, merr := registry.ToolRegenerations.GetRegenerationHistory(tool.ID)
-	if merr != nil && merr.Type != errors.ErrorTypeNotFound {
-		return nil, errors.Wrap(merr, "get regeneration for tool %d", tool.ID)
+	if merr != nil && merr.Code != http.StatusNotFound {
+		merr.Code = http.StatusInternalServerError
+		return nil, merr
 	}
 
 	rt := models.NewResolvedTool(tool, bindingTool, notes, regenerations)
@@ -66,15 +82,19 @@ func resolveTool(registry *Registry, tool *models.Tool, skipResolveBindingTool b
 	return rt, nil
 }
 
-func ResolveModification[T any](registry *Registry, modification *models.Modification[any]) (*models.ResolvedModification[T], error) {
-	user, err := registry.Users.Get(modification.UserID)
-	if err != nil {
-		return nil, err
+func ResolveModification[T any](
+	registry *Registry, modification *models.Modification[any],
+) (*models.ResolvedModification[T], *errors.MasterError) {
+
+	user, merr := registry.Users.Get(modification.UserID)
+	if merr != nil {
+		merr.Code = http.StatusInternalServerError
+		return nil, merr
 	}
 
 	var data T
 	if err := json.Unmarshal(modification.Data, &data); err != nil {
-		return nil, err
+		return nil, errors.NewMasterError(err, http.StatusInternalServerError)
 	}
 
 	m := models.NewModification(data, user.TelegramID)

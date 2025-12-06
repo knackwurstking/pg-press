@@ -221,38 +221,38 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError { // TODO: ...
+func (h *Handler) PutEditCycle(c echo.Context) error {
 	slog.Info("Updating cycle")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
 	if err != nil {
-		return errors.NewBadRequestError(err, "parse ID from query")
+		return errors.NewMasterError(err, http.StatusBadRequest).Echo()
 	}
 	cycleID := models.CycleID(cycleIDQuery)
 
 	cycle, dberr := h.registry.PressCycles.Get(cycleID)
 	if dberr != nil {
-		return errors.HandlerError(dberr, "get cycle")
+		return dberr.Echo()
 	}
 
 	// Get original tool
 	originalTool, dberr := h.registry.Tools.Get(cycle.ToolID)
 	if dberr != nil {
-		return errors.HandlerError(dberr, "get original tool")
+		return dberr.Echo()
 	}
 
-	form, err := getEditCycleFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "get cycle form data from query")
+	form, merr := getEditCycleFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	if !models.IsValidPressNumber(form.PressNumber) {
-		return errors.NewBadRequestError(nil, "press_number must be a valid integer")
+		return errors.NewMasterError(fmt.Errorf("press_number must be a valid integer"), http.StatusBadRequest).Echo()
 	}
 
 	// Determine which tool to use for the cycle
@@ -261,7 +261,7 @@ func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError { // TODO: ...
 		// Tool change requested - get the new tool
 		newTool, dberr := h.registry.Tools.Get(*form.ToolID)
 		if dberr != nil {
-			return errors.HandlerError(dberr, "get new tool")
+			return dberr.Echo()
 		}
 		tool = newTool
 	} else {
@@ -280,7 +280,7 @@ func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError { // TODO: ...
 
 	dberr = h.registry.PressCycles.Update(pressCycle, user)
 	if dberr != nil {
-		return errors.HandlerError(dberr, "update press cycle")
+		return dberr.Echo()
 	}
 
 	// Handle regeneration if requested
@@ -320,26 +320,30 @@ func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError { // TODO: ...
 }
 
 func (h *Handler) GetEditTool(c echo.Context) error {
-	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
 	var tool *models.Tool
+
+	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
 	if toolIDQuery > 0 {
-		var dberr *errors.DBError
-		tool, dberr = h.registry.Tools.Get(models.ToolID(toolIDQuery))
-		if dberr != nil {
-			return errors.HandlerError(dberr, "get tool from database")
+		var merr *errors.MasterError
+		tool, merr = h.registry.Tools.Get(models.ToolID(toolIDQuery))
+		if merr != nil {
+			return merr.Echo()
 		}
 	}
 
-	var d templ.Component
+	var t templ.Component
+	var tName string
 	if tool != nil {
-		d = templates.EditToolDialog(tool)
+		t = templates.EditToolDialog(tool)
+		tName = "EditToolDialog"
 	} else {
-		d = templates.NewToolDialog()
+		t = templates.NewToolDialog()
+		tName = "NewToolDialog"
 	}
 
-	err := d.Render(c.Request().Context(), c.Response())
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "ToolDialog")
+		return errors.NewRenderError(err, tName)
 	}
 
 	return nil
@@ -348,22 +352,22 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 func (h *Handler) PostEditTool(c echo.Context) error {
 	slog.Info("Creating new tool")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	formData, err := getEditToolFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "get tool form data")
+	formData, merr := getEditToolFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
 	tool.SetPress(formData.Press)
 
-	_, dberr := h.registry.Tools.Add(tool, user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "add tool")
+	_, merr = h.registry.Tools.Add(tool, user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -376,9 +380,9 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	_, dberr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for tool creation", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for tool creation", "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -389,25 +393,25 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 func (h *Handler) PutEditTool(c echo.Context) error {
 	slog.Info("Updating existing tool")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	toolIDQuery, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse tool ID")
+	toolIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	formData, err := getEditToolFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "get tool form data")
+	formData, merr := getEditToolFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	tool, dberr := h.registry.Tools.Get(toolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool")
+	tool, merr := h.registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	tool.Press = formData.Press
@@ -416,9 +420,9 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 	tool.Code = formData.Code
 	tool.Type = formData.Type
 
-	dberr = h.registry.Tools.Update(tool, user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "update tool")
+	merr = h.registry.Tools.Update(tool, user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -431,9 +435,9 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	_, dberr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for tool update", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for tool update", "error", merr)
 	}
 
 	// Set HX headers
@@ -458,45 +462,41 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 		// Fetch existing metal sheet for editing
-		metalSheet, dberr := h.registry.MetalSheets.Get(metalSheetID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "fetch metal sheet from database")
+		metalSheet, merr := h.registry.MetalSheets.Get(metalSheetID)
+		if merr != nil {
+			return merr.Echo()
 		}
 
 		// Fetch the associated tool for the dialog
-		tool, dberr := h.registry.Tools.Get(metalSheet.ToolID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "get tool from database")
+		tool, merr := h.registry.Tools.Get(metalSheet.ToolID)
+		if merr != nil {
+			return merr.Echo()
 		}
 
-		var d templ.Component
-		d = templates.EditMetalSheetDialog(metalSheet, tool)
-
-		err := d.Render(c.Request().Context(), c.Response())
+		t := templates.EditMetalSheetDialog(metalSheet, tool)
+		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
-			return errors.NewRenderError(err, "MetalSheetDialog")
+			return errors.NewRenderError(err, "EditMetalSheetDialog")
 		}
 	}
 
 	// Creating new metal sheet, get tool_id from query
-	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
-	if err != nil {
-		return errors.HandlerError(err, "get the tool id from query")
+	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	// Fetch the associated tool for the dialog
-	tool, dberr := h.registry.Tools.Get(toolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool from database")
+	tool, merr := h.registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	var d templ.Component
-	d = templates.NewMetalSheetDialog(tool)
-
-	err = d.Render(c.Request().Context(), c.Response())
+	t := templates.NewMetalSheetDialog(tool)
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.HandlerError(err, "MetalSheetDialog")
+		return errors.NewRenderError(err, "NewMetalSheetDialog")
 	}
 
 	return nil
@@ -506,37 +506,37 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 	slog.Info("Metal sheet creation request received")
 
 	// Get current user for feed creation
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Extract tool ID from query parameters
-	toolIDQuery, err := utils.ParseQueryInt64(c, "tool_id")
-	if err != nil {
-		return errors.HandlerError(err, "get tool_id from query")
+	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	toolID := models.ToolID(toolIDQuery)
 
 	// Fetch the associated tool
-	tool, dberr := h.registry.Tools.Get(toolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool from database")
+	tool, merr := h.registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Parse form data into metal sheet model
-	metalSheet, err := getMetalSheetFormData(c)
-	if err != nil {
-		return errors.HandlerError(err, "parse metal sheet form data")
+	metalSheet, merr := getMetalSheetFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Associate metal sheet with the tool
 	metalSheet.ToolID = toolID
 
 	// Save new metal sheet to database
-	_, dberr = h.registry.MetalSheets.Add(metalSheet)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "create metal sheet in database")
+	_, merr = h.registry.MetalSheets.Add(metalSheet)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	h.createNewMetalSheetFeed(user, tool, metalSheet)
@@ -550,34 +550,34 @@ func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 	slog.Info("Updating metal sheet")
 
 	// Get current user for feed creation
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "get id from query")
+	metalSheetIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet to preserve ID and tool association
-	existingSheet, dberr := h.registry.MetalSheets.Get(metalSheetID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get existing metal sheet from database")
+	existingSheet, merr := h.registry.MetalSheets.Get(metalSheetID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, dberr := h.registry.Tools.Get(existingSheet.ToolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool from database")
+	tool, merr := h.registry.Tools.Get(existingSheet.ToolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Parse updated form data
-	metalSheet, err := getMetalSheetFormData(c)
-	if err != nil {
-		return errors.HandlerError(err, "parse metal sheet form data")
+	metalSheet, merr := getMetalSheetFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Preserve the original ID and tool association
@@ -585,9 +585,9 @@ func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 	metalSheet.ToolID = existingSheet.ToolID
 
 	// Update the metal sheet in database
-	dberr = h.registry.MetalSheets.Update(metalSheet)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "update metal sheet in database")
+	merr = h.registry.MetalSheets.Update(metalSheet)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	h.createUpdateMetalSheetFeed(user, tool, existingSheet, metalSheet)
@@ -598,9 +598,9 @@ func (h *Handler) PutEditMetalSheet(c echo.Context) error {
 }
 
 func (h *Handler) GetEditNote(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	var (
@@ -617,23 +617,27 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := models.NoteID(id)
 
-		var dberr *errors.DBError
-		note, dberr = h.registry.Notes.Get(noteID)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "get note from database")
+		note, merr = h.registry.Notes.Get(noteID)
+		if merr != nil {
+			return merr.Echo()
 		}
 	}
 
-	var d templ.Component
+	var (
+		t     templ.Component
+		tName string
+	)
 	if note != nil {
-		d = templates.EditNoteDialog(note, linkToTables, user)
+		t = templates.EditNoteDialog(note, linkToTables, user)
+		tName = "EditNoteDialog"
 	} else {
-		d = templates.NewNoteDialog(linkToTables, user)
+		t = templates.NewNoteDialog(linkToTables, user)
+		tName = "NewNoteDialog"
 	}
 
-	err := d.Render(c.Request().Context(), c.Response())
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.HandlerError(err, "NoteDialog")
+		return errors.NewRenderError(err, tName)
 	}
 
 	return nil
@@ -642,14 +646,14 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 func (h *Handler) PostEditNote(c echo.Context) error {
 	slog.Info("Creating new note")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	note, err := getNoteFromFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse note form data")
+	note, merr := getNoteFromFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -661,9 +665,9 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
 	}
 
-	_, dberr := h.registry.Feeds.AddSimple(title, content, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -674,29 +678,29 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 func (h *Handler) PutEditNote(c echo.Context) error {
 	slog.Info("Updating note")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	idq, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse note ID")
+	idq, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	noteID := models.NoteID(idq)
 
-	note, err := getNoteFromFormData(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse note form data")
+	note, merr := getNoteFromFormData(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Set the ID for update
 	note.ID = noteID
 
 	// Update the note
-	dberr := h.registry.Notes.Update(note)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "update note")
+	merr = h.registry.Notes.Update(note)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -708,9 +712,9 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
 	}
 
-	_, dberr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
 
 	// Trigger reload of notes sections
@@ -720,26 +724,26 @@ func (h *Handler) PutEditNote(c echo.Context) error {
 }
 
 func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
-	rid, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse regeneration id")
+	rid, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	regenerationID := models.ToolRegenerationID(rid)
 
-	regeneration, dberr := h.registry.ToolRegenerations.Get(regenerationID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get regeneration")
+	regeneration, merr := h.registry.ToolRegenerations.Get(regenerationID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	resolvedRegeneration, err := services.ResolveToolRegeneration(h.registry, regeneration)
-	if err != nil {
-		return err
+	resolvedRegeneration, merr := services.ResolveToolRegeneration(h.registry, regeneration)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	dialog := templates.EditToolRegenerationDialog(resolvedRegeneration)
-	err = dialog.Render(c.Request().Context(), c.Response())
+	err := dialog.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.HandlerError(err, "ToolRegeneration")
+		return errors.NewRenderError(err, "EditToolRegenerationDialog")
 	}
 
 	return nil
@@ -748,34 +752,35 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 	slog.Info("Updating tool regeneration entry")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	var regenerationID models.ToolRegenerationID
-	if id, err := utils.ParseQueryInt64(c, "id"); err != nil {
-		return errors.NewBadRequestError(err, "get the regeneration id from url query")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	} else {
 		regenerationID = models.ToolRegenerationID(id)
 	}
 
-	r, dberr := h.registry.ToolRegenerations.Get(regenerationID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get regeneration before deleting")
+	r, merr := h.registry.ToolRegenerations.Get(regenerationID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	regeneration, err := services.ResolveToolRegeneration(h.registry, r)
-	if err != nil {
-		return errors.HandlerError(err, "resolve regeneration")
+	regeneration, merr := services.ResolveToolRegeneration(h.registry, r)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	formData := getEditRegenerationFormData(c)
 	regeneration.Reason = formData.Reason
 
-	dberr = h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "update regeneration")
+	merr = h.registry.ToolRegenerations.Update(regeneration.ToolRegeneration, user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create Feed
@@ -791,8 +796,9 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
 	}
 
-	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", err)
+	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
@@ -801,20 +807,20 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "press regeneration id query")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	r, dberr := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get press regeneration from database")
+	r, merr := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	d := templates.EditPressRegenerationDialog(r)
-	err = d.Render(c.Request().Context(), c.Response())
+	err := d.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "PressRegeneration")
+		return errors.NewRenderError(err, "EditPressRegenerationDialog")
 	}
 
 	return nil
@@ -823,25 +829,25 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	slog.Info("Updating press regeneration entry")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	r, dberr := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
-	if dberr != nil {
-		return errors.HandlerError(dberr, "press regenerations")
+	r, merr := h.registry.PressRegenerations.Get(models.PressRegenerationID(id))
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	r.Reason = c.FormValue("reason")
-	dberr = h.registry.PressRegenerations.Update(r)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "press regenerations")
+	merr = h.registry.PressRegenerations.Update(r)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	feedTitle := fmt.Sprintf("\"Regenerierung\" für Presse %d aktualisiert", r.PressNumber)
@@ -849,9 +855,9 @@ func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
 	feedContent += fmt.Sprintf("Von: %s, Bis: %s\n", r.StartedAt.Format(env.DateTimeFormat), r.CompletedAt.Format(env.DateTimeFormat))
 	feedContent += fmt.Sprintf("Bemerkung: %s", r.Reason)
 
-	_, dberr = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Add feed", "title", feedTitle, "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Add feed", "title", feedTitle, "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)

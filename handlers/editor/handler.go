@@ -40,7 +40,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
 	editorType := c.QueryParam("type")
 	if editorType == "" {
-		return errors.NewBadRequestError(nil, "editor type is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "editor type is required")
 	}
 
 	var id int64
@@ -48,7 +48,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return errors.NewBadRequestError(err, "invalid ID parameter")
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
 		}
 	}
 
@@ -62,7 +62,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	if id > 0 {
 		err := h.loadExistingContent(props)
 		if err != nil {
-			return errors.HandlerError(err, "load existing content")
+			return echo.NewHTTPError(http.StatusInternalServerError, "load existing content")
 		}
 	}
 
@@ -70,13 +70,13 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	page := templates.Page(props)
 	err := page.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "EditorPage")
+		return errors.NewRenderError(err, fmt.Sprintf("EditorPage: %s", editorType))
 	}
 
 	return nil
 }
 
-func (h *Handler) PostSaveContent(c echo.Context) error {
+func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
 	var (
 		editorType = c.FormValue("type")
 		idParam    = c.FormValue("id")
@@ -327,4 +327,3 @@ func (h *Handler) getMimeTypeFromFilename(filename string) string {
 		return "application/octet-stream"
 	}
 }
-

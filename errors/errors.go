@@ -15,6 +15,16 @@ type MasterError struct {
 }
 
 func NewMasterError(err error, code int) *MasterError {
+	if e, ok := err.(*MasterError); ok {
+		if code == 0 {
+			code = e.Code
+		}
+		return &MasterError{
+			Err:  e.Err,
+			Code: code,
+		}
+	}
+
 	if code == 0 {
 		switch err {
 		case sql.ErrNoRows:
