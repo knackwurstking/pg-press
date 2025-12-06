@@ -91,7 +91,7 @@ func addUserCommand() cli.Command {
 
 					user := models.NewUser(telegramID, *userName, *apiKey)
 					_, merr := r.Users.Add(user)
-					if strings.Contains(merr.Error(), "already exists") {
+					if strings.Contains(merr.Error(), "already exists") { // TODO: ...
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}
 					return merr
