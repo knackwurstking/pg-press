@@ -156,12 +156,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 
 	// Check if the path matches any of the tracked pages (ignoring prefix and query parameters)
 	pathMatches := false
-	requestPath := ctx.Request().URL.Path
-	for _, page := range pages {
-		if strings.HasSuffix(requestPath, page) {
-			pathMatches = true
-			break
-		}
+	requestPath := strings.TrimRight(ctx.Request().URL.Path, "/")
+	if slices.Contains(pages, requestPath) {
+		pathMatches = true
 	}
 
 	if pathMatches {

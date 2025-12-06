@@ -1,8 +1,6 @@
 package models
 
-import (
-	"fmt"
-)
+import ()
 
 type ToolRegenerationID int64
 

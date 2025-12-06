@@ -11,7 +11,7 @@ import (
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/ui"
+	ui "github.com/knackwurstking/ui/ui-templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -47,7 +47,7 @@ func serverCommand() cli.Command {
 				}))
 
 				e.Use(middlewareKeyAuth(r))
-				e.Use(ui.EchoMiddlewareCache())
+				e.Use(ui.EchoMiddlewareCache(pages))
 
 				Serve(e, r)
 

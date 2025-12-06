@@ -1,6 +1,8 @@
 package pressregenerations
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -18,26 +20,19 @@ type RegenerationsFormData struct {
 // ParseFormRegenerationsPage parses the form data from the press regenerations page
 // and validates it to create a PressRegeneration model
 func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (
-	*models.PressRegeneration, *echo.HTTPError,
+	*models.PressRegeneration, *errors.MasterError,
 ) {
 
-	var (
-		reason      string
-		startedAt   time.Time
-		completedAt time.Time
-		err         error
-	)
+	reason := c.FormValue("reason") // This is optional for now
 
-	reason = c.FormValue("reason") // This is optional for now
-
-	startedAt, err = utils.ParseFormValueTime(c, "started")
-	if err != nil {
-		return nil, errors.NewBadRequestError(err, "parsing form value \"started\"")
+	startedAt, merr := utils.ParseFormValueTime(c, "started")
+	if merr != nil {
+		return nil, merr
 	}
 
-	completedAt, err = utils.ParseFormValueTime(c, "completed")
-	if err != nil {
-		return nil, errors.NewBadRequestError(err, "parsing form value \"completed\"")
+	completedAt, merr := utils.ParseFormValueTime(c, "completed")
+	if merr != nil {
+		return nil, merr
 	}
 
 	r := &models.PressRegeneration{
@@ -47,22 +42,25 @@ func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (
 		Reason:      reason,
 	}
 
-	if err = r.Validate(); err != nil {
-		return r, errors.NewBadRequestError(err, "invalid press regeneration data")
+	if !r.Validate() {
+		return r, errors.NewMasterError(
+			fmt.Errorf("invalid regeneration data for press %d", press),
+			http.StatusBadRequest,
+		)
 	}
 
 	return r, nil
 }
 
-func (h *Handler) parseParamPress(c echo.Context) (models.PressNumber, *echo.HTTPError) {
-	pressNum, err := utils.ParseParamInt8(c, "press")
-	if err != nil {
-		return -1, errors.NewBadRequestError(err, "invalid or missing press parameter")
+func (h *Handler) parseParamPress(c echo.Context) (models.PressNumber, *errors.MasterError) {
+	pressNum, merr := utils.ParseParamInt8(c, "press")
+	if merr != nil {
+		return -1, merr
 	}
 
 	press := models.PressNumber(pressNum)
 	if !models.IsValidPressNumber(&press) {
-		return -1, errors.NewBadRequestError(err, "invalid press number")
+		return -1, merr
 	}
 
 	return press, nil

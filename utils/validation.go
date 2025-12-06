@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/env"
 )
 

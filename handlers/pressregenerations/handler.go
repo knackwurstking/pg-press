@@ -49,7 +49,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-func (h *Handler) GetRegenerationPage(c echo.Context) error {
+// TODO: Continue here
+func (h *Handler) GetRegenerationPage(c echo.Context) *errors.MasterError {
 	press, eerr := h.parseParamPress(c)
 	if eerr != nil {
 		return eerr
@@ -64,7 +65,7 @@ func (h *Handler) GetRegenerationPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HxAddRegeneration(c echo.Context) error {
+func (h *Handler) HxAddRegeneration(c echo.Context) *errors.MasterError {
 	slog.Info("Adding new press regeneration entry")
 
 	user, eerr := utils.GetUserFromContext(c)
@@ -92,7 +93,7 @@ func (h *Handler) HxAddRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HxDeleteRegeneration(c echo.Context) (err error) {
+func (h *Handler) HxDeleteRegeneration(c echo.Context) *errors.MasterError {
 	slog.Info("Removing press regeneration entry")
 
 	user, eerr := utils.GetUserFromContext(c)
