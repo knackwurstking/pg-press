@@ -30,39 +30,42 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodGet, path+"/list", h.HTMXGetFeedsList),
 	})
 }
+
 func (h *Handler) GetFeedPage(c echo.Context) error {
-	page := templates.Page()
-	if err := page.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "FeedPage")
+	t := templates.Page()
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "Page")
 	}
+
 	return nil
 }
 
 func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	slog.Debug("Retrieving feed list", "offset", 0, "limit", env.MaxFeedsPerPage)
 
-	feeds, dberr := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get feeds")
+	feeds, merr := h.registry.Feeds.ListRange(0, env.MaxFeedsPerPage)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	userMap := make(map[models.TelegramID]*models.User)
 	for _, feed := range feeds {
-		feedUser, err := h.registry.Users.Get(feed.UserID)
-		if err != nil {
-			slog.Error("failed to get user", "error", err)
+		feedUser, merr := h.registry.Users.Get(feed.UserID)
+		if merr != nil {
+			slog.Error("failed to get user", "error", merr)
 			continue
 		}
 		userMap[feed.UserID] = feedUser
 	}
 
-	feedData := templates.FeedsList(feeds, user.LastFeed, userMap)
-	err := feedData.Render(c.Request().Context(), c.Response())
+	t := templates.FeedsList(feeds, user.LastFeed, userMap)
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "FeedsList")
 	}
@@ -70,12 +73,16 @@ func (h *Handler) HTMXGetFeedsList(c echo.Context) error {
 	if len(feeds) > 0 && feeds[0].ID != user.LastFeed {
 		oldLastFeed := user.LastFeed
 		user.LastFeed = feeds[0].ID
-		slog.Debug("update users last viewed feed",
-			"user_name", user.Name, "last_feed_from", oldLastFeed, "last_feed_to", user.LastFeed)
+		slog.Debug(
+			"update users last viewed feed",
+			"user_name", user.Name,
+			"last_feed_from", oldLastFeed,
+			"last_feed_to", user.LastFeed,
+		)
 
-		dberr := h.registry.Users.Update(user)
-		if dberr != nil {
-			return errors.HandlerError(dberr, "update user's last feed")
+		merr = h.registry.Users.Update(user)
+		if merr != nil {
+			return merr.WrapEcho("update user's last feed")
 		}
 	}
 

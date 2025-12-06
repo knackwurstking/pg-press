@@ -29,11 +29,10 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetHomePage(c echo.Context) error {
-	page := templates.Page()
-
-	err := page.Render(c.Request().Context(), c.Response())
+	t := templates.Page()
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "home-page")
+		return errors.NewRenderError(err, "Page")
 	}
 
 	return nil
