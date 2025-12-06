@@ -7,7 +7,7 @@ require (
 	github.com/a-h/templ v0.3.960
 	github.com/google/uuid v1.6.0
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
-	github.com/knackwurstking/ui v1.1.2-0.20251203220524-1cd3b5827d78
+	github.com/knackwurstking/ui v1.1.2-0.20251206161601-92d6501fae80
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/labstack/gommon v0.4.2
 	github.com/lmittmann/tint v1.1.2
