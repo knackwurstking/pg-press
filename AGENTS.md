@@ -21,3 +21,5 @@
 ## Git commit guidelines
 - Commit message format (semantic) - `type(scope): subject`
 - The `(scope)` is optional
+- Use present tense, imperative mood
+- Keep messages under 72 characters when possible
