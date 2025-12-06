@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -36,34 +35,34 @@ func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
 	slog.Info("Remove a metal sheet entry")
 
 	// Get current user for feed creation
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetIDQuery, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "get id from query")
+	metalSheetIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
 
 	// Fetch the existing metal sheet before deletion for feed creation
-	existingSheet, dberr := h.registry.MetalSheets.Get(metalSheetID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get existing metal sheet from database")
+	existingSheet, merr := h.registry.MetalSheets.Get(metalSheetID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Fetch the associated tool for feed creation
-	tool, dberr := h.registry.Tools.Get(existingSheet.ToolID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tool from database")
+	tool, merr := h.registry.Tools.Get(existingSheet.ToolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Delete the metal sheet from database
-	dberr = h.registry.MetalSheets.Delete(metalSheetID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "delete metal sheet from database")
+	merr = h.registry.MetalSheets.Delete(metalSheetID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry for the deleted metal sheet
