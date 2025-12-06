@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -38,7 +39,7 @@ func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
 	rows, err := c.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -47,7 +48,10 @@ func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterError) {
 	if !utils.ValidateAPIKey(apiKey) {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("invalid api key"),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(
@@ -57,7 +61,7 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterErr
 
 	rows, err := c.DB.Query(query, apiKey)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -66,13 +70,16 @@ func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterErr
 
 func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 	if value == "" {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("cookie value missing"),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies)
 	cookie, err := ScanCookie(c.DB.QueryRow(query, value))
 	if err != nil {
-		return cookie, errors.NewMasterError(err)
+		return cookie, errors.NewMasterError(err, 0)
 	}
 
 	return cookie, nil
@@ -80,19 +87,25 @@ func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 
 func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
 	if !cookie.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid cookie data to add: %s", cookie),
+			http.StatusBadRequest,
+		)
 	}
 
 	// Check if cookie already exists
-	count, dberr := c.QueryCount(
+	count, merr := c.QueryCount(
 		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE value = ?`, TableNameCookies),
 		cookie.Value,
 	)
-	if dberr != nil {
-		return dberr
+	if merr != nil {
+		return merr
 	}
 	if count > 0 {
-		return errors.NewMasterError(errors.ErrExists)
+		return errors.NewMasterError(
+			fmt.Errorf("already exists: %s", cookie),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(
@@ -101,7 +114,7 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
 	)
 	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -110,7 +123,10 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
 // Update updates a cookie with database-level locking to prevent race conditions
 func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterError {
 	if value == "" || !cookie.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("update cookie with value \"%s\" %s", utils.MaskString(value), cookie),
+			http.StatusBadRequest,
+		)
 	}
 
 	// For SQLite, we'll use a different approach: attempt to update with a condition
@@ -144,7 +160,7 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterErro
 		currentCookie.LastLogin,
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -152,14 +168,17 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterErro
 
 func (c *Cookies) Remove(value string) *errors.MasterError {
 	if value == "" {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("value missing"),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE value = ?`, TableNameCookies)
 
 	_, err := c.DB.Exec(query, value)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -167,13 +186,16 @@ func (c *Cookies) Remove(value string) *errors.MasterError {
 
 func (c *Cookies) RemoveApiKey(apiKey string) *errors.MasterError {
 	if !utils.ValidateAPIKey(apiKey) {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid api key: %s", utils.MaskString(apiKey)),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE api_key = ?`, TableNameCookies)
 	_, err := c.DB.Exec(query, apiKey)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -184,7 +206,7 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.MasterError {
 
 	_, err := c.DB.Exec(query, beforeTimestamp)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil

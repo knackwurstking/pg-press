@@ -12,14 +12,14 @@ import (
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
 ) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, *errors.MasterError) {
-	cycles, dberr := s.GetPressCycles(pressNumber, nil, nil)
-	if dberr != nil {
-		return nil, nil, nil, dberr
+	cycles, merr := s.GetPressCycles(pressNumber, nil, nil)
+	if merr != nil {
+		return nil, nil, nil, merr
 	}
 
-	tools, dberr := s.Registry.Tools.List()
-	if dberr != nil {
-		return nil, nil, nil, dberr
+	tools, merr := s.Registry.Tools.List()
+	if merr != nil {
+		return nil, nil, nil, merr
 	}
 
 	toolsMap := make(map[models.ToolID]*models.Tool, len(tools))
@@ -27,9 +27,9 @@ func (s *PressCycles) GetCycleSummaryData(
 		toolsMap[tool.ID] = tool
 	}
 
-	users, dberr := s.Registry.Users.List()
-	if dberr != nil {
-		return nil, nil, nil, dberr
+	users, merr := s.Registry.Users.List()
+	if merr != nil {
+		return nil, nil, nil, merr
 	}
 
 	usersMap := make(map[models.TelegramID]*models.User, len(users))

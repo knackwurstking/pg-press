@@ -12,7 +12,7 @@ import (
 // This function checks for press regenerations that might have occurred after the current cycle,
 // which would reset the cycle count, and adjusts the calculation accordingly.
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
-	if err := cycle.Validate(); err != nil {
+	if !cycle.Validate() {
 		return cycle.TotalCycles
 	}
 

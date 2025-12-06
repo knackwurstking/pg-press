@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"slices"
 	"time"
 
@@ -49,17 +50,17 @@ func NewModifications(r *Registry) *Modifications {
 }
 
 func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user models.TelegramID) (models.ModificationID, *errors.MasterError) {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return 0, dberr
+	if merr := s.validateModificationType(mt, mtID); merr != nil {
+		return 0, merr
 	}
 
 	if data == nil {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("missing data"), http.StatusBadRequest)
 	}
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("marshal data: %#v", err), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -69,12 +70,12 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 
 	result, err := s.DB.Exec(query, user, mt, mtID, jsonData, time.Now())
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return models.ModificationID(id), nil
@@ -90,7 +91,7 @@ func (s *Modifications) Get(id models.ModificationID) (*models.Modification[any]
 	row := s.DB.QueryRow(query, id)
 	m, err := ScanModification(row)
 	if err != nil {
-		return m, errors.NewMasterError(err)
+		return m, errors.NewMasterError(err, 0)
 	}
 	return m, nil
 }
@@ -110,7 +111,7 @@ func (s *Modifications) List(mt models.ModificationType, mtID int64, limit, offs
 
 	rows, err := s.DB.Query(query, mt, mtID, limit, offset)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -122,8 +123,8 @@ func (s *Modifications) ListAll(mt models.ModificationType, mtID int64) ([]*mode
 }
 
 func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, *errors.MasterError) {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return 0, dberr
+	if merr := s.validateModificationType(mt, mtID); merr != nil {
+		return 0, merr
 	}
 
 	query := fmt.Sprintf(`
@@ -135,15 +136,15 @@ func (s *Modifications) Count(mt models.ModificationType, mtID int64) (int64, *e
 	var count int64
 	err := s.DB.QueryRow(query, mt, mtID).Scan(&count)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return count, nil
 }
 
 func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.MasterError) {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return nil, dberr
+	if merr := s.validateModificationType(mt, mtID); merr != nil {
+		return nil, merr
 	}
 
 	query := fmt.Sprintf(`
@@ -157,14 +158,14 @@ func (s *Modifications) GetLatest(mt models.ModificationType, mtID int64) (*mode
 	row := s.DB.QueryRow(query, mt, mtID)
 	m, err := ScanModification(row)
 	if err != nil {
-		return m, errors.NewMasterError(err)
+		return m, errors.NewMasterError(err, 0)
 	}
 	return m, nil
 }
 
 func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*models.Modification[any], *errors.MasterError) {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return nil, dberr
+	if merr := s.validateModificationType(mt, mtID); merr != nil {
+		return nil, merr
 	}
 
 	query := fmt.Sprintf(`
@@ -178,7 +179,7 @@ func (s *Modifications) GetOldest(mt models.ModificationType, mtID int64) (*mode
 	row := s.DB.QueryRow(query, mt, mtID)
 	m, err := ScanModification(row)
 	if err != nil {
-		return m, errors.NewMasterError(err)
+		return m, errors.NewMasterError(err, 0)
 	}
 	return m, nil
 }
@@ -187,21 +188,21 @@ func (s *Modifications) Delete(id models.ModificationID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
 }
 
 func (s *Modifications) DeleteAll(mt models.ModificationType, mtID int64) *errors.MasterError {
-	if dberr := s.validateModificationType(mt, mtID); dberr != nil {
-		return dberr
+	if merr := s.validateModificationType(mt, mtID); merr != nil {
+		return merr
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE entity_type = ? AND entity_id = ?`, TableNameModifications)
 	_, err := s.DB.Exec(query, mt, mtID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -218,7 +219,7 @@ func (s *Modifications) GetByUser(user int64, limit, offset int) ([]*models.Modi
 
 	rows, err := s.DB.Query(query, user, limit, offset)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -231,7 +232,7 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 	}
 
 	if from.After(to) {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid timing from %#v to %#v", from, to), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -243,7 +244,7 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 
 	rows, err := s.DB.Query(query, mt, mtID, from, to)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -252,11 +253,11 @@ func (s *Modifications) GetByDateRange(mt models.ModificationType, mtID int64, f
 
 func (s *Modifications) validateModificationType(mt models.ModificationType, mtID int64) *errors.MasterError {
 	if !slices.Contains(ModificationTypes, mt) {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid modification type: %#v", mt), http.StatusBadRequest)
 	}
 
 	if mtID <= 0 {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("modidfication type id cannot be lower or equal 0"), http.StatusBadRequest)
 	}
 
 	return nil

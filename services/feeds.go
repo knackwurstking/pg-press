@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -49,7 +50,7 @@ func (f *Feeds) List() ([]*models.Feed, *errors.MasterError) {
 
 	rows, err := f.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -67,7 +68,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, *errors.MasterErro
 
 	rows, err := f.DB.Query(query, limit, offset)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -86,7 +87,7 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, *er
 
 	rows, err := f.DB.Query(query, userID, limit, offset)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -101,7 +102,7 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.MasterError) {
 
 	feed, err := ScanFeed(f.DB.QueryRow(query, id))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	return feed, nil
@@ -109,7 +110,10 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.MasterError) {
 
 func (f *Feeds) Add(feed *models.Feed) *errors.MasterError {
 	if !feed.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid feed data %s", feed),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(
@@ -119,12 +123,12 @@ func (f *Feeds) Add(feed *models.Feed) *errors.MasterError {
 
 	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 	feed.ID = models.FeedID(id)
 
@@ -142,7 +146,10 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 
 	// Validate the feed
 	if !feed.Validate() {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("invalid feed data %s", feed),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(
@@ -152,12 +159,12 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 
 	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	feed.ID = models.FeedID(id)
 
@@ -174,7 +181,7 @@ func (f *Feeds) Delete(id models.FeedID) *errors.MasterError {
 
 	_, err := f.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -185,12 +192,12 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int, *errors.MasterError) {
 
 	result, err := f.DB.Exec(query, timestamp)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return int(rowsAffected), nil
@@ -199,7 +206,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int, *errors.MasterError) {
 func (f *Feeds) Count() (int, *errors.MasterError) {
 	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return count, nil
@@ -211,7 +218,7 @@ func (f *Feeds) CountByUser(userID int64) (int, *errors.MasterError) {
 		userID,
 	)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return count, nil

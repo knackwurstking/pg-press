@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -40,7 +41,7 @@ func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY id DESC`, TableNameTroubleReports)
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -51,19 +52,23 @@ func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameTroubleReports)
 	tr, err := ScanTroubleReport(s.DB.QueryRow(query, id))
 	if err != nil {
-		return tr, errors.NewMasterError(err)
+		return tr, errors.NewMasterError(err, 0)
 	}
 	return tr, nil
 }
 
 func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *errors.MasterError) {
-	if !tr.Validate() || !u.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+	if !tr.Validate() {
+		return 0, errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+	}
+
+	if !u.Validate() {
+		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", u), http.StatusBadRequest)
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	query := fmt.Sprintf(`INSERT INTO %s (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`,
@@ -71,32 +76,35 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 
 	result, err := s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 	tr.ID = models.TroubleReportID(id)
 
-	_, dberr := s.Registry.Modifications.Add(
+	_, merr := s.Registry.Modifications.Add(
 		models.ModificationTypeTroubleReport,
 		id,
 		models.NewTroubleReportModData(tr),
 		u.TelegramID,
 	)
-	return id, dberr
+	return id, merr
 }
 
 func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *errors.MasterError {
-	if !tr.Validate() || !u.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+	if !tr.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+	}
+	if !u.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", u), http.StatusBadRequest)
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
 	if err != nil {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(err, 0)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`,
@@ -104,17 +112,17 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 
 	_, err = s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown, tr.ID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
-	_, dberr := s.Registry.Modifications.Add(
+	_, merr := s.Registry.Modifications.Add(
 		models.ModificationTypeTroubleReport,
 		int64(tr.ID),
 		models.NewTroubleReportModData(tr),
 		u.TelegramID,
 	)
-	if dberr != nil {
-		return dberr
+	if merr != nil {
+		return merr
 	}
 
 	return nil
@@ -122,7 +130,7 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 
 func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *errors.MasterError {
 	if !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	_, merr := s.Get(id)
@@ -133,7 +141,7 @@ func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *e
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTroubleReports)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -145,9 +153,9 @@ func (s *TroubleReports) GetWithAttachments(id models.TroubleReportID) (*models.
 		return nil, err
 	}
 
-	attachments, dberr := s.LoadAttachments(tr)
-	if dberr != nil {
-		return nil, dberr
+	attachments, merr := s.LoadAttachments(tr)
+	if merr != nil {
+		return nil, merr
 	}
 
 	return &models.TroubleReportWithAttachments{
@@ -184,7 +192,7 @@ func (s *TroubleReports) AddWithAttachments(
 	attachments ...*models.Attachment,
 ) *errors.MasterError {
 	if !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	var attachmentIDs []models.AttachmentID
@@ -193,10 +201,10 @@ func (s *TroubleReports) AddWithAttachments(
 			continue
 		}
 
-		id, dberr := s.Registry.Attachments.Add(attachment)
-		if dberr != nil {
+		id, merr := s.Registry.Attachments.Add(attachment)
+		if merr != nil {
 			s.cleanupAttachments(attachmentIDs)
-			return dberr
+			return merr
 		}
 
 		attachmentIDs = append(attachmentIDs, id)
@@ -204,10 +212,10 @@ func (s *TroubleReports) AddWithAttachments(
 
 	troubleReport.LinkedAttachments = attachmentIDs
 
-	id, dberr := s.Add(troubleReport, user)
-	if dberr != nil {
+	id, merr := s.Add(troubleReport, user)
+	if merr != nil {
 		s.cleanupAttachments(attachmentIDs)
-		return dberr
+		return merr
 	}
 
 	troubleReport.ID = models.TroubleReportID(id)
@@ -220,8 +228,11 @@ func (s *TroubleReports) UpdateWithAttachments(
 	user *models.User,
 	newAttachments ...*models.Attachment,
 ) *errors.MasterError {
-	if !tr.Validate() || !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+	if !tr.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+	}
+	if !user.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	var newAttachmentIDs []models.AttachmentID
@@ -230,10 +241,10 @@ func (s *TroubleReports) UpdateWithAttachments(
 			continue
 		}
 
-		attachmentID, dberr := s.Registry.Attachments.Add(attachment)
-		if dberr != nil {
+		attachmentID, merr := s.Registry.Attachments.Add(attachment)
+		if merr != nil {
 			s.cleanupAttachments(newAttachmentIDs)
-			return dberr
+			return merr
 		}
 
 		newAttachmentIDs = append(newAttachmentIDs, attachmentID)
@@ -242,10 +253,10 @@ func (s *TroubleReports) UpdateWithAttachments(
 	tr.LinkedAttachments = append(tr.LinkedAttachments, newAttachmentIDs...)
 	tr.ID = id
 
-	dberr := s.Update(tr, user)
-	if dberr != nil {
+	merr := s.Update(tr, user)
+	if merr != nil {
 		s.cleanupAttachments(newAttachmentIDs)
-		return dberr
+		return merr
 	}
 
 	return nil
@@ -256,7 +267,7 @@ func (s *TroubleReports) RemoveWithAttachments(
 	user *models.User,
 ) (*models.TroubleReport, *errors.MasterError) {
 	if !user.Validate() {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	tr, merr := s.Get(id)
@@ -272,14 +283,14 @@ func (s *TroubleReports) RemoveWithAttachments(
 	failedMessages := []string{}
 	failedDeletes := 0
 	for _, attachmentID := range tr.LinkedAttachments {
-		dberr := s.Registry.Attachments.Delete(attachmentID)
-		if dberr != nil {
+		merr := s.Registry.Attachments.Delete(attachmentID)
+		if merr != nil {
 			failedDeletes++
 			failedMessages = append(
 				failedMessages,
 				fmt.Sprintf(
 					"Failed to delete attachment for trouble report %d: (attachment id: %d) %#v",
-					tr.ID, attachmentID, dberr,
+					tr.ID, attachmentID, merr,
 				),
 			)
 		}
@@ -293,7 +304,7 @@ func (s *TroubleReports) RemoveWithAttachments(
 				msg += "\n\t"
 			}
 		}
-		return tr, errors.NewMasterError(fmt.Errorf("Some attachments could not be removed:\n\t%s", msg))
+		return tr, errors.NewMasterError(fmt.Errorf("Some attachments could not be removed:\n\t%s", msg), 0)
 	}
 
 	return tr, nil
@@ -303,7 +314,7 @@ func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) (
 	[]*models.Attachment, *errors.MasterError,
 ) {
 	if !report.Validate() {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", report), http.StatusBadRequest)
 	}
 
 	var attachments []*models.Attachment

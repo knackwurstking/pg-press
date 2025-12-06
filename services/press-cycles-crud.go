@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -19,7 +20,7 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.MasterError
 	row := s.DB.QueryRow(query, id)
 	cycle, err := ScanCycle(row)
 	if err != nil {
-		return cycle, errors.NewMasterError(err)
+		return cycle, errors.NewMasterError(err, 0)
 	}
 
 	cycle.PartialCycles = s.GetPartialCycles(cycle)
@@ -29,11 +30,11 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.MasterError
 // Add creates a new press cycle
 func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, *errors.MasterError) {
 	if cycle.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid cycle: %s", cycle), http.StatusBadRequest)
 	}
 
 	if !user.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	if cycle.Date.IsZero() {
@@ -54,12 +55,12 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 		user.TelegramID,
 	)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	cycle.ID = models.CycleID(id)
@@ -76,13 +77,13 @@ func (s *PressCycles) List() ([]*models.Cycle, *errors.MasterError) {
 
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
-	cycles, dberr := ScanRows(rows, ScanCycle)
-	if dberr != nil {
-		return nil, dberr
+	cycles, merr := ScanRows(rows, ScanCycle)
+	if merr != nil {
+		return nil, merr
 	}
 
 	s.injectPartialCycles(cycles)
@@ -91,8 +92,12 @@ func (s *PressCycles) List() ([]*models.Cycle, *errors.MasterError) {
 
 // Update modifies an existing press cycle
 func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.MasterError {
-	if !cycle.Validate() || !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+	if !cycle.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid cycle: %s", user), http.StatusBadRequest)
+	}
+
+	if !user.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	if cycle.Date.IsZero() {
@@ -114,12 +119,12 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.Mas
 		cycle.Date,
 		cycle.ID,
 	)
-	return errors.NewMasterError(err)
+	return errors.NewMasterError(err, 0)
 }
 
 // Delete removes a press cycle from the database
 func (s *PressCycles) Delete(id models.CycleID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
 	_, err := s.DB.Exec(query, id)
-	return errors.NewMasterError(err)
+	return errors.NewMasterError(err, 0)
 }

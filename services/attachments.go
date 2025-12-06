@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -43,7 +44,7 @@ func (a *Attachments) List() ([]*models.Attachment, *errors.MasterError) {
 
 	rows, err := a.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -58,7 +59,7 @@ func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.M
 
 	attachment, err := ScanAttachment(a.DB.QueryRow(query, id))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	return attachment, nil
@@ -85,14 +86,14 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 
 	rows, err := a.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
 	attachments, err := ScanRows(rows, ScanAttachment)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Create a map for O(1) lookup
@@ -111,7 +112,10 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 
 func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.MasterError) {
 	if !attachment.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("invalid attachment data to add %#v", attachment),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(
@@ -121,12 +125,12 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *
 
 	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return models.AttachmentID(id), nil
@@ -134,7 +138,10 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *
 
 func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError {
 	if !attachment.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid attachment data for update: %#v", attachment),
+			http.StatusBadRequest,
+		)
 	}
 
 	id := attachment.GetID()
@@ -145,7 +152,7 @@ func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError 
 
 	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -155,7 +162,7 @@ func (a *Attachments) Delete(id models.AttachmentID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
 	_, err := a.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil

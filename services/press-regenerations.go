@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -41,14 +42,14 @@ func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRe
 	row := s.DB.QueryRow(query, id)
 	r, err := ScanPressRegeneration(row)
 	if err != nil {
-		return r, errors.NewMasterError(err)
+		return r, errors.NewMasterError(err, 0)
 	}
 	return r, nil
 }
 
 func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, *errors.MasterError) {
 	if !r.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", r), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -58,12 +59,12 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 
 	result, err := s.DB.Exec(query, r.PressNumber, r.StartedAt, r.CompletedAt, r.Reason)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return models.PressRegenerationID(id), nil
@@ -71,7 +72,7 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 
 func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterError {
 	if !r.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", r), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -81,7 +82,7 @@ func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterE
 	`, TableNamePressRegenerations)
 
 	if _, err := s.DB.Exec(query, r.StartedAt, r.CompletedAt, r.Reason, r.ID); err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -91,7 +92,7 @@ func (s *PressRegenerations) Delete(id models.PressRegenerationID) *errors.Maste
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -109,15 +110,15 @@ func (s *PressRegenerations) StartPressRegeneration(
 }
 
 func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID) *errors.MasterError {
-	regeneration, dberr := s.Get(id)
-	if dberr != nil {
-		return dberr
+	regeneration, merr := s.Get(id)
+	if merr != nil {
+		return merr
 	}
 
 	regeneration.Stop()
 
 	if !regeneration.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", regeneration), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -128,7 +129,7 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 
 	_, err := s.DB.Exec(query, regeneration.CompletedAt, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -147,7 +148,7 @@ func (s *PressRegenerations) GetLastRegeneration(
 
 	r, err := ScanPressRegeneration(s.DB.QueryRow(query, pressNumber))
 	if err != nil {
-		return r, errors.NewMasterError(err)
+		return r, errors.NewMasterError(err, 0)
 	}
 	return r, nil
 }
@@ -164,7 +165,7 @@ func (s *PressRegenerations) GetRegenerationHistory(
 
 	rows, err := s.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 

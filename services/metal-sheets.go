@@ -3,6 +3,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -53,7 +54,7 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.M
 
 	sheet, err := ScanMetalSheet(row)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	return sheet, nil
@@ -68,7 +69,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.MasterError) {
 
 	rows, err := s.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -85,7 +86,7 @@ func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, 
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -102,7 +103,7 @@ func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*mode
 
 	rows, err := s.DB.Query(query, machineType.String())
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -133,7 +134,10 @@ func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[m
 
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.MasterError) {
 	if !sheet.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(
+			fmt.Errorf("invalid metal sheet data: %s", sheet),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(`
@@ -152,12 +156,12 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 		sheet.ToolID,
 	)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	sheet.ID = models.MetalSheetID(id)
@@ -166,7 +170,10 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
 	if !sheet.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid metal sheet data: %s", sheet),
+			http.StatusBadRequest,
+		)
 	}
 
 	query := fmt.Sprintf(`
@@ -180,7 +187,7 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.Identifier.String(), sheet.ToolID, sheet.ID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -188,11 +195,15 @@ func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
 
 func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *errors.MasterError {
 	if toolID <= 0 {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid tool id: %d", toolID),
+			http.StatusBadRequest,
+		)
 	}
 
-	if _, dberr := s.Get(sheetID); dberr != nil {
-		return dberr
+	_, merr := s.Get(sheetID)
+	if merr != nil {
+		return merr
 	}
 
 	query := fmt.Sprintf(`
@@ -201,8 +212,9 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *err
 		WHERE id = $2;
 	`, TableNameMetalSheets)
 
-	if _, err := s.DB.Exec(query, toolID, sheetID); err != nil {
-		return errors.NewMasterError(err)
+	_, err := s.DB.Exec(query, toolID, sheetID)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -212,7 +224,7 @@ func (s *MetalSheets) Delete(id models.MetalSheetID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
 
 	if _, err := s.DB.Exec(query, id); err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil

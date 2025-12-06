@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -16,7 +17,7 @@ func (t *Tools) List() ([]*models.Tool, *errors.MasterError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -33,7 +34,7 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.MasterError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -50,7 +51,7 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.MasterError) {
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -59,7 +60,7 @@ func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.MasterError) {
 
 func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *errors.MasterError) {
 	if pressNumber != nil && !models.IsValidPressNumber(pressNumber) {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid press number: %d", pressNumber), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -70,7 +71,7 @@ func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *e
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -79,7 +80,7 @@ func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *e
 
 func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*models.Tool, *errors.MasterError) {
 	if !models.IsValidPressNumber(&pressNumber) {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid press number: %d", pressNumber), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -90,7 +91,7 @@ func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*mode
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 

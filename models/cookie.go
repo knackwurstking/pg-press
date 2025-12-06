@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
 // Cookie represents a user session with authentication information.
@@ -87,8 +88,8 @@ func (c *Cookie) UpdateLastLogin() {
 
 // String returns a string representation of the cookie (without sensitive data).
 func (c *Cookie) String() string {
-	return fmt.Sprintf("Cookie{UserAgent: %s, LastLogin: %s, Age: %v}",
-		c.UserAgent, c.TimeString(), c.Age())
+	return fmt.Sprintf("Cookie{UserAgent: %s, Value: %s, LastLogin: %s, Age: %v}",
+		c.UserAgent, utils.MaskString(c.Value), c.TimeString(), c.Age())
 }
 
 // SortCookies sorts a slice of cookies by last login time in descending order.

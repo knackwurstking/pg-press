@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -41,7 +42,7 @@ func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegen
 
 	regeneration, err := ScanToolRegeneration(row)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	return regeneration, nil
@@ -51,8 +52,12 @@ func (s *ToolRegenerations) Add(
 	toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User,
 ) (models.ToolRegenerationID, *errors.MasterError) {
 	r := models.NewToolRegeneration(toolID, cycleID, reason, &user.TelegramID)
-	if !user.Validate() || !r.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+	if !r.Validate() {
+		return 0, errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %s", r), http.StatusBadRequest)
+	}
+
+	if !user.Validate() {
+		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -62,20 +67,24 @@ func (s *ToolRegenerations) Add(
 
 	result, err := s.DB.Exec(query, r.ToolID, r.CycleID, r.Reason, user.TelegramID)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return models.ToolRegenerationID(id), nil
 }
 
 func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) *errors.MasterError {
-	if !user.Validate() || !r.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+	if !r.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %s", r), http.StatusBadRequest)
+	}
+
+	if !user.Validate() {
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -86,7 +95,7 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 
 	_, err := s.DB.Exec(query, r.CycleID, r.Reason, user.TelegramID, r.ID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -96,7 +105,7 @@ func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) *errors.MasterE
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameToolRegenerations)
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -106,26 +115,26 @@ func (s *ToolRegenerations) StartToolRegeneration(
 	id models.ToolID, reason string, user *models.User,
 ) (models.ToolRegenerationID, *errors.MasterError) {
 	if !user.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
-	cycle, dberr := s.Registry.PressCycles.GetLastToolCycle(id)
-	if dberr != nil {
-		return 0, dberr
+	cycle, merr := s.Registry.PressCycles.GetLastToolCycle(id)
+	if merr != nil {
+		return 0, merr
 	}
 
-	dberr = s.Registry.Tools.UpdateRegenerating(id, true, user)
-	if dberr != nil {
-		return 0, dberr
+	merr = s.Registry.Tools.UpdateRegenerating(id, true, user)
+	if merr != nil {
+		return 0, merr
 	}
 
-	regenerationID, dberr := s.Add(id, cycle.ID, reason, user)
-	if dberr != nil {
+	regenerationID, merr := s.Add(id, cycle.ID, reason, user)
+	if merr != nil {
 		undoErr := s.Registry.Tools.UpdateRegenerating(id, false, user)
 		if undoErr != nil {
 			return 0, undoErr
 		}
-		return 0, dberr
+		return 0, merr
 	}
 
 	return regenerationID, nil
@@ -133,12 +142,12 @@ func (s *ToolRegenerations) StartToolRegeneration(
 
 func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) *errors.MasterError {
 	if !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
-	dberr := s.Registry.Tools.UpdateRegenerating(toolID, false, user)
-	if dberr != nil {
-		return dberr
+	merr := s.Registry.Tools.UpdateRegenerating(toolID, false, user)
+	if merr != nil {
+		return merr
 	}
 
 	return nil
@@ -146,30 +155,30 @@ func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *mod
 
 func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) *errors.MasterError {
 	if !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
-	lastRegeneration, dberr := s.GetLastRegeneration(toolID)
-	if dberr != nil {
-		return dberr
+	lastRegeneration, merr := s.GetLastRegeneration(toolID)
+	if merr != nil {
+		return merr
 	}
 
-	tool, dberr := s.Registry.Tools.Get(toolID)
-	if dberr != nil {
-		return dberr
+	tool, merr := s.Registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr
 	}
 	if !tool.Regenerating {
 		return nil
 	}
 
-	dberr = s.Delete(lastRegeneration.ID)
-	if dberr != nil {
-		return dberr
+	merr = s.Delete(lastRegeneration.ID)
+	if merr != nil {
+		return merr
 	}
 
-	dberr = s.Registry.Tools.UpdateRegenerating(toolID, false, user)
-	if dberr != nil {
-		return dberr
+	merr = s.Registry.Tools.UpdateRegenerating(toolID, false, user)
+	if merr != nil {
+		return merr
 	}
 
 	return nil
@@ -189,15 +198,15 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (
 	row := s.DB.QueryRow(query, toolID)
 	r, err := ScanToolRegeneration(row)
 	if err != nil {
-		return r, errors.NewMasterError(err)
+		return r, errors.NewMasterError(err, 0)
 	}
 	return r, nil
 }
 
 func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableNameToolRegenerations)
-	count, dberr := s.QueryCount(query, cycleID)
-	return count > 0, dberr
+	count, merr := s.QueryCount(query, cycleID)
+	return count > 0, merr
 }
 
 func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) (
@@ -212,7 +221,7 @@ func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) (
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 

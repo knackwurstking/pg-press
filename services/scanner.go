@@ -15,14 +15,14 @@ func ScanRows[T any](rows *sql.Rows, scanFunc func(Scannable) (*T, error)) ([]*T
 	for rows.Next() {
 		item, err := scanFunc(rows)
 		if err != nil {
-			return nil, errors.NewMasterErrorDB(errors.ErrorTypeDB, err)
+			return nil, errors.NewMasterError(err, 0)
 		}
 		results = append(results, item)
 	}
 
 	err := rows.Err()
 	if err != nil {
-		return results, errors.NewMasterErrorDB(errors.ErrorTypeDB, err)
+		return results, errors.NewMasterError(err, 0)
 	}
 
 	return results, nil

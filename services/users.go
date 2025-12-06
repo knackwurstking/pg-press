@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -39,21 +40,21 @@ func (u *Users) Get(telegramID models.TelegramID) (*models.User, *errors.MasterE
 	row := u.DB.QueryRow(query, telegramID)
 	user, err := ScanUser(row)
 	if err != nil {
-		return user, errors.NewMasterError(err)
+		return user, errors.NewMasterError(err, 0)
 	}
 	return user, nil
 }
 
 func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, *errors.MasterError) {
 	if !utils.ValidateAPIKey(apiKey) {
-		return nil, errors.NewMasterError(errors.ErrValidation)
+		return nil, errors.NewMasterError(fmt.Errorf("invalid api key: %s", utils.MaskString(apiKey)), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE api_key = ?`, TableNameUsers)
 	row := u.DB.QueryRow(query, apiKey)
 	user, err := ScanUser(row)
 	if err != nil {
-		return user, errors.NewMasterError(err)
+		return user, errors.NewMasterError(err, 0)
 	}
 	return user, nil
 }
@@ -62,7 +63,7 @@ func (u *Users) List() ([]*models.User, *errors.MasterError) {
 	query := fmt.Sprintf(`SELECT * FROM %s`, TableNameUsers)
 	rows, err := u.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -71,7 +72,7 @@ func (u *Users) List() ([]*models.User, *errors.MasterError) {
 
 func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) {
 	if !user.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	// Check if user already exists
@@ -81,14 +82,14 @@ func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) 
 		return 0, dberr
 	}
 	if count > 0 {
-		return 0, errors.NewMasterError(fmt.Errorf("User with Telegram ID %d already exists", user.TelegramID))
+		return 0, errors.NewMasterError(fmt.Errorf("User with Telegram ID %d already exists", user.TelegramID), http.StatusBadRequest)
 	}
 
 	// Insert the new user
 	query = fmt.Sprintf(`INSERT INTO %s (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`, TableNameUsers)
 	_, err := u.DB.Exec(query, user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return user.TelegramID, nil
@@ -103,7 +104,7 @@ func (u *Users) Delete(telegramID models.TelegramID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE telegram_id = ?`, TableNameUsers)
 	_, err := u.DB.Exec(query, telegramID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil
@@ -111,13 +112,13 @@ func (u *Users) Delete(telegramID models.TelegramID) *errors.MasterError {
 
 func (u *Users) Update(user *models.User) *errors.MasterError {
 	if !user.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`, TableNameUsers)
 	_, err := u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, user.TelegramID)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil

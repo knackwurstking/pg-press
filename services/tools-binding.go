@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -10,7 +11,11 @@ import (
 
 func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.MasterError {
 	if !t.validateBindingTools(cassetteID, targetID) {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(
+			fmt.Errorf("invalid tools for binding: cassette=%d, target=%d",
+				cassetteID, targetID),
+			http.StatusBadRequest,
+		)
 	}
 
 	// Get press from the target tool
@@ -36,7 +41,7 @@ func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.MasterError {
 			sql.Named("cassette", cassetteID),
 			sql.Named("press", targetTool.Press),
 		); err != nil {
-			return errors.NewMasterError(err)
+			return errors.NewMasterError(err, 0)
 		}
 	}
 
@@ -63,7 +68,7 @@ func (t *Tools) UnBind(toolID models.ToolID) *errors.MasterError {
 		sql.Named("toolID", toolID),
 		sql.Named("binding", *tool.Binding),
 	); err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewMasterError(err, 0)
 	}
 
 	return nil

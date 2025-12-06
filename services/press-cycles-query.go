@@ -20,7 +20,7 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *er
 	row := s.DB.QueryRow(query, toolID)
 	cycle, err := ScanCycle(row)
 	if err != nil {
-		return cycle, errors.NewMasterError(err)
+		return cycle, errors.NewMasterError(err, 0)
 	}
 	cycle.PartialCycles = s.GetPartialCycles(cycle)
 	return cycle, nil
@@ -37,13 +37,13 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
-	cycles, dberr := ScanRows(rows, ScanCycle)
-	if dberr != nil {
-		return nil, dberr
+	cycles, merr := ScanRows(rows, ScanCycle)
+	if merr != nil {
+		return nil, merr
 	}
 
 	s.injectPartialCycles(cycles)
@@ -66,12 +66,12 @@ func (s *PressCycles) GetPressCycles(
 
 	rows, err := s.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
-	cycles, dberr := ScanRows(rows, ScanCycle)
-	if dberr != nil {
+	cycles, merr := ScanRows(rows, ScanCycle)
+	if merr != nil {
 		return cycles, nil
 	}
 	s.injectPartialCycles(cycles)

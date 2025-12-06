@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -43,7 +44,7 @@ func (n *Notes) List() ([]*models.Note, *errors.MasterError) {
 
 	rows, err := n.DB.Query(query)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -61,7 +62,7 @@ func (n *Notes) Get(id models.NoteID) (*models.Note, *errors.MasterError) {
 	row := n.DB.QueryRow(query, id)
 	note, err := ScanNote(row)
 	if err != nil {
-		return note, errors.NewMasterError(err)
+		return note, errors.NewMasterError(err, 0)
 	}
 	return note, nil
 }
@@ -89,7 +90,7 @@ func (n *Notes) GetByIDs(ids []models.NoteID) ([]*models.Note, *errors.MasterErr
 
 	rows, err := n.DB.Query(query, args...)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -129,7 +130,7 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.MasterError)
 
 	rows, err := n.DB.Query(query, linked)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
@@ -138,7 +139,7 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.MasterError)
 
 func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 	if !note.Validate() {
-		return 0, errors.NewMasterError(errors.ErrValidation)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid note: %s", note), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(
@@ -148,12 +149,12 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 
 	result, err := n.DB.Exec(query, note.Level, note.Content, note.Linked)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return models.NoteID(id), nil
@@ -161,7 +162,7 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 
 func (n *Notes) Update(note *models.Note) *errors.MasterError {
 	if !note.Validate() {
-		return errors.NewMasterError(errors.ErrValidation)
+		return errors.NewMasterError(fmt.Errorf("invalid note: %s", note), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(
@@ -170,13 +171,13 @@ func (n *Notes) Update(note *models.Note) *errors.MasterError {
 	)
 
 	_, err := n.DB.Exec(query, note.Level, note.Content, note.Linked, note.ID)
-	return errors.NewMasterError(err)
+	return errors.NewMasterError(err, 0)
 }
 
 func (n *Notes) Delete(id models.NoteID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameNotes)
 	_, err := n.DB.Exec(query, id)
-	return errors.NewMasterError(err)
+	return errors.NewMasterError(err, 0)
 }
 
 func MapNotes(notes []*models.Note) map[models.NoteID]*models.Note {

@@ -23,7 +23,7 @@ func (b *Base) QueryCount(query string, args ...any) (int, *errors.MasterError) 
 
 	err := b.DB.QueryRow(query, args...).Scan(&count)
 	if err != nil {
-		return 0, errors.NewMasterError(err)
+		return 0, errors.NewMasterError(err, 0)
 	}
 
 	return count, nil
