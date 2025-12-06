@@ -49,7 +49,7 @@ func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRe
 
 func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, *errors.MasterError) {
 	if !r.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", r), http.StatusBadRequest)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", r), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -72,7 +72,7 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 
 func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterError {
 	if !r.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", r), http.StatusBadRequest)
+		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", r), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`
@@ -118,7 +118,7 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 	regeneration.Stop()
 
 	if !regeneration.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %s", regeneration), http.StatusBadRequest)
+		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", regeneration), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(`

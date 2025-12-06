@@ -139,7 +139,7 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.MasterError)
 
 func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 	if !note.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid note: %s", note), http.StatusBadRequest)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid note: %v", note), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(
@@ -162,7 +162,7 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 
 func (n *Notes) Update(note *models.Note) *errors.MasterError {
 	if !note.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid note: %s", note), http.StatusBadRequest)
+		return errors.NewMasterError(fmt.Errorf("invalid note: %v", note), http.StatusBadRequest)
 	}
 
 	query := fmt.Sprintf(

@@ -91,9 +91,9 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 	defer rows.Close()
 
 	// Store attachments in a map for efficient lookup
-	attachments, err := ScanRows(rows, ScanAttachment)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+	attachments, merr := ScanRows(rows, ScanAttachment)
+	if merr != nil {
+		return nil, merr
 	}
 
 	// Create a map for O(1) lookup

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -124,8 +125,8 @@ func createSimpleCommand(name, usage string, action func(*services.Registry) err
 }
 
 // handleNotFoundError provides consistent handling for not found errors
-func handleNotFoundError(err *errors.DBError) {
-	if err.Typ == errors.DBTypeNotFound {
+func handleNotFoundError(err *errors.MasterError) {
+	if err.Code == http.StatusNotFound {
 		fmt.Fprintf(os.Stderr, "not found: %v\n", err)
 		os.Exit(exitCodeNotFound)
 	}

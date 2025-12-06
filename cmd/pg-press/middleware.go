@@ -126,9 +126,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, err := db.Cookies.Get(httpCookie.Value)
-	if err != nil {
-		return nil, errors.Wrap(err, "get cookie")
+	cookie, merr := db.Cookies.Get(httpCookie.Value)
+	if merr != nil {
+		return nil, merr.Wrap("get cookie")
 	}
 
 	// Check if cookie has expired
@@ -137,9 +137,9 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, err := db.Users.GetUserFromApiKey(cookie.ApiKey)
-	if err != nil {
-		return nil, fmt.Errorf("validate user from API key: %s", err.Error())
+	user, merr := db.Users.GetUserFromApiKey(cookie.ApiKey)
+	if merr != nil {
+		return nil, merr.Wrap("validate user from API key")
 	}
 
 	// Log user agent mismatch as potential security concern

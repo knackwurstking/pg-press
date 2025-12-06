@@ -19,8 +19,8 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolI
 		WHERE id != ? AND position = ? AND format = ? AND code = ?`,
 		TableNameTools)
 
-	count, err := t.QueryCount(query, excludeID, tool.Position, formatBytes, tool.Code)
-	if err != nil {
+	count, merr := t.QueryCount(query, excludeID, tool.Position, formatBytes, tool.Code)
+	if merr != nil {
 		return false
 	}
 

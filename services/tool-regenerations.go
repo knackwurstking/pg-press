@@ -53,7 +53,7 @@ func (s *ToolRegenerations) Add(
 ) (models.ToolRegenerationID, *errors.MasterError) {
 	r := models.NewToolRegeneration(toolID, cycleID, reason, &user.TelegramID)
 	if !r.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %s", r), http.StatusBadRequest)
+		return 0, errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
 	}
 
 	if !user.Validate() {
@@ -80,7 +80,7 @@ func (s *ToolRegenerations) Add(
 
 func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) *errors.MasterError {
 	if !r.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %s", r), http.StatusBadRequest)
+		return errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
 	}
 
 	if !user.Validate() {

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/labstack/gommon/color"
@@ -41,11 +41,11 @@ func showUserCommand() cli.Command {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					telegramID := models.TelegramID(*telegramIDArg)
 
-					user, dberr := r.Users.Get(telegramID)
-					if dberr != nil {
-						handleNotFoundError(dberr)
-						handleGenericError(dberr, fmt.Sprintf("Get user \"%d\" failed", telegramID))
-						return dberr
+					user, merr := r.Users.Get(telegramID)
+					if merr != nil {
+						handleNotFoundError(merr)
+						handleGenericError(merr, fmt.Sprintf("Get user \"%d\" failed", telegramID))
+						return merr
 					}
 
 					if *flagApiKey {
@@ -90,12 +90,11 @@ func addUserCommand() cli.Command {
 					telegramID := models.TelegramID(*telegramIDArg)
 
 					user := models.NewUser(telegramID, *userName, *apiKey)
-					_, dberr := r.Users.Add(user)
-					if dberr.Typ == errors.DBTypeExists {
+					_, merr := r.Users.Add(user)
+					if strings.Contains(merr.Error(), "already exists") {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
-					} else {
-						return dberr
 					}
+					return merr
 				})
 			}
 		}),

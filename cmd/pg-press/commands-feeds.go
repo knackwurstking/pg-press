@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -58,17 +59,17 @@ func listFeedsCommand() cli.Command {
 				return withDBOperation(customDBPath, func(r *services.Registry) error {
 					var feeds []*models.Feed
 
-					var dberr *errors.DBError
+					var merr *errors.MasterError
 					// Get feeds based on parameters
 					if *limit > 0 {
-						feeds, dberr = r.Feeds.ListRange(*offset, *limit)
-						if dberr != nil {
-							return dberr
+						feeds, merr = r.Feeds.ListRange(*offset, *limit)
+						if merr != nil {
+							return merr
 						}
 					} else {
-						feeds, dberr = r.Feeds.List()
-						if dberr != nil {
-							return dberr
+						feeds, merr = r.Feeds.List()
+						if merr != nil {
+							return merr
 						}
 					}
 
@@ -244,9 +245,9 @@ func removeFeedsByIDs(r *services.Registry, ids []string) error {
 			continue
 		}
 
-		dberr := r.Feeds.Delete(models.FeedID(id))
-		if dberr != nil {
-			if dberr.Typ == errors.DBTypeNotFound {
+		merr := r.Feeds.Delete(models.FeedID(id))
+		if merr != nil {
+			if merr.Code == http.StatusNotFound {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
 			} else {
 				failed = append(failed, fmt.Sprintf("failed to remove feed ID %d: %s", id, err))
@@ -292,9 +293,9 @@ func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 	cutoffTime := time.Now().Add(-duration)
 	timestamp := cutoffTime.UnixMilli()
 
-	deletionCount, dberr := r.Feeds.DeleteBefore(timestamp)
-	if dberr != nil {
-		return fmt.Errorf("remove feeds: %s", dberr)
+	deletionCount, merr := r.Feeds.DeleteBefore(timestamp)
+	if merr != nil {
+		return fmt.Errorf("remove feeds: %s", merr)
 	}
 
 	fmt.Printf("Removed %d feed(s) older than %s (before %s)\n",
@@ -311,9 +312,9 @@ func removeFeedsByDate(r *services.Registry, dateStr string) error {
 
 	timestamp := cutoffTime.UnixMilli()
 
-	rowsAffected, dberr := r.Feeds.DeleteBefore(timestamp)
-	if dberr != nil {
-		return fmt.Errorf("remove feeds: %s", dberr)
+	rowsAffected, merr := r.Feeds.DeleteBefore(timestamp)
+	if merr != nil {
+		return fmt.Errorf("remove feeds: %s", merr)
 	}
 
 	fmt.Printf("Removed %d feed(s) before %s\n", rowsAffected, cutoffTime.Format("2006-01-02 15:04:05"))
