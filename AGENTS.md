@@ -1,58 +1,21 @@
-# PG Press Agent Guidelines
+# AGENTS
 
-## Build/Lint/Test Commands
-- `make init` - Initialize project dependencies
-- `make build` - Build the application
-- `make dev` - Run development server with hot reloading
-- `make test` - Run all tests
-- `make test -run TestFunctionName` - Run a specific test
-- `make lint` - Run linters
+## Build
+- `go build ./...`
 
-## Code Style Guidelines
+## Test
+- All tests: `go test ./...`
+- Single test: `go test -run ^TestName$ ./...`
 
-### Imports
-- Group imports by standard library, external dependencies, and internal packages
-- Use `gofumpt` for import formatting
-- Sort imports alphabetically within each group
+## Lint / Vet
+- `go vet ./...`
+- `golangci-lint run`
 
-### Formatting
-- Use `gofumpt` for code formatting
-- Follow Go's official style guide
-- Maintain consistent indentation (tabs/spaces)
+## Format
+- `go fmt ./...` - `goimports -l -w .` - `go mod tidy`
 
-### Types
-- Use clear, descriptive type names
-- Prefer named types over anonymous types when possible
-- Use interfaces for dependencies and abstractions
+## Code style guidelines
+- Imports std first, external, internal, alphabetically.; Types exported UpperCamelCase, unexported camelCase.; Constants UpperCamelCase, typed.; Errors wrapped via `fmt.Errorf("%w", err)`, never nil.; JSON tags `json:"fieldName,omitempty"`.
+- Tests *_test.go, use t.Helper(); Logging single logger interface; defer context.
 
-### Naming Conventions
-- Use camelCase for variables and functions
-- Use PascalCase for exported types and methods
-- Use descriptive names that clearly indicate purpose
-
-### Error Handling
-- Always handle errors explicitly
-- Use named return values for error handling when appropriate
-- Log errors with context using structured logging
-
-### Testing
-- Write tests in the same directory as the code they test
-- Use table-driven tests for multiple test cases
-- Test both happy path and error conditions
-
-### Security
-- Sanitize all user inputs
-- Use secure cookie configuration
-- Validate and authenticate all requests
-
-### Performance
-- Optimize database queries with proper indexing
-- Use connection pooling for database access
-- Minimize memory allocations in hot paths
-
-### Git Commit Messages
-- Always use semantic style git commit messages
-- Follow the convention: `<type>(<scope>): <subject>`
-- Use one of these types: feat, fix, docs, style, refactor, test, chore
-- Keep subject line under 50 characters
-- Use imperative mood in the subject line
+## Commit message format (semantic) - `type(scope): subject`
