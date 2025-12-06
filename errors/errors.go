@@ -41,6 +41,10 @@ func NewMasterError(err error, code int) *MasterError {
 }
 
 func (e *MasterError) Error() string {
+	if e == nil {
+		return "error is nil?"
+	}
+
 	if e.Code > 0 {
 		return fmt.Sprintf("%d: %s", e.Code, e.Err.Error())
 	}
