@@ -17,7 +17,10 @@ type RegenerationsFormData struct {
 
 // ParseFormRegenerationsPage parses the form data from the press regenerations page
 // and validates it to create a PressRegeneration model
-func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (*models.PressRegeneration, *echo.HTTPError) {
+func ParseFormRegenerationsPage(c echo.Context, press models.PressNumber) (
+	*models.PressRegeneration, *echo.HTTPError,
+) {
+
 	var (
 		reason      string
 		startedAt   time.Time

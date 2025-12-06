@@ -51,7 +51,7 @@ func (p Position) GermanString() string {
 
 // ValidateUniquePositions checks that there's only one tool per position
 // Returns an error if duplicates are found
-func ValidateUniquePositions(tools []*Tool) error {
+func ValidateUniquePositions(tools []*Tool) bool {
 	positionCount := make(map[Position][]ToolID)
 
 	for _, tool := range tools {
@@ -67,8 +67,8 @@ func ValidateUniquePositions(tools []*Tool) error {
 	}
 
 	if len(duplicates) > 0 {
-		return fmt.Errorf("duplicate tool positions found: %s", strings.Join(duplicates, ", "))
+		return false
 	}
 
-	return nil
+	return true
 }

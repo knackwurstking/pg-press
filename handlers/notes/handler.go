@@ -40,9 +40,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 // GetNotesPage serves the main notes page
 func (h *Handler) GetNotesPage(c echo.Context) error {
 	// Get all notes with defensive error handling
-	notes, dberr := h.registry.Notes.List()
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get notes from database")
+	notes, merr := h.registry.Notes.List()
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Handle case where notes might be nil
@@ -51,9 +51,9 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	}
 
 	// Get all tools to show relationships
-	tools, dberr := h.registry.Tools.List()
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get tools from database")
+	tools, merr := h.registry.Tools.List()
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Handle case where tools might be nil
@@ -61,10 +61,10 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 		tools = []*models.Tool{}
 	}
 
-	page := templates.Page(notes, tools)
-	err := page.Render(c.Request().Context(), c.Response())
+	t := templates.Page(notes, tools)
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "NotesPage")
+		return errors.NewRenderError(err, "Page")
 	}
 
 	return nil
@@ -74,27 +74,27 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	slog.Info("Deleting note")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	idq, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse note ID")
+	idq, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	noteID := models.NoteID(idq)
 
 	// Delete the note
-	dberr := h.registry.Notes.Delete(noteID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "delete note")
+	merr = h.registry.Notes.Delete(noteID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
-	_, dberr = h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for note deletion", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for note deletion", "error", merr)
 	}
 
 	// Trigger reload of notes sections
@@ -104,14 +104,14 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetNotesGrid(c echo.Context) error {
-	notes, dberr := h.registry.Notes.List()
-	if dberr != nil {
-		return errors.HandlerError(dberr, "list notes")
+	notes, merr := h.registry.Notes.List()
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	tools, dberr := h.registry.Tools.List()
-	if dberr != nil {
-		return errors.HandlerError(dberr, "list tools")
+	tools, merr := h.registry.Tools.List()
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	ng := templates.NotesGrid(notes, tools)
