@@ -60,9 +60,9 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 
 	// Load existing content based on type
 	if id > 0 {
-		err := h.loadExistingContent(props)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "load existing content")
+		merr := h.loadExistingContent(props)
+		if merr != nil {
+			return merr.WrapEcho("load existing content")
 		}
 	}
 
@@ -76,7 +76,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
+func (h *Handler) PostSaveContent(c echo.Context) error {
 	var (
 		editorType = c.FormValue("type")
 		idParam    = c.FormValue("id")
@@ -85,9 +85,9 @@ func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
 	slog.Info("Save editor content", "type", editorType, "id", idParam)
 
 	// Get user from context
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Parse form data
@@ -98,11 +98,11 @@ func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
 	)
 
 	if editorType == "" {
-		return errors.NewBadRequestError(nil, "editor type is required")
+		return echo.NewHTTPError(http.StatusBadRequest, "editor type is required")
 	}
 
 	if title == "" || content == "" {
-		return errors.NewBadRequestError(nil, "title and content are required")
+		return echo.NewHTTPError(http.StatusBadRequest, "title and content are required")
 	}
 
 	var id int64
@@ -110,76 +110,94 @@ func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
 		var err error
 		id, err = strconv.ParseInt(idParam, 10, 64)
 		if err != nil {
-			return errors.NewBadRequestError(err, "invalid ID parameter")
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
 		}
 	}
 
 	// Handle attachments
-	attachments, err := h.processAttachments(c)
-	if err != nil {
-		return errors.NewBadRequestError(err, "process attachments")
+	attachments, merr := h.processAttachments(c)
+	if merr != nil {
+		return merr.WrapEcho("process attachments")
 	}
 
 	// Save content based on type
-	err = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
-	if err != nil {
-		return errors.HandlerError(err, "save content")
+	merr = h.saveContent(editorType, id, title, content, useMarkdown, attachments, user)
+	if merr != nil {
+		return merr.WrapEcho("save")
 	}
 
 	// Redirect back to return URL or appropriate page
 	returnURL := c.FormValue("return_url")
 	if returnURL != "" {
-		return utils.RedirectTo(c, templ.SafeURL(returnURL))
+		url := templ.SafeURL(returnURL)
+		merr = utils.RedirectTo(c, url)
+		if merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
 	}
 
 	// Default redirects based on type
 	switch editorType {
 	case "troublereport":
-		return utils.RedirectTo(c, utils.UrlTroubleReports(0, 0, 0).Page)
+		url := utils.UrlTroubleReports(0, 0, 0).Page
+		merr = utils.RedirectTo(c, url)
+		if merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
 	default:
-		return utils.RedirectTo(c, utils.UrlHome().Page)
+		url := utils.UrlHome().Page
+		merr = utils.RedirectTo(c, url)
+		if merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
 	}
 }
 
 // loadExistingContent loads existing content based on type and ID
-func (h *Handler) loadExistingContent(props *templates.PageProps) error {
+func (h *Handler) loadExistingContent(props *templates.PageProps) *errors.MasterError {
 	switch props.Type {
 	case "troublereport":
-		tr, err := h.registry.TroubleReports.Get(models.TroubleReportID(props.ID))
-		if err != nil {
-			return fmt.Errorf("get trouble report: %v", err)
+		tr, merr := h.registry.TroubleReports.Get(models.TroubleReportID(props.ID))
+		if merr != nil {
+			return merr
 		}
 		props.Title = tr.Title
 		props.Content = tr.Content
 		props.UseMarkdown = tr.UseMarkdown
 
 		// Load attachments
-		loadedAttachments, err := h.registry.TroubleReports.LoadAttachments(tr)
-		if err == nil {
+		loadedAttachments, merr := h.registry.TroubleReports.LoadAttachments(tr)
+		if merr == nil {
 			props.Attachments = loadedAttachments
 		} else {
 			slog.Error("Failed to load attachments for trouble report",
-				"trouble_report_id", props.ID, "error", err)
+				"trouble_report_id", props.ID, "error", merr)
 		}
 
 	default:
-		return fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", props.Type)
+		return errors.NewMasterError(
+			fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", props.Type),
+			http.StatusBadRequest,
+		)
 	}
 
 	return nil
 }
 
 // saveContent saves content based on type
-func (h *Handler) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) error {
+func (h *Handler) saveContent(editorType string, id int64, title, content string, useMarkdown bool, attachments []*models.Attachment, user *models.User) *errors.MasterError {
 	switch editorType {
 	case "troublereport":
 		if id > 0 {
 			trID := models.TroubleReportID(id)
 
 			// Update existing trouble report
-			tr, err := h.registry.TroubleReports.Get(trID)
-			if err != nil {
-				return fmt.Errorf("get trouble report: %v", err)
+			tr, merr := h.registry.TroubleReports.Get(trID)
+			if merr != nil {
+				return merr
 			}
 
 			// Filter out existing and new attachments
@@ -198,9 +216,9 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			tr.UseMarkdown = useMarkdown
 			tr.LinkedAttachments = existingAttachmentIDs
 
-			err = h.registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
-			if err != nil {
-				return fmt.Errorf("update trouble report: %v", err)
+			merr = h.registry.TroubleReports.UpdateWithAttachments(trID, tr, user, newAttachments...)
+			if merr != nil {
+				return merr
 			}
 
 			// Create feed entry
@@ -219,9 +237,9 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			tr := models.NewTroubleReport(title, content)
 			tr.UseMarkdown = useMarkdown
 
-			err := h.registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
-			if err != nil {
-				return fmt.Errorf("add trouble report: %v", err)
+			merr := h.registry.TroubleReports.AddWithAttachments(tr, user, attachments...)
+			if merr != nil {
+				return merr
 			}
 
 			// Create feed entry
@@ -238,14 +256,17 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 	// Note: Notes are not supported in the editor
 
 	default:
-		return fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", editorType)
+		return errors.NewMasterError(
+			fmt.Errorf("unsupported editor type: %s (only 'troublereport' is supported)", editorType),
+			http.StatusBadRequest,
+		)
 	}
 
 	return nil
 }
 
 // processAttachments handles file uploads and existing attachments
-func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, error) {
+func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, *errors.MasterError) {
 	var attachments []*models.Attachment
 
 	// Handle new file uploads
@@ -263,17 +284,23 @@ func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, erro
 
 		// Validate file size (max 10MB)
 		if fileHeader.Size > 10*1024*1024 {
-			return nil, fmt.Errorf("file %s is too large (max 10MB)", fileHeader.Filename)
+			return nil, errors.NewMasterError(
+				fmt.Errorf("file %s is too large (max 10MB)", fileHeader.Filename),
+				http.StatusBadRequest,
+			)
 		}
 
 		// Validate file type (images only)
 		if !strings.HasPrefix(fileHeader.Header.Get("Content-Type"), "image/") {
-			return nil, fmt.Errorf("file %s is not an image", fileHeader.Filename)
+			return nil, errors.NewMasterError(
+				fmt.Errorf("file %s is not an image", fileHeader.Filename),
+				http.StatusBadRequest,
+			)
 		}
 
-		attachment, err := h.processFileUpload(fileHeader)
-		if err != nil {
-			return nil, fmt.Errorf("process file %s: %v", fileHeader.Filename, err)
+		attachment, merr := h.processFileUpload(fileHeader)
+		if merr != nil {
+			return nil, merr.Wrap("process file %s", fileHeader.Filename)
 		}
 
 		attachments = append(attachments, attachment)
@@ -283,10 +310,12 @@ func (h *Handler) processAttachments(c echo.Context) ([]*models.Attachment, erro
 }
 
 // processFileUpload processes a single file upload
-func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, error) {
+func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.Attachment, *errors.MasterError) {
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fmt.Errorf("open file: %v", err)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("open file: %v", err), http.StatusInternalServerError,
+		)
 	}
 	defer file.Close()
 
@@ -294,7 +323,9 @@ func (h *Handler) processFileUpload(fileHeader *multipart.FileHeader) (*models.A
 	data := make([]byte, fileHeader.Size)
 	_, err = file.Read(data)
 	if err != nil {
-		return nil, fmt.Errorf("read file: %v", err)
+		return nil, errors.NewMasterError(
+			fmt.Errorf("read file: %v", err), http.StatusInternalServerError,
+		)
 	}
 
 	// Get MIME type
