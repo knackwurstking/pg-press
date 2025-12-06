@@ -70,7 +70,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	page := templates.Page(props)
 	err := page.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, fmt.Sprintf("EditorPage: %s", editorType))
+		return errors.NewRenderError(err, fmt.Sprintf("Editor Page: %s", editorType))
 	}
 
 	return nil

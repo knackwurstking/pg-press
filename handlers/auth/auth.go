@@ -45,7 +45,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 
 	err := page.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "login page")
+		return errors.NewRenderError(err, "Login Page")
 	}
 
 	return nil

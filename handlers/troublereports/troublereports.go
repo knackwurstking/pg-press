@@ -47,45 +47,49 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetPage(c echo.Context) error {
-	page := templates.Page()
-	err := page.Render(c.Request().Context(), c.Response())
+	t := templates.Page()
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "TroubleReportsPage")
+		return errors.NewRenderError(err, "Trouble Reports Page")
 	}
+
 	return nil
 }
 
 func (h *Handler) GetSharePDF(c echo.Context) error {
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "missing id query parameter")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	troubleReportID := models.TroubleReportID(id)
 
-	tr, dberr := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "retrieve trouble report")
+	tr, merr := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	pdfBuffer, err := pdf.GenerateTroubleReportPDF(tr)
 	if err != nil {
-		return errors.HandlerError(err, "generate PDF")
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			errors.Wrap(err, "generate PDF"),
+		)
 	}
 
 	return h.shareResponse(c, tr, pdfBuffer)
 }
 
 func (h *Handler) GetAttachment(c echo.Context) error {
-	var attachmentID models.AttachmentID
-	if id, err := utils.ParseQueryInt64(c, "attachment_id"); err != nil {
-		return errors.NewBadRequestError(err, "invalid attachment ID")
-	} else {
-		attachmentID = models.AttachmentID(id)
+	id, merr := utils.ParseQueryInt64(c, "attachment_id")
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	attachment, dberr := h.registry.Attachments.Get(attachmentID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "get attachment")
+	attachmentID := models.AttachmentID(id)
+
+	attachment, merr := h.registry.Attachments.Get(attachmentID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Set appropriate headers
@@ -99,64 +103,69 @@ func (h *Handler) GetAttachment(c echo.Context) error {
 	}
 	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	return c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
+	err := c.Blob(http.StatusOK, attachment.MimeType, attachment.Data)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return nil
 }
 
 func (h *Handler) GetModificationsForID(c echo.Context) error {
-	id, err := utils.ParseParamInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "invalid id in request")
+	id, merr := utils.ParseParamInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	modifications, dberr := h.registry.Modifications.List(
+	modifications, merr := h.registry.Modifications.List(
 		models.ModificationTypeTroubleReport,
 		id, 100, 0,
 	)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "retrieve modifications")
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Convert to the format expected by the modifications page
 	var resolvedModifications []*models.ResolvedModification[models.TroubleReportModData]
 	for _, m := range modifications {
-		resolvedModification, err := services.ResolveModification[models.TroubleReportModData](h.registry, m)
-		if err != nil {
-			slog.Error("Failed to resolve modification", "id", m.ID, "error", err)
+		resolvedModification, merr := services.ResolveModification[models.TroubleReportModData](h.registry, m)
+		if merr != nil {
+			slog.Error("Failed to resolve modification", "id", m.ID, "error", merr)
 			continue
 		}
 		resolvedModifications = append(resolvedModifications, resolvedModification)
 	}
 
 	// Render the page
-	currentUser, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	currentUser, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 	isAdmin := currentUser != nil && currentUser.IsAdmin()
 	itemRenderFunc := templates.CreateModificationRenderer(models.TroubleReportID(id), isAdmin)
 
-	page := templates.ModificationsPage(resolvedModifications, itemRenderFunc)
-	err = page.Render(c.Request().Context(), c.Response())
+	t := templates.ModificationsPage(resolvedModifications, itemRenderFunc)
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "ModificationsPage")
+		return errors.NewRenderError(err, "Modifications Page")
 	}
 
 	return nil
 }
 
 func (h *Handler) HTMXGetData(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	trs, dberr := h.registry.TroubleReports.ListWithAttachments()
-	if dberr != nil {
-		return errors.HandlerError(dberr, "load trouble reports")
+	trs, merr := h.registry.TroubleReports.ListWithAttachments()
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	troubleReportsList := templates.ListReports(user, trs)
-	err := troubleReportsList.Render(c.Request().Context(), c.Response())
+	t := templates.ListReports(user, trs)
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "ListReports")
 	}
@@ -167,20 +176,20 @@ func (h *Handler) HTMXGetData(c echo.Context) error {
 func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 	slog.Info("Remove a trouble report")
 
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse trouble report ID")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	troubleReportID := models.TroubleReportID(id)
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	removedReport, dberr := h.registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "delete trouble report")
+	removedReport, merr := h.registry.TroubleReports.RemoveWithAttachments(troubleReportID, user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -190,27 +199,31 @@ func (h *Handler) HTMXDeleteTroubleReport(c echo.Context) error {
 		slog.Warn("Failed to create feed for trouble report deletion", "error", err)
 	}
 
-	return h.HTMXGetData(c)
+	err := h.HTMXGetData(c)
+	if err != nil {
+		return errors.NewMasterError(err, 0).Echo()
+	}
+
+	return nil
 }
 
 func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse ID from query")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	troubleReportID := models.TroubleReportID(id)
 
-	tr, dberr := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "load trouble report")
+	tr, merr := h.registry.TroubleReports.GetWithAttachments(troubleReportID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	attachmentsPreview := templates.AttachmentsPreview(
+	t := templates.AttachmentsPreview(
 		templates.AttachmentPathTroubleReports,
 		tr.LoadedAttachments,
 	)
-
-	err = attachmentsPreview.Render(c.Request().Context(), c.Response())
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "AttachmentsPreview")
 	}
@@ -221,33 +234,39 @@ func (h *Handler) HTMXGetAttachmentsPreview(c echo.Context) error {
 func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	slog.Info("Rollback a trouble report to an other version")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	id, err := utils.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewBadRequestError(err, "parse ID query")
+	id, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
 	}
 	troubleReportID := models.TroubleReportID(id)
 
 	modTimeStr := c.FormValue("modification_time")
 	if modTimeStr == "" {
-		return errors.NewBadRequestError(nil, "modification_time form value is required")
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"modification_time form value is required",
+		)
 	}
 
 	modTime, err := strconv.ParseInt(modTimeStr, 10, 64)
 	if err != nil {
-		return errors.NewBadRequestError(err, "invalid modification_time format")
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid modification_time format",
+		)
 	}
 
-	modifications, dberr := h.registry.Modifications.ListAll(
+	modifications, merr := h.registry.Modifications.ListAll(
 		models.ModificationTypeTroubleReport,
 		id,
 	)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "retrieve modifications")
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	var targetMod *models.Modification[any]
@@ -265,17 +284,20 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	var modData models.TroubleReportModData
 	err = json.Unmarshal(targetMod.Data, &modData)
 	if err != nil {
-		return errors.HandlerError(err, "parse modification data")
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"parse modification data",
+		)
 	}
 
-	tr, dberr := h.registry.TroubleReports.Get(troubleReportID)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "retrieve trouble report")
+	tr, merr := h.registry.TroubleReports.Get(troubleReportID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	dberr = h.registry.TroubleReports.Update(modData.CopyTo(tr), user)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "rollback trouble report")
+	merr = h.registry.TroubleReports.Update(modData.CopyTo(tr), user)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Create feed entry
@@ -283,9 +305,9 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 	feedContent := fmt.Sprintf("Titel: %s\nZurückgesetzt auf Version vom: %s",
 		tr.Title, targetMod.CreatedAt.Format("2006-01-02 15:04:05"))
 
-	_, dberr = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed for trouble report rollback", "error", dberr)
+	_, merr = h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for trouble report rollback", "error", merr)
 	}
 
 	return nil
@@ -293,9 +315,12 @@ func (h *Handler) HTMXPostRollback(c echo.Context) error {
 
 func (h *Handler) shareResponse(
 	c echo.Context, tr *models.TroubleReportWithAttachments, buf *bytes.Buffer,
-) error {
+) *echo.HTTPError {
 	if buf == nil || buf.Len() == 0 {
-		return errors.HandlerError(nil, "PDF buffer is empty")
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"PDF buffer is empty",
+		)
 	}
 
 	sanitizedTitle := utils.SanitizeFilename(tr.Title)
@@ -318,5 +343,13 @@ func (h *Handler) shareResponse(
 	c.Response().Header().Set("X-XSS-Protection", "1; mode=block")
 	c.Response().Header().Set("Content-Description", "Trouble Report PDF")
 
-	return c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
+	err := c.Blob(http.StatusOK, "application/pdf", buf.Bytes())
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			err,
+		)
+	}
+
+	return nil
 }

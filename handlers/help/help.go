@@ -1,14 +1,13 @@
-package home
+package help
 
 import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/home/templates"
+	"github.com/knackwurstking/pg-press/handlers/help/templates"
 	"github.com/knackwurstking/pg-press/services"
 	ui "github.com/knackwurstking/ui/ui-templ"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,15 +23,15 @@ func NewHandler(r *services.Registry) *Handler {
 
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
-		ui.NewEchoRoute(http.MethodGet, path, h.GetHomePage),
+		ui.NewEchoRoute(http.MethodGet, path+"/markdown", h.GetMarkdown),
 	})
 }
 
-func (h *Handler) GetHomePage(c echo.Context) error {
-	t := templates.Page()
-	err := t.Render(c.Request().Context(), c.Response())
+func (h *Handler) GetMarkdown(c echo.Context) error {
+	t := templates.MarkdownPage()
+	err := t.Render(c.Request().Context(), c.Response().Writer)
 	if err != nil {
-		return errors.NewRenderError(err, "Page")
+		return errors.NewRenderError(err, "Markdown Page")
 	}
 
 	return nil

@@ -49,42 +49,43 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-// TODO: Continue here
-func (h *Handler) GetRegenerationPage(c echo.Context) *errors.MasterError {
-	press, eerr := h.parseParamPress(c)
-	if eerr != nil {
-		return eerr
+func (h *Handler) GetRegenerationPage(c echo.Context) error {
+	press, merr := h.parseParamPress(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	if err := templates.Page(templates.PageProps{
+	err := templates.Page(templates.PageProps{
 		Press: press,
-	}).Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.HandlerError(err, "render press page template")
+	}).Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "Press Regenration Page")
 	}
 
 	return nil
 }
 
-func (h *Handler) HxAddRegeneration(c echo.Context) *errors.MasterError {
+func (h *Handler) HxAddRegeneration(c echo.Context) error {
 	slog.Info("Adding new press regeneration entry")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	press, eerr := h.parseParamPress(c)
-	if eerr != nil {
-		return eerr
+	press, merr := h.parseParamPress(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	data, eerr := ParseFormRegenerationsPage(c, press)
-	if eerr != nil {
-		return eerr
+	data, merr := ParseForm(c, press)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	if _, err := h.registry.PressRegenerations.Add(data); err != nil {
-		return errors.HandlerError(err, "add press regeneration")
+	_, merr = h.registry.PressRegenerations.Add(data)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d Hinzugefügt", press), data, user)
@@ -93,25 +94,25 @@ func (h *Handler) HxAddRegeneration(c echo.Context) *errors.MasterError {
 	return nil
 }
 
-func (h *Handler) HxDeleteRegeneration(c echo.Context) *errors.MasterError {
+func (h *Handler) HxDeleteRegeneration(c echo.Context) error {
 	slog.Info("Removing press regeneration entry")
 
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	id, err := utils.ParseQueryInt64(c, "id") // PressRegenerationID
-	if err != nil {
-		return errors.NewBadRequestError(err, "missing id query")
+	id, merr := utils.ParseQueryInt64(c, "id") // PressRegenerationID
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	rid := models.PressRegenerationID(id)
 	r, _ := h.registry.PressRegenerations.Get(rid) // Need this for the feed
 
-	dberr := h.registry.PressRegenerations.Delete(rid)
-	if dberr != nil {
-		return errors.HandlerError(dberr, "delete press regeneration")
+	merr = h.registry.PressRegenerations.Delete(rid)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	h.createFeed(fmt.Sprintf("\"Regenerierung\" für Presse %d entfernt", r.PressNumber), r, user)

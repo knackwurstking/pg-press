@@ -64,7 +64,7 @@ func (h *Handler) GetNotesPage(c echo.Context) error {
 	t := templates.Page(notes, tools)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "Page")
+		return errors.NewRenderError(err, "Notes Page")
 	}
 
 	return nil

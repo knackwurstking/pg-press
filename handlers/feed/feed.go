@@ -35,7 +35,7 @@ func (h *Handler) GetFeedPage(c echo.Context) error {
 	t := templates.Page()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "Page")
+		return errors.NewRenderError(err, "Feed Page")
 	}
 
 	return nil

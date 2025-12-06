@@ -5,11 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
 // GetOverlappingTools detects tools that appear on multiple presses during overlapping time periods
-func (s *PressCycles) GetOverlappingTools() ([]*models.OverlappingTool, error) {
+func (s *PressCycles) GetOverlappingTools() ([]*models.OverlappingTool, *errors.MasterError) {
 	validPresses := []models.PressNumber{0, 2, 3, 4, 5}
 	allToolSummaries := s.collectAllPressSummaries(validPresses)
 	toolGroups := s.groupSummariesByToolID(allToolSummaries)
@@ -26,11 +27,7 @@ func (s *PressCycles) collectAllPressSummaries(presses []models.PressNumber) map
 			continue
 		}
 
-		summaries, err := s.GetToolSummaries(cycles, toolsMap)
-		if err != nil {
-			continue
-		}
-
+		summaries := s.GetToolSummaries(cycles, toolsMap)
 		allSummaries[press] = summaries
 	}
 
