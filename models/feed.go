@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"time"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type FeedID int64
@@ -27,30 +29,30 @@ func NewFeed(title, content string, userID TelegramID) *Feed {
 }
 
 // Validate checks if the feed has valid data.
-func (f *Feed) Validate() bool {
+func (f *Feed) Validate() *errors.ValidationError {
 	if f.Title == "" {
-		return false
+		return errors.NewValidationError("missing title")
 	}
 	if len(f.Title) > 255 {
-		return false
+		return errors.NewValidationError("title exceeds 255 chars: %d", len(f.Title))
 	}
 
 	if f.Content == "" {
-		return false
+		return errors.NewValidationError("missing content")
 	}
 	if len(f.Content) > 10000 {
-		return false
+		return errors.NewValidationError("content exceeds 10000 chars: %d", len(f.Content))
 	}
 
 	if f.UserID <= 0 {
-		return false
+		return errors.NewValidationError("invalid user id %d", f.UserID)
 	}
 
 	if f.CreatedAt <= 0 {
-		return false
+		return errors.NewValidationError("invalid created_at timestamp: %d", f.CreatedAt)
 	}
 
-	return true
+	return nil
 }
 
 // GetCreatedTime returns the feed creation time as a Go time.Time.

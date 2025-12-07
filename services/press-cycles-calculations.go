@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/models"
 )
@@ -12,7 +13,9 @@ import (
 // This function checks for press regenerations that might have occurred after the current cycle,
 // which would reset the cycle count, and adjusts the calculation accordingly.
 func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
-	if !cycle.Validate() {
+	verr := cycle.Validate()
+	if verr != nil {
+		slog.Warn("Invalid cycle data, cannot calculate partial cycles", "err", verr, "total_cycles", cycle.TotalCycles)
 		return cycle.TotalCycles
 	}
 

@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -29,11 +28,12 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.MasterError
 
 // Add creates a new press cycle
 func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, *errors.MasterError) {
-	if cycle.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid cycle: %v", cycle), http.StatusBadRequest)
+	verr := cycle.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
@@ -93,11 +93,12 @@ func (s *PressCycles) List() ([]*models.Cycle, *errors.MasterError) {
 
 // Update modifies an existing press cycle
 func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.MasterError {
-	if !cycle.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid cycle: %s", user), http.StatusBadRequest)
+	verr := cycle.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}

@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type CycleID int64
@@ -40,20 +42,21 @@ func NewCycleWithID(id CycleID, press PressNumber, toolID ToolID, toolPosition P
 	}
 }
 
-func (c *Cycle) Validate() bool {
+func (c *Cycle) Validate() *errors.ValidationError {
 	if !IsValidPressNumber(&c.PressNumber) {
-		return false
+		return errors.NewValidationError("invalid press number %d", c.PressNumber)
 	}
 	if c.ToolID <= 0 {
-		return false
+		return errors.NewValidationError("tool id cannot be lower or equal 0")
 	}
 	if !IsValidPosition(&c.ToolPosition) {
-		return false
+		return errors.NewValidationError("invalid postion %#v", c.ToolPosition)
 	}
 	if c.TotalCycles < 0 {
-		return false
+		return errors.NewValidationError("total_cycles have to be positive or zero")
 	}
-	return true
+
+	return nil
 }
 
 func FilterCyclesByToolPosition(toolPosition Position, cycles ...*Cycle) []*Cycle {

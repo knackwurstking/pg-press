@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -109,11 +108,9 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.MasterError) {
 }
 
 func (f *Feeds) Add(feed *models.Feed) *errors.MasterError {
-	if !feed.Validate() {
-		return errors.NewMasterError(
-			fmt.Errorf("invalid feed data %s", feed),
-			http.StatusBadRequest,
-		)
+	verr := feed.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(
@@ -145,11 +142,9 @@ func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*mod
 	feed := models.NewFeed(title, content, userID)
 
 	// Validate the feed
-	if !feed.Validate() {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid feed data %s", feed),
-			http.StatusBadRequest,
-		)
+	verr := feed.Validate()
+	if verr != nil {
+		return nil, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(
