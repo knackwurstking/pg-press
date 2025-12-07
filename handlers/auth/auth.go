@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/handlers/auth/templates"
-	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -152,9 +151,7 @@ func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
 		cookiePath = "/"
 	}
 
-	err := h.registry.Cookies.Add(
-		models.NewCookie(ctx.Request().UserAgent(), cookieValue, apiKey),
-	)
+	err := h.registry.Cookies.Add(ctx.Request().UserAgent(), cookieValue, apiKey)
 	if err != nil {
 		return err
 	}

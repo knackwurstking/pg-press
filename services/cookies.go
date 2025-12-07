@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -20,8 +21,7 @@ func NewCookies(registry *Registry) *Cookies {
 }
 
 func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY last_login DESC`, TableNameCookies)
-	rows, err := c.DB.Query(query)
+	rows, err := c.DB.Query(SQLListCookies)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -31,19 +31,12 @@ func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 }
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterError) {
-	if !utils.ValidateAPIKey(apiKey) {
-		return nil, errors.NewMasterError(
-			errors.NewValidationError("invalid api_key: %s", utils.MaskString(apiKey)),
-			http.StatusBadRequest,
-		)
+	verr := c.validateApiKey(apiKey)
+	if verr != nil {
+		return nil, verr.MasterError()
 	}
 
-	query := fmt.Sprintf(
-		`SELECT * FROM %s WHERE api_key = ? ORDER BY last_login DESC`,
-		TableNameCookies,
-	)
-
-	rows, err := c.DB.Query(query, apiKey)
+	rows, err := c.DB.Query(SQLListCookiesByApiKey, apiKey)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -60,8 +53,7 @@ func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 		)
 	}
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE value = ?`, TableNameCookies)
-	cookie, err := ScanCookie(c.DB.QueryRow(query, value))
+	cookie, err := ScanCookie(c.DB.QueryRow(SQLGetCookieByValue, value))
 	if err != nil {
 		return cookie, errors.NewMasterError(err, 0)
 	}
@@ -69,32 +61,24 @@ func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 	return cookie, nil
 }
 
-func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
-	verr := cookie.Validate()
+func (c *Cookies) Add(userAgent, value, apiKey string) *errors.MasterError {
+	verr := c.validateApiKey(apiKey)
 	if verr != nil {
 		return verr.MasterError()
 	}
 
 	// Check if cookie already exists
-	count, merr := c.QueryCount(
-		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE value = ?`, TableNameCookies),
-		cookie.Value,
-	)
+	count, merr := c.QueryCount(SQLCountCookies, value)
 	if merr != nil {
 		return merr
 	}
 	if count > 0 {
-		return errors.NewMasterError(
-			fmt.Errorf("already exists: %s", cookie),
-			http.StatusBadRequest,
-		)
+		return errors.NewValidationError("cookie for %s already exists",
+			utils.MaskString(value)).MasterError()
 	}
 
-	query := fmt.Sprintf(
-		`INSERT INTO %s (user_agent, value, api_key, last_login) VALUES (?, ?, ?, ?)`,
-		TableNameCookies,
-	)
-	_, err := c.DB.Exec(query, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
+	lastLogin := time.Now().UnixMilli()
+	_, err := c.DB.Exec(SQLAddCookie, userAgent, value, apiKey, lastLogin)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -102,7 +86,6 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
 	return nil
 }
 
-// Update updates a cookie with database-level locking to prevent race conditions
 func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterError {
 	verr := cookie.Validate()
 	if verr != nil {
@@ -116,35 +99,18 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterErro
 		).MasterError()
 	}
 
-	// For SQLite, we'll use a different approach: attempt to update with a condition
-	// that ensures we're updating the same row with the same timestamp as when we read it
-	query := fmt.Sprintf(
-		`
-			UPDATE %s 
-			SET 
-				user_agent = ?, 
-				value = ?, 
-				api_key = ?, 
-				last_login = ? 
-			WHERE value = ? AND last_login = ?`,
-		TableNameCookies,
-	)
-
 	// First, get the current cookie to check its last_login timestamp
 	currentCookie, dberr := c.Get(value)
 	if dberr != nil {
 		return dberr
 	}
 
-	// Try to update with the current timestamp to ensure we're updating the same row
+	// NOTE: Should i mutex lock here?
 	_, err := c.DB.Exec(
-		query,
-		cookie.UserAgent,
-		cookie.Value,
-		cookie.ApiKey,
-		cookie.LastLogin,
-		value,
-		currentCookie.LastLogin,
+		SQLUpdateCookie,
+		cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin, // SET
+		value,                   // WHERE ...
+		currentCookie.LastLogin, // ... AND
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -155,15 +121,10 @@ func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterErro
 
 func (c *Cookies) Remove(value string) *errors.MasterError {
 	if value == "" {
-		return errors.NewMasterError(
-			fmt.Errorf("value missing"),
-			http.StatusBadRequest,
-		)
+		return errors.NewMasterError(fmt.Errorf("value missing"), http.StatusBadRequest)
 	}
 
-	query := fmt.Sprintf(`DELETE FROM %s WHERE value = ?`, TableNameCookies)
-
-	_, err := c.DB.Exec(query, value)
+	_, err := c.DB.Exec(SQLDeleteCookie, value)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -172,15 +133,12 @@ func (c *Cookies) Remove(value string) *errors.MasterError {
 }
 
 func (c *Cookies) RemoveApiKey(apiKey string) *errors.MasterError {
-	if !utils.ValidateAPIKey(apiKey) {
-		return errors.NewMasterError(
-			fmt.Errorf("invalid api key: %s", utils.MaskString(apiKey)),
-			http.StatusBadRequest,
-		)
+	verr := c.validateApiKey(apiKey)
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`DELETE FROM %s WHERE api_key = ?`, TableNameCookies)
-	_, err := c.DB.Exec(query, apiKey)
+	_, err := c.DB.Exec(SQLDeleteCookiesByApiKey, apiKey)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -189,12 +147,17 @@ func (c *Cookies) RemoveApiKey(apiKey string) *errors.MasterError {
 }
 
 func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE last_login < ?`, TableNameCookies)
-
-	_, err := c.DB.Exec(query, beforeTimestamp)
+	_, err := c.DB.Exec(SQLDeleteExpiredCookies, beforeTimestamp)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
 
+	return nil
+}
+
+func (c *Cookies) validateApiKey(key string) *errors.ValidationError {
+	if !utils.ValidateAPIKey(key) {
+		return errors.NewValidationError("invalid api_key")
+	}
 	return nil
 }

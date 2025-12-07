@@ -25,12 +25,7 @@ func (f *Feeds) SetBroadcaster(broadcaster Broadcaster) {
 }
 
 func (f *Feeds) List() ([]*models.Feed, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, title, content, user_id, created_at FROM %s ORDER BY created_at DESC`,
-		TableNameFeeds,
-	)
-
-	rows, err := f.DB.Query(query)
+	rows, err := f.DB.Query(SQLListFeeds)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -39,6 +34,7 @@ func (f *Feeds) List() ([]*models.Feed, *errors.MasterError) {
 	return ScanRows(rows, ScanFeed)
 }
 
+// TODO: ...
 func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, *errors.MasterError) {
 	query := fmt.Sprintf(
 		`SELECT id, title, content, user_id, created_at

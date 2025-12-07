@@ -18,13 +18,17 @@ func NewAttachments(r *Registry) *Attachments {
 	}
 }
 
-func (a *Attachments) List() ([]*models.Attachment, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s ORDER BY id ASC`,
-		TableNameAttachments,
-	)
+func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.MasterError) {
+	attachment, err := ScanAttachment(a.DB.QueryRow(SQLGetAttachmentByID, id))
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
 
-	rows, err := a.DB.Query(query)
+	return attachment, nil
+}
+
+func (a *Attachments) List() ([]*models.Attachment, *errors.MasterError) {
+	rows, err := a.DB.Query(SQLListAttachments)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -33,21 +37,7 @@ func (a *Attachments) List() ([]*models.Attachment, *errors.MasterError) {
 	return ScanRows(rows, ScanAttachment)
 }
 
-func (a *Attachments) Get(id models.AttachmentID) (*models.Attachment, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s WHERE id = ?`,
-		TableNameAttachments,
-	)
-
-	attachment, err := ScanAttachment(a.DB.QueryRow(query, id))
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-
-	return attachment, nil
-}
-
-func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment, *errors.MasterError) {
+func (a *Attachments) ListByIDs(ids []models.AttachmentID) ([]*models.Attachment, *errors.MasterError) {
 	if len(ids) == 0 {
 		return []*models.Attachment{}, nil
 	}
@@ -60,13 +50,10 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 		args[i] = id
 	}
 
-	query := fmt.Sprintf(
-		`SELECT id, mime_type, data FROM %s WHERE id IN (%s) ORDER BY id ASC`,
-		TableNameAttachments,
-		strings.Join(placeholders, ","),
+	rows, err := a.DB.Query(
+		fmt.Sprintf(SQLListAttachmentsByIDs, strings.Join(placeholders, ", ")),
+		args...,
 	)
-
-	rows, err := a.DB.Query(query, args...)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -92,18 +79,8 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 	return attachmentsInOrder, nil
 }
 
-func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.MasterError) {
-	verr := attachment.Validate()
-	if verr != nil {
-		return 0, verr.MasterError()
-	}
-
-	query := fmt.Sprintf(
-		`INSERT INTO %s (mime_type, data) VALUES (?, ?)`,
-		TableNameAttachments,
-	)
-
-	result, err := a.DB.Exec(query, attachment.MimeType, attachment.Data)
+func (a *Attachments) Add(mimeType string, data []byte) (models.AttachmentID, *errors.MasterError) {
+	result, err := a.DB.Exec(SQLAddAttachment, mimeType, data)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
 	}
@@ -116,19 +93,8 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *
 	return models.AttachmentID(id), nil
 }
 
-func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError {
-	verr := attachment.Validate()
-	if verr != nil {
-		return verr.MasterError()
-	}
-
-	id := attachment.GetID()
-	query := fmt.Sprintf(
-		`UPDATE %s SET mime_type = ?, data = ? WHERE id = ?`,
-		TableNameAttachments,
-	)
-
-	_, err := a.DB.Exec(query, attachment.MimeType, attachment.Data, id)
+func (a *Attachments) Update(id int64, mimeType string, data []byte) *errors.MasterError {
+	_, err := a.DB.Exec(SQLUpdateAttachment, mimeType, data, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -137,8 +103,7 @@ func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError 
 }
 
 func (a *Attachments) Delete(id models.AttachmentID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameAttachments)
-	_, err := a.DB.Exec(query, id)
+	_, err := a.DB.Exec(SQLDeleteAttachment, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}

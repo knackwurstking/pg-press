@@ -166,3 +166,117 @@ const (
 
 	`
 )
+
+// SQL queries for attachments service
+//
+// id 			INTEGER NOT NULL,
+// mime_type 	TEXT NOT NULL,
+// data 		BLOB NOT NULL,
+// PRIMARY 		KEY("id" AUTOINCREMENT)
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+	SQLGetAttachmentByID = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		WHERE id = ?
+	`
+	SQLListAttachments = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		ORDER BY id ASC
+	`
+	SQLListAttachmentsByIDs = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		WHERE id IN (%s) 
+		ORDER BY id ASC
+	`
+	SQLAddAttachment = `
+		INSERT INTO attachments (mime_type, data) 
+		VALUES (?, ?)
+	`
+	SQLUpdateAttachment = `
+		UPDATE attachments 
+		SET mime_type = ?, data = ? 
+		WHERE id = ?
+	`
+	SQLDeleteAttachment = `
+		DELETE FROM attachments 
+		WHERE id = ?
+	`
+)
+
+// SQL queries for cookies service
+//
+// user_agent 	TEXT NOT NULL,
+// value 		TEXT NOT NULL,
+// api_key 		TEXT NOT NULL,
+// last_login 	INTEGER NOT NULL,
+//
+// PRIMARY KEY("value")
+
+const (
+	SQLCountCookies = `
+		SELECT COUNT(*) 
+		FROM cookies 
+		WHERE value = ?
+	`
+	SQLListCookies = `
+		SELECT user_agent, value, api_key, last_login 
+		FROM cookies 
+		ORDER BY last_login DESC
+	`
+	SQLListCookiesByApiKey = `
+		SELECT user_agent, value, api_key, last_login 
+		FROM cookies 
+		WHERE api_key = ? 
+		ORDER BY last_login DESC
+	`
+	SQLGetCookieByValue = `
+		SELECT user_agent, value, api_key, last_login
+		FROM cookies 
+		WHERE value = ?
+	`
+	SQLAddCookie = `
+		INSERT INTO cookies (user_agent, value, api_key, last_login)
+		VALUES (?, ?, ?, ?)
+	`
+	SQLUpdateCookie = `
+		UPDATE cookies
+		SET user_agent = ?, value = ?, api_key = ?, last_login = ? 
+		WHERE value = ? AND last_login = ?
+	`
+	SQLDeleteCookie = `
+		DELETE FROM cookies 
+		WHERE value = ?
+	`
+	SQLDeleteCookiesByApiKey = `
+		DELETE FROM cookies 
+		WHERE api_key = ?
+	`
+	SQLDeleteExpiredCookies = `
+		DELETE FROM cookies
+		WHERE last_login < ?
+	`
+)
+
+// SQL queries for feeds service
+//
+// id 			INTEGER NOT NULL,
+// title 		TEXT NOT NULL,
+// content 		TEXT NOT NULL,
+// user_id 		INTEGER NOT NULL,
+// created_at 	INTEGER NOT NULL,
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+	SQLListFeeds = `
+		SELECT id, title, content, user_id, created_at 
+		FROM feeds
+		ORDER BY created_at DESC
+	`
+	// TODO: ...
+)
