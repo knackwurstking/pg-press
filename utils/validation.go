@@ -6,5 +6,5 @@ import (
 
 // ValidateAPIKey validates an API key according to the minimum length requirement
 func ValidateAPIKey(apiKey string) bool {
-	return len(apiKey) == env.MinAPIKeyLength
+	return len(apiKey) >= env.MinAPIKeyLength
 }
