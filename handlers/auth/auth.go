@@ -62,27 +62,40 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
-		return utils.RedirectTo(c, utils.UrlLogin(apiKey, &invalid).Page)
+		merr := utils.RedirectTo(c, utils.UrlLogin(apiKey, &invalid).Page)
+		if merr != nil {
+			return merr.Echo()
+		}
 	}
 
-	return utils.RedirectTo(c, utils.UrlProfile("").Page)
+	merr := utils.RedirectTo(c, utils.UrlProfile("").Page)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	return nil
 }
 
 func (h *Handler) GetLogout(c echo.Context) error {
-	user, eerr := utils.GetUserFromContext(c)
-	if eerr != nil {
-		return eerr
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	cookie, err := c.Cookie(env.CookieName)
 	if err == nil {
-		dberr := h.registry.Cookies.Remove(cookie.Value)
-		if dberr != nil {
-			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", dberr)
+		merr := h.registry.Cookies.Remove(cookie.Value)
+		if merr != nil {
+			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", merr)
 		}
 	}
 
-	return utils.RedirectTo(c, utils.UrlLogin("", nil).Page)
+	merr = utils.RedirectTo(c, utils.UrlLogin("", nil).Page)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	return nil
 }
 
 func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
