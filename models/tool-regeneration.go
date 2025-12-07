@@ -1,6 +1,6 @@
 package models
 
-import ()
+import "github.com/knackwurstking/pg-press/errors"
 
 type ToolRegenerationID int64
 
@@ -22,14 +22,14 @@ func NewToolRegeneration(toolID ToolID, cycleID CycleID, reason string, performe
 	}
 }
 
-func (r *ToolRegeneration) Validate() bool {
+func (r *ToolRegeneration) Validate() *errors.ValidationError {
 	if r.ToolID <= 0 {
-		return false
+		return errors.NewValidationError("tool_id must be a positive integer")
 	}
 
 	if r.CycleID <= 0 {
-		return false
+		return errors.NewValidationError("cycle_id must be a positive integer")
 	}
 
-	return true
+	return nil
 }

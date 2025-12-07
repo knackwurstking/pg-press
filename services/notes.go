@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -138,8 +137,9 @@ func (n *Notes) getByLinked(linked string) ([]*models.Note, *errors.MasterError)
 }
 
 func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
-	if !note.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid note: %v", note), http.StatusBadRequest)
+	verr := note.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(
@@ -161,8 +161,9 @@ func (n *Notes) Add(note *models.Note) (models.NoteID, *errors.MasterError) {
 }
 
 func (n *Notes) Update(note *models.Note) *errors.MasterError {
-	if !note.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid note: %v", note), http.StatusBadRequest)
+	verr := note.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(

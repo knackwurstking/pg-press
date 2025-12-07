@@ -1,8 +1,6 @@
 package pressregenerations
 
 import (
-	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -42,11 +40,9 @@ func ParseForm(c echo.Context, press models.PressNumber) (
 		Reason:      reason,
 	}
 
-	if !r.Validate() {
-		return r, errors.NewMasterError(
-			fmt.Errorf("invalid regeneration data for press %d", press),
-			http.StatusBadRequest,
-		)
+	verr := r.Validate()
+	if verr != nil {
+		return r, verr.MasterError()
 	}
 
 	return r, nil

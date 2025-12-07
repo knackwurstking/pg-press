@@ -133,11 +133,9 @@ func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[m
 }
 
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.MasterError) {
-	if !sheet.Validate() {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("invalid metal sheet data: %s", sheet),
-			http.StatusBadRequest,
-		)
+	verr := sheet.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
@@ -169,11 +167,9 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 }
 
 func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
-	if !sheet.Validate() {
-		return errors.NewMasterError(
-			fmt.Errorf("invalid metal sheet data: %s", sheet),
-			http.StatusBadRequest,
-		)
+	verr := sheet.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`

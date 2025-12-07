@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -52,11 +51,13 @@ func (s *ToolRegenerations) Add(
 	toolID models.ToolID, cycleID models.CycleID, reason string, user *models.User,
 ) (models.ToolRegenerationID, *errors.MasterError) {
 	r := models.NewToolRegeneration(toolID, cycleID, reason, &user.TelegramID)
-	if !r.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
+
+	verr := r.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
@@ -80,11 +81,12 @@ func (s *ToolRegenerations) Add(
 }
 
 func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User) *errors.MasterError {
-	if !r.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
+	verr := r.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}

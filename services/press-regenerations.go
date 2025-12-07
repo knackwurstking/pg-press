@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -48,8 +47,9 @@ func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRe
 }
 
 func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegenerationID, *errors.MasterError) {
-	if !r.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", r), http.StatusBadRequest)
+	verr := r.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
@@ -71,8 +71,9 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 }
 
 func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterError {
-	if !r.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", r), http.StatusBadRequest)
+	verr := r.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
@@ -117,8 +118,9 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 
 	regeneration.Stop()
 
-	if !regeneration.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid press regenration data: %v", regeneration), http.StatusBadRequest)
+	verr := regeneration.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
