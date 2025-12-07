@@ -9,7 +9,7 @@ import (
 )
 
 type PageProps struct {
-	Type        models.EditorType // TODO: I could use a type alias here, and also define some constants
+	Type        models.EditorType
 	ID          int64
 	ReturnURL   templ.SafeURL
 	Title       string
