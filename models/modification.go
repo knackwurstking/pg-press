@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (
@@ -78,18 +80,18 @@ func (m *Modification[T]) String() string {
 }
 
 // Validate performs basic validation on the modification
-func (m *Modification[T]) Validate() error {
+func (m *Modification[T]) Validate() *errors.ValidationError {
 	if m.ID < 0 {
-		return fmt.Errorf("modification ID cannot be negative")
+		return errors.NewValidationError("modification ID cannot be negative")
 	}
 	if m.UserID <= 0 {
-		return fmt.Errorf("user ID must be positive")
+		return errors.NewValidationError("user ID must be positive")
 	}
 	if m.CreatedAt.IsZero() {
-		return fmt.Errorf("created_at cannot be zero")
+		return errors.NewValidationError("created_at cannot be zero")
 	}
 	if m.CreatedAt.After(time.Now()) {
-		return fmt.Errorf("created_at cannot be in the future")
+		return errors.NewValidationError("created_at cannot be in the future")
 	}
 	return nil
 }

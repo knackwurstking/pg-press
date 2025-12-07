@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type PressRegenerationID int64
@@ -30,18 +32,18 @@ func (r *PressRegeneration) StopAt(completedAt time.Time) {
 	r.CompletedAt = completedAt
 }
 
-func (r *PressRegeneration) Validate() bool {
+func (r *PressRegeneration) Validate() *errors.ValidationError {
 	if !IsValidPressNumber(&r.PressNumber) {
-		return false
+		return errors.NewValidationError("invalid press_number: %d", r.PressNumber)
 	}
 
 	if r.StartedAt.IsZero() {
-		return false
+		return errors.NewValidationError("started_at cannot be zero")
 	}
 
 	if !r.CompletedAt.IsZero() && !r.CompletedAt.After(r.StartedAt) {
-		return false
+		return errors.NewValidationError("completed_at must be after started_at")
 	}
 
-	return true
+	return nil
 }

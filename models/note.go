@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (
@@ -48,16 +50,16 @@ func NewLinkedNote(l Level, message string, linked string) *Note {
 	}
 }
 
-func (n *Note) Validate() bool {
+func (n *Note) Validate() *errors.ValidationError {
 	if n.Content == "" {
-		return false
+		return errors.NewValidationError("content cannot be empty")
 	}
 
 	if n.Level < 0 {
-		return false
+		return errors.NewValidationError("invalid level: %d", n.Level)
 	}
 
-	return true
+	return nil
 }
 
 // IsLinked returns true if the note is linked to any entity

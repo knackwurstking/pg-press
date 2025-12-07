@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"sort"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 // Machine type identifiers
@@ -100,48 +102,48 @@ func (ms *MetalSheet) String() string {
 		ms.ID, ms.Identifier, ms.TileHeight, ms.Value, ms.MarkeHeight, ms.STF, ms.STFMax)
 }
 
-func (ms *MetalSheet) Validate() bool {
+func (ms *MetalSheet) Validate() *errors.ValidationError {
 	// Validate machine type identifier
 	if !ms.Identifier.IsValid() {
-		return false
+		return errors.NewValidationError("invalid machine type identifier: %s", ms.Identifier)
 	}
 
 	// Validate tool ID (foreign key reference)
 	if ms.ToolID <= 0 {
-		return false
+		return errors.NewValidationError("invalid tool ID: %d", ms.ToolID)
 	}
 
 	// Validate tile height
 	if ms.TileHeight < 0 {
-		return false
+		return errors.NewValidationError("tile height cannot be negative: %.1f", ms.TileHeight)
 	}
 
 	// Validate value
 	if ms.Value < 0 {
-		return false
+		return errors.NewValidationError("value cannot be negative: %.1f", ms.Value)
 	}
 
 	// Validate marke height
 	if ms.MarkeHeight < 0 {
-		return false
+		return errors.NewValidationError("marke height cannot be negative: %d", ms.MarkeHeight)
 	}
 
 	// Validate STF
 	if ms.STF < 0 {
-		return false
+		return errors.NewValidationError("STF cannot be negative: %.1f", ms.STF)
 	}
 
 	// Validate STF Max
 	if ms.STFMax < 0 {
-		return false
+		return errors.NewValidationError("STF Max cannot be negative: %.1f", ms.STFMax)
 	}
 
 	// Validate STF relationship - STFMax should be >= STF
 	if ms.STFMax < ms.STF {
-		return false
+		return errors.NewValidationError("STF Max (%.1f) cannot be less than STF (%.1f)", ms.STFMax, ms.STF)
 	}
 
-	return true
+	return nil
 }
 
 // ParseMachineType parses a string into a MachineType with validation
