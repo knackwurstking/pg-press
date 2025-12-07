@@ -38,7 +38,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 func (h *Handler) GetEditorPage(c echo.Context) error {
 	// Parse query parameters
-	editorType := c.QueryParam("type")
+	editorType := models.EditorType(c.QueryParam("type"))
 	if editorType == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "editor type is required")
 	}

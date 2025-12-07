@@ -79,13 +79,13 @@ func UrlHelp() (url struct {
 }
 
 // UrlEditor constructs editor URLs
-func UrlEditor(_type, id string, returnURL templ.SafeURL) (url struct {
+func UrlEditor(_type models.EditorType, id string, returnURL templ.SafeURL) (url struct {
 	Page templ.SafeURL
 	Save templ.SafeURL
 }) {
 	a, _ := strings.CutPrefix(string(returnURL), env.ServerPathPrefix)
 	url.Page = BuildURL("/editor", map[string]string{
-		"type":       _type,
+		"type":       string(_type),
 		"id":         id,
 		"return_url": string(a),
 	})
