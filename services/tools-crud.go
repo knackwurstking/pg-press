@@ -9,11 +9,12 @@ import (
 )
 
 func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *errors.MasterError) {
-	if !tool.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid tool: %s", tool), http.StatusBadRequest)
+	verr := tool.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
@@ -54,11 +55,12 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 }
 
 func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.MasterError {
-	if !tool.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid tool: %s", tool), http.StatusBadRequest)
+	verr := tool.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"net/http"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -58,11 +57,12 @@ func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, 
 }
 
 func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *errors.MasterError) {
-	if !tr.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+	verr := tr.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
-	verr := u.Validate()
+	verr = u.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
@@ -96,11 +96,12 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 }
 
 func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *errors.MasterError {
-	if !tr.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+	verr := tr.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	verr := u.Validate()
+	verr = u.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
@@ -234,11 +235,13 @@ func (s *TroubleReports) UpdateWithAttachments(
 	user *models.User,
 	newAttachments ...*models.Attachment,
 ) *errors.MasterError {
-	if !tr.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
+
+	verr := tr.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
-	verr := user.Validate()
+	verr = user.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
@@ -320,15 +323,17 @@ func (s *TroubleReports) RemoveWithAttachments(
 	return tr, nil
 }
 
-func (s *TroubleReports) LoadAttachments(report *models.TroubleReport) (
+func (s *TroubleReports) LoadAttachments(tr *models.TroubleReport) (
 	[]*models.Attachment, *errors.MasterError,
 ) {
-	if !report.Validate() {
-		return nil, errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", report), http.StatusBadRequest)
+
+	verr := tr.Validate()
+	if verr != nil {
+		return nil, verr.MasterError()
 	}
 
 	var attachments []*models.Attachment
-	for _, attachmentID := range report.LinkedAttachments {
+	for _, attachmentID := range tr.LinkedAttachments {
 		attachment, err := s.Registry.Attachments.Get(attachmentID)
 		if err != nil {
 			continue

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type TroubleReportID int64
@@ -29,33 +30,33 @@ func NewTroubleReport(title, content string, linkedAttachments ...AttachmentID) 
 }
 
 // Validate checks if the trouble report has valid data.
-func (tr *TroubleReport) Validate() bool {
+func (tr *TroubleReport) Validate() *errors.ValidationError {
 	if tr.Title == "" {
-		return false
+		return errors.NewValidationError("title cannot be empty")
 	}
 	if len(tr.Title) < env.MinTitleLength {
-		return false
+		return errors.NewValidationError("title must be at least %d characters long", env.MinTitleLength)
 	}
 	if len(tr.Title) > env.MaxTitleLength {
-		return false
+		return errors.NewValidationError("title cannot exceed %d characters", env.MaxTitleLength)
 	}
 
 	if tr.Content == "" {
-		return false
+		return errors.NewValidationError("content cannot be empty")
 	}
 	if len(tr.Content) < env.MinContentLength {
-		return false
+		return errors.NewValidationError("content must be at least %d characters long", env.MinContentLength)
 	}
 	if len(tr.Content) > env.MaxContentLength {
-		return false
+		return errors.NewValidationError("content cannot exceed %d characters", env.MaxContentLength)
 	}
 
 	for _, attachmentID := range tr.LinkedAttachments {
 		if attachmentID <= 0 {
-			return false
+			return errors.NewValidationError("invalid attachment ID: %d", attachmentID)
 		}
 	}
-	return true
+	return nil
 }
 
 // String returns a string representation of the trouble report.

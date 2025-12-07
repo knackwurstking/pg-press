@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"sort"
+
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 const (
@@ -42,16 +44,16 @@ func NewTool(position Position, format Format, code string, _type string) *Tool 
 	}
 }
 
-func (t *Tool) Validate() bool {
+func (t *Tool) Validate() *errors.ValidationError {
 	if !IsValidPosition(&t.Position) {
-		return false
+		return errors.NewValidationError("invalid tool position: %s", t.Position)
 	}
 
 	if t.Code == "" {
-		return false
+		return errors.NewValidationError("tool code cannot be empty")
 	}
 
-	return true
+	return nil
 }
 
 func (t *Tool) Status() Status {
