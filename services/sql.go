@@ -3,16 +3,6 @@ package services
 const (
 	SQLCreateUserTables = `
 
-	-- Create table for cookies
-
-	CREATE TABLE IF NOT EXISTS cookies (
-		user_agent TEXT NOT NULL,
-		value TEXT NOT NULL,
-		api_key TEXT NOT NULL,
-		last_login INTEGER NOT NULL,
-		PRIMARY KEY("value")
-	);
-
 	-- Create table for users
 
 	CREATE TABLE IF NOT EXISTS users (
@@ -23,7 +13,23 @@ const (
 		PRIMARY KEY("telegram_id")
 	);
 
-	-- TODO: Create indexes here
+	-- Create table for cookies
+
+	CREATE TABLE IF NOT EXISTS cookies (
+		user_agent TEXT NOT NULL,
+		value TEXT NOT NULL,
+		api_key TEXT NOT NULL,
+		last_login INTEGER NOT NULL,
+		PRIMARY KEY("value")
+	);
+
+	-- Indexes for users table
+
+	CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key);
+
+	-- Indexes for cookies table
+
+	CREATE INDEX IF NOT EXISTS idx_cookies_value ON cookies(value);
 
 `
 
@@ -144,7 +150,19 @@ const (
 		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
-	-- TODO: Create indexes here
+	-- Indexes for notes table
+
+	CREATE INDEX IF NOT EXISTS idx_notes_linked ON notes(linked);
+
+	-- Indexes for tool_regenerations table
+
+	CREATE INDEX IF NOT EXISTS idx_tool_regenerations_tool_id ON tool_regenerations(tool_id);
+
+	-- Indexes for press_cycles table
+
+	CREATE INDEX IF NOT EXISTS idx_press_cycles_tool_id ON press_cycles(tool_id);
+	CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
+	CREATE INDEX IF NOT EXISTS idx_press_cycles_date ON press_cycles(date);
 
 	`
 )
