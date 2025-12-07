@@ -56,8 +56,9 @@ func (s *ToolRegenerations) Add(
 		return 0, errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
@@ -83,8 +84,9 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 		return errors.NewMasterError(fmt.Errorf("invalid tool regeneration: %v", r), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`
@@ -114,8 +116,10 @@ func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) *errors.MasterE
 func (s *ToolRegenerations) StartToolRegeneration(
 	id models.ToolID, reason string, user *models.User,
 ) (models.ToolRegenerationID, *errors.MasterError) {
-	if !user.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+
+	verr := user.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	cycle, merr := s.Registry.PressCycles.GetLastToolCycle(id)
@@ -141,8 +145,9 @@ func (s *ToolRegenerations) StartToolRegeneration(
 }
 
 func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	merr := s.Registry.Tools.UpdateRegenerating(toolID, false, user)
@@ -154,8 +159,9 @@ func (s *ToolRegenerations) StopToolRegeneration(toolID models.ToolID, user *mod
 }
 
 func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	lastRegeneration, merr := s.GetLastRegeneration(toolID)

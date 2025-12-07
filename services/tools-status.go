@@ -13,8 +13,9 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 		return errors.NewMasterError(fmt.Errorf("invalid press number: %d", pressNumber), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	tool, merr := t.Get(toolID)
@@ -43,8 +44,9 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 }
 
 func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	// Get the current tool to check if the regeneration status is actually changing
@@ -67,8 +69,9 @@ func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user
 }
 
 func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 1, press = NULL WHERE id = ?`, TableNameTools)
@@ -80,8 +83,9 @@ func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) *errors.Mast
 }
 
 func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET is_dead = 0 WHERE id = ?`, TableNameTools)

@@ -33,8 +33,9 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 		return 0, errors.NewMasterError(fmt.Errorf("invalid cycle: %v", cycle), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	if cycle.Date.IsZero() {
@@ -96,8 +97,9 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.Mas
 		return errors.NewMasterError(fmt.Errorf("invalid cycle: %s", user), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	if cycle.Date.IsZero() {

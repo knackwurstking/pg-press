@@ -49,7 +49,7 @@ func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterError) {
 	if !utils.ValidateAPIKey(apiKey) {
 		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid api key"),
+			errors.NewValidationError("invalid api_key: %s", utils.MaskString(apiKey)),
 			http.StatusBadRequest,
 		)
 	}
@@ -86,11 +86,9 @@ func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 }
 
 func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
-	if !cookie.Validate() {
-		return errors.NewMasterError(
-			fmt.Errorf("invalid cookie data to add: %s", cookie),
-			http.StatusBadRequest,
-		)
+	verr := cookie.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	// Check if cookie already exists
@@ -122,11 +120,16 @@ func (c *Cookies) Add(cookie *models.Cookie) *errors.MasterError {
 
 // Update updates a cookie with database-level locking to prevent race conditions
 func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterError {
-	if value == "" || !cookie.Validate() {
-		return errors.NewMasterError(
-			fmt.Errorf("update cookie with value \"%s\" %s", utils.MaskString(value), cookie),
-			http.StatusBadRequest,
-		)
+	verr := cookie.Validate()
+	if verr != nil {
+		return verr.MasterError()
+	}
+
+	if value == "" {
+		return errors.NewValidationError(
+			"update cookie with value \"%s\" %s",
+			utils.MaskString(value), cookie,
+		).MasterError()
 	}
 
 	// For SQLite, we'll use a different approach: attempt to update with a condition

@@ -71,8 +71,9 @@ func (u *Users) List() ([]*models.User, *errors.MasterError) {
 }
 
 func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) {
-	if !user.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	// Check if user already exists
@@ -111,8 +112,9 @@ func (u *Users) Delete(telegramID models.TelegramID) *errors.MasterError {
 }
 
 func (u *Users) Update(user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`, TableNameUsers)

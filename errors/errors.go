@@ -8,6 +8,42 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type ValidationError struct {
+	Message string
+}
+
+func NewValidationError(format string, v ...any) *ValidationError {
+	return &ValidationError{
+		Message: fmt.Sprintf(format, v...),
+	}
+}
+
+func (ve *ValidationError) Error() string {
+	return ve.Message
+}
+
+func (ve *ValidationError) MasterError() *MasterError {
+	return NewMasterError(ve, 0)
+}
+
+type ExistsError struct {
+	Name string
+}
+
+func NewExistsError(name string) *ExistsError {
+	return &ExistsError{
+		Name: name,
+	}
+}
+
+func (ee *ExistsError) MasterError() *MasterError {
+	return NewMasterError(ee, 0)
+}
+
+func (ee *ExistsError) Error() string {
+	return fmt.Sprintf("%s already exists", ee.Name)
+}
+
 // MasterError represents a unified error type that encompasses all error handling patterns
 type MasterError struct {
 	Err  error // Err is required
@@ -30,7 +66,12 @@ func NewMasterError(err error, code int) *MasterError {
 		case sql.ErrNoRows:
 			code = http.StatusNotFound
 		default:
-			code = http.StatusInternalServerError
+			switch err.(type) {
+			case *ValidationError, *ExistsError:
+				code = http.StatusBadRequest
+			default:
+				code = http.StatusInternalServerError
+			}
 		}
 	}
 
@@ -68,4 +109,14 @@ func (e *MasterError) Echo() *echo.HTTPError {
 func (e *MasterError) WrapEcho(format string, a ...any) *echo.HTTPError {
 	msg := fmt.Sprintf(format, a...)
 	return echo.NewHTTPError(e.Code, msg+": "+e.Err.Error())
+}
+
+func (e *MasterError) IsValidationError() bool {
+	_, ok := e.Err.(*ValidationError)
+	return ok
+}
+
+func (e *MasterError) IsExistsError() bool {
+	_, ok := e.Err.(*ExistsError)
+	return ok
 }

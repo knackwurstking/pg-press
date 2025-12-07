@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 // Cookie represents a user session with authentication information.
@@ -28,33 +29,33 @@ func NewCookie(userAgent, value, apiKey string) *Cookie {
 }
 
 // Validate checks if the cookie has valid data.
-func (c *Cookie) Validate() bool {
+func (c *Cookie) Validate() *errors.ValidationError {
 	if c.UserAgent == "" {
-		return false
+		return errors.NewValidationError("user agent is required")
 	}
 	if len(c.UserAgent) > env.MaxUserAgentLength {
-		return false
+		return errors.NewValidationError("user agent too long, max %d characters", env.MaxUserAgentLength)
 	}
 
 	if c.Value == "" {
-		return false
+		return errors.NewValidationError("value is required")
 	}
 	if len(c.Value) < env.MinValueLength {
-		return false
+		return errors.NewValidationError("value too short, min %d characters", env.MinValueLength)
 	}
 
 	if c.ApiKey == "" {
-		return false
+		return errors.NewValidationError("api key is required")
 	}
 	if len(c.ApiKey) < env.MinAPIKeyLength {
-		return false
+		return errors.NewValidationError("api key too short, min %d characters", env.MinAPIKeyLength)
 	}
 
 	if c.LastLogin <= 0 {
-		return false
+		return errors.NewValidationError("last login must be positive")
 	}
 
-	return true
+	return nil
 }
 
 // GetLastLoginTime returns the last login time as a Go time.Time.

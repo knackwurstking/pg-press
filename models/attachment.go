@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 var (
@@ -30,24 +31,24 @@ type Attachment struct {
 }
 
 // Validate checks if the attachment has valid data.
-func (a *Attachment) Validate() bool {
+func (a *Attachment) Validate() *errors.ValidationError {
 	if a.MimeType == "" {
-		return false
+		return errors.NewValidationError("mime type is required")
 	}
 
 	if !a.IsImage() {
-		return false
+		return errors.NewValidationError("only image files are allowed")
 	}
 
 	if a.Data == nil {
-		return false
+		return errors.NewValidationError("data is required")
 	}
 
 	if len(a.Data) > env.MaxDataSize {
-		return false
+		return errors.NewValidationError("data size exceeds maximum allowed")
 	}
 
-	return true
+	return nil
 }
 
 // GetFileExtension returns the file extension based on the mime type.

@@ -62,8 +62,9 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 		return 0, errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
 	}
 
-	if !u.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", u), http.StatusBadRequest)
+	verr := u.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
@@ -98,8 +99,10 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 	if !tr.Validate() {
 		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
 	}
-	if !u.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", u), http.StatusBadRequest)
+
+	verr := u.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	linkedAttachments, err := json.Marshal(tr.LinkedAttachments)
@@ -129,8 +132,9 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 }
 
 func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	_, merr := s.Get(id)
@@ -191,8 +195,10 @@ func (s *TroubleReports) AddWithAttachments(
 	user *models.User,
 	attachments ...*models.Attachment,
 ) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	var attachmentIDs []models.AttachmentID
@@ -231,8 +237,10 @@ func (s *TroubleReports) UpdateWithAttachments(
 	if !tr.Validate() {
 		return errors.NewMasterError(fmt.Errorf("invalid trouble report: %s", tr), http.StatusBadRequest)
 	}
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	var newAttachmentIDs []models.AttachmentID
@@ -266,8 +274,10 @@ func (s *TroubleReports) RemoveWithAttachments(
 	id models.TroubleReportID,
 	user *models.User,
 ) (*models.TroubleReport, *errors.MasterError) {
-	if !user.Validate() {
-		return nil, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+
+	verr := user.Validate()
+	if verr != nil {
+		return nil, verr.MasterError()
 	}
 
 	tr, merr := s.Get(id)

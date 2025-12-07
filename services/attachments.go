@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -111,11 +110,9 @@ func (a *Attachments) GetByIDs(ids []models.AttachmentID) ([]*models.Attachment,
 }
 
 func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *errors.MasterError) {
-	if !attachment.Validate() {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("invalid attachment data to add %#v", attachment),
-			http.StatusBadRequest,
-		)
+	verr := attachment.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	query := fmt.Sprintf(
@@ -137,11 +134,9 @@ func (a *Attachments) Add(attachment *models.Attachment) (models.AttachmentID, *
 }
 
 func (a *Attachments) Update(attachment *models.Attachment) *errors.MasterError {
-	if !attachment.Validate() {
-		return errors.NewMasterError(
-			fmt.Errorf("invalid attachment data for update: %#v", attachment),
-			http.StatusBadRequest,
-		)
+	verr := attachment.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	id := attachment.GetID()

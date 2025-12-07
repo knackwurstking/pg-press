@@ -12,8 +12,10 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 	if !tool.Validate() {
 		return 0, errors.NewMasterError(fmt.Errorf("invalid tool: %s", tool), http.StatusBadRequest)
 	}
-	if !user.Validate() {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+
+	verr := user.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
 	}
 
 	if !t.validateToolUniqueness(tool, 0) {
@@ -56,8 +58,9 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.MasterError
 		return errors.NewMasterError(fmt.Errorf("invalid tool: %s", tool), http.StatusBadRequest)
 	}
 
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	if !t.validateToolUniqueness(tool, tool.ID) {
@@ -109,8 +112,9 @@ func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.MasterError) {
 }
 
 func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.MasterError {
-	if !user.Validate() {
-		return errors.NewMasterError(fmt.Errorf("invalid user: %s", user), http.StatusBadRequest)
+	verr := user.Validate()
+	if verr != nil {
+		return verr.MasterError()
 	}
 
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTools)

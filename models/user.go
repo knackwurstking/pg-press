@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/errors"
 )
 
 type TelegramID int64
@@ -29,33 +30,33 @@ func NewUser(telegramID TelegramID, userName, apiKey string) *User {
 }
 
 // Validate checks if the user has valid data
-func (u *User) Validate() bool {
+func (u *User) Validate() *errors.ValidationError {
 	if u.TelegramID <= 0 {
-		return false
+		return errors.NewValidationError("telegram_id must be positive")
 	}
 
 	if u.Name == "" {
-		return false
+		return errors.NewValidationError("name is required")
 	}
 	if len(u.Name) < env.UserNameMinLength {
-		return false
+		return errors.NewValidationError("name must be at least %d characters long", env.UserNameMinLength)
 	}
 	if len(u.Name) > env.UserNameMaxLength {
-		return false
+		return errors.NewValidationError("name must be at most %d characters long", env.UserNameMaxLength)
 	}
 
 	if u.ApiKey == "" {
-		return false
+		return errors.NewValidationError("api_key is required")
 	}
 	if len(u.ApiKey) < env.MinAPIKeyLength {
-		return false
+		return errors.NewValidationError("api_key must be at least %d characters long", env.MinAPIKeyLength)
 	}
 
 	if u.LastFeed < 0 {
-		return false
+		return errors.NewValidationError("last_feed must be non-negative")
 	}
 
-	return true
+	return nil
 }
 
 // IsAdmin checks if the user is an administrator

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
@@ -91,7 +90,7 @@ func addUserCommand() cli.Command {
 
 					user := models.NewUser(telegramID, *userName, *apiKey)
 					_, merr := r.Users.Add(user)
-					if strings.Contains(merr.Error(), "already exists") { // TODO: ...
+					if merr.IsExistsError() {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}
 					return merr
