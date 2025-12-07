@@ -18,6 +18,8 @@ system.
 
 ## Refactoring
 
-- [ ] Split the dialog handler, on file per dialog
+- [x] Split the dialog handler, on file per dialog
 - [x] Implement a validation error, update all validation functions/methods
 - [x] Implement a already exists error (bad request), and update the already exists check in `commands-user.go`
+- [ ] Change the way the tables are created, put all table creation code to one file
+- [ ] Split database into data.db and users.db

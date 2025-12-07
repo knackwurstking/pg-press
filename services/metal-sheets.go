@@ -9,37 +9,13 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameMetalSheets = "metal_sheets"
-
 type MetalSheets struct {
 	*Base
 }
 
 func NewMetalSheets(r *Registry) *MetalSheets {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			id INTEGER NOT NULL,
-			tile_height REAL NOT NULL,
-			value REAL NOT NULL,
-			marke_height INTEGER NOT NULL,
-			stf REAL NOT NULL,
-			stf_max REAL NOT NULL,
-			identifier TEXT NOT NULL,
-			tool_id INTEGER NOT NULL,
-			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY("id" AUTOINCREMENT),
-			FOREIGN KEY("tool_id") REFERENCES "tools"("id") ON DELETE CASCADE
-		);
-	`, TableNameMetalSheets)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameMetalSheets))
-	}
-
 	return &MetalSheets{
-		Base: base,
+		Base: NewBase(r),
 	}
 }
 

@@ -8,30 +8,13 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameAttachments = "attachments"
-
 type Attachments struct {
 	*Base
 }
 
 func NewAttachments(r *Registry) *Attachments {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			id INTEGER NOT NULL,
-			mime_type TEXT NOT NULL,
-			data BLOB NOT NULL,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`, TableNameAttachments)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameAttachments))
-	}
-
 	return &Attachments{
-		Base: base,
+		Base: NewBase(r),
 	}
 }
 

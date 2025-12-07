@@ -8,30 +8,14 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameNotes = "notes"
-
 type Notes struct {
 	*Base
 }
 
 func NewNotes(r *Registry) *Notes {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			id INTEGER NOT NULL,
-			level INTEGER NOT NULL,
-			content TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			linked TEXT,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);`, TableNameNotes)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameNotes))
+	return &Notes{
+		Base: NewBase(r),
 	}
-
-	return &Notes{Base: base}
 }
 
 func (n *Notes) List() ([]*models.Note, *errors.MasterError) {

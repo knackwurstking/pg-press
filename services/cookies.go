@@ -9,30 +9,14 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-const TableNameCookies = "cookies"
-
 type Cookies struct {
 	*Base
 }
 
 func NewCookies(registry *Registry) *Cookies {
-	base := NewBase(registry)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			user_agent TEXT NOT NULL,
-			value TEXT NOT NULL,
-			api_key TEXT NOT NULL,
-			last_login INTEGER NOT NULL,
-			PRIMARY KEY("value")
-		);
-	`, TableNameCookies)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameCookies))
+	return &Cookies{
+		Base: NewBase(registry),
 	}
-
-	return &Cookies{Base: base}
 }
 
 func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {

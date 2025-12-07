@@ -11,8 +11,6 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameModifications = "modifications"
-
 var ModificationTypes = []models.ModificationType{
 	models.ModificationTypeTroubleReport,
 	models.ModificationTypeMetalSheet,
@@ -28,25 +26,9 @@ type Modifications struct {
 }
 
 func NewModifications(r *Registry) *Modifications {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %[1]s (
-			id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-			user_id INTEGER NOT NULL,
-			entity_type TEXT NOT NULL,
-			entity_id INTEGER NOT NULL,
-			data BLOB NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY(user_id) REFERENCES users(telegram_id) ON DELETE SET NULL
-		);
-	`, TableNameModifications)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameModifications))
+	return &Modifications{
+		Base: NewBase(r),
 	}
-
-	return &Modifications{Base: base}
 }
 
 func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, user models.TelegramID) (models.ModificationID, *errors.MasterError) {

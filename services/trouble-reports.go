@@ -9,31 +9,14 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameTroubleReports = "trouble_reports"
-
 type TroubleReports struct {
 	*Base
 }
 
 func NewTroubleReports(r *Registry) *TroubleReports {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			id INTEGER NOT NULL,
-			title TEXT NOT NULL,
-			content TEXT NOT NULL,
-			linked_attachments TEXT NOT NULL,
-			use_markdown BOOLEAN DEFAULT 0,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`, TableNameTroubleReports)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameTroubleReports))
+	return &TroubleReports{
+		Base: NewBase(r),
 	}
-
-	return &TroubleReports{Base: base}
 }
 
 func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.MasterError) {

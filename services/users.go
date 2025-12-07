@@ -9,30 +9,14 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-const TableNameUsers = "users"
-
 type Users struct {
 	*Base
 }
 
 func NewUsers(r *Registry) *Users {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %s (
-			telegram_id INTEGER NOT NULL,
-			user_name TEXT NOT NULL,
-			api_key TEXT NOT NULL UNIQUE,
-			last_feed TEXT NOT NULL,
-			PRIMARY KEY("telegram_id")
-		);
-	`, TableNameUsers)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameUsers))
+	return &Users{
+		Base: NewBase(r),
 	}
-
-	return &Users{Base: base}
 }
 
 func (u *Users) Get(telegramID models.TelegramID) (*models.User, *errors.MasterError) {

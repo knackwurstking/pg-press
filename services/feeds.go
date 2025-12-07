@@ -15,25 +15,8 @@ type Feeds struct {
 }
 
 func NewFeeds(r *Registry) *Feeds {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %[1]s (
-			id INTEGER NOT NULL,
-			title TEXT NOT NULL,
-			content TEXT NOT NULL,
-			user_id INTEGER NOT NULL,
-			created_at INTEGER NOT NULL,
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`, TableNameFeeds)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameFeeds))
-	}
-
 	return &Feeds{
-		Base: base,
+		Base: NewBase(r),
 	}
 }
 

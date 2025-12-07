@@ -7,31 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNameToolRegenerations = "tool_regenerations"
-
 type ToolRegenerations struct {
 	*Base
 }
 
 func NewToolRegenerations(r *Registry) *ToolRegenerations {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %[1]s (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			tool_id INTEGER NOT NULL,
-			cycle_id INTEGER NOT NULL,
-			reason TEXT,
-			performed_by INTEGER NOT NULL
-		);
-	`, TableNameToolRegenerations, TableNameTools)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNameToolRegenerations))
-	}
-
 	return &ToolRegenerations{
-		Base: base,
+		Base: NewBase(r),
 	}
 }
 

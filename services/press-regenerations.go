@@ -8,31 +8,13 @@ import (
 	"github.com/knackwurstking/pg-press/models"
 )
 
-const TableNamePressRegenerations = "press_regenerations"
-
 type PressRegenerations struct {
 	*Base
 }
 
 func NewPressRegenerations(r *Registry) *PressRegenerations {
-	base := NewBase(r)
-
-	query := fmt.Sprintf(`
-		CREATE TABLE IF NOT EXISTS %[1]s (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			press_number INTEGER NOT NULL,
-			started_at DATETIME NOT NULL,
-			completed_at DATETIME,
-			reason TEXT
-		);
-	`, TableNamePressRegenerations)
-
-	if _, err := base.DB.Exec(query); err != nil {
-		panic(errors.Wrap(err, "create %s table", TableNamePressRegenerations))
-	}
-
 	return &PressRegenerations{
-		Base: base,
+		Base: NewBase(r),
 	}
 }
 
