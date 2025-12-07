@@ -33,7 +33,6 @@ test:
 	go test -v ./...
 
 lint:
-	find . | grep -e '\.templ$$' | xargs -- gopls check -severity=hint 
 	find . | grep -e '\.go$$' | xargs -- gopls check -severity=hint 
 
 run: generate
