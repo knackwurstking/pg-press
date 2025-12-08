@@ -23,6 +23,7 @@ func (s *CookieService) TableName() string {
 	return "cookies"
 }
 
+// TODO: Implement methods
 func (s *CookieService) Setup(setup *shared.Setup) *errors.MasterError
 func (s *CookieService) Close() *errors.MasterError
 func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError
