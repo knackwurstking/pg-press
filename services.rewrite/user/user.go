@@ -28,23 +28,46 @@ const (
 	`
 )
 
-type UserService[T *shared.User, ID shared.TelegramID] struct {
+type UserService struct {
+	Data map[shared.TelegramID]*shared.User `json:"data"`
+
 	setup *shared.Setup `json:"-"`
 	mx    *sync.Mutex   `json:"-"`
 }
 
-func NewUserService[T *shared.User, ID shared.TelegramID](setup *shared.Setup) *UserService[T, ID] {
-	return &UserService[T, ID]{
+func NewUserService(setup *shared.Setup) *UserService {
+	return &UserService{
 		setup: setup,
 		mx:    &sync.Mutex{},
 	}
 }
 
-func (s *UserService[T, ID]) TableName() string {
+func (s *UserService) TableName() string {
 	return "users"
 }
 
-func (s *UserService[T, ID]) Setup(setup *shared.Setup) *errors.MasterError {
+func (s *UserService) Memory() map[shared.TelegramID]*shared.User {
+	if s.Data == nil {
+		s.Data = make(map[shared.TelegramID]*shared.User)
+	}
+
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	// Create a deep copy to avoid external modifications
+	data := make(map[shared.TelegramID]*shared.User)
+	for k, v := range s.Data {
+		if v != nil {
+			data[k] = v.Clone()
+		} else {
+			data[k] = nil
+		}
+	}
+
+	return data
+}
+
+func (s *UserService) Setup(setup *shared.Setup) *errors.MasterError {
 	if s.setup != nil {
 		s.setup.Close()
 	}
@@ -58,7 +81,7 @@ func (s *UserService[T, ID]) Setup(setup *shared.Setup) *errors.MasterError {
 	return s.createSQLTable()
 }
 
-func (s *UserService[T, ID]) Create(entity *shared.User) *errors.MasterError {
+func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -84,7 +107,7 @@ func (s *UserService[T, ID]) Create(entity *shared.User) *errors.MasterError {
 	return nil
 }
 
-func (s *UserService[T, ID]) GetByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
+func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -97,7 +120,7 @@ func (s *UserService[T, ID]) GetByID(id shared.TelegramID) (*shared.User, *error
 		sql.Named("id", id),
 	)
 
-	// Scan row into T
+	// Scan row into user entity
 	var u = &shared.User{}
 	err := r.Scan(
 		&u.ID,
@@ -112,13 +135,13 @@ func (s *UserService[T, ID]) GetByID(id shared.TelegramID) (*shared.User, *error
 	return u, nil
 }
 
-func (s *UserService[T, ID]) Update(entity T) *errors.MasterError
+func (s *UserService) Update(entity *shared.User) *errors.MasterError
 
-func (s *UserService[T, ID]) Delete(id ID) *errors.MasterError
+func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError
 
-func (s *UserService[T, ID]) List() ([]T, *errors.MasterError)
+func (s *UserService) List() ([]*shared.User, *errors.MasterError)
 
-func (s *UserService[T, ID]) createSQLTable() *errors.MasterError {
+func (s *UserService) createSQLTable() *errors.MasterError {
 	_, err := s.setup.DB.Exec(SQLCreateUserTable, sql.Named("table_name", s.TableName()))
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -128,4 +151,4 @@ func (s *UserService[T, ID]) createSQLTable() *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.User, shared.TelegramID] = (*UserService[*shared.User, shared.TelegramID])(nil)
+var _ shared.Service[*shared.User, shared.TelegramID] = (*UserService)(nil)

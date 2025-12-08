@@ -6,6 +6,16 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
+type Setup struct {
+	// Contains configuration parameters for the service(s)
+	EnableSQL      bool   `json:"enable_sql"`
+	DriverName     string `json:"driver_name"`
+	DataSourceName string `json:"data_source_name"`
+
+	// DB is the database connection instance if SQL is enabled
+	DB *sql.DB `json:"-"`
+}
+
 func (s *Setup) Open() *errors.MasterError {
 	var err error
 

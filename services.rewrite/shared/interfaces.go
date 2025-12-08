@@ -27,7 +27,10 @@ type Service[T any, ID comparable] interface {
 	List() ([]T, *errors.MasterError)
 }
 
-type Entity interface {
+type Entity[T any] interface {
 	// Validate checks if the entity has valid data
 	Validate() *errors.ValidationError
+
+	// Entity clones the entity and returns a copy
+	Clone() T
 }
