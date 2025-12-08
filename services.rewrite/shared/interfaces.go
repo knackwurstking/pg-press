@@ -1,18 +1,8 @@
 package shared
 
 import (
-	"database/sql"
-
 	"github.com/knackwurstking/pg-press/errors"
 )
-
-type Setup struct {
-	// Contains configuration parameters for the service(s)
-	EnableSQL bool `json:"enable_sql"`
-
-	// db is the database connection instance if SQL is enabled
-	db *sql.DB `json:"-"`
-}
 
 type Service[T any, ID comparable] interface {
 	// TableName returns the (SQL) table name in use
@@ -22,17 +12,22 @@ type Service[T any, ID comparable] interface {
 	Setup(setup *Setup) *errors.MasterError
 
 	// Create adds a new entity to the repository
-	Create(entity *T) *errors.MasterError
+	Create(entity T) *errors.MasterError
 
 	// GetByID retrieves an entity by its ID
-	GetByID(id ID) (*T, *errors.MasterError)
+	GetByID(id ID) (T, *errors.MasterError)
 
 	// Update modifies an existing entity in the repository
-	Update(entity *T) *errors.MasterError
+	Update(entity T) *errors.MasterError
 
 	// Delete removes an entity from the repository by its ID
 	Delete(id ID) *errors.MasterError
 
 	// List retrieves all entities from the repository
-	List() ([]*T, *errors.MasterError)
+	List() ([]T, *errors.MasterError)
+}
+
+type Entity interface {
+	// Validate checks if the entity has valid data
+	Validate() *errors.ValidationError
 }
