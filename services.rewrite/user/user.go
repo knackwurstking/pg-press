@@ -12,25 +12,38 @@ const (
 	SQLCreateUserTable string = `
 		CREATE TABLE IF NOT EXISTS :table_name (
 			id 			INTEGER PRIMARY KEY NOT NULL,
-			user_name 	TEXT NOT NULL,
+			name 	TEXT NOT NULL,
 			api_key 	TEXT NOT NULL UNIQUE,
 			last_feed 	TEXT NOT NULL
 		);
 	`
 	SQLCreateUser string = `
-		INSERT INTO :table_name (user_name, api_key, last_feed) 
-		VALUES (:user_name, :api_key, :last_feed);
+		INSERT INTO :table_name (name, api_key, last_feed) 
+		VALUES (:name, :api_key, :last_feed);
 	`
 	SQLGetUserByID string = `
-		SELECT id, user_name, api_key, last_feed 
+		SELECT id, name, api_key, last_feed 
 		FROM :table_name
 		WHERE id = :id;
+	`
+	SQLUpdateUser string = `
+		UPDATE :table_name
+		SET name 	= :name,
+			api_key 	= :api_key,
+			last_feed 	= :last_feed
+		WHERE id = :id;
+	`
+	SQLDeleteUser string = `
+		DELETE FROM :table_name
+		WHERE id = :id;
+	`
+	SQLListUsers string = `
+		SELECT id, name, api_key, last_feed 
+		FROM :table_name;
 	`
 )
 
 type UserService struct {
-	Data map[shared.TelegramID]*shared.User `json:"data"`
-
 	setup *shared.Setup `json:"-"`
 	mx    *sync.Mutex   `json:"-"`
 }
@@ -44,27 +57,6 @@ func NewUserService(setup *shared.Setup) *UserService {
 
 func (s *UserService) TableName() string {
 	return "users"
-}
-
-func (s *UserService) Memory() map[shared.TelegramID]*shared.User {
-	if s.Data == nil {
-		s.Data = make(map[shared.TelegramID]*shared.User)
-	}
-
-	s.mx.Lock()
-	defer s.mx.Unlock()
-
-	// Create a deep copy to avoid external modifications
-	data := make(map[shared.TelegramID]*shared.User)
-	for k, v := range s.Data {
-		if v != nil {
-			data[k] = v.Clone()
-		} else {
-			data[k] = nil
-		}
-	}
-
-	return data
 }
 
 func (s *UserService) Setup(setup *shared.Setup) *errors.MasterError {
@@ -92,7 +84,7 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 
 	r, err := s.setup.DB.Exec(SQLCreateUser,
 		sql.Named("table_name", s.TableName()),
-		sql.Named("user_name", entity.Name),
+		sql.Named("name", entity.Name),
 		sql.Named("api_key", entity.ApiKey),
 		sql.Named("last_feed", entity.LastFeed),
 	)
@@ -135,11 +127,77 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 	return u, nil
 }
 
-func (s *UserService) Update(entity *shared.User) *errors.MasterError
+func (s *UserService) Update(entity *shared.User) *errors.MasterError {
+	verr := entity.Validate()
+	if verr != nil {
+		return verr.MasterError()
+	}
 
-func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError
+	s.mx.Lock()
+	defer s.mx.Unlock()
 
-func (s *UserService) List() ([]*shared.User, *errors.MasterError)
+	_, err := s.setup.DB.Exec(SQLUpdateUser,
+		sql.Named("table_name", s.TableName()),
+		sql.Named("id", entity.ID),
+		sql.Named("name", entity.Name),
+		sql.Named("api_key", entity.ApiKey),
+		sql.Named("last_feed", entity.LastFeed),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	return nil
+}
+
+func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	_, err := s.setup.DB.Exec(SQLDeleteUser,
+		sql.Named("table_name", s.TableName()),
+		sql.Named("id", id),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	return nil
+}
+
+func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	rows, err := s.setup.DB.Query(SQLListUsers,
+		sql.Named("table_name", s.TableName()),
+	)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	users := []*shared.User{}
+	for rows.Next() {
+		u := &shared.User{}
+		err := rows.Scan(
+			&u.ID,
+			&u.Name,
+			&u.ApiKey,
+			&u.LastFeed,
+		)
+		if err != nil {
+			return nil, errors.NewMasterError(err, 0)
+		}
+		users = append(users, u)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+
+	return users, nil
+}
 
 func (s *UserService) createSQLTable() *errors.MasterError {
 	_, err := s.setup.DB.Exec(SQLCreateUserTable, sql.Named("table_name", s.TableName()))
