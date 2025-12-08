@@ -10,6 +10,7 @@ type Cookie struct {
 	LastLogin UnixMilly  `json:"last_login"` // Last login timestamp in milliseconds
 }
 
+// TODO: Continue here
 func (e *Cookie) Validate() *errors.ValidationError
 
 func (e *Cookie) Clone() *Cookie {

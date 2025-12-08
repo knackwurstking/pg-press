@@ -48,10 +48,9 @@ type UserService struct {
 	mx    *sync.Mutex   `json:"-"`
 }
 
-func NewUserService(setup *shared.Setup) *UserService {
+func NewUserService() *UserService {
 	return &UserService{
-		setup: setup,
-		mx:    &sync.Mutex{},
+		mx: &sync.Mutex{},
 	}
 }
 
@@ -73,7 +72,23 @@ func (s *UserService) Setup(setup *shared.Setup) *errors.MasterError {
 	return s.createSQLTable()
 }
 
+func (s *UserService) Close() *errors.MasterError {
+	if s.setup != nil {
+		err := s.setup.Close()
+		if err != nil {
+			return errors.NewMasterError(err, 0)
+		}
+		s.setup = nil
+	}
+	return nil
+}
+
 func (s *UserService) Create(entity *shared.User) *errors.MasterError {
+	merr := s.checkSetup()
+	if merr != nil {
+		return merr
+	}
+
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -99,7 +114,40 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	return nil
 }
 
+func (s *UserService) Update(entity *shared.User) *errors.MasterError {
+	merr := s.checkSetup()
+	if merr != nil {
+		return merr
+	}
+
+	verr := entity.Validate()
+	if verr != nil {
+		return verr.MasterError()
+	}
+
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	_, err := s.setup.DB.Exec(SQLUpdateUser,
+		sql.Named("table_name", s.TableName()),
+		sql.Named("id", entity.ID),
+		sql.Named("name", entity.Name),
+		sql.Named("api_key", entity.ApiKey),
+		sql.Named("last_feed", entity.LastFeed),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	return nil
+}
+
 func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
+	merr := s.checkSetup()
+	if merr != nil {
+		return nil, merr
+	}
+
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -127,45 +175,12 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 	return u, nil
 }
 
-func (s *UserService) Update(entity *shared.User) *errors.MasterError {
-	verr := entity.Validate()
-	if verr != nil {
-		return verr.MasterError()
-	}
-
-	s.mx.Lock()
-	defer s.mx.Unlock()
-
-	_, err := s.setup.DB.Exec(SQLUpdateUser,
-		sql.Named("table_name", s.TableName()),
-		sql.Named("id", entity.ID),
-		sql.Named("name", entity.Name),
-		sql.Named("api_key", entity.ApiKey),
-		sql.Named("last_feed", entity.LastFeed),
-	)
-	if err != nil {
-		return errors.NewMasterError(err, 0)
-	}
-
-	return nil
-}
-
-func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
-	s.mx.Lock()
-	defer s.mx.Unlock()
-
-	_, err := s.setup.DB.Exec(SQLDeleteUser,
-		sql.Named("table_name", s.TableName()),
-		sql.Named("id", id),
-	)
-	if err != nil {
-		return errors.NewMasterError(err, 0)
-	}
-
-	return nil
-}
-
 func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
+	merr := s.checkSetup()
+	if merr != nil {
+		return nil, merr
+	}
+
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -199,12 +214,39 @@ func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
 	return users, nil
 }
 
+func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
+	merr := s.checkSetup()
+	if merr != nil {
+		return merr
+	}
+
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	_, err := s.setup.DB.Exec(SQLDeleteUser,
+		sql.Named("table_name", s.TableName()),
+		sql.Named("id", id),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	return nil
+}
+
 func (s *UserService) createSQLTable() *errors.MasterError {
 	_, err := s.setup.DB.Exec(SQLCreateUserTable, sql.Named("table_name", s.TableName()))
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
 
+	return nil
+}
+
+func (s *UserService) checkSetup() *errors.MasterError {
+	if s.setup == nil || s.setup.DB == nil {
+		return errors.NewValidationError("service not properly setup").MasterError()
+	}
 	return nil
 }
 

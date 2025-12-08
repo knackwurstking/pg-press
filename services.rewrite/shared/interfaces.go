@@ -11,6 +11,9 @@ type Service[T any, ID comparable] interface {
 	// Setup initializes the service with the provided setup configuration
 	Setup(setup *Setup) *errors.MasterError
 
+	// Close cleans up any resources held by the service
+	Close() *errors.MasterError
+
 	// Create adds a new entity to the repository
 	Create(entity T) *errors.MasterError
 
