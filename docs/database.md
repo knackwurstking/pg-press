@@ -17,13 +17,14 @@ services/
 ├── user/
 │   ├── user_service.go
 │   └── auth_service.go
-├── tool/
+├── press/
 │   ├── press_service.go
-│   ├── tool_regeneration_service.go
-│   ├── press_regeneration_service.go
-│   ├── tool_service.go
+│   ├── regeneration_service.go
 │   └── cycle_service.go
-├── report/
+├── tool/
+│   ├── tool_service.go
+│   └── regeneration_service.go
+├── troublereport/
 │   ├── modification_service.go
 │   └── trouble_report_service.go
 └── common/
