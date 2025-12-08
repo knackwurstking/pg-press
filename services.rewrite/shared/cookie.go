@@ -10,8 +10,15 @@ type Cookie struct {
 	LastLogin UnixMilly  `json:"last_login"` // Last login timestamp in milliseconds
 }
 
-// TODO: Continue here
-func (e *Cookie) Validate() *errors.ValidationError
+func (e *Cookie) Validate() *errors.ValidationError {
+	if e.Value == "" {
+		return errors.NewValidationError("cookie value is required")
+	}
+	if e.UserID == 0 {
+		return errors.NewValidationError("cookie user_id is required")
+	}
+	return nil
+}
 
 func (e *Cookie) Clone() *Cookie {
 	return &Cookie{
