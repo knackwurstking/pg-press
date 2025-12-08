@@ -16,9 +16,6 @@ const (
 
 	MaxFeedsPerPage = 50
 
-	UserNameMinLength = 1
-	UserNameMaxLength = 100
-
 	HXGlobalTrigger        = "pageLoaded"
 	HXPageTool_ToolUpdated = "toolUpdated"
 

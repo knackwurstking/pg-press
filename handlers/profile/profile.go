@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/services.rewrite/shared"
 	"github.com/knackwurstking/pg-press/utils"
 	ui "github.com/knackwurstking/ui/ui-templ"
 	"github.com/labstack/echo/v4"
@@ -105,7 +106,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) *error
 		return nil
 	}
 
-	if len(userName) < env.UserNameMinLength || len(userName) > env.UserNameMaxLength {
+	if len(userName) < shared.UserNameMinLength || len(userName) > shared.UserNameMaxLength {
 		return errors.NewMasterError(
 			fmt.Errorf("username must be between 1 and 100 characters"),
 			http.StatusBadRequest,

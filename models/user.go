@@ -38,11 +38,11 @@ func (u *User) Validate() *errors.ValidationError {
 	if u.Name == "" {
 		return errors.NewValidationError("name is required")
 	}
-	if len(u.Name) < env.UserNameMinLength {
-		return errors.NewValidationError("name must be at least %d characters long", env.UserNameMinLength)
+	if len(u.Name) < 1 {
+		return errors.NewValidationError("name must be at least %d characters long", 1)
 	}
-	if len(u.Name) > env.UserNameMaxLength {
-		return errors.NewValidationError("name must be at most %d characters long", env.UserNameMaxLength)
+	if len(u.Name) > 100 {
+		return errors.NewValidationError("name must be at most %d characters long", 100)
 	}
 
 	if u.ApiKey == "" {
