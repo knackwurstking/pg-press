@@ -6,16 +6,19 @@ import (
 )
 
 type SessionService struct {
-	setup *shared.Setup `json:"-"`
+	*shared.BaseService
 }
 
-func NewSessionService() *SessionService {
-	return &SessionService{}
+func NewSessionService(c *shared.Config) *SessionService {
+	return &SessionService{
+		BaseService: &shared.BaseService{
+			Config: c,
+		},
+	}
 }
 
 func (s *SessionService) TableName() string
-func (s *SessionService) Setup(setup *shared.Setup) *errors.MasterError
-func (s *SessionService) Close() *errors.MasterError
+func (s *SessionService) Setup() *errors.MasterError
 func (s *SessionService) Create(entity *shared.Session) *errors.MasterError
 func (s *SessionService) Update(entity *shared.Session) *errors.MasterError
 func (s *SessionService) GetByID(id shared.EntityID) (*shared.Session, *errors.MasterError)

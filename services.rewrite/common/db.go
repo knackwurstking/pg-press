@@ -16,24 +16,24 @@ type UserDB struct {
 	Session *user.SessionService `json:"session"`
 }
 
-func (udb *UserDB) Setup(setup *shared.Setup) {
+func (udb *UserDB) Setup() {
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error, 3)
 
 	wg.Go(func() {
-		if err := udb.User.Setup(setup); err != nil {
+		if err := udb.User.Setup(); err != nil {
 			errCh <- fmt.Errorf("user: %w", err)
 		}
 	})
 
 	wg.Go(func() {
-		if err := udb.Cookie.Setup(setup); err != nil {
+		if err := udb.Cookie.Setup(); err != nil {
 			errCh <- fmt.Errorf("cookie: %w", err)
 		}
 	})
 
 	wg.Go(func() {
-		if err := udb.Session.Setup(setup); err != nil {
+		if err := udb.Session.Setup(); err != nil {
 			errCh <- fmt.Errorf("session: %w", err)
 		}
 	})
@@ -81,25 +81,25 @@ type DB struct {
 	User *UserDB `json:"user"`
 }
 
-func NewDB(setup *shared.Setup) *DB {
+func NewDB(c *shared.Config) *DB {
 	db := &DB{
 		User: &UserDB{
-			User:    user.NewUserService(),
-			Cookie:  user.NewCookieService(),
-			Session: user.NewSessionService(),
+			User:    user.NewUserService(c),
+			Cookie:  user.NewCookieService(c),
+			Session: user.NewSessionService(c),
 		},
 	}
 
-	db.Setup(setup)
+	db.Setup()
 
 	return db
 }
 
-func (db *DB) Setup(setup *shared.Setup) {
+func (db *DB) Setup() {
 	wg := &sync.WaitGroup{}
 
 	wg.Go(func() {
-		db.User.Setup(setup)
+		db.User.Setup()
 	})
 
 	wg.Wait()

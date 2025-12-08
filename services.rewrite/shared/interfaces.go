@@ -9,7 +9,7 @@ type Service[T any, ID comparable] interface {
 	TableName() string
 
 	// Setup initializes the service with the provided setup configuration
-	Setup(setup *Setup) *errors.MasterError
+	Setup() *errors.MasterError
 
 	// Close cleans up any resources held by the service
 	Close() *errors.MasterError

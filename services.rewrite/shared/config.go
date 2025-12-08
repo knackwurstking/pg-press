@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 )
 
-type Setup struct {
+type Config struct {
 	// Contains configuration parameters for the service(s)
 	EnableSQL      bool   `json:"enable_sql"`
 	DriverName     string `json:"driver_name"`
@@ -16,7 +16,7 @@ type Setup struct {
 	DB *sql.DB `json:"-"`
 }
 
-func (s *Setup) Open() *errors.MasterError {
+func (s *Config) Open() *errors.MasterError {
 	var err error
 
 	if s.DB != nil {
@@ -36,7 +36,7 @@ func (s *Setup) Open() *errors.MasterError {
 	return nil
 }
 
-func (s *Setup) Close() error {
+func (s *Config) Close() error {
 	if s.DB != nil {
 		return s.DB.Close()
 	}
