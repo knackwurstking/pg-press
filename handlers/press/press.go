@@ -143,7 +143,7 @@ func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
 	}
 
 	// Get cycles for this press
-	cycles, merr := h.registry.PressCycles.GetPressCycles(press, nil, nil)
+	cycles, merr := h.registry.PressCycles.ListPressCyclesByPress(press, -1, 0)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -175,7 +175,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 	}
 
 	// Get notes directly linked to this press
-	notes, merr := h.registry.Notes.GetByPress(press)
+	notes, merr := h.registry.Notes.ListByLinked("press", int64(press))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -188,7 +188,7 @@ func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
 
 	// Get notes for tools
 	for _, t := range sortedTools {
-		n, merr := h.registry.Notes.GetByTool(t.ID)
+		n, merr := h.registry.Notes.ListByLinked("tool", int64(t.ID))
 		if merr != nil {
 			return merr.WrapEcho("get notes for tool %d", t.ID)
 		}

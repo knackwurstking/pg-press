@@ -23,7 +23,7 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 		return merr
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET press = ? WHERE id = ?`, TableNameTools)
+	query := `UPDATE tools SET press = ? WHERE id = ?`
 	_, err := t.DB.Exec(query, pressNumber, toolID)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -34,7 +34,7 @@ func (t *Tools) UpdatePress(toolID models.ToolID, pressNumber *models.PressNumbe
 		return nil
 	}
 
-	query = fmt.Sprintf(`UPDATE %s SET press = ? WHERE id = ?`, TableNameTools)
+	query = `UPDATE tools SET press = ? WHERE id = ?`
 	_, err = t.DB.Exec(query, pressNumber, *tool.Binding)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -59,7 +59,7 @@ func (t *Tools) UpdateRegenerating(toolID models.ToolID, regenerating bool, user
 		return nil
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET regenerating = ? WHERE id = ?`, TableNameTools)
+	query := `UPDATE tools SET regenerating = ? WHERE id = ?`
 	_, err := t.DB.Exec(query, regenerating, toolID)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -74,7 +74,7 @@ func (t *Tools) MarkAsDead(toolID models.ToolID, user *models.User) *errors.Mast
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET is_dead = 1, press = NULL WHERE id = ?`, TableNameTools)
+	query := `UPDATE tools SET is_dead = 1, press = NULL WHERE id = ?`
 	if _, err := t.DB.Exec(query, toolID); err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -88,7 +88,7 @@ func (t *Tools) ReviveTool(toolID models.ToolID, user *models.User) *errors.Mast
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET is_dead = 0 WHERE id = ?`, TableNameTools)
+	query := `UPDATE tools SET is_dead = 0 WHERE id = ?`
 	if _, err := t.DB.Exec(query, toolID); err != nil {
 		return errors.NewMasterError(err, 0)
 	}

@@ -20,7 +20,7 @@ func NewUsers(r *Registry) *Users {
 }
 
 func (u *Users) Get(telegramID models.TelegramID) (*models.User, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE telegram_id = ?`, TableNameUsers)
+	query := `SELECT * FROM users WHERE telegram_id = ?`
 	row := u.DB.QueryRow(query, telegramID)
 	user, err := ScanUser(row)
 	if err != nil {
@@ -34,7 +34,7 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, *errors.MasterEr
 		return nil, errors.NewMasterError(fmt.Errorf("invalid api key: %s", utils.MaskString(apiKey)), http.StatusBadRequest)
 	}
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE api_key = ?`, TableNameUsers)
+	query := `SELECT * FROM users WHERE api_key = ?`
 	row := u.DB.QueryRow(query, apiKey)
 	user, err := ScanUser(row)
 	if err != nil {
@@ -44,7 +44,7 @@ func (u *Users) GetUserFromApiKey(apiKey string) (*models.User, *errors.MasterEr
 }
 
 func (u *Users) List() ([]*models.User, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s`, TableNameUsers)
+	query := `SELECT * FROM users`
 	rows, err := u.DB.Query(query)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
@@ -61,7 +61,7 @@ func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) 
 	}
 
 	// Check if user already exists
-	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE telegram_id = ?`, TableNameUsers)
+	query := `SELECT COUNT(*) FROM users WHERE telegram_id = ?`
 	count, dberr := u.QueryCount(query, user.TelegramID)
 	if dberr != nil {
 		return 0, dberr
@@ -71,7 +71,7 @@ func (u *Users) Add(user *models.User) (models.TelegramID, *errors.MasterError) 
 	}
 
 	// Insert the new user
-	query = fmt.Sprintf(`INSERT INTO %s (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`, TableNameUsers)
+	query = `INSERT INTO users (telegram_id, user_name, api_key, last_feed) VALUES (?, ?, ?, ?)`
 	_, err := u.DB.Exec(query, user.TelegramID, user.Name, user.ApiKey, user.LastFeed)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
@@ -86,7 +86,7 @@ func (u *Users) Delete(telegramID models.TelegramID) *errors.MasterError {
 		return dberr
 	}
 
-	query := fmt.Sprintf(`DELETE FROM %s WHERE telegram_id = ?`, TableNameUsers)
+	query := `DELETE FROM users WHERE telegram_id = ?`
 	_, err := u.DB.Exec(query, telegramID)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -101,7 +101,7 @@ func (u *Users) Update(user *models.User) *errors.MasterError {
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`, TableNameUsers)
+	query := `UPDATE users SET user_name = ?, api_key = ?, last_feed = ? WHERE telegram_id = ?`
 	_, err := u.DB.Exec(query, user.Name, user.ApiKey, user.LastFeed, user.TelegramID)
 	if err != nil {
 		return errors.NewMasterError(err, 0)

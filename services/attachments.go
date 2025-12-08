@@ -51,7 +51,7 @@ func (a *Attachments) ListByIDs(ids []models.AttachmentID) ([]*models.Attachment
 	}
 
 	rows, err := a.DB.Query(
-		fmt.Sprintf(SQLListAttachmentsByIDs, strings.Join(placeholders, ", ")),
+		fmt.Sprintf(SQLListAttachmentsByIDs, strings.Join(placeholders, ",")),
 		args...,
 	)
 	if err != nil {

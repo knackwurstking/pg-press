@@ -295,7 +295,7 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 2. Delete all cycles for this tool
-					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
+					cycles, err := r.PressCycles.ListPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("get cycles for tool: %v", err)
 					}
@@ -346,7 +346,7 @@ func listCyclesCommand() cli.Command {
 						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get cycles for this tool
-					cycles, err := r.PressCycles.GetPressCyclesForTool(toolID)
+					cycles, err := r.PressCycles.ListPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("retrieve cycles: %v", err)
 					}

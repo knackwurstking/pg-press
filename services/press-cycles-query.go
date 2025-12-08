@@ -1,23 +1,13 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
 
 // GetLastToolCycle retrieves the most recent cycle for a specific tool
 func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE tool_id = ?
-		ORDER BY date DESC
-		LIMIT 1
-	`, TableNamePressCycles)
-
-	row := s.DB.QueryRow(query, toolID)
+	row := s.DB.QueryRow(SQLGetLastToolCycle, toolID)
 	cycle, err := ScanCycle(row)
 	if err != nil {
 		return cycle, errors.NewMasterError(err, 0)
@@ -27,15 +17,8 @@ func (s *PressCycles) GetLastToolCycle(toolID models.ToolID) (*models.Cycle, *er
 }
 
 // GetPressCyclesForTool retrieves all cycles for a specific tool
-func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE tool_id = ?
-		ORDER BY date DESC
-	`, TableNamePressCycles)
-
-	rows, err := s.DB.Query(query, toolID)
+func (s *PressCycles) ListPressCyclesForTool(toolID models.ToolID) ([]*models.Cycle, *errors.MasterError) {
+	rows, err := s.DB.Query(SQLListPressCyclesForTool, toolID)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -51,20 +34,13 @@ func (s *PressCycles) GetPressCyclesForTool(toolID models.ToolID) ([]*models.Cyc
 }
 
 // GetPressCycles retrieves cycles for a specific press with optional pagination
-func (s *PressCycles) GetPressCycles(
-	pressNumber models.PressNumber, limit *int, offset *int,
+//
+// For all press cycles just set limit to -1 and offset to 0
+func (s *PressCycles) ListPressCyclesByPress(
+	pressNumber models.PressNumber, limit int, offset int,
 ) ([]*models.Cycle, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE press_number = ?
-		ORDER BY date DESC
-	`, TableNamePressCycles)
 
-	args := []any{pressNumber}
-	query = s.addPaginationToQuery(query, limit, offset, &args)
-
-	rows, err := s.DB.Query(query, args...)
+	rows, err := s.DB.Query(SQLListPressCyclesByPress, pressNumber, limit, offset)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -76,19 +52,4 @@ func (s *PressCycles) GetPressCycles(
 	}
 	s.injectPartialCycles(cycles)
 	return cycles, nil
-}
-
-func (s *PressCycles) addPaginationToQuery(query string, limit *int, offset *int, args *[]any) string {
-	if limit != nil {
-		query += " LIMIT ?"
-		*args = append(*args, *limit)
-	}
-	if offset != nil {
-		if limit == nil {
-			query += " LIMIT -1"
-		}
-		query += " OFFSET ?"
-		*args = append(*args, *offset)
-	}
-	return query
 }

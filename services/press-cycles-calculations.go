@@ -58,7 +58,7 @@ func (s *PressCycles) GetPartialCycles(cycle *models.Cycle) int64 {
 func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
 	baseQuery := `
 		SELECT total_cycles
-		FROM %s
+		FROM press_cycles
 		WHERE press_number = ? AND %s AND date < ? AND total_cycles < ?
 		ORDER BY date DESC
 		LIMIT 1
@@ -69,7 +69,7 @@ func (s *PressCycles) buildPartialCyclesQuery(position models.Position) string {
 		condition = "(tool_position = ? OR tool_position = ?)"
 	}
 
-	return fmt.Sprintf(baseQuery, TableNamePressCycles, condition)
+	return fmt.Sprintf(baseQuery, condition)
 }
 
 func (s *PressCycles) buildPartialCyclesArgs(cycle *models.Cycle) []any {

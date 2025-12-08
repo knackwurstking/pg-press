@@ -20,7 +20,7 @@ func NewTroubleReports(r *Registry) *TroubleReports {
 }
 
 func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s ORDER BY id DESC`, TableNameTroubleReports)
+	query := `SELECT * FROM trouble_reports ORDER BY id DESC`
 	rows, err := s.DB.Query(query)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
@@ -31,7 +31,7 @@ func (s *TroubleReports) List() ([]*models.TroubleReport, *errors.MasterError) {
 }
 
 func (s *TroubleReports) Get(id models.TroubleReportID) (*models.TroubleReport, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameTroubleReports)
+	query := `SELECT * FROM trouble_reports WHERE id = ?`
 	tr, err := ScanTroubleReport(s.DB.QueryRow(query, id))
 	if err != nil {
 		return tr, errors.NewMasterError(err, 0)
@@ -55,8 +55,9 @@ func (s *TroubleReports) Add(tr *models.TroubleReport, u *models.User) (int64, *
 		return 0, errors.NewMasterError(err, 0)
 	}
 
-	query := fmt.Sprintf(`INSERT INTO %s (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)`,
-		TableNameTroubleReports)
+	query := `
+		INSERT INTO trouble_reports (title, content, linked_attachments, use_markdown) VALUES (?, ?, ?, ?)
+	`
 
 	result, err := s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown)
 	if err != nil {
@@ -94,8 +95,9 @@ func (s *TroubleReports) Update(tr *models.TroubleReport, u *models.User) *error
 		return errors.NewMasterError(err, 0)
 	}
 
-	query := fmt.Sprintf(`UPDATE %s SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?`,
-		TableNameTroubleReports)
+	query := `
+		UPDATE trouble_reports SET title = ?, content = ?, linked_attachments = ?, use_markdown = ? WHERE id = ?
+	`
 
 	_, err = s.DB.Exec(query, tr.Title, tr.Content, linkedAttachments, tr.UseMarkdown, tr.ID)
 	if err != nil {
@@ -126,7 +128,7 @@ func (s *TroubleReports) Delete(id models.TroubleReportID, user *models.User) *e
 		return merr
 	}
 
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTroubleReports)
+	query := `DELETE FROM trouble_reports WHERE id = ?`
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)

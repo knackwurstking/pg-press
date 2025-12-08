@@ -63,7 +63,7 @@ func resolveTool(
 		}
 	}
 
-	notes, merr := registry.Notes.GetByTool(tool.ID)
+	notes, merr := registry.Notes.ListByLinked("tool", int64(tool.ID))
 	if merr != nil && merr.Code != http.StatusNotFound {
 		merr.Code = http.StatusInternalServerError
 		return nil, merr

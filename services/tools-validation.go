@@ -13,11 +13,11 @@ func (t *Tools) validateToolUniqueness(tool *models.Tool, excludeID models.ToolI
 		return false
 	}
 
-	query := fmt.Sprintf(`
+	query := `
 		SELECT COUNT(*)
-		FROM %s
-		WHERE id != ? AND position = ? AND format = ? AND code = ?`,
-		TableNameTools)
+		FROM tools
+		WHERE id != ? AND position = ? AND format = ? AND code = ?
+	`
 
 	count, merr := t.QueryCount(query, excludeID, tool.Position, formatBytes, tool.Code)
 	if merr != nil {

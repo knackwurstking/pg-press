@@ -134,12 +134,14 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	pressCycle := models.NewCycle(*form.PressNumber, tool.ID, tool.Position,
+	pc := models.NewCycle(*form.PressNumber, tool.ID, tool.Position,
 		form.TotalCycles, user.TelegramID)
 
-	pressCycle.Date = form.Date
+	pc.Date = form.Date
 
-	_, merr = h.registry.PressCycles.Add(pressCycle, user)
+	_, merr = h.registry.PressCycles.Add(
+		pc.PressNumber, pc.ToolID, pc.ToolPosition, pc.TotalCycles, pc.PerformedBy,
+	)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -190,15 +192,15 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	}
 	cycleID := models.CycleID(cycleIDQuery)
 
-	cycle, dberr := h.registry.PressCycles.Get(cycleID)
-	if dberr != nil {
-		return dberr.Echo()
+	cycle, merr := h.registry.PressCycles.Get(cycleID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Get original tool
-	originalTool, dberr := h.registry.Tools.Get(cycle.ToolID)
-	if dberr != nil {
-		return dberr.Echo()
+	originalTool, merr := h.registry.Tools.Get(cycle.ToolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	form, merr := GetEditCycleFormData(c)
@@ -214,9 +216,9 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	var tool *models.Tool
 	if form.ToolID != nil {
 		// Tool change requested - get the new tool
-		newTool, dberr := h.registry.Tools.Get(*form.ToolID)
-		if dberr != nil {
-			return dberr.Echo()
+		newTool, merr := h.registry.Tools.Get(*form.ToolID)
+		if merr != nil {
+			return merr.Echo()
 		}
 		tool = newTool
 	} else {
@@ -225,7 +227,7 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	}
 
 	// Update the cycle
-	pressCycle := models.NewCycleWithID(
+	pc := models.NewCycleWithID(
 		cycle.ID,
 		*form.PressNumber,
 		tool.ID, tool.Position, form.TotalCycles,
@@ -233,16 +235,24 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		form.Date,
 	)
 
-	dberr = h.registry.PressCycles.Update(pressCycle, user)
-	if dberr != nil {
-		return dberr.Echo()
+	merr = h.registry.PressCycles.Update(
+		pc.ID,
+		pc.PressNumber,
+		pc.ToolID,
+		pc.ToolPosition,
+		pc.TotalCycles,
+		pc.Date,
+		pc.PerformedBy,
+	)
+	if merr != nil {
+		return merr.Echo()
 	}
 
 	// Handle regeneration if requested
 	if form.Regenerating {
-		_, dberr = h.registry.ToolRegenerations.Add(tool.ID, pressCycle.ID, "", user)
-		if dberr != nil {
-			slog.Error("Failed to add tool regeneration", "error", dberr)
+		_, merr = h.registry.ToolRegenerations.Add(tool.ID, pc.ID, "", user)
+		if merr != nil {
+			slog.Error("Failed to add tool regeneration", "error", merr)
 		}
 	}
 
@@ -266,7 +276,7 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	}
 
 	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	merr != nil {
+	if merr != nil {
 		slog.Warn("Failed to create feed for cycle update", "error", merr)
 	}
 

@@ -28,10 +28,10 @@ func (t *Tools) Add(tool *models.Tool, user *models.User) (models.ToolID, *error
 		return 0, errors.NewMasterError(err, 0)
 	}
 
-	query := fmt.Sprintf(`
-		INSERT INTO %s (position, format, type, code, regenerating, is_dead, press, binding)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		TableNameTools)
+	query := `
+		INSERT INTO tools (position, format, type, code, regenerating, is_dead, press, binding)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		`
 
 	result, err := t.DB.Exec(query,
 		tool.Position,
@@ -74,11 +74,11 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.MasterError
 		return errors.NewMasterError(err, 0)
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
+	query := `
+		UPDATE tools
 		SET position = ?, format = ?, type = ?, code = ?, regenerating = ?, is_dead = ?, press = ?, binding = ?
-		WHERE id = ?`,
-		TableNameTools)
+		WHERE id = ?
+	`
 
 	_, err = t.DB.Exec(query,
 		tool.Position,
@@ -98,11 +98,11 @@ func (t *Tools) Update(tool *models.Tool, user *models.User) *errors.MasterError
 }
 
 func (t *Tools) Get(id models.ToolID) (*models.Tool, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
-		WHERE id = ?`,
-		ToolQuerySelect, TableNameTools)
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
+		WHERE id = ?
+	`
 
 	row := t.DB.QueryRow(query, id)
 
@@ -119,7 +119,7 @@ func (t *Tools) Delete(id models.ToolID, user *models.User) *errors.MasterError 
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameTools)
+	query := `DELETE FROM tools WHERE id = ?`
 	_, err := t.DB.Exec(query, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)

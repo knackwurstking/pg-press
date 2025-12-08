@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
@@ -18,7 +16,7 @@ func NewToolRegenerations(r *Registry) *ToolRegenerations {
 }
 
 func (s *ToolRegenerations) Get(id models.ToolRegenerationID) (*models.ToolRegeneration, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNameToolRegenerations)
+	query := `SELECT * FROM tool_regenerations WHERE id = ?`
 	row := s.DB.QueryRow(query, id)
 
 	regeneration, err := ScanToolRegeneration(row)
@@ -44,10 +42,10 @@ func (s *ToolRegenerations) Add(
 		return 0, verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		INSERT INTO %s (tool_id, cycle_id, reason, performed_by)
+	query := `
+		INSERT INTO tool_regenerations (tool_id, cycle_id, reason, performed_by)
 		VALUES (?, ?, ?, ?)
-	`, TableNameToolRegenerations)
+	`
 
 	result, err := s.DB.Exec(query, r.ToolID, r.CycleID, r.Reason, user.TelegramID)
 	if err != nil {
@@ -73,11 +71,11 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
+	query := `
+		UPDATE tool_regenerations
 		SET cycle_id = ?, reason = ?, performed_by = ?
 		WHERE id = ?
-	`, TableNameToolRegenerations)
+	`
 
 	_, err := s.DB.Exec(query, r.CycleID, r.Reason, user.TelegramID, r.ID)
 	if err != nil {
@@ -88,7 +86,7 @@ func (s *ToolRegenerations) Update(r *models.ToolRegeneration, user *models.User
 }
 
 func (s *ToolRegenerations) Delete(id models.ToolRegenerationID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameToolRegenerations)
+	query := `DELETE FROM tool_regenerations WHERE id = ?`
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -177,13 +175,13 @@ func (s *ToolRegenerations) AbortToolRegeneration(toolID models.ToolID, user *mo
 func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (
 	*models.ToolRegeneration, *errors.MasterError,
 ) {
-	query := fmt.Sprintf(`
+	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
-		FROM %s
+		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY id DESC
 		LIMIT 1
-	`, TableNameToolRegenerations)
+	`
 
 	row := s.DB.QueryRow(query, toolID)
 	r, err := ScanToolRegeneration(row)
@@ -194,7 +192,7 @@ func (s *ToolRegenerations) GetLastRegeneration(toolID models.ToolID) (
 }
 
 func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bool, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE cycle_id = ?`, TableNameToolRegenerations)
+	query := `SELECT COUNT(*) FROM tool_regenerations WHERE cycle_id = ?`
 	count, merr := s.QueryCount(query, cycleID)
 	return count > 0, merr
 }
@@ -202,12 +200,12 @@ func (s *ToolRegenerations) HasRegenerationsForCycle(cycleID models.CycleID) (bo
 func (s *ToolRegenerations) GetRegenerationHistory(toolID models.ToolID) (
 	[]*models.ToolRegeneration, *errors.MasterError,
 ) {
-	query := fmt.Sprintf(`
+	query := `
 		SELECT id, tool_id, cycle_id, reason, performed_by
-		FROM %s
+		FROM tool_regenerations
 		WHERE tool_id = ?
 		ORDER BY id DESC
-	`, TableNameToolRegenerations)
+	`
 
 	rows, err := s.DB.Query(query, toolID)
 	if err != nil {

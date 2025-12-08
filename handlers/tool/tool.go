@@ -259,7 +259,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	}
 
 	// Get cycles for this specific tool
-	toolCycles, merr := h.registry.PressCycles.GetPressCyclesForTool(toolID)
+	toolCycles, merr := h.registry.PressCycles.ListPressCyclesForTool(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -383,7 +383,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	}
 
 	// Get notes for this tool
-	notes, merr := h.registry.Notes.GetByTool(toolID)
+	notes, merr := h.registry.Notes.ListByLinked("tool", int64(toolID))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -688,7 +688,7 @@ func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *err
 	}
 
 	var filteredCycles []*models.Cycle
-	cycles, merr := h.registry.PressCycles.GetPressCyclesForTool(toolID)
+	cycles, merr := h.registry.PressCycles.ListPressCyclesForTool(toolID)
 	if merr != nil {
 		return nil, merr
 	}

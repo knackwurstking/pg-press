@@ -176,7 +176,9 @@ func (h *Handler) PostUmbauPage(c echo.Context) error {
 	for _, tool := range currentTools {
 		cycle := models.NewCycle(pressNumber, tool.ID, tool.Position, totalCycles, user.TelegramID)
 
-		_, merr = h.registry.PressCycles.Add(cycle, user)
+		_, merr = h.registry.PressCycles.Add(
+			cycle.PressNumber, cycle.ToolID, cycle.ToolPosition, cycle.TotalCycles, cycle.PerformedBy,
+		)
 		if merr != nil {
 			return merr.Echo()
 		}

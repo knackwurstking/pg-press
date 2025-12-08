@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -10,13 +9,7 @@ import (
 
 // Get retrieves a press cycle by ID
 func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
-		FROM %s
-		WHERE id = ?
-	`, TableNamePressCycles)
-
-	row := s.DB.QueryRow(query, id)
+	row := s.DB.QueryRow(SQLGetPressCycle, id)
 	cycle, err := ScanCycle(row)
 	if err != nil {
 		return cycle, errors.NewMasterError(err, 0)
@@ -27,33 +20,31 @@ func (s *PressCycles) Get(id models.CycleID) (*models.Cycle, *errors.MasterError
 }
 
 // Add creates a new press cycle
-func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleID, *errors.MasterError) {
+func (s *PressCycles) Add(
+	press models.PressNumber,
+	toolID models.ToolID,
+	toolPosition models.Position,
+	totalCycles int64,
+	performedBy models.TelegramID,
+) (models.CycleID, *errors.MasterError) {
+
+	cycle := models.NewCycle(
+		press, toolID, toolPosition, totalCycles, performedBy,
+	)
+
 	verr := cycle.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
 
-	verr = user.Validate()
-	if verr != nil {
-		return 0, verr.MasterError()
-	}
-
-	if cycle.Date.IsZero() {
-		cycle.Date = time.Now()
-	}
-
-	query := fmt.Sprintf(`
-		INSERT INTO %s (press_number, tool_id, tool_position, total_cycles, date, performed_by)
-		VALUES (?, ?, ?, ?, ?, ?)
-	`, TableNamePressCycles)
-
-	result, err := s.DB.Exec(query,
+	result, err := s.DB.Exec(
+		SQLAddPressCycle,
 		cycle.PressNumber,
 		cycle.ToolID,
 		cycle.ToolPosition,
 		cycle.TotalCycles,
 		cycle.Date,
-		user.TelegramID,
+		cycle.PerformedBy,
 	)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
@@ -70,13 +61,7 @@ func (s *PressCycles) Add(cycle *models.Cycle, user *models.User) (models.CycleI
 
 // List retrieves all press cycles
 func (s *PressCycles) List() ([]*models.Cycle, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT *
-		FROM %s
-		ORDER BY date DESC
-	`, TableNamePressCycles)
-
-	rows, err := s.DB.Query(query)
+	rows, err := s.DB.Query(SQLListPressCycles)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -92,13 +77,23 @@ func (s *PressCycles) List() ([]*models.Cycle, *errors.MasterError) {
 }
 
 // Update modifies an existing press cycle
-func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.MasterError {
-	verr := cycle.Validate()
-	if verr != nil {
-		return verr.MasterError()
-	}
+func (s *PressCycles) Update(
+	id models.CycleID,
+	press models.PressNumber,
+	toolID models.ToolID,
+	toolPosition models.Position,
+	totalCycles int64,
+	date time.Time,
+	performedBy models.TelegramID,
+) *errors.MasterError {
 
-	verr = user.Validate()
+	cycle := models.NewCycle(
+		press, toolID, toolPosition, totalCycles, performedBy,
+	)
+	cycle.ID = id
+	cycle.Date = date
+
+	verr := cycle.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
@@ -107,17 +102,12 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.Mas
 		cycle.Date = time.Now()
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
-		SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
-		WHERE id = ?
-	`, TableNamePressCycles)
-
-	_, err := s.DB.Exec(query,
+	_, err := s.DB.Exec(
+		SQLUpdatePressCycle,
 		cycle.TotalCycles,
 		cycle.ToolID,
 		cycle.ToolPosition,
-		user.TelegramID,
+		performedBy,
 		cycle.PressNumber,
 		cycle.Date,
 		cycle.ID,
@@ -127,7 +117,6 @@ func (s *PressCycles) Update(cycle *models.Cycle, user *models.User) *errors.Mas
 
 // Delete removes a press cycle from the database
 func (s *PressCycles) Delete(id models.CycleID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressCycles)
-	_, err := s.DB.Exec(query, id)
+	_, err := s.DB.Exec(SQLDeletePressCycle, id)
 	return errors.NewMasterError(err, 0)
 }

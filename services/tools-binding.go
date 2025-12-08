@@ -27,12 +27,12 @@ func (t *Tools) Bind(cassetteID, targetID models.ToolID) *errors.MasterError {
 	// Execute binding operations
 	queries := []string{
 		// Set bindings
-		fmt.Sprintf(`UPDATE %s SET binding = :target WHERE id = :cassette`, TableNameTools),
-		fmt.Sprintf(`UPDATE %s SET binding = :cassette WHERE id = :target`, TableNameTools),
+		`UPDATE tools SET binding = :target WHERE id = :cassette`,
+		`UPDATE tools SET binding = :cassette WHERE id = :target`,
 		// Clear press from other cassettes at the same press
-		fmt.Sprintf(`UPDATE %s SET press = NULL WHERE press = :press AND position = "cassette top"`, TableNameTools),
+		`UPDATE tools SET press = NULL WHERE press = :press AND position = "cassette top"`,
 		// Assign press to cassette
-		fmt.Sprintf(`UPDATE %s SET press = :press WHERE id = :cassette`, TableNameTools),
+		`UPDATE tools SET press = :press WHERE id = :cassette`,
 	}
 
 	for _, query := range queries {
@@ -58,11 +58,11 @@ func (t *Tools) UnBind(toolID models.ToolID) *errors.MasterError {
 		return nil
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
+	query := `
+		UPDATE tools
 		SET binding = NULL
-		WHERE id = :toolID OR id = :binding`,
-		TableNameTools)
+		WHERE id = :toolID OR id = :binding
+	`
 
 	if _, err := t.DB.Exec(query,
 		sql.Named("toolID", toolID),

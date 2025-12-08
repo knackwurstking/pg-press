@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -19,7 +18,7 @@ func NewPressRegenerations(r *Registry) *PressRegenerations {
 }
 
 func (s *PressRegenerations) Get(id models.PressRegenerationID) (*models.PressRegeneration, *errors.MasterError) {
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE id = ?`, TableNamePressRegenerations)
+	query := `SELECT * FROM press_regenerations WHERE id = ?`
 	row := s.DB.QueryRow(query, id)
 	r, err := ScanPressRegeneration(row)
 	if err != nil {
@@ -34,10 +33,10 @@ func (s *PressRegenerations) Add(r *models.PressRegeneration) (models.PressRegen
 		return 0, verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		INSERT INTO %s (press_number, started_at, completed_at, reason)
+	query := `
+		INSERT INTO press_regenerations (press_number, started_at, completed_at, reason)
 		VALUES (?, ?, ?, ?)
-	`, TableNamePressRegenerations)
+	`
 
 	result, err := s.DB.Exec(query, r.PressNumber, r.StartedAt, r.CompletedAt, r.Reason)
 	if err != nil {
@@ -58,11 +57,11 @@ func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterE
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
+	query := `
+		UPDATE press_regenerations
 		SET started_at = ?, completed_at = ?, reason = ?
 		WHERE id = ?
-	`, TableNamePressRegenerations)
+	`
 
 	if _, err := s.DB.Exec(query, r.StartedAt, r.CompletedAt, r.Reason, r.ID); err != nil {
 		return errors.NewMasterError(err, 0)
@@ -72,7 +71,7 @@ func (s *PressRegenerations) Update(r *models.PressRegeneration) *errors.MasterE
 }
 
 func (s *PressRegenerations) Delete(id models.PressRegenerationID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNamePressRegenerations)
+	query := `DELETE FROM press_regenerations WHERE id = ?`
 	_, err := s.DB.Exec(query, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -105,11 +104,11 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
+	query := `
+		UPDATE press_regenerations
 		SET completed_at = ?
 		WHERE id = ?
-	`, TableNamePressRegenerations)
+	`
 
 	_, err := s.DB.Exec(query, regeneration.CompletedAt, id)
 	if err != nil {
@@ -122,13 +121,13 @@ func (s *PressRegenerations) StopPressRegeneration(id models.PressRegenerationID
 func (s *PressRegenerations) GetLastRegeneration(
 	pressNumber models.PressNumber,
 ) (*models.PressRegeneration, *errors.MasterError) {
-	query := fmt.Sprintf(`
+	query := `
 		SELECT id, press_number, started_at, completed_at, reason
-		FROM %s
+		FROM press_regenerations
 		WHERE press_number = ?
 		ORDER BY id DESC
 		LIMIT 1
-	`, TableNamePressRegenerations)
+	`
 
 	r, err := ScanPressRegeneration(s.DB.QueryRow(query, pressNumber))
 	if err != nil {
@@ -140,12 +139,12 @@ func (s *PressRegenerations) GetLastRegeneration(
 func (s *PressRegenerations) GetRegenerationHistory(
 	pressNumber models.PressNumber,
 ) ([]*models.PressRegeneration, *errors.MasterError) {
-	query := fmt.Sprintf(`
+	query := `
 		SELECT id, press_number, started_at, completed_at, reason
-		FROM %s
+		FROM press_regenerations
 		WHERE press_number = ?
 		ORDER BY id DESC
-	`, TableNamePressRegenerations)
+	`
 
 	rows, err := s.DB.Query(query, pressNumber)
 	if err != nil {

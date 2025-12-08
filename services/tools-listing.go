@@ -9,11 +9,11 @@ import (
 )
 
 func (t *Tools) List() ([]*models.Tool, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
-		ORDER BY format ASC, code ASC`,
-		ToolQuerySelect, TableNameTools)
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
+		ORDER BY format ASC, code ASC
+	`
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
@@ -25,12 +25,12 @@ func (t *Tools) List() ([]*models.Tool, *errors.MasterError) {
 }
 
 func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
 		WHERE is_dead = 0
-		ORDER BY format ASC, code ASC`,
-		ToolQuerySelect, TableNameTools)
+		ORDER BY format ASC, code ASC
+	`
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
@@ -42,12 +42,12 @@ func (t *Tools) ListToolsNotDead() ([]*models.Tool, *errors.MasterError) {
 }
 
 func (t *Tools) ListDeadTools() ([]*models.Tool, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
 		WHERE is_dead = 1
-		ORDER BY format ASC, code ASC`,
-		ToolQuerySelect, TableNameTools)
+		ORDER BY format ASC, code ASC
+	`
 
 	rows, err := t.DB.Query(query)
 	if err != nil {
@@ -63,11 +63,11 @@ func (t *Tools) ListByPress(pressNumber *models.PressNumber) ([]*models.Tool, *e
 		return nil, errors.NewMasterError(fmt.Errorf("invalid press number: %d", pressNumber), http.StatusBadRequest)
 	}
 
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
-		WHERE press = ? AND regenerating = 0 AND is_dead = 0`,
-		ToolQuerySelect, TableNameTools)
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
+		WHERE press = ? AND regenerating = 0 AND is_dead = 0
+	`
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {
@@ -83,11 +83,11 @@ func (t *Tools) ListActiveToolsForPress(pressNumber models.PressNumber) ([]*mode
 		return nil, errors.NewMasterError(fmt.Errorf("invalid press number: %d", pressNumber), http.StatusBadRequest)
 	}
 
-	query := fmt.Sprintf(`
-		SELECT %s
-		FROM %s
-		WHERE regenerating = 0 AND is_dead = 0 AND press = ?`,
-		ToolQuerySelect, TableNameTools)
+	query := `
+		SELECT id, position, format, type, code, regenerating, is_dead, press, binding
+		FROM tools
+		WHERE regenerating = 0 AND is_dead = 0 AND press = ?
+	`
 
 	rows, err := t.DB.Query(query, pressNumber)
 	if err != nil {

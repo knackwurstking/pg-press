@@ -12,7 +12,8 @@ import (
 func (s *PressCycles) GetCycleSummaryData(
 	pressNumber models.PressNumber,
 ) ([]*models.Cycle, map[models.ToolID]*models.Tool, map[models.TelegramID]*models.User, *errors.MasterError) {
-	cycles, merr := s.GetPressCycles(pressNumber, nil, nil)
+
+	cycles, merr := s.ListPressCyclesByPress(pressNumber, -1, 0)
 	if merr != nil {
 		return nil, nil, nil, merr
 	}

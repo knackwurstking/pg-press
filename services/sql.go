@@ -67,6 +67,17 @@ const (
 		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
+	-- Create table for notes
+
+	CREATE TABLE IF NOT EXISTS notes (
+		id INTEGER NOT NULL,
+		level INTEGER NOT NULL,
+		content TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		linked TEXT,
+		PRIMARY KEY("id" AUTOINCREMENT)
+	);
+
 	-- Create table for metal sheets
 
 	CREATE TABLE IF NOT EXISTS metal_sheets (
@@ -82,28 +93,10 @@ const (
 		PRIMARY KEY("id" AUTOINCREMENT),
 	);
 
-	-- Create table for notes
-
-	CREATE TABLE IF NOT EXISTS notes (
-		id INTEGER NOT NULL,
-		level INTEGER NOT NULL,
-		content TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		linked TEXT,
-		PRIMARY KEY("id" AUTOINCREMENT)
-	);
-
 	-- Create table for press cycles
 
 	CREATE TABLE IF NOT EXISTS press_cycles (
-		id INTEGER NOT NULL,
-		press_number INTEGER NOT NULL,
-		tool_id INTEGER NOT NULL,
-		tool_position TEXT NOT NULL,
-		total_cycles INTEGER NOT NULL DEFAULT 0,
-		date DATETIME NOT NULL,
-		performed_by INTEGER NOT NULL
-		PRIMARY KEY("id" AUTOINCREMENT)
+
 	);
 
 	-- Create table for press regenerations
@@ -114,17 +107,6 @@ const (
 		started_at DATETIME NOT NULL,
 		completed_at DATETIME,
 		reason TEXT
-		PRIMARY KEY("id" AUTOINCREMENT)
-	);
-
-	-- Create table for tool regenerations
-
-	CREATE TABLE IF NOT EXISTS tool_regenerations (
-		id INTEGER NOT NULL,
-		tool_id INTEGER NOT NULL,
-		cycle_id INTEGER NOT NULL,
-		reason TEXT,
-		performed_by INTEGER NOT NULL
 		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
@@ -140,6 +122,17 @@ const (
 		is_dead INTEGER NOT NULL DEFAULT 0,
 		press INTEGER,
 		binding INTEGER,
+		PRIMARY KEY("id" AUTOINCREMENT)
+	);
+
+	-- Create table for tool regenerations
+
+	CREATE TABLE IF NOT EXISTS tool_regenerations (
+		id INTEGER NOT NULL,
+		tool_id INTEGER NOT NULL,
+		cycle_id INTEGER NOT NULL,
+		reason TEXT,
+		performed_by INTEGER NOT NULL
 		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
@@ -390,5 +383,136 @@ const (
 // PRIMARY KEY("id" AUTOINCREMENT)
 
 const (
-// TODO: ...
+	SQLAddModification = `
+		INSERT INTO modifications (user_id, entity_type, entity_id, data, created_at)
+		VALUES (?, ?, ?, ?, ?)
+	`
+	SQLGetModification = `
+		SELECT id, user_id, data, created_at
+		FROM modifications
+		WHERE id = ?
+	`
+	SQLListModificationsByEntityType = `
+		SELECT id, user_id, data, created_at
+		FROM modifications
+		WHERE entity_type = ? AND entity_id = ?
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`
+	SQLCountModificationsByEntityType = `
+		SELECT COUNT(*)
+		FROM modifications
+		WHERE entity_type = ? AND entity_id = ?
+	`
+	SQLDeleteModification = `
+		DELETE FROM modifications
+		WHERE id = ?
+	`
+	SQLDeleteModificationsByEntityType = `
+		DELETE FROM modifications
+		WHERE entity_type = ? AND entity_id = ?
+	`
+)
+
+// SQL queries for notes service
+//
+// id 			INTEGER NOT NULL,
+// level 		INTEGER NOT NULL,
+// content 		TEXT NOT NULL,
+// created_at 	DATETIME DEFAULT CURRENT_TIMESTAMP,
+// linked 		TEXT,
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+	SQLListNotes = `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+	`
+	SQLGetNote = `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+		WHERE id = ?
+	`
+	SQLListNotesByIDs = `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+		WHERE id IN (%s)
+	`
+	SQLListNotesByLinked = `
+		SELECT id, level, content, created_at, COALESCE(linked, '') as linked
+		FROM notes
+		WHERE linked = ?
+	`
+	SQLAddNote = `
+		INSERT INTO notes (level, content, linked) 
+		VALUES (?, ?, ?)
+	`
+	SQLUpdateNote = `
+		UPDATE notes 
+		SET level = ?, content = ?, linked = ? 
+		WHERE id = ?;
+	`
+	SQLDeleteNote = `
+		DELETE FROM notes
+		WHERE id = ?
+	`
+)
+
+// SQL queries for press cycles service
+//
+// id 				INTEGER NOT NULL,
+// press_number 	INTEGER NOT NULL,
+// tool_id 			INTEGER NOT NULL,
+// tool_position 	TEXT NOT NULL,
+// total_cycles 	INTEGER NOT NULL DEFAULT 0,
+// date 			DATETIME NOT NULL,
+// performed_by 	INTEGER NOT NULL
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+	SQLGetLastToolCycle = `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY date DESC
+		LIMIT 1
+	`
+	SQLListPressCyclesForTool = `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE tool_id = ?
+		ORDER BY date DESC
+	`
+	SQLListPressCyclesByPress = `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE press_number = ?
+		ORDER BY date DESC
+		LIMIT ? OFFSET ?
+	`
+	SQLGetPressCycle = `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		WHERE id = ?
+	`
+	SQLAddPressCycle = `
+		INSERT INTO press_cycles (press_number, tool_id, tool_position, total_cycles, date, performed_by)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
+	SQLListPressCycles = `
+		SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by
+		FROM press_cycles
+		ORDER BY date DESC
+	`
+	SQLUpdatePressCycle = `
+		UPDATE press_cycles
+		SET total_cycles = ?, tool_id = ?, tool_position = ?, performed_by = ?, press_number = ?, date = ?
+		WHERE id = ?
+	`
+	SQLDeletePressCycle = `
+		DELETE FROM press_cycles
+		WHERE id = ?
+	`
 )
