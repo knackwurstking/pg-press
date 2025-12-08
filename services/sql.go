@@ -274,9 +274,31 @@ const (
 
 const (
 	SQLListFeeds = `
-		SELECT id, title, content, user_id, created_at 
+		SELECT id, title, content, user_id, created_at
 		FROM feeds
 		ORDER BY created_at DESC
+	`
+	SQLListFeedsWithRange = `
+		SELECT id, title, content, user_id, created_at
+		FROM feeds
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`
+	SQLListFeedsByUserIDWithRange = `
+		SELECT id, title, content, user_id, created_at
+		FROM feeds
+		WHERE user_id = ?
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`
+	SQLGetFeed = `
+		SELECT id, title, content, user_id, created_at 
+		FROM feeds
+		WHERE id = ?
+	`
+	SQLAddFeed = `
+		INSERT INTO feeds (title, content, user_id, created_at) 
+		VALUES (?, ?, ?, ?)
 	`
 	// TODO: ...
 )

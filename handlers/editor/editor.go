@@ -224,12 +224,15 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			// Create feed entry
 			feedTitle := "Problembericht aktualisiert"
 			feedContent := fmt.Sprintf("Titel: %s", tr.Title)
+
 			totalAttachments := len(existingAttachmentIDs) + len(newAttachments)
 			if totalAttachments > 0 {
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
-			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Warn("Failed to create feed for trouble report update", "error", err)
+
+			merr = h.registry.Feeds.Add(feedTitle, feedContent, user.TelegramID)
+			if merr != nil {
+				slog.Warn("Failed to create feed for trouble report update", "error", merr)
 			}
 
 		} else {
@@ -245,11 +248,14 @@ func (h *Handler) saveContent(editorType string, id int64, title, content string
 			// Create feed entry
 			feedTitle := "Neuer Problembericht erstellt"
 			feedContent := fmt.Sprintf("Titel: %s", tr.Title)
+
 			if len(attachments) > 0 {
 				feedContent += fmt.Sprintf("\nAnhänge: %d", len(attachments))
 			}
-			if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-				slog.Warn("Failed to create feed for trouble report creation", "error", err)
+
+			merr = h.registry.Feeds.Add(feedTitle, feedContent, user.TelegramID)
+			if merr != nil {
+				slog.Warn("Failed to create feed for trouble report creation", "error", merr)
 			}
 		}
 

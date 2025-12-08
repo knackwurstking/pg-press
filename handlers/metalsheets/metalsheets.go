@@ -86,7 +86,8 @@ func (h *Handler) createFeed(user *models.User, tool *models.Tool, metalSheet *m
 	}
 
 	// Create and save the feed entry
-	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Warn("Failed to create feed", "error", err)
+	merr := h.registry.Feeds.Add(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed", "error", merr)
 	}
 }

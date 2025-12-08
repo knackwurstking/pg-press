@@ -77,7 +77,7 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for tool creation", "error", merr)
 	}
@@ -132,7 +132,7 @@ func (h *Handler) PutEditTool(c echo.Context) error {
 		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
 	}
 
-	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for tool update", "error", merr)
 	}

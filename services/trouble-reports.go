@@ -191,7 +191,7 @@ func (s *TroubleReports) AddWithAttachments(
 			continue
 		}
 
-		id, merr := s.Registry.Attachments.Add(attachment)
+		id, merr := s.Registry.Attachments.Add(attachment.MimeType, attachment.Data)
 		if merr != nil {
 			s.cleanupAttachments(attachmentIDs)
 			return merr
@@ -235,7 +235,7 @@ func (s *TroubleReports) UpdateWithAttachments(
 			continue
 		}
 
-		attachmentID, merr := s.Registry.Attachments.Add(attachment)
+		attachmentID, merr := s.Registry.Attachments.Add(attachment.MimeType, attachment.Data)
 		if merr != nil {
 			s.cleanupAttachments(newAttachmentIDs)
 			return merr

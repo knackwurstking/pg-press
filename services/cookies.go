@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
@@ -31,11 +30,6 @@ func (c *Cookies) List() ([]*models.Cookie, *errors.MasterError) {
 }
 
 func (c *Cookies) ListApiKey(apiKey string) ([]*models.Cookie, *errors.MasterError) {
-	verr := c.validateApiKey(apiKey)
-	if verr != nil {
-		return nil, verr.MasterError()
-	}
-
 	rows, err := c.DB.Query(SQLListCookiesByApiKey, apiKey)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
@@ -62,13 +56,14 @@ func (c *Cookies) Get(value string) (*models.Cookie, *errors.MasterError) {
 }
 
 func (c *Cookies) Add(userAgent, value, apiKey string) *errors.MasterError {
-	verr := c.validateApiKey(apiKey)
+	cookie := models.NewCookie(userAgent, value, apiKey)
+	verr := cookie.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
 
 	// Check if cookie already exists
-	count, merr := c.QueryCount(SQLCountCookies, value)
+	count, merr := c.QueryCount(SQLCountCookies, cookie.Value)
 	if merr != nil {
 		return merr
 	}
@@ -77,8 +72,7 @@ func (c *Cookies) Add(userAgent, value, apiKey string) *errors.MasterError {
 			utils.MaskString(value)).MasterError()
 	}
 
-	lastLogin := time.Now().UnixMilli()
-	_, err := c.DB.Exec(SQLAddCookie, userAgent, value, apiKey, lastLogin)
+	_, err := c.DB.Exec(SQLAddCookie, cookie.UserAgent, cookie.Value, cookie.ApiKey, cookie.LastLogin)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -86,7 +80,8 @@ func (c *Cookies) Add(userAgent, value, apiKey string) *errors.MasterError {
 	return nil
 }
 
-func (c *Cookies) Update(value string, cookie *models.Cookie) *errors.MasterError {
+func (c *Cookies) Update(oldValue string, userAgent, value, apiKey string) *errors.MasterError {
+	cookie := models.NewCookie(userAgent, value, apiKey)
 	verr := cookie.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -133,11 +128,6 @@ func (c *Cookies) Remove(value string) *errors.MasterError {
 }
 
 func (c *Cookies) RemoveApiKey(apiKey string) *errors.MasterError {
-	verr := c.validateApiKey(apiKey)
-	if verr != nil {
-		return verr.MasterError()
-	}
-
 	_, err := c.DB.Exec(SQLDeleteCookiesByApiKey, apiKey)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -152,12 +142,5 @@ func (c *Cookies) RemoveExpired(beforeTimestamp int64) *errors.MasterError {
 		return errors.NewMasterError(err, 0)
 	}
 
-	return nil
-}
-
-func (c *Cookies) validateApiKey(key string) *errors.ValidationError {
-	if !utils.ValidateAPIKey(key) {
-		return errors.NewValidationError("invalid api_key")
-	}
 	return nil
 }

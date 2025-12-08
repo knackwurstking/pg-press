@@ -168,7 +168,7 @@ func (h *Handler) createNewMetalSheetFeed(user *models.User, tool *models.Tool, 
 	}
 
 	// Create and save the feed entry
-	_, dberr := h.registry.Feeds.AddSimple("Blech erstellt", content, user.TelegramID)
+	dberr := h.registry.Feeds.Add("Blech erstellt", content, user.TelegramID)
 	if dberr != nil {
 		slog.Warn("Failed to create feed", "error", dberr)
 	}
@@ -223,7 +223,7 @@ func (h *Handler) createUpdateMetalSheetFeed(user *models.User, tool *models.Too
 	}
 
 	// Create and save the feed entry
-	_, dberr := h.registry.Feeds.AddSimple("Blech aktualisiert", content, user.TelegramID)
+	dberr := h.registry.Feeds.Add("Blech aktualisiert", content, user.TelegramID)
 	if dberr != nil {
 		slog.Warn("Failed to create update feed", "error", dberr)
 	}

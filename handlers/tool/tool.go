@@ -738,8 +738,8 @@ func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *
 }
 
 func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
-	_, dberr := h.registry.Feeds.AddSimple(title, content, userID)
-	if dberr != nil {
-		slog.Warn("Failed to create feed", "error", dberr)
+	merr := h.registry.Feeds.Add(title, content, userID)
+	if merr != nil {
+		slog.Warn("Failed to create feed", "error", merr)
 	}
 }

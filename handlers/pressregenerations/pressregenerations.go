@@ -125,7 +125,8 @@ func (h *Handler) createFeed(feedTitle string, r *models.PressRegeneration, user
 	feedContent := fmt.Sprintf("Presse: %d\n", r.PressNumber)
 	feedContent += fmt.Sprintf("Von %s bis %s\n", r.StartedAt.Format(env.DateFormat), r.CompletedAt.Format(env.DateFormat))
 	feedContent += fmt.Sprintf("Reason: %s", r.Reason)
-	if _, err := h.registry.Feeds.AddSimple(feedTitle, feedContent, user.TelegramID); err != nil {
-		slog.Warn("Failed to create feed for deleting a press regeneration", "error", err)
+	merr := h.registry.Feeds.Add(feedTitle, feedContent, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for deleting a press regeneration", "error", merr)
 	}
 }

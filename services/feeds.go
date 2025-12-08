@@ -34,17 +34,8 @@ func (f *Feeds) List() ([]*models.Feed, *errors.MasterError) {
 	return ScanRows(rows, ScanFeed)
 }
 
-// TODO: ...
 func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, title, content, user_id, created_at
-		FROM %s
-		ORDER BY created_at DESC
-		LIMIT ? OFFSET ?`,
-		TableNameFeeds,
-	)
-
-	rows, err := f.DB.Query(query, limit, offset)
+	rows, err := f.DB.Query(SQLListFeedsWithRange, limit, offset)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -54,16 +45,7 @@ func (f *Feeds) ListRange(offset, limit int) ([]*models.Feed, *errors.MasterErro
 }
 
 func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, title, content, user_id, created_at
-		FROM %s
-		WHERE user_id = ?
-		ORDER BY created_at DESC
-		LIMIT ? OFFSET ?`,
-		TableNameFeeds,
-	)
-
-	rows, err := f.DB.Query(query, userID, limit, offset)
+	rows, err := f.DB.Query(SQLListFeedsByUserIDWithRange, userID, limit, offset)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -73,12 +55,7 @@ func (f *Feeds) ListByUser(userID int64, offset, limit int) ([]*models.Feed, *er
 }
 
 func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.MasterError) {
-	query := fmt.Sprintf(
-		`SELECT id, title, content, user_id, created_at FROM %s WHERE id = ?`,
-		TableNameFeeds,
-	)
-
-	feed, err := ScanFeed(f.DB.QueryRow(query, id))
+	feed, err := ScanFeed(f.DB.QueryRow(SQLGetFeed, id))
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -86,18 +63,14 @@ func (f *Feeds) Get(id models.FeedID) (*models.Feed, *errors.MasterError) {
 	return feed, nil
 }
 
-func (f *Feeds) Add(feed *models.Feed) *errors.MasterError {
+func (f *Feeds) Add(title, content string, userID models.TelegramID) *errors.MasterError {
+	feed := models.NewFeed(title, content, userID)
 	verr := feed.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(
-		`INSERT INTO %s (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`,
-		TableNameFeeds,
-	)
-
-	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
+	result, err := f.DB.Exec(SQLAddFeed, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -115,41 +88,7 @@ func (f *Feeds) Add(feed *models.Feed) *errors.MasterError {
 	return nil
 }
 
-// AddSimple creates a new feed with automatic timestamp and broadcasts the update
-func (f *Feeds) AddSimple(title, content string, userID models.TelegramID) (*models.Feed, *errors.MasterError) {
-	// Create feed with automatic timestamp
-	feed := models.NewFeed(title, content, userID)
-
-	// Validate the feed
-	verr := feed.Validate()
-	if verr != nil {
-		return nil, verr.MasterError()
-	}
-
-	query := fmt.Sprintf(
-		`INSERT INTO %s (title, content, user_id, created_at) VALUES (?, ?, ?, ?)`,
-		TableNameFeeds,
-	)
-
-	result, err := f.DB.Exec(query, feed.Title, feed.Content, feed.UserID, feed.CreatedAt)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	feed.ID = models.FeedID(id)
-
-	// Broadcast update if broadcaster is set
-	if f.broadcaster != nil {
-		f.broadcaster.Broadcast()
-	}
-
-	return feed, nil
-}
-
+// TODO: Continue here with moving SQL statements to constants
 func (f *Feeds) Delete(id models.FeedID) *errors.MasterError {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
 

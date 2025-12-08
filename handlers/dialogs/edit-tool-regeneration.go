@@ -86,7 +86,7 @@ func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
 		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
 	}
 
-	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}

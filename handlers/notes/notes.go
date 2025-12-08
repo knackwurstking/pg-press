@@ -92,7 +92,7 @@ func (h *Handler) HTMXDeleteNote(c echo.Context) error {
 	}
 
 	// Create feed entry
-	_, merr = h.registry.Feeds.AddSimple("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
+	merr = h.registry.Feeds.Add("Notiz gelöscht", "Eine Notiz wurde gelöscht", user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for note deletion", "error", merr)
 	}

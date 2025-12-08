@@ -80,7 +80,16 @@ func (a *Attachments) ListByIDs(ids []models.AttachmentID) ([]*models.Attachment
 }
 
 func (a *Attachments) Add(mimeType string, data []byte) (models.AttachmentID, *errors.MasterError) {
-	result, err := a.DB.Exec(SQLAddAttachment, mimeType, data)
+	attachment := models.Attachment{ // TODO: Create a NewAttachment constructor
+		MimeType: mimeType,
+		Data:     data,
+	}
+	verr := attachment.Validate()
+	if verr != nil {
+		return 0, verr.MasterError()
+	}
+
+	result, err := a.DB.Exec(SQLAddAttachment, attachment.MimeType, attachment.Data)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
 	}
@@ -94,7 +103,17 @@ func (a *Attachments) Add(mimeType string, data []byte) (models.AttachmentID, *e
 }
 
 func (a *Attachments) Update(id int64, mimeType string, data []byte) *errors.MasterError {
-	_, err := a.DB.Exec(SQLUpdateAttachment, mimeType, data, id)
+	attachment := models.Attachment{
+		ID:       fmt.Sprintf("%d", id),
+		MimeType: mimeType,
+		Data:     data,
+	}
+	verr := attachment.Validate()
+	if verr != nil {
+		return verr.MasterError()
+	}
+
+	_, err := a.DB.Exec(SQLUpdateAttachment, attachment.MimeType, attachment.Data, attachment.GetID())
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}

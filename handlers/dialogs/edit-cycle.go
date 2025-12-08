@@ -166,7 +166,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		content += "\nRegenerierung gestartet"
 	}
 
-	_, merr = h.registry.Feeds.AddSimple(title, content, user.TelegramID)
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
@@ -265,8 +265,9 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		content += "\nRegenerierung abgeschlossen"
 	}
 
-	if _, err := h.registry.Feeds.AddSimple(title, content, user.TelegramID); err != nil {
-		slog.Warn("Failed to create feed for cycle update", "error", err)
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
+	merr != nil {
+		slog.Warn("Failed to create feed for cycle update", "error", merr)
 	}
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
