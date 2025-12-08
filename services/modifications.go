@@ -45,6 +45,7 @@ func (s *Modifications) Add(mt models.ModificationType, mtID int64, data any, us
 		return 0, errors.NewMasterError(fmt.Errorf("marshal data: %#v", err), http.StatusBadRequest)
 	}
 
+	// TODO: Continue outsourcing SQL queries here...
 	query := fmt.Sprintf(`
 		INSERT INTO %s (user_id, entity_type, entity_id, data, created_at)
 		VALUES (?, ?, ?, ?, ?)

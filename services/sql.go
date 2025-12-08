@@ -38,12 +38,13 @@ const (
 	-- Create table for modifications
 
 	CREATE TABLE IF NOT EXISTS modifications (
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		id INTEGER NOT NULL,
 		user_id INTEGER NOT NULL,
 		entity_type TEXT NOT NULL,
 		entity_id INTEGER NOT NULL,
 		data BLOB NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
 	-- Create table for feeds 
@@ -95,33 +96,36 @@ const (
 	-- Create table for press cycles
 
 	CREATE TABLE IF NOT EXISTS press_cycles (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id INTEGER NOT NULL,
 		press_number INTEGER NOT NULL,
 		tool_id INTEGER NOT NULL,
 		tool_position TEXT NOT NULL,
 		total_cycles INTEGER NOT NULL DEFAULT 0,
 		date DATETIME NOT NULL,
 		performed_by INTEGER NOT NULL
+		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
 	-- Create table for press regenerations
 
 	CREATE TABLE IF NOT EXISTS press_regenerations (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id INTEGER NOT NULL,
 		press_number INTEGER NOT NULL,
 		started_at DATETIME NOT NULL,
 		completed_at DATETIME,
 		reason TEXT
+		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
 	-- Create table for tool regenerations
 
 	CREATE TABLE IF NOT EXISTS tool_regenerations (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id INTEGER NOT NULL,
 		tool_id INTEGER NOT NULL,
 		cycle_id INTEGER NOT NULL,
 		reason TEXT,
 		performed_by INTEGER NOT NULL
+		PRIMARY KEY("id" AUTOINCREMENT)
 	);
 
 	-- Create table for tools
@@ -164,47 +168,6 @@ const (
 	CREATE INDEX IF NOT EXISTS idx_press_cycles_press_number ON press_cycles(press_number);
 	CREATE INDEX IF NOT EXISTS idx_press_cycles_date ON press_cycles(date);
 
-	`
-)
-
-// SQL queries for attachments service
-//
-// id 			INTEGER NOT NULL,
-// mime_type 	TEXT NOT NULL,
-// data 		BLOB NOT NULL,
-// PRIMARY 		KEY("id" AUTOINCREMENT)
-//
-// PRIMARY KEY("id" AUTOINCREMENT)
-
-const (
-	SQLGetAttachmentByID = `
-		SELECT id, mime_type, data 
-		FROM attachments 
-		WHERE id = ?
-	`
-	SQLListAttachments = `
-		SELECT id, mime_type, data 
-		FROM attachments 
-		ORDER BY id ASC
-	`
-	SQLListAttachmentsByIDs = `
-		SELECT id, mime_type, data 
-		FROM attachments 
-		WHERE id IN (%s) 
-		ORDER BY id ASC
-	`
-	SQLAddAttachment = `
-		INSERT INTO attachments (mime_type, data) 
-		VALUES (?, ?)
-	`
-	SQLUpdateAttachment = `
-		UPDATE attachments 
-		SET mime_type = ?, data = ? 
-		WHERE id = ?
-	`
-	SQLDeleteAttachment = `
-		DELETE FROM attachments 
-		WHERE id = ?
 	`
 )
 
@@ -262,6 +225,47 @@ const (
 	`
 )
 
+// SQL queries for attachments service
+//
+// id 			INTEGER NOT NULL,
+// mime_type 	TEXT NOT NULL,
+// data 		BLOB NOT NULL,
+// PRIMARY 		KEY("id" AUTOINCREMENT)
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+	SQLGetAttachmentByID = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		WHERE id = ?
+	`
+	SQLListAttachments = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		ORDER BY id ASC
+	`
+	SQLListAttachmentsByIDs = `
+		SELECT id, mime_type, data 
+		FROM attachments 
+		WHERE id IN (%s) 
+		ORDER BY id ASC
+	`
+	SQLAddAttachment = `
+		INSERT INTO attachments (mime_type, data) 
+		VALUES (?, ?)
+	`
+	SQLUpdateAttachment = `
+		UPDATE attachments 
+		SET mime_type = ?, data = ? 
+		WHERE id = ?
+	`
+	SQLDeleteAttachment = `
+		DELETE FROM attachments 
+		WHERE id = ?
+	`
+)
+
 // SQL queries for feeds service
 //
 // id 			INTEGER NOT NULL,
@@ -300,5 +304,91 @@ const (
 		INSERT INTO feeds (title, content, user_id, created_at) 
 		VALUES (?, ?, ?, ?)
 	`
-	// TODO: ...
+	SQLDeleteFeed = `
+		DELETE FROM feeds
+		WHERE id = ?
+	`
+	SQLDeleteFeedsBefore = `
+		DELETE FROM feeds 
+		WHERE created_at < ?
+	`
+	SQLCountFeeds = `
+		SELECT COUNT(*) FROM feeds
+	`
+	SQLCountFeedsByUserID = `
+		SELECT COUNT(*) FROM feeds WHERE user_id = ?
+	`
+)
+
+// SQL queries for metal sheets service
+//
+// id 				INTEGER NOT NULL,
+// tile_height 		REAL NOT NULL,
+// value 			REAL NOT NULL,
+// marke_height 	INTEGER NOT NULL,
+// stf 				REAL NOT NULL,
+// stf_max 			REAL NOT NULL,
+// identifier 		TEXT NOT NULL,
+// tool_id 			INTEGER NOT NULL,
+// updated_at 		DATETIME DEFAULT CURRENT_TIMESTAMP,
+//
+// PRIMARY KEY("id" AUTOINCREMENT),
+
+const (
+	SQLGetMetalSheet = `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, updated_at
+		FROM metal_sheets
+		WHERE id = ?
+	`
+	SQLListMetalSheets = `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, updated_at
+		FROM metal_sheets
+		ORDER BY id DESC
+	`
+	SQLListMetalSheetsByToolID = `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, updated_at
+		FROM metal_sheets
+		WHERE tool_id = ?
+		ORDER BY id DESC
+	`
+	SQLListMetalSheetsByMachineType = `
+		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id, updated_at
+		FROM metal_sheets
+		WHERE identifier = ?
+		ORDER BY id DESC
+	`
+	SQLAddMetalSheet = `
+		INSERT INTO metal_sheets (tile_height, value, marke_height, stf, stf_max, identifier, tool_id, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
+	`
+	SQLUpdateMetalSheet = `
+		UPDATE metal_sheets
+		SET tile_height = ?, value = ?, marke_height = ?, stf = ?, stf_max = ?,
+			identifier = ?, tool_id = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?
+	`
+	SQLUpdateMetalSheetToolID = `
+		UPDATE metal_sheets
+		SET tool_id = ?, updated_at = CURRENT_TIMESTAMP
+		WHERE id = ?;
+	`
+	SQLDeleteMetalSheet = `
+		DELETE FROM metal_sheets
+		WHERE id = ?
+	`
+)
+
+// SQL queries for modifications service
+//
+// id INTEGER NOT NULL,
+// user_id INTEGER NOT NULL,
+// entity_type TEXT NOT NULL,
+// entity_id INTEGER NOT NULL,
+// data BLOB NOT NULL,
+// created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+//
+// PRIMARY KEY("id" AUTOINCREMENT)
+
+const (
+// TODO: ...
 )

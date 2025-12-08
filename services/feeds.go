@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/models"
 )
@@ -88,11 +86,8 @@ func (f *Feeds) Add(title, content string, userID models.TelegramID) *errors.Mas
 	return nil
 }
 
-// TODO: Continue here with moving SQL statements to constants
 func (f *Feeds) Delete(id models.FeedID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = ?`, TableNameFeeds)
-
-	_, err := f.DB.Exec(query, id)
+	_, err := f.DB.Exec(SQLDeleteFeed, id)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -101,9 +96,7 @@ func (f *Feeds) Delete(id models.FeedID) *errors.MasterError {
 }
 
 func (f *Feeds) DeleteBefore(timestamp int64) (int, *errors.MasterError) {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE created_at < ?`, TableNameFeeds)
-
-	result, err := f.DB.Exec(query, timestamp)
+	result, err := f.DB.Exec(SQLDeleteFeedsBefore, timestamp)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
 	}
@@ -117,7 +110,7 @@ func (f *Feeds) DeleteBefore(timestamp int64) (int, *errors.MasterError) {
 }
 
 func (f *Feeds) Count() (int, *errors.MasterError) {
-	count, err := f.QueryCount(fmt.Sprintf(`SELECT COUNT(*) FROM %s`, TableNameFeeds))
+	count, err := f.QueryCount(SQLCountFeeds)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
 	}
@@ -126,10 +119,7 @@ func (f *Feeds) Count() (int, *errors.MasterError) {
 }
 
 func (f *Feeds) CountByUser(userID int64) (int, *errors.MasterError) {
-	count, err := f.QueryCount(
-		fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE user_id = ?`, TableNameFeeds),
-		userID,
-	)
+	count, err := f.QueryCount(SQLCountFeedsByUserID, userID)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
 	}

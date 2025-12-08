@@ -62,7 +62,7 @@ func ScanMetalSheet(scanner Scannable) (*models.MetalSheet, error) {
 	var identifierStr string
 
 	err := scanner.Scan(&sheet.ID, &sheet.TileHeight, &sheet.Value, &sheet.MarkeHeight,
-		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID)
+		&sheet.STF, &sheet.STFMax, &identifierStr, &sheet.ToolID, &sheet.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}

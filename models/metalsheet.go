@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
 )
@@ -78,7 +79,7 @@ type MetalSheet struct {
 	STFMax      float64      `json:"stf_max"`      // STF max value
 	Identifier  MachineType  `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
 	ToolID      ToolID       `json:"tool_id"`      // Currently assigned tool
-
+	UpdatedAt   time.Time    `json:"updated_at"`   // Last updated timestamp
 }
 
 // New creates a new MetalSheet with default values

@@ -20,13 +20,7 @@ func NewMetalSheets(r *Registry) *MetalSheets {
 }
 
 func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
-		FROM %s
-		WHERE id = ?;
-	`, TableNameMetalSheets)
-
-	row := s.DB.QueryRow(query, id)
+	row := s.DB.QueryRow(SQLGetMetalSheet, id)
 
 	sheet, err := ScanMetalSheet(row)
 	if err != nil {
@@ -37,13 +31,7 @@ func (s *MetalSheets) Get(id models.MetalSheetID) (*models.MetalSheet, *errors.M
 }
 
 func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
-		FROM %s
-		ORDER BY id DESC;
-	`, TableNameMetalSheets)
-
-	rows, err := s.DB.Query(query)
+	rows, err := s.DB.Query(SQLListMetalSheets)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -53,14 +41,7 @@ func (s *MetalSheets) List() ([]*models.MetalSheet, *errors.MasterError) {
 }
 
 func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
-		FROM %s
-		WHERE tool_id = $1
-		ORDER BY id DESC;
-	`, TableNameMetalSheets)
-
-	rows, err := s.DB.Query(query, toolID)
+	rows, err := s.DB.Query(SQLListMetalSheetsByToolID, toolID)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -70,14 +51,7 @@ func (s *MetalSheets) ListByToolID(toolID models.ToolID) ([]*models.MetalSheet, 
 }
 
 func (s *MetalSheets) ListByMachineType(machineType models.MachineType) ([]*models.MetalSheet, *errors.MasterError) {
-	query := fmt.Sprintf(`
-		SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id
-		FROM %s
-		WHERE identifier = $1
-		ORDER BY id DESC;
-	`, TableNameMetalSheets)
-
-	rows, err := s.DB.Query(query, machineType.String())
+	rows, err := s.DB.Query(SQLListMetalSheetsByMachineType, machineType.String())
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -108,19 +82,21 @@ func (s *MetalSheets) ListByPress(pressNumber models.PressNumber, toolsMap map[m
 	return filteredSheets, nil
 }
 
+// TODO: Create `AddUpperMetalSheet` method
+//func (s *MetalSheets) AddUpperMetalSheet(...) (models.MetalSheetID, *errors.MasterError) {}
+
+// TODO: Create `AddLowerMetalSheet` method
+//func (s *MetalSheets) AddLowerMetalSheet(...) (models.MetalSheetID, *errors.MasterError) {}
+
+// TODO: Remove this method once specific methods for upper and lower sheets are implemented
 func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *errors.MasterError) {
 	verr := sheet.Validate()
 	if verr != nil {
 		return 0, verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		INSERT INTO %s (tile_height, value, marke_height, stf, stf_max, identifier, tool_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7);
-	`, TableNameMetalSheets)
-
 	result, err := s.DB.Exec(
-		query,
+		SQLAddMetalSheet,
 		sheet.TileHeight,
 		sheet.Value,
 		sheet.MarkeHeight,
@@ -128,6 +104,7 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 		sheet.STFMax,
 		sheet.Identifier.String(),
 		sheet.ToolID,
+		sheet.UpdatedAt,
 	)
 	if err != nil {
 		return 0, errors.NewMasterError(err, 0)
@@ -142,20 +119,20 @@ func (s *MetalSheets) Add(sheet *models.MetalSheet) (models.MetalSheetID, *error
 	return sheet.ID, nil
 }
 
+// TODO: Create `UpdateUpperMetalSheet` method
+//func (s *MetalSheets) UpdateUpperMetalSheet(...) *errors.MasterError {}
+
+// TODO: Create `UpdateLowerMetalSheet` method
+//func (s *MetalSheets) UpdateLowerMetalSheet(...) *errors.MasterError {}
+
+// TODO: Remove this method once specific methods for upper and lower sheets are implemented
 func (s *MetalSheets) Update(sheet *models.MetalSheet) *errors.MasterError {
 	verr := sheet.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
-		SET tile_height = $1, value = $2, marke_height = $3, stf = $4, stf_max = $5,
-			identifier = $6, tool_id = $7, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $8;
-	`, TableNameMetalSheets)
-
-	_, err := s.DB.Exec(query,
+	_, err := s.DB.Exec(SQLUpdateMetalSheet,
 		sheet.TileHeight, sheet.Value, sheet.MarkeHeight, sheet.STF, sheet.STFMax,
 		sheet.Identifier.String(), sheet.ToolID, sheet.ID)
 	if err != nil {
@@ -178,13 +155,7 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *err
 		return merr
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s
-		SET tool_id = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2;
-	`, TableNameMetalSheets)
-
-	_, err := s.DB.Exec(query, toolID, sheetID)
+	_, err := s.DB.Exec(SQLUpdateMetalSheetToolID, toolID, sheetID)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
@@ -193,9 +164,8 @@ func (s *MetalSheets) AssignTool(sheetID models.MetalSheetID, toolID int64) *err
 }
 
 func (s *MetalSheets) Delete(id models.MetalSheetID) *errors.MasterError {
-	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1;`, TableNameMetalSheets)
-
-	if _, err := s.DB.Exec(query, id); err != nil {
+	_, err := s.DB.Exec(SQLDeleteMetalSheet, id)
+	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
 
