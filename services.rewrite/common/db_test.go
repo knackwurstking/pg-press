@@ -1,12 +1,22 @@
 package common
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewDB(t *testing.T) {
+	currentPath, err := os.Getwd()
+	t.Logf("Current working directory: %s (err: %v)", currentPath, err)
+
+	err = os.Remove(filepath.Join(currentPath, "userdb.sqlite"))
+	if err != nil {
+		t.Logf("Could not remove existing userdb.sqlite file: %v", err)
+	}
+
 	// Test that NewDB creates a valid DB instance
 	db := NewDB()
 	assert.NotNil(t, db)
