@@ -1,3 +1,4 @@
+// TODO: Maybe implement some methods for checking the cookie expiration like IsExpired, Expires, Age etc.
 package shared
 
 import "github.com/knackwurstking/pg-press/errors"
