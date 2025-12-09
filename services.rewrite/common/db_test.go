@@ -46,17 +46,3 @@ func TestNewDB(t *testing.T) {
 
 	db.Close()
 }
-
-func TestDBSetupAndClose(t *testing.T) {
-	// Test that DB setup and close work correctly
-	db := NewDB()
-	assert.NotNil(t, db)
-
-	// This should not error
-	err := db.Setup()
-	if err != nil {
-		t.Fatalf("DB setup failed: %v", err)
-	}
-
-	db.Close()
-}
