@@ -27,12 +27,14 @@ func (ve *ValidationError) MasterError() *MasterError {
 }
 
 type ExistsError struct {
-	Name string
+	Name  string
+	Value any
 }
 
-func NewExistsError(name string) *ExistsError {
+func NewExistsError(name string, v any) *ExistsError {
 	return &ExistsError{
-		Name: name,
+		Name:  name,
+		Value: v,
 	}
 }
 
@@ -41,6 +43,10 @@ func (ee *ExistsError) MasterError() *MasterError {
 }
 
 func (ee *ExistsError) Error() string {
+	if ee.Value != nil {
+		return fmt.Sprintf("%s with value %#v already exists", ee.Name, ee.Value)
+	}
+
 	return fmt.Sprintf("%s already exists", ee.Name)
 }
 
@@ -67,8 +73,10 @@ func NewMasterError(err error, code int) *MasterError {
 			code = http.StatusNotFound
 		default:
 			switch err.(type) {
-			case *ValidationError, *ExistsError:
+			case *ValidationError:
 				code = http.StatusBadRequest
+			case *ExistsError:
+				code = http.StatusConflict
 			default:
 				code = http.StatusInternalServerError
 			}

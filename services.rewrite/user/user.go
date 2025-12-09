@@ -87,7 +87,15 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	}
 
 	// Store the inserted ID back into the entity
-	id, _ := r.LastInsertId()
+	id, err := r.LastInsertId()
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	if id <= 0 {
+		return errors.NewMasterError(
+			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+	}
+
 	entity.ID = shared.TelegramID(id)
 
 	return nil
