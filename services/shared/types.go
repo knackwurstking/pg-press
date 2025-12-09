@@ -10,7 +10,6 @@ const (
 
 type (
 	EntityID    int64
-	UnixMilly   int64
 	TelegramID  int64
 	PressNumber int8
 	EditorType  string
@@ -18,10 +17,6 @@ type (
 
 func (id EntityID) String() string {
 	return fmt.Sprintf("%d", id)
-}
-
-func (u UnixMilly) String() string {
-	return fmt.Sprintf("%d", u)
 }
 
 func (id TelegramID) String() string {

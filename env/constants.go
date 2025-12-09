@@ -5,8 +5,7 @@ import (
 )
 
 const (
-	CookieExpirationDuration = time.Hour * 24 * 31 * 6
-	CookieName               = "pgpress-api-key"
+	CookieName = "pgpress-api-key"
 
 	DateFormat     = "02.01.2006"
 	TimeFormat     = "15:04"

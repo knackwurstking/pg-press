@@ -89,57 +89,38 @@ func autoCleanCookiesCommand() cli.Command {
 	return cli.Command{
 		Name: "auto-clean",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd)
-			telegramIDArg := cli.Int64(cmd, "user", cli.WithShort("u"), cli.Optional)
+			argCustomDBPath := createDBPathOption(cmd)
+			argTelegramIDArg := cli.Int64(cmd, "user", cli.WithShort("u"), cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *common.DB) error {
-					telegramID := shared.EntityID(*telegramIDArg)
+				return withDBOperation(argCustomDBPath, func(db *common.DB) error {
+					telegramID := shared.TelegramID(*argTelegramIDArg)
 
 					// Clean up cookies for a specific telegram user
 					if telegramID != 0 {
-						u, merr := db.Users.Get(telegramID) // TODO: Continue here...
-						if merr != nil {
-							fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
-
-							if merr.Code == http.StatusNotFound {
-								os.Exit(exitCodeNotFound)
-							}
-
-							os.Exit(exitCodeGeneric)
-						}
-
-						cookies, merr := r.Cookies.ListApiKey(u.ApiKey)
-						if merr != nil {
-							fmt.Fprintf(os.Stderr, "List cookies for user \"%d\" failed: %v\n", telegramID, merr)
-							os.Exit(exitCodeGeneric)
-						}
-
-						for _, cookie := range cookies {
-							if cookie.IsExpired() {
-								merr = r.Cookies.Remove(cookie.Value)
-								if merr != nil {
-									// Print out error and continue
-									fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\": %v\n", cookie.Value, merr)
-								}
-							}
-						}
-
-						return nil
+						cleanUpCookiesForUser(db, telegramID)
+						os.Exit(0)
 					}
 
 					// Clean up all cookies
-					cookies, err := r.Cookies.List()
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "List cookies from database failed: %v\n", err)
+					cookies, merr := db.User.Cookie.List()
+					if merr != nil {
+						fmt.Fprintf(os.Stderr,
+							"List cookies from database failed: %v\n",
+							merr,
+						)
 						os.Exit(exitCodeGeneric)
 					}
 
-					for _, cookie := range cookies {
-						if cookie.IsExpired() {
-							if err = r.Cookies.Remove(cookie.Value); err != nil {
+					for _, c := range cookies {
+						if c.IsExpired() {
+							merr = db.User.Cookie.Delete(c.Value)
+							if merr != nil {
 								// Print out error and continue
-								fmt.Fprintf(os.Stderr, "Removing cookie with value \"%s\": %v\n", cookie.Value, err)
+								fmt.Fprintf(os.Stderr,
+									"Removing cookie with value \"%s\": %v\n",
+									c.Value, merr,
+								)
 							}
 						}
 					}
@@ -148,5 +129,41 @@ func autoCleanCookiesCommand() cli.Command {
 				})
 			}
 		}),
+	}
+}
+
+func cleanUpCookiesForUser(db *common.DB, telegramID shared.TelegramID) {
+	cookies, merr := db.User.Cookie.List()
+	if merr != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get the cookies: %v\n", merr)
+		os.Exit(exitCodeGeneric)
+	}
+
+	user, merr := db.User.User.GetByID(telegramID)
+	if merr != nil {
+		fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
+
+		if merr.Code == http.StatusNotFound {
+			os.Exit(exitCodeNotFound)
+		}
+
+		os.Exit(exitCodeGeneric)
+	}
+
+	for _, c := range cookies {
+		if c.UserID != user.ID {
+			continue
+		}
+
+		if c.IsExpired() {
+			merr = db.User.Cookie.Delete(c.Value)
+			if merr != nil {
+				// Print out error and continue
+				fmt.Fprintf(os.Stderr,
+					"Removing cookie for user %d with value \"%s\": %v\n",
+					telegramID, c.Value, merr,
+				)
+			}
+		}
 	}
 }
