@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -78,7 +79,11 @@ func NewMasterError(err error, code int) *MasterError {
 			case *ExistsError:
 				code = http.StatusConflict
 			default:
-				code = http.StatusInternalServerError
+				if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+					code = http.StatusConflict
+				} else {
+					code = http.StatusInternalServerError
+				}
 			}
 		}
 	}
