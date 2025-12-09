@@ -10,18 +10,18 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/services/shared"
 	"github.com/labstack/echo/v4"
 )
 
 // GetUserFromContext retrieves the authenticated user from the request context
-func GetUserFromContext(c echo.Context) (*models.User, *errors.MasterError) {
+func GetUserFromContext(c echo.Context) (*shared.User, *errors.MasterError) {
 	userInterface := c.Get("user")
 	if userInterface == nil {
 		return nil, errors.NewMasterError(fmt.Errorf("user missing"), http.StatusBadRequest)
 	}
 
-	user, ok := userInterface.(*models.User)
+	user, ok := userInterface.(*shared.User)
 	if !ok {
 		return nil, errors.NewMasterError(fmt.Errorf("invalid user"), http.StatusUnauthorized)
 	}

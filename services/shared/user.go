@@ -2,12 +2,12 @@ package shared
 
 import (
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/utils"
 )
 
 const (
 	UserNameMinLength = 1
 	UserNameMaxLength = 100
+	MinAPIKeyLength   = 32
 )
 
 // User represents a user entity with relevant information.
@@ -28,7 +28,7 @@ func (e *User) Validate() *errors.ValidationError {
 			UserNameMinLength, UserNameMaxLength,
 		)
 	}
-	if !utils.ValidateAPIKey(e.ApiKey) {
+	if !ValidateAPIKey(e.ApiKey) {
 		return errors.NewValidationError("api_key is not valid")
 	}
 	return nil
@@ -44,3 +44,8 @@ func (e *User) Clone() *User {
 }
 
 var _ Entity[*User] = (*User)(nil)
+
+// ValidateAPIKey validates an API key according to the minimum length requirement
+func ValidateAPIKey(apiKey string) bool {
+	return len(apiKey) >= MinAPIKeyLength
+}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/services/shared"
 )
 
 // BuildURL constructs a URL with the given path and query parameters
@@ -79,7 +79,7 @@ func UrlHelp() (url struct {
 }
 
 // UrlEditor constructs editor URLs
-func UrlEditor(_type models.EditorType, id string, returnURL templ.SafeURL) (url struct {
+func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) (url struct {
 	Page templ.SafeURL
 	Save templ.SafeURL
 }) {
@@ -108,7 +108,7 @@ func UrlProfile(cookieValue string) (url struct {
 }
 
 // UrlNotes constructs notes URLs
-func UrlNotes(noteID models.NoteID) (url struct {
+func UrlNotes(noteID shared.EntityID) (url struct {
 	Page   templ.SafeURL
 	Delete templ.SafeURL
 	Grid   templ.SafeURL
@@ -122,7 +122,7 @@ func UrlNotes(noteID models.NoteID) (url struct {
 }
 
 // UrlMetalSheets constructs metal sheets URLs
-func UrlMetalSheets(metalSheetID models.MetalSheetID) (url struct {
+func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 	Delete templ.SafeURL
 }) {
 	url.Delete = BuildURL("/metal-sheets/delete", map[string]string{
@@ -132,7 +132,7 @@ func UrlMetalSheets(metalSheetID models.MetalSheetID) (url struct {
 }
 
 // UrlUmbau constructs umbau URLs
-func UrlUmbau(press models.PressNumber) (url struct {
+func UrlUmbau(press shared.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
 	url.Page = BuildURL(fmt.Sprintf("/umbau/%d", press), nil)
@@ -140,7 +140,7 @@ func UrlUmbau(press models.PressNumber) (url struct {
 }
 
 // UrlTroubleReports constructs trouble reports URLs
-func UrlTroubleReports(trID models.TroubleReportID, aID models.AttachmentID, modificationTime int64) (url struct {
+func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTime int64) (url struct {
 	Page               templ.SafeURL
 	SharePDF           templ.SafeURL
 	Attachment         templ.SafeURL
@@ -172,7 +172,7 @@ func UrlTroubleReports(trID models.TroubleReportID, aID models.AttachmentID, mod
 }
 
 // UrlTools constructs tools URLs
-func UrlTools(id models.ToolID) (url struct {
+func UrlTools(toolID shared.EntityID) (url struct {
 	Page                  templ.SafeURL
 	Delete                templ.SafeURL
 	MarkDead              templ.SafeURL
@@ -181,8 +181,8 @@ func UrlTools(id models.ToolID) (url struct {
 	AdminOverlappingTools templ.SafeURL
 }) {
 	params := map[string]string{}
-	if id != 0 {
-		params["id"] = fmt.Sprintf("%d", id)
+	if toolID != 0 {
+		params["id"] = fmt.Sprintf("%d", toolID)
 	}
 
 	url.Page = BuildURL("/tools", nil)
@@ -196,7 +196,7 @@ func UrlTools(id models.ToolID) (url struct {
 }
 
 // UrlTool constructs tool URLs
-func UrlTool(toolID models.ToolID, toolRegenerationID models.ToolRegenerationID, cycleID models.CycleID) (url struct {
+func UrlTool(toolID shared.EntityID, toolRegenerationID shared.EntityID, cycleID shared.EntityID) (url struct {
 	Page               templ.SafeURL
 	DeleteRegeneration templ.SafeURL
 	StatusEdit         templ.SafeURL
@@ -244,7 +244,7 @@ func UrlTool(toolID models.ToolID, toolRegenerationID models.ToolRegenerationID,
 }
 
 // UrlPress constructs press URLs
-func UrlPress(pressNumber models.PressNumber) (url struct {
+func UrlPress(pressNumber shared.PressNumber) (url struct {
 	Page               templ.SafeURL
 	ActiveTools        templ.SafeURL
 	MetalSheets        templ.SafeURL
@@ -265,12 +265,12 @@ func UrlPress(pressNumber models.PressNumber) (url struct {
 }
 
 // UrlPressRegeneration constructs press regeneration URLs
-func UrlPressRegeneration(press models.PressNumber, rid models.PressRegenerationID) (url struct {
+func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.EntityID) (url struct {
 	Page   templ.SafeURL
 	Delete templ.SafeURL
 }) {
 	params := map[string]string{
-		"id": fmt.Sprintf("%d", rid),
+		"id": fmt.Sprintf("%d", pressRegenerationID),
 	}
 
 	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press), nil)
@@ -281,12 +281,12 @@ func UrlPressRegeneration(press models.PressNumber, rid models.PressRegeneration
 
 // UrlDialogs constructs dialog URLs
 func UrlDialogs() (url struct {
-	EditCycle             func(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL
-	EditTool              func(toolID models.ToolID) templ.SafeURL
-	EditMetalSheet        func(metalSheetID models.MetalSheetID, toolID models.ToolID) templ.SafeURL
-	EditNote              func(noteID models.NoteID, linkToTables string) templ.SafeURL
-	EditToolRegeneration  func(toolRegenerationID models.ToolRegenerationID) templ.SafeURL
-	EditPressRegeneration func(pressRegenerationID models.PressRegenerationID) templ.SafeURL
+	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode *bool) templ.SafeURL
+	EditTool              func(toolID shared.EntityID) templ.SafeURL
+	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL
+	EditNote              func(noteID shared.EntityID, linkToTables string) templ.SafeURL
+	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
+	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
 }) {
 	url.EditCycle = urlEditCycleDialog
 	url.EditTool = urlEditToolDialog
@@ -299,7 +299,7 @@ func UrlDialogs() (url struct {
 }
 
 // urlEditCycleDialog constructs edit cycle dialog URL
-func urlEditCycleDialog(cycleID models.CycleID, toolID models.ToolID, toolChangeMode *bool) templ.SafeURL {
+func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode *bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
 		params["id"] = fmt.Sprintf("%d", cycleID)
@@ -315,7 +315,7 @@ func urlEditCycleDialog(cycleID models.CycleID, toolID models.ToolID, toolChange
 }
 
 // urlEditToolDialog constructs edit tool dialog URL
-func urlEditToolDialog(toolID models.ToolID) templ.SafeURL {
+func urlEditToolDialog(toolID shared.EntityID) templ.SafeURL {
 	params := map[string]string{}
 	if toolID != 0 {
 		params["id"] = fmt.Sprintf("%d", toolID)
@@ -325,7 +325,7 @@ func urlEditToolDialog(toolID models.ToolID) templ.SafeURL {
 }
 
 // urlEditMetalSheetDialog constructs edit metal sheet dialog URL
-func urlEditMetalSheetDialog(metalSheetID models.MetalSheetID, toolID models.ToolID) templ.SafeURL {
+func urlEditMetalSheetDialog(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL {
 	params := map[string]string{}
 	if metalSheetID != 0 {
 		params["id"] = fmt.Sprintf("%d", metalSheetID)
@@ -338,7 +338,7 @@ func urlEditMetalSheetDialog(metalSheetID models.MetalSheetID, toolID models.Too
 }
 
 // urlEditNoteDialog constructs edit note dialog URL
-func urlEditNoteDialog(noteID models.NoteID, linkToTables string) templ.SafeURL {
+func urlEditNoteDialog(noteID shared.EntityID, linkToTables string) templ.SafeURL {
 	params := map[string]string{
 		"link_to_tables": linkToTables,
 	}
@@ -350,7 +350,7 @@ func urlEditNoteDialog(noteID models.NoteID, linkToTables string) templ.SafeURL 
 }
 
 // urlEditToolRegenerationDialog constructs edit tool regeneration dialog URL
-func urlEditToolRegenerationDialog(toolRegenerationID models.ToolRegenerationID) templ.SafeURL {
+func urlEditToolRegenerationDialog(toolRegenerationID shared.EntityID) templ.SafeURL {
 	params := map[string]string{}
 	if toolRegenerationID != 0 {
 		params["id"] = fmt.Sprintf("%d", toolRegenerationID)
@@ -360,7 +360,7 @@ func urlEditToolRegenerationDialog(toolRegenerationID models.ToolRegenerationID)
 }
 
 // urlEditPressRegenerationDialog constructs edit press regeneration dialog URL
-func urlEditPressRegenerationDialog(pressRegenerationID models.PressRegenerationID) templ.SafeURL {
+func urlEditPressRegenerationDialog(pressRegenerationID shared.EntityID) templ.SafeURL {
 	params := map[string]string{}
 	if pressRegenerationID != 0 {
 		params["id"] = fmt.Sprintf("%d", pressRegenerationID)

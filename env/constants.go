@@ -5,8 +5,6 @@ import (
 )
 
 const (
-	MinAPIKeyLength = 32
-
 	CookieExpirationDuration = time.Hour * 24 * 31 * 6
 	CookieName               = "pgpress-api-key"
 
