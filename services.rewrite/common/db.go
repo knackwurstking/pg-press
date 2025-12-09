@@ -81,12 +81,18 @@ type DB struct {
 	User *UserDB `json:"user"`
 }
 
-func NewDB(c *shared.Config) *DB {
+func NewDB() *DB {
+	userConfig := &shared.Config{
+		EnableSQL:      true,
+		DriverName:     "sqlite3",
+		DataSourceName: "file:userdb.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
+	}
+
 	db := &DB{
 		User: &UserDB{
-			User:    user.NewUserService(c),
-			Cookie:  user.NewCookieService(c),
-			Session: user.NewSessionService(c),
+			User:    user.NewUserService(userConfig),
+			Cookie:  user.NewCookieService(userConfig),
+			Session: user.NewSessionService(userConfig),
 		},
 	}
 
