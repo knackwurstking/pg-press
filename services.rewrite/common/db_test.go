@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,10 +12,6 @@ import (
 	"github.com/knackwurstking/pg-press/errors"
 	"github.com/knackwurstking/pg-press/services.rewrite/shared"
 )
-
-func init() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
-}
 
 func TestNewDB(t *testing.T) {
 	removeDBFiles()
@@ -87,9 +82,11 @@ func TestUserCRUD(t *testing.T) {
 	merr = db.User.User.Delete(userEntity.ID)
 	assertNoMasterError(t, merr, "Error deleting user")
 
-	// Verify deletion
+	// Verify deletion, expecting an error
 	_, merr = db.User.User.GetByID(userEntity.ID)
-	assert.Error(t, merr)
+	if merr == nil {
+		t.Fatalf("Expected error when fetching deleted user, got none")
+	}
 }
 
 func TestCookieCRUD(t *testing.T) {
@@ -142,9 +139,11 @@ func TestCookieCRUD(t *testing.T) {
 	merr = db.User.Cookie.Delete(cookieEntity.Value)
 	assertNoMasterError(t, merr, "Error deleting cookie")
 
-	// Verify deletion
+	// Verify deletion, expecting an error
 	_, merr = db.User.Cookie.GetByID(cookieEntity.Value)
-	assert.Error(t, merr)
+	if merr == nil {
+		t.Fatalf("Expected error when fetching deleted cookie, got none")
+	}
 }
 
 func TestSessionCRUD(t *testing.T) {
@@ -192,9 +191,11 @@ func TestSessionCRUD(t *testing.T) {
 	merr = db.User.Session.Delete(sessionEntity.ID)
 	assertNoMasterError(t, merr, "Error deleting session")
 
-	// Verify deletion
+	// Verify deletion, expecting an error
 	_, merr = db.User.Session.GetByID(sessionEntity.ID)
-	assert.Error(t, merr)
+	if merr == nil {
+		t.Fatalf("Expected error when fetching deleted session, got none")
+	}
 }
 
 func removeDBFiles() {
@@ -210,8 +211,8 @@ func removeDBFiles() {
 	}
 }
 
-func assertNoMasterError(t *testing.T, merr *errors.MasterError, format string, args ...interface{}) {
+func assertNoMasterError(t *testing.T, merr *errors.MasterError, format string, args ...any) {
 	if merr != nil {
-		t.Fatalf("%s: %#v", fmt.Sprintf(format, args...), merr)
+		t.Fatalf("%s: %v", fmt.Sprintf(format, args...), merr)
 	}
 }
