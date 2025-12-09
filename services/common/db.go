@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/services.rewrite/shared"
-	"github.com/knackwurstking/pg-press/services.rewrite/user"
+	"github.com/knackwurstking/pg-press/services/shared"
+	"github.com/knackwurstking/pg-press/services/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )

@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/services.rewrite/shared"
+	"github.com/knackwurstking/pg-press/services/shared"
 )
 
 type SessionService struct {
