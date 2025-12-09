@@ -12,7 +12,7 @@ const (
 	SQLCreateUserTable string = `
 		CREATE TABLE IF NOT EXISTS :table_name (
 			id 			INTEGER PRIMARY KEY NOT NULL,
-			name 	TEXT NOT NULL,
+			name 		TEXT NOT NULL,
 			api_key 	TEXT NOT NULL UNIQUE,
 			last_feed 	TEXT NOT NULL
 		);

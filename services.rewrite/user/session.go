@@ -17,8 +17,15 @@ func NewSessionService(c *shared.Config) *SessionService {
 	}
 }
 
-func (s *SessionService) TableName() string
-func (s *SessionService) Setup() *errors.MasterError
+func (s *SessionService) TableName() string {
+	return "sessions"
+}
+
+func (s *SessionService) Setup() *errors.MasterError {
+	return nil // Only in-memory storage; no setup needed
+}
+
+// TODO: Implement session service methods (in-memory)
 func (s *SessionService) Create(entity *shared.Session) *errors.MasterError
 func (s *SessionService) Update(entity *shared.Session) *errors.MasterError
 func (s *SessionService) GetByID(id shared.EntityID) (*shared.Session, *errors.MasterError)
