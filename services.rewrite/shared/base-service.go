@@ -20,7 +20,7 @@ func (bs *BaseService) Setup(tableName, tableCreationQuery string) *errors.Maste
 }
 
 func (s *BaseService) Close() *errors.MasterError {
-	err := s.Close()
+	err := s.Config.Close()
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}

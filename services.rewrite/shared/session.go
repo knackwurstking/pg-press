@@ -6,7 +6,10 @@ type Session struct {
 	ID EntityID `json:"id"` // Unique session ID
 }
 
-func (e *Session) Validate() *errors.ValidationError
+func (e *Session) Validate() *errors.ValidationError {
+	// Add validation logic here if needed
+	return nil
+}
 
 func (e *Session) Clone() *Session {
 	return &Session{

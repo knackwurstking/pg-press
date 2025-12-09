@@ -7,6 +7,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/services.rewrite/shared"
 	"github.com/knackwurstking/pg-press/services.rewrite/user"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -88,17 +89,13 @@ func NewDB() *DB {
 		DataSourceName: "file:userdb.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
 	}
 
-	db := &DB{
+	return &DB{
 		User: &UserDB{
 			User:    user.NewUserService(userConfig),
 			Cookie:  user.NewCookieService(userConfig),
 			Session: user.NewSessionService(userConfig),
 		},
 	}
-
-	db.Setup()
-
-	return db
 }
 
 func (db *DB) Setup() {
