@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/services.rewrite/shared"
@@ -17,7 +18,7 @@ type UserDB struct {
 	Session *user.SessionService `json:"session"`
 }
 
-func (udb *UserDB) Setup() {
+func (udb *UserDB) Setup() error {
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error, 3)
 
@@ -42,9 +43,17 @@ func (udb *UserDB) Setup() {
 	wg.Wait()
 	close(errCh)
 
+	errs := []string{}
 	for err := range errCh {
+		errs = append(errs, err.Error())
 		slog.Error("Failed to setup user database service", "error", err)
 	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to setup user database service:\n%s", strings.Join(errs, "\n -> "))
+	}
+
+	return nil
 }
 
 func (udb *UserDB) Close() {
@@ -98,14 +107,29 @@ func NewDB() *DB {
 	}
 }
 
-func (db *DB) Setup() {
+func (db *DB) Setup() error {
 	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 1)
 
 	wg.Go(func() {
-		db.User.Setup()
+		errCh <- db.User.Setup()
 	})
 
 	wg.Wait()
+	close(errCh)
+
+	errs := []string{}
+	for err := range errCh {
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to setup DB:\n%s", strings.Join(errs, "\n"))
+	}
+
+	return nil
 }
 
 func (db *DB) Close() {

@@ -14,17 +14,17 @@ const (
 			user_agent 	TEXT NOT NULL,
 			value 		TEXT PRIMARY KEY NOT NULL,
 			user_id 	INTEGER NOT NULL,
-			last_login 	INTEGER NOT NULL,
+			last_login 	INTEGER NOT NULL
 		);
 
 		-- Index to quickly find cookies by user_id
 
-		CREATE INDEX IF NOT EXISTS idx_(:table_name)_user_id
+		CREATE INDEX IF NOT EXISTS idx_:table_name_user_id
 		ON :table_name(user_id);
 
 		-- Index to quickly find cookies by value
 
-		create index if not exists idx_(:table_name)_value
+		create index if not exists idx_:table_name_value
 		on :table_name(value);
 	`
 	SQLCreateCookie string = `

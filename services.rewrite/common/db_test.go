@@ -1,6 +1,7 @@
 package common
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -8,15 +9,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewDB(t *testing.T) {
-	currentPath, err := os.Getwd()
-	t.Logf("Current working directory: %s (err: %v)", currentPath, err)
+func init() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
-	err = os.Remove(filepath.Join(currentPath, "userdb.sqlite"))
-	if err != nil {
-		t.Logf("Could not remove existing userdb.sqlite file: %v", err)
+	currentPath, err := os.Getwd()
+	slog.Info("Current working directory: %s (err: %v)", currentPath, err)
+
+	filesToRemove := []string{
+		"userdb.sqlite",
+		"userdb.sqlite-shm",
+		"userdb.sqlite-wal",
 	}
 
+	for _, file := range filesToRemove {
+		err = os.Remove(filepath.Join(currentPath, file))
+		if err != nil {
+			slog.Debug("Could not remove existing %s file: %v", file, err)
+		}
+	}
+}
+
+func TestNewDB(t *testing.T) {
 	// Test that NewDB creates a valid DB instance
 	db := NewDB()
 	assert.NotNil(t, db)
@@ -26,7 +39,11 @@ func TestNewDB(t *testing.T) {
 	assert.NotNil(t, db.User.Session)
 
 	// Test setup functionality
-	db.Setup()
+	err := db.Setup()
+	if err != nil {
+		t.Fatalf("DB setup failed: %v", err)
+	}
+
 	db.Close()
 }
 
@@ -36,6 +53,10 @@ func TestDBSetupAndClose(t *testing.T) {
 	assert.NotNil(t, db)
 
 	// This should not error
-	db.Setup()
+	err := db.Setup()
+	if err != nil {
+		t.Fatalf("DB setup failed: %v", err)
+	}
+
 	db.Close()
 }
