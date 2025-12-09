@@ -3,3 +3,4 @@ test.db
 *_templ.go
 /data
 pg-press.db
+*\.sqlite*
