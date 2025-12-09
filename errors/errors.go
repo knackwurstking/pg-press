@@ -58,6 +58,10 @@ type MasterError struct {
 }
 
 func NewMasterError(err error, code int) *MasterError {
+	if err == nil {
+		panic("cannot create MasterError with nil error")
+	}
+
 	if e, ok := err.(*MasterError); ok {
 		if code == 0 {
 			code = e.Code
@@ -96,7 +100,7 @@ func NewMasterError(err error, code int) *MasterError {
 
 func (e *MasterError) Error() string {
 	if e == nil {
-		return "error is nil?"
+		panic("error is nil?")
 	}
 
 	if e.Code > 0 {

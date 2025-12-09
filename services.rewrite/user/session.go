@@ -55,6 +55,12 @@ func (s *SessionService) Create(entity *shared.Session) *errors.MasterError {
 	return nil
 }
 
+// NOTE: I need to overwrite the Close method from the BaseService here
+func (s *SessionService) Close() *errors.MasterError {
+	// No resources to close for in-memory storage
+	return nil
+}
+
 func (s *SessionService) Update(entity *shared.Session) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {

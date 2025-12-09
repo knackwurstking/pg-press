@@ -10,7 +10,7 @@ import (
 
 const (
 	SQLCreateUserTable string = `
-		CREATE TABLE IF NOT EXISTS :table_name (
+		CREATE TABLE IF NOT EXISTS users (
 			id 			INTEGER PRIMARY KEY NOT NULL,
 			name 		TEXT NOT NULL,
 			api_key 	TEXT NOT NULL UNIQUE,
@@ -18,28 +18,28 @@ const (
 		);
 	`
 	SQLCreateUser string = `
-		INSERT INTO :table_name (name, api_key, last_feed) 
+		INSERT INTO users (name, api_key, last_feed) 
 		VALUES (:name, :api_key, :last_feed);
 	`
 	SQLGetUserByID string = `
 		SELECT id, name, api_key, last_feed 
-		FROM :table_name
+		FROM users
 		WHERE id = :id;
 	`
 	SQLUpdateUser string = `
-		UPDATE :table_name
+		UPDATE users
 		SET name 	= :name,
 			api_key 	= :api_key,
 			last_feed 	= :last_feed
 		WHERE id = :id;
 	`
 	SQLDeleteUser string = `
-		DELETE FROM :table_name
+		DELETE FROM users
 		WHERE id = :id;
 	`
 	SQLListUsers string = `
 		SELECT id, name, api_key, last_feed 
-		FROM :table_name;
+		FROM users;
 	`
 )
 

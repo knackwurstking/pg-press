@@ -10,7 +10,7 @@ import (
 
 const (
 	SQLCreateCookieTable string = `
-		CREATE TABLE IF NOT EXISTS :table_name (
+		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent 	TEXT NOT NULL,
 			value 		TEXT PRIMARY KEY NOT NULL,
 			user_id 	INTEGER NOT NULL,
@@ -19,20 +19,20 @@ const (
 
 		-- Index to quickly find cookies by user_id
 
-		CREATE INDEX IF NOT EXISTS idx_:table_name_user_id
-		ON :table_name(user_id);
+		CREATE INDEX IF NOT EXISTS idx_cookies_user_id
+		ON cookies(user_id);
 
 		-- Index to quickly find cookies by value
 
-		create index if not exists idx_:table_name_value
-		on :table_name(value);
+		create index if not exists idx_cookies_value
+		on cookies(value);
 	`
 	SQLCreateCookie string = `
-		INSERT INTO :table_name (user_agent, value, user_id, last_login) 
+		INSERT INTO cookies (user_agent, value, user_id, last_login) 
 		VALUES (:user_agent, :value, :user_id, :last_login);
 	`
 	SQLUpdateCookie string = `
-		UPDATE :table_name
+		UPDATE cookies
 		SET user_agent 	= :user_agent,
 			user_id 	= :user_id,
 			last_login 	= :last_login
@@ -40,15 +40,15 @@ const (
 	`
 	SQLGetCookieByID string = `
 		SELECT user_agent, value, user_id, last_login 
-		FROM :table_name
+		FROM cookies
 		WHERE value = :value;
 	`
 	SQLListCookies string = `
 		SELECT user_agent, value, user_id, last_login 
-		FROM :table_name;
+		FROM cookies;
 	`
 	SQLDeleteCookie string = `
-		DELETE FROM :table_name
+		DELETE FROM cookies
 		WHERE value = :value;
 	`
 )
@@ -64,6 +64,8 @@ func NewCookieService(c *shared.Config) *CookieService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+
+		mx: &sync.Mutex{},
 	}
 }
 

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"database/sql"
+	"log/slog"
 
 	"github.com/knackwurstking/pg-press/errors"
 )
@@ -27,6 +28,7 @@ func (s *Config) Open() *errors.MasterError {
 	}
 
 	if s.EnableSQL {
+		slog.Debug("Opening SQL database connection", "driver", s.DriverName, "data_source", s.DataSourceName)
 		s.DB, err = sql.Open(s.DriverName, s.DataSourceName)
 		if err != nil {
 			return errors.NewMasterError(err, 0)
@@ -38,6 +40,7 @@ func (s *Config) Open() *errors.MasterError {
 
 func (s *Config) Close() error {
 	if s.DB != nil {
+		slog.Debug("Closing SQL database connection", "driver", s.DriverName, "data_source", s.DataSourceName)
 		return s.DB.Close()
 	}
 	return nil
