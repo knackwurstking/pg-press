@@ -14,7 +14,7 @@ const (
 
 	exitCodeGeneric     = 1
 	exitCodeNotFound    = 10
-	exitCodeServerStart = 20 // exitCodeServerStart failed
+	exitCodeServerStart = 20
 )
 
 var (

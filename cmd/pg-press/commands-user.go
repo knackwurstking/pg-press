@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/knackwurstking/pg-press/models"
@@ -32,7 +33,7 @@ func showUserCommand() cli.Command {
 	return cli.Command{
 		Name: "show",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			flagApiKey := cli.Bool(cmd, "api-key", cli.Optional)
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
@@ -42,9 +43,13 @@ func showUserCommand() cli.Command {
 
 					user, merr := r.Users.Get(telegramID)
 					if merr != nil {
-						handleNotFoundError(merr)
-						handleGenericError(merr, fmt.Sprintf("Get user \"%d\" failed", telegramID))
-						return merr
+						fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
+
+						if merr != nil && merr.Code == http.StatusNotFound {
+							os.Exit(exitCodeNotFound)
+						}
+
+						os.Exit(exitCodeGeneric)
 					}
 
 					if *flagApiKey {
@@ -79,7 +84,7 @@ func addUserCommand() cli.Command {
 	return cli.Command{
 		Name: "add",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 			userName := cli.StringArg(cmd, "user-name", cli.Required)
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
@@ -104,7 +109,7 @@ func removeUserCommand() cli.Command {
 	return cli.Command{
 		Name: "remove",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
@@ -120,7 +125,7 @@ func modUserCommand() cli.Command {
 	return cli.Command{
 		Name: "mod",
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			userName := cli.String(cmd, "name", cli.WithShort("n"), cli.Optional)
 			apiKey := cli.String(cmd, "api-key", cli.Optional)
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
