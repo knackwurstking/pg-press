@@ -6,13 +6,17 @@ import (
 
 const (
 	EditorTypeTroubleReport EditorType = "troublereport"
+
+	PressTypeSACMI = "SACMI"
+	PressTypeSITI  = "SITI"
 )
 
 type (
 	EntityID    int64
 	TelegramID  int64
-	PressNumber int8
 	EditorType  string
+	PressNumber int8
+	PressType   string
 )
 
 func (id EntityID) String() string {

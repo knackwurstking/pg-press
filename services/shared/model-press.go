@@ -14,6 +14,7 @@ type Press struct {
 	LastRegeneration EntityID    `json:"last_regeneration,omitempty"` // Tools last regeneration (entity) ID, optional
 	StartCycles      int64       `json:"start_cycles,omitempty"`      // Press cycles since last regeneration, optional
 	Cycles           int64       `json:"cycles"`                      // Current press cycles, required
+	Type             PressType   `json:"type"`                        // Type of press, e.g., "SACMI", "SITI"
 }
 
 func (p *Press) Validate() *errors.ValidationError {
@@ -33,10 +34,12 @@ func (p *Press) Validate() *errors.ValidationError {
 func (p *Press) Clone() *Press {
 	return &Press{
 		ID:               p.ID,
-		UpperTool:        p.UpperTool,
-		LowerTool:        p.LowerTool,
+		SlotUp:           p.SlotUp,
+		SlotDown:         p.SlotDown,
 		LastRegeneration: p.LastRegeneration,
+		StartCycles:      p.StartCycles,
 		Cycles:           p.Cycles,
+		Type:             p.Type,
 	}
 }
 
