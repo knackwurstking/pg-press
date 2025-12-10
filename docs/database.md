@@ -8,34 +8,28 @@
 2. Tools, cycles and regenerations for press and tools
 3. Trouble Reports
 
-But first i need to restructure the services package
+But first i need to restructure the services package, Also remove old the models 
+package, include stuff to the service/shared.
 
 ```text
 services/
 ├── shared/
+│   ├── base-service-config.go
+│   ├── base-service.go
+│   ├── model-...
+│   ├── types.go
 │   └── interfaces.go
 ├── user/
-│   ├── user_service.go
-│   └── auth_service.go
+│   ├── cookie.go
+│   ├── session.go
+│   └── user.go
 ├── press/
-│   ├── press_service.go
-│   ├── regeneration_service.go
-│   └── cycle_service.go
-├── tool/
-│   ├── tool_service.go
-│   └── regeneration_service.go
-├── troublereport/
-│   ├── modification_service.go
-│   └── trouble_report_service.go
+│   ├── cycles.go
+│   ├── press.go
+│   └── regeneration.go
 └── common/
     └── db.go
 ```
-
-In memory database which saves changes to the database in the background using
-some kind of queue to prevent concurrency issues
-
-Design it in a way so i could swap out the sqlite database with something else later on
-
 
 ### Generic Repository Pattern
 
@@ -70,43 +64,36 @@ type CycleCreateParams struct {
 
 ### Random Stuff
 
-> Models should be moved to their respective packages
-
-I still need to find an answer to the question when to save on-memory changes
-to the database. Maybe a background goroutine that flushes changes every time 
-something changes? And loads them on periodically and on startup?
-
-> Do not forget to add json tags
-
 - common/
     - db.go
-        - Contains the main database object
-        - Pass the SQL database here (optional), runs on-memory otherwise
+        - Main entry point for database services
+
+- shared/
+    - interfaces.go
+        - `Service`
+        - `Entity`
+    - types.go
+        - Common and simple type aliases used across services
+    - model-...
+        - Common models used across services
+    - base-service.go
+        - Base service struct implementing common functionality
+    - base-service-config.go
+        - Configuration struct for base service configuration
+
+- user/
+    - cookie.go
+        - Index: `cookies(user_id)`
+        - Index: `cookies(value)`
+    - session.go
+        - In-Memory Service, does not store stuf in the database
+    - user.go
+        - Index: `users(api_key)`
+        - Contains api keys for users
+        - Uses telegram ID as primary identifier
 
 - press/
     - cycles.go
     - press.go
     - regeneration.go
-
-- shared/
-    - interfaces.go
-        - `type Repository[T any] struct` 
-
-- tool/
-    - tools.go
-    - regeneration.go
-
-- troublereport/
-    - reports.go
-    - modification.go
-        - Modifications are linked to Reports via the Report `ID`
-
-- user/
-    - users.go
-    - cookie.go
-        - Cookies are linked to Users via the User `ID` 
-    - session.go
-        - This will be on-memory only
-        - Shows current active user sessions
-        - Handles all websocket connections for user updates (feed counter)
 
