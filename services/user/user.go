@@ -16,11 +16,6 @@ const (
 			api_key 	TEXT NOT NULL UNIQUE,
 			last_feed 	TEXT NOT NULL
 		);
-
-		-- Index to quickly find users by api_key
-
-		CREATE INDEX IF NOT EXISTS idx_users_api_key
-		ON users(api_key);
 	`
 	SQLCreateUser string = `
 		INSERT INTO users (name, api_key, last_feed) 

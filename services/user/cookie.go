@@ -21,11 +21,6 @@ const (
 
 		CREATE INDEX IF NOT EXISTS idx_cookies_user_id
 		ON cookies(user_id);
-
-		-- Index to quickly find cookies by value
-
-		create index if not exists idx_cookies_value
-		on cookies(value);
 	`
 	SQLCreateCookie string = `
 		INSERT INTO cookies (user_agent, value, user_id, last_login) 
