@@ -33,7 +33,7 @@ test:
 	go test -v ./...
 
 lint:
-	find . | grep -e '\.go$$' | xargs -- gopls check -severity=hint 
+	find . -name '*.go' | xargs -- gopls check -severity=hint 
 
 run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
@@ -55,7 +55,7 @@ build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
 
 count:
-	find . | grep -e '\.go$$' -e '\.html$$' -e '\.css$$' -e '\.js$$' -e '\.templ$$' | grep --invert-match '_templ\.go$$' | xargs cat | wc -l
+	find . -name '*.go' -o -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.templ' | grep -v '_templ\.go$$' | xargs cat | wc -l
 
 define LAUNCHCTL_PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -145,3 +145,4 @@ macos-update: all
 	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
 	make macos-start-service
 	make macos-watch-service
+
