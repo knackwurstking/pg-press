@@ -11,7 +11,7 @@ import (
 const (
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
-			id 					INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+			id 					INTEGER NOT NULL,
 			width 				INTEGER NOT NULL,
 			height 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
@@ -22,6 +22,8 @@ const (
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			status 				TEXT NOT NULL,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	SQLCreateTool string = `

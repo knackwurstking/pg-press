@@ -11,13 +11,15 @@ import (
 const (
 	SQLCreatePressTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
-			id 					INTEGER PRIMARY KEY NOT NULL,
+			id 					INTEGER NOT NULL,
 			slot_up 			INTEGER NOT NULL,
 			slot_down 			INTEGER NOT NULL,
 			last_regeneration 	INTEGER NOT NULL,
 			start_cycles 		INTEGER NOT NULL,
 			cycles 				INTEGER NOT NULL,
-			type 				TEXT NOT NULL
+			type 				TEXT NOT NULL,
+
+			PRIMARY KEY("id")
 		);
 	`
 

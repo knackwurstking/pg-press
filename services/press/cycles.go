@@ -11,11 +11,13 @@ import (
 const (
 	SQLCreateCycleTable string = `
 		CREATE TABLE IF NOT EXISTS press_cycles (
-			id           INTEGER PRIMARY KEY NOT NULL,
+			id           INTEGER NOT NULL,
 			press_number INTEGER NOT NULL,
 			cycles       INTEGER NOT NULL,
 			start        INTEGER NOT NULL,
-			stop         INTEGER NOT NULL
+			stop         INTEGER NOT NULL,
+
+			PRIMARY KEY("id")
 		);
 	`
 	SQLCreateCycle string = `

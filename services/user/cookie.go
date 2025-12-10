@@ -12,9 +12,11 @@ const (
 	SQLCreateCookieTable string = `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent 	TEXT NOT NULL,
-			value 		TEXT PRIMARY KEY NOT NULL,
+			value 		TEXT NOT NULL,
 			user_id 	INTEGER NOT NULL,
-			last_login 	INTEGER NOT NULL
+			last_login 	INTEGER NOT NULL,
+
+			PRIMARY KEY("id")
 		);
 
 		-- Index to quickly find cookies by user_id

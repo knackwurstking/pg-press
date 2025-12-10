@@ -11,10 +11,12 @@ import (
 const (
 	SQLCreateUserTable string = `
 		CREATE TABLE IF NOT EXISTS users (
-			id 			INTEGER PRIMARY KEY NOT NULL,
+			id 			INTEGER NOT NULL,
 			name 		TEXT NOT NULL,
 			api_key 	TEXT NOT NULL UNIQUE,
-			last_feed 	TEXT NOT NULL
+			last_feed 	TEXT NOT NULL,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	SQLCreateUser string = `

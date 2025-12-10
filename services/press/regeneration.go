@@ -11,11 +11,13 @@ import (
 const (
 	SQLCreatePressRegenerationTable string = `
 		CREATE TABLE IF NOT EXISTS press_regenerations (
-			id 				INTEGER PRIMARY KEY NOT NULL,
+			id 				INTEGER NOT NULL,
 			press_number 	INTEGER NOT NULL,
 			start 			INTEGER NOT NULL,
 			stop 			INTEGER NOT NULL,
-			cycles 			INTEGER NOT NULL
+			cycles 			INTEGER NOT NULL,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	SQLCreatePressRegeneration string = `
