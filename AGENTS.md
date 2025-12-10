@@ -1,135 +1,171 @@
-# PG Press - Project Handover Documentation
+# PG Press - Project Handover Document
 
 ## Project Overview
-PG Press is a Go-based application for managing press operations, tools, and related data. It includes a web interface built with Go templates and a command-line tool for managing various aspects of the system.
+
+PG Press is a web-based application built in Go that manages press-related data including tools, cycles, metal sheets, notes, and press regenerations. It provides both a command-line interface and a web interface for managing various aspects of press operations.
+
+## Technologies Used
+
+- **Go 1.25.3** - Main programming language
+- **Echo Framework** - Web framework for building REST APIs and web applications
+- **Templ** - Go templating engine for building HTML UI components
+- **SQLite** - Local database storage
+- **Custom UI Library** - Shared UI components using `knackwurstking/ui`
+- **CLI Library** - Command-line interface using `SuperPaintman/nice`
 
 ## Project Structure
+
 ```
-.
-├── cmd/                  # Main application entry points
-│   └── pg-press/         # CLI application
-├── services/             # Business logic and service layer
-├── handlers/             # HTTP handlers
-├── models/               # Data models
-├── components/           # Go template components
-├── assets/               # Static assets (images, CSS, JS, etc.)
-├── docs/                 # Documentation files
-├── pdf/                  # PDF generation functionality
-├── utils/                # Utility functions
-├── env/                  # Environment configuration
-├── errors/               # Custom error types
-└── scripts/              # Helper scripts
+pg-press/
+├── cmd/pg-press/           # Command-line interface
+│   ├── main.go             # Main entry point
+│   ├── commands-*.go       # CLI command implementations
+│   └── middleware.go       # Custom middleware
+├── handlers/               # Web handlers for different application sections
+│   ├── auth/               # Authentication handlers
+│   ├── home/               # Home page handler
+│   ├── press/              # Press-related handlers
+│   ├── tools/              # Tools management handlers
+│   ├── notes/              # Notes handlers
+│   ├── metalsheets/        # Metal sheets handlers
+│   └── ...                 # Other handlers
+├── components/             # UI components built with templ
+├── services/               # Database services
+│   ├── press/              # Press-related services
+│   ├── shared/             # Shared model and service definitions
+│   └── user/               # User-related services
+├── pdf/                    # PDF generation functionality
+├── env/                    # Environment configuration
+├── utils/                  # Utility functions
+├── assets/                 # Static assets (embedded)
+├── templates/              # Page templates
+└── Makefile                # Build and development commands
 ```
 
-## Build/Run
-- Build: `make build`
-- Lint: `make lint (golangci-lint)`
-- Test: `go test ./...`
-- Single test: `go test -run ^TestX$`
-- Development: `make dev` (uses gow for hot reloading)
-- Run server: `make run`
+## Key Files and Directories
 
-## Code Style
-- Imports: stdlib, external, local groups
-- Naming: PascalCase (types), camelCase (variables)
-- Errors: Explicit checks with if err != nil
-- Formatting: gofmt -w
-- Linting: golangci-lint run
+### Main Entry Points
+- `cmd/pg-press/main.go` - Main CLI application with all commands
+- `cmd/pg-press/commands-server.go` - Server command that launches the web app
+- `embed.go` - Asset embedding for static files
 
-## Guidelines
-- No unused imports or unhandled errors
-- Comment public APIs
-- Use validation package for inputs
-- Keep functions under 50 lines
-- Always log errors with stack trace
-- Commit messages: Always use semantic git commit message style
+### Core Services
+- `services/shared/` - Shared models and interfaces for database entities
+- `services/press/` - Press-related database services
+- `services/user/` - User authentication and session management
 
-## Key Features
-- Web-based UI for managing press operations
-- Command-line interface for various administrative tasks
-- Database integration with SQLite
-- PDF generation capabilities
-- Template-based UI using templ
-- RESTful API endpoints
-- User management
-- Tools and feeds management
-- Press cycles tracking and reporting
-- Cookie management
+### Web Handlers
+- `handlers/home/` - Home page handler
+- `handlers/auth/` - Authentication handlers
+- `handlers/tool/` - Tool management handlers
+- `handlers/press/` - Press-related handlers
 
-## Dependencies
-- github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
-- github.com/a-h/templ v0.3.960
-- github.com/google/uuid v1.6.0
-- github.com/jung-kurt/gofpdf/v2 v2.17.3
-- github.com/knackwurstking/ui v1.1.2-0.20251206161601-92d6501fae80
-- github.com/labstack/echo/v4 v4.13.4
-- github.com/labstack/gommon v0.4.2
-- github.com/lmittmann/tint v1.1.2
-- github.com/mattn/go-sqlite3 v1.14.32
-- github.com/williepotgieter/keymaker v1.0.0
-- golang.org/x/net v0.42.0
+### UI Components
+- `components/` - Reusable UI components built with templ
+- `handlers/*/templates/` - Page templates for different sections
 
-## Development Commands
-- `make build` - Build the application
-- `make dev` - Run development server with hot reloading
-- `make run` - Run the server
-- `make test` - Run all tests
-- `make lint` - Run linter
-- `make generate` - Generate Go templates
-- `make clean` - Clean project directory
+## Running the Application
 
-## macOS Service Management
-- `make macos-install` - Install as macOS service
-- `make macos-start-service` - Start service
-- `make macos-stop-service` - Stop service
-- `make macos-restart-service` - Restart service
-- `make macos-print-service` - Print service information
-- `make macos-watch-service` - Watch service logs
-- `make macos-update` - Update service
+### Development
+```bash
+# Install dependencies and generate templates
+make init
 
-## Key Components
-- **Services**: Business logic implementations (press cycles, tools, users, etc.)
-- **Handlers**: HTTP request handlers
-- **Models**: Data structures and database models
-- **Components**: Reusable UI components built with templ
-- **PDF**: PDF generation functionality
-- **Utils**: Generic utility functions
-- **Env**: Environment configuration management
+# Run in development mode with auto-reload (requires gow)
+make dev
 
-## Database
-The application uses SQLite for data storage. Database operations are handled through the service layer.
+# Or run directly
+make run
+```
 
-## API Endpoints
-The application exposes RESTful API endpoints for managing various resources including:
-- Press cycles
-- Tools
-- Users
-- Feeds
-- Cookies
-- Reports
+### Building
+```bash
+# Build the binary
+make build
 
-## CLI Commands
-The CLI supports various commands for administrative tasks:
-- apiKey
-- user (list, show, add, remove, modify)
-- cookies (remove, auto-clean)
-- feeds (list, remove)
-- cycles
-- tools
-- server
+# Build and install for macOS service
+make macos-install
+```
 
-## Environment Variables
-The application uses environment variables for configuration:
-- SERVER_ADDR
-- SERVER_PATH_PREFIX
-- LOG_LEVEL
-- LOG_FORMAT
-- ADMINS
+## Database Schema
 
-## Testing
-Tests are written using Go's built-in testing framework. Run all tests with `go test ./...` or individual tests with `go test -run ^TestX$`.
+The application uses SQLite for data storage. Key tables are defined in the services modules:
 
-## Documentation
-- Database schema documentation: docs/database.md
-- PG Press mon documentation: docs/pg-press-mon.md
-- PG Press roadmap: docs/pg-press-roadmap.md
+- `press` - Main press information
+- `tools` - Tool data
+- `press_cycles` - Cycle tracking
+- `tool_regenerations` - Tool regeneration history
+- `press_regenerations` - Press regeneration history
+- `users` - User accounts
+- `user_sessions` - User session management
+- `user_cookies` - Cookie data
+
+## Adding New Features
+
+### 1. Adding a New Handler
+1. Create a new handler file in `handlers/`
+2. Define the handler struct and route registration method
+3. Add route registration to the main router (in `cmd/pg-press/router.go`)
+
+### 2. Adding New UI Components
+1. Create a new `.templ` file in the `components/` directory
+2. Generate the Go code using `make generate`
+3. Use the component in templates or other components
+
+### 3. Adding New Services
+1. Define the model in `services/shared/`
+2. Implement service methods in the appropriate service directory
+3. Add any necessary database migrations
+
+### 4. Adding New CLI Commands
+1. Add a new command function in `cmd/pg-press/commands-*.go`
+2. Register it in the main CLI configuration in `main.go`
+
+## Key Environment Variables
+
+- `SERVER_ADDR` - Server address in format `<host>:<port>` (default: `:9020`)
+- `SERVER_PATH_PREFIX` - Path prefix for server routes (default: `/pg-press`)
+- `LOG_LEVEL` - Logging level (`debug`, `info`, `warn`, `error`, `fatal`)
+- `LOG_FORMAT` - Logging format (`json`, `text`)
+- `ADMINS` - Admin user identifiers
+
+## Development Workflow
+
+1. **Code Generation**: Run `make generate` after modifying `.templ` files
+2. **Testing**: Run `make test` for unit tests
+3. **Linting**: Run `make lint` for code linting
+4. **Building**: Run `make build` to create a binary
+
+## Deployment
+
+### macOS Service Installation
+```bash
+make macos-install
+make macos-start-service
+```
+
+### Configuration
+The application stores configuration in:
+- User config directory (`$HOME/Library/Application Support/pg-press/`)
+- Environment variables for runtime settings
+
+## Troubleshooting
+
+### Common Issues
+1. **Port in use**: Ensure no other process uses the configured port
+2. **Missing dependencies**: Run `make init` to install all dependencies
+3. **Template not found**: Run `make generate` to regenerate templates
+4. **Database issues**: Check database file permissions and path
+
+### Logging
+- Logs are written to `~/Library/Application Support/pg-press/pg-press.log` on macOS
+- Set `LOG_LEVEL=debug` for detailed logging during development
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make changes and add tests
+4. Run `make test` and `make lint`
+5. Submit a pull request
+
