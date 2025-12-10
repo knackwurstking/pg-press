@@ -89,6 +89,7 @@ func (udb *UserDB) Close() {
 // DB holds and initializes all the services required
 type DB struct {
 	User *UserDB `json:"user"`
+	// TODO: Add Press next here
 }
 
 func NewDB(c *shared.Config) *DB {
