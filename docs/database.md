@@ -31,7 +31,7 @@ services/
     └── db.go
 ```
 
-In memory database wich saves changes to the database in the background using
+In memory database which saves changes to the database in the background using
 some kind of queue to prevent concurrency issues
 
 Design it in a way so i could swap out the sqlite database with something else later on
@@ -109,3 +109,4 @@ something changes? And loads them on periodically and on startup?
         - This will be on-memory only
         - Shows current active user sessions
         - Handles all websocket connections for user updates (feed counter)
+
