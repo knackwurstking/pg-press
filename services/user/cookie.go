@@ -16,7 +16,7 @@ const (
 			user_id 	INTEGER NOT NULL,
 			last_login 	INTEGER NOT NULL,
 
-			PRIMARY KEY("id")
+			PRIMARY KEY("value")
 		);
 
 		-- Index to quickly find cookies by user_id
