@@ -10,8 +10,8 @@ import (
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/services/common"
+	"github.com/knackwurstking/pg-press/services/shared"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -31,7 +31,7 @@ func listFeedsCommand() cli.Command {
 		Name:  "list",
 		Usage: cli.Usage("List all feeds in the database"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "Custom database path")
+			customDBPath := createDBPathOption(cmd)
 
 			limit := cli.Int(cmd, "limit",
 				cli.WithShort("l"),
@@ -56,8 +56,8 @@ func listFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					var feeds []*models.Feed
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					var feeds []*shared.Feed
 
 					var merr *errors.MasterError
 					// Get feeds based on parameters
@@ -130,7 +130,7 @@ func removeFeedsCommand() cli.Command {
 		Name:  "remove",
 		Usage: cli.Usage("Remove feeds from the database"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "Custom database path")
+			customDBPath := createDBPathOption(cmd)
 
 			olderThan := cli.String(cmd, "older-than",
 				cli.Usage("Remove feeds older than duration (e.g., 24h, 7d, 30d)"),
@@ -148,7 +148,7 @@ func removeFeedsCommand() cli.Command {
 			)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *common.DB) error {
 					// Remove by IDs
 					if *idsStr != "" {
 						ids := strings.Split(*idsStr, ",")
@@ -178,8 +178,8 @@ func removeFeedsCommand() cli.Command {
 
 // Helper functions
 
-func filterFeedsByDate(feeds []*models.Feed, since, before string) []*models.Feed {
-	var filtered []*models.Feed
+func filterFeedsByDate(feeds []*shared.Feed, since, before string) []*shared.Feed {
+	var filtered []*shared.Feed
 
 	var sinceTime, beforeTime time.Time
 	var err error
@@ -234,7 +234,7 @@ func formatAge(duration time.Duration) string {
 // This function is no longer needed with the simplified feed structure
 // Content is now directly accessible as feed.Content
 
-func removeFeedsByIDs(r *services.Registry, ids []string) error {
+func removeFeedsByIDs(r *common.DB, ids []string) error {
 	var failed []string
 	var removed int
 
@@ -245,7 +245,7 @@ func removeFeedsByIDs(r *services.Registry, ids []string) error {
 			continue
 		}
 
-		merr := r.Feeds.Delete(models.FeedID(id))
+		merr := r.Feeds.Delete(shared.EntityID(id))
 		if merr != nil {
 			if merr.Code == http.StatusNotFound {
 				failed = append(failed, fmt.Sprintf("feed ID %d not found", id))
@@ -275,7 +275,7 @@ func removeFeedsByIDs(r *services.Registry, ids []string) error {
 	return nil
 }
 
-func removeFeedsByDuration(r *services.Registry, durationStr string) error {
+func removeFeedsByDuration(r *common.DB, durationStr string) error {
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {
 		// Try parsing as days if direct parsing fails
@@ -304,7 +304,7 @@ func removeFeedsByDuration(r *services.Registry, durationStr string) error {
 	return nil
 }
 
-func removeFeedsByDate(r *services.Registry, dateStr string) error {
+func removeFeedsByDate(r *common.DB, dateStr string) error {
 	cutoffTime, err := parseDateTime(dateStr)
 	if err != nil {
 		return fmt.Errorf("invalid date format: %s (use format '2006-01-02' or '2006-01-02 15:04:05')", dateStr)

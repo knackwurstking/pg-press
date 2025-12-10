@@ -52,7 +52,7 @@ func (s *Config) Open() *errors.MasterError {
 }
 
 func (s *Config) Close() error {
-	if s.DB != nil {
+	if s.db != nil {
 		slog.Debug("Closing SQL database connection", "driver", s.DriverName, "location", s.DatabaseLocation)
 		return s.db.Close()
 	}

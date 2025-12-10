@@ -6,8 +6,8 @@ import (
 	"text/tabwriter"
 
 	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/services/common"
+	"github.com/knackwurstking/pg-press/services/shared"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -28,25 +28,25 @@ func listCyclesAllCommand() cli.Command {
 		Name:  "list",
 		Usage: cli.Usage("List all cycles for a specific press number"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			pressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
+				return withDBOperation(customDBPath, func(db *common.DB) error {
 					// Validate press number
-					press := models.PressNumber(*pressNumber)
-					if !models.IsValidPressNumber(&press) {
+					press := shared.PressNumber(*pressNumber)
+					if !press.IsValid() {
 						return fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
 					}
 
 					// Get all cycles and filter by press
-					allCycles, err := r.PressCycles.List()
+					allCycles, err := db.Press.Cycle.List()
 					if err != nil {
 						return fmt.Errorf("retrieve cycles: %v", err)
 					}
 
 					// Filter cycles by press number
-					var cycles []*models.Cycle
+					var cycles []*shared.Cycle
 					for _, cycle := range allCycles {
 						if cycle.PressNumber == press {
 							cycles = append(cycles, cycle)
@@ -95,15 +95,15 @@ func deleteCycleCommand() cli.Command {
 		Name:  "delete",
 		Usage: cli.Usage("Delete a cycle by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			cycleIDArg := cli.Int64Arg(cmd, "cycle-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					cycleID := models.CycleID(*cycleIDArg)
+				return withDBOperation(customDBPath, func(db *common.DB) error {
+					cycleID := shared.EntityID(*cycleIDArg)
 
 					// First check if there are any regenerations that reference this cycle
-					hasRegenerations, err := r.ToolRegenerations.HasRegenerationsForCycle(cycleID)
+					hasRegenerations, err := db.Tool.Regeneration.HasRegenerationsForCycle(cycleID)
 					if err != nil {
 						return fmt.Errorf("check for regenerations: %v", err)
 					}
@@ -115,7 +115,7 @@ func deleteCycleCommand() cli.Command {
 					fmt.Printf("Deleting cycle %d...\n", cycleID)
 
 					// Delete cycle
-					err = r.PressCycles.Delete(cycleID)
+					err = db.Press.Cycles.Delete(cycleID)
 					if err != nil {
 						return fmt.Errorf("delete cycle: %v", err)
 					}

@@ -86,7 +86,7 @@ func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	r, err := s.DB.Exec(SQLCreateCookie,
+	r, err := s.DB().Exec(SQLCreateCookie,
 		sql.Named("user_agent", entity.UserAgent),
 		sql.Named("value", entity.Value),
 		sql.Named("user_id", entity.UserID),
@@ -117,7 +117,7 @@ func (s *CookieService) Update(entity *shared.Cookie) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	_, err := s.DB.Exec(SQLUpdateCookie,
+	_, err := s.DB().Exec(SQLUpdateCookie,
 		sql.Named("user_agent", entity.UserAgent),
 		sql.Named("value", entity.Value),
 		sql.Named("user_id", entity.UserID),
@@ -138,7 +138,7 @@ func (s *CookieService) GetByID(value string) (*shared.Cookie, *errors.MasterErr
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	r := s.DB.QueryRow(SQLGetCookieByID,
+	r := s.DB().QueryRow(SQLGetCookieByID,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("value", value),
 	)
@@ -157,7 +157,7 @@ func (s *CookieService) List() ([]*shared.Cookie, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	rows, err := s.DB.Query(SQLListCookies,
+	rows, err := s.DB().Query(SQLListCookies,
 		sql.Named("table_name", s.TableName()),
 	)
 	if err != nil {
@@ -186,7 +186,7 @@ func (s *CookieService) Delete(value string) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	_, err := s.DB.Exec(SQLDeleteCookie,
+	_, err := s.DB().Exec(SQLDeleteCookie,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("value", value),
 	)

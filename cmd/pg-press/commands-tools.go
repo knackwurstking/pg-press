@@ -9,8 +9,8 @@ import (
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/services/common"
+	"github.com/knackwurstking/pg-press/services/shared"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -36,13 +36,13 @@ func listToolsCommand() cli.Command {
 		Name:  "list",
 		Usage: cli.Usage("List tools from the database with optional ID filtering"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			idRange := cli.StringArg(cmd, "id-range",
 				cli.Usage("ID range (e.g., '5..8' for range or '5,7,9' for specific IDs)"),
 				cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
+				return withDBOperation(customDBPath, func(r *common.DB) error {
 					// Get all tools from database
 					tools, dberr := r.Tools.List()
 					if dberr != nil {
@@ -116,7 +116,7 @@ func listToolsCommand() cli.Command {
 }
 
 func listDeadToolsCommand() cli.Command {
-	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *services.Registry) error {
+	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *common.DB) error {
 		// Get all dead tools from database
 		tools, err := r.Tools.ListDeadTools()
 		if err != nil {
@@ -172,12 +172,12 @@ func markDeadCommand() cli.Command {
 		Name:  "mark-dead",
 		Usage: cli.Usage("Mark a tool as dead by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					toolID := models.ToolID(*toolIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
 					tool, err := r.Tools.Get(toolID)
@@ -191,7 +191,7 @@ func markDeadCommand() cli.Command {
 					}
 
 					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &models.User{
+					user := &shared.User{
 						TelegramID: 1,
 						Name:       "cli-user",
 					}
@@ -215,12 +215,12 @@ func reviveDeadToolCommand() cli.Command {
 		Name:  "revive",
 		Usage: cli.Usage("Revive a dead tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					toolID := models.ToolID(*toolIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
 					tool, err := r.Tools.Get(toolID)
@@ -234,9 +234,9 @@ func reviveDeadToolCommand() cli.Command {
 					}
 
 					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &models.User{
-						TelegramID: 1,
-						Name:       "cli-user",
+					user := &shared.User{
+						ID:   1,
+						Name: "cli-user",
 					}
 
 					// Revive tool (mark as alive)
@@ -258,12 +258,12 @@ func deleteToolCommand() cli.Command {
 		Name:  "delete",
 		Usage: cli.Usage("Delete a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					toolID := models.ToolID(*toolIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)
@@ -274,9 +274,9 @@ func deleteToolCommand() cli.Command {
 					fmt.Printf("Deleting tool %d (%s %s) and all related data...\n", tool.ID, tool.Format.String(), tool.Code)
 
 					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &models.User{
-						TelegramID: 1,
-						Name:       "cli-user",
+					user := &shared.User{
+						ID:   1,
+						Name: "cli-user",
 					}
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
@@ -329,12 +329,12 @@ func listCyclesCommand() cli.Command {
 		Name:  "list-cycles",
 		Usage: cli.Usage("List press cycles for a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					toolID := models.ToolID(*toolIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)
@@ -382,8 +382,8 @@ func listCyclesCommand() cli.Command {
 }
 
 // filterToolsByIDs filters tools based on ID range or comma-separated list
-func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, error) {
-	var targetIDs []models.ToolID
+func filterToolsByIDs(tools []*shared.Tool, idSpec string) ([]*shared.Tool, error) {
+	var targetIDs []shared.EntityID
 	var err error
 
 	// Check if it's a range (contains "..")
@@ -401,13 +401,13 @@ func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, erro
 	}
 
 	// Create a set for efficient lookup
-	idSet := make(map[models.ToolID]bool)
+	idSet := make(map[shared.EntityID]bool)
 	for _, id := range targetIDs {
 		idSet[id] = true
 	}
 
 	// Filter tools
-	var filteredTools []*models.Tool
+	var filteredTools []*shared.Tool
 	for _, tool := range tools {
 		if idSet[tool.ID] {
 			filteredTools = append(filteredTools, tool)
@@ -418,7 +418,7 @@ func filterToolsByIDs(tools []*models.Tool, idSpec string) ([]*models.Tool, erro
 }
 
 // parseIDRange parses range like "5..8" into slice of IDs
-func parseIDRange(rangeSpec string) ([]models.ToolID, error) {
+func parseIDRange(rangeSpec string) ([]shared.EntityID, error) {
 	parts := strings.Split(rangeSpec, "..")
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid range format '%s', expected format: 'start..end'", rangeSpec)
@@ -438,18 +438,18 @@ func parseIDRange(rangeSpec string) ([]models.ToolID, error) {
 		return nil, fmt.Errorf("start ID %d cannot be greater than end ID %d", start, end)
 	}
 
-	var ids []models.ToolID
+	var ids []shared.EntityID
 	for i := start; i <= end; i++ {
-		ids = append(ids, models.ToolID(i))
+		ids = append(ids, shared.EntityID(i))
 	}
 
 	return ids, nil
 }
 
 // parseIDList parses comma-separated list like "5,7,9" into slice of IDs
-func parseIDList(listSpec string) ([]models.ToolID, error) {
+func parseIDList(listSpec string) ([]shared.EntityID, error) {
 	parts := strings.Split(listSpec, ",")
-	var ids []models.ToolID
+	var ids []shared.EntityID
 
 	for _, part := range parts {
 		trimmed := strings.TrimSpace(part)
@@ -461,7 +461,7 @@ func parseIDList(listSpec string) ([]models.ToolID, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid ID '%s': %v", trimmed, err)
 		}
-		ids = append(ids, models.ToolID(id))
+		ids = append(ids, shared.EntityID(id))
 	}
 
 	if len(ids) == 0 {
@@ -476,12 +476,12 @@ func listRegenerationsCommand() cli.Command {
 		Name:  "list-regenerations",
 		Usage: cli.Usage("List regenerations for a tool by ID"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd, "")
+			customDBPath := createDBPathOption(cmd)
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					toolID := models.ToolID(*toolIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
 					tool, err := r.Tools.Get(toolID)

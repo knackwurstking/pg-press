@@ -28,7 +28,7 @@ func (s *BaseService) Close() *errors.MasterError {
 }
 
 func (bs *BaseService) createSQLTable(tableName, tableCreationQuery string) *errors.MasterError {
-	_, err := bs.DB.Exec(tableCreationQuery, sql.Named("table_name", tableName))
+	_, err := bs.DB().Exec(tableCreationQuery, sql.Named("table_name", tableName))
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}

@@ -13,11 +13,18 @@ import (
 	"github.com/knackwurstking/pg-press/services/shared"
 )
 
+var (
+	config = &shared.Config{
+		DriverName:       "sqlite3",
+		DatabaseLocation: "",
+	}
+)
+
 func TestNewDB(t *testing.T) {
 	removeDBFiles()
 
 	// Test that NewDB creates a valid DB instance
-	db := NewDB()
+	db := NewDB(config)
 	assert.NotNil(t, db)
 	assert.NotNil(t, db.User)
 	assert.NotNil(t, db.User.User)
@@ -35,7 +42,7 @@ func TestNewDB(t *testing.T) {
 func TestUserCRUD(t *testing.T) {
 	removeDBFiles()
 
-	db := NewDB()
+	db := NewDB(config)
 	assert.NotNil(t, db)
 
 	err := db.Setup()
@@ -92,7 +99,7 @@ func TestUserCRUD(t *testing.T) {
 func TestCookieCRUD(t *testing.T) {
 	removeDBFiles()
 
-	db := NewDB()
+	db := NewDB(config)
 	assert.NotNil(t, db)
 
 	err := db.Setup()
@@ -149,7 +156,7 @@ func TestCookieCRUD(t *testing.T) {
 func TestSessionCRUD(t *testing.T) {
 	removeDBFiles()
 
-	db := NewDB()
+	db := NewDB(config)
 	assert.NotNil(t, db)
 
 	err := db.Setup()

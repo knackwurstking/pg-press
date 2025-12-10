@@ -76,7 +76,7 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	r, err := s.DB.Exec(SQLCreateUser,
+	r, err := s.DB().Exec(SQLCreateUser,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("name", entity.Name),
 		sql.Named("api_key", entity.ApiKey),
@@ -110,7 +110,7 @@ func (s *UserService) Update(entity *shared.User) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	_, err := s.DB.Exec(SQLUpdateUser,
+	_, err := s.DB().Exec(SQLUpdateUser,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("id", entity.ID),
 		sql.Named("name", entity.Name),
@@ -132,7 +132,7 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	r := s.DB.QueryRow(SQLGetUserByID,
+	r := s.DB().QueryRow(SQLGetUserByID,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("id", id),
 	)
@@ -156,7 +156,7 @@ func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	rows, err := s.DB.Query(SQLListUsers,
+	rows, err := s.DB().Query(SQLListUsers,
 		sql.Named("table_name", s.TableName()),
 	)
 	if err != nil {
@@ -190,7 +190,7 @@ func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	_, err := s.DB.Exec(SQLDeleteUser,
+	_, err := s.DB().Exec(SQLDeleteUser,
 		sql.Named("table_name", s.TableName()),
 		sql.Named("id", id),
 	)
