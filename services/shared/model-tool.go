@@ -1,22 +1,53 @@
 package shared
 
+import "github.com/knackwurstking/pg-press/errors"
+
 // Tool represents a tool used in a press machine,
 // there are upper and lower tools. Each tool can have its own regeneration history.
 // And the upper tool type has an optional cassette slot.
 type Tool struct {
-	ID EntityID `json:"id"`
-	// Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
-	Type string `json:"type"`
-	// Code is the unique tool code/identifier, "G01", "12345", etc.
-	Code string `json:"code"`
-	// Status represents the current state of the tool
-	Status string `json:"status"`
-	// Regenerating indicates if the tool is currently being regenerated
-	Regenerating bool `json:"regenerating"`
-	// IsDead indicates if the tool is dead/destroyed
-	IsDead bool `json:"is_dead"`
+	ID               EntityID `json:"id"`
+	Width            int      `json:"width"`  // Width defines the tile width this tool can press
+	Height           int      `json:"height"` // Height defines the tile height this tool can press
+	Type             string   `json:"type"`   // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
+	Code             string   `json:"code"`   // Code is the unique tool code/identifier, "G01", "12345", etc.
+	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
+	Regenerating     bool     `json:"regenerating"`
+	Status           string   `json:"status"`  // Status represents the current state of the tool
+	IsDead           bool     `json:"is_dead"` // IsDead indicates if the tool is dead/destroyed
 }
 
-// TODO: Add missing validate and clone methods to fit the Entity interface
+// Validate checks if the tool data is valid
+func (t *Tool) Validate() *errors.ValidationError {
+	// verify width and height not negative
+	if t.Width < 0 {
+		return errors.NewValidationError("Tool width cannot be negative")
+	}
+	if t.Height < 0 {
+		return errors.NewValidationError("Tool height cannot be negative")
+	}
+	// verify type and code are not empty
+	if t.Type == "" {
+		return errors.NewValidationError("Tool type is required")
+	}
+	if t.Code == "" {
+		return errors.NewValidationError("Tool code is required")
+	}
+	return nil
+}
+
+// Clone creates a copy of the tool
+func (t *Tool) Clone() *Tool {
+	return &Tool{
+		ID:           t.ID,
+		Width:        t.Width,
+		Height:       t.Height,
+		Type:         t.Type,
+		Code:         t.Code,
+		Status:       t.Status,
+		Regenerating: t.Regenerating,
+		IsDead:       t.IsDead,
+	}
+}
 
 var _ Entity[*Tool] = (*Tool)(nil)
