@@ -7,14 +7,16 @@ import "github.com/knackwurstking/pg-press/errors"
 // And the upper tool type has an optional cassette slot.
 type Tool struct {
 	ID               EntityID `json:"id"`
-	Width            int      `json:"width"`  // Width defines the tile width this tool can press
-	Height           int      `json:"height"` // Height defines the tile height this tool can press
-	Type             string   `json:"type"`   // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
-	Code             string   `json:"code"`   // Code is the unique tool code/identifier, "G01", "12345", etc.
+	Width            int      `json:"width"`         // Width defines the tile width this tool can press
+	Height           int      `json:"height"`        // Height defines the tile height this tool can press
+	Type             string   `json:"type"`          // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
+	Code             string   `json:"code"`          // Code is the unique tool code/identifier, "G01", "12345", etc.
+	CyclesOffset     int64    `json:"cycles_offset"` // CyclesOffset is an offset added to the cycles count
+	Cycles           int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
-	Regenerating     bool     `json:"regenerating"`
-	Status           string   `json:"status"`  // Status represents the current state of the tool
-	IsDead           bool     `json:"is_dead"` // IsDead indicates if the tool is dead/destroyed
+	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
+	Status           string   `json:"status"`       // Status represents the current state of the tool
+	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
 }
 
 // Validate checks if the tool data is valid
