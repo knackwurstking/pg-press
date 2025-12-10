@@ -34,6 +34,7 @@ func (s *Config) Open() *errors.MasterError {
 
 	// NOTE: Previously used: "?_busy_timeout=30000&_journal_mode=WAL&_foreign_keys=on&_synchronous=NORMAL"
 	path := fmt.Sprintf(
+		// FIXME: Need to change the table name based on which service is using it
 		"file:%suserdb.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
 		s.DatabaseLocation,
 	)
