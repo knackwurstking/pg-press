@@ -15,9 +15,12 @@ type Tool struct {
 	Cycles           int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
-	Status           string   `json:"status"`       // Status represents the current state of the tool
-	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
-	Slot             Slot     `json:"slot"`         // SlotType indicates the cassette slot type
+
+	// TODO: This status think could be removed i think
+	Status string `json:"status"` // Status represents the current state of the tool
+
+	IsDead bool `json:"is_dead"` // IsDead indicates if the tool is dead/destroyed
+	Slot   Slot `json:"slot"`    // SlotType indicates the cassette slot type
 }
 
 // Validate checks if the tool data is valid
