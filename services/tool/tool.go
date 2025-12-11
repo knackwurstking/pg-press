@@ -20,7 +20,6 @@ const (
 			cycles 				INTEGER NOT NULL DEFAULT 0,
 			last_regeneration 	INTEGER NOT NULL DEFAULT 0,
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
-			status 				TEXT NOT NULL,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
 			slot 				INTEGER NOT NULL DEFAULT 0,
 
@@ -28,11 +27,11 @@ const (
 		);
 	`
 	SQLCreateTool string = `
-		INSERT INTO tools (width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, status, is_dead)
-		VALUES (:width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :status, :is_dead);
+	INSERT INTO tools (width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot)
+		VALUES (:width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :slot);
 	`
 	SQLGetToolByID string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, status, is_dead
+		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot
 		FROM tools
 		WHERE id = :id;
 	`
@@ -46,8 +45,8 @@ const (
 			cycles = :cycles,
 			last_regeneration = :last_regeneration,
 			regenerating = :regenerating,
-			status = :status,
 			is_dead = :is_dead
+			slot = :slot
 		WHERE id = :id;
 	`
 	SQLDeleteTool string = `
@@ -56,7 +55,7 @@ const (
 		WHERE id = :id;
 	`
 	SQLListTools string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, status, is_dead
+		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot
 		FROM tools;
 	`
 
@@ -105,8 +104,8 @@ func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
 		sql.Named("cycles", entity.Cycles),
 		sql.Named("last_regeneration", entity.LastRegeneration),
 		sql.Named("regenerating", entity.Regenerating),
-		sql.Named("status", entity.Status),
 		sql.Named("is_dead", entity.IsDead),
+		sql.Named("slot", entity.Slot),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -151,8 +150,8 @@ func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterE
 		&t.Cycles,
 		&t.LastRegeneration,
 		&t.Regenerating,
-		&t.Status,
 		&t.IsDead,
+		&t.Slot,
 	)
 	if err != nil {
 		return t, errors.NewMasterError(err, 0)
@@ -180,8 +179,8 @@ func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
 		sql.Named("cycles", entity.Cycles),
 		sql.Named("last_regeneration", entity.LastRegeneration),
 		sql.Named("regenerating", entity.Regenerating),
-		sql.Named("status", entity.Status),
 		sql.Named("is_dead", entity.IsDead),
+		sql.Named("slot", entity.Slot),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -227,8 +226,8 @@ func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
 			&t.Cycles,
 			&t.LastRegeneration,
 			&t.Regenerating,
-			&t.Status,
 			&t.IsDead,
+			&t.Slot,
 		)
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)

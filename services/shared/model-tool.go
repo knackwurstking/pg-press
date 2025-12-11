@@ -1,6 +1,10 @@
 package shared
 
-import "github.com/knackwurstking/pg-press/errors"
+import (
+	"slices"
+
+	"github.com/knackwurstking/pg-press/errors"
+)
 
 // Tool represents a tool used in a press machine,
 // there are upper and lower tools. Each tool can have its own regeneration history.
@@ -15,12 +19,8 @@ type Tool struct {
 	Cycles           int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
-
-	// TODO: This status think could be removed i think
-	Status string `json:"status"` // Status represents the current state of the tool
-
-	IsDead bool `json:"is_dead"` // IsDead indicates if the tool is dead/destroyed
-	Slot   Slot `json:"slot"`    // SlotType indicates the cassette slot type
+	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
+	Slot             Slot     `json:"slot"`         // SlotType indicates the cassette slot type
 }
 
 // Validate checks if the tool data is valid
@@ -39,20 +39,26 @@ func (t *Tool) Validate() *errors.ValidationError {
 	if t.Code == "" {
 		return errors.NewValidationError("Tool code is required")
 	}
+	if !slices.Contains([]Slot{SlotUp, SlotDown}, t.Slot) {
+		return errors.NewValidationError("Tool slot type is invalid: %v", t.Slot)
+	}
 	return nil
 }
 
 // Clone creates a copy of the tool
 func (t *Tool) Clone() *Tool {
 	return &Tool{
-		ID:           t.ID,
-		Width:        t.Width,
-		Height:       t.Height,
-		Type:         t.Type,
-		Code:         t.Code,
-		Status:       t.Status,
-		Regenerating: t.Regenerating,
-		IsDead:       t.IsDead,
+		ID:               t.ID,
+		Width:            t.Width,
+		Height:           t.Height,
+		Type:             t.Type,
+		Code:             t.Code,
+		Slot:             t.Slot,
+		CyclesOffset:     t.CyclesOffset,
+		Cycles:           t.Cycles,
+		Regenerating:     t.Regenerating,
+		LastRegeneration: t.LastRegeneration,
+		IsDead:           t.IsDead,
 	}
 }
 
