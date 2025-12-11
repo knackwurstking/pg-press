@@ -12,6 +12,53 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// DB holds and initializes all the services required
+type DB struct {
+	User *UserDB `json:"user"`
+	// TODO: Add Press next here
+}
+
+func NewDB(c *shared.Config) *DB {
+	return &DB{
+		User: &UserDB{
+			User:    user.NewUserService(c),
+			Cookie:  user.NewCookieService(c),
+			Session: user.NewSessionService(c),
+		},
+	}
+}
+
+func (db *DB) Setup() error {
+	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 1)
+
+	wg.Go(func() {
+		errCh <- db.User.Setup()
+	})
+
+	wg.Wait()
+	close(errCh)
+
+	errs := []string{}
+	for err := range errCh {
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to setup DB:\n%s", strings.Join(errs, "\n"))
+	}
+
+	return nil
+}
+
+func (db *DB) Close() {
+	wg := &sync.WaitGroup{}
+	wg.Go(db.User.Close)
+	wg.Wait()
+}
+
 type UserDB struct {
 	User    *user.UserService    `json:"user"`
 	Cookie  *user.CookieService  `json:"cookie"`
@@ -84,51 +131,4 @@ func (udb *UserDB) Close() {
 	for err := range errCh {
 		slog.Error("Failed to close user database service", "error", err)
 	}
-}
-
-// DB holds and initializes all the services required
-type DB struct {
-	User *UserDB `json:"user"`
-	// TODO: Add Press next here
-}
-
-func NewDB(c *shared.Config) *DB {
-	return &DB{
-		User: &UserDB{
-			User:    user.NewUserService(c),
-			Cookie:  user.NewCookieService(c),
-			Session: user.NewSessionService(c),
-		},
-	}
-}
-
-func (db *DB) Setup() error {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 1)
-
-	wg.Go(func() {
-		errCh <- db.User.Setup()
-	})
-
-	wg.Wait()
-	close(errCh)
-
-	errs := []string{}
-	for err := range errCh {
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup DB:\n%s", strings.Join(errs, "\n"))
-	}
-
-	return nil
-}
-
-func (db *DB) Close() {
-	wg := &sync.WaitGroup{}
-	wg.Go(db.User.Close)
-	wg.Wait()
 }
