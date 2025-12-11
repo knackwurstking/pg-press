@@ -96,7 +96,7 @@ func listToolsCommand() cli.Command {
 							tool.Width, tool.Height,
 							tool.Code,
 							tool.Type,
-							tool.Position.GermanString(),
+							tool.Slot.German(),
 							pressStr,
 							regenStr,
 							statusStr,
@@ -327,7 +327,7 @@ func listCyclesCommand() cli.Command {
 					}
 
 					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.GermanString())
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Slot.German())
 
 					// Get cycles for this tool
 					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)
@@ -474,7 +474,7 @@ func listRegenerationsCommand() cli.Command {
 					}
 
 					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.GermanString())
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Slot.German())
 
 					// Get regenerations for this tool
 					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)

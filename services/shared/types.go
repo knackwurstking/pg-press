@@ -36,11 +36,33 @@ func (p PressNumber) String() string {
 	return fmt.Sprintf("%d", p)
 }
 
+func (p Slot) String() string {
+	switch p {
+	case SlotUp:
+		return "UP"
+	case SlotDown:
+		return "DOWN"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 func (p PressNumber) IsValid() bool {
 	switch p {
 	case 0, 2, 3, 4, 5:
 		return true
 	default:
 		return false
+	}
+}
+
+func (p Slot) German() string {
+	switch p {
+	case SlotUp:
+		return "Oben"
+	case SlotDown:
+		return "Unten"
+	default:
+		return "?"
 	}
 }
