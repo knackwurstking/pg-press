@@ -1,6 +1,7 @@
-package common
+package helper
 
 import (
+	"github.com/knackwurstking/pg-press/services/common"
 	"github.com/knackwurstking/pg-press/services/shared"
 )
 
@@ -10,7 +11,7 @@ const (
 	`
 )
 
-func GetPressNumberForTool(db DB, toolID shared.EntityID) (shared.PressNumber, shared.Slot, error) {
+func GetPressNumberForTool(db common.DB, toolID shared.EntityID) (shared.PressNumber, shared.Slot, error) {
 	var pressNumber shared.PressNumber = -1
 	var slotUp, slotDown shared.EntityID
 
