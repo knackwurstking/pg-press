@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/services/press"
 	"github.com/knackwurstking/pg-press/services/shared"
 	"github.com/knackwurstking/pg-press/services/user"
 
@@ -15,9 +16,10 @@ import (
 // DB holds and initializes all the services required
 type DB struct {
 	User *UserDB `json:"user"`
-	// TODO: Add Press next here
+	Press *PressDB `json:"press"`
 }
 
+// NewDB creates a new database instance with initialized services
 func NewDB(c *shared.Config) *DB {
 	return &DB{
 		User: &UserDB{
@@ -25,15 +27,25 @@ func NewDB(c *shared.Config) *DB {
 			Cookie:  user.NewCookieService(c),
 			Session: user.NewSessionService(c),
 		},
+		Press: &PressDB{
+			Press:        press.NewPressService(c),
+			Cycle:        press.NewCycleService(c),
+			Regeneration: press.NewPressRegenerationService(c),
+		},
 	}
 }
 
+// Setup initializes all database services
 func (db *DB) Setup() error {
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2) // User and Press services
 
 	wg.Go(func() {
 		errCh <- db.User.Setup()
+	})
+
+	wg.Go(func() {
+		errCh <- db.Press.Setup()
 	})
 
 	wg.Wait()
@@ -53,18 +65,22 @@ func (db *DB) Setup() error {
 	return nil
 }
 
+// Close shuts down all database services
 func (db *DB) Close() {
 	wg := &sync.WaitGroup{}
 	wg.Go(db.User.Close)
+	wg.Go(db.Press.Close)
 	wg.Wait()
 }
 
+// UserDB holds user-related database services
 type UserDB struct {
 	User    *user.UserService    `json:"user"`
 	Cookie  *user.CookieService  `json:"cookie"`
 	Session *user.SessionService `json:"session"`
 }
 
+// Setup initializes user database services
 func (udb *UserDB) Setup() error {
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error, 3)
@@ -103,6 +119,7 @@ func (udb *UserDB) Setup() error {
 	return nil
 }
 
+// Close shuts down user database services
 func (udb *UserDB) Close() {
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error, 3)
@@ -130,5 +147,82 @@ func (udb *UserDB) Close() {
 
 	for err := range errCh {
 		slog.Error("Failed to close user database service", "error", err)
+	}
+}
+
+// PressDB holds press-related database services
+type PressDB struct {
+	Press        *press.PressService        `json:"press"`
+	Cycle        *press.CycleService        `json:"cycle"`
+	Regeneration *press.PressRegenerationService `json:"regeneration"`
+}
+
+// Setup initializes press database services
+func (pdb *PressDB) Setup() error {
+	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 3)
+
+	wg.Go(func() {
+		if err := pdb.Press.Setup(); err != nil {
+			errCh <- fmt.Errorf("press: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := pdb.Cycle.Setup(); err != nil {
+			errCh <- fmt.Errorf("cycle: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := pdb.Regeneration.Setup(); err != nil {
+			errCh <- fmt.Errorf("regeneration: %w", err)
+		}
+	})
+
+	wg.Wait()
+	close(errCh)
+
+	errs := []string{}
+	for err := range errCh {
+		errs = append(errs, err.Error())
+		slog.Error("Failed to setup press database service", "error", err)
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to setup press database service:\n%s", strings.Join(errs, "\n -> "))
+	}
+
+	return nil
+}
+
+// Close shuts down press database services
+func (pdb *PressDB) Close() {
+	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 3)
+
+	wg.Go(func() {
+		if err := pdb.Press.Close(); err != nil {
+			errCh <- fmt.Errorf("press: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := pdb.Cycle.Close(); err != nil {
+			errCh <- fmt.Errorf("cycle: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := pdb.Regeneration.Close(); err != nil {
+			errCh <- fmt.Errorf("regeneration: %w", err)
+		}
+	})
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		slog.Error("Failed to close press database service", "error", err)
 	}
 }
