@@ -5,9 +5,6 @@ This document describes the database structure and services of the PG Press appl
 ## Database Components
 
 ### Core Services
-- **common/** - Main database entry points
-  - `db.go` - Main entry point for database services
-
 - **shared/** - Shared components across services
   - `interfaces.go` - Defines `Service` and `Entity` interfaces
   - `types.go` - Common type aliases used across services
