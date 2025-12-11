@@ -9,6 +9,10 @@ const (
 
 	PressTypeSACMI = "SACMI"
 	PressTypeSITI  = "SITI"
+
+	SlotUnknown = 0
+	SlotUp      = 1
+	SlotDown    = 2
 )
 
 type (
@@ -17,6 +21,7 @@ type (
 	EditorType  string
 	PressNumber int8
 	PressType   string
+	Slot        string
 )
 
 func (id EntityID) String() string {

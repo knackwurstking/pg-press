@@ -17,6 +17,7 @@ type Tool struct {
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	Status           string   `json:"status"`       // Status represents the current state of the tool
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
+	Slot             Slot     `json:"slot"`         // SlotType indicates the cassette slot type
 }
 
 // Validate checks if the tool data is valid

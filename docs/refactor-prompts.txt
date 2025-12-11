@@ -1,0 +1,3 @@
+I changed the services and models package recently.
+
+- The models package content is now located in the services/shared package. and the services are in services/ (press, tool, user). the trouble reports service and models are still missing, ignore this for now. Fix everything what can be fixed. feel free to change commandline args if needed, because things are different now.

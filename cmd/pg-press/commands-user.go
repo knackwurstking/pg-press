@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/services/common"
+	"github.com/knackwurstking/pg-press/services/shared"
 	"github.com/labstack/gommon/color"
 
 	"github.com/SuperPaintman/nice/cli"
 )
 
 func listUserCommand() cli.Command {
-	return createSimpleCommand("list", "List all users", func(r *services.Registry) error {
-		users, err := r.Users.List()
+	return createSimpleCommand("list", "List all users", func(r *common.DB) error {
+		users, err := r.User.User.List()
 		if err != nil {
 			return err
 		}
@@ -22,7 +24,7 @@ func listUserCommand() cli.Command {
 		fmt.Printf("%-15s %s\n", "Telegram ID", "User Name")
 		fmt.Printf("%-15s %s\n", "-----------", "---------")
 		for _, u := range users {
-			fmt.Printf("%-15d %s\n", u.TelegramID, u.Name)
+			fmt.Printf("%-15d %s\n", u.ID, u.Name)
 		}
 
 		return nil
@@ -38,14 +40,14 @@ func showUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					telegramID := models.TelegramID(*telegramIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					telegramID := shared.TelegramID(*telegramIDArg)
 
-					user, merr := r.Users.Get(telegramID)
+					user, merr := r.User.User.GetByID(telegramID)
 					if merr != nil {
 						fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
 
-						if merr != nil && merr.Code == http.StatusNotFound {
+						if merr.Code == http.StatusNotFound {
 							os.Exit(exitCodeNotFound)
 						}
 
@@ -59,16 +61,22 @@ func showUserCommand() cli.Command {
 
 					fmt.Printf("%-15s %-20s %s\n", "Telegram ID", "User Name", "Api Key")
 					fmt.Printf("%-15s %-20s %s\n", "-----------", "---------", "-------")
-					fmt.Printf("%-15d %-20s %s\n", user.TelegramID, user.Name, user.ApiKey)
+					fmt.Printf("%-15d %-20s %s\n", user.ID, user.Name, user.ApiKey)
 
-					if cookies, err := r.Cookies.ListApiKey(user.ApiKey); err != nil {
+					if cookies, err := r.User.Cookie.List(); err != nil {
 						fmt.Fprintf(os.Stderr, "Get cookies from the database: %v\n", err)
 					} else {
 						if len(cookies) > 0 {
-							fmt.Printf("\n%s <last-login> - <api-key> - <value> - <user-agent>\n\n", color.Underline(color.Bold("Cookies:")))
+							fmt.Printf("\n%s <last-login> - <user> - <value> - <user-agent>\n\n",
+								color.Underline(color.Bold("Cookies:")))
 
-							for _, c := range models.SortCookies(cookies) {
-								fmt.Printf("%s - %s - %s - \"%s\"\n", c.TimeString(), color.Bold(c.ApiKey), c.Value, color.Italic(c.UserAgent))
+							for _, c := range cookies {
+								fmt.Printf("%s - %s - %s - \"%s\"\n",
+									time.UnixMilli(c.LastLogin).Format(env.DateTimeFormat),
+									color.Bold(c.UserID.String()),
+									c.Value,
+									color.Italic(c.UserAgent),
+								)
 							}
 						}
 					}
@@ -90,12 +98,16 @@ func addUserCommand() cli.Command {
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					telegramID := models.TelegramID(*telegramIDArg)
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					telegramID := shared.TelegramID(*telegramIDArg)
 
-					user := models.NewUser(telegramID, *userName, *apiKey)
-					_, merr := r.Users.Add(user)
-					if merr.IsExistsError() {
+					user := &shared.User{
+						ID:     telegramID,
+						Name:   *userName,
+						ApiKey: *apiKey,
+					}
+					merr := r.User.User.Create(user)
+					if merr != nil && merr.IsExistsError() {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}
 					return merr
@@ -113,8 +125,8 @@ func removeUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					return r.Users.Delete(models.TelegramID(*telegramIDArg))
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					return r.User.User.Delete(shared.TelegramID(*telegramIDArg))
 				})
 			}
 		}),
@@ -131,8 +143,8 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *services.Registry) error {
-					user, err := r.Users.Get(models.TelegramID(*telegramID))
+				return withDBOperation(customDBPath, func(r *common.DB) error {
+					user, err := r.User.User.GetByID(shared.TelegramID(*telegramID))
 					if err != nil {
 						return err
 					}
@@ -145,7 +157,7 @@ func modUserCommand() cli.Command {
 						user.ApiKey = *apiKey
 					}
 
-					return r.Users.Update(user)
+					return r.User.User.Update(user)
 				})
 			}
 		}),

@@ -41,4 +41,12 @@ func (e *Cookie) IsExpired() bool {
 	return time.Now().UnixMilli()-int64(e.LastLogin) > CookieExpirationDuration
 }
 
+func (e *Cookie) ExipredAt() int64 {
+	return e.LastLogin + CookieExpirationDuration
+}
+
+func (e *Cookie) ExpiredAtTime() time.Time {
+	return time.UnixMilli(e.ExipredAt())
+}
+
 var _ Entity[*Cookie] = (*Cookie)(nil)

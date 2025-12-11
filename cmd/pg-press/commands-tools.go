@@ -44,9 +44,9 @@ func listToolsCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(r *common.DB) error {
 					// Get all tools from database
-					tools, dberr := r.Tools.List()
-					if dberr != nil {
-						return errors.Wrap(dberr, "retrieve tools")
+					tools, merr := r.Tool.Tool.List()
+					if merr != nil {
+						return errors.Wrap(merr, "retrieve tools")
 					}
 
 					// Filter tools by ID if range/list is specified
@@ -91,9 +91,9 @@ func listToolsCommand() cli.Command {
 							statusStr = "Dead"
 						}
 
-						fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						fmt.Fprintf(w, "%d\t%sx%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
 							tool.ID,
-							tool.Format.String(),
+							tool.Width, tool.Height,
 							tool.Code,
 							tool.Type,
 							tool.Position.GermanString(),
@@ -118,7 +118,7 @@ func listToolsCommand() cli.Command {
 func listDeadToolsCommand() cli.Command {
 	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *common.DB) error {
 		// Get all dead tools from database
-		tools, err := r.Tools.ListDeadTools()
+		tools, err := r.Tool.Tool.ListDeadTools()
 		if err != nil {
 			return fmt.Errorf("retrieve dead tools: %v", err)
 		}
@@ -180,29 +180,24 @@ func markDeadCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
-					tool, err := r.Tools.Get(toolID)
+					tool, err := r.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					if tool.IsDead {
-						fmt.Printf("Tool %d (%s %s) is already marked as dead.\n", tool.ID, tool.Format.String(), tool.Code)
+						fmt.Printf("Tool %d (%sx%s %s) is already marked as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 						return nil
 					}
 
-					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &shared.User{
-						TelegramID: 1,
-						Name:       "cli-user",
-					}
-
 					// Mark tool as dead
-					dberr := r.Tools.MarkAsDead(toolID, user)
-					if dberr != nil {
-						return errors.Wrap(dberr, "mark tool as dead")
+					tool.IsDead = true
+					merr := r.Tool.Tool.Update(tool)
+					if merr != nil {
+						return errors.Wrap(merr, "mark tool as dead")
 					}
 
-					fmt.Printf("Successfully marked tool %d (%s %s) as dead.\n", tool.ID, tool.Format.String(), tool.Code)
+					fmt.Printf("Successfully marked tool %d (%sx%s %s) as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 					return nil
 				})
 			}
@@ -223,29 +218,24 @@ func reviveDeadToolCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
-					tool, err := r.Tools.Get(toolID)
+					tool, err := r.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
 					if !tool.IsDead {
-						fmt.Printf("Tool %d (%s %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Format.String(), tool.Code)
+						fmt.Printf("Tool %d (%sx%s %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 						return nil
 					}
 
-					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &shared.User{
-						ID:   1,
-						Name: "cli-user",
-					}
-
 					// Revive tool (mark as alive)
-					err = r.Tools.ReviveTool(toolID, user)
+					tool.IsDead = false
+					err = r.Tool.Tool.Update(tool)
 					if err != nil {
 						return fmt.Errorf("revive tool: %v", err)
 					}
 
-					fmt.Printf("Successfully revived tool %d (%s %s).\n", tool.ID, tool.Format.String(), tool.Code)
+					fmt.Printf("Successfully revived tool %d (%sx%s %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
 					return nil
 				})
 			}
@@ -266,21 +256,15 @@ func deleteToolCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(toolID)
+					tool, err := r.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Deleting tool %d (%s %s) and all related data...\n", tool.ID, tool.Format.String(), tool.Code)
-
-					// Create a dummy user for CLI operations (you might want to make this configurable)
-					user := &shared.User{
-						ID:   1,
-						Name: "cli-user",
-					}
+					fmt.Printf("Deleting tool %d (%sx%s %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
+					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)
 					if err != nil {
 						return fmt.Errorf("get regenerations for tool: %v", err)
 					}
@@ -288,14 +272,14 @@ func deleteToolCommand() cli.Command {
 					if len(regenerations) > 0 {
 						fmt.Printf("Deleting %d regeneration(s)...\n", len(regenerations))
 						for _, regen := range regenerations {
-							if err := r.ToolRegenerations.Delete(regen.ID); err != nil {
+							if err := r.Tool.Regeneration.Delete(regen.ID); err != nil {
 								return fmt.Errorf("delete regeneration %d: %v", regen.ID, err)
 							}
 						}
 					}
 
 					// 2. Delete all cycles for this tool
-					cycles, err := r.PressCycles.ListPressCyclesForTool(toolID)
+					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("get cycles for tool: %v", err)
 					}
@@ -303,20 +287,20 @@ func deleteToolCommand() cli.Command {
 					if len(cycles) > 0 {
 						fmt.Printf("Deleting %d cycle(s)...\n", len(cycles))
 						for _, cycle := range cycles {
-							if err := r.PressCycles.Delete(cycle.ID); err != nil {
+							if err := r.Press.Cycle.Delete(cycle.ID); err != nil {
 								return fmt.Errorf("delete cycle %d: %v", cycle.ID, err)
 							}
 						}
 					}
 
 					// 3. Finally, delete the tool itself
-					err = r.Tools.Delete(toolID, user)
+					err = r.Tool.Tool.Delete(toolID)
 					if err != nil {
 						return fmt.Errorf("delete tool: %v", err)
 					}
 
-					fmt.Printf("Successfully deleted tool %d (%s %s) with %d cycle(s) and %d regeneration(s).\n",
-						tool.ID, tool.Format.String(), tool.Code, len(cycles), len(regenerations))
+					fmt.Printf("Successfully deleted tool %d (%sx%s %s) with %d cycle(s) and %d regeneration(s).\n",
+						tool.ID, tool.Width, tool.Height, tool.Code, len(cycles), len(regenerations))
 					return nil
 				})
 			}
@@ -337,16 +321,16 @@ func listCyclesCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(toolID)
+					tool, err := r.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
-						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
+					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get cycles for this tool
-					cycles, err := r.PressCycles.ListPressCyclesForTool(toolID)
+					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)
 					if err != nil {
 						return fmt.Errorf("retrieve cycles: %v", err)
 					}
@@ -484,16 +468,16 @@ func listRegenerationsCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tools.Get(toolID)
+					tool, err := r.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%s %s) - %s - %s\n\n",
-						tool.ID, tool.Format.String(), tool.Code, tool.Type, tool.Position.GermanString())
+					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.GermanString())
 
 					// Get regenerations for this tool
-					regenerations, err := r.ToolRegenerations.GetRegenerationHistory(toolID)
+					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)
 					if err != nil {
 						return fmt.Errorf("retrieve regenerations: %v", err)
 					}

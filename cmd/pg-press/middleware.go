@@ -6,11 +6,12 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/services/common"
+	"github.com/knackwurstking/pg-press/services/shared"
 	"github.com/knackwurstking/pg-press/utils"
 
 	"github.com/labstack/echo/v4"
@@ -72,7 +73,7 @@ func init() {
 	keyAuthFilesToSkipRegExp = regexp.MustCompile(`.*woff[2]`)
 }
 
-func middlewareKeyAuth(db *services.Registry) echo.MiddlewareFunc {
+func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: keyAuthSkipper,
 		KeyLookup: "header:" + echo.HeaderAuthorization +
@@ -102,16 +103,31 @@ func keyAuthSkipper(ctx echo.Context) bool {
 	return keyAuthFilesToSkipRegExp.MatchString(url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (bool, error) {
+func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error) {
 	realIP := ctx.RealIP()
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		slog.Warn("Validate user from cookie failed... Get user from api key now...", "error", err)
-		var masterErr *errors.MasterError
-		if user, masterErr = db.Users.GetUserFromApiKey(auth); masterErr != nil {
-			return false, masterErr.Echo()
+		// Try to get user directly from the API key
+		users, merr := db.User.User.List()
+		if merr != nil {
+			return false, merr.Echo()
 		}
+
+		// Find user by API key
+		var foundUser *shared.User
+		for _, u := range users {
+			if u.ApiKey == auth {
+				foundUser = u
+				break
+			}
+		}
+
+		if foundUser == nil {
+			return false, fmt.Errorf("invalid API key")
+		}
+		user = foundUser
 	}
 
 	slog.Info("API key auth successful", "user_name", user.Name, "real_ip", realIP)
@@ -119,14 +135,14 @@ func keyAuthValidator(auth string, ctx echo.Context, db *services.Registry) (boo
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.User, error) {
+func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, error) {
 	realIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(env.CookieName)
 	if err != nil {
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, merr := db.Cookies.Get(httpCookie.Value)
+	cookie, merr := db.User.Cookie.GetByID(httpCookie.Value)
 	if merr != nil {
 		return nil, merr.Wrap("get cookie")
 	}
@@ -137,7 +153,7 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, merr := db.Users.GetUserFromApiKey(cookie.ApiKey)
+	user, merr := db.User.User.GetByID(cookie.UserID)
 	if merr != nil {
 		return nil, merr.Wrap("validate user from API key")
 	}
@@ -162,13 +178,13 @@ func validateUserFromCookie(ctx echo.Context, db *services.Registry) (*models.Us
 	}
 
 	if pathMatches {
-		cookie.UpdateLastLogin()
-		httpCookie.Expires = cookie.Expires()
+		cookie.LastLogin = time.Now().UnixMilli()
+		httpCookie.Expires = cookie.ExpiredAtTime()
 
 		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
 
 		// Try to update cookie with lock
-		err := db.Cookies.Update(cookie.Value, cookie.UserAgent, cookie.Value, cookie.ApiKey)
+		err := db.User.Cookie.Update(cookie)
 		if err != nil {
 			// If the update failed due to a race condition (another goroutine updated first),
 			// we log it but don't treat it as a critical error

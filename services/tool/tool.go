@@ -22,6 +22,7 @@ const (
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			status 				TEXT NOT NULL,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
+			slot 				INTEGER NOT NULL DEFAULT 0,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
