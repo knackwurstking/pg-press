@@ -8,6 +8,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/services/press"
 	"github.com/knackwurstking/pg-press/services/shared"
+	"github.com/knackwurstking/pg-press/services/tool"
 	"github.com/knackwurstking/pg-press/services/user"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -15,8 +16,9 @@ import (
 
 // DB holds and initializes all the services required
 type DB struct {
-	User *UserDB `json:"user"`
+	User  *UserDB  `json:"user"`
 	Press *PressDB `json:"press"`
+	Tool  *ToolDB  `json:"tool"`
 }
 
 // NewDB creates a new database instance with initialized services
@@ -32,13 +34,17 @@ func NewDB(c *shared.Config) *DB {
 			Cycle:        press.NewCycleService(c),
 			Regeneration: press.NewPressRegenerationService(c),
 		},
+		Tool: &ToolDB{
+			Tool:         tool.NewToolService(c),
+			Regeneration: tool.NewToolRegenerationService(c),
+		},
 	}
 }
 
 // Setup initializes all database services
 func (db *DB) Setup() error {
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 2) // User and Press services
+	errCh := make(chan error, 3) // User, Press and Tool services
 
 	wg.Go(func() {
 		errCh <- db.User.Setup()
@@ -46,6 +52,10 @@ func (db *DB) Setup() error {
 
 	wg.Go(func() {
 		errCh <- db.Press.Setup()
+	})
+
+	wg.Go(func() {
+		errCh <- db.Tool.Setup()
 	})
 
 	wg.Wait()
@@ -70,6 +80,7 @@ func (db *DB) Close() {
 	wg := &sync.WaitGroup{}
 	wg.Go(db.User.Close)
 	wg.Go(db.Press.Close)
+	wg.Go(db.Tool.Close)
 	wg.Wait()
 }
 
@@ -152,8 +163,8 @@ func (udb *UserDB) Close() {
 
 // PressDB holds press-related database services
 type PressDB struct {
-	Press        *press.PressService        `json:"press"`
-	Cycle        *press.CycleService        `json:"cycle"`
+	Press        *press.PressService             `json:"press"`
+	Cycle        *press.CycleService             `json:"cycle"`
 	Regeneration *press.PressRegenerationService `json:"regeneration"`
 }
 
@@ -224,5 +235,69 @@ func (pdb *PressDB) Close() {
 
 	for err := range errCh {
 		slog.Error("Failed to close press database service", "error", err)
+	}
+}
+
+// ToolDB holds tool-related database services
+type ToolDB struct {
+	Tool         *tool.ToolService             `json:"tool"`
+	Regeneration *tool.ToolRegenerationService `json:"regeneration"`
+}
+
+// Setup initializes tool database services
+func (tdb *ToolDB) Setup() error {
+	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 2)
+
+	wg.Go(func() {
+		if err := tdb.Tool.Setup(); err != nil {
+			errCh <- fmt.Errorf("tool: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.Regeneration.Setup(); err != nil {
+			errCh <- fmt.Errorf("regeneration: %w", err)
+		}
+	})
+
+	wg.Wait()
+	close(errCh)
+
+	errs := []string{}
+	for err := range errCh {
+		errs = append(errs, err.Error())
+		slog.Error("Failed to setup tool database service", "error", err)
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to setup tool database service:\n%s", strings.Join(errs, "\n -> "))
+	}
+
+	return nil
+}
+
+// Close shuts down tool database services
+func (tdb *ToolDB) Close() {
+	wg := &sync.WaitGroup{}
+	errCh := make(chan error, 2)
+
+	wg.Go(func() {
+		if err := tdb.Tool.Close(); err != nil {
+			errCh <- fmt.Errorf("tool: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.Regeneration.Close(); err != nil {
+			errCh <- fmt.Errorf("regeneration: %w", err)
+		}
+	})
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		slog.Error("Failed to close tool database service", "error", err)
 	}
 }
