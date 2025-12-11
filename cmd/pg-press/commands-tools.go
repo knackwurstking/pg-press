@@ -77,6 +77,7 @@ func listToolsCommand() cli.Command {
 					// Print each tool
 					for _, tool := range tools {
 						pressStr := "None"
+						// TODO: Fetch actual press number for tool using the new helper function in helper
 						if tool.Press != nil {
 							pressStr = strconv.Itoa(int(*tool.Press))
 						}
