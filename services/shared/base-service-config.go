@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 	"time"
 
 	"github.com/knackwurstking/pg-press/errors"
@@ -12,7 +13,6 @@ import (
 type Config struct {
 	DriverName       string `json:"driver_name"`
 	DatabaseLocation string `json:"database_location"`
-	// TODO: Need to add a new field to change the database file name, without the extension
 
 	db *sql.DB `json:"-"`
 }
@@ -21,7 +21,7 @@ func (s *Config) DB() *sql.DB {
 	return s.db
 }
 
-func (s *Config) Open() *errors.MasterError {
+func (s *Config) Open(dbName string) *errors.MasterError {
 	var err error
 
 	if s.db != nil {
@@ -35,9 +35,8 @@ func (s *Config) Open() *errors.MasterError {
 
 	// NOTE: Previously used: "?_busy_timeout=30000&_journal_mode=WAL&_foreign_keys=on&_synchronous=NORMAL"
 	path := fmt.Sprintf(
-		// FIXME: Need to change the table name based on which service is using it
-		"file:%suserdb.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
-		s.DatabaseLocation,
+		"file:%s.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
+		filepath.Join(s.DatabaseLocation, dbName),
 	)
 
 	s.db, err = sql.Open(s.DriverName, path)

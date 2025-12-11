@@ -73,7 +73,7 @@ func (s *ToolRegenerationService) TableName() string {
 }
 
 func (s *ToolRegenerationService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreateToolRegenerationTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateToolRegenerationTable)
 }
 
 func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {

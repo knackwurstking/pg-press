@@ -68,7 +68,7 @@ func (s *CycleService) TableName() string {
 }
 
 func (s *CycleService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreateCycleTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateCycleTable)
 }
 
 func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {

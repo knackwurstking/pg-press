@@ -71,7 +71,7 @@ func (s *CookieService) TableName() string {
 }
 
 func (s *CookieService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreateCookieTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateCookieTable)
 }
 
 func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError {

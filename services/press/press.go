@@ -54,6 +54,8 @@ const (
 		SELECT id, slot_up, slot_down, last_regeneration, start_cycles, cycles, type
 		FROM presses;
 	`
+
+	DBName string = "pg-press-presses"
 )
 
 type PressService struct {
@@ -77,7 +79,7 @@ func (s *PressService) TableName() string {
 }
 
 func (s *PressService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreatePressTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreatePressTable)
 }
 
 func (s *PressService) Close() *errors.MasterError {

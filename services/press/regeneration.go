@@ -73,7 +73,7 @@ func (s *PressRegenerationService) TableName() string {
 }
 
 func (s *PressRegenerationService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreatePressRegenerationTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreatePressRegenerationTable)
 }
 
 func (s *PressRegenerationService) Create(entity *shared.PressRegeneration) *errors.MasterError {

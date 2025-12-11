@@ -10,8 +10,8 @@ type BaseService struct {
 	*Config
 }
 
-func (bs *BaseService) Setup(tableName, tableCreationQuery string) *errors.MasterError {
-	merr := bs.Open()
+func (bs *BaseService) Setup(dbName, tableName, tableCreationQuery string) *errors.MasterError {
+	merr := bs.Open(dbName)
 	if merr != nil {
 		return merr
 	}

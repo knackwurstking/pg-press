@@ -43,6 +43,8 @@ const (
 		SELECT id, name, api_key, last_feed 
 		FROM users;
 	`
+
+	DBName string = "pg-press-users"
 )
 
 type UserService struct {
@@ -66,7 +68,7 @@ func (s *UserService) TableName() string {
 }
 
 func (s *UserService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreateUserTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateUserTable)
 }
 
 func (s *UserService) Create(entity *shared.User) *errors.MasterError {

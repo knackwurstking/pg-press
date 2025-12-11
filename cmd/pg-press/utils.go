@@ -48,14 +48,14 @@ func initializeLogging() {
 	slog.SetDefault(slog.New(handler))
 }
 
-func openDB(dbLocation string, logging bool) (*common.DB, error) {
+func openDB(dbPath string, logging bool) (*common.DB, error) {
 	if logging {
-		slog.Info("Database opened", "location", dbLocation)
+		slog.Info("Database opened", "path", dbPath)
 	}
 
 	return common.NewDB(&shared.Config{
 		DriverName:       "sqlite3",
-		DatabaseLocation: dbLocation,
+		DatabaseLocation: dbPath,
 	}), nil
 }
 
@@ -87,7 +87,7 @@ func createSimpleCommand(name, usage string, action func(*common.DB) error) cli.
 
 // withDBOperation is a helper that handles common database operations
 func withDBOperation(customDBPath *string, operation func(*common.DB) error) error {
-	r, err := openDB(*customDBPath, false)
+	r, err := openDB(*customDBPath, false) // TODO: Continue here...
 	if err != nil {
 		return err
 	}

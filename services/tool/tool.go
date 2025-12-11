@@ -58,6 +58,8 @@ const (
 		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, status, is_dead
 		FROM tools;
 	`
+
+	DBName string = "pg-press-tools"
 )
 
 type ToolService struct {
@@ -81,7 +83,7 @@ func (s *ToolService) TableName() string {
 }
 
 func (s *ToolService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(s.TableName(), SQLCreateToolTable)
+	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateToolTable)
 }
 
 func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
