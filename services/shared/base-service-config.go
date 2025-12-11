@@ -12,6 +12,7 @@ import (
 type Config struct {
 	DriverName       string `json:"driver_name"`
 	DatabaseLocation string `json:"database_location"`
+	// TODO: Need to add a new field to change the database file name, without the extension
 
 	db *sql.DB `json:"-"`
 }
