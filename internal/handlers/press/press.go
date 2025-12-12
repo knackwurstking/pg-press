@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
@@ -19,10 +20,10 @@ import (
 )
 
 type Handler struct {
-	registry *services.Registry
+	registry *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(r *common.DB) *Handler {
 	return &Handler{
 		registry: r,
 	}

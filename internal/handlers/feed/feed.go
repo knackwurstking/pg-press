@@ -4,11 +4,11 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/feed/templates"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -17,10 +17,10 @@ import (
 )
 
 type Handler struct {
-	registry *services.Registry
+	registry *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(r *common.DB) *Handler {
 	return &Handler{
 		registry: r,
 	}

@@ -103,7 +103,10 @@ func (p Slot) German() string {
 	}
 }
 
-// UnixMilli methods
-func (um UnixMilli) Format() string {
+func (um UnixMilli) FormatDate() string {
+	return time.UnixMilli(int64(um)).Format(DateFormat)
+}
+
+func (um UnixMilli) FormatDateTime() string {
 	return time.UnixMilli(int64(um)).Format(fmt.Sprintf("%s %s", DateFormat, TimeFormat))
 }

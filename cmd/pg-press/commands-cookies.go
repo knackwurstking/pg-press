@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/knackwurstking/pg-press/services/common"
-	"github.com/knackwurstking/pg-press/services/shared"
+	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
 )

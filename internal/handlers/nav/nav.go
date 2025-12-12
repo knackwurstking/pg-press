@@ -4,9 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/handlers/wsfeed"
-	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -16,11 +16,11 @@ import (
 )
 
 type Handler struct {
-	registry    *services.Registry
+	registry    *common.DB
 	feedHandler *wsfeed.Handler
 }
 
-func NewHandler(r *services.Registry, fh *wsfeed.Handler) *Handler {
+func NewHandler(r *common.DB, fh *wsfeed.Handler) *Handler {
 	return &Handler{
 		registry:    r,
 		feedHandler: fh,

@@ -7,10 +7,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/services/common"
-	"github.com/knackwurstking/pg-press/services/shared"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
 )
@@ -351,7 +350,7 @@ func listCyclesCommand() cli.Command {
 								cycle.PressNumber,
 								cycle.ToolPosition.GermanString(),
 								cycle.TotalCycles,
-								cycle.Date.Format(env.DateTimeFormat), // TODO: Date replaced with start->stop
+								fmt.Sprintf("%s -> %s", cycle.Start.FromatDate(), cycle.Stop.FormatDate()),
 								cycle.PerformedBy,
 							)
 						}
