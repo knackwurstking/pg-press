@@ -21,17 +21,17 @@ const (
 			last_regeneration 	INTEGER NOT NULL DEFAULT 0,
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
-			slot 				INTEGER NOT NULL DEFAULT 0,
+			cassette 				INTEGER NOT NULL DEFAULT 0,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	SQLCreateTool string = `
-	INSERT INTO tools (width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot)
-		VALUES (:width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :slot);
+	INSERT INTO tools (width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette)
+		VALUES (:width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette);
 	`
 	SQLGetToolByID string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot
+		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
 		FROM tools
 		WHERE id = :id;
 	`
@@ -46,7 +46,7 @@ const (
 			last_regeneration = :last_regeneration,
 			regenerating = :regenerating,
 			is_dead = :is_dead
-			slot = :slot
+			cassette = :cassette
 		WHERE id = :id;
 	`
 	SQLDeleteTool string = `
@@ -55,7 +55,7 @@ const (
 		WHERE id = :id;
 	`
 	SQLListTools string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, slot
+		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
 		FROM tools;
 	`
 
@@ -105,7 +105,7 @@ func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
 		sql.Named("last_regeneration", entity.LastRegeneration),
 		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
-		sql.Named("slot", entity.Slot),
+		sql.Named("cassette", entity.Cassette),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -151,7 +151,7 @@ func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterE
 		&t.LastRegeneration,
 		&t.Regenerating,
 		&t.IsDead,
-		&t.Slot,
+		&t.Cassette,
 	)
 	if err != nil {
 		return t, errors.NewMasterError(err, 0)
@@ -180,7 +180,7 @@ func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
 		sql.Named("last_regeneration", entity.LastRegeneration),
 		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
-		sql.Named("slot", entity.Slot),
+		sql.Named("cassette", entity.Cassette),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -227,7 +227,7 @@ func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
 			&t.LastRegeneration,
 			&t.Regenerating,
 			&t.IsDead,
-			&t.Slot,
+			&t.Cassette,
 		)
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)

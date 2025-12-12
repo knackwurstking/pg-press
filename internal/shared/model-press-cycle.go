@@ -1,6 +1,10 @@
 package shared
 
-import "github.com/knackwurstking/pg-press/internal/errors"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pg-press/internal/errors"
+)
 
 type Cycle struct {
 	ID          EntityID    `json:"id"`           // ID is the unique identifier for the Cycle entity
@@ -40,6 +44,13 @@ func (c *Cycle) Clone() *Cycle {
 		Start:       c.Start,
 		Stop:        c.Stop,
 	}
+}
+
+func (c *Cycle) String() string {
+	return fmt.Sprintf(
+		"Cycle[ID=%d, PressNumber=%d, Cycles=%d, Start=%d, Stop=%d]",
+		c.ID, c.PressNumber, c.Cycles, c.Start, c.Stop,
+	)
 }
 
 var _ Entity[*Cycle] = (*Cycle)(nil)

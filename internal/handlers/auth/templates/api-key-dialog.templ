@@ -1,11 +1,11 @@
 package templates
 
-import "github.com/knackwurstking/pg-press/utils"
+import "github.com/knackwurstking/pg-press/internal/urlb"
 
 templ apiKeyDialog(apiKey string, invalidApiKey bool) {
 	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
 		<form
-			action={ utils.UrlLogin("", nil).Page }
+			action={ urlb.UrlLogin("", nil).Page }
 			method="post"
 		>
 			<label class="flex flex-col">

@@ -1,6 +1,10 @@
 package shared
 
-import "github.com/knackwurstking/pg-press/internal/errors"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pg-press/internal/errors"
+)
 
 type PressRegeneration struct {
 	ID          EntityID    `json:"id"`           // ID is the unique identifier for the PressRegeneration entity
@@ -40,6 +44,13 @@ func (pr *PressRegeneration) Clone() *PressRegeneration {
 		Stop:        pr.Stop,
 		Cycles:      pr.Cycles,
 	}
+}
+
+func (pr *PressRegeneration) String() string {
+	return fmt.Sprintf(
+		"PressRegeneration[ID=%d, PressNumber=%d, Cycles=%d, Start=%d, Stop=%d]",
+		pr.ID, pr.PressNumber, pr.Cycles, pr.Start, pr.Stop,
+	)
 }
 
 var _ Entity[*PressRegeneration] = (*PressRegeneration)(nil)

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
 const (
@@ -41,6 +42,10 @@ func (e *User) Clone() *User {
 		ApiKey:   e.ApiKey,
 		LastFeed: e.LastFeed,
 	}
+}
+
+func (e *User) String() string {
+	return "User[ID=" + e.ID.String() + ", Name=" + e.Name + ", ApiKey=" + utils.MaskString(e.ApiKey) + "]"
 }
 
 var _ Entity[*User] = (*User)(nil)

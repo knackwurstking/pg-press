@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -20,7 +21,7 @@ type Tool struct {
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
-	Slot             Slot     `json:"slot"`         // SlotType indicates the cassette slot type
+	Cassette         Slot     `json:"cassette"`     // SlotType indicates the cassette slot type
 }
 
 // Validate checks if the tool data is valid
@@ -39,8 +40,11 @@ func (t *Tool) Validate() *errors.ValidationError {
 	if t.Code == "" {
 		return errors.NewValidationError("Tool code is required")
 	}
-	if !slices.Contains([]Slot{SlotUp, SlotDown}, t.Slot) {
-		return errors.NewValidationError("Tool slot type is invalid: %v", t.Slot)
+	if slices.Contains([]Slot{SlotPressUp, SlotPressDown}, t.Cassette) {
+		return errors.NewValidationError(
+			"Tool cassette slot type is invalid: %d, expect %d",
+			t.Cassette, SlotUpperToolCassette,
+		)
 	}
 	return nil
 }
@@ -53,13 +57,17 @@ func (t *Tool) Clone() *Tool {
 		Height:           t.Height,
 		Type:             t.Type,
 		Code:             t.Code,
-		Slot:             t.Slot,
+		Cassette:         t.Cassette,
 		CyclesOffset:     t.CyclesOffset,
 		Cycles:           t.Cycles,
 		Regenerating:     t.Regenerating,
 		LastRegeneration: t.LastRegeneration,
 		IsDead:           t.IsDead,
 	}
+}
+
+func (t *Tool) String() string {
+	return fmt.Sprintf("Tool[ID=%s, Type=%s, Code=%s]", t.ID.String(), t.Type, t.Code)
 }
 
 var _ Entity[*Tool] = (*Tool)(nil)

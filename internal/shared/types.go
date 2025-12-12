@@ -10,9 +10,11 @@ const (
 	PressTypeSACMI = "SACMI"
 	PressTypeSITI  = "SITI"
 
-	SlotUnknown Slot = 0
-	SlotUp      Slot = 1
-	SlotDown    Slot = 2
+	SlotUnknown           Slot = 0
+	SlotPressUp           Slot = 1
+	SlotPressDown         Slot = 2
+	SlotUpperToolCassette Slot = 10
+	//SlotLowerToolCassette Slot = 20
 )
 
 type (
@@ -38,9 +40,9 @@ func (p PressNumber) String() string {
 
 func (p Slot) String() string {
 	switch p {
-	case SlotUp:
+	case SlotPressUp:
 		return "UP"
-	case SlotDown:
+	case SlotPressDown:
 		return "DOWN"
 	default:
 		return "UNKNOWN"
@@ -58,9 +60,9 @@ func (p PressNumber) IsValid() bool {
 
 func (p Slot) German() string {
 	switch p {
-	case SlotUp:
+	case SlotPressUp:
 		return "Oben"
-	case SlotDown:
+	case SlotPressDown:
 		return "Unten"
 	default:
 		return "?"

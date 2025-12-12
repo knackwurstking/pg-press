@@ -5,8 +5,6 @@ import (
 )
 
 const (
-	CookieName = "pgpress-api-key"
-
 	DateFormat     = "02.01.2006"
 	TimeFormat     = "15:04"
 	DateTimeFormat = DateFormat + " " + TimeFormat

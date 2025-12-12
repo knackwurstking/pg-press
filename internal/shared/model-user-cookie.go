@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
 var (
@@ -47,6 +48,10 @@ func (e *Cookie) ExipredAt() int64 {
 
 func (e *Cookie) ExpiredAtTime() time.Time {
 	return time.UnixMilli(e.ExipredAt())
+}
+
+func (e *Cookie) String() string {
+	return "Cookie[UserID=" + e.UserID.String() + ", Value=" + utils.MaskString(e.Value) + "]"
 }
 
 var _ Entity[*Cookie] = (*Cookie)(nil)

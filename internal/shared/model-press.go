@@ -1,6 +1,10 @@
 package shared
 
-import "github.com/knackwurstking/pg-press/internal/errors"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/pg-press/internal/errors"
+)
 
 // Press represents a press machine with its associated tools and cassettes
 //
@@ -41,6 +45,13 @@ func (p *Press) Clone() *Press {
 		Cycles:           p.Cycles,
 		Type:             p.Type,
 	}
+}
+
+func (p *Press) String() string {
+	return fmt.Sprintf(
+		"Press[ID=%d, SlotUp=%d, SlotDown=%d, LastRegeneration=%d, StartCycles=%d, Cycles=%d, Type=%s]",
+		p.ID, p.SlotUp, p.SlotDown, p.LastRegeneration, p.StartCycles, p.Cycles, p.Type,
+	)
 }
 
 var _ Entity[*Press] = (*Press)(nil)

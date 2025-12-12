@@ -1,3 +1,0 @@
-package env
-
-import "os"

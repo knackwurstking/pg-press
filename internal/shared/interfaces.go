@@ -36,4 +36,6 @@ type Entity[T any] interface {
 
 	// Entity clones the entity and returns a copy
 	Clone() T
+
+	String() string
 }

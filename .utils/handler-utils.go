@@ -151,15 +151,6 @@ func SanitizeFilename(filename string) string {
 	return filename
 }
 
-// RedirectTo performs an HTTP redirect to the specified path
-func RedirectTo(c echo.Context, path templ.SafeURL) *errors.MasterError {
-	err := c.Redirect(http.StatusSeeOther, string(path))
-	if err != nil {
-		return errors.NewMasterError(err, 0)
-	}
-	return nil
-}
-
 // SetHXTrigger sets HX-Trigger header
 func SetHXTrigger(c echo.Context, events ...string) {
 	c.Response().Header().Set("HX-Trigger", strings.Join(events, ", "))

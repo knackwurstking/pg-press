@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
-	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -18,11 +18,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	CookieName = "pgpress-api-key"
+)
+
 type Handler struct {
-	registry *services.Registry
+	registry *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(r *common.DB) *Handler {
 	return &Handler{
 		registry: r,
 	}
@@ -63,13 +67,13 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
-		merr := utils.RedirectTo(c, utils.UrlLogin(apiKey, &invalid).Page)
+		merr := urlb.RedirectTo(c, urlb.UrlLogin(apiKey, &invalid).Page)
 		if merr != nil {
 			return merr.Echo()
 		}
 	}
 
-	merr := utils.RedirectTo(c, utils.UrlProfile("").Page)
+	merr := urlb.RedirectTo(c, urlb.UrlProfile("").Page)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -83,7 +87,7 @@ func (h *Handler) GetLogout(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	cookie, err := c.Cookie(env.CookieName)
+	cookie, err := c.Cookie(CookieName)
 	if err == nil {
 		merr := h.registry.Cookies.Remove(cookie.Value)
 		if merr != nil {
@@ -91,7 +95,7 @@ func (h *Handler) GetLogout(c echo.Context) error {
 		}
 	}
 
-	merr = utils.RedirectTo(c, utils.UrlLogin("", nil).Page)
+	merr = urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -131,7 +135,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 }
 
 func (h *Handler) clearExistingSession(ctx echo.Context) error {
-	cookie, err := ctx.Cookie(env.CookieName)
+	cookie, err := ctx.Cookie(CookieName)
 	if err != nil {
 		return nil
 	}
@@ -159,7 +163,7 @@ func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
 	}
 
 	ctx.SetCookie(&http.Cookie{
-		Name:     env.CookieName,
+		Name:     CookieName,
 		Value:    cookieValue,
 		Expires:  time.Now().Add(env.CookieExpirationDuration),
 		Path:     cookiePath,

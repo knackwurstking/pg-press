@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/auth"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -77,7 +78,7 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: keyAuthSkipper,
 		KeyLookup: "header:" + echo.HeaderAuthorization +
-			",query:access_token,cookie:" + env.CookieName,
+			",query:access_token,cookie:" + auth.CookieName,
 		AuthScheme: "Bearer",
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
 			return keyAuthValidator(auth, ctx, db)
@@ -89,7 +90,7 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 				"url_path", c.Request().URL.Path,
 				"real_ip", c.RealIP(),
 			)
-			return utils.RedirectTo(c, utils.UrlLogin("", nil).Page)
+			return urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
 		},
 	})
 }
@@ -137,7 +138,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, error) {
 	realIP := ctx.RealIP()
-	httpCookie, err := ctx.Cookie(env.CookieName)
+	httpCookie, err := ctx.Cookie(auth.CookieName)
 	if err != nil {
 		return nil, errors.Wrap(err, "get cookie")
 	}
