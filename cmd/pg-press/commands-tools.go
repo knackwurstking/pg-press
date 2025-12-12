@@ -348,17 +348,16 @@ func listCyclesCommand() cli.Command {
 						fmt.Println("No cycles found for this tool")
 					} else {
 						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tPRESS\tPOSITION\tTOTAL CYCLES\tDATE\tPERFORMED BY")
-						fmt.Fprintln(w, "----\t-----\t--------\t------------\t----\t------------")
+						fmt.Fprintln(w, "ID\tPRESS\tCYCLES\tSTART\tSTOP")
+						fmt.Fprintln(w, "----\t-----\t-------\t-----\t----")
 
 						for _, cycle := range cycles {
 							fmt.Fprintf(w, "%d\t%d\t%s\t%d\t%s\t%d\n",
 								cycle.ID,
 								cycle.PressNumber,
-								cycle.ToolPosition.GermanString(),
-								cycle.TotalCycles,
-								fmt.Sprintf("%s -> %s", cycle.Start.FromatDate(), cycle.Stop.FormatDate()),
-								cycle.PerformedBy,
+								cycle.Cycles,
+								cycle.Start.FormatDate(),
+								cycle.Stop.FormatDate(),
 							)
 						}
 						w.Flush()
@@ -484,7 +483,7 @@ func listRegenerationsCommand() cli.Command {
 						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.German())
 
 					// Get regenerations for this tool
-					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)
+					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID) // TODO: Create helper function
 					if err != nil {
 						return fmt.Errorf("retrieve regenerations: %v", err)
 					}
