@@ -10,8 +10,8 @@ type Cycle struct {
 	ID          EntityID    `json:"id"`           // ID is the unique identifier for the Cycle entity
 	PressNumber PressNumber `json:"press_number"` // PressNumber indicates which press machine performed the cycles
 	Cycles      int64       `json:"cycles"`       // Cycles indicates the number of (partial) cycles
-	Start       int64       `json:"start"`        // Start timestamp in milliseconds
-	Stop        int64       `json:"stop"`         // Stop timestamp in milliseconds
+	Start       UnixMilli   `json:"start"`        // Start timestamp in milliseconds
+	Stop        UnixMilli   `json:"stop"`         // Stop timestamp in milliseconds
 }
 
 func (c *Cycle) Validate() *errors.ValidationError {

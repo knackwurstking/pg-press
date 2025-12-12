@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -15,6 +16,9 @@ const (
 	SlotPressDown         Slot = 2
 	SlotUpperToolCassette Slot = 10
 	//SlotLowerToolCassette Slot = 20
+
+	DateFormat = "02.01.2006"
+	TimeFormat = "15:04"
 )
 
 type (
@@ -24,6 +28,7 @@ type (
 	PressNumber int8
 	PressType   string
 	Slot        int
+	UnixMilli   int64
 )
 
 func (id EntityID) String() string {
@@ -67,4 +72,8 @@ func (p Slot) German() string {
 	default:
 		return "?"
 	}
+}
+
+func (um UnixMilli) Format() string {
+	return time.UnixMilli(int64(um)).Format(fmt.Sprintf("%s %s", DateFormat, TimeFormat))
 }

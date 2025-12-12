@@ -5,9 +5,8 @@ import (
 )
 
 const (
-	DateFormat     = "02.01.2006"
-	TimeFormat     = "15:04"
-	DateTimeFormat = DateFormat + " " + TimeFormat
+	DateFormat = "02.01.2006"
+	TimeFormat = "15:04"
 
 	MaxFeedsPerPage = 50
 

@@ -16,7 +16,7 @@ type Cookie struct {
 	UserAgent string     `json:"user_agent"` // User agent string of the client
 	Value     string     `json:"value"`      // Unique UUID cookie value
 	UserID    TelegramID `json:"user_id"`    // Associated Telegram ID
-	LastLogin int64      `json:"last_login"` // Last login timestamp in milliseconds
+	LastLogin UnixMilli  `json:"last_login"` // Last login timestamp in milliseconds
 }
 
 func (e *Cookie) Validate() *errors.ValidationError {
