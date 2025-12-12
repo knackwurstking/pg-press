@@ -95,9 +95,11 @@ func (p Slot) String() string {
 func (p Slot) German() string {
 	switch p {
 	case SlotPressUp:
-		return "Oben"
+		return "Oberteil"
 	case SlotPressDown:
-		return "Unten"
+		return "Unterteil"
+	case SlotUpperToolCassette:
+		return "Obere Kassette"
 	default:
 		return "?"
 	}

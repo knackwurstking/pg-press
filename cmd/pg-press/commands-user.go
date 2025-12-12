@@ -70,7 +70,7 @@ func showUserCommand() cli.Command {
 
 							for _, c := range cookies {
 								fmt.Printf("%s - %s - %s - \"%s\"\n",
-									c.LastLogin.Format(),
+									c.LastLogin.FormatDateTime(),
 									color.Bold(c.UserID.String()),
 									c.Value,
 									color.Italic(c.UserAgent),

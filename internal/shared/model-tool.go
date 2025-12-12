@@ -1,3 +1,4 @@
+// TODO: Implement a method, to detect if this tool is from type cassette (top)
 package shared
 
 import (

@@ -9,6 +9,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -70,25 +71,36 @@ func listToolsCommand() cli.Command {
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 					// Print header
-					fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS\tREGEN\tSTATUS")
+					fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS\tREGEN\tSTATE")
 					fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----\t-----\t------")
 
 					// Print each tool
 					for _, tool := range tools {
 						pressStr := "None"
-						// TODO: Fetch actual press number for tool using the new helper function in helper
-						if tool.Press != nil {
-							pressStr = strconv.Itoa(int(*tool.Press))
+						pressNumber, pressSlot, merr := helper.GetPressNumberForTool(r, tool.ID)
+						if merr != nil {
+							return errors.Wrap(merr, "get press number for tool")
 						}
+						if pressNumber >= 0 {
+							pressStr = strconv.Itoa(int(pressNumber))
+						}
+						slot := shared.SlotUnknown
+						switch pressSlot {
+						case shared.SlotPressUp:
+							slot = shared.SlotPressUp
+						case shared.SlotPressDown:
+							slot = shared.SlotPressDown
+						}
+						// TODO: Cassette slots not handled yet
 
 						regenStr := "No"
 						if tool.Regenerating {
 							regenStr = "Yes"
 						}
 
-						statusStr := "Alive"
+						stateStr := "Alive"
 						if tool.IsDead {
-							statusStr = "Dead"
+							stateStr = "Dead"
 						}
 
 						fmt.Fprintf(w, "%d\t%sx%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
@@ -96,10 +108,10 @@ func listToolsCommand() cli.Command {
 							tool.Width, tool.Height,
 							tool.Code,
 							tool.Type,
-							tool.Slot.German(),
+							slot.German(),
 							pressStr,
 							regenStr,
-							statusStr,
+							stateStr,
 						)
 					}
 
@@ -264,10 +276,18 @@ func deleteToolCommand() cli.Command {
 					fmt.Printf("Deleting tool %d (%sx%s %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)
+					regenerations, err := r.Tool.Regeneration.List()
 					if err != nil {
 						return fmt.Errorf("get regenerations for tool: %v", err)
 					}
+					// Filter regenerations for this tool
+					var toolRegenerations []*shared.ToolRegeneration
+					for _, regen := range regenerations {
+						if regen.ToolID == tool.ID {
+							toolRegenerations = append(toolRegenerations, regen)
+						}
+					}
+					regenerations = toolRegenerations
 
 					if len(regenerations) > 0 {
 						fmt.Printf("Deleting %d regeneration(s)...\n", len(regenerations))
@@ -326,8 +346,8 @@ func listCyclesCommand() cli.Command {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Slot.German())
+					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s\n\n",
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type) // TODO: " - %s" removed, tool position
 
 					// Get cycles for this tool
 					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)

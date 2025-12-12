@@ -8,7 +8,7 @@ import (
 
 type ToolRegeneration struct {
 	ID     EntityID  `json:"id"`      // ID is the unique identifier for the ToolRegeneration entity
-	ToolID int64     `json:"tool_id"` // ToolID indicates which tool has regenerated
+	ToolID EntityID  `json:"tool_id"` // ToolID indicates which tool has regenerated
 	Start  UnixMilli `json:"start"`   // Start timestamp in milliseconds
 	Stop   UnixMilli `json:"stop"`    // Stop timestamp in milliseconds
 	Cycles int64     `json:"cycles"`  // Cycles indicates the number cyles done before regeneration
