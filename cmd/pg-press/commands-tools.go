@@ -71,27 +71,17 @@ func listToolsCommand() cli.Command {
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 					// Print header
-					fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS\tREGEN\tSTATE")
+					fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPRESS\tREGEN\tSTATE")
 					fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----\t-----\t------")
 
 					// Print each tool
 					for _, tool := range tools {
+						// TODO: need to handle positons
 						pressStr := "None"
-						pressNumber, pressSlot, merr := helper.GetPressNumberForTool(r, tool.ID)
-						if merr != nil {
-							return errors.Wrap(merr, "get press number for tool")
-						}
-						if pressNumber >= 0 {
+						pressNumber, _ := helper.GetPressNumberForTool(r, tool.ID)
+						if pressNumber.IsValid() {
 							pressStr = strconv.Itoa(int(pressNumber))
 						}
-						slot := shared.SlotUnknown
-						switch pressSlot {
-						case shared.SlotPressUp:
-							slot = shared.SlotPressUp
-						case shared.SlotPressDown:
-							slot = shared.SlotPressDown
-						}
-						// TODO: Cassette slots not handled yet
 
 						regenStr := "No"
 						if tool.Regenerating {
@@ -108,7 +98,6 @@ func listToolsCommand() cli.Command {
 							tool.Width, tool.Height,
 							tool.Code,
 							tool.Type,
-							slot.German(),
 							pressStr,
 							regenStr,
 							stateStr,

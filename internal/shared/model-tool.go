@@ -9,16 +9,16 @@ import (
 type Slot int
 
 const (
-	ToolSlotUnknown Slot = iota
-	ToolSlotUpper
-	ToolSlotLower
+	SlotUnknown Slot = iota
+	SlotUpper
+	SlotLower
 )
 
 func (s Slot) String() string {
 	switch s {
-	case ToolSlotUpper:
+	case SlotUpper:
 		return "top"
-	case ToolSlotLower:
+	case SlotLower:
 		return "bottom"
 	default:
 		return "unknown"
@@ -27,18 +27,16 @@ func (s Slot) String() string {
 
 func (s Slot) German() string {
 	switch s {
-	case ToolSlotUpper:
+	case SlotUpper:
 		return "Oberteil"
-	case ToolSlotLower:
+	case SlotLower:
 		return "Unterteil"
 	default:
 		return "Unbekannt"
 	}
 }
 
-// Tool represents a tool used in a press machine,
-// there are upper and lower tools. Each tool can have its own regeneration history.
-type Tool struct {
+type BaseTool struct {
 	ID               EntityID `json:"id"`
 	Width            int      `json:"width"`         // Width defines the tile width this tool can press
 	Height           int      `json:"height"`        // Height defines the tile height this tool can press
@@ -50,69 +48,109 @@ type Tool struct {
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
-	Cassette         EntityID `json:"cassette"`     // Cassette indicates the cassette ID this tool belongs to (if any)
+}
+
+func (bt *BaseTool) Validate() *errors.ValidationError {
+	if bt.Width < 0 {
+		return errors.NewValidationError("Tool width cannot be negative")
+	}
+	if bt.Height < 0 {
+		return errors.NewValidationError("Tool height cannot be negative")
+	}
+	if bt.Type == "" {
+		return errors.NewValidationError("Tool type is required")
+	}
+	if bt.Code == "" {
+		return errors.NewValidationError("Tool code is required")
+	}
+	if bt.Cycles < 0 {
+		return errors.NewValidationError("Tool cycles cannot be negative")
+	}
+	return nil
+}
+
+func (bt *BaseTool) Clone() BaseTool {
+	return BaseTool{
+		ID:               bt.ID,
+		Width:            bt.Width,
+		Height:           bt.Height,
+		Postition:        bt.Postition,
+		Type:             bt.Type,
+		Code:             bt.Code,
+		CyclesOffset:     bt.CyclesOffset,
+		Cycles:           bt.Cycles,
+		LastRegeneration: bt.LastRegeneration,
+		Regenerating:     bt.Regenerating,
+		IsDead:           bt.IsDead,
+	}
+}
+
+func (bt *BaseTool) String() string {
+	return fmt.Sprintf(
+		"BaseTool[ID=%d, Width=%d, Height=%d, Position=%s, Type=%s, Code=%s, "+
+			"CyclesOffset=%d, Cycles=%d, LastRegeneration=%d, Regenerating=%t, "+
+			"IsDead=%t]",
+		bt.ID,
+		bt.Width,
+		bt.Height,
+		bt.Postition.String(),
+		bt.Type,
+		bt.Code,
+		bt.CyclesOffset,
+		bt.Cycles,
+		bt.LastRegeneration,
+		bt.Regenerating,
+		bt.IsDead,
+	)
+}
+
+// Tool represents a tool used in a press machine,
+// there are upper and lower tools. Each tool can have its own regeneration history.
+type Tool struct {
+	BaseTool
+	Cassette EntityID `json:"cassette"` // Cassette indicates the cassette ID this tool belongs to (if any)
 }
 
 // Validate checks if the tool data is valid
 func (t *Tool) Validate() *errors.ValidationError {
-	if t.Width < 0 {
-		return errors.NewValidationError("Tool width cannot be negative")
+	if verr := t.BaseTool.Validate(); verr != nil {
+		return verr
 	}
-	if t.Height < 0 {
-		return errors.NewValidationError("Tool height cannot be negative")
-	}
-	if t.Type == "" {
-		return errors.NewValidationError("Tool type is required")
-	}
-	if t.Code == "" {
-		return errors.NewValidationError("Tool code is required")
-	}
-	if t.Cycles < 0 {
-		return errors.NewValidationError("Tool cycles cannot be negative")
-	}
+
 	if t.Cassette < 0 {
 		return errors.NewValidationError("Tool cassette ID cannot be negative")
 	}
+
 	return nil
 }
 
 // Clone creates a copy of the tool
 func (t *Tool) Clone() *Tool {
 	return &Tool{
-		ID:               t.ID,
-		Width:            t.Width,
-		Height:           t.Height,
-		Type:             t.Type,
-		Code:             t.Code,
-		Cassette:         t.Cassette,
-		CyclesOffset:     t.CyclesOffset,
-		Cycles:           t.Cycles,
-		Regenerating:     t.Regenerating,
-		LastRegeneration: t.LastRegeneration,
-		IsDead:           t.IsDead,
+		BaseTool: t.BaseTool.Clone(),
+		Cassette: t.Cassette,
 	}
 }
 
 func (t *Tool) String() string {
 	return fmt.Sprintf(
-		"Tool[ID=%d, Type=%s, Code=%s, Position=%s, Width=%d, Height=%d, CyclesOffset=%d, Cycles=%d, Regenerating=%t, IsDead=%t, Cassette=%d]",
-		t.ID, t.Type, t.Code, t.Postition.String(), t.Width, t.Height,
-		t.CyclesOffset, t.Cycles, t.Regenerating, t.IsDead, t.Cassette,
+		"Tool[BaseTool=%s, Cassette=%s]",
+		t.BaseTool.String(),
+		t.Cassette,
 	)
 }
 
 type Cassette struct {
-	Postition    Slot    `json:"position"`       // required, top or bottom (upper/lower)
-	Type         string  `json:"type"`           // required
-	Code         string  `json:"code,omitempty"` // optional
-	MinThickness float32 `json:"min_thickness"`  // required
-	MaxThickness float32 `json:"max_thickness"`  // required
+	BaseTool
+	MinThickness float32 `json:"min_thickness"` // required
+	MaxThickness float32 `json:"max_thickness"` // required
 }
 
 func (c *Cassette) Validate() *errors.ValidationError {
-	if c.Type == "" {
-		return errors.NewValidationError("Cassette type is required")
+	if verr := c.BaseTool.Validate(); verr != nil {
+		return verr
 	}
+
 	if c.MinThickness < 0 {
 		return errors.NewValidationError("Cassette min_thickness cannot be negative")
 	}
@@ -128,16 +166,19 @@ func (c *Cassette) Validate() *errors.ValidationError {
 
 func (c *Cassette) Clone() *Cassette {
 	return &Cassette{
-		Postition:    c.Postition,
-		Type:         c.Type,
-		Code:         c.Code,
+		BaseTool:     c.BaseTool.Clone(),
 		MinThickness: c.MinThickness,
 		MaxThickness: c.MaxThickness,
 	}
 }
 
 func (c *Cassette) String() string {
-	return fmt.Sprintf("Cassette[Position=%s]", c.Postition.String())
+	return fmt.Sprintf(
+		"Cassette[BaseTool=%s, MinThickness=%.1f, MaxThickness=%.1f]",
+		c.BaseTool.String(),
+		c.MinThickness,
+		c.MaxThickness,
+	)
 }
 
 var _ Entity[*Tool] = (*Tool)(nil)

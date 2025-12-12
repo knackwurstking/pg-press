@@ -8,10 +8,12 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+// TODO: this service needs to be fixed, the shared tool type has changed a bit
+
 const (
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
-			id 					INTEGER NOT NULL,
+			id					INTEGER NOT NULL,
 			width 				INTEGER NOT NULL,
 			height 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
@@ -21,7 +23,7 @@ const (
 			last_regeneration 	INTEGER NOT NULL DEFAULT 0,
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
-			cassette 				INTEGER NOT NULL DEFAULT 0,
+			cassette			INTEGER NOT NULL DEFAULT 0,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);

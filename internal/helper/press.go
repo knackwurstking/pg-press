@@ -2,7 +2,6 @@ package helper
 
 import (
 	"github.com/knackwurstking/pg-press/internal/common"
-	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
@@ -12,21 +11,18 @@ const (
 	`
 )
 
-func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) (shared.PressNumber, shared.Slot, *errors.MasterError) {
+func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) (shared.PressNumber, shared.Slot) {
 	var pressNumber shared.PressNumber = -1
 	var slotUp, slotDown shared.EntityID
 
-	err := db.Press.Press.DB().QueryRow(SQLGetPressNumberForTool, toolID, toolID).Scan(&pressNumber, &slotUp, &slotDown)
-	if err != nil {
-		return pressNumber, shared.SlotUnknown, errors.NewMasterError(err, 0)
-	}
+	_ = db.Press.Press.DB().QueryRow(SQLGetPressNumberForTool, toolID, toolID).Scan(&pressNumber, &slotUp, &slotDown)
 
 	switch toolID {
 	case slotUp:
-		return pressNumber, shared.SlotPressUp, nil
+		return pressNumber, shared.SlotUpper
 	case slotDown:
-		return pressNumber, shared.SlotPressDown, nil
+		return pressNumber, shared.SlotLower
 	default:
-		return pressNumber, shared.SlotUnknown, nil
+		return pressNumber, shared.SlotUnknown
 	}
 }
