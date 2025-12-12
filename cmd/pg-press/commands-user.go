@@ -9,9 +9,9 @@ import (
 	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/services/common"
 	"github.com/knackwurstking/pg-press/services/shared"
-	"github.com/labstack/gommon/color"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/labstack/gommon/color"
 )
 
 func listUserCommand() cli.Command {

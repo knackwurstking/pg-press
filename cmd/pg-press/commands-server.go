@@ -9,9 +9,11 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pg-press/env"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
+
+	"github.com/SuperPaintman/nice/cli"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

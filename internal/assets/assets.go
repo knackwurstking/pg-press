@@ -1,4 +1,4 @@
-package pgpress
+package assets
 
 import (
 	"embed"
