@@ -8,8 +8,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// TODO: this service needs to be fixed, the shared tool type has changed a bit
-
 const (
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
