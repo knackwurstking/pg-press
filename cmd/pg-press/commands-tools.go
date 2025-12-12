@@ -351,7 +351,7 @@ func listCyclesCommand() cli.Command {
 								cycle.PressNumber,
 								cycle.ToolPosition.GermanString(),
 								cycle.TotalCycles,
-								cycle.Date.Format(env.DateTimeFormat),
+								cycle.Date.Format(env.DateTimeFormat), // TODO: Date replaced with start->stop
 								cycle.PerformedBy,
 							)
 						}

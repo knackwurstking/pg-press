@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -72,7 +70,7 @@ func showUserCommand() cli.Command {
 
 							for _, c := range cookies {
 								fmt.Printf("%s - %s - %s - \"%s\"\n",
-									time.UnixMilli(c.LastLogin).Format(env.DateTimeFormat),
+									c.LastLogin.Format(),
 									color.Bold(c.UserID.String()),
 									c.Value,
 									color.Italic(c.UserAgent),

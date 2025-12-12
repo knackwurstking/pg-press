@@ -43,7 +43,7 @@ func (e *Cookie) IsExpired() bool {
 }
 
 func (e *Cookie) ExipredAt() int64 {
-	return e.LastLogin + CookieExpirationDuration
+	return int64(e.LastLogin) + CookieExpirationDuration
 }
 
 func (e *Cookie) ExpiredAtTime() time.Time {
