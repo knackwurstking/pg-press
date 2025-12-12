@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/internal/env"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 

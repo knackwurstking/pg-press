@@ -4,14 +4,15 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/handlers/wsfeed"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/handlers/wsfeed"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
-	"golang.org/x/net/websocket"
 
 	"github.com/labstack/echo/v4"
+	"golang.org/x/net/websocket"
 )
 
 type Handler struct {

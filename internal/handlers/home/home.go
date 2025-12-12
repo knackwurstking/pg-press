@@ -3,10 +3,11 @@ package home
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/home/templates"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/home/templates"
 	"github.com/knackwurstking/pg-press/services"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"

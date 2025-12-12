@@ -6,13 +6,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/auth/templates"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
+
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 

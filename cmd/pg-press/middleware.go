@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"

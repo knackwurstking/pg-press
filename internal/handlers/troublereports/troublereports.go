@@ -9,14 +9,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/errors"
-	"github.com/knackwurstking/pg-press/handlers/troublereports/templates"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/troublereports/templates"
+	"github.com/knackwurstking/pg-press/internal/pdf"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/pdf"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
+
 	"github.com/labstack/echo/v4"
 )
 
