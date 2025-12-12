@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/internal/assets"
 	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/handlers"
 
 	"github.com/labstack/echo/v4"

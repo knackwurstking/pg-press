@@ -1,4 +1,4 @@
-package utils
+package urlb
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/services/shared"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 // BuildURL constructs a URL with the given path and query parameters
