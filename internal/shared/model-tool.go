@@ -40,7 +40,7 @@ type BaseTool struct {
 	ID               EntityID `json:"id"`
 	Width            int      `json:"width"`         // Width defines the tile width this tool can press
 	Height           int      `json:"height"`        // Height defines the tile height this tool can press
-	Postition        Slot     `json:"position"`      // Position indicates the position of the tool in the press (e.g., 1 for upper, 2 for lower)
+	Position         Slot     `json:"position"`      // Position indicates the position of the tool in the press (e.g., 1 for upper, 2 for lower)
 	Type             string   `json:"type"`          // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
 	Code             string   `json:"code"`          // Code is the unique tool code/identifier, "G01", "12345", etc.
 	CyclesOffset     int64    `json:"cycles_offset"` // CyclesOffset is an offset added to the cycles count
@@ -74,7 +74,7 @@ func (bt *BaseTool) Clone() BaseTool {
 		ID:               bt.ID,
 		Width:            bt.Width,
 		Height:           bt.Height,
-		Postition:        bt.Postition,
+		Position:         bt.Position,
 		Type:             bt.Type,
 		Code:             bt.Code,
 		CyclesOffset:     bt.CyclesOffset,
@@ -93,7 +93,7 @@ func (bt *BaseTool) String() string {
 		bt.ID,
 		bt.Width,
 		bt.Height,
-		bt.Postition.String(),
+		bt.Position.String(),
 		bt.Type,
 		bt.Code,
 		bt.CyclesOffset,
