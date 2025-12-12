@@ -14,9 +14,6 @@ type PressType string
 // PressNumber represents a press machine number
 type PressNumber int8
 
-// Slot represents a slot type (for tool cassette slots or press positions)
-type Slot int
-
 // EntityID represents a generic entity identifier
 type EntityID int64
 
@@ -35,15 +32,6 @@ const (
 const (
 	PressTypeSACMI PressType = "SACMI"
 	PressTypeSITI  PressType = "SITI"
-)
-
-// Constants for slot types
-const (
-	SlotUnknown           Slot = 0
-	SlotPressUp           Slot = 1
-	SlotPressDown         Slot = 2
-	SlotUpperToolCassette Slot = 10
-	//SlotLowerToolCassette Slot = 20
 )
 
 // Constants for date/time formats
@@ -77,31 +65,6 @@ func (p PressNumber) IsValid() bool {
 		return true
 	default:
 		return false
-	}
-}
-
-// Slot methods
-func (p Slot) String() string {
-	switch p {
-	case SlotPressUp:
-		return "UP"
-	case SlotPressDown:
-		return "DOWN"
-	default:
-		return "UNKNOWN"
-	}
-}
-
-func (p Slot) German() string {
-	switch p {
-	case SlotPressUp:
-		return "Oberteil"
-	case SlotPressDown:
-		return "Unterteil"
-	case SlotUpperToolCassette:
-		return "Obere Kassette"
-	default:
-		return "?"
 	}
 }
 

@@ -3,14 +3,12 @@ package shared
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
 // Tool represents a tool used in a press machine,
 // there are upper and lower tools. Each tool can have its own regeneration history.
-// And the upper tool type has an optional cassette slot.
 type Tool struct {
 	ID               EntityID `json:"id"`
 	Width            int      `json:"width"`         // Width defines the tile width this tool can press
@@ -22,30 +20,28 @@ type Tool struct {
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
-	Cassette         Slot     `json:"cassette"`     // SlotType indicates the cassette slot type
+	Cassette         EntityID `json:"cassette"`     // Cassette indicates the cassette ID this tool belongs to (if any)
 }
 
 // Validate checks if the tool data is valid
 func (t *Tool) Validate() *errors.ValidationError {
-	// verify width and height not negative
 	if t.Width < 0 {
 		return errors.NewValidationError("Tool width cannot be negative")
 	}
 	if t.Height < 0 {
 		return errors.NewValidationError("Tool height cannot be negative")
 	}
-	// verify type and code are not empty
 	if t.Type == "" {
 		return errors.NewValidationError("Tool type is required")
 	}
 	if t.Code == "" {
 		return errors.NewValidationError("Tool code is required")
 	}
-	if slices.Contains([]Slot{SlotPressUp, SlotPressDown}, t.Cassette) {
-		return errors.NewValidationError(
-			"Tool cassette slot type is invalid: %d, expect %d",
-			t.Cassette, SlotUpperToolCassette,
-		)
+	if t.Cycles < 0 {
+		return errors.NewValidationError("Tool cycles cannot be negative")
+	}
+	if t.Cassette < 0 {
+		return errors.NewValidationError("Tool cassette ID cannot be negative")
 	}
 	return nil
 }
