@@ -11,22 +11,23 @@ import (
 )
 
 // BuildURL constructs a URL with the given path and query parameters
-func BuildURL(path string, params map[string]string) templ.SafeURL {
-	u := fmt.Sprintf("%s%s", env.ServerPathPrefix, path)
+func BuildURL(path string) templ.SafeURL {
+	return templ.SafeURL(fmt.Sprintf("%s%s", env.ServerPathPrefix, path))
+}
 
-	if len(params) > 0 {
-		values := url.Values{}
-		for k, v := range params {
-			if v != "" {
-				values.Add(k, v)
-			}
+// BuildURLWithParams constructs a URL with the given path and query parameters
+func BuildURLWithParams(path string, params map[string]string) templ.SafeURL {
+	values := url.Values{}
+	for k, v := range params {
+		if v == "" {
+			continue
 		}
-		if len(values) > 0 {
-			u = fmt.Sprintf("%s?%s", u, values.Encode())
-		}
+		values.Add(k, v)
 	}
-
-	return templ.SafeURL(u)
+	if len(values) > 0 {
+		return BuildURL(fmt.Sprintf("%s?%s", path, values.Encode()))
+	}
+	return BuildURL(path)
 }
 
 // UrlLogin constructs login URL with optional API key and invalid flag
@@ -40,7 +41,7 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 	if invalid != nil {
 		params["invalid"] = fmt.Sprintf("%t", *invalid)
 	}
-	url.Page = BuildURL("/login", params)
+	url.Page = BuildURLWithParams("/login", params)
 	return url
 }
 
@@ -48,7 +49,7 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 func UrlNav() (url struct {
 	FeedCounter templ.SafeURL
 }) {
-	url.FeedCounter = BuildURL("/nav/feed-counter", nil)
+	url.FeedCounter = BuildURL("/nav/feed-counter")
 	return url
 }
 
@@ -56,7 +57,7 @@ func UrlNav() (url struct {
 func UrlHome() (url struct {
 	Page templ.SafeURL
 }) {
-	url.Page = BuildURL("", nil)
+	url.Page = BuildURL("")
 	return url
 }
 
@@ -65,8 +66,8 @@ func UrlFeed() (url struct {
 	Page templ.SafeURL
 	List templ.SafeURL
 }) {
-	url.Page = BuildURL("/feed", nil)
-	url.List = BuildURL("/feed/list", nil)
+	url.Page = BuildURL("/feed")
+	url.List = BuildURL("/feed/list")
 	return url
 }
 
@@ -74,7 +75,7 @@ func UrlFeed() (url struct {
 func UrlHelp() (url struct {
 	MarkdownPage templ.SafeURL
 }) {
-	url.MarkdownPage = BuildURL("/help/markdown", nil)
+	url.MarkdownPage = BuildURL("/help/markdown")
 	return url
 }
 
@@ -84,13 +85,13 @@ func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) (url
 	Save templ.SafeURL
 }) {
 	a, _ := strings.CutPrefix(string(returnURL), env.ServerPathPrefix)
-	url.Page = BuildURL("/editor", map[string]string{
+	url.Page = BuildURLWithParams("/editor", map[string]string{
 		"type":       string(_type),
 		"id":         id,
 		"return_url": string(a),
 	})
 
-	url.Save = BuildURL("/editor/save", nil)
+	url.Save = BuildURL("/editor/save")
 
 	return url
 }
@@ -100,8 +101,8 @@ func UrlProfile(cookieValue string) (url struct {
 	Page    templ.SafeURL
 	Cookies templ.SafeURL
 }) {
-	url.Page = BuildURL("/profile", nil)
-	url.Cookies = BuildURL("/profile/cookies", map[string]string{
+	url.Page = BuildURL("/profile")
+	url.Cookies = BuildURLWithParams("/profile/cookies", map[string]string{
 		"value": cookieValue,
 	})
 	return url
@@ -113,11 +114,11 @@ func UrlNotes(noteID shared.EntityID) (url struct {
 	Delete templ.SafeURL
 	Grid   templ.SafeURL
 }) {
-	url.Page = BuildURL("/notes", nil)
-	url.Delete = BuildURL("/notes/delete", map[string]string{
+	url.Page = BuildURL("/notes")
+	url.Delete = BuildURLWithParams("/notes/delete", map[string]string{
 		"id": fmt.Sprintf("%d", noteID),
 	})
-	url.Grid = BuildURL("/notes/grid", nil)
+	url.Grid = BuildURL("/notes/grid")
 	return url
 }
 
@@ -125,7 +126,7 @@ func UrlNotes(noteID shared.EntityID) (url struct {
 func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 	Delete templ.SafeURL
 }) {
-	url.Delete = BuildURL("/metal-sheets/delete", map[string]string{
+	url.Delete = BuildURLWithParams("/metal-sheets/delete", map[string]string{
 		"id": fmt.Sprintf("%d", metalSheetID),
 	})
 	return url
@@ -135,7 +136,7 @@ func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 func UrlUmbau(press shared.PressNumber) (url struct {
 	Page templ.SafeURL
 }) {
-	url.Page = BuildURL(fmt.Sprintf("/umbau/%d", press), nil)
+	url.Page = BuildURL(fmt.Sprintf("/umbau/%d", press))
 	return url
 }
 
@@ -160,13 +161,13 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 		params["modification_time"] = fmt.Sprintf("%d", modificationTime)
 	}
 
-	url.Page = BuildURL("/trouble-reports", nil)
-	url.SharePDF = BuildURL("/trouble-reports/share-pdf", params)
-	url.Attachment = BuildURL("/trouble-reports/attachment", params)
-	url.Modifications = BuildURL(fmt.Sprintf("/trouble-reports/modifications/%d", trID), params)
-	url.Data = BuildURL("/trouble-reports/data", params)
-	url.AttachmentsPreview = BuildURL("/trouble-reports/attachments-preview", params)
-	url.Rollback = BuildURL("/trouble-reports/rollback", params)
+	url.Page = BuildURL("/trouble-reports")
+	url.SharePDF = BuildURLWithParams("/trouble-reports/share-pdf", params)
+	url.Attachment = BuildURLWithParams("/trouble-reports/attachment", params)
+	url.Modifications = BuildURLWithParams(fmt.Sprintf("/trouble-reports/modifications/%d", trID), params)
+	url.Data = BuildURLWithParams("/trouble-reports/data", params)
+	url.AttachmentsPreview = BuildURLWithParams("/trouble-reports/attachments-preview", params)
+	url.Rollback = BuildURLWithParams("/trouble-reports/rollback", params)
 
 	return url
 }
@@ -185,12 +186,12 @@ func UrlTools(toolID shared.EntityID) (url struct {
 		params["id"] = fmt.Sprintf("%d", toolID)
 	}
 
-	url.Page = BuildURL("/tools", nil)
-	url.Delete = BuildURL("/tools/delete", params)
-	url.MarkDead = BuildURL("/tools/mark-dead", params)
-	url.SectionPress = BuildURL("/tools/section/press", nil)
-	url.SectionTools = BuildURL("/tools/section/tools", nil)
-	url.AdminOverlappingTools = BuildURL("/tools/admin/overlapping-tools", nil)
+	url.Page = BuildURL("/tools")
+	url.Delete = BuildURLWithParams("/tools/delete", params)
+	url.MarkDead = BuildURLWithParams("/tools/mark-dead", params)
+	url.SectionPress = BuildURL("/tools/section/press")
+	url.SectionTools = BuildURL("/tools/section/tools")
+	url.AdminOverlappingTools = BuildURL("/tools/admin/overlapping-tools")
 
 	return url
 }
@@ -210,35 +211,34 @@ func UrlTool(toolID shared.EntityID, toolRegenerationID shared.EntityID, cycleID
 	Bind               templ.SafeURL
 	UnBind             templ.SafeURL
 }) {
-	url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID), nil)
+	url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID))
 
 	{
 		params := map[string]string{}
 		if toolRegenerationID != 0 {
 			params["id"] = fmt.Sprintf("%d", toolRegenerationID)
 		}
-		url.DeleteRegeneration = BuildURL(
-			fmt.Sprintf("/tool/%d/delete-regeneration", toolID), params)
+		url.DeleteRegeneration = BuildURLWithParams(fmt.Sprintf("/tool/%d/delete-regeneration", toolID), params)
 	}
 
-	url.StatusEdit = BuildURL(fmt.Sprintf("/tool/%d/status-edit", toolID), nil)
-	url.StatusDisplay = BuildURL(fmt.Sprintf("/tool/%d/status-display", toolID), nil)
-	url.Status = BuildURL(fmt.Sprintf("/tool/%d/status", toolID), nil)
-	url.Notes = BuildURL(fmt.Sprintf("/tool/%d/notes", toolID), nil)
-	url.MetalSheets = BuildURL(fmt.Sprintf("/tool/%d/metal-sheets", toolID), nil)
-	url.Cycles = BuildURL(fmt.Sprintf("/tool/%d/cycles", toolID), nil)
-	url.TotalCycles = BuildURL(fmt.Sprintf("/tool/%d/total-cycles", toolID), nil)
+	url.StatusEdit = BuildURL(fmt.Sprintf("/tool/%d/status-edit", toolID))
+	url.StatusDisplay = BuildURL(fmt.Sprintf("/tool/%d/status-display", toolID))
+	url.Status = BuildURL(fmt.Sprintf("/tool/%d/status", toolID))
+	url.Notes = BuildURL(fmt.Sprintf("/tool/%d/notes", toolID))
+	url.MetalSheets = BuildURL(fmt.Sprintf("/tool/%d/metal-sheets", toolID))
+	url.Cycles = BuildURL(fmt.Sprintf("/tool/%d/cycles", toolID))
+	url.TotalCycles = BuildURL(fmt.Sprintf("/tool/%d/total-cycles", toolID))
 
 	{
 		params := map[string]string{}
 		if cycleID != 0 {
 			params["id"] = fmt.Sprintf("%d", cycleID)
 		}
-		url.CycleDelete = BuildURL("/tool/cycle/delete", params)
+		url.CycleDelete = BuildURLWithParams("/tool/cycle/delete", params)
 	}
 
-	url.Bind = BuildURL(fmt.Sprintf("/tool/%d/bind", toolID), nil)
-	url.UnBind = BuildURL(fmt.Sprintf("/tool/%d/unbind", toolID), nil)
+	url.Bind = BuildURL(fmt.Sprintf("/tool/%d/bind", toolID))
+	url.UnBind = BuildURL(fmt.Sprintf("/tool/%d/unbind", toolID))
 
 	return url
 }
@@ -253,13 +253,13 @@ func UrlPress(pressNumber shared.PressNumber) (url struct {
 	PressRegenerations templ.SafeURL
 	CycleSummaryPDF    templ.SafeURL
 }) {
-	url.Page = BuildURL(fmt.Sprintf("/press/%d", pressNumber), nil)
-	url.ActiveTools = BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber), nil)
-	url.MetalSheets = BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber), nil)
-	url.Cycles = BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber), nil)
-	url.Notes = BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber), nil)
-	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/press-regenerations", pressNumber), nil)
-	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber), nil)
+	url.Page = BuildURL(fmt.Sprintf("/press/%d", pressNumber))
+	url.ActiveTools = BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber))
+	url.MetalSheets = BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber))
+	url.Cycles = BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber))
+	url.Notes = BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
+	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/press-regenerations", pressNumber))
+	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
 
 	return url
 }
@@ -273,8 +273,8 @@ func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.E
 		"id": fmt.Sprintf("%d", pressRegenerationID),
 	}
 
-	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press), nil)
-	url.Delete = BuildURL(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
+	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press))
+	url.Delete = BuildURLWithParams(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
 
 	return url
 }
@@ -311,7 +311,7 @@ func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolCha
 		params["tool_change_mode"] = fmt.Sprintf("%t", *toolChangeMode)
 	}
 
-	return BuildURL("/dialog/edit-cycle", params)
+	return BuildURLWithParams("/dialog/edit-cycle", params)
 }
 
 // urlEditToolDialog constructs edit tool dialog URL
@@ -321,7 +321,7 @@ func urlEditToolDialog(toolID shared.EntityID) templ.SafeURL {
 		params["id"] = fmt.Sprintf("%d", toolID)
 	}
 
-	return BuildURL("/dialog/edit-tool", params)
+	return BuildURLWithParams("/dialog/edit-tool", params)
 }
 
 // urlEditMetalSheetDialog constructs edit metal sheet dialog URL
@@ -334,7 +334,7 @@ func urlEditMetalSheetDialog(metalSheetID shared.EntityID, toolID shared.EntityI
 		params["tool_id"] = fmt.Sprintf("%d", toolID)
 	}
 
-	return BuildURL("/dialog/edit-metal-sheet", params)
+	return BuildURLWithParams("/dialog/edit-metal-sheet", params)
 }
 
 // urlEditNoteDialog constructs edit note dialog URL
@@ -346,7 +346,7 @@ func urlEditNoteDialog(noteID shared.EntityID, linkToTables string) templ.SafeUR
 		params["id"] = fmt.Sprintf("%d", noteID)
 	}
 
-	return BuildURL("/dialog/edit-note", params)
+	return BuildURLWithParams("/dialog/edit-note", params)
 }
 
 // urlEditToolRegenerationDialog constructs edit tool regeneration dialog URL
@@ -356,7 +356,7 @@ func urlEditToolRegenerationDialog(toolRegenerationID shared.EntityID) templ.Saf
 		params["id"] = fmt.Sprintf("%d", toolRegenerationID)
 	}
 
-	return BuildURL("/dialog/edit-tool-regeneration", params)
+	return BuildURLWithParams("/dialog/edit-tool-regeneration", params)
 }
 
 // urlEditPressRegenerationDialog constructs edit press regeneration dialog URL
@@ -366,5 +366,5 @@ func urlEditPressRegenerationDialog(pressRegenerationID shared.EntityID) templ.S
 		params["id"] = fmt.Sprintf("%d", pressRegenerationID)
 	}
 
-	return BuildURL("/dialog/edit-press-regeneration", params)
+	return BuildURLWithParams("/dialog/edit-press-regeneration", params)
 }
