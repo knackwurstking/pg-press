@@ -94,14 +94,51 @@ func (t *Tool) Clone() *Tool {
 }
 
 func (t *Tool) String() string {
-	return fmt.Sprintf("Tool[ID=%s, Type=%s, Code=%s]", t.ID.String(), t.Type, t.Code)
+	return fmt.Sprintf(
+		"Tool[ID=%d, Type=%s, Code=%s, Position=%s, Width=%d, Height=%d, CyclesOffset=%d, Cycles=%d, Regenerating=%t, IsDead=%t, Cassette=%d]",
+		t.ID, t.Type, t.Code, t.Postition.String(), t.Width, t.Height,
+		t.CyclesOffset, t.Cycles, t.Regenerating, t.IsDead, t.Cassette,
+	)
 }
 
 type Cassette struct {
-	Postition Slot `json:"position"`
+	Postition    Slot    `json:"position"`       // required, top or bottom (upper/lower)
+	Type         string  `json:"type"`           // required
+	Code         string  `json:"code,omitempty"` // optional
+	MinThickness float32 `json:"min_thickness"`  // required
+	MaxThickness float32 `json:"max_thickness"`  // required
 }
 
-// TODO: Implement Entity interface methods
+func (c *Cassette) Validate() *errors.ValidationError {
+	if c.Type == "" {
+		return errors.NewValidationError("Cassette type is required")
+	}
+	if c.MinThickness < 0 {
+		return errors.NewValidationError("Cassette min_thickness cannot be negative")
+	}
+	if c.MaxThickness < 0 {
+		return errors.NewValidationError("Cassette max_thickness cannot be negative")
+	}
+	if c.MaxThickness < c.MinThickness {
+		return errors.NewValidationError("Cassette max_thickness cannot be less than min_thickness")
+	}
+
+	return nil
+}
+
+func (c *Cassette) Clone() *Cassette {
+	return &Cassette{
+		Postition:    c.Postition,
+		Type:         c.Type,
+		Code:         c.Code,
+		MinThickness: c.MinThickness,
+		MaxThickness: c.MaxThickness,
+	}
+}
+
+func (c *Cassette) String() string {
+	return fmt.Sprintf("Cassette[Position=%s]", c.Postition.String())
+}
 
 var _ Entity[*Tool] = (*Tool)(nil)
 var _ Entity[*Cassette] = (*Cassette)(nil)
