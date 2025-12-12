@@ -76,7 +76,6 @@ func listToolsCommand() cli.Command {
 
 					// Print each tool
 					for _, tool := range tools {
-						// TODO: need to handle positons
 						pressStr := "None"
 						pressNumber, _ := helper.GetPressNumberForTool(r, tool.ID)
 						if pressNumber.IsValid() {
@@ -93,7 +92,7 @@ func listToolsCommand() cli.Command {
 							stateStr = "Dead"
 						}
 
-						fmt.Fprintf(w, "%d\t%sx%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\t%s\n",
 							tool.ID,
 							tool.Width, tool.Height,
 							tool.Code,
@@ -119,13 +118,10 @@ func listToolsCommand() cli.Command {
 func listDeadToolsCommand() cli.Command {
 	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *common.DB) error {
 		// Get all dead tools from database
-		tools, err := r.Tool.Tool.ListDeadTools()
-		if err != nil {
-			return fmt.Errorf("retrieve dead tools: %v", err)
-		}
+		tools, _ := helper.ListDeadTools(r)
 
 		if len(tools) == 0 {
-			fmt.Println("No dead tools found in database.")
+			fmt.Fprintln(os.Stderr, "No dead tools found in database.")
 			return nil
 		}
 
@@ -138,9 +134,11 @@ func listDeadToolsCommand() cli.Command {
 
 		// Print each tool
 		for _, tool := range tools {
+			pn, _ := helper.GetPressNumberForTool(r, tool.ID)
+
 			pressStr := "None"
-			if tool.Press != nil {
-				pressStr = strconv.Itoa(int(*tool.Press))
+			if pn.IsValid() {
+				pressStr = strconv.Itoa(int(pn))
 			}
 
 			regenStr := "No"
@@ -148,12 +146,12 @@ func listDeadToolsCommand() cli.Command {
 				regenStr = "Yes"
 			}
 
-			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\t%s\t%s\n",
+			fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\n",
 				tool.ID,
-				tool.Format.String(),
+				tool.Width, tool.Height,
 				tool.Code,
 				tool.Type,
-				tool.Position.GermanString(),
+				tool.Position.German(),
 				pressStr,
 				regenStr,
 			)
@@ -187,7 +185,7 @@ func markDeadCommand() cli.Command {
 					}
 
 					if tool.IsDead {
-						fmt.Printf("Tool %d (%sx%s %s) is already marked as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
+						fmt.Printf("Tool %d (%dx%d %s) is already marked as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 						return nil
 					}
 
@@ -198,7 +196,7 @@ func markDeadCommand() cli.Command {
 						return errors.Wrap(merr, "mark tool as dead")
 					}
 
-					fmt.Printf("Successfully marked tool %d (%sx%s %s) as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
+					fmt.Printf("Successfully marked tool %d (%dx%d %s) as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 					return nil
 				})
 			}
@@ -225,7 +223,7 @@ func reviveDeadToolCommand() cli.Command {
 					}
 
 					if !tool.IsDead {
-						fmt.Printf("Tool %d (%sx%s %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
+						fmt.Printf("Tool %d (%dx%d %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
 						return nil
 					}
 
@@ -236,7 +234,7 @@ func reviveDeadToolCommand() cli.Command {
 						return fmt.Errorf("revive tool: %v", err)
 					}
 
-					fmt.Printf("Successfully revived tool %d (%sx%s %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
+					fmt.Printf("Successfully revived tool %d (%dx%d %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
 					return nil
 				})
 			}
@@ -262,7 +260,7 @@ func deleteToolCommand() cli.Command {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Deleting tool %d (%sx%s %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
+					fmt.Printf("Deleting tool %d (%dx%d %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
 					regenerations, err := r.Tool.Regeneration.List()
@@ -308,7 +306,7 @@ func deleteToolCommand() cli.Command {
 						return fmt.Errorf("delete tool: %v", err)
 					}
 
-					fmt.Printf("Successfully deleted tool %d (%sx%s %s) with %d cycle(s) and %d regeneration(s).\n",
+					fmt.Printf("Successfully deleted tool %d (%dx%d %s) with %d cycle(s) and %d regeneration(s).\n",
 						tool.ID, tool.Width, tool.Height, tool.Code, len(cycles), len(regenerations))
 					return nil
 				})
@@ -335,7 +333,7 @@ func listCyclesCommand() cli.Command {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s\n\n",
+					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s\n\n",
 						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type) // TODO: " - %s" removed, tool position
 
 					// Get cycles for this tool
@@ -482,8 +480,8 @@ func listRegenerationsCommand() cli.Command {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%sx%s %s) - %s - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Slot.German())
+					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s - %s\n\n",
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.German())
 
 					// Get regenerations for this tool
 					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID)
