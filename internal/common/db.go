@@ -86,9 +86,9 @@ func (db *DB) Close() {
 
 // UserDB holds user-related database services
 type UserDB struct {
-	User    *user.UserService    `json:"user"`
-	Cookie  *user.CookieService  `json:"cookie"`
-	Session *user.SessionService `json:"session"`
+	User    shared.Service[*shared.User, shared.TelegramID]  `json:"user"`
+	Cookie  shared.Service[*shared.Cookie, string]           `json:"cookie"`
+	Session shared.Service[*shared.Session, shared.EntityID] `json:"session"`
 }
 
 // Setup initializes user database services
@@ -163,9 +163,9 @@ func (udb *UserDB) Close() {
 
 // PressDB holds press-related database services
 type PressDB struct {
-	Press        *press.PressService             `json:"press"`
-	Cycle        *press.CycleService             `json:"cycle"`
-	Regeneration *press.PressRegenerationService `json:"regeneration"`
+	Press        shared.Service[*shared.Press, shared.PressNumber]          `json:"press"`
+	Cycle        shared.Service[*shared.Cycle, shared.EntityID]             `json:"cycle"`
+	Regeneration shared.Service[*shared.PressRegeneration, shared.EntityID] `json:"regeneration"`
 }
 
 // Setup initializes press database services
@@ -240,8 +240,8 @@ func (pdb *PressDB) Close() {
 
 // ToolDB holds tool-related database services
 type ToolDB struct {
-	Tool         *tool.ToolService             `json:"tool"`
-	Regeneration *tool.ToolRegenerationService `json:"regeneration"`
+	Tool         shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
+	Regeneration shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
 }
 
 // Setup initializes tool database services
