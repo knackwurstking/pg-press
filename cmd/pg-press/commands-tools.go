@@ -255,17 +255,17 @@ func deleteToolCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tool.Tool.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
+					tool, merr := r.Tool.Tool.GetByID(toolID)
+					if merr != nil {
+						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
 					}
 
 					fmt.Printf("Deleting tool %d (%dx%d %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, err := r.Tool.Regeneration.List()
-					if err != nil {
-						return fmt.Errorf("get regenerations for tool: %v", err)
+					regenerations, merr := r.Tool.Regeneration.List()
+					if merr != nil {
+						return fmt.Errorf("get regenerations for tool: %v", merr)
 					}
 					// Filter regenerations for this tool
 					var toolRegenerations []*shared.ToolRegeneration
@@ -286,9 +286,9 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 2. Delete all cycles for this tool
-					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)
-					if err != nil {
-						return fmt.Errorf("get cycles for tool: %v", err)
+					cycles, merr := helper.ListCyclesForTool(r, toolID)
+					if merr != nil {
+						return fmt.Errorf("get cycles for tool: %v", merr)
 					}
 
 					if len(cycles) > 0 {
@@ -301,9 +301,9 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 3. Finally, delete the tool itself
-					err = r.Tool.Tool.Delete(toolID)
-					if err != nil {
-						return fmt.Errorf("delete tool: %v", err)
+					merr = r.Tool.Tool.Delete(toolID)
+					if merr != nil {
+						return fmt.Errorf("delete tool: %v", merr)
 					}
 
 					fmt.Printf("Successfully deleted tool %d (%dx%d %s) with %d cycle(s) and %d regeneration(s).\n",
@@ -328,18 +328,18 @@ func listCyclesCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tool.Tool.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
+					tool, merr := r.Tool.Tool.GetByID(toolID)
+					if merr != nil {
+						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
 					}
 
 					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type) // TODO: " - %s" removed, tool position
+						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type) // NOTE: " - %s" removed, tool position
 
 					// Get cycles for this tool
-					cycles, err := r.Press.Cycle.ListPressCyclesForTool(toolID)
-					if err != nil {
-						return fmt.Errorf("retrieve cycles: %v", err)
+					cycles, merr := helper.ListCyclesForTool(r, toolID)
+					if merr != nil {
+						return fmt.Errorf("retrieve cycles: %v", merr)
 					}
 
 					// Display Cycles

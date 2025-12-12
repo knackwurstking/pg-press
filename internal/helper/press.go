@@ -2,12 +2,18 @@ package helper
 
 import (
 	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 const (
 	SQLGetPressNumberForTool string = `
 		SELECT id, slot_up, slot_down FROM presses WHERE slot_up = :slot_up OR slot_down = :slot_down;
+	`
+	SQLListCyclesForPress string = `
+		SELECT id, press_number, cycles, start, stop
+		FROM press_cycles
+		WHERE slot_up = :tool_id OR slot_down = :tool_id;
 	`
 )
 
@@ -25,4 +31,36 @@ func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) (shared.PressN
 	default:
 		return pressNumber, shared.SlotUnknown
 	}
+}
+
+// ListCyclesForTool returns all cycles associated with a specific tool by finding
+// the press the tool is associated with and returning cycles for that press
+func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
+	rows, err := db.Press.Cycle.DB().Query(SQLListCyclesForPress, toolID)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	cycles := []*shared.Cycle{}
+	for rows.Next() {
+		c := &shared.Cycle{}
+		err := rows.Scan(
+			&c.ID,
+			&c.PressNumber,
+			&c.Cycles,
+			&c.Start,
+			&c.Stop,
+		)
+		if err != nil {
+			return nil, errors.NewMasterError(err, 0)
+		}
+		cycles = append(cycles, c)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+
+	return cycles, nil
 }
