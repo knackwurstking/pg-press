@@ -1,17 +1,19 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
-	ui "github.com/knackwurstking/ui/ui-templ"
 	"net/http"
 	"strings"
+
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
-templ NewNoteDialog(linkToTables []string, user *models.User) {
+templ NewNoteDialog(linkToTables []string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             utils.UrlDialogs().EditNote(0, strings.Join(linkToTables, ",")),
+		Href:             urlb.UrlDialogs().EditNote(0, strings.Join(linkToTables, ",")),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -21,10 +23,10 @@ templ NewNoteDialog(linkToTables []string, user *models.User) {
 	}
 }
 
-templ EditNoteDialog(note *models.Note, linkToTables []string, user *models.User) {
+templ EditNoteDialog(note *shared.Note, linkToTables []string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             utils.UrlDialogs().EditNote(note.ID, strings.Join(linkToTables, ",")),
+		Href:             urlb.UrlDialogs().EditNote(note.ID, strings.Join(linkToTables, ",")),
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
@@ -34,7 +36,7 @@ templ EditNoteDialog(note *models.Note, linkToTables []string, user *models.User
 	}
 }
 
-templ noteLevelSelect(level models.Level) {
+templ noteLevelSelect(level shared.NoteLevel) {
 	<label for="level" class="flex flex-col">
 		Priorität
 		<select id="level" name="level" required>
@@ -64,7 +66,7 @@ templ noteContent(content string) {
 	</label>
 }
 
-templ displayLinkedTables(linkToTables []string, user *models.User) {
+templ displayLinkedTables(linkToTables []string, user *shared.User) {
 	if len(linkToTables) > 0 {
 		<div
 			class="flex flex-col gap"

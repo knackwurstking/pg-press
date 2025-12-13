@@ -12,12 +12,12 @@ import (
 )
 
 type Handler struct {
-	registry *common.DB
+	db *common.DB
 }
 
-func NewHandler(r *common.DB) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		db: db,
 	}
 }
 

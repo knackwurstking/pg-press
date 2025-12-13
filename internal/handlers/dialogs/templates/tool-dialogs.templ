@@ -1,8 +1,9 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/utils"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
@@ -13,7 +14,7 @@ templ NewToolDialog() {
 		ID:               "tool-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
-		{{ tool := &models.Tool{} }}
+		{{ tool := &shared.Tool{} }}
 		@toolPositionAndPressSelection(tool.Position, tool.Press)
 		@toolFormat(tool.Format.Width, tool.Format.Height)
 		@toolType(tool.Type)
@@ -21,7 +22,7 @@ templ NewToolDialog() {
 	}
 }
 
-templ EditToolDialog(tool *models.Tool) {
+templ EditToolDialog(tool *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "PUT",
 		Href:             utils.UrlDialogs().EditTool(tool.ID),
@@ -35,7 +36,7 @@ templ EditToolDialog(tool *models.Tool) {
 	}
 }
 
-templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSelection *models.PressNumber) {
+templ toolPositionAndPressSelection(inputPosition shared.Position, inputPressSelection *shared.PressNumber) {
 	<div class="flex flex-row gap flex-wrap justify-between items-center">
 		<div class="flex flex-col gap-0">
 			<label for="position">Position</label>
@@ -49,24 +50,24 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 					Position auswählen
 				</option>
 				<option
-					value={ models.PositionTop }
-					if inputPosition == models.PositionTop {
+					value={ shared.SlotUpper }
+					if inputPosition == shared.SlotUpper {
 						selected
 					}
 				>
 					Oberteil
 				</option>
 				<option
-					value={ models.PositionBottom }
-					if inputPosition == models.PositionBottom {
+					value={ shared.SlotLower }
+					if inputPosition == shared.SlotLower {
 						selected
 					}
 				>
 					Unterteil
 				</option>
 				<option
-					value={ models.PositionTopCassette }
-					if inputPosition == models.PositionTopCassette {
+					value={ shared.SlotUpperCassette }
+					if inputPosition == shared.SlotUpperCassette {
 						selected
 					}
 				>
@@ -76,10 +77,11 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 		</div>
 		<div class="flex flex-col gap-0 w-fit">
 			<label for="pressSelection">Presse</label>
+			{{ validInputPressSelection := inputPressSelection.IsValid() }}
 			<select id="pressSelection" name="press-selection">
 				<option
 					value=""
-					if !models.IsValidPressNumber(inputPressSelection) {
+					if ! {
 						selected
 					}
 				>
@@ -87,7 +89,7 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 				</option>
 				<option
 					value="0"
-					if models.IsValidPressNumber(inputPressSelection) && *inputPressSelection == 0 {
+					if validInputPressSelection && *inputPressSelection == 0 {
 						selected
 					}
 				>
@@ -95,7 +97,7 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 				</option>
 				<option
 					value="2"
-					if models.IsValidPressNumber(inputPressSelection) && *inputPressSelection == 2 {
+					if validInputPressSelection && *inputPressSelection == 2 {
 						selected
 					}
 				>
@@ -103,7 +105,7 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 				</option>
 				<option
 					value="3"
-					if models.IsValidPressNumber(inputPressSelection) && *inputPressSelection == 3 {
+					if validInputPressSelection && *inputPressSelection == 3 {
 						selected
 					}
 				>
@@ -111,7 +113,7 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 				</option>
 				<option
 					value="4"
-					if models.IsValidPressNumber(inputPressSelection) && *inputPressSelection == 4 {
+					if validInputPressSelection && *inputPressSelection == 4 {
 						selected
 					}
 				>
@@ -119,7 +121,7 @@ templ toolPositionAndPressSelection(inputPosition models.Position, inputPressSel
 				</option>
 				<option
 					value="5"
-					if models.IsValidPressNumber(inputPressSelection) && *inputPressSelection == 5 {
+					if validInputPressSelection && *inputPressSelection == 5 {
 						selected
 					}
 				>

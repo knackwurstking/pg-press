@@ -4,49 +4,50 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
 templ NewMetalSheetDialog(
-	tool *models.Tool,
+	tool *shared.Tool,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             utils.UrlDialogs().EditMetalSheet(0, tool.ID),
+		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID),
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
 		switch tool.Position {
-			case models.PositionTop:
+			case shared.SlotUpper:
 				@metalSheetContentPositionTop(nil)
-			case models.PositionBottom:
+			case shared.SlotLower:
 				@metalSheetContentPositionBottom(nil)
 		}
 	}
 }
 
 templ EditMetalSheetDialog(
-	metalSheet *models.MetalSheet,
-	tool *models.Tool,
+	metalSheet *shared.MetalSheet,
+	tool *shared.Tool,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             utils.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
+		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
 		ID:               "metal-sheet-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
 		switch tool.Position {
-			case models.PositionTop:
+			case shared.SlotUpper:
 				@metalSheetContentPositionTop(metalSheet)
-			case models.PositionBottom:
+			case shared.SlotLower:
 				@metalSheetContentPositionBottom(metalSheet)
 		}
 	}
 }
 
-templ metalSheetContentPositionTop(metalSheet *models.MetalSheet) {
+templ metalSheetContentPositionTop(metalSheet *shared.MetalSheet) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
@@ -99,7 +100,7 @@ templ metalSheetContentPositionTop(metalSheet *models.MetalSheet) {
 	</div>
 }
 
-templ metalSheetContentPositionBottom(metalSheet *models.MetalSheet) {
+templ metalSheetContentPositionBottom(metalSheet *shared.MetalSheet) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input

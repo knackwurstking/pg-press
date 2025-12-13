@@ -28,7 +28,8 @@ func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
 		tools            []*shared.Tool
 		inputPressNumber *shared.PressNumber
 		inputTotalCycles int64
-		originalDate     *time.Time
+		start            *time.Time
+		stop             *time.Time
 	)
 
 	if c.QueryParam("id") != "" {
@@ -36,16 +37,16 @@ func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Echo()
 		}
-		cycleID := shared.EntityID(cycleIDQuery)
 
 		// Get cycle data from the database
-		cycle, merr = h.registry.PressCycles.Get(cycleID)
+		cycle, merr = h.db.Press.Cycle.GetByID(shared.EntityID(cycleIDQuery))
 		if merr != nil {
 			return merr.Echo()
 		}
 		inputPressNumber = &(cycle.PressNumber)
-		inputTotalCycles = cycle.TotalCycles
-		originalDate = &cycle.Date
+		inputTotalCycles = cycle.Cycles
+		start = time.UnixMilli(cycle.Start)
+		stop = time.UnixMilli(cycle.Stop)
 
 		// Set the cycles (original) tool to props
 		tool, merr = h.registry.Tools.Get(cycle.ToolID)
