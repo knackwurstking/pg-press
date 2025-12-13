@@ -470,11 +470,11 @@ func listRegenerationsCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(customDBPath, func(db *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := r.Tool.Tool.GetByID(toolID)
+					tool, err := db.Tool.Tool.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
@@ -483,7 +483,7 @@ func listRegenerationsCommand() cli.Command {
 						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.German())
 
 					// Get regenerations for this tool
-					regenerations, err := r.Tool.Regeneration.GetRegenerationHistory(toolID) // TODO: Create helper function
+					regenerations, err := helper.GetRegenerationsForTool(db, toolID)
 					if err != nil {
 						return fmt.Errorf("retrieve regenerations: %v", err)
 					}
@@ -494,20 +494,16 @@ func listRegenerationsCommand() cli.Command {
 						fmt.Println("No regenerations found for this tool")
 					} else {
 						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tCYCLE ID\tREASON\tPERFORMED BY")
-						fmt.Fprintln(w, "----\t--------\t------\t------------")
+						fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
+						fmt.Fprintln(w, "----\t-------\t-----\t----\t------")
 
 						for _, regen := range regenerations {
-							performedByStr := "None"
-							if regen.PerformedBy != nil {
-								performedByStr = strconv.Itoa(int(*regen.PerformedBy))
-							}
-
-							fmt.Fprintf(w, "%d\t%d\t%s\t%s\n",
+							fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
 								regen.ID,
-								regen.CycleID,
-								regen.Reason,
-								performedByStr,
+								regen.ToolID,
+								regen.Start.FormatDate(),
+								regen.Stop.FormatDate(),
+								regen.Cycles,
 							)
 						}
 						w.Flush()
