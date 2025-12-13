@@ -6,7 +6,7 @@ templ LoginPage(apiKey string, invalidApiKey bool) {
 	@components.Layout(components.LayoutOptions{
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
-		NavContent:  components.BasicNavContent(),
+		NavContent:  components.StandardNavContent(),
 	}) {
 		<main class="container">
 			@apiKeyDialog(apiKey, invalidApiKey)

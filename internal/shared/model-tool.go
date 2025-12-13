@@ -12,6 +12,7 @@ const (
 	SlotUnknown Slot = iota
 	SlotUpper
 	SlotLower
+	SlotUpperCassette
 )
 
 func (s Slot) String() string {
@@ -20,6 +21,8 @@ func (s Slot) String() string {
 		return "top"
 	case SlotLower:
 		return "bottom"
+	case SlotUpperCassette:
+		return "cassette"
 	default:
 		return "unknown"
 	}
@@ -31,6 +34,8 @@ func (s Slot) German() string {
 		return "Oberteil"
 	case SlotLower:
 		return "Unterteil"
+	case SlotUpperCassette:
+		return "Kassette"
 	default:
 		return "Unbekannt"
 	}

@@ -28,6 +28,7 @@ func (p *Press) Validate() *errors.ValidationError {
 	if p.SlotDown <= 0 {
 		return errors.NewValidationError("lower tool id cannot be lower or equal 0")
 	}
+
 	if p.Cycles < 0 {
 		return errors.NewValidationError("cycles have to be positive or zero")
 	}

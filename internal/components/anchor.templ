@@ -33,8 +33,9 @@ templ ToolAnchor(tool *shared.ResolvedTool, options *ToolAnchorOptions) {
 					"w-full": true,
 				}) }
 			>
-				// TODO: For this to work i need the resolved tool back, or something similar
-				@PositionBadge(tool.Position, "primary text-bold")
+				@SmallBadge("primary", "text-bold") {
+					{ tool.Position.German() }
+				}
 				if options.EnableStatusBadge {
 					@ToolStatusBadge(tool.Tool)
 				}

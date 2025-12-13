@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/utils"
 )
@@ -68,17 +69,17 @@ templ listPressItem(props listPressItemOptions) {
 						<span class="flex flex-col gap-sm">
 							if props.Top != "" {
 								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
-									@components.PositionBadge(
-										models.PositionTop, "primary text-bold",
-									)
+									@components.SmallBadge("primary", "text-bold") {
+										{ shared.SlotUpper.German() }
+									}
 									<small class="text-sm">{ props.Top }</small>
 								</span>
 							}
 							if props.TopCassette != "" {
 								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
-									@components.PositionBadge(
-										models.PositionTopCassette, "primary text-bold",
-									)
+									@components.SmallBadge("primary", "text-bold") {
+										{ shared.SlotUpperCassette.German() }
+									}
 									<small class="text-sm">{ props.TopCassette }</small>
 								</span>
 							}
@@ -87,7 +88,9 @@ templ listPressItem(props listPressItemOptions) {
 					if props.Bottom != "" {
 						<!-- Lower Tool -->
 						<span class="flex flex-col justify-center items-start gap-sm">
-							@components.PositionBadge(models.PositionBottom, "primary text-bold")
+							@components.SmallBadge("primary", "text-bold") {
+								{ shared.SlotLower.German() }
+							}
 							<small class="text-sm">{ props.Bottom }</small>
 						</span>
 					}

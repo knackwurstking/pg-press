@@ -13,7 +13,7 @@ templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 	<span
 		hx-get={ utils.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ "#"+IDTabContent }
+		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<div class="admin-overlapping-tools">
@@ -63,7 +63,9 @@ templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 									<div class="border p-sm">
 										<div class="flex justify-between items-center mb-sm">
 											<strong>Presse { fmt.Sprintf("%d", instance.PressNumber) }</strong>
-											@components.PositionBadge(instance.Position, "secondary")
+											@components.SmallBadge("secondary", "text-bold") {
+												{ instance.Position.German() }
+											}
 										</div>
 										<pre>
 											@templ.Raw(fmt.Sprintf(
