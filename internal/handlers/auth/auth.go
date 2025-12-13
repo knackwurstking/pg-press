@@ -10,6 +10,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
+	"github.com/knackwurstking/pg-press/internal/helper"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -23,12 +25,12 @@ const (
 )
 
 type Handler struct {
-	registry *common.DB
+	db *common.DB
 }
 
-func NewHandler(r *common.DB) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		db: db,
 	}
 }
 
@@ -63,7 +65,7 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 	apiKey := c.FormValue("api-key")
 	err := h.processApiKeyLogin(apiKey, c)
 	if err != nil {
-		slog.Warn("Processing api key failed", "api_key", utils.MaskString(apiKey), "error", err)
+		slog.Warn("Processing api key failed", "api_key", shared.MaskString(apiKey), "error", err)
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
@@ -82,14 +84,14 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 }
 
 func (h *Handler) GetLogout(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	cookie, err := c.Cookie(CookieName)
 	if err == nil {
-		merr := h.registry.Cookies.Remove(cookie.Value)
+		merr := h.db.User.Cookie.Delete(cookie.Value)
 		if merr != nil {
 			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", merr)
 		}
@@ -104,11 +106,11 @@ func (h *Handler) GetLogout(c echo.Context) error {
 }
 
 func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
-	if len(apiKey) < env.MinAPIKeyLength {
+	if len(apiKey) < shared.MinAPIKeyLength {
 		return fmt.Errorf("api key too short")
 	}
 
-	user, merr := h.registry.Users.GetUserFromApiKey(apiKey)
+	user, merr := helper.GetUserForApiKey(h.db, apiKey)
 	if merr != nil {
 		if merr.Code != http.StatusNotFound {
 			return errors.Wrap(merr, "database authentication")
@@ -165,7 +167,7 @@ func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
 	ctx.SetCookie(&http.Cookie{
 		Name:     CookieName,
 		Value:    cookieValue,
-		Expires:  time.Now().Add(env.CookieExpirationDuration),
+		Expires:  time.UnixMilli(time.Now().UnixMilli() + shared.CookieExpirationDuration), // TODO: Use the cookie's ExpiredAt method
 		Path:     cookiePath,
 		HttpOnly: true,
 		Secure:   ctx.Request().TLS != nil || ctx.Scheme() == "https",

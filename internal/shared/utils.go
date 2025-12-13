@@ -3,6 +3,7 @@ package shared
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -44,4 +45,23 @@ func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 	return user, nil
 }
 
+/*******************************************************************************
+ * Echo Parse Utils
+ ******************************************************************************/
+
 // TODO: Add echo parse utilities
+
+// ParseQueryBool parses a boolean query parameter from the request
+func ParseQueryBool(c echo.Context, paramName string) bool {
+	value := c.QueryParam(paramName)
+	if value == "" {
+		return false
+	}
+
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		return false
+	}
+
+	return boolValue
+}
