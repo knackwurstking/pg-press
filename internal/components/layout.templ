@@ -25,7 +25,7 @@ templ Layout(options LayoutOptions) {
 				@options.AdditionalHead
 			}
 		</head>
-		<body hx-ext="ws">
+		<body>
 			@appBar(options.AppBarTitle, options.NavContent)
 			{ children... }
 			@ImageViewerTemplate()
@@ -57,7 +57,6 @@ templ links() {
 
 templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
-	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-ext-ws-v2.0.3.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/main-layout.js") }></script>
 }
 

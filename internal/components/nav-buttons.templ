@@ -1,12 +1,12 @@
 package components
 
-import "github.com/knackwurstking/pg-press/utils"
+import "github.com/knackwurstking/pg-press/internal/urlb"
 
 templ NavProfileButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ utils.UrlProfile("").Page }
+		href={ urlb.UrlProfile("").Page }
 		title="Profil"
 	>
 		<i class="bi bi-person-circle"></i>
@@ -17,35 +17,15 @@ templ NavHomeButton() {
 	<a
 		role="button"
 		class="ghost contrast icon"
-		href={ utils.UrlHome().Page }
+		href={ urlb.UrlHome().Page }
 		title="Startseite"
 	>
 		<i class="bi bi-house"></i>
 	</a>
 }
 
-templ NavFeedButton() {
-	<a
-		role="button"
-		class="ghost contrast icon"
-		href={ utils.UrlFeed().Page }
-		ws-connect={ utils.UrlNav().FeedCounter }
-		hx-target="#feed-counter"
-		hx-swap="outerHTML"
-	>
-		<i class="bi bi-bell"></i>
-		<span id="feed-counter"></span>
-	</a>
-}
-
 // Common navigation patterns to reduce duplication
 templ StandardNavContent() {
-	@NavFeedButton()
-	@NavProfileButton()
-	@NavHomeButton()
-}
-
-templ BasicNavContent() {
 	@NavProfileButton()
 	@NavHomeButton()
 }

@@ -54,7 +54,6 @@ func init() {
 
 		// Libraries
 		env.ServerPathPrefix + "/js/htmx-v2.0.7.min.js",
-		env.ServerPathPrefix + "/js/htmx-ext-ws-v2.0.3.min.js",
 		env.ServerPathPrefix + "/js/main-layout.js",
 
 		// Fonts

@@ -9,7 +9,10 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/knackwurstking/pg-press/internal/assets"
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/handlers"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -42,26 +45,50 @@ func serverCommand() cli.Command {
 				e := echo.New()
 				e.HideBanner = true
 
-				e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-					Output:           os.Stderr,
-					Format:           "${time_custom} ${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error}\n",
-					CustomTimeFormat: "2006-01-02 15:04:05",
-				}))
-
-				e.Use(middlewareKeyAuth(r))
-				e.Use(ui.EchoMiddlewareCache(pages))
-
-				Serve(e, r)
-
-				slog.Info("Starting HTTP server", "address", env.ServerAddress)
-				if err := e.Start(env.ServerAddress); err != nil {
-					slog.Error("Server startup failed", "address", env.ServerAddress, "error", err)
-					slog.Error("Common causes: port already in use, permission denied, invalid address format")
-					os.Exit(exitCodeServerStart)
-				}
+				middlewareConfiguration(e, r)
+				setupRouter(e, r, env.ServerPathPrefix)
+				startServer(e, r, env.ServerAddress)
 
 				return nil
 			}
 		}),
+	}
+}
+
+/*******************************************************************************
+ * Server Middleware Configuration
+ ******************************************************************************/
+
+func middlewareConfiguration(e *echo.Echo, r *common.DB) {
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Output:           os.Stderr,
+		Format:           "${time_custom} ${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error}\n",
+		CustomTimeFormat: "2006-01-02 15:04:05",
+	}))
+
+	e.Use(middlewareKeyAuth(r))
+	e.Use(ui.EchoMiddlewareCache(pages))
+}
+
+/*******************************************************************************
+ * Server Route Configuration
+ ******************************************************************************/
+
+func setupRouter(e *echo.Echo, r *common.DB, prefix string) {
+	// Static File Server
+	e.StaticFS(prefix+"/", assets.GetAssets())
+	handlers.RegisterAll(r, e)
+}
+
+/*******************************************************************************
+ * Server Startup
+ ******************************************************************************/
+
+func startServer(e *echo.Echo, r *common.DB, address string) {
+	slog.Info("Starting HTTP server", "address", address)
+	if err := e.Start(address); err != nil {
+		slog.Error("Server startup failed", "address", address, "error", err)
+		slog.Error("Common causes: port already in use, permission denied, invalid address format")
+		os.Exit(exitCodeServerStart)
 	}
 }

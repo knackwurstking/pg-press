@@ -45,14 +45,6 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 	return url
 }
 
-// UrlNav constructs navigation URLs
-func UrlNav() (url struct {
-	FeedCounter templ.SafeURL
-}) {
-	url.FeedCounter = BuildURL("/nav/feed-counter")
-	return url
-}
-
 // UrlHome constructs home URL
 func UrlHome() (url struct {
 	Page templ.SafeURL
