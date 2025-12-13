@@ -38,6 +38,7 @@ func NewDB(c *shared.Config) *DB {
 			Tool:         tool.NewToolService(c),
 			Regeneration: tool.NewToolRegenerationService(c),
 			Cassette:     tool.NewCassetteService(c),
+			MetalSheet:   tool.NewMetalSheetService(c),
 		},
 	}
 }
@@ -244,12 +245,13 @@ type ToolDB struct {
 	Tool         shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
 	Regeneration shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
 	Cassette     shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
+	MetalSheet   shared.Service[any, shared.EntityID]                       `json:"metal_sheet"`
 }
 
 // Setup initializes tool database services
 func (tdb *ToolDB) Setup() error {
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
+	errCh := make(chan error, 4)
 
 	wg.Go(func() {
 		if err := tdb.Tool.Setup(); err != nil {
@@ -266,6 +268,12 @@ func (tdb *ToolDB) Setup() error {
 	wg.Go(func() {
 		if err := tdb.Cassette.Setup(); err != nil {
 			errCh <- fmt.Errorf("cassette: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.MetalSheet.Setup(); err != nil {
+			errCh <- fmt.Errorf("metal_sheet: %w", err)
 		}
 	})
 
@@ -288,7 +296,7 @@ func (tdb *ToolDB) Setup() error {
 // Close shuts down tool database services
 func (tdb *ToolDB) Close() {
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
+	errCh := make(chan error, 4)
 
 	wg.Go(func() {
 		if err := tdb.Tool.Close(); err != nil {
@@ -305,6 +313,12 @@ func (tdb *ToolDB) Close() {
 	wg.Go(func() {
 		if err := tdb.Cassette.Close(); err != nil {
 			errCh <- fmt.Errorf("cassette: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.MetalSheet.Close(); err != nil {
+			errCh <- fmt.Errorf("metal_sheet: %w", err)
 		}
 	})
 
