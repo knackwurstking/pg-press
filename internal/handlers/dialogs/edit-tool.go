@@ -17,7 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditTool(c echo.Context) error {
+func (h *Handler) GetEditTool(c echo.Context) *echo.HTTPError {
 	var tool *models.Tool
 
 	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
@@ -47,7 +47,7 @@ func (h *Handler) GetEditTool(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostEditTool(c echo.Context) error {
+func (h *Handler) PostEditTool(c echo.Context) *echo.HTTPError {
 	slog.Info("Creating new tool")
 
 	user, merr := utils.GetUserFromContext(c)
@@ -88,7 +88,7 @@ func (h *Handler) PostEditTool(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditTool(c echo.Context) error {
+func (h *Handler) PutEditTool(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating existing tool")
 
 	user, merr := utils.GetUserFromContext(c)

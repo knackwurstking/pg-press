@@ -17,7 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditNote(c echo.Context) error {
+func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
 	user, merr := utils.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -63,7 +63,7 @@ func (h *Handler) GetEditNote(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostEditNote(c echo.Context) error {
+func (h *Handler) PostEditNote(c echo.Context) *echo.HTTPError {
 	slog.Info("Creating new note")
 
 	user, merr := utils.GetUserFromContext(c)
@@ -95,7 +95,7 @@ func (h *Handler) PostEditNote(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditNote(c echo.Context) error {
+func (h *Handler) PutEditNote(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating note")
 
 	user, merr := utils.GetUserFromContext(c)

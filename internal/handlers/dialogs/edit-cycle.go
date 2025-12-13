@@ -11,32 +11,32 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditCycle(c echo.Context) error {
+func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
-	toolChangeMode := utils.ParseQueryBool(c, "tool_change_mode")
+	toolChangeMode := shared.ParseQueryBool(c, "tool_change_mode")
 
 	var (
-		tool             *models.Tool
-		cycle            *models.Cycle
-		tools            []*models.Tool
-		inputPressNumber *models.PressNumber
+		tool             *shared.Tool
+		cycle            *shared.Cycle
+		tools            []*shared.Tool
+		inputPressNumber *shared.PressNumber
 		inputTotalCycles int64
 		originalDate     *time.Time
 	)
 
 	if c.QueryParam("id") != "" {
-		cycleIDQuery, merr := utils.ParseQueryInt64(c, "id")
+		cycleIDQuery, merr := shared.ParseQueryInt64(c, "id")
 		if merr != nil {
 			return merr.Echo()
 		}
-		cycleID := models.CycleID(cycleIDQuery)
+		cycleID := shared.EntityID(cycleIDQuery)
 
 		// Get cycle data from the database
 		cycle, merr = h.registry.PressCycles.Get(cycleID)
@@ -74,11 +74,11 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 			})
 		}
 	} else if c.QueryParam("tool_id") != "" {
-		toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+		toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
 		if merr != nil {
 			return merr.Echo()
 		}
-		toolID := models.ToolID(toolIDQuery)
+		toolID := shared.EntityID(toolIDQuery)
 
 		tool, merr = h.registry.Tools.Get(toolID)
 		if merr != nil {
@@ -110,19 +110,19 @@ func (h *Handler) GetEditCycle(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostEditCycle(c echo.Context) error {
+func (h *Handler) PostEditCycle(c echo.Context) *echo.HTTPError {
 	slog.Info("Cycle creation request received")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
+	toolID := shared.EntityID(toolIDQuery)
 
 	tool, merr := h.registry.Tools.Get(toolID)
 	if merr != nil {
@@ -135,7 +135,7 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	pc := models.NewCycle(*form.PressNumber, tool.ID, tool.Position,
+	pc := shared.NewCycle(*form.PressNumber, tool.ID, tool.Position,
 		form.TotalCycles, user.TelegramID)
 
 	pc.Date = form.Date
@@ -174,24 +174,24 @@ func (h *Handler) PostEditCycle(c echo.Context) error {
 		slog.Warn("Failed to create feed for cycle creation", "error", merr)
 	}
 
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
 
-func (h *Handler) PutEditCycle(c echo.Context) error {
+func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating cycle")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	cycleIDQuery, err := utils.ParseQueryInt64(c, "id")
+	cycleIDQuery, err := shared.ParseQueryInt64(c, "id")
 	if err != nil {
 		return errors.NewMasterError(err, http.StatusBadRequest).Echo()
 	}
-	cycleID := models.CycleID(cycleIDQuery)
+	cycleID := shared.EntityID(cycleIDQuery)
 
 	cycle, merr := h.registry.PressCycles.Get(cycleID)
 	if merr != nil {
@@ -209,12 +209,12 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	if !models.IsValidPressNumber(form.PressNumber) {
+	if !form.PressNumber.IsValid() {
 		return errors.NewMasterError(fmt.Errorf("press_number must be a valid integer"), http.StatusBadRequest).Echo()
 	}
 
 	// Determine which tool to use for the cycle
-	var tool *models.Tool
+	var tool *shared.Tool
 	if form.ToolID != nil {
 		// Tool change requested - get the new tool
 		newTool, merr := h.registry.Tools.Get(*form.ToolID)
@@ -228,7 +228,7 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 	}
 
 	// Update the cycle
-	pc := models.NewCycleWithID(
+	pc := shared.NewCycleWithID(
 		cycle.ID,
 		*form.PressNumber,
 		tool.ID, tool.Position, form.TotalCycles,
@@ -281,17 +281,17 @@ func (h *Handler) PutEditCycle(c echo.Context) error {
 		slog.Warn("Failed to create feed for cycle update", "error", merr)
 	}
 
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
 
 type EditCycleFormData struct {
 	TotalCycles  int64 // TotalCycles form field name "total_cycles"
-	PressNumber  *models.PressNumber
+	PressNumber  *shared.PressNumber
 	Date         time.Time // OriginalDate form field name "original_date"
 	Regenerating bool
-	ToolID       *models.ToolID // ToolID form field name "tool_id" (for tool change mode)
+	ToolID       *shared.EntityID // ToolID form field name "tool_id" (for tool change mode)
 }
 
 func GetEditCycleFormData(c echo.Context) (*EditCycleFormData, *errors.MasterError) {
@@ -303,10 +303,10 @@ func GetEditCycleFormData(c echo.Context) (*EditCycleFormData, *errors.MasterErr
 		if err != nil {
 			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
-		pn := models.PressNumber(press)
+		pn := shared.PressNumber(press)
 		form.PressNumber = &pn
 
-		if !models.IsValidPressNumber(form.PressNumber) {
+		if !form.PressNumber.IsValid() {
 			return nil, errors.NewMasterError(
 				fmt.Errorf("press_number must be a valid integer"),
 				http.StatusBadRequest,
@@ -317,7 +317,7 @@ func GetEditCycleFormData(c echo.Context) (*EditCycleFormData, *errors.MasterErr
 	// Parse date
 	if dateString := c.FormValue("original_date"); dateString != "" {
 		var err error
-		form.Date, err = time.Parse(env.DateFormat, dateString)
+		form.Date, err = time.Parse(shared.DateFormat, dateString)
 		if err != nil {
 			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
@@ -349,7 +349,7 @@ func GetEditCycleFormData(c echo.Context) (*EditCycleFormData, *errors.MasterErr
 		if err != nil {
 			return nil, errors.NewMasterError(err, http.StatusBadRequest)
 		}
-		toolID := models.ToolID(toolIDParsed)
+		toolID := shared.EntityID(toolIDParsed)
 		form.ToolID = &toolID
 	}
 

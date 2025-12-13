@@ -15,7 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditMetalSheet(c echo.Context) error {
+func (h *Handler) GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	metalSheetIDQuery, _ := utils.ParseQueryInt64(c, "id")
 	if metalSheetIDQuery > 0 {
@@ -62,7 +62,7 @@ func (h *Handler) GetEditMetalSheet(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostEditMetalSheet(c echo.Context) error {
+func (h *Handler) PostEditMetalSheet(c echo.Context) *echo.HTTPError {
 	slog.Info("Metal sheet creation request received")
 
 	// Get current user for feed creation
@@ -106,7 +106,7 @@ func (h *Handler) PostEditMetalSheet(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditMetalSheet(c echo.Context) error {
+func (h *Handler) PutEditMetalSheet(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating metal sheet")
 
 	// Get current user for feed creation

@@ -47,27 +47,6 @@ func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError
 	return int8(id), nil
 }
 
-// ParseQueryInt64 parses an int64 query parameter from the request
-func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
-	idStr := c.QueryParam(paramName)
-	if idStr == "" {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("missing %s query parameter", paramName),
-			http.StatusNotFound,
-		)
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("invalid %s query parameter: must be a number", paramName),
-			http.StatusBadRequest,
-		)
-	}
-
-	return id, nil
-}
-
 // ParseQueryString parses a string query parameter from the request
 func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
 	s := c.QueryParam(paramName)
@@ -119,20 +98,4 @@ func SanitizeFilename(filename string) string {
 	}
 
 	return filename
-}
-
-// SetHXTrigger sets HX-Trigger header
-func SetHXTrigger(c echo.Context, events ...string) {
-	c.Response().Header().Set("HX-Trigger", strings.Join(events, ", "))
-}
-
-// SetHXRedirect sets HX-Redirect header
-func SetHXRedirect(c echo.Context, path templ.SafeURL) {
-	c.Response().Header().Set("HX-Redirect", string(path))
-}
-
-// SetHXAfterSettle sets HX-Trigger-After-Settle header with JSON data
-func SetHXAfterSettle(c echo.Context, data map[string]any) {
-	triggerDataJSON, _ := json.Marshal(data)
-	c.Response().Header().Set("HX-Trigger-After-Settle", string(triggerDataJSON))
 }

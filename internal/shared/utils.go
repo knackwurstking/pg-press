@@ -65,3 +65,24 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 
 	return boolValue
 }
+
+// ParseQueryInt64 parses an int64 query parameter from the request
+func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
+	idStr := c.QueryParam(paramName)
+	if idStr == "" {
+		return 0, errors.NewMasterError(
+			fmt.Errorf("missing %s query parameter", paramName),
+			http.StatusNotFound,
+		)
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return 0, errors.NewMasterError(
+			fmt.Errorf("invalid %s query parameter: must be a number", paramName),
+			http.StatusBadRequest,
+		)
+	}
+
+	return id, nil
+}

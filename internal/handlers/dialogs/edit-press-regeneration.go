@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
+func (h *Handler) GetEditPressRegeneration(c echo.Context) *echo.HTTPError {
 	id, merr := utils.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
@@ -32,7 +32,7 @@ func (h *Handler) GetEditPressRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditPressRegeneration(c echo.Context) error {
+func (h *Handler) PutEditPressRegeneration(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating press regeneration entry")
 
 	user, merr := utils.GetUserFromContext(c)

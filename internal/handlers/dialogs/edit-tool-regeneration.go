@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
+func (h *Handler) GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 	rid, merr := utils.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
@@ -40,7 +40,7 @@ func (h *Handler) GetEditToolRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PutEditToolRegeneration(c echo.Context) error {
+func (h *Handler) PutEditToolRegeneration(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating tool regeneration entry")
 
 	user, merr := utils.GetUserFromContext(c)
