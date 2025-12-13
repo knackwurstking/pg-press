@@ -56,4 +56,6 @@ func (n *Note) String() string {
 	)
 }
 
+// TODO: Get linked method
+
 var _ Entity[*Note] = (*Note)(nil)

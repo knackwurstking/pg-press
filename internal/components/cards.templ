@@ -30,7 +30,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 			<span class="note-importance flex gap">
 				<i class={ "bi " + icon }></i>
 				<span class="note-date">
-					{ note.CreatedAt.Format("2006-01-02 15:04") }
+					{ note.CreatedAt.FormatDateTime() }
 				</span>
 			</span>
 			<span class="flex gap">
